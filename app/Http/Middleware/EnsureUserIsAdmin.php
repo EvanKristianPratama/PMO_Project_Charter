@@ -10,7 +10,7 @@ class EnsureUserIsAdmin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (! $request->user()?->hasRole('Admin')) {
+        if (! $request->user()?->isAdminUser()) {
             abort(403, 'Akses ditolak.');
         }
 

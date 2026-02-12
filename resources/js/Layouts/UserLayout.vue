@@ -7,7 +7,7 @@ import { useDarkMode } from '@/Composables/useDarkMode';
 const props = defineProps({
     title: {
         type: String,
-        default: 'Admin',
+        default: 'Dashboard',
     },
 });
 
@@ -15,11 +15,32 @@ const { isDark, toggleDarkMode } = useDarkMode();
 const page = usePage();
 const authUser = computed(() => page.props.auth?.user || {});
 const currentUrl = computed(() => page.url);
-const displayName = computed(() => authUser.value?.name || authUser.value?.email || 'Admin');
+const displayName = computed(() => authUser.value?.name || authUser.value?.email || 'User');
+
+const roleNames = computed(() => {
+    const roles = authUser.value?.roles;
+
+    if (Array.isArray(roles)) {
+        return roles;
+    }
+
+    if (roles && typeof roles === 'object') {
+        return Object.values(roles);
+    }
+
+    if (typeof roles === 'string') {
+        return [roles];
+    }
+
+    return [];
+});
+
+const primaryRole = computed(() => roleNames.value[0] || authUser.value?.role || 'Viewer');
+const isAdmin = computed(() => roleNames.value.includes('Admin') || primaryRole.value === 'Admin');
 
 const getInitials = (name) => {
     if (!name) {
-        return 'A';
+        return 'U';
     }
 
     return name
@@ -33,19 +54,6 @@ const getInitials = (name) => {
 const logout = () => {
     router.post('/logout');
 };
-
-const navItems = [
-    {
-        label: 'Dashboard',
-        href: '/admin/dashboard',
-        active: (url) => url.startsWith('/admin/dashboard'),
-    },
-    {
-        label: 'Users',
-        href: '/admin/users',
-        active: (url) => url.startsWith('/admin/users'),
-    },
-];
 </script>
 
 <template>
@@ -55,35 +63,46 @@ const navItems = [
         <nav class="sticky top-0 z-50 border-b border-slate-200/70 bg-white/85 backdrop-blur-xl dark:border-white/5 dark:bg-[#171717]/85">
             <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center gap-6">
-                    <Link href="/admin/dashboard" class="inline-flex items-center gap-3">
+                    <Link href="/dashboard" class="inline-flex items-center gap-3">
                         <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm shadow-indigo-500/40">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25h16.5v13.5H3.75V5.25Zm4.5 4.5h.008v.008H8.25V9.75Zm0 4.5h.008v.008H8.25v-.008Zm4.5-4.5h3m-3 4.5h3" />
                             </svg>
                         </span>
                         <div class="hidden md:block">
-                            <p class="text-sm font-semibold tracking-tight text-slate-900 dark:text-white">PMO Admin</p>
-                            <p class="text-[11px] uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">Control Panel</p>
+                            <p class="text-sm font-semibold tracking-tight text-slate-900 dark:text-white">PMO Portal</p>
+                            <p class="text-[11px] uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">Workspace</p>
                         </div>
                     </Link>
 
                     <div class="hidden items-center gap-1 md:flex">
                         <Link
-                            v-for="item in navItems"
-                            :key="item.href"
-                            :href="item.href"
+                            href="/dashboard"
                             class="rounded-lg px-3 py-2 text-sm font-medium transition-colors"
-                            :class="item.active(currentUrl)
+                            :class="currentUrl.startsWith('/dashboard')
                                 ? 'bg-slate-100 text-slate-900 dark:bg-white/10 dark:text-white'
                                 : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200'"
                         >
-                            {{ item.label }}
+                            Dashboard
                         </Link>
                         <Link
-                            href="/dashboard"
-                            class="rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200"
+                            href="/projects"
+                            class="rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+                            :class="currentUrl.startsWith('/projects')
+                                ? 'bg-slate-100 text-slate-900 dark:bg-white/10 dark:text-white'
+                                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200'"
                         >
-                            Portal
+                            Projects
+                        </Link>
+                        <Link
+                            v-if="isAdmin"
+                            href="/admin/dashboard"
+                            class="rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+                            :class="currentUrl.startsWith('/admin')
+                                ? 'bg-slate-100 text-slate-900 dark:bg-white/10 dark:text-white'
+                                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200'"
+                        >
+                            Admin
                         </Link>
                     </div>
                 </div>
@@ -128,16 +147,15 @@ const navItems = [
                                     <p class="truncate text-xs text-slate-500 dark:text-slate-400">{{ authUser?.email }}</p>
                                 </div>
 
-                                <MenuItem v-slot="{ active }">
+                                <MenuItem v-if="isAdmin" v-slot="{ active }">
                                     <Link
-                                        href="/dashboard"
+                                        href="/admin/dashboard"
                                         :class="[active ? 'bg-slate-50 dark:bg-white/5' : '', 'flex w-full items-center gap-2 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300']"
                                     >
                                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6H6.75A2.25 2.25 0 004.5 8.25v9A2.25 2.25 0 006.75 19.5h9a2.25 2.25 0 002.25-2.25V13.5" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12.75 11.25 19.5 4.5m0 0H15m4.5 0V9" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25h16.5v13.5H3.75V5.25Zm4.5 4.5h.008v.008H8.25V9.75Zm0 4.5h.008v.008H8.25v-.008Zm4.5-4.5h3m-3 4.5h3" />
                                         </svg>
-                                        Kembali ke Portal
+                                        Admin Dashboard
                                     </Link>
                                 </MenuItem>
 
@@ -167,7 +185,7 @@ const navItems = [
 
         <footer class="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
             <div class="border-t border-slate-200/70 pt-5 dark:border-white/5">
-                <p class="text-center text-xs text-slate-400 dark:text-slate-500">PMO Portal Admin</p>
+                <p class="text-center text-xs text-slate-400 dark:text-slate-500">PMO Portal Workspace</p>
             </div>
         </footer>
     </div>

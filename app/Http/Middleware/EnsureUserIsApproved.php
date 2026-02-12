@@ -16,13 +16,14 @@ class EnsureUserIsApproved
             $user = $request->user();
             Auth::logout();
             
-            $statusData = base64_encode(json_encode([
-                'status' => $user->status,
-                'name' => $user->name,
-                'email' => $user->email,
-            ]));
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
 
-            return redirect()->route('login', ['check_status' => $statusData]);
+            return redirect()->route('login', [
+                'status' => $user->status,
+                'name'   => $user->name,
+                'email'  => $user->email,
+            ]);
         }
 
         return $next($request);

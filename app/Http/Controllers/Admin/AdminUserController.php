@@ -51,6 +51,7 @@ class AdminUserController extends Controller
 
         if (isset($validated['role'])) {
             $user->syncRoles([$validated['role']]);
+            $user->update(['role' => $validated['role']]);
         }
 
         return back()->with('success', "User {$user->name} berhasil diperbarui.");

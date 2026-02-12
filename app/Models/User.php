@@ -18,6 +18,7 @@ class User extends Authenticatable
         'google_id',
         'avatar',
         'status',
+        'role',
     ];
 
     protected $hidden = [
@@ -48,6 +49,16 @@ class User extends Authenticatable
     public function isRejected(): bool
     {
         return $this->status === 'rejected';
+    }
+
+    public function primaryRoleName(): string
+    {
+        return $this->getRoleNames()->first() ?? ($this->role ?: 'Viewer');
+    }
+
+    public function isAdminUser(): bool
+    {
+        return $this->hasRole('Admin') || strcasecmp((string) $this->role, 'Admin') === 0;
     }
 
     /* ── Scopes ────────────────────────────────────── */

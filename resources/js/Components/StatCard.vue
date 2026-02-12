@@ -1,6 +1,6 @@
 <template>
-    <div class="bg-white rounded-xl border border-slate-200 p-5">
-        <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">{{ label }}</p>
+    <div class="bg-white dark:bg-[#1a1a1a] rounded-xl border border-slate-200 dark:border-white/5 p-5">
+        <p class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ label }}</p>
         <p :class="['text-2xl font-bold mt-1', textColorClass]">{{ value }}</p>
     </div>
 </template>
@@ -15,11 +15,11 @@ const props = defineProps({
 });
 
 const colorMap = {
-    slate:   'text-slate-900',
-    indigo:  'text-indigo-600',
-    emerald: 'text-emerald-600',
-    amber:   'text-amber-600',
-    red:     'text-red-600',
+    slate:   'text-slate-900 dark:text-white',
+    indigo:  'text-indigo-600 dark:text-indigo-400',
+    emerald: 'text-emerald-600 dark:text-emerald-400',
+    amber:   'text-amber-600 dark:text-amber-400',
+    red:     'text-red-600 dark:text-red-400',
 };
 
 const textColorClass = computed(() => colorMap[props.color] || colorMap.slate);

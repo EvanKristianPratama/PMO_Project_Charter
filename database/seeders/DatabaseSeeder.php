@@ -31,9 +31,11 @@ class DatabaseSeeder extends Seeder
                 'name'     => 'Admin PMO',
                 'password' => bcrypt('password'),
                 'status'   => 'approved',
+                'role'     => 'Admin',
             ]
         );
 
-        $admin->assignRole('Admin');
+        $admin->forceFill(['role' => 'Admin'])->save();
+        $admin->syncRoles(['Admin']);
     }
 }
