@@ -18,7 +18,7 @@ class ProjectStoreRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'code' => ['required', 'string', Rule::unique('trs_projects', 'code')],
             'status' => ['required', Rule::in(['draft', 'active', 'completed', 'on_hold'])],
-            'owner_id' => ['nullable', 'exists:users,id'],
+            'owner_name' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

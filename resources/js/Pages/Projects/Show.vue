@@ -1,95 +1,107 @@
 <template>
-    <div class="min-h-screen bg-slate-100 dark:bg-[#0f0f0f] print:bg-white">
-        <!-- Navigation Bar (Hidden in Print) -->
-        <nav class="bg-white dark:bg-[#1a1a1a] border-b border-slate-200 dark:border-white/10 sticky top-0 z-30 print:hidden">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between h-16">
-                    <div class="flex items-center gap-4">
-                        <Link href="/projects" class="text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400">
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+    <UserLayout :title="`Project Charter - ${project.name}`">
+        <div class="space-y-5 print:space-y-0">
+            <section class="print:hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <Link
+                            href="/projects"
+                            class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5"
+                        >
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 19-7-7 7-7" />
                             </svg>
+                            Back to Projects
                         </Link>
-                        <h1 class="text-lg font-bold text-slate-900 dark:text-white truncate">{{ project.name }} <span class="text-slate-400 dark:text-slate-500 font-normal">({{ project.code }})</span></h1>
+
+                        <h1 class="text-lg font-bold text-slate-900 dark:text-white">
+                            {{ project.name }}
+                        </h1>
+
+                        <span class="text-sm text-slate-500 dark:text-slate-400">{{ project.code }}</span>
                         <StatusBadge :status="project.status" />
                     </div>
-                    <div class="flex items-center gap-2">
-                        <button
-                            type="button"
-                            @click="toggleDarkMode"
-                            class="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-white/5"
-                            title="Toggle dark mode"
-                        >
-                            <svg v-if="isDark" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                            </svg>
-                            <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                            </svg>
-                        </button>
+
+                    <div class="flex flex-wrap items-center gap-2">
                         <button
                             v-if="!isEditing"
+                            type="button"
+                            class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700"
                             @click="isEditing = true"
-                            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg"
                         >
                             Edit Charter
                         </button>
+
                         <template v-else>
                             <button
+                                type="button"
+                                class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5"
                                 @click="cancelEdit"
-                                class="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg"
                             >
                                 Cancel
                             </button>
                             <button
-                                @click="saveCharter"
+                                type="button"
                                 :disabled="form.processing"
-                                class="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg flex items-center gap-2"
+                                class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-70"
+                                @click="saveCharter"
                             >
-                                <svg v-if="form.processing" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                <svg v-if="form.processing" class="h-4 w-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.37 0 0 5.37 0 12h4Zm2 5.29A7.95 7.95 0 0 1 4 12H0c0 3.04 1.14 5.82 3 7.94l3-2.65Z"></path>
                                 </svg>
                                 Save Changes
                             </button>
                         </template>
+
                         <button
+                            type="button"
+                            class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5"
                             @click="printCharter"
-                            class="p-2 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg"
-                            title="Print PDF"
                         >
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9V4h12v5M6 17h12v3H6v-3Zm-2-2h16a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2Z" />
                             </svg>
+                            Print
                         </button>
                     </div>
                 </div>
-            </div>
-        </nav>
 
-        <!-- Main Content -->
-        <main class="py-8 print:py-0 print:m-0">
-            <CharterDocument
-                :project="project"
-                :form="form"
-                :editable="isEditing"
-            />
-        </main>
-    </div>
+                <div class="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+                    <span>
+                        Roadmap dipisah di menu <strong>Roadmap</strong> dan otomatis mengambil data durasi/tanggal dari project yang sudah diinput.
+                    </span>
+                    <Link
+                        :href="`/roadmap?project_id=${project.id}`"
+                        class="inline-flex items-center rounded-md bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
+                    >
+                        Buka Roadmap Module
+                    </Link>
+                </div>
+            </section>
+
+            <main class="print:m-0 print:p-0">
+                <CharterDocument
+                    :project="project"
+                    :form="form"
+                    :editable="isEditing"
+                />
+            </main>
+        </div>
+    </UserLayout>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
+import UserLayout from '@/Layouts/UserLayout.vue';
 import CharterDocument from './Partials/CharterDocument.vue';
 import StatusBadge from '@/Components/StatusBadge.vue';
-import { useDarkMode } from '@/Composables/useDarkMode';
 
 const props = defineProps({
     project: Object,
 });
 
-const { isDark, toggleDarkMode } = useDarkMode();
 const isEditing = ref(false);
 
 const form = useForm({

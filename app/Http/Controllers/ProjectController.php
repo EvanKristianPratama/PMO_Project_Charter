@@ -7,20 +7,65 @@ use App\Http\Requests\Projects\ProjectStoreRequest;
 use App\Http\Requests\Projects\ProjectUpdateRequest;
 use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ProjectController extends Controller
 {
+    public function roadmapIndex(Request $request): Response
+    {
+        $selectedProjectId = $request->integer('project_id');
+
+        $roadmapScope = static function ($query): void {
+            $query->where(function ($builder): void {
+                $builder
+                    ->whereHas('charter', static function ($charter): void {
+                        $charter
+                            ->whereNotNull('duration')
+                            ->where('duration', '!=', '');
+                    })
+                    ->orWhereHas('milestones', static function ($milestones): void {
+                        $milestones
+                            ->whereNotNull('start_date')
+                            ->orWhereNotNull('end_date');
+                    });
+            });
+        };
+
+        $projects = Project::query()
+            ->select(['id', 'name', 'code'])
+            ->where($roadmapScope)
+            ->orderBy('name')
+            ->get();
+
+        $resolvedProjectId = $projects->contains('id', $selectedProjectId)
+            ? $selectedProjectId
+            : $projects->first()?->id;
+
+        $selectedProject = $resolvedProjectId
+            ? Project::query()
+                ->with(['charter', 'milestones', 'owner'])
+                ->find($resolvedProjectId)
+            : null;
+
+        return Inertia::render('Roadmap/Index', [
+            'projects' => $projects,
+            'selectedProject' => $selectedProject,
+            'selectedProjectId' => $resolvedProjectId,
+        ]);
+    }
+
     public function index(ProjectIndexRequest $request): Response
     {
         $filters = $request->validated();
 
         $projects = Project::query()
-            ->with(['owner', 'programs', 'goals'])
+            ->with('owner')
             ->when($filters['search'] ?? null, fn ($q, $search) => $q->where(function ($inner) use ($search): void {
                 $inner->where('name', 'like', "%{$search}%")
-                    ->orWhere('code', 'like', "%{$search}%");
+                    ->orWhere('code', 'like', "%{$search}%")
+                    ->orWhere('owner_name', 'like', "%{$search}%");
             }))
             ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
             ->latest()

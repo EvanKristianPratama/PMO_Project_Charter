@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Auth\SsoController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProjectMilestoneController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -40,8 +41,11 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
     // Projects & Charters
+    Route::get('/roadmap', [\App\Http\Controllers\ProjectController::class, 'roadmapIndex'])->name('roadmap.index');
     Route::resource('projects', \App\Http\Controllers\ProjectController::class);
     Route::post('/projects/{project}/charter', [\App\Http\Controllers\ProjectCharterController::class, 'store'])->name('projects.charter.store');
+    Route::post('/projects/{project}/milestones', [ProjectMilestoneController::class, 'store'])->name('projects.milestones.store');
+    Route::delete('/projects/{project}/milestones/{milestone}', [ProjectMilestoneController::class, 'destroy'])->name('projects.milestones.destroy');
 });
 
 /*

@@ -60,28 +60,51 @@
 
                 <div class="flex items-center justify-center p-12 w-full relative z-10">
                     <div class="max-w-lg animate-fade-in delay-300">
-                        <!-- Quote Card -->
-                        <div class="glass-dark rounded-2xl p-8 border border-white/10 shadow-2xl">
-                            <p class="text-lg text-white/90 font-light leading-relaxed italic">
-                                "Satu akun untuk mengakses semua modul enterprise. Lebih aman, lebih cepat, lebih efisien."
-                            </p>
+                        <!-- Quote Card Carousel -->
+                        <div class="relative h-64">
+                            <transition-group
+                                enter-active-class="transition duration-500 ease-out absolute inset-0"
+                                enter-from-class="opacity-0 translate-y-4"
+                                enter-to-class="opacity-100 translate-y-0"
+                                leave-active-class="transition duration-300 ease-in absolute inset-0"
+                                leave-from-class="opacity-100 translate-y-0"
+                                leave-to-class="opacity-0 -translate-y-4"
+                            >
+                                <div
+                                    v-for="(slide, index) in slides"
+                                    :key="index"
+                                    v-show="activeSlide === index"
+                                    class="w-full"
+                                >
+                                    <div class="glass-dark rounded-2xl p-8 border border-white/10 shadow-2xl bg-white/5 backdrop-blur-md">
+                                        <p class="text-lg text-white/90 font-light leading-relaxed italic">
+                                            {{ slide.quote }}
+                                        </p>
 
-                            <div class="flex items-center gap-4 mt-6 pt-6 border-t border-white/10">
-                                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                                    P
+                                        <div class="flex items-center gap-4 mt-6 pt-6 border-t border-white/10">
+                                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shrink-0">
+                                                {{ slide.initial }}
+                                            </div>
+                                            <div>
+                                                <p class="text-white font-semibold">{{ slide.title }}</p>
+                                                <p class="text-white/50 text-sm">{{ slide.subtitle }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="text-white font-semibold">PMO Portal</p>
-                                    <p class="text-white/50 text-sm">Enterprise Architecture Solutions</p>
-                                </div>
-                            </div>
+                            </transition-group>
                         </div>
 
                         <!-- Carousel Dots -->
                         <div class="flex items-center justify-center gap-2 mt-8">
-                            <span class="w-6 h-1.5 rounded-full bg-white/80"></span>
-                            <span class="w-1.5 h-1.5 rounded-full bg-white/30"></span>
-                            <span class="w-1.5 h-1.5 rounded-full bg-white/30"></span>
+                            <button
+                                v-for="(slide, index) in slides"
+                                :key="`dot-${index}`"
+                                @click="activeSlide = index"
+                                class="h-1.5 rounded-full transition-all duration-300"
+                                :class="activeSlide === index ? 'w-6 bg-white/90' : 'w-1.5 bg-white/30 hover:bg-white/50'"
+                                :aria-label="`Go to slide ${index + 1}`"
+                            ></button>
                         </div>
                     </div>
                 </div>
@@ -101,7 +124,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import StatusModal from '@/Components/StatusModal.vue';
@@ -111,6 +134,29 @@ const page = usePage();
 
 const showModal = ref(false);
 const statusData = ref({});
+const activeSlide = ref(0);
+let slideInterval = null;
+
+const slides = [
+    {
+        initial: 'P',
+        title: 'Program & Project Management',
+        subtitle: 'Integrated Platform',
+        quote: '"Satu wadah terintegrasi untuk seluruh siklus inisiatif perusahaan. Lebih terstruktur, lebih transparan."',
+    },
+    {
+        initial: 'O',
+        title: 'Operational Excellence',
+        subtitle: 'The "O" in PMO',
+        quote: '"Mentransformasi "Office" menjadi pusat keunggulan operasional. Standarisasi proses untuk hasil yang konsisten."',
+    },
+    {
+        initial: 'S',
+        title: 'Strategic Alignment',
+        subtitle: 'Value Driven',
+        quote: '"Memastikan setiap eksekusi proyek selaras dengan visi strategis organisasi."',
+    },
+];
 
 onMounted(() => {
     // Check for query params 'status', 'name', 'email'
@@ -125,6 +171,15 @@ onMounted(() => {
         };
         showModal.value = true;
     }
+
+    // Start Carousel
+    slideInterval = setInterval(() => {
+        activeSlide.value = (activeSlide.value + 1) % slides.length;
+    }, 5000);
+});
+
+onUnmounted(() => {
+    if (slideInterval) clearInterval(slideInterval);
 });
 
 const closeModal = () => {

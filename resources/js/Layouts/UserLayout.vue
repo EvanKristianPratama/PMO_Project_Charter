@@ -10,6 +10,7 @@ import {
     MoonIcon,
     HomeIcon,
     FolderIcon,
+    CalendarDaysIcon,
     ShieldCheckIcon,
     ChevronDownIcon,
     ArrowRightOnRectangleIcon,
@@ -48,6 +49,12 @@ const navItems = computed(() => {
             icon: FolderIcon,
             active: (url) => url.startsWith('/projects'),
         },
+        {
+            label: 'Roadmap',
+            href: '/roadmap',
+            icon: CalendarDaysIcon,
+            active: (url) => url.startsWith('/roadmap'),
+        },
     ];
 
     if (isAdmin.value) {
@@ -82,7 +89,7 @@ const logout = () => {
     <div class="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-[#0f0f0f] dark:text-slate-100">
         <Head :title="title" />
 
-        <nav class="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-white/5 dark:bg-[#171717]/90">
+        <nav class="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-white/5 dark:bg-[#171717]/90 print:hidden">
             <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center gap-6">
                     <!-- Logo -->
@@ -228,11 +235,11 @@ const logout = () => {
             </div>
         </nav>
 
-        <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 print:max-w-none print:px-0 print:py-0">
             <slot />
         </main>
 
-        <footer class="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
+        <footer class="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8 print:hidden">
             <div class="border-t border-slate-200/70 pt-5 dark:border-white/5">
                 <p class="text-center text-xs text-slate-400 dark:text-slate-500">PMO Portal Workspace</p>
             </div>
