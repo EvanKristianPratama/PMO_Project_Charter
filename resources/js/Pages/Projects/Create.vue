@@ -1,0 +1,95 @@
+<template>
+    <AdminLayout>
+        <template #title>Create Project</template>
+
+        <div class="max-w-2xl mx-auto animate-fade-in">
+            <div class="mb-8">
+                <Link href="/projects" class="text-slate-500 hover:text-indigo-600 text-sm flex items-center gap-1 mb-2">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Back to Projects
+                </Link>
+                <h2 class="text-2xl font-bold text-slate-900">New Project</h2>
+                <p class="text-slate-500 text-sm">Create a new project entry to start drafting its charter.</p>
+            </div>
+
+            <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                <form @submit.prevent="submit" class="space-y-6">
+                    <!-- Code & Name -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div class="md:col-span-1">
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Project Code</label>
+                            <input
+                                v-model="form.code"
+                                type="text"
+                                class="w-full rounded-lg border-slate-300 focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder="PRJ-001"
+                            />
+                            <p v-if="form.errors.code" class="text-red-500 text-xs mt-1">{{ form.errors.code }}</p>
+                        </div>
+                        <div class="md:col-span-3">
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Project Name</label>
+                            <input
+                                v-model="form.name"
+                                type="text"
+                                class="w-full rounded-lg border-slate-300 focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder="e.g., UI/UX Standardization"
+                            />
+                            <p v-if="form.errors.name" class="text-red-500 text-xs mt-1">{{ form.errors.name }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Owner & Status -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Owner</label>
+                            <select v-model="form.owner_id" class="w-full rounded-lg border-slate-300 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option :value="null">Select Owner</option>
+                                <!-- We should pass users prop, but for now let's assume current user or empty -->
+                                 <!-- Ideally this comes from a prop -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                            <select v-model="form.status" class="w-full rounded-lg border-slate-300 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="draft">Draft</option>
+                                <option value="active">Active</option>
+                                <option value="on_hold">On Hold</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                        <Link href="/projects" class="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-lg">Cancel</Link>
+                        <button
+                            type="submit"
+                            :disabled="form.processing"
+                            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg disabled:opacity-50"
+                        >
+                            Create Project
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </AdminLayout>
+</template>
+
+<script setup>
+import { useForm, Link } from '@inertiajs/vue3';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
+
+const form = useForm({
+    code: '',
+    name: '',
+    owner_id: null,
+    status: 'draft',
+});
+
+const submit = () => {
+    form.post('/projects');
+};
+</script>
