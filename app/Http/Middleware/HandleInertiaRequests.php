@@ -22,6 +22,7 @@ class HandleInertiaRequests extends Middleware
                 }
 
                 $roles = $user->getRoleNames()->values()->all();
+                $appRole = $user->appRole();
 
                 return [
                     'user' => [
@@ -31,7 +32,8 @@ class HandleInertiaRequests extends Middleware
                         'avatar'   => $user->avatar,
                         'initials' => $user->initials,
                         'status'   => $user->status,
-                        'role'     => $user->primaryRoleName(),
+                        'app_role' => $appRole,
+                        'permission_role' => $user->primaryRoleName(),
                         'roles'    => $roles,
                     ],
                 ];

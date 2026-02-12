@@ -4,15 +4,19 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\UserAccessService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\Socialite\Facades\Socialite;
-use Spatie\Permission\Models\Role;
 
 class SsoController extends Controller
 {
+    public function __construct(
+        private readonly UserAccessService $userAccessService,
+    ) {}
+
     public function showLogin(): Response
     {
         return Inertia::render('Auth/Login');
@@ -44,7 +48,7 @@ class SsoController extends Controller
                     'google_id' => $googleUser->getId(),
                     'avatar'    => $googleUser->getAvatar(),
                     'status'    => 'pending',
-                    'role'      => 'Viewer',
+                    'app_role'  => User::APP_ROLE_USER,
                 ]);
             }
         } else {
@@ -54,7 +58,8 @@ class SsoController extends Controller
             ]);
         }
 
-        $this->ensureRoleIsSynced($user);
+        $this->userAccessService->syncAppRole($user);
+        $this->userAccessService->ensureDefaultPermissionRole($user);
         Auth::login($user, remember: true);
 
         return $this->redirectByStatus($user);
@@ -68,38 +73,6 @@ class SsoController extends Controller
         request()->session()->regenerateToken();
 
         return redirect()->route('login');
-    }
-
-    /* ── Helpers ───────────────────────────────────── */
-
-    private function ensureRoleIsSynced(User $user): void
-    {
-        $assignedRole = $user->getRoleNames()->first();
-        $storedRole = trim((string) $user->role);
-        $storedRole = $storedRole !== '' ? $storedRole : 'Viewer';
-
-        if (! $assignedRole) {
-            $roleToAssign = Role::query()->where('name', $storedRole)->first();
-
-            if (! $roleToAssign) {
-                $roleToAssign = Role::query()
-                    ->whereRaw('LOWER(name) = ?', [strtolower($storedRole)])
-                    ->first();
-            }
-
-            $roleToAssign ??= Role::query()->where('name', 'Viewer')->first();
-
-            if ($roleToAssign) {
-                $user->syncRoles([$roleToAssign->name]);
-                $assignedRole = $roleToAssign->name;
-            }
-        }
-
-        $effectiveRole = $assignedRole ?: $storedRole;
-
-        if ($user->role !== $effectiveRole) {
-            $user->forceFill(['role' => $effectiveRole])->save();
-        }
     }
 
     private function redirectByStatus(User $user): RedirectResponse

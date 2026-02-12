@@ -31,11 +31,11 @@ class DatabaseSeeder extends Seeder
                 'name'     => 'Admin PMO',
                 'password' => bcrypt('password'),
                 'status'   => 'approved',
-                'role'     => 'Admin',
+                'app_role' => User::APP_ROLE_ADMIN,
             ]
         );
 
-        $admin->forceFill(['role' => 'Admin'])->save();
+        $admin->forceFill(['app_role' => User::APP_ROLE_ADMIN])->save();
         $admin->syncRoles(['Admin']);
     }
 }

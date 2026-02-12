@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
@@ -11,6 +12,9 @@ class User extends Authenticatable
 {
     use HasFactory, HasRoles, Notifiable;
 
+    public const APP_ROLE_ADMIN = 'admin';
+    public const APP_ROLE_USER = 'user';
+
     protected $fillable = [
         'name',
         'email',
@@ -18,7 +22,7 @@ class User extends Authenticatable
         'google_id',
         'avatar',
         'status',
-        'role',
+        'app_role',
     ];
 
     protected $hidden = [
@@ -53,12 +57,24 @@ class User extends Authenticatable
 
     public function primaryRoleName(): string
     {
-        return $this->getRoleNames()->first() ?? ($this->role ?: 'Viewer');
+        return $this->getRoleNames()->first() ?? 'Viewer';
+    }
+
+    public static function appRoles(): array
+    {
+        return [self::APP_ROLE_ADMIN, self::APP_ROLE_USER];
+    }
+
+    public function appRole(): string
+    {
+        $role = strtolower(trim((string) $this->app_role));
+
+        return $role === self::APP_ROLE_ADMIN ? self::APP_ROLE_ADMIN : self::APP_ROLE_USER;
     }
 
     public function isAdminUser(): bool
     {
-        return $this->hasRole('Admin') || strcasecmp((string) $this->role, 'Admin') === 0;
+        return $this->appRole() === self::APP_ROLE_ADMIN;
     }
 
     /* ── Scopes ────────────────────────────────────── */
@@ -76,6 +92,16 @@ class User extends Authenticatable
     public function scopeRejected($query)
     {
         return $query->where('status', 'rejected');
+    }
+
+    public function scopeWithAppRole($query, string $appRole)
+    {
+        return $query->whereRaw('LOWER(app_role) = ?', [strtolower($appRole)]);
+    }
+
+    public function accessAudits(): HasMany
+    {
+        return $this->hasMany(UserAccessAudit::class);
     }
 
     /* ── Accessors ─────────────────────────────────── */

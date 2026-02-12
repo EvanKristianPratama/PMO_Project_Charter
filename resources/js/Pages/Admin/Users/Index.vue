@@ -55,7 +55,7 @@
 
             <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="grid grid-cols-1 gap-3 md:grid-cols-12">
-                    <div class="relative md:col-span-6">
+                    <div class="relative md:col-span-4">
                         <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35m0 0a7.5 7.5 0 10-10.6 0 7.5 7.5 0 0010.6 0z" />
                         </svg>
@@ -80,12 +80,21 @@
                     </select>
 
                     <select
-                        v-model="localFilters.role"
+                        v-model="localFilters.app_role"
                         @change="applyFilters"
                         class="md:col-span-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200"
                     >
-                        <option value="all">Semua Role</option>
-                        <option v-for="role in roles" :key="role" :value="role">{{ role }}</option>
+                        <option value="all">App Role</option>
+                        <option v-for="role in appRoles" :key="role" :value="role">{{ role }}</option>
+                    </select>
+
+                    <select
+                        v-model="localFilters.permission_role"
+                        @change="applyFilters"
+                        class="md:col-span-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200"
+                    >
+                        <option value="all">Internal Role</option>
+                        <option v-for="role in permissionRoles" :key="role" :value="role">{{ role }}</option>
                     </select>
 
                     <button
@@ -128,13 +137,20 @@
 
                                 <td class="px-5 py-4">
                                     <div class="flex items-center gap-2">
-                                        <span class="rounded-lg bg-indigo-50 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">{{ getUserRole(user) }}</span>
+                                        <span class="rounded-lg bg-indigo-50 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">App: {{ getUserRole(user) }}</span>
                                         <select
                                             :value="getUserRole(user)"
-                                            @change="updateUser(user, { role: $event.target.value })"
+                                            @change="updateUser(user, { app_role: $event.target.value })"
                                             class="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 focus:border-indigo-500 focus:outline-none dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200"
                                         >
-                                            <option v-for="role in roles" :key="role" :value="role">{{ role }}</option>
+                                            <option v-for="role in appRoles" :key="role" :value="role">{{ role }}</option>
+                                        </select>
+                                        <select
+                                            :value="getPermissionRole(user)"
+                                            @change="updateUser(user, { permission_role: $event.target.value })"
+                                            class="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 focus:border-indigo-500 focus:outline-none dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200"
+                                        >
+                                            <option v-for="role in permissionRoles" :key="role" :value="role">{{ role }}</option>
                                         </select>
                                     </div>
                                 </td>
@@ -240,7 +256,8 @@ import UserAvatar from '@/Components/UserAvatar.vue';
 
 const props = defineProps({
     users: { type: Object, required: true },
-    roles: { type: Array, required: true },
+    appRoles: { type: Array, required: true },
+    permissionRoles: { type: Array, required: true },
     stats: { type: Object, required: true },
     filters: { type: Object, default: () => ({}) },
 });
@@ -248,7 +265,8 @@ const props = defineProps({
 const localFilters = reactive({
     search: props.filters.search || '',
     status: props.filters.status || 'all',
-    role: props.filters.role || 'all',
+    app_role: props.filters.app_role || 'all',
+    permission_role: props.filters.permission_role || 'all',
 });
 
 const statCards = computed(() => [
@@ -279,7 +297,11 @@ const statCards = computed(() => [
 ]);
 
 function getUserRole(user) {
-    return user.roles?.[0]?.name || user.role || 'Viewer';
+    return (user.app_role || 'user').toLowerCase() === 'admin' ? 'admin' : 'user';
+}
+
+function getPermissionRole(user) {
+    return user.roles?.[0]?.name || 'Viewer';
 }
 
 function formatDate(dateStr) {
@@ -301,14 +323,16 @@ function applyFilters() {
     router.get('/admin/users', {
         search: localFilters.search || undefined,
         status: localFilters.status !== 'all' ? localFilters.status : undefined,
-        role: localFilters.role !== 'all' ? localFilters.role : undefined,
+        app_role: localFilters.app_role !== 'all' ? localFilters.app_role : undefined,
+        permission_role: localFilters.permission_role !== 'all' ? localFilters.permission_role : undefined,
     }, { preserveState: true, replace: true });
 }
 
 function resetFilters() {
     localFilters.search = '';
     localFilters.status = 'all';
-    localFilters.role = 'all';
+    localFilters.app_role = 'all';
+    localFilters.permission_role = 'all';
     router.get('/admin/users', {}, { preserveState: true, replace: true });
 }
 

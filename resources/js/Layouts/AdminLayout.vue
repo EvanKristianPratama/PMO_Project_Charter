@@ -1,8 +1,21 @@
 <script setup>
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
-import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
+import { computed, ref } from 'vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
+import {
+    ArrowRightOnRectangleIcon,
+    ArrowTopRightOnSquareIcon,
+    Bars3Icon,
+    ChevronDownIcon,
+    HomeIcon,
+    KeyIcon,
+    MoonIcon,
+    ShieldCheckIcon,
+    SunIcon,
+    UsersIcon,
+    XMarkIcon,
+} from '@heroicons/vue/24/outline';
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
 
 const props = defineProps({
     title: {
@@ -13,9 +26,32 @@ const props = defineProps({
 
 const { isDark, toggleDarkMode } = useDarkMode();
 const page = usePage();
+const sidebarOpen = ref(false);
 const authUser = computed(() => page.props.auth?.user || {});
-const currentUrl = computed(() => page.url);
+const currentUrl = computed(() => page.url || '');
 const displayName = computed(() => authUser.value?.name || authUser.value?.email || 'Admin');
+const userEmail = computed(() => authUser.value?.email || '-');
+
+const navItems = [
+    {
+        label: 'Dashboard',
+        href: '/admin/dashboard',
+        icon: HomeIcon,
+        active: (url) => url.startsWith('/admin/dashboard'),
+    },
+    {
+        label: 'User Management',
+        href: '/admin/users',
+        icon: UsersIcon,
+        active: (url) => url.startsWith('/admin/users'),
+    },
+    {
+        label: 'Role Management',
+        href: '/admin/roles',
+        icon: KeyIcon,
+        active: (url) => url.startsWith('/admin/roles'),
+    },
+];
 
 const getInitials = (name) => {
     if (!name) {
@@ -30,145 +66,145 @@ const getInitials = (name) => {
         .slice(0, 2);
 };
 
+const closeSidebar = () => {
+    sidebarOpen.value = false;
+};
+
 const logout = () => {
     router.post('/logout');
 };
-
-const navItems = [
-    {
-        label: 'Dashboard',
-        href: '/admin/dashboard',
-        active: (url) => url.startsWith('/admin/dashboard'),
-    },
-    {
-        label: 'Users',
-        href: '/admin/users',
-        active: (url) => url.startsWith('/admin/users'),
-    },
-];
 </script>
 
 <template>
-    <div class="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#0f0f0f] dark:text-slate-100 transition-colors duration-300">
+    <div class="min-h-screen bg-slate-100 text-slate-900 transition-colors duration-300 dark:bg-[#0d1117] dark:text-slate-100">
         <Head :title="title" />
 
-        <nav class="sticky top-0 z-50 border-b border-slate-200/70 bg-white/85 backdrop-blur-xl dark:border-white/5 dark:bg-[#171717]/85">
-            <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-                <div class="flex items-center gap-6">
-                    <Link href="/admin/dashboard" class="inline-flex items-center gap-3">
-                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm shadow-indigo-500/40">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25h16.5v13.5H3.75V5.25Zm4.5 4.5h.008v.008H8.25V9.75Zm0 4.5h.008v.008H8.25v-.008Zm4.5-4.5h3m-3 4.5h3" />
-                            </svg>
+        <header class="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-white/5 dark:bg-[#111827]/90">
+            <div class="flex h-16 items-center justify-between px-4 sm:px-6">
+                <div class="flex items-center gap-3">
+                    <button
+                        type="button"
+                        class="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/5 md:hidden"
+                        @click="sidebarOpen = true"
+                    >
+                        <Bars3Icon class="h-6 w-6" />
+                    </button>
+
+                    <Link href="/admin/dashboard" class="inline-flex items-center gap-2">
+                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
+                            <ShieldCheckIcon class="h-5 w-5" />
                         </span>
-                        <div class="hidden md:block">
-                            <p class="text-sm font-semibold tracking-tight text-slate-900 dark:text-white">PMO Admin</p>
-                            <p class="text-[11px] uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">Control Panel</p>
+                        <div class="hidden sm:block">
+                            <p class="text-sm font-semibold text-slate-900 dark:text-white">PMO Admin</p>
+                            <p class="text-[11px] uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">{{ props.title }}</p>
                         </div>
                     </Link>
 
-                    <div class="hidden items-center gap-1 md:flex">
-                        <Link
-                            v-for="item in navItems"
-                            :key="item.href"
-                            :href="item.href"
-                            class="rounded-lg px-3 py-2 text-sm font-medium transition-colors"
-                            :class="item.active(currentUrl)
-                                ? 'bg-slate-100 text-slate-900 dark:bg-white/10 dark:text-white'
-                                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200'"
-                        >
-                            {{ item.label }}
-                        </Link>
-                        <Link
-                            href="/dashboard"
-                            class="rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200"
-                        >
-                            Portal
-                        </Link>
-                    </div>
+
                 </div>
 
                 <div class="flex items-center gap-2">
+
+
                     <button
                         type="button"
+                        class="rounded-xl p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/5"
                         @click="toggleDarkMode"
-                        class="rounded-xl p-2.5 text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/5"
-                        aria-label="Toggle dark mode"
                     >
-                        <svg v-if="isDark" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
-                        <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                        </svg>
+                        <SunIcon v-if="isDark" class="h-5 w-5" />
+                        <MoonIcon v-else class="h-5 w-5" />
                     </button>
 
                     <Menu as="div" class="relative">
-                        <MenuButton class="flex items-center gap-3 rounded-xl p-1.5 pr-3 transition-colors hover:bg-slate-100 focus:outline-none dark:hover:bg-white/5">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-sm font-medium text-white">
+                        <MenuButton
+                            class="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5 transition-colors hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
+                        >
+                            <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-xs font-semibold text-white">
                                 {{ getInitials(displayName) }}
+                            </span>
+                            <div class="hidden max-w-[9rem] text-left sm:block">
+                                <p class="truncate text-xs font-semibold text-slate-900 dark:text-white">{{ displayName }}</p>
+                                <p class="truncate text-[11px] text-slate-500 dark:text-slate-400">{{ userEmail }}</p>
                             </div>
-                            <span class="hidden text-sm font-medium text-slate-700 dark:text-slate-200 sm:block">{{ displayName }}</span>
-                            <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
+                            <ChevronDownIcon class="h-4 w-4 text-slate-400" />
                         </MenuButton>
 
                         <transition
                             enter-active-class="transition duration-100 ease-out"
-                            enter-from-class="scale-95 opacity-0"
-                            enter-to-class="scale-100 opacity-100"
+                            enter-from-class="transform scale-95 opacity-0"
+                            enter-to-class="transform scale-100 opacity-100"
                             leave-active-class="transition duration-75 ease-in"
-                            leave-from-class="scale-100 opacity-100"
-                            leave-to-class="scale-95 opacity-0"
+                            leave-from-class="transform scale-100 opacity-100"
+                            leave-to-class="transform scale-95 opacity-0"
                         >
-                            <MenuItems class="absolute right-0 mt-2 w-56 rounded-xl bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none dark:bg-[#1a1a1a] dark:ring-white/10">
-                                <div class="border-b border-slate-100 px-4 py-3 dark:border-white/5">
-                                    <p class="text-sm font-medium text-slate-900 dark:text-white">{{ displayName }}</p>
-                                    <p class="truncate text-xs text-slate-500 dark:text-slate-400">{{ authUser?.email }}</p>
+                            <MenuItems
+                                class="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-slate-100 rounded-xl bg-white shadow-lg ring-1 ring-black/5 focus:outline-none dark:divide-white/5 dark:bg-[#1f2937] dark:ring-white/10"
+                            >
+                                <div class="px-4 py-3 sm:hidden">
+                                    <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">{{ displayName }}</p>
+                                    <p class="truncate text-xs text-slate-500 dark:text-slate-400">{{ userEmail }}</p>
                                 </div>
-
-                                <MenuItem v-slot="{ active }">
-                                    <Link
-                                        href="/dashboard"
-                                        :class="[active ? 'bg-slate-50 dark:bg-white/5' : '', 'flex w-full items-center gap-2 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300']"
-                                    >
-                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6H6.75A2.25 2.25 0 004.5 8.25v9A2.25 2.25 0 006.75 19.5h9a2.25 2.25 0 002.25-2.25V13.5" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12.75 11.25 19.5 4.5m0 0H15m4.5 0V9" />
-                                        </svg>
-                                        Kembali ke Portal
-                                    </Link>
-                                </MenuItem>
-
-                                <MenuItem v-slot="{ active }">
-                                    <button
-                                        type="button"
-                                        @click="logout"
-                                        :class="[active ? 'bg-slate-50 dark:bg-white/5' : '', 'flex w-full items-center gap-2 px-4 py-2.5 text-sm text-red-600 dark:text-red-400']"
-                                    >
-                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="m12 15 3-3m0 0-3-3m3 3H3" />
-                                        </svg>
-                                        Keluar
-                                    </button>
-                                </MenuItem>
+                                <div class="p-1">
+                                    <MenuItem v-slot="{ active }">
+                                        <button
+                                            type="button"
+                                            class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition-colors"
+                                            :class="active ? 'bg-red-50 dark:bg-red-500/10' : ''"
+                                            @click="logout"
+                                        >
+                                            <ArrowRightOnRectangleIcon class="h-4 w-4" />
+                                            Keluar
+                                        </button>
+                                    </MenuItem>
+                                </div>
                             </MenuItems>
                         </transition>
                     </Menu>
                 </div>
             </div>
-        </nav>
+        </header>
 
-        <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-            <slot />
-        </main>
+        <div v-if="sidebarOpen" class="fixed inset-0 z-40 bg-slate-900/55 backdrop-blur-sm md:hidden" @click="closeSidebar"></div>
 
-        <footer class="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
-            <div class="border-t border-slate-200/70 pt-5 dark:border-white/5">
-                <p class="text-center text-xs text-slate-400 dark:text-slate-500">PMO Portal Admin</p>
+        <aside
+            :class="[
+                'fixed bottom-0 left-0 top-16 z-50 flex w-72 flex-col border-r border-slate-200/80 bg-white transition-transform duration-300 dark:border-white/5 dark:bg-[#111827]',
+                sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
+            ]"
+        >
+            <div class="flex h-14 items-center justify-between border-b border-slate-200/80 px-4 dark:border-white/5 md:hidden">
+                <p class="text-sm font-semibold text-slate-900 dark:text-white">Menu Admin</p>
+                <button
+                    type="button"
+                    class="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/5"
+                    @click="closeSidebar"
+                >
+                    <XMarkIcon class="h-5 w-5" />
+                </button>
             </div>
-        </footer>
+
+            <nav class="flex-1 space-y-1 overflow-y-auto p-3">
+                <Link
+                    v-for="item in navItems"
+                    :key="`side-${item.href}`"
+                    :href="item.href"
+                    class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"
+                    :class="item.active(currentUrl)
+                        ? 'bg-indigo-600/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300'
+                        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200'"
+                    @click="closeSidebar"
+                >
+                    <component :is="item.icon" class="h-5 w-5" />
+                    <span>{{ item.label }}</span>
+                </Link>
+            </nav>
+
+        </aside>
+
+        <div class="min-h-[calc(100vh-4rem)] md:ml-72">
+            <main class="px-4 py-6 sm:px-6 lg:px-8">
+                <slot />
+            </main>
+        </div>
     </div>
 </template>

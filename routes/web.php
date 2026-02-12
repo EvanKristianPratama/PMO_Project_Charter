@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Auth\SsoController;
 use App\Http\Controllers\DashboardController;
@@ -54,6 +55,11 @@ Route::middleware(['auth', 'approved', 'admin'])->prefix('admin')->name('admin.'
     Route::get('/users',            [AdminUserController::class, 'index'])->name('users.index');
     Route::put('/users/{user}',     [AdminUserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}',  [AdminUserController::class, 'destroy'])->name('users.destroy');
+    Route::get('/roles',            [AdminRoleController::class, 'index'])->name('roles.index');
+    Route::post('/roles',           [AdminRoleController::class, 'store'])->name('roles.store');
+    Route::post('/roles/permissions', [AdminRoleController::class, 'storePermission'])->name('roles.permissions.store');
+    Route::put('/roles/{role}/permissions', [AdminRoleController::class, 'updatePermissions'])->name('roles.permissions.update');
+    Route::delete('/roles/{role}',  [AdminRoleController::class, 'destroy'])->name('roles.destroy');
 });
 
 /*

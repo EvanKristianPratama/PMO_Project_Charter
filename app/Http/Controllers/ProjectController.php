@@ -2,31 +2,37 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Projects\ProjectIndexRequest;
+use App\Http\Requests\Projects\ProjectStoreRequest;
+use App\Http\Requests\Projects\ProjectUpdateRequest;
 use App\Models\Project;
-use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ProjectController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(ProjectIndexRequest $request): Response
     {
+        $filters = $request->validated();
+
         $projects = Project::query()
             ->with(['owner', 'programs', 'goals'])
-            ->when($request->search, fn ($q, $search) =>
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%")
-            )
-            ->when($request->status, fn ($q, $status) =>
-                $q->where('status', $status)
-            )
+            ->when($filters['search'] ?? null, fn ($q, $search) => $q->where(function ($inner) use ($search): void {
+                $inner->where('name', 'like', "%{$search}%")
+                    ->orWhere('code', 'like', "%{$search}%");
+            }))
+            ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
             ->latest()
             ->paginate(10)
             ->withQueryString();
 
         return Inertia::render('Projects/Index', [
             'projects' => $projects,
-            'filters'  => $request->only(['search', 'status']),
+            'filters'  => [
+                'search' => $filters['search'] ?? null,
+                'status' => $filters['status'] ?? null,
+            ],
         ]);
     }
 
@@ -35,16 +41,9 @@ class ProjectController extends Controller
         return Inertia::render('Projects/Create');
     }
 
-    public function store(Request $request)
+    public function store(ProjectStoreRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'code' => 'required|string|unique:trs_projects,code',
-            'status' => 'required|in:draft,active,completed,on_hold',
-            'owner_id' => 'nullable|exists:users,id',
-        ]);
-
-        Project::create($validated);
+        Project::create($request->validated());
 
         return redirect()->route('projects.index')->with('success', 'Project created successfully.');
     }
@@ -65,21 +64,14 @@ class ProjectController extends Controller
         ]);
     }
 
-    public function update(Request $request, Project $project)
+    public function update(ProjectUpdateRequest $request, Project $project): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'code' => 'required|string|unique:trs_projects,code,' . $project->id,
-            'status' => 'required|in:draft,active,completed,on_hold',
-            'owner_id' => 'nullable|exists:users,id',
-        ]);
-
-        $project->update($validated);
+        $project->update($request->validated());
 
         return redirect()->route('projects.index')->with('success', 'Project updated successfully.');
     }
 
-    public function destroy(Project $project)
+    public function destroy(Project $project): RedirectResponse
     {
         $project->delete();
 
