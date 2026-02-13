@@ -3,21 +3,23 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class DigitalInitiative extends Model
 {
     use SoftDeletes;
+
     protected $table = 'mst_digitalInitiative';
 
     protected $fillable = [
-        'type', 
-        'no', 
-        'projectOwner', 
-        'useCase', 
+        'type',
+        'no',
+        'projectOwner',
+        'useCase',
         'desc',
-        'value', 
+        'value',
         'urgency',
         'rjjp',
-        'coe'
+        'coe',
     ];
 }

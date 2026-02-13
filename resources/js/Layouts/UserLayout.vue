@@ -60,7 +60,7 @@ const navItems = computed(() => {
         },
         {
             label: 'Digital Initiatives',
-            href: '/projects',
+            href: '/digital-initiatives',
             icon: FolderIcon,
             active: (url) => url.startsWith('/projects'),
         },

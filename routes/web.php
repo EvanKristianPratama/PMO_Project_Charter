@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Auth\SsoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GoalsController;
+use App\Http\Controllers\DigitalInitiativeController;
 use App\Http\Controllers\ProjectCharterController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectMilestoneController;
@@ -50,6 +51,9 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::post('/projects/{project}/charter', [ProjectCharterController::class, 'store'])->name('projects.charter.store');
     Route::post('/projects/{project}/milestones', [ProjectMilestoneController::class, 'store'])->name('projects.milestones.store');
     Route::delete('/projects/{project}/milestones/{milestone}', [ProjectMilestoneController::class, 'destroy'])->name('projects.milestones.destroy');
+
+    // Digital Initiatives
+    Route::resource('digital-initiatives', DigitalInitiativeController::class);
 });
 
 /*
