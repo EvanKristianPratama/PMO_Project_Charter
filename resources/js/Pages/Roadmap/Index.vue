@@ -33,7 +33,7 @@ import ProjectRoadmap from './Partials/ProjectRoadmap.vue';
 import ActivityQuarterManager from './Partials/ActivityQuarterManager.vue';
 
 const props = defineProps({
-    projects: { type: Array, default: () => [] },
+    itInitiatives: { type: Array, default: () => [] },
     selectedProject: { type: Object, default: null },
     selectedProjectId: { type: Number, default: null },
 });

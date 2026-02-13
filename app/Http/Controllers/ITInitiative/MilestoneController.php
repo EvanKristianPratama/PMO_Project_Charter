@@ -1,15 +1,16 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\ITInitiative;
 
-use App\Http\Requests\Projects\ProjectMilestoneStoreRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\ITInitiative\MilestoneStoreRequest;
 use App\Models\Milestone;
 use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
 
-class ProjectMilestoneController extends Controller
+class MilestoneController extends Controller
 {
-    public function store(ProjectMilestoneStoreRequest $request, Project $project): RedirectResponse
+    public function store(MilestoneStoreRequest $request, Project $project): RedirectResponse
     {
         $payload = $request->validated();
         $nextOrder = (int) ($project->milestones()->max('order') ?? 0) + 1;

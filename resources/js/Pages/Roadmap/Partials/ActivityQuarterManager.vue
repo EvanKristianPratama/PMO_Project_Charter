@@ -316,7 +316,7 @@ const addMilestone = () => {
         return;
     }
 
-    milestoneForm.post(`/projects/${props.project.id}/milestones`, {
+    milestoneForm.post(`/it-initiatives/${props.project.id}/milestones`, {
         preserveScroll: true,
         preserveState: true,
         onSuccess: () => {
@@ -336,7 +336,7 @@ const removeMilestone = (milestoneId) => {
         return;
     }
 
-    router.delete(`/projects/${props.project.id}/milestones/${milestoneId}`, {
+    router.delete(`/it-initiatives/${props.project.id}/milestones/${milestoneId}`, {
         preserveScroll: true,
         preserveState: true,
     });

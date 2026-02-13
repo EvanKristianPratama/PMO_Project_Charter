@@ -1,17 +1,18 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\ITInitiative;
 
-use App\Http\Requests\Projects\ProjectIndexRequest;
-use App\Http\Requests\Projects\ProjectStoreRequest;
-use App\Http\Requests\Projects\ProjectUpdateRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\ITInitiative\ITInitiativeIndexRequest;
+use App\Http\Requests\ITInitiative\ITInitiativeStoreRequest;
+use App\Http\Requests\ITInitiative\ITInitiativeUpdateRequest;
 use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class ProjectController extends Controller
+class ITInitiativeController extends Controller
 {
     public function roadmapIndex(Request $request): Response
     {
@@ -50,13 +51,13 @@ class ProjectController extends Controller
             : null;
 
         return Inertia::render('Roadmap/Index', [
-            'projects' => $projects,
+            'itInitiatives' => $projects,
             'selectedProject' => $selectedProject,
             'selectedProjectId' => $resolvedProjectId,
         ]);
     }
 
-    public function index(ProjectIndexRequest $request): Response
+    public function index(ITInitiativeIndexRequest $request): Response
     {
         $filters = $request->validated();
 
@@ -72,8 +73,8 @@ class ProjectController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return Inertia::render('Projects/Index', [
-            'projects' => $projects,
+        return Inertia::render('ITInitiative/Index', [
+            'itInitiatives' => $projects,
             'filters'  => [
                 'search' => $filters['search'] ?? null,
                 'status' => $filters['status'] ?? null,
@@ -83,43 +84,43 @@ class ProjectController extends Controller
 
     public function create(): Response
     {
-        return Inertia::render('Projects/Create');
+        return Inertia::render('ITInitiative/Create');
     }
 
-    public function store(ProjectStoreRequest $request): RedirectResponse
+    public function store(ITInitiativeStoreRequest $request): RedirectResponse
     {
         Project::create($request->validated());
 
-        return redirect()->route('projects.index')->with('success', 'Project created successfully.');
+        return redirect()->route('it-initiatives.index')->with('success', 'Project created successfully.');
     }
 
     public function show(Project $project): Response
     {
         $project->load(['charter', 'milestones', 'programs', 'goals', 'owner']);
 
-        return Inertia::render('Projects/Show', [
-            'project' => $project,
+        return Inertia::render('ITInitiative/Show', [
+            'itInitiative' => $project,
         ]);
     }
 
     public function edit(Project $project): Response
     {
-        return Inertia::render('Projects/Edit', [
-            'project' => $project,
+        return Inertia::render('ITInitiative/Edit', [
+            'itInitiative' => $project,
         ]);
     }
 
-    public function update(ProjectUpdateRequest $request, Project $project): RedirectResponse
+    public function update(ITInitiativeUpdateRequest $request, Project $project): RedirectResponse
     {
         $project->update($request->validated());
 
-        return redirect()->route('projects.index')->with('success', 'Project updated successfully.');
+        return redirect()->route('it-initiatives.index')->with('success', 'Project updated successfully.');
     }
 
     public function destroy(Project $project): RedirectResponse
     {
         $project->delete();
 
-        return redirect()->route('projects.index')->with('success', 'Project deleted successfully.');
+        return redirect()->route('it-initiatives.index')->with('success', 'Project deleted successfully.');
     }
 }

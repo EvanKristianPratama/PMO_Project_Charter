@@ -1,15 +1,15 @@
 <template>
-    <UserLayout title="Create Project">
+    <UserLayout title="Create IT Initiative">
         <div class="max-w-2xl mx-auto animate-fade-in">
             <div class="mb-8">
-                <Link href="/projects" class="text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 text-sm flex items-center gap-1 mb-2">
+                <Link href="/it-initiatives" class="text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 text-sm flex items-center gap-1 mb-2">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                     </svg>
-                    Back to Projects
+                    Back to IT Initiatives
                 </Link>
-                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">New Project</h2>
-                <p class="text-slate-500 dark:text-slate-400 text-sm">Create a new project entry to start drafting its charter.</p>
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">New IT Initiative</h2>
+                <p class="text-slate-500 dark:text-slate-400 text-sm">Create a new IT initiative entry to start drafting its charter.</p>
             </div>
 
             <div class="bg-white dark:bg-[#1a1a1a] rounded-xl border border-slate-200 dark:border-white/5 p-6 shadow-sm">
@@ -17,7 +17,7 @@
                     <!-- Code & Name -->
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                         <div class="md:col-span-1">
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Project Code</label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">IT Initiative Code</label>
                             <input
                                 v-model="form.code"
                                 type="text"
@@ -27,7 +27,7 @@
                             <p v-if="form.errors.code" class="text-red-500 text-xs mt-1">{{ form.errors.code }}</p>
                         </div>
                         <div class="md:col-span-3">
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Project Name</label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">IT Initiative Name</label>
                             <input
                                 v-model="form.name"
                                 type="text"
@@ -41,7 +41,7 @@
                     <!-- Owner & Status -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Project Owner</label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">IT Initiative Owner</label>
                             <input
                                 v-model="form.owner_name"
                                 type="text"
@@ -63,13 +63,13 @@
 
                     <!-- Actions -->
                     <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-white/5">
-                        <Link href="/projects" class="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 rounded-lg">Cancel</Link>
+                        <Link href="/it-initiatives" class="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 rounded-lg">Cancel</Link>
                         <button
                             type="submit"
                             :disabled="form.processing"
                             class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg disabled:opacity-50"
                         >
-                            Create Project
+                            Create IT Initiative
                         </button>
                     </div>
                 </form>
@@ -90,6 +90,6 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post('/projects');
+    form.post('/it-initiatives');
 };
 </script>

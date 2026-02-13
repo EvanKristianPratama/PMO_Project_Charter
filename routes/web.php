@@ -5,10 +5,10 @@ use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Auth\SsoController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\GoalsController;
-use App\Http\Controllers\ProjectCharterController;
-use App\Http\Controllers\ProjectController;
-use App\Http\Controllers\ProjectMilestoneController;
+use App\Http\Controllers\StrategicPillar\StrategicPillarController;
+use App\Http\Controllers\ITInitiative\CharterController;
+use App\Http\Controllers\ITInitiative\ITInitiativeController;
+use App\Http\Controllers\ITInitiative\MilestoneController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -42,14 +42,14 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
-    Route::get('/goals', [GoalsController::class, 'index'])->name('goals.index');
+    Route::get('/strategic-pillars', [StrategicPillarController::class, 'index'])->name('strategic-pillars.index');
 
-    // Projects & Charters
-    Route::get('/roadmap', [ProjectController::class, 'roadmapIndex'])->name('roadmap.index');
-    Route::resource('projects', ProjectController::class);
-    Route::post('/projects/{project}/charter', [ProjectCharterController::class, 'store'])->name('projects.charter.store');
-    Route::post('/projects/{project}/milestones', [ProjectMilestoneController::class, 'store'])->name('projects.milestones.store');
-    Route::delete('/projects/{project}/milestones/{milestone}', [ProjectMilestoneController::class, 'destroy'])->name('projects.milestones.destroy');
+    // IT Initiatives & Charters
+    Route::get('/roadmap', [ITInitiativeController::class, 'roadmapIndex'])->name('roadmap.index');
+    Route::resource('it-initiatives', ITInitiativeController::class);
+    Route::post('/it-initiatives/{project}/charter', [CharterController::class, 'store'])->name('it-initiatives.charter.store');
+    Route::post('/it-initiatives/{project}/milestones', [MilestoneController::class, 'store'])->name('it-initiatives.milestones.store');
+    Route::delete('/it-initiatives/{project}/milestones/{milestone}', [MilestoneController::class, 'destroy'])->name('it-initiatives.milestones.destroy');
 });
 
 /*

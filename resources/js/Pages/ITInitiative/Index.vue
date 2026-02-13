@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Projects">
+    <UserLayout title="IT Initiatives">
         <div class="animate-fade-in">
             <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
@@ -7,10 +7,10 @@
                     <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Manage projects and charters</p>
                 </div>
                 <Link
-                    href="/projects/create"
+                    href="/it-initiatives/create"
                     class="inline-flex items-center justify-center rounded-lg border border-transparent bg-indigo-600 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-indigo-700 focus:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-indigo-900"
                 >
-                    + New Project
+                    + New IT Initiative
                 </Link>
             </div>
 
@@ -42,7 +42,7 @@
 
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <div
-                    v-for="project in projects.data"
+                    v-for="project in itInitiatives.data"
                     :key="project.id"
                     class="overflow-hidden rounded-xl border border-slate-200 bg-white transition-shadow hover:shadow-md dark:border-white/5 dark:bg-[#1a1a1a]"
                 >
@@ -52,7 +52,7 @@
                                 <h3 class="line-clamp-1 text-lg font-semibold text-slate-900 dark:text-white">{{ project.name }}</h3>
                             </div>
                             <Link
-                                :href="`/projects/${project.id}/edit`"
+                                :href="`/it-initiatives/${project.id}/edit`"
                                 class="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-white/5 dark:hover:text-slate-300"
                             >
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -99,7 +99,7 @@
 
                         <div class="mt-4 flex items-center justify-between gap-2 border-t border-slate-100 pt-4 dark:border-white/5">
                             <Link
-                                :href="`/projects/${project.id}`"
+                                :href="`/it-initiatives/${project.id}`"
                                 class="rounded-lg px-2 py-1.5 text-center text-sm font-medium text-indigo-600 transition-colors hover:bg-indigo-50 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-500/10 dark:hover:text-indigo-300"
                             >
                                 View Charter
@@ -116,19 +116,19 @@
             </div>
 
             <div
-                v-if="projects.data.length === 0"
+                v-if="itInitiatives.data.length === 0"
                 class="mt-6 rounded-xl border border-slate-200 bg-white py-12 text-center dark:border-white/5 dark:bg-[#1a1a1a]"
             >
-                <p class="text-slate-500 dark:text-slate-400">No projects found.</p>
-                <Link href="/projects/create" class="mt-2 inline-block font-medium text-indigo-600 hover:underline dark:text-indigo-400">
-                    Create your first project
+                <p class="text-slate-500 dark:text-slate-400">No IT initiatives found.</p>
+                <Link href="/it-initiatives/create" class="mt-2 inline-block font-medium text-indigo-600 hover:underline dark:text-indigo-400">
+                    Create your first IT initiative
                 </Link>
             </div>
 
-            <div v-if="projects.links && projects.links.length > 3" class="mt-6 flex justify-center">
+            <div v-if="itInitiatives.links && itInitiatives.links.length > 3" class="mt-6 flex justify-center">
                 <div class="flex gap-1">
                     <Link
-                        v-for="(link, k) in projects.links"
+                        v-for="(link, k) in itInitiatives.links"
                         :key="k"
                         :href="link.url || '#'"
                         v-html="link.label"
@@ -147,7 +147,7 @@ import { Link, router } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
 const props = defineProps({
-    projects: Object,
+    itInitiatives: Object,
     filters: Object,
 });
 
@@ -219,6 +219,6 @@ const debouncedSearch = () => {
 };
 
 const applyFilters = () => {
-    router.get('/projects', filters.value, { preserveState: true, replace: true });
+    router.get('/it-initiatives', filters.value, { preserveState: true, replace: true });
 };
 </script>

@@ -3,6 +3,7 @@ import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
+import Breadcrumb from '@/Components/Breadcrumb.vue';
 import {
     Bars3Icon,
     XMarkIcon,
@@ -54,22 +55,17 @@ const navItems = computed(() => {
         },
         {
             label: 'Strategic Pillars',
-            href: '/goals',
+            href: '/strategic-pillars',
             icon: FlagIcon,
-            active: (url) => url.startsWith('/goals'),
-        },
-        {
-            label: 'Digital Initiatives',
-            href: '/projects',
-            icon: FolderIcon,
-            active: (url) => url.startsWith('/projects'),
+            active: (url) => url.startsWith('/strategic-pillars'),
         },
         {
             label: 'IT Initiatives',
-            href: '/projects',
+            href: '/it-initiatives',
             icon: FolderIcon,
-            active: (url) => url.startsWith('/projects'),
+            active: (url) => url.startsWith('/it-initiatives'),
         },
+
     ];
 
     if (isAdmin.value) {
@@ -235,25 +231,7 @@ const logout = () => {
         </nav>
 
         <!-- ═══ Breadcrumb Navigation Bar ═══ -->
-        <div class="sticky top-16 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl shadow-sm dark:border-white/5 dark:bg-[#171717]/90 print:hidden">
-            <div class="mx-auto flex items-center gap-0.5 overflow-x-auto px-4 py-1.5 sm:px-6 lg:px-8">
-                <template v-for="(item, index) in navItems" :key="`bc-${item.href}-${index}`">
-                    <!-- Separator -->
-                    <span v-if="index > 0" class="mx-1 text-[11px] text-slate-300 dark:text-slate-600">/</span>
-                    <!-- Breadcrumb Item -->
-                    <Link
-                        :href="item.href"
-                        class="inline-flex shrink-0 items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-medium transition-colors"
-                        :class="item.active(currentUrl)
-                            ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
-                            : 'text-slate-500 hover:bg-slate-100 hover:text-blue-600 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-blue-300'"
-                    >
-                        <component :is="item.icon" class="h-3 w-3" />
-                        <span>{{ item.label }}</span>
-                    </Link>
-                </template>
-            </div>
-        </div>
+        <Breadcrumb :items="navItems" :current-url="currentUrl" />
 
         <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 print:max-w-none print:px-0 print:py-0">
             <slot />

@@ -206,7 +206,7 @@ const deleteRole = (role) => {
                         <input
                             v-model="createPermissionForm.name"
                             type="text"
-                            placeholder="Contoh: projects.approve"
+                            placeholder="Contoh: it-initiatives.approve"
                             class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#0f172a] dark:text-slate-200 dark:placeholder:text-slate-500"
                         />
                         <button

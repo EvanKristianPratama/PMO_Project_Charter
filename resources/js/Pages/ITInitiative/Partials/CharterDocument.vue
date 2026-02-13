@@ -2,7 +2,7 @@
 import { ClockIcon, DocumentTextIcon, Squares2X2Icon } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
-    project: { type: Object, required: true },
+    itInitiative: { type: Object, required: true },
     form: { type: Object, required: true },
     editable: { type: Boolean, default: false },
 });
@@ -19,7 +19,7 @@ const showScope = () => props.editable || Boolean(String(props.form.scope || '')
     <article class="charter-sheet mx-auto w-full max-w-[1200px] border border-slate-300 bg-[#e9e9e9] p-5 text-slate-900 shadow-sm dark:border-white/20 dark:bg-[#d7d7d7]">
         <header class="charter-block border-b-2 border-[#2e6ea2] pb-3">
             <h1 class="text-2xl font-extrabold leading-tight tracking-tight text-[#0f63b5]">
-                Project Charter: {{ project.name || '-' }}
+                IT Initiative Charter: {{ itInitiative.name || '-' }}
             </h1>
         </header>
 
@@ -62,15 +62,15 @@ const showScope = () => props.editable || Boolean(String(props.form.scope || '')
                 <span class="meta-icon">
                     <DocumentTextIcon class="h-5 w-5" />
                 </span>
-                <div class="meta-label">Project Owner</div>
+                <div class="meta-label">IT Initiative Owner</div>
                 <div class="meta-value font-semibold">
-                    {{ project.owner_name || project.owner?.name || 'Unassigned' }}
+                    {{ itInitiative.owner_name || itInitiative.owner?.name || 'Unassigned' }}
                 </div>
             </div>
         </section>
 
         <section class="charter-block mt-4">
-            <div class="bar-main">Project Information</div>
+            <div class="bar-main">IT Initiative Information</div>
 
             <div class="mt-2 grid gap-3 lg:grid-cols-2">
                 <article class="panel">

@@ -1,11 +1,11 @@
 <template>
-    <UserLayout :title="`Project Charter - ${project.name}`">
+    <UserLayout :title="`IT Initiative Charter - ${itInitiative.name}`">
         <div class="space-y-4 print:space-y-0">
             <section class="print:hidden rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                     <div class="flex flex-wrap items-center gap-2">
                         <Link
-                            href="/projects"
+                            href="/it-initiatives"
                             class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5"
                         >
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -15,11 +15,11 @@
                         </Link>
 
                         <h1 class="text-base font-bold text-slate-900 dark:text-white">
-                            {{ project.name }}
+                            {{ itInitiative.name }}
                         </h1>
 
-                        <span class="text-xs text-slate-500 dark:text-slate-400">{{ project.code }}</span>
-                        <StatusBadge :status="project.status" />
+                        <span class="text-xs text-slate-500 dark:text-slate-400">{{ itInitiative.code }}</span>
+                        <StatusBadge :status="itInitiative.status" />
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2">
@@ -69,10 +69,10 @@
 
                 <div class="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
                     <span>
-                        Roadmap dipisah di menu <strong>Roadmap</strong> dan otomatis mengambil data durasi/tanggal dari project yang sudah diinput.
+                        Roadmap dipisah di menu <strong>Roadmap</strong> dan otomatis mengambil data durasi/tanggal dari IT initiative yang sudah diinput.
                     </span>
                     <Link
-                        :href="`/roadmap?project_id=${project.id}`"
+                        :href="`/roadmap?project_id=${itInitiative.id}`"
                         class="inline-flex items-center rounded-md bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
                     >
                         Buka Roadmap Module
@@ -82,7 +82,7 @@
 
             <main class="print:m-0 print:p-0">
                 <CharterDocument
-                    :project="project"
+                    :it-initiative="itInitiative"
                     :form="form"
                     :editable="isEditing"
                 />
@@ -99,27 +99,27 @@ import CharterDocument from './Partials/CharterDocument.vue';
 import StatusBadge from '@/Components/StatusBadge.vue';
 
 const props = defineProps({
-    project: Object,
+    itInitiative: Object,
 });
 
 const isEditing = ref(false);
 
 const form = useForm({
-    category: props.project.charter?.category || '',
-    duration: props.project.charter?.duration || '',
-    background: props.project.charter?.background || '',
-    objectives: props.project.charter?.objectives || '',
-    scope: props.project.charter?.scope || '',
-    impact_value: props.project.charter?.impact_value || '',
-    key_personnel: props.project.charter?.key_personnel || '',
-    key_items: props.project.charter?.key_items || '',
-    budget: props.project.charter?.budget || '',
-    risks_identified: props.project.charter?.risks_identified || '',
-    risk_mitigation: props.project.charter?.risk_mitigation || '',
+    category: props.itInitiative.charter?.category || '',
+    duration: props.itInitiative.charter?.duration || '',
+    background: props.itInitiative.charter?.background || '',
+    objectives: props.itInitiative.charter?.objectives || '',
+    scope: props.itInitiative.charter?.scope || '',
+    impact_value: props.itInitiative.charter?.impact_value || '',
+    key_personnel: props.itInitiative.charter?.key_personnel || '',
+    key_items: props.itInitiative.charter?.key_items || '',
+    budget: props.itInitiative.charter?.budget || '',
+    risks_identified: props.itInitiative.charter?.risks_identified || '',
+    risk_mitigation: props.itInitiative.charter?.risk_mitigation || '',
 });
 
 const saveCharter = () => {
-    form.post(`/projects/${props.project.id}/charter`, {
+    form.post(`/it-initiatives/${props.itInitiative.id}/charter`, {
         preserveScroll: true,
         onSuccess: () => {
             isEditing.value = false;

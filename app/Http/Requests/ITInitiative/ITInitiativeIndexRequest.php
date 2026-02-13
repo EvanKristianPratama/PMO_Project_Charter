@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Projects;
+namespace App\Http\Requests\ITInitiative;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class ProjectIndexRequest extends FormRequest
+class ITInitiativeIndexRequest extends FormRequest
 {
     public function authorize(): bool
     {
