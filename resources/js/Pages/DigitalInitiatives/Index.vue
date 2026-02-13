@@ -37,7 +37,7 @@
                     disabled
                     class="rounded-lg border-slate-300 bg-white text-slate-700 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-200"
                 >
-                    <option value="completed">Completed</option>
+                    <option :value="completedStatusId">{{ completedStatusLabel }}</option>
                 </select>
             </div>
 
@@ -75,15 +75,11 @@
                                     </div>
                                 </td>
                                 <td class="whitespace-nowrap px-4 py-3">
-                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize"
-                                        :class="{
-                                            'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-400': item.status === 'completed',
-                                            'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-400': item.status === 'active',
-                                            'bg-slate-100 text-slate-800 dark:bg-white/10 dark:text-slate-400': item.status === 'draft' || !item.status,
-                                            'bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-400': item.status === 'on_hold',
-                                        }"
+                                    <span
+                                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize"
+                                        :class="statusBadgeClassById(item.status)"
                                     >
-                                        {{ item.status?.replace('_', ' ') || 'Draft' }}
+                                        {{ statusLabelFromOptions(item.status, statusOptions) }}
                                     </span>
                                 </td>
                                 <td class="whitespace-nowrap px-4 py-3 text-right">
@@ -111,7 +107,7 @@
                 class="mt-6 rounded-xl border border-slate-200 bg-white py-12 text-center dark:border-white/5 dark:bg-[#1a1a1a]"
             >
                 <p class="text-slate-500 dark:text-slate-400">No digital initiatives found.</p>
-                <p class="mt-2 text-sm text-slate-400 dark:text-slate-500">Belum ada digital initiative dengan status completed.</p>
+                <p class="mt-2 text-sm text-slate-400 dark:text-slate-500">Belum ada digital initiative dengan status {{ completedStatusLabel.toLowerCase() }}.</p>
             </div>
 
 
@@ -120,19 +116,49 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
+import { statusBadgeClassById, statusLabelFromOptions } from '@/Composables/initiativeStatus';
 
 const props = defineProps({
     initiatives: Object,
     filters: Object,
+    statusOptions: {
+        type: Array,
+        default: () => [],
+    },
+    completedStatusId: {
+        type: Number,
+        default: 4,
+    },
+});
+
+const statusOptions = computed(() => {
+    if (props.statusOptions.length > 0) {
+        return props.statusOptions;
+    }
+
+    return [
+        { id: 1, name: 'propose', label: 'Propose' },
+        { id: 2, name: 'review', label: 'Review' },
+        { id: 3, name: 'approve', label: 'Approve' },
+        { id: 4, name: 'baseline', label: 'Baseline' },
+    ];
+});
+
+const completedStatusId = computed(() => {
+    return Number(props.completedStatusId || 4);
+});
+
+const completedStatusLabel = computed(() => {
+    return statusLabelFromOptions(completedStatusId.value, statusOptions.value);
 });
 
 const filters = ref({
     search: props.filters?.search || '',
     type: props.filters?.type || '',
-    status: 'completed',
+    status: completedStatusId.value,
 });
 
 const typeBadgeClass = (type) => {
@@ -141,20 +167,6 @@ const typeBadgeClass = (type) => {
     if (t === 'operational') return 'bg-teal-100 text-teal-700 dark:bg-teal-500/10 dark:text-teal-400';
     if (t === 'tactical') return 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400';
     return 'bg-slate-100 text-slate-700 dark:bg-white/10 dark:text-slate-300';
-};
-
-const urgencyBadgeClass = (urgency) => {
-    const u = String(urgency || '').toLowerCase();
-    if (u === 'high' || u === 'tinggi') return 'bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400';
-    if (u === 'medium' || u === 'sedang') return 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400';
-    if (u === 'low' || u === 'rendah') return 'bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400';
-    return 'bg-slate-100 text-slate-700 dark:bg-white/10 dark:text-slate-300';
-};
-
-const confirmDelete = (item) => {
-    if (confirm(`Are you sure you want to delete initiative "${item.no}"?`)) {
-        router.delete(`/digital-initiatives/${item.id}`);
-    }
 };
 
 let timeout = null;

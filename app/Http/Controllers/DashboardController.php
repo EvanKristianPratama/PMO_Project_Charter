@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\DigitalInitiative;
+use App\Models\InitiativeStatus;
 use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -16,9 +18,10 @@ class DashboardController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        $totalProjects = Project::query()->count();
-        $totalDigitalInitiatives = DigitalInitiative::query()->count();
-        $statusCounts = Project::query()
+        $statusOptions = $this->statusOptions();
+        $baselineStatusId = $this->baselineStatusId($statusOptions);
+
+        $projectStatusCounts = Project::query()
             ->selectRaw('status, COUNT(*) as total')
             ->groupBy('status')
             ->pluck('total', 'status');
@@ -30,44 +33,65 @@ class DashboardController extends Controller
 
         $openDigitalInitiatives = DigitalInitiative::query()
             ->select(['id', 'no', 'type', 'projectOwner', 'useCase', 'status', 'updated_at'])
-            ->where(static function ($query): void {
+            ->with(['statusRef:id,name'])
+            ->where(static function ($query) use ($baselineStatusId): void {
                 $query
                     ->whereNull('status')
-                    ->orWhere('status', '!=', 'completed');
+                    ->orWhere('status', '!=', $baselineStatusId);
             })
             ->latest()
             ->get();
 
         $openItInitiatives = Project::query()
             ->select(['id', 'code', 'name', 'status', 'updated_at'])
-            ->with(['charter:id,project_id,category'])
-            ->where(static function ($query): void {
+            ->with(['charter:id,project_id,category', 'statusRef:id,name'])
+            ->where(static function ($query) use ($baselineStatusId): void {
                 $query
                     ->whereNull('status')
-                    ->orWhere('status', '!=', 'completed');
+                    ->orWhere('status', '!=', $baselineStatusId);
             })
             ->latest()
             ->get();
 
         return Inertia::render('Dashboard', [
             'overview' => [
-                'total_projects' => $totalProjects,
-                'total_digital_initiatives' => $totalDigitalInitiatives,
-                'status_counts' => [
-                    'draft' => (int) ($statusCounts['draft'] ?? 0),
-                    'on_hold' => (int) ($statusCounts['on_hold'] ?? 0),
-                    'active' => (int) ($statusCounts['active'] ?? 0),
-                    'completed' => (int) ($statusCounts['completed'] ?? 0),
-                ],
-                'digital_status_counts' => [
-                    'draft' => (int) ($digitalStatusCounts['draft'] ?? 0),
-                    'on_hold' => (int) ($digitalStatusCounts['on_hold'] ?? 0),
-                    'active' => (int) ($digitalStatusCounts['active'] ?? 0),
-                    'completed' => (int) ($digitalStatusCounts['completed'] ?? 0),
-                ],
+                'total_projects' => Project::query()->count(),
+                'total_digital_initiatives' => DigitalInitiative::query()->count(),
+                'status_options' => $statusOptions,
+                'status_counts' => $this->mapCountsByStatus($statusOptions, $projectStatusCounts),
+                'digital_status_counts' => $this->mapCountsByStatus($statusOptions, $digitalStatusCounts),
             ],
+            'completedStatusId' => $baselineStatusId,
             'openDigitalInitiatives' => $openDigitalInitiatives,
             'openItInitiatives' => $openItInitiatives,
         ]);
+    }
+
+    private function statusOptions(): array
+    {
+        return InitiativeStatus::ordered()
+            ->map(fn (InitiativeStatus $status) => [
+                'id' => (int) $status->id,
+                'name' => $status->name,
+                'label' => ucfirst($status->name),
+            ])
+            ->values()
+            ->all();
+    }
+
+    private function baselineStatusId(array $statusOptions): int
+    {
+        $baselineStatus = collect($statusOptions)->firstWhere('name', 'baseline');
+
+        return (int) ($baselineStatus['id'] ?? InitiativeStatus::baselineId());
+    }
+
+    private function mapCountsByStatus(array $statusOptions, Collection $rawCounts): array
+    {
+        return collect($statusOptions)
+            ->mapWithKeys(fn (array $status) => [
+                (string) $status['id'] => (int) ($rawCounts[$status['id']] ?? $rawCounts[(string) $status['id']] ?? 0),
+            ])
+            ->all();
     }
 }

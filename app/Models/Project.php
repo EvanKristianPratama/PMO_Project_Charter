@@ -22,6 +22,7 @@ class Project extends Model
     {
         return [
             'metadata' => 'array',
+            'status' => 'integer',
         ];
     }
 
@@ -30,6 +31,11 @@ class Project extends Model
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    public function statusRef(): BelongsTo
+    {
+        return $this->belongsTo(InitiativeStatus::class, 'status');
     }
 
     public function charter(): HasOne
@@ -59,7 +65,7 @@ class Project extends Model
 
     /* ── Scopes ────────────────────────────────────── */
 
-    public function scopeStatus($query, string $status)
+    public function scopeStatus($query, int $status)
     {
         return $query->where('status', $status);
     }

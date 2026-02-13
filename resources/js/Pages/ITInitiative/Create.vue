@@ -53,10 +53,9 @@
                         <div>
                             <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Status</label>
                             <select v-model="form.status" class="w-full rounded-lg border-slate-300 dark:border-white/10 bg-white dark:bg-[#131313] text-slate-700 dark:text-slate-200 focus:ring-indigo-500 focus:border-indigo-500">
-                                <option value="draft">Draft</option>
-                                <option value="active">Active</option>
-                                <option value="on_hold">On Hold</option>
-                                <option value="completed">Completed</option>
+                                <option v-for="statusOption in statusOptions" :key="statusOption.id" :value="statusOption.id">
+                                    {{ statusOption.label }}
+                                </option>
                             </select>
                         </div>
                     </div>
@@ -82,11 +81,28 @@
 import { useForm, Link } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
+const props = defineProps({
+    statusOptions: {
+        type: Array,
+        default: () => [],
+    },
+    defaultStatusId: {
+        type: Number,
+        default: 1,
+    },
+});
+
+const statusOptions = props.statusOptions.length > 0
+    ? props.statusOptions
+    : [{ id: 1, label: 'Propose' }];
+
 const form = useForm({
     code: '',
     name: '',
     owner_name: '',
-    status: 'draft',
+    status: statusOptions.some((statusOption) => statusOption.id === props.defaultStatusId)
+        ? props.defaultStatusId
+        : statusOptions[0].id,
 });
 
 const submit = () => {

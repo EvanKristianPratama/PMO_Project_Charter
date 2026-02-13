@@ -57,10 +57,9 @@
                                 v-model="form.status"
                                 class="w-full rounded-lg border-slate-300 bg-white text-slate-700 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-200"
                             >
-                                <option value="draft">Draft</option>
-                                <option value="active">Active</option>
-                                <option value="on_hold">On Hold</option>
-                                <option value="completed">Completed</option>
+                                <option v-for="statusOption in statusOptions" :key="statusOption.id" :value="statusOption.id">
+                                    {{ statusOption.label }}
+                                </option>
                             </select>
                             <p v-if="form.errors.status" class="mt-1 text-xs text-red-500">{{ form.errors.status }}</p>
                         </div>
@@ -93,13 +92,29 @@ const props = defineProps({
         type: Object,
         required: true,
     },
+    statusOptions: {
+        type: Array,
+        default: () => [],
+    },
+    defaultStatusId: {
+        type: Number,
+        default: 1,
+    },
 });
+
+const statusOptions = props.statusOptions.length > 0
+    ? props.statusOptions
+    : [{ id: 1, label: 'Propose' }];
+
+const resolvedDefaultStatusId = statusOptions.some((statusOption) => statusOption.id === props.defaultStatusId)
+    ? props.defaultStatusId
+    : statusOptions[0].id;
 
 const form = useForm({
     code: props.itInitiative.code ?? '',
     name: props.itInitiative.name ?? '',
     owner_name: props.itInitiative.owner_name ?? '',
-    status: props.itInitiative.status ?? 'draft',
+    status: props.itInitiative.status ?? resolvedDefaultStatusId,
 });
 
 const submit = () => {

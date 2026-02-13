@@ -40,11 +40,14 @@
                         <div>
                             <div class="flex items-center justify-between gap-3">
                                 <h2 class="text-base font-semibold text-slate-900 dark:text-white">Status Usulan Digital Initiatives</h2>
-                                <span class="text-xs text-slate-500 dark:text-slate-400">Draft → Review → Approved → Complete</span>
+                                <span class="text-xs text-slate-500 dark:text-slate-400">{{ statusFlowLegend }}</span>
                             </div>
 
                             <div class="mt-5">
-                                <div class="grid grid-cols-4">
+                                <div
+                                    class="grid"
+                                    :style="{ gridTemplateColumns: `repeat(${Math.max(digitalStatusFlow.length, 1)}, minmax(0, 1fr))` }"
+                                >
                                     <div
                                         v-for="(step, index) in digitalStatusFlow"
                                         :key="step.key"
@@ -64,7 +67,10 @@
                                     </div>
                                 </div>
 
-                                <div class="mt-3 grid grid-cols-4 gap-2 text-center">
+                                <div
+                                    class="mt-3 grid gap-2 text-center"
+                                    :style="{ gridTemplateColumns: `repeat(${Math.max(digitalStatusFlow.length, 1)}, minmax(0, 1fr))` }"
+                                >
                                     <div v-for="step in digitalStatusFlow" :key="`label-digital-${step.key}`">
                                         <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">{{ step.label }}</p>
                                     </div>
@@ -76,11 +82,14 @@
                         <div>
                             <div class="flex items-center justify-between gap-3">
                                 <h2 class="text-base font-semibold text-slate-900 dark:text-white">Status Usulan IT Initiatives</h2>
-                                <span class="text-xs text-slate-500 dark:text-slate-400">Draft → Review → Approved → Complete</span>
+                                <span class="text-xs text-slate-500 dark:text-slate-400">{{ statusFlowLegend }}</span>
                             </div>
 
                             <div class="mt-5">
-                                <div class="grid grid-cols-4">
+                                <div
+                                    class="grid"
+                                    :style="{ gridTemplateColumns: `repeat(${Math.max(itStatusFlow.length, 1)}, minmax(0, 1fr))` }"
+                                >
                                     <div
                                         v-for="(step, index) in itStatusFlow"
                                         :key="step.key"
@@ -100,7 +109,10 @@
                                     </div>
                                 </div>
 
-                                <div class="mt-3 grid grid-cols-4 gap-2 text-center">
+                                <div
+                                    class="mt-3 grid gap-2 text-center"
+                                    :style="{ gridTemplateColumns: `repeat(${Math.max(itStatusFlow.length, 1)}, minmax(0, 1fr))` }"
+                                >
                                     <div v-for="step in itStatusFlow" :key="`label-it-${step.key}`">
                                         <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">{{ step.label }}</p>
                                     </div>
@@ -115,14 +127,14 @@
                 <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                     <div class="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-4 dark:border-white/10">
                         <div>
-                            <h2 class="text-base font-semibold text-slate-900 dark:text-white">Digital Initiatives (Belum Complete)</h2>
-                            <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Hanya initiative dengan status selain completed.</p>
+                            <h2 class="text-base font-semibold text-slate-900 dark:text-white">Digital Initiatives (Belum {{ completedStatusLabel }})</h2>
+                            <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Hanya initiative dengan status selain {{ completedStatusLabel.toLowerCase() }}.</p>
                         </div>
                         <Link
-                            href="/digital-initiatives?status=completed"
+                            :href="`/digital-initiatives?status=${completedStatusId}`"
                             class="text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
                         >
-                            Lihat Completed
+                            Lihat {{ completedStatusLabel }}
                         </Link>
                     </div>
 
@@ -146,8 +158,8 @@
                                         </div>
                                     </td>
                                     <td class="whitespace-nowrap px-4 py-3">
-                                        <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize" :class="statusBadgeClass(item.status)">
-                                            {{ statusLabel(item.status) }}
+                                        <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize" :class="statusBadgeClassById(item.status)">
+                                            {{ statusLabelFromOptions(item.status, statusOptions) }}
                                         </span>
                                     </td>
                                     <td class="whitespace-nowrap px-4 py-3 text-right">
@@ -177,7 +189,7 @@
 
                                 <tr v-if="openDigitalInitiatives.length === 0">
                                     <td colspan="4" class="px-4 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
-                                        Semua digital initiatives sudah completed.
+                                        Semua digital initiatives sudah {{ completedStatusLabel.toLowerCase() }}.
                                     </td>
                                 </tr>
                             </tbody>
@@ -188,14 +200,14 @@
                 <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                     <div class="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-4 dark:border-white/10">
                         <div>
-                            <h2 class="text-base font-semibold text-slate-900 dark:text-white">IT Initiatives (Belum Complete)</h2>
-                            <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Hanya initiative dengan status selain completed.</p>
+                            <h2 class="text-base font-semibold text-slate-900 dark:text-white">IT Initiatives (Belum {{ completedStatusLabel }})</h2>
+                            <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Hanya initiative dengan status selain {{ completedStatusLabel.toLowerCase() }}.</p>
                         </div>
                         <Link
-                            href="/it-initiatives?status=completed"
+                            :href="`/it-initiatives?status=${completedStatusId}`"
                             class="text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
                         >
-                            Lihat Completed
+                            Lihat {{ completedStatusLabel }}
                         </Link>
                     </div>
 
@@ -219,8 +231,8 @@
                                         </div>
                                     </td>
                                     <td class="whitespace-nowrap px-4 py-3">
-                                        <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize" :class="statusBadgeClass(item.status)">
-                                            {{ statusLabel(item.status) }}
+                                        <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize" :class="statusBadgeClassById(item.status)">
+                                            {{ statusLabelFromOptions(item.status, statusOptions) }}
                                         </span>
                                     </td>
                                     <td class="whitespace-nowrap px-4 py-3 text-right">
@@ -250,7 +262,7 @@
 
                                 <tr v-if="openItInitiatives.length === 0">
                                     <td colspan="4" class="px-4 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
-                                        Semua IT initiatives sudah completed.
+                                        Semua IT initiatives sudah {{ completedStatusLabel.toLowerCase() }}.
                                     </td>
                                 </tr>
                             </tbody>
@@ -266,6 +278,7 @@
 import { computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
+import { statusBadgeClassById, statusFlowClassByIndex, statusLabelFromOptions } from '@/Composables/initiativeStatus';
 
 const page = usePage();
 const auth = computed(() => page.props.auth || {});
@@ -276,19 +289,14 @@ const props = defineProps({
         default: () => ({
             total_projects: 0,
             total_digital_initiatives: 0,
-            status_counts: {
-                draft: 0,
-                on_hold: 0,
-                active: 0,
-                completed: 0,
-            },
-            digital_status_counts: {
-                draft: 0,
-                on_hold: 0,
-                active: 0,
-                completed: 0,
-            },
+            status_options: [],
+            status_counts: {},
+            digital_status_counts: {},
         }),
+    },
+    completedStatusId: {
+        type: Number,
+        default: 4,
     },
     openDigitalInitiatives: {
         type: Array,
@@ -298,6 +306,31 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+});
+
+const fallbackStatusOptions = [
+    { id: 1, name: 'propose', label: 'Propose' },
+    { id: 2, name: 'review', label: 'Review' },
+    { id: 3, name: 'approve', label: 'Approve' },
+    { id: 4, name: 'baseline', label: 'Baseline' },
+];
+
+const statusOptions = computed(() => {
+    return Array.isArray(props.overview?.status_options) && props.overview.status_options.length > 0
+        ? props.overview.status_options
+        : fallbackStatusOptions;
+});
+
+const completedStatusId = computed(() => Number(props.completedStatusId || 4));
+
+const completedStatusLabel = computed(() => {
+    return statusLabelFromOptions(completedStatusId.value, statusOptions.value);
+});
+
+const statusFlowLegend = computed(() => {
+    return statusOptions.value
+        .map((status) => statusLabelFromOptions(status.id, statusOptions.value))
+        .join(' → ');
 });
 
 const metricCards = computed(() => [
@@ -314,113 +347,23 @@ const metricCards = computed(() => [
         note: 'Semua usulan initiatives yang sudah terdaftar di sistem.',
     },
 
-    // {
-    //     key: 'roadmap',
-    //     label: 'Roadmap Ready',
-    //     value: props.overview.roadmap_projects,
-    //     note: 'Project yang sudah punya durasi atau milestone bertanggal.',
-    // },
-    // {
-    //     key: 'quarter',
-    //     label: 'Milestone Quarter Ini',
-    //     value: props.overview.milestones_this_quarter,
-    //     note: 'Jumlah milestone yang jatuh pada quarter berjalan.',
-    // },
-    // {
-    //     key: 'completed',
-    //     label: 'Completed Projects',
-    //     value: props.overview.completed_projects,
-    //     note: 'Project dengan status selesai (completed).',
-    // },
 ]);
 
-const itStatusFlow = computed(() => [
-    {
-        key: 'draft',
-        label: 'Usulan',
-        count: props.overview.status_counts?.draft ?? 0,
-        circleClass: 'border-emerald-500 bg-emerald-500 text-white',
-        lineClass: 'bg-emerald-300 dark:bg-emerald-500/40',
-    },
-    {
-        key: 'on_hold',
-        label: 'Review',
-        count: props.overview.status_counts?.on_hold ?? 0,
-        circleClass: 'border-emerald-500 bg-emerald-500 text-white',
-        lineClass: 'bg-amber-300 dark:bg-amber-500/40',
-    },
-    {
-        key: 'active',
-        label: 'Persetujuan',
-        count: props.overview.status_counts?.active ?? 0,
-        circleClass: 'border-amber-500 bg-amber-500 text-white',
-        lineClass: 'bg-slate-200 dark:bg-white/10',
-    },
-    {
-        key: 'completed',
-        label: 'Selesai as baseline',
-        count: props.overview.status_counts?.completed ?? 0,
-        circleClass: 'border-slate-300 bg-slate-100 text-slate-600 dark:border-white/20 dark:bg-white/5 dark:text-slate-200',
-        lineClass: 'bg-slate-200 dark:bg-white/10',
-    },
-]);
+const mapFlowData = (counts = {}) => {
+    return statusOptions.value.map((status, index) => {
+        const flowClass = statusFlowClassByIndex(index);
+        const key = String(status.id);
 
-const digitalStatusFlow = computed(() => [
-    {
-        key: 'draft',
-        label: 'Usulan',
-        count: props.overview.digital_status_counts?.draft ?? 0,
-        circleClass: 'border-emerald-500 bg-emerald-500 text-white',
-        lineClass: 'bg-emerald-300 dark:bg-emerald-500/40',
-    },
-    {
-        key: 'on_hold',
-        label: 'Review',
-        count: props.overview.digital_status_counts?.on_hold ?? 0,
-        circleClass: 'border-emerald-500 bg-emerald-500 text-white',
-        lineClass: 'bg-amber-300 dark:bg-amber-500/40',
-    },
-    {
-        key: 'active',
-        label: 'Persetujuan',
-        count: props.overview.digital_status_counts?.active ?? 0,
-        circleClass: 'border-amber-500 bg-amber-500 text-white',
-        lineClass: 'bg-slate-200 dark:bg-white/10',
-    },
-    {
-        key: 'completed',
-        label: 'Selesai as baseline',
-        count: props.overview.digital_status_counts?.completed ?? 0,
-        circleClass: 'border-slate-300 bg-slate-100 text-slate-600 dark:border-white/20 dark:bg-white/5 dark:text-slate-200',
-        lineClass: 'bg-slate-200 dark:bg-white/10',
-    },
-]);
-
-const statusLabel = (status) => {
-    const normalized = String(status || '').toLowerCase();
-
-    if (!normalized) {
-        return 'draft';
-    }
-
-    return normalized.replace('_', ' ');
+        return {
+            key,
+            label: statusLabelFromOptions(status.id, statusOptions.value),
+            count: Number(counts?.[key] ?? 0),
+            circleClass: flowClass.circleClass,
+            lineClass: flowClass.lineClass,
+        };
+    });
 };
 
-const statusBadgeClass = (status) => {
-    const normalized = String(status || '').toLowerCase();
-
-    if (normalized === 'active') {
-        return 'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-400';
-    }
-
-    if (normalized === 'on_hold') {
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-400';
-    }
-
-    if (normalized === 'completed') {
-        return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-400';
-    }
-
-    return 'bg-slate-100 text-slate-800 dark:bg-white/10 dark:text-slate-300';
-};
+const itStatusFlow = computed(() => mapFlowData(props.overview?.status_counts || {}));
+const digitalStatusFlow = computed(() => mapFlowData(props.overview?.digital_status_counts || {}));
 </script>

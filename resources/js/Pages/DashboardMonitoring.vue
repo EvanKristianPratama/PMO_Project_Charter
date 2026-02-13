@@ -43,7 +43,7 @@
                         <tbody class="divide-y divide-slate-100 dark:divide-white/5">
                             <tr v-for="row in statusRows" :key="row.key">
                                 <td class="px-4 py-3">
-                                    <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize" :class="row.badgeClass">
+                                    <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize" :class="statusBadgeClassById(row.id)">
                                         {{ row.label }}
                                     </span>
                                 </td>
@@ -62,6 +62,7 @@
 <script setup>
 import { computed } from 'vue';
 import UserLayout from '@/Layouts/UserLayout.vue';
+import { statusBadgeClassById, statusLabelFromOptions } from '@/Composables/initiativeStatus';
 
 const props = defineProps({
     summary: {
@@ -70,60 +71,53 @@ const props = defineProps({
             total_it_initiatives: 0,
             total_digital_initiatives: 0,
             total_all_initiatives: 0,
-            it_status_counts: {
-                draft: 0,
-                on_hold: 0,
-                active: 0,
-                completed: 0,
-            },
-            digital_status_counts: {
-                draft: 0,
-                on_hold: 0,
-                active: 0,
-                completed: 0,
-            },
-            combined_status_counts: {
-                draft: 0,
-                on_hold: 0,
-                active: 0,
-                completed: 0,
-            },
+            status_options: [],
+            it_status_counts: {},
+            digital_status_counts: {},
+            combined_status_counts: {},
+            status_rows: [],
         }),
     },
 });
 
-const statusRows = computed(() => [
-    {
-        key: 'draft',
-        label: 'draft',
-        it: props.summary.it_status_counts?.draft ?? 0,
-        digital: props.summary.digital_status_counts?.draft ?? 0,
-        total: props.summary.combined_status_counts?.draft ?? 0,
-        badgeClass: 'bg-slate-100 text-slate-700 dark:bg-white/10 dark:text-slate-300',
-    },
-    {
-        key: 'on_hold',
-        label: 'on hold',
-        it: props.summary.it_status_counts?.on_hold ?? 0,
-        digital: props.summary.digital_status_counts?.on_hold ?? 0,
-        total: props.summary.combined_status_counts?.on_hold ?? 0,
-        badgeClass: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400',
-    },
-    {
-        key: 'active',
-        label: 'active',
-        it: props.summary.it_status_counts?.active ?? 0,
-        digital: props.summary.digital_status_counts?.active ?? 0,
-        total: props.summary.combined_status_counts?.active ?? 0,
-        badgeClass: 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400',
-    },
-    {
-        key: 'completed',
-        label: 'completed',
-        it: props.summary.it_status_counts?.completed ?? 0,
-        digital: props.summary.digital_status_counts?.completed ?? 0,
-        total: props.summary.combined_status_counts?.completed ?? 0,
-        badgeClass: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400',
-    },
-]);
+const fallbackStatusOptions = [
+    { id: 1, name: 'propose', label: 'Propose' },
+    { id: 2, name: 'review', label: 'Review' },
+    { id: 3, name: 'approve', label: 'Approve' },
+    { id: 4, name: 'baseline', label: 'Baseline' },
+];
+
+const statusOptions = computed(() => {
+    return Array.isArray(props.summary?.status_options) && props.summary.status_options.length > 0
+        ? props.summary.status_options
+        : fallbackStatusOptions;
+});
+
+const statusRows = computed(() => {
+    if (Array.isArray(props.summary?.status_rows) && props.summary.status_rows.length > 0) {
+        return props.summary.status_rows.map((row) => ({
+            key: String(row.id),
+            id: Number(row.id),
+            label: row.label || statusLabelFromOptions(row.id, statusOptions.value),
+            it: Number(row.it ?? 0),
+            digital: Number(row.digital ?? 0),
+            total: Number(row.total ?? 0),
+        }));
+    }
+
+    return statusOptions.value.map((status) => {
+        const key = String(status.id);
+        const itCount = Number(props.summary.it_status_counts?.[key] ?? 0);
+        const digitalCount = Number(props.summary.digital_status_counts?.[key] ?? 0);
+
+        return {
+            key,
+            id: Number(status.id),
+            label: statusLabelFromOptions(status.id, statusOptions.value),
+            it: itCount,
+            digital: digitalCount,
+            total: itCount + digitalCount,
+        };
+    });
+});
 </script>

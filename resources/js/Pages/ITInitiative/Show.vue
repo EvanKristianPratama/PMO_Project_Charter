@@ -19,7 +19,12 @@
                         </h1>
 
                         <span class="text-xs text-slate-500 dark:text-slate-400">{{ itInitiative.code }}</span>
-                        <StatusBadge :status="itInitiative.status" />
+                        <span
+                            class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize"
+                            :class="statusBadgeClassById(itInitiative.status)"
+                        >
+                            {{ statusLabelFromOptions(itInitiative.status, statusOptions) }}
+                        </span>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2">
@@ -177,10 +182,35 @@ import { computed, ref, watch } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import CharterDocument from './Partials/CharterDocument.vue';
-import StatusBadge from '@/Components/StatusBadge.vue';
+import { statusBadgeClassById, statusLabelFromOptions } from '@/Composables/initiativeStatus';
 
 const props = defineProps({
     itInitiative: Object,
+});
+
+const statusOptions = computed(() => {
+    const defaultOptions = [
+        { id: 1, name: 'propose', label: 'Propose' },
+        { id: 2, name: 'review', label: 'Review' },
+        { id: 3, name: 'approve', label: 'Approve' },
+        { id: 4, name: 'baseline', label: 'Baseline' },
+    ];
+
+    if (!props.itInitiative?.status_ref?.name) {
+        return defaultOptions;
+    }
+
+    return defaultOptions.map((option) =>
+        option.id === Number(props.itInitiative.status)
+            ? {
+                ...option,
+                name: props.itInitiative.status_ref.name,
+                label: String(props.itInitiative.status_ref.name)
+                    .replace(/_/g, ' ')
+                    .replace(/\b\w/g, (char) => char.toUpperCase()),
+            }
+            : option
+    );
 });
 
 const CHARTER_FIELDS = [

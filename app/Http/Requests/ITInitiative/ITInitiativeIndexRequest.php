@@ -16,7 +16,8 @@ class ITInitiativeIndexRequest extends FormRequest
     {
         return [
             'search' => ['nullable', 'string', 'max:255'],
-            'status' => ['nullable', Rule::in(['draft', 'active', 'completed', 'on_hold'])],
+            'status' => ['nullable', 'integer', Rule::exists('trs_status_initiative', 'id')],
+            'month' => ['nullable', 'date_format:m'],
         ];
     }
 }

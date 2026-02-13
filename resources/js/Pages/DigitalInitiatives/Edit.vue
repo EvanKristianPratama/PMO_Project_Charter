@@ -159,10 +159,9 @@
                                     v-model="form.status"
                                     class="w-full rounded-md border-slate-300 bg-slate-50 shadow-sm focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-200 sm:text-sm"
                                 >
-                                    <option value="draft">Draft / Usulan</option>
-                                    <option value="on_hold">On Hold / Review</option>
-                                    <option value="active">Active / Persetujuan</option>
-                                    <option value="completed">Completed / Selesai</option>
+                                    <option v-for="statusOption in statusOptions" :key="statusOption.id" :value="statusOption.id">
+                                        {{ statusOption.label }}
+                                    </option>
                                 </select>
                                 <p v-if="form.errors.status" class="mt-1 text-xs text-red-500">{{ form.errors.status }}</p>
                             </div>
@@ -197,7 +196,23 @@ const props = defineProps({
         type: Object,
         required: true,
     },
+    statusOptions: {
+        type: Array,
+        default: () => [],
+    },
+    defaultStatusId: {
+        type: Number,
+        default: 1,
+    },
 });
+
+const statusOptions = props.statusOptions.length > 0
+    ? props.statusOptions
+    : [{ id: 1, label: 'Propose' }];
+
+const resolvedDefaultStatusId = statusOptions.some((statusOption) => statusOption.id === props.defaultStatusId)
+    ? props.defaultStatusId
+    : statusOptions[0].id;
 
 const form = useForm({
     type: props.initiative.type ?? '',
@@ -209,7 +224,7 @@ const form = useForm({
     urgency: props.initiative.urgency ?? '',
     rjjp: props.initiative.rjjp ?? '',
     coe: props.initiative.coe ?? '',
-    status: props.initiative.status ?? 'draft',
+    status: props.initiative.status ?? resolvedDefaultStatusId,
 });
 
 const submit = () => {

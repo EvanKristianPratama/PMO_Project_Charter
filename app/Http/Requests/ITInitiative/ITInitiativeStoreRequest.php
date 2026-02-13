@@ -17,7 +17,7 @@ class ITInitiativeStoreRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'code' => ['required', 'string', Rule::unique('trs_projects', 'code')],
-            'status' => ['required', Rule::in(['draft', 'active', 'completed', 'on_hold'])],
+            'status' => ['required', 'integer', Rule::exists('trs_status_initiative', 'id')],
             'owner_name' => ['nullable', 'string', 'max:255'],
         ];
     }

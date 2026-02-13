@@ -26,7 +26,7 @@
                     disabled
                     class="rounded-lg border-slate-300 bg-white py-1.5 text-sm text-slate-700 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-200"
                 >
-                    <option value="completed">Completed</option>
+                    <option :value="completedStatusId">{{ completedStatusLabel }}</option>
                 </select>
                 <select
                     v-model="filters.month"
@@ -69,14 +69,11 @@
                                 <span class="font-medium text-slate-700 dark:text-slate-200">{{ project.name }}</span>
                             </td>
                             <td class="whitespace-nowrap px-6 py-4">
-                                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-medium capitalize"
-                                    :class="{
-                                        'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-400': project.status === 'completed',
-                                        'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-400': project.status === 'active',
-                                        'bg-slate-100 text-slate-800 dark:bg-white/10 dark:text-slate-400': project.status === 'draft',
-                                    }"
+                                <span
+                                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-medium capitalize"
+                                    :class="statusBadgeClassById(project.status)"
                                 >
-                                    {{ project.status?.replace('_', ' ') }}
+                                    {{ statusLabelFromOptions(project.status, statusOptions) }}
                                 </span>
                             </td>
                             <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
@@ -103,7 +100,7 @@
                 class="mt-6 rounded-xl border border-slate-200 bg-white py-12 text-center dark:border-white/5 dark:bg-[#1a1a1a]"
             >
                 <p class="text-slate-500 dark:text-slate-400">No IT initiatives found.</p>
-                <p class="mt-2 text-sm text-slate-400 dark:text-slate-500">Belum ada IT initiative dengan status completed.</p>
+                <p class="mt-2 text-sm text-slate-400 dark:text-slate-500">Belum ada IT initiative dengan status {{ completedStatusLabel.toLowerCase() }}.</p>
             </div>
 
 
@@ -112,18 +109,48 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
+import { statusBadgeClassById, statusLabelFromOptions } from '@/Composables/initiativeStatus';
 
 const props = defineProps({
     itInitiatives: Object,
     filters: Object,
+    statusOptions: {
+        type: Array,
+        default: () => [],
+    },
+    completedStatusId: {
+        type: Number,
+        default: 4,
+    },
+});
+
+const statusOptions = computed(() => {
+    if (props.statusOptions.length > 0) {
+        return props.statusOptions;
+    }
+
+    return [
+        { id: 1, name: 'propose', label: 'Propose' },
+        { id: 2, name: 'review', label: 'Review' },
+        { id: 3, name: 'approve', label: 'Approve' },
+        { id: 4, name: 'baseline', label: 'Baseline' },
+    ];
+});
+
+const completedStatusId = computed(() => {
+    return Number(props.completedStatusId || 4);
+});
+
+const completedStatusLabel = computed(() => {
+    return statusLabelFromOptions(completedStatusId.value, statusOptions.value);
 });
 
 const filters = ref({
     search: props.filters.search || '',
-    status: 'completed',
+    status: completedStatusId.value,
     month: props.filters.month || '',
 });
 

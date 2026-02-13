@@ -10,6 +10,7 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->call(InitiativeStatusSeeder::class);
         $this->seedRoles();
         $this->seedAdminUser();
     }

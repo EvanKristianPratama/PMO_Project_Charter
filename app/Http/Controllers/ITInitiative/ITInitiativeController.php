@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ITInitiative\ITInitiativeIndexRequest;
 use App\Http\Requests\ITInitiative\ITInitiativeStoreRequest;
 use App\Http\Requests\ITInitiative\ITInitiativeUpdateRequest;
+use App\Models\InitiativeStatus;
 use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -60,31 +61,53 @@ class ITInitiativeController extends Controller
     public function index(ITInitiativeIndexRequest $request): Response
     {
         $filters = $request->validated();
-        $status = 'completed';
+        $statusOptions = InitiativeStatus::ordered()
+            ->map(fn (InitiativeStatus $status) => [
+                'id' => (int) $status->id,
+                'name' => $status->name,
+                'label' => ucfirst($status->name),
+            ])
+            ->values();
+
+        $baselineStatus = $statusOptions->firstWhere('name', 'baseline');
+        $baselineStatusId = (int) ($baselineStatus['id'] ?? InitiativeStatus::baselineId());
 
         $projects = Project::query()
-            ->with(['owner', 'charter'])
-            ->where('status', $status)
+            ->with(['owner', 'charter', 'statusRef:id,name'])
+            ->where('status', $baselineStatusId)
             ->when($filters['search'] ?? null, fn ($q, $search) => $q->where(function ($inner) use ($search): void {
                 $inner->where('name', 'like', "%{$search}%")
                     ->orWhere('code', 'like', "%{$search}%")
                     ->orWhere('owner_name', 'like', "%{$search}%");
             }))
+            ->when($filters['month'] ?? null, fn ($q, $month) => $q->whereMonth('updated_at', $month))
             ->orderBy('id', 'asc')
             ->get();
 
         return Inertia::render('ITInitiative/Index', [
             'itInitiatives' => $projects,
+            'statusOptions' => $statusOptions,
+            'completedStatusId' => $baselineStatusId,
             'filters'  => [
                 'search' => $filters['search'] ?? null,
-                'status' => $status,
+                'status' => $baselineStatusId,
+                'month' => $filters['month'] ?? null,
             ],
         ]);
     }
 
     public function create(): Response
     {
-        return Inertia::render('ITInitiative/Create');
+        return Inertia::render('ITInitiative/Create', [
+            'statusOptions' => InitiativeStatus::ordered()
+                ->map(fn (InitiativeStatus $status) => [
+                    'id' => (int) $status->id,
+                    'name' => $status->name,
+                    'label' => ucfirst($status->name),
+                ])
+                ->values(),
+            'defaultStatusId' => InitiativeStatus::PROPOSE,
+        ]);
     }
 
     public function store(ITInitiativeStoreRequest $request): RedirectResponse
@@ -103,6 +126,7 @@ class ITInitiativeController extends Controller
             'programs',
             'goals',
             'owner',
+            'statusRef:id,name',
         ]);
 
         return Inertia::render('ITInitiative/Show', [
@@ -114,6 +138,14 @@ class ITInitiativeController extends Controller
     {
         return Inertia::render('ITInitiative/Edit', [
             'itInitiative' => $project,
+            'statusOptions' => InitiativeStatus::ordered()
+                ->map(fn (InitiativeStatus $status) => [
+                    'id' => (int) $status->id,
+                    'name' => $status->name,
+                    'label' => ucfirst($status->name),
+                ])
+                ->values(),
+            'defaultStatusId' => InitiativeStatus::PROPOSE,
         ]);
     }
 

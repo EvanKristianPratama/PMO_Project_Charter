@@ -174,6 +174,21 @@
 import { useForm, Link } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
+const props = defineProps({
+    statusOptions: {
+        type: Array,
+        default: () => [],
+    },
+    defaultStatusId: {
+        type: Number,
+        default: 1,
+    },
+});
+
+const statusOptions = props.statusOptions.length > 0
+    ? props.statusOptions
+    : [{ id: 1, label: 'Propose' }];
+
 const form = useForm({
     type: '',
     no: '',
@@ -184,7 +199,9 @@ const form = useForm({
     urgency: '',
     rjjp: '',
     coe: '',
-    status: 'draft',
+    status: statusOptions.some((statusOption) => statusOption.id === props.defaultStatusId)
+        ? props.defaultStatusId
+        : statusOptions[0].id,
 });
 
 const submit = () => {

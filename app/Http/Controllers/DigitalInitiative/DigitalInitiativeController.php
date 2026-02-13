@@ -4,8 +4,10 @@ namespace App\Http\Controllers\DigitalInitiative;
 
 use App\Http\Controllers\Controller;
 use App\Models\DigitalInitiative;
+use App\Models\InitiativeStatus;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -15,10 +17,21 @@ class DigitalInitiativeController extends Controller
     {
         $search = $request->input('search');
         $type = $request->input('type');
-        $status = 'completed';
+
+        $statusOptions = InitiativeStatus::ordered()
+            ->map(fn (InitiativeStatus $status) => [
+                'id' => (int) $status->id,
+                'name' => $status->name,
+                'label' => ucfirst($status->name),
+            ])
+            ->values();
+
+        $baselineStatus = $statusOptions->firstWhere('name', 'baseline');
+        $baselineStatusId = (int) ($baselineStatus['id'] ?? InitiativeStatus::baselineId());
 
         $initiatives = DigitalInitiative::query()
-            ->where('status', $status)
+            ->with(['statusRef:id,name'])
+            ->where('status', $baselineStatusId)
             ->when($search, fn ($q, $search) => $q->where(function ($inner) use ($search) {
                 $inner->where('no', 'like', "%{$search}%")
                     ->orWhere('useCase', 'like', "%{$search}%")
@@ -31,17 +44,28 @@ class DigitalInitiativeController extends Controller
 
         return Inertia::render('DigitalInitiatives/Index', [
             'initiatives' => $initiatives,
+            'statusOptions' => $statusOptions,
+            'completedStatusId' => $baselineStatusId,
             'filters' => [
                 'search' => $search,
                 'type' => $type,
-                'status' => $status,
+                'status' => $baselineStatusId,
             ],
         ]);
     }
 
     public function create(): Response
     {
-        return Inertia::render('DigitalInitiatives/Create');
+        return Inertia::render('DigitalInitiatives/Create', [
+            'statusOptions' => InitiativeStatus::ordered()
+                ->map(fn (InitiativeStatus $status) => [
+                    'id' => (int) $status->id,
+                    'name' => $status->name,
+                    'label' => ucfirst($status->name),
+                ])
+                ->values(),
+            'defaultStatusId' => InitiativeStatus::PROPOSE,
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -56,7 +80,7 @@ class DigitalInitiativeController extends Controller
             'urgency' => 'nullable|string|max:255',
             'rjjp' => 'nullable|string|max:255',
             'coe' => 'nullable|string|max:255',
-            'status' => 'nullable|string|in:draft,on_hold,active,completed',
+            'status' => ['required', 'integer', Rule::exists('trs_status_initiative', 'id')],
         ]);
 
         DigitalInitiative::create($validated);
@@ -66,6 +90,8 @@ class DigitalInitiativeController extends Controller
 
     public function show(DigitalInitiative $digitalInitiative): Response
     {
+        $digitalInitiative->load('statusRef:id,name');
+
         return Inertia::render('DigitalInitiatives/Show', [
             'initiative' => $digitalInitiative,
         ]);
@@ -75,6 +101,14 @@ class DigitalInitiativeController extends Controller
     {
         return Inertia::render('DigitalInitiatives/Edit', [
             'initiative' => $digitalInitiative,
+            'statusOptions' => InitiativeStatus::ordered()
+                ->map(fn (InitiativeStatus $status) => [
+                    'id' => (int) $status->id,
+                    'name' => $status->name,
+                    'label' => ucfirst($status->name),
+                ])
+                ->values(),
+            'defaultStatusId' => InitiativeStatus::PROPOSE,
         ]);
     }
 
@@ -90,7 +124,7 @@ class DigitalInitiativeController extends Controller
             'urgency' => 'nullable|string|max:255',
             'rjjp' => 'nullable|string|max:255',
             'coe' => 'nullable|string|max:255',
-            'status' => 'nullable|string|in:draft,on_hold,active,completed',
+            'status' => ['required', 'integer', Rule::exists('trs_status_initiative', 'id')],
         ]);
 
         $digitalInitiative->update($validated);
