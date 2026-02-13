@@ -34,7 +34,11 @@ class Project extends Model
 
     public function charter(): HasOne
     {
-        return $this->hasOne(ProjectCharter::class)->latestOfMany();
+        return $this->hasOne(ProjectCharter::class)->ofMany([
+            'id' => 'max',
+        ], function ($query) {
+            $query->where('trs_project_charters.project_id', $this->id);
+        });
     }
 
     public function charters(): HasMany
