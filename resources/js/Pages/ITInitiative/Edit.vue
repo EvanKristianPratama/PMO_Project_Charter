@@ -64,6 +64,15 @@
                             </select>
                             <p v-if="form.errors.status" class="mt-1 text-xs text-red-500">{{ form.errors.status }}</p>
                         </div>
+
+                        <div>
+                             <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Status (Mock Text)</label>
+                             <input
+                                 type="text"
+                                 class="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
+                                 placeholder="Enter status text (e.g., On Track)"
+                             />
+                        </div>
                     </div>
 
                     <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-4 dark:border-white/5">

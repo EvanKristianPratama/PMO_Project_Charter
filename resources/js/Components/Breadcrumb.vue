@@ -1,25 +1,17 @@
 <script setup>
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { useNavigation } from '@/Composables/useNavigation';
 
-// Note: Passing icons as props can be tricky if they are raw components. 
-// However, in UserLayout they are objects. We can pass the whole item object.
-
-defineProps({
-    items: {
-        type: Array,
-        required: true,
-    },
-    currentUrl: {
-        type: String,
-        required: true,
-    },
-});
+const { navItems } = useNavigation();
+const page = usePage();
+const currentUrl = computed(() => page.url);
 </script>
 
 <template>
     <div class="sticky top-16 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl shadow-sm dark:border-white/5 dark:bg-[#171717]/90 print:hidden">
         <div class="mx-auto flex items-center gap-0.5 overflow-x-auto px-4 py-1.5 sm:px-6 lg:px-8">
-            <template v-for="(item, index) in items" :key="index">
+            <template v-for="(item, index) in navItems" :key="index">
                 <!-- Separator (only if not first item) -->
                 <span v-if="index > 0" class="mx-1 text-[11px] text-slate-300 dark:text-slate-600">/</span>
 

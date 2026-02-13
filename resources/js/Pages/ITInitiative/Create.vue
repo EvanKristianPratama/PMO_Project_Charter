@@ -59,6 +59,14 @@
                                 <option value="completed">Completed</option>
                             </select>
                         </div>
+                        <div>
+                             <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Status (Mock Text)</label>
+                             <input
+                                 type="text"
+                                 class="w-full rounded-lg border-slate-300 dark:border-white/10 bg-white dark:bg-[#131313] text-slate-900 dark:text-slate-100 focus:ring-indigo-500 focus:border-indigo-500"
+                                 placeholder="Enter status text (e.g., On Track)"
+                             />
+                        </div>
                     </div>
 
                     <!-- Actions -->

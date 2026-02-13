@@ -62,7 +62,7 @@ class ITInitiativeController extends Controller
         $filters = $request->validated();
 
         $projects = Project::query()
-            ->with('owner')
+            ->with(['owner', 'charter'])
             ->when($filters['search'] ?? null, fn ($q, $search) => $q->where(function ($inner) use ($search): void {
                 $inner->where('name', 'like', "%{$search}%")
                     ->orWhere('code', 'like', "%{$search}%")

@@ -62,7 +62,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
 */
 
 Route::middleware(['auth', 'approved', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [AdminDashboardController::class])->name('dashboard');
+    Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
     Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');

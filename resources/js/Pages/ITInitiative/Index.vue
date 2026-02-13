@@ -40,79 +40,66 @@
                 </select>
             </div>
 
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <div
-                    v-for="project in itInitiatives.data"
-                    :key="project.id"
-                    class="overflow-hidden rounded-xl border border-slate-200 bg-white transition-shadow hover:shadow-md dark:border-white/5 dark:bg-[#1a1a1a]"
-                >
-                    <div class="p-5">
-                        <div class="mb-3 flex items-start justify-between gap-3">
-                            <div>
-                                <h3 class="line-clamp-1 text-lg font-semibold text-slate-900 dark:text-white">{{ project.name }}</h3>
-                            </div>
-                            <Link
-                                :href="`/it-initiatives/${project.id}/edit`"
-                                class="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-white/5 dark:hover:text-slate-300"
-                            >
-                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                </svg>
-                            </Link>
-                        </div>
-
-                        <div class="mb-4 inline-flex items-center gap-2 rounded-md bg-slate-100 px-2.5 py-1 text-sm text-slate-700 dark:bg-white/10 dark:text-slate-200">
-                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A9 9 0 1118.88 17.8M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            <span>{{ ownerName(project) }}</span>
-                        </div>
-
-                        <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 pb-8 dark:border-white/10 dark:bg-white/5">
-                            <div class="flex items-start justify-between">
-                                <template v-for="(step, index) in statusFlow" :key="`${project.id}-${step.key}`">
-                                    <div v-if="index > 0" class="flex-1 mx-1 mt-[13px] h-0.5 rounded-full" :class="stepLineClass(project.status, index - 1)"></div>
-                                    
-                                    <div class="relative flex flex-col items-center z-10 w-7">
-                                        <span
-                                            class="inline-flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border-2 text-[11px] font-bold"
-                                            :class="stepCircleClass(project.status, index)"
-                                        >
-                                            <svg
-                                                v-if="isStepChecked(project.status, index)"
-                                                class="h-4 w-4"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                            </svg>
-                                            <span v-else>{{ index + 1 }}</span>
-                                        </span>
-                                        <span class="absolute top-8 left-1/2 -translate-x-1/2 w-max text-center text-[10px] font-semibold text-slate-600 dark:text-slate-300">
-                                            {{ step.label }}
-                                        </span>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-
-                        <div class="mt-4 flex items-center justify-between gap-2 border-t border-slate-100 pt-4 dark:border-white/5">
-                            <Link
-                                :href="`/it-initiatives/${project.id}`"
-                                class="rounded-lg px-2 py-1.5 text-center text-sm font-medium text-indigo-600 transition-colors hover:bg-indigo-50 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-500/10 dark:hover:text-indigo-300"
-                            >
-                                View Charter
-                            </Link>
-                            <Link
-                                :href="`/roadmap?project_id=${project.id}`"
-                                class="rounded-lg px-2 py-1.5 text-center text-sm font-medium text-teal-600 transition-colors hover:bg-teal-50 hover:text-teal-700 dark:text-teal-400 dark:hover:bg-teal-500/10 dark:hover:text-teal-300"
-                            >
-                                Roadmap
-                            </Link>
-                        </div>
-                    </div>
-                </div>
+            <div class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/5 dark:bg-[#1a1a1a]">
+                <table class="min-w-full divide-y divide-slate-200 dark:divide-white/5">
+                    <thead class="bg-slate-50 dark:bg-white/5">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">IT Arsitektur Building Blok</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Daftar Inisiatif</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Timelines</th>
+                            <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
+                        <tr v-for="project in itInitiatives.data" :key="project.id" class="group transition-colors hover:bg-slate-50 dark:hover:bg-white/5">
+                            <td class="whitespace-nowrap px-6 py-4">
+                                <span class="inline-flex rounded-full bg-blue-100 px-2 text-xs font-semibold leading-5 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300">
+                                    {{ project.charter?.category || 'Uncategorized' }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-col">
+                                    <span class="font-medium text-slate-900 dark:text-white">{{ project.name }}</span>
+                                    <span class="text-xs text-slate-500 dark:text-slate-400">{{ project.code }}</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center w-full max-w-xs">
+                                    <template v-for="(step, index) in statusFlow" :key="`${project.id}-${step.key}`">
+                                        <!-- Line -->
+                                        <div v-if="index > 0" class="flex-1 mx-1 h-0.5 rounded-full" :class="stepLineClass(project.status, index - 1)"></div>
+                                        
+                                        <!-- Circle -->
+                                        <div class="relative flex flex-col items-center group/tooltip">
+                                            <span
+                                                class="inline-flex h-3 w-3 flex-shrink-0 rounded-full border"
+                                                :class="stepCircleClass(project.status, index)"
+                                            ></span>
+                                            
+                                            <!-- Tooltip -->
+                                            <div class="absolute bottom-full mb-2 hidden w-max rounded bg-slate-800 px-2 py-1 text-[10px] text-white shadow-sm group-hover/tooltip:block dark:bg-white dark:text-slate-900">
+                                                {{ step.label }}
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                                <div class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                                    Status: <span class="font-medium capitalize text-slate-700 dark:text-slate-300">{{ project.status?.replace('_', ' ') }}</span>
+                                </div>
+                            </td>
+                            <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
+                                <div class="flex items-center justify-end gap-3 opacity-0 transition-opacity group-hover:opacity-100">
+                                    <Link :href="`/it-initiatives/${project.id}`" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
+                                        View
+                                    </Link>
+                                    <Link :href="`/it-initiatives/${project.id}/edit`" class="text-slate-400 hover:text-indigo-600 dark:text-slate-500 dark:hover:text-indigo-400">
+                                        Edit
+                                    </Link>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
             <div
@@ -181,27 +168,19 @@ const statusStepIndex = (status) => {
     return 0;
 };
 
-const ownerName = (project) => project.owner_name || project.owner?.name || 'Unassigned';
-
-const isStepChecked = (status, stepIndex) => {
-    const current = statusStepIndex(status);
-
-    return stepIndex < current || (String(status || '').toLowerCase() === 'completed' && stepIndex === current);
-};
-
 const stepCircleClass = (status, stepIndex) => {
     const current = statusStepIndex(status);
     const normalized = String(status || '').toLowerCase();
 
     if (stepIndex < current || (normalized === 'completed' && stepIndex === current)) {
-        return 'border-emerald-500 bg-emerald-500 text-white';
+        return 'border-emerald-500 bg-emerald-500';
     }
 
     if (stepIndex === current) {
-        return 'border-amber-500 bg-amber-500 text-white ring-2 ring-amber-200 dark:ring-amber-500/30';
+        return 'border-amber-500 bg-amber-500 ring-2 ring-amber-200 dark:ring-amber-500/30';
     }
 
-    return 'border-slate-300 bg-slate-100 text-slate-500 dark:border-white/20 dark:bg-white/5 dark:text-slate-400';
+    return 'border-slate-300 bg-slate-100 dark:border-white/20 dark:bg-white/5';
 };
 
 const stepLineClass = (status, stepIndex) => {
@@ -211,6 +190,8 @@ const stepLineClass = (status, stepIndex) => {
         ? 'bg-emerald-300 dark:bg-emerald-500/40'
         : 'bg-slate-200 dark:bg-white/10';
 };
+
+
 
 let timeout = null;
 const debouncedSearch = () => {

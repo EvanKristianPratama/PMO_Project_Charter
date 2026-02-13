@@ -4,21 +4,15 @@ import { computed, ref } from 'vue';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
+import { useNavigation } from '@/Composables/useNavigation';
 import {
     Bars3Icon,
     XMarkIcon,
     SunIcon,
     MoonIcon,
-    HomeIcon,
-    FolderIcon,
-    CalendarDaysIcon,
-    ShieldCheckIcon,
     ChevronDownIcon,
     ArrowRightOnRectangleIcon,
-    RectangleStackIcon,
-    FlagIcon,
     ComputerDesktopIcon,
-    ChevronRightIcon,
 } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
@@ -34,57 +28,7 @@ const authUser = computed(() => page.props.auth?.user || {});
 const currentUrl = computed(() => page.url || '');
 const displayName = computed(() => authUser.value?.name || authUser.value?.email || 'User');
 const userEmail = computed(() => authUser.value?.email || '-');
-const appRole = computed(() => String(authUser.value?.app_role || 'user').toLowerCase());
-const isAdmin = computed(() => appRole.value === 'admin');
-
-const mobileMenuOpen = ref(false);
-
-const navItems = computed(() => {
-    const items = [
-        {
-            label: 'Program Planning',
-            href: '/dashboard',
-            icon: HomeIcon,
-            active: (url) => url.startsWith('/dashboard'),
-        },
-        {
-            label: 'Dashboard',
-            href: '/dashboard',
-            icon: HomeIcon,
-            active: (url) => url.startsWith('/dashboard'),
-        },
-        {
-            label: 'Strategic Pillars',
-            href: '/strategic-pillars',
-            icon: FlagIcon,
-            active: (url) => url.startsWith('/strategic-pillars'),
-        },
-        {
-            label: 'Digital Initiatives',
-            href: '/digital-initiatives',
-            icon: FolderIcon,
-            active: (url) => url.startsWith('/digital-initiatives'),
-        },
-        {
-            label: 'IT Initiatives',
-            href: '/it-initiatives',
-            icon: FolderIcon,
-            active: (url) => url.startsWith('/it-initiatives'),
-        },
-
-    ];
-
-    if (isAdmin.value) {
-        items.push({
-            label: 'Admin',
-            href: '/admin/dashboard',
-            icon: ShieldCheckIcon,
-            active: (url) => url.startsWith('/admin'),
-        });
-    }
-
-    return items;
-});
+const { navItems } = useNavigation();
 
 const getInitials = (name) => {
     if (!name) return 'U';
@@ -237,7 +181,7 @@ const logout = () => {
         </nav>
 
         <!-- ═══ Breadcrumb Navigation Bar ═══ -->
-        <Breadcrumb :items="navItems" :current-url="currentUrl" />
+        <Breadcrumb />
 
         <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 print:max-w-none print:px-0 print:py-0">
             <slot />
