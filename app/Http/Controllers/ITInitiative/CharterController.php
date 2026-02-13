@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\ITInitiative;
 
-use App\Http\Requests\Projects\ProjectCharterStoreRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\ITInitiative\CharterStoreRequest;
 use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
 
-class ProjectCharterController extends Controller
+class CharterController extends Controller
 {
-    public function store(ProjectCharterStoreRequest $request, Project $project): RedirectResponse
+    public function store(CharterStoreRequest $request, Project $project): RedirectResponse
     {
         $project->charter()->updateOrCreate(
             ['project_id' => $project->id],

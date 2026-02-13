@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Projects;
+namespace App\Http\Requests\ITInitiative;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ProjectCharterStoreRequest extends FormRequest
+class CharterStoreRequest extends FormRequest
 {
     public function authorize(): bool
     {
