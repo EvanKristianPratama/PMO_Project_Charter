@@ -60,15 +60,16 @@ class ITInitiativeController extends Controller
     public function index(ITInitiativeIndexRequest $request): Response
     {
         $filters = $request->validated();
+        $status = 'completed';
 
         $projects = Project::query()
             ->with(['owner', 'charter'])
+            ->where('status', $status)
             ->when($filters['search'] ?? null, fn ($q, $search) => $q->where(function ($inner) use ($search): void {
                 $inner->where('name', 'like', "%{$search}%")
                     ->orWhere('code', 'like', "%{$search}%")
                     ->orWhere('owner_name', 'like', "%{$search}%");
             }))
-            ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
             ->orderBy('id', 'asc')
             ->get();
 
@@ -76,7 +77,7 @@ class ITInitiativeController extends Controller
             'itInitiatives' => $projects,
             'filters'  => [
                 'search' => $filters['search'] ?? null,
-                'status' => $filters['status'] ?? null,
+                'status' => $status,
             ],
         ]);
     }

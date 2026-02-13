@@ -4,6 +4,7 @@
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h3 class="text-xl font-bold text-slate-900 dark:text-white">IT Initiatives</h3>
+                    <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Completed IT initiative entries</p>
                 </div>
             </div>
 
@@ -22,14 +23,10 @@
                 </div>
                 <select
                     v-model="filters.status"
+                    disabled
                     class="rounded-lg border-slate-300 bg-white py-1.5 text-sm text-slate-700 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-200"
-                    @change="applyFilters"
                 >
-                    <option value="">All Status</option>
-                    <option value="draft">Draft</option>
-                    <option value="active">Active</option>
                     <option value="completed">Completed</option>
-                    <option value="on_hold">On Hold</option>
                 </select>
                 <select
                     v-model="filters.month"
@@ -84,11 +81,15 @@
                             </td>
                             <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                                 <div class="flex items-center justify-end gap-3 opacity-0 transition-opacity group-hover:opacity-100">
-                                    <Link :href="`/it-initiatives/${project.id}`" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
-                                        View
-                                    </Link>
-                                    <Link :href="`/it-initiatives/${project.id}/edit`" class="text-slate-400 hover:text-indigo-600 dark:text-slate-500 dark:hover:text-indigo-400">
-                                        Edit
+                                    <Link
+                                        :href="`/it-initiatives/${project.id}`"
+                                        class="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-indigo-600 dark:text-slate-500 dark:hover:bg-white/5 dark:hover:text-indigo-400"
+                                        title="View"
+                                    >
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
                                     </Link>
                                 </div>
                             </td>
@@ -102,9 +103,7 @@
                 class="mt-6 rounded-xl border border-slate-200 bg-white py-12 text-center dark:border-white/5 dark:bg-[#1a1a1a]"
             >
                 <p class="text-slate-500 dark:text-slate-400">No IT initiatives found.</p>
-                <Link href="/it-initiatives/create" class="mt-2 inline-block font-medium text-indigo-600 hover:underline dark:text-indigo-400">
-                    Create your first IT initiative
-                </Link>
+                <p class="mt-2 text-sm text-slate-400 dark:text-slate-500">Belum ada IT initiative dengan status completed.</p>
             </div>
 
 
@@ -124,7 +123,7 @@ const props = defineProps({
 
 const filters = ref({
     search: props.filters.search || '',
-    status: props.filters.status || '',
+    status: 'completed',
     month: props.filters.month || '',
 });
 

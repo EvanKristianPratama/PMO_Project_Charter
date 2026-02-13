@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\DigitalInitiative;
-use App\Models\Milestone;
 use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -29,6 +28,27 @@ class DashboardController extends Controller
             ->groupBy('status')
             ->pluck('total', 'status');
 
+        $openDigitalInitiatives = DigitalInitiative::query()
+            ->select(['id', 'no', 'type', 'projectOwner', 'useCase', 'status', 'updated_at'])
+            ->where(static function ($query): void {
+                $query
+                    ->whereNull('status')
+                    ->orWhere('status', '!=', 'completed');
+            })
+            ->latest()
+            ->get();
+
+        $openItInitiatives = Project::query()
+            ->select(['id', 'code', 'name', 'status', 'updated_at'])
+            ->with(['charter:id,project_id,category'])
+            ->where(static function ($query): void {
+                $query
+                    ->whereNull('status')
+                    ->orWhere('status', '!=', 'completed');
+            })
+            ->latest()
+            ->get();
+
         return Inertia::render('Dashboard', [
             'overview' => [
                 'total_projects' => $totalProjects,
@@ -46,6 +66,8 @@ class DashboardController extends Controller
                     'completed' => (int) ($digitalStatusCounts['completed'] ?? 0),
                 ],
             ],
+            'openDigitalInitiatives' => $openDigitalInitiatives,
+            'openItInitiatives' => $openItInitiatives,
         ]);
     }
 }

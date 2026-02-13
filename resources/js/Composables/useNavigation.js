@@ -41,9 +41,9 @@ export function useNavigation() {
             },
             {
                 label: 'Dashboard Monitoring',
-                href: '/dashboard',
+                href: '/dashboard-monitoring',
                 icon: HomeIcon,
-                active: (url) => url.startsWith('/dashboard'),
+                active: (url) => url.startsWith('/dashboard-monitoring'),
             },
         ];
 

@@ -4,7 +4,7 @@
             <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Digital Initiatives</h2>
-                    <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Manage digital initiative entries</p>
+                    <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Completed digital initiative entries</p>
                 </div>
             </div>
 
@@ -34,14 +34,10 @@
                 </select>
                 <select
                     v-model="filters.status"
+                    disabled
                     class="rounded-lg border-slate-300 bg-white text-slate-700 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-200"
-                    @change="applyFilters"
                 >
-                    <option value="">All Status</option>
-                    <option value="draft">Draft</option>
-                    <option value="active">Active</option>
                     <option value="completed">Completed</option>
-                    <option value="on_hold">On Hold</option>
                 </select>
             </div>
 
@@ -102,15 +98,6 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                             </svg>
                                         </Link>
-                                        <Link
-                                            :href="`/digital-initiatives/${item.id}/edit`"
-                                            class="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-amber-600 dark:text-slate-500 dark:hover:bg-white/5 dark:hover:text-amber-400"
-                                            title="Edit"
-                                        >
-                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </Link>
                                     </div>
                                 </td>
                             </tr>
@@ -125,9 +112,7 @@
                 class="mt-6 rounded-xl border border-slate-200 bg-white py-12 text-center dark:border-white/5 dark:bg-[#1a1a1a]"
             >
                 <p class="text-slate-500 dark:text-slate-400">No digital initiatives found.</p>
-                <Link href="/digital-initiatives/create" class="mt-2 inline-block font-medium text-indigo-600 hover:underline dark:text-indigo-400">
-                    Create your first initiative
-                </Link>
+                <p class="mt-2 text-sm text-slate-400 dark:text-slate-500">Belum ada digital initiative dengan status completed.</p>
             </div>
 
             <!-- Pagination -->
@@ -160,7 +145,7 @@ const props = defineProps({
 const filters = ref({
     search: props.filters?.search || '',
     type: props.filters?.type || '',
-    status: props.filters?.status || '',
+    status: 'completed',
 });
 
 const typeBadgeClass = (type) => {
