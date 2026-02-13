@@ -5,7 +5,7 @@ use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Auth\SsoController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\DigitalInitiativeController;
+use App\Http\Controllers\DigitalInitiative\DigitalInitiativeController;
 use App\Http\Controllers\ITInitiative\CharterController;
 use App\Http\Controllers\ITInitiative\ITInitiativeController;
 use App\Http\Controllers\ITInitiative\MilestoneController;
