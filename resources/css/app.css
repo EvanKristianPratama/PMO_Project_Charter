@@ -1,19 +1,26 @@
 @import 'tailwindcss';
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* ── Global Transitions ───────────────────────────── */
+* {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 500ms;
+}
+
 /* ── Design Tokens ───────────────────────────────── */
 :root {
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 
     /* Brand colors */
-    --color-brand-50:  #eef2ff;
+    --color-brand-50: #eef2ff;
     --color-brand-100: #e0e7ff;
     --color-brand-500: #6366f1;
     --color-brand-600: #4f46e5;
     --color-brand-700: #4338ca;
 
     /* Neutral */
-    --color-slate-50:  #f8fafc;
+    --color-slate-50: #f8fafc;
     --color-slate-100: #f1f5f9;
     --color-slate-200: #e2e8f0;
     --color-slate-300: #cbd5e1;
@@ -28,7 +35,7 @@
     /* Status */
     --color-success: #22c55e;
     --color-warning: #f59e0b;
-    --color-danger:  #ef4444;
+    --color-danger: #ef4444;
 }
 
 /* ── Base ──────────────────────────────────────────── */
@@ -53,13 +60,27 @@ body {
 
 /* ── Animations ────────────────────────────────────── */
 @keyframes fade-in {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes slide-in-left {
-    from { opacity: 0; transform: translateX(-20px); }
-    to   { opacity: 1; transform: translateX(0); }
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .animate-fade-in {
@@ -71,7 +92,18 @@ body {
 }
 
 /* Staggered delays */
-.delay-100 { animation-delay: 0.1s; }
-.delay-200 { animation-delay: 0.2s; }
-.delay-300 { animation-delay: 0.3s; }
-.delay-400 { animation-delay: 0.4s; }
+.delay-100 {
+    animation-delay: 0.1s;
+}
+
+.delay-200 {
+    animation-delay: 0.2s;
+}
+
+.delay-300 {
+    animation-delay: 0.3s;
+}
+
+.delay-400 {
+    animation-delay: 0.4s;
+}

@@ -12,7 +12,6 @@ import {
     MoonIcon,
     ChevronDownIcon,
     ArrowRightOnRectangleIcon,
-    ComputerDesktopIcon,
 } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
@@ -24,6 +23,7 @@ const props = defineProps({
 
 const { isDark, toggleDarkMode } = useDarkMode();
 const page = usePage();
+const mobileMenuOpen = ref(false);
 const authUser = computed(() => page.props.auth?.user || {});
 const currentUrl = computed(() => page.url || '');
 const displayName = computed(() => authUser.value?.name || authUser.value?.email || 'User');
@@ -47,48 +47,44 @@ const logout = () => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-[#0f0f0f] dark:text-slate-100">
+    <div class="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#0f0f0f] dark:text-slate-100">
         <Head :title="title" />
 
-        <!-- ═══ Top Navbar ═══ -->
-        <nav class="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-white/5 dark:bg-[#171717]/90 print:hidden">
+        <nav class="sticky top-0 z-50 border-b border-slate-200 bg-white dark:border-white/10 dark:bg-[#141414] print:hidden">
             <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-                <!-- Left: Logo -->
                 <div class="flex items-center gap-3">
                     <Link href="/dashboard" class="group inline-flex items-center gap-3">
-                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-md shadow-blue-500/20 transition-transform group-hover:scale-105">
-                            <ComputerDesktopIcon class="h-5 w-5" />
-                        </span>
+                        <img
+                            src="/logo-divusi.png"
+                            alt="Divusi Logo"
+                            class="h-9 w-auto transition-opacity group-hover:opacity-90"
+                        />
                         <div class="hidden md:block">
-                            <p class="text-sm font-bold tracking-tight text-slate-900 dark:text-white">IT Strategic Planning System</p>
-                            <p class="text-[10px] font-medium uppercase tracking-widest text-slate-400 dark:text-slate-500">Workspace</p>
+                            <p class="text-sm font-semibold tracking-tight text-slate-900 dark:text-white">IT Strategic Planning System</p>
+                            <p class="text-[11px] text-slate-400 dark:text-slate-500">Divusi Workspace</p>
                         </div>
                     </Link>
                 </div>
 
-                <!-- Right: Actions -->
                 <div class="flex items-center gap-2">
-                    <!-- Dark Mode -->
                     <button
                         type="button"
-                        class="rounded-xl p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/5"
+                        class="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/10"
                         @click="toggleDarkMode"
                     >
                         <SunIcon v-if="isDark" class="h-5 w-5" />
                         <MoonIcon v-else class="h-5 w-5" />
                     </button>
 
-                    <!-- User Dropdown (Desktop) -->
                     <Menu as="div" class="relative hidden sm:block">
                         <MenuButton
-                            class="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5 transition-colors hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
+                            class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#1c1c1c] dark:hover:bg-[#252525]"
                         >
-                            <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-xs font-semibold text-white">
+                            <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-indigo-600 text-xs font-semibold text-white">
                                 {{ getInitials(displayName) }}
                             </span>
                             <div class="hidden max-w-[9rem] text-left sm:block">
                                 <p class="truncate text-xs font-semibold text-slate-900 dark:text-white">{{ displayName }}</p>
-                                <p class="truncate text-[11px] text-slate-500 dark:text-slate-400">{{ userEmail }}</p>
                             </div>
                             <ChevronDownIcon class="h-4 w-4 text-slate-400" />
                         </MenuButton>
@@ -102,9 +98,9 @@ const logout = () => {
                             leave-to-class="transform scale-95 opacity-0"
                         >
                             <MenuItems
-                                class="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-slate-100 rounded-xl bg-white shadow-lg ring-1 ring-black/5 focus:outline-none dark:divide-white/5 dark:bg-[#1f2937] dark:ring-white/10"
+                                class="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white shadow-sm focus:outline-none dark:divide-white/10 dark:border-white/10 dark:bg-[#1d1d1d]"
                             >
-                                <div class="px-4 py-3 sm:hidden">
+                                <div class="px-4 py-3">
                                     <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">{{ displayName }}</p>
                                     <p class="truncate text-xs text-slate-500 dark:text-slate-400">{{ userEmail }}</p>
                                 </div>
@@ -128,7 +124,7 @@ const logout = () => {
                     <!-- Mobile Menu Button -->
                     <button
                         type="button"
-                        class="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/5 md:hidden"
+                        class="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/10 md:hidden"
                         @click="mobileMenuOpen = !mobileMenuOpen"
                     >
                         <Bars3Icon v-if="!mobileMenuOpen" class="h-6 w-6" />
@@ -137,8 +133,7 @@ const logout = () => {
                 </div>
             </div>
 
-            <!-- Mobile Menu -->
-            <div v-if="mobileMenuOpen" class="border-t border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-white/5 dark:bg-[#171717]/90 md:hidden">
+            <div v-if="mobileMenuOpen" class="border-t border-slate-200 bg-white dark:border-white/10 dark:bg-[#141414] md:hidden">
                 <div class="space-y-1 px-4 py-4">
                     <Link
                         v-for="item in navItems"
@@ -180,7 +175,6 @@ const logout = () => {
             </div>
         </nav>
 
-        <!-- ═══ Breadcrumb Navigation Bar ═══ -->
         <Breadcrumb />
 
         <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 print:max-w-none print:px-0 print:py-0">

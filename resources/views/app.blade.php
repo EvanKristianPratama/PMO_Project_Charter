@@ -20,7 +20,7 @@
         })();
     </script>
 </head>
-<body class="antialiased bg-slate-50 text-slate-900 dark:bg-[#0f0f0f] dark:text-slate-100 transition-colors duration-300">
+<body class="antialiased bg-slate-50 text-slate-900 dark:bg-[#0f0f0f] dark:text-slate-100">
     @inertia
 </body>
 </html>

@@ -4,13 +4,11 @@ import { computed, ref } from 'vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
 import {
     ArrowRightOnRectangleIcon,
-    ArrowTopRightOnSquareIcon,
     Bars3Icon,
     ChevronDownIcon,
     HomeIcon,
     KeyIcon,
     MoonIcon,
-    ShieldCheckIcon,
     SunIcon,
     UsersIcon,
     XMarkIcon,
@@ -76,39 +74,37 @@ const logout = () => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-slate-100 text-slate-900 transition-colors duration-300 dark:bg-[#0d1117] dark:text-slate-100">
+    <div class="min-h-screen bg-slate-100 text-slate-900 dark:bg-[#0d1117] dark:text-slate-100">
         <Head :title="title" />
 
-        <header class="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-white/5 dark:bg-[#111827]/90">
+        <header class="sticky top-0 z-40 border-b border-slate-200 bg-white dark:border-white/10 dark:bg-[#141414]">
             <div class="flex h-16 items-center justify-between px-4 sm:px-6">
                 <div class="flex items-center gap-3">
                     <button
                         type="button"
-                        class="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/5 md:hidden"
+                        class="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/10 md:hidden"
                         @click="sidebarOpen = true"
                     >
                         <Bars3Icon class="h-6 w-6" />
                     </button>
 
                     <Link href="/admin/dashboard" class="inline-flex items-center gap-2">
-                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
-                            <ShieldCheckIcon class="h-5 w-5" />
-                        </span>
+                        <img
+                            src="/logo-divusi.png"
+                            alt="Divusi Logo"
+                            class="h-9 w-auto"
+                        />
                         <div class="hidden sm:block">
                             <p class="text-sm font-semibold text-slate-900 dark:text-white">PMO Admin</p>
-                            <p class="text-[11px] uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">{{ props.title }}</p>
+                            <p class="text-[11px] text-slate-400 dark:text-slate-500">{{ props.title }}</p>
                         </div>
                     </Link>
-
-
                 </div>
 
                 <div class="flex items-center gap-2">
-
-
                     <button
                         type="button"
-                        class="rounded-xl p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/5"
+                        class="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/10"
                         @click="toggleDarkMode"
                     >
                         <SunIcon v-if="isDark" class="h-5 w-5" />
@@ -117,14 +113,13 @@ const logout = () => {
 
                     <Menu as="div" class="relative">
                         <MenuButton
-                            class="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5 transition-colors hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
+                            class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#1c1c1c] dark:hover:bg-[#252525]"
                         >
                             <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-xs font-semibold text-white">
                                 {{ getInitials(displayName) }}
                             </span>
                             <div class="hidden max-w-[9rem] text-left sm:block">
                                 <p class="truncate text-xs font-semibold text-slate-900 dark:text-white">{{ displayName }}</p>
-                                <p class="truncate text-[11px] text-slate-500 dark:text-slate-400">{{ userEmail }}</p>
                             </div>
                             <ChevronDownIcon class="h-4 w-4 text-slate-400" />
                         </MenuButton>
@@ -138,9 +133,9 @@ const logout = () => {
                             leave-to-class="transform scale-95 opacity-0"
                         >
                             <MenuItems
-                                class="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-slate-100 rounded-xl bg-white shadow-lg ring-1 ring-black/5 focus:outline-none dark:divide-white/5 dark:bg-[#1f2937] dark:ring-white/10"
+                                class="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white shadow-sm focus:outline-none dark:divide-white/10 dark:border-white/10 dark:bg-[#1d1d1d]"
                             >
-                                <div class="px-4 py-3 sm:hidden">
+                                <div class="px-4 py-3">
                                     <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">{{ displayName }}</p>
                                     <p class="truncate text-xs text-slate-500 dark:text-slate-400">{{ userEmail }}</p>
                                 </div>
@@ -164,19 +159,19 @@ const logout = () => {
             </div>
         </header>
 
-        <div v-if="sidebarOpen" class="fixed inset-0 z-40 bg-slate-900/55 backdrop-blur-sm md:hidden" @click="closeSidebar"></div>
+        <div v-if="sidebarOpen" class="fixed inset-0 z-40 bg-slate-900/55 md:hidden" @click="closeSidebar"></div>
 
         <aside
             :class="[
-                'fixed bottom-0 left-0 top-16 z-50 flex w-72 flex-col border-r border-slate-200/80 bg-white transition-transform duration-300 dark:border-white/5 dark:bg-[#111827]',
+                'fixed bottom-0 left-0 top-16 z-50 flex w-72 flex-col border-r border-slate-200 bg-white transition-transform duration-300 dark:border-white/10 dark:bg-[#141414]',
                 sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
             ]"
         >
-            <div class="flex h-14 items-center justify-between border-b border-slate-200/80 px-4 dark:border-white/5 md:hidden">
+            <div class="flex h-14 items-center justify-between border-b border-slate-200 px-4 dark:border-white/10 md:hidden">
                 <p class="text-sm font-semibold text-slate-900 dark:text-white">Menu Admin</p>
                 <button
                     type="button"
-                    class="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/5"
+                    class="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/10"
                     @click="closeSidebar"
                 >
                     <XMarkIcon class="h-5 w-5" />
@@ -188,7 +183,7 @@ const logout = () => {
                     v-for="item in navItems"
                     :key="`side-${item.href}`"
                     :href="item.href"
-                    class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"
+                    class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
                     :class="item.active(currentUrl)
                         ? 'bg-indigo-600/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300'
                         : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200'"

@@ -9,7 +9,7 @@ const { isDark, toggleDarkMode } = useDarkMode();
         <button
             type="button"
             @click="toggleDarkMode"
-            class="absolute right-4 top-4 z-20 rounded-xl border border-slate-200 bg-white/90 p-2.5 text-slate-500 shadow-sm transition-colors hover:bg-slate-100 dark:border-white/10 dark:bg-[#1a1a1a]/90 dark:text-slate-400 dark:hover:bg-white/5"
+            class="absolute right-4 top-4 z-20 rounded-lg p-2.5 text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/10"
             aria-label="Toggle dark mode"
         >
             <svg v-if="isDark" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
