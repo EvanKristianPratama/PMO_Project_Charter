@@ -49,7 +49,8 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::resource('digital-initiatives', DigitalInitiativeController::class);
     // IT Initiatives & Charters
     Route::get('/roadmap', [ITInitiativeController::class, 'roadmapIndex'])->name('roadmap.index');
-    Route::resource('it-initiatives', ITInitiativeController::class);
+    Route::resource('it-initiatives', ITInitiativeController::class)
+        ->parameters(['it-initiatives' => 'project']);
     Route::post('/it-initiatives/{project}/charter', [CharterController::class, 'store'])->name('it-initiatives.charter.store');
     Route::post('/it-initiatives/{project}/milestones', [MilestoneController::class, 'store'])->name('it-initiatives.milestones.store');
     Route::delete('/it-initiatives/{project}/milestones/{milestone}', [MilestoneController::class, 'destroy'])->name('it-initiatives.milestones.destroy');
