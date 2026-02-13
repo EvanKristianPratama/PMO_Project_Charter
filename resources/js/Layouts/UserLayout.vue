@@ -57,17 +57,13 @@ const navItems = computed(() => {
             label: 'Strategic Pillars',
             href: '/strategic-pillars',
             icon: FlagIcon,
-<<<<<<< HEAD
-            active: (url) => url.startsWith('/goals'),
+            active: (url) => url.startsWith('/strategic-pillars'),
         },
         {
             label: 'Digital Initiatives',
             href: '/digital-initiatives',
             icon: FolderIcon,
-            active: (url) => url.startsWith('/projects'),
-=======
-            active: (url) => url.startsWith('/strategic-pillars'),
->>>>>>> 07502e8f0ec0f43ae02d78fcc9e9b15ae03703d2
+            active: (url) => url.startsWith('/digital-initiatives'),
         },
         {
             label: 'IT Initiatives',
