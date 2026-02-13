@@ -10,13 +10,13 @@
 
             <section class="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                    <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">Total IT Initiatives</p>
-                    <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">{{ summary.total_it_initiatives }}</p>
+                    <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">Total Digital Initiatives</p>
+                    <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">{{ summary.total_digital_initiatives }}</p>
                 </article>
 
                 <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                    <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">Total Digital Initiatives</p>
-                    <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">{{ summary.total_digital_initiatives }}</p>
+                    <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">Total IT Initiatives</p>
+                    <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">{{ summary.total_it_initiatives }}</p>
                 </article>
 
                 <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#171717]">
@@ -35,8 +35,8 @@
                         <thead class="bg-slate-50 dark:bg-white/5">
                             <tr>
                                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</th>
-                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">IT</th>
                                 <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Digital</th>
+                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">IT</th>
                                 <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total</th>
                             </tr>
                         </thead>
@@ -47,8 +47,8 @@
                                         {{ row.label }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3 text-right font-semibold text-slate-800 dark:text-slate-100">{{ row.it }}</td>
                                 <td class="px-4 py-3 text-right font-semibold text-slate-800 dark:text-slate-100">{{ row.digital }}</td>
+                                <td class="px-4 py-3 text-right font-semibold text-slate-800 dark:text-slate-100">{{ row.it }}</td>
                                 <td class="px-4 py-3 text-right font-semibold text-slate-900 dark:text-white">{{ row.total }}</td>
                             </tr>
                         </tbody>

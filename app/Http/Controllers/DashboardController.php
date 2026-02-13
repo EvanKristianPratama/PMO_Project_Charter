@@ -44,7 +44,16 @@ class DashboardController extends Controller
 
         $openItInitiatives = Project::query()
             ->select(['id', 'code', 'name', 'status', 'updated_at'])
-            ->with(['charter:id,project_id,category', 'statusRef:id,name'])
+            ->with([
+                'charter' => static function ($query): void {
+                    $query->select([
+                        'trs_project_charters.id',
+                        'trs_project_charters.project_id',
+                        'trs_project_charters.category',
+                    ]);
+                },
+                'statusRef:id,name',
+            ])
             ->where(static function ($query) use ($baselineStatusId): void {
                 $query
                     ->whereNull('status')
