@@ -27,8 +27,7 @@ class DigitalInitiativeController extends Controller
             }))
             ->when($type, fn ($q, $type) => $q->where('type', $type))
             ->latest()
-            ->paginate(10)
-            ->withQueryString();
+            ->get();
 
         return Inertia::render('DigitalInitiatives/Index', [
             'initiatives' => $initiatives,

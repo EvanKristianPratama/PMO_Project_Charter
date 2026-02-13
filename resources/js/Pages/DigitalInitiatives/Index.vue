@@ -56,7 +56,7 @@
                         </thead>
                         <tbody class="divide-y divide-slate-100 dark:divide-white/5">
                             <tr
-                                v-for="item in initiatives.data"
+                                v-for="item in initiatives"
                                 :key="item.id"
                                 class="transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.02]"
                             >
@@ -106,28 +106,15 @@
                 </div>
             </div>
 
-            <!-- Empty State -->
             <div
-                v-if="initiatives.data.length === 0"
+                v-if="initiatives.length === 0"
                 class="mt-6 rounded-xl border border-slate-200 bg-white py-12 text-center dark:border-white/5 dark:bg-[#1a1a1a]"
             >
                 <p class="text-slate-500 dark:text-slate-400">No digital initiatives found.</p>
                 <p class="mt-2 text-sm text-slate-400 dark:text-slate-500">Belum ada digital initiative dengan status completed.</p>
             </div>
 
-            <!-- Pagination -->
-            <div v-if="initiatives.links && initiatives.links.length > 3" class="mt-6 flex justify-center">
-                <div class="flex gap-1">
-                    <Link
-                        v-for="(link, k) in initiatives.links"
-                        :key="k"
-                        :href="link.url || '#'"
-                        v-html="link.label"
-                        class="rounded border border-slate-200 bg-white px-3 py-1 text-sm text-slate-700 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300"
-                        :class="{'border-indigo-600 bg-indigo-600 text-white': link.active, 'pointer-events-none opacity-50': !link.url}"
-                    />
-                </div>
-            </div>
+
         </div>
     </UserLayout>
 </template>
