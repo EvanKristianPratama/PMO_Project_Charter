@@ -28,16 +28,16 @@ export function useNavigation() {
                 active: (url) => url.startsWith('/strategic-pillars'),
             },
             {
-                label: 'IT Initiatives',
-                href: '/it-initiatives',
-                icon: FolderIcon,
-                active: (url) => url.startsWith('/it-initiatives'),
-            },
-            {
                 label: 'Digital Initiatives',
                 href: '/digital-initiatives',
                 icon: FolderIcon,
                 active: (url) => url.startsWith('/digital-initiatives'),
+            },
+            {
+                label: 'IT Initiatives',
+                href: '/it-initiatives',
+                icon: FolderIcon,
+                active: (url) => url.startsWith('/it-initiatives'),
             },
         ];
 
