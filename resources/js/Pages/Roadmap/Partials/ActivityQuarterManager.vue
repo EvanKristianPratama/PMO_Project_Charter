@@ -8,6 +8,17 @@
         </div>
 
         <form v-if="project" class="grid grid-cols-1 gap-3 lg:grid-cols-12" @submit.prevent="addMilestone">
+            <div class="lg:col-span-2">
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">Section</label>
+                <input
+                    v-model="milestoneForm.type"
+                    type="text"
+                    placeholder="Contoh: Assessment and Planning"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#101826] dark:text-slate-100"
+                />
+                <p v-if="milestoneForm.errors.type" class="mt-1 text-xs text-red-500">{{ milestoneForm.errors.type }}</p>
+            </div>
+            
             <div class="lg:col-span-4">
                 <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">Activity</label>
                 <input
@@ -17,17 +28,6 @@
                     class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#101826] dark:text-slate-100"
                 />
                 <p v-if="milestoneForm.errors.title" class="mt-1 text-xs text-red-500">{{ milestoneForm.errors.title }}</p>
-            </div>
-
-            <div class="lg:col-span-2">
-                <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">Section</label>
-                <select
-                    v-model="milestoneForm.type"
-                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#101826] dark:text-slate-100"
-                >
-                    <option v-for="option in milestoneTypeOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
-                </select>
-                <p v-if="milestoneForm.errors.type" class="mt-1 text-xs text-red-500">{{ milestoneForm.errors.type }}</p>
             </div>
 
             <div class="lg:col-span-2">
@@ -118,7 +118,7 @@
                 <tbody class="divide-y divide-slate-200 dark:divide-white/10">
                     <tr v-for="item in roadmapMilestones" :key="item.id">
                         <td class="px-3 py-2 text-slate-800 dark:text-slate-100">{{ item.title }}</td>
-                        <td class="px-3 py-2 text-slate-600 dark:text-slate-300">{{ milestoneTypeLabel(item.type) }}</td>
+                        <td class="px-3 py-2 text-slate-600 dark:text-slate-300">{{ item.type || '-' }}</td>
                         <td class="px-3 py-2 text-slate-600 dark:text-slate-300">{{ quarterLabel(item.start_date) }}</td>
                         <td class="px-3 py-2 text-slate-600 dark:text-slate-300">{{ quarterLabel(item.end_date) }}</td>
                         <td class="px-3 py-2 text-slate-600 dark:text-slate-300">{{ item.output || '-' }}</td>
@@ -155,16 +155,13 @@ const props = defineProps({
 });
 
 const quarterOptions = [1, 2, 3, 4];
-const milestoneTypeOptions = [
-    { value: 'assessment_design', label: 'Assessment & Design' },
-    { value: 'rollout', label: 'Rollout' },
-];
+
 const currentYear = new Date().getFullYear();
 
 const milestoneForm = useForm({
     title: '',
     output: '',
-    type: 'assessment_design',
+    type: '',
     start_date: '',
     end_date: '',
 });
@@ -248,7 +245,7 @@ watch(
     () => {
         milestoneForm.reset();
         milestoneForm.clearErrors();
-        milestoneForm.type = 'assessment_design';
+        milestoneForm.type = '';
         resetMilestoneRange();
     },
     { immediate: true }
@@ -279,9 +276,7 @@ const quarterLabel = (value) => {
     return `Q${quarter} ${date.getUTCFullYear()}`;
 };
 
-const milestoneTypeLabel = (type) => String(type || '').toLowerCase().includes('rollout')
-    ? 'Rollout'
-    : 'Assessment & Design';
+
 
 const quarterStartDate = (year, quarter) => {
     const month = (quarter * 3) - 2;
@@ -321,7 +316,7 @@ const addMilestone = () => {
         preserveState: true,
         onSuccess: () => {
             milestoneForm.reset();
-            milestoneForm.type = 'assessment_design';
+            milestoneForm.type = '';
             resetMilestoneRange();
         },
     });
