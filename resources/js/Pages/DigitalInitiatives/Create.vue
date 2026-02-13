@@ -89,40 +89,55 @@
                         <p v-if="form.errors.value" class="mt-1 text-xs text-red-500">{{ form.errors.value }}</p>
                     </div>
 
-                    <!-- Urgency, RJJP, COE -->
-                    <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-                        <div>
-                            <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Urgency</label>
+                    <!-- Urgency, RJJP, COE, Status -->
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <div class="grid grid-cols-1 gap-6 md:grid-cols-3 md:col-span-2">
+                            <div>
+                                <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Urgency</label>
+                                <select
+                                    v-model="form.urgency"
+                                    class="w-full rounded-lg border-slate-300 bg-white text-slate-700 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-200"
+                                >
+                                    <option value="">Select Urgency</option>
+                                    <option value="high">High</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="low">Low</option>
+                                </select>
+                                <p v-if="form.errors.urgency" class="mt-1 text-xs text-red-500">{{ form.errors.urgency }}</p>
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">RJJP</label>
+                                <input
+                                    v-model="form.rjjp"
+                                    type="text"
+                                    class="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
+                                    placeholder="RJJP"
+                                />
+                                <p v-if="form.errors.rjjp" class="mt-1 text-xs text-red-500">{{ form.errors.rjjp }}</p>
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">COE</label>
+                                <input
+                                    v-model="form.coe"
+                                    type="text"
+                                    class="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
+                                    placeholder="COE"
+                                />
+                                <p v-if="form.errors.coe" class="mt-1 text-xs text-red-500">{{ form.errors.coe }}</p>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Status</label>
                             <select
-                                v-model="form.urgency"
+                                v-model="form.status"
                                 class="w-full rounded-lg border-slate-300 bg-white text-slate-700 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-200"
                             >
-                                <option value="">Select Urgency</option>
-                                <option value="high">High</option>
-                                <option value="medium">Medium</option>
-                                <option value="low">Low</option>
+                                <option value="draft">Draft / Usulan</option>
+                                <option value="on_hold">On Hold / Review</option>
+                                <option value="active">Active / Persetujuan</option>
+                                <option value="completed">Completed / Selesai</option>
                             </select>
-                            <p v-if="form.errors.urgency" class="mt-1 text-xs text-red-500">{{ form.errors.urgency }}</p>
-                        </div>
-                        <div>
-                            <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">RJJP</label>
-                            <input
-                                v-model="form.rjjp"
-                                type="text"
-                                class="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
-                                placeholder="RJJP"
-                            />
-                            <p v-if="form.errors.rjjp" class="mt-1 text-xs text-red-500">{{ form.errors.rjjp }}</p>
-                        </div>
-                        <div>
-                            <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">COE</label>
-                            <input
-                                v-model="form.coe"
-                                type="text"
-                                class="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
-                                placeholder="COE"
-                            />
-                            <p v-if="form.errors.coe" class="mt-1 text-xs text-red-500">{{ form.errors.coe }}</p>
+                            <p v-if="form.errors.status" class="mt-1 text-xs text-red-500">{{ form.errors.status }}</p>
                         </div>
                     </div>
 
@@ -159,6 +174,7 @@ const form = useForm({
     urgency: '',
     rjjp: '',
     coe: '',
+    status: 'draft',
 });
 
 const submit = () => {

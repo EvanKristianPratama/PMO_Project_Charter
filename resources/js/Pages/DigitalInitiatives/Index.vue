@@ -6,12 +6,6 @@
                     <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Digital Initiatives</h2>
                     <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Manage digital initiative entries</p>
                 </div>
-                <Link
-                    href="/digital-initiatives/create"
-                    class="inline-flex items-center justify-center rounded-lg border border-transparent bg-indigo-600 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-indigo-700 focus:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-indigo-900"
-                >
-                    + New Initiative
-                </Link>
             </div>
 
             <!-- Filters -->
@@ -38,6 +32,17 @@
                     <option value="operational">Operational</option>
                     <option value="tactical">Tactical</option>
                 </select>
+                <select
+                    v-model="filters.status"
+                    class="rounded-lg border-slate-300 bg-white text-slate-700 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-200"
+                    @change="applyFilters"
+                >
+                    <option value="">All Status</option>
+                    <option value="draft">Draft</option>
+                    <option value="active">Active</option>
+                    <option value="completed">Completed</option>
+                    <option value="on_hold">On Hold</option>
+                </select>
             </div>
 
             <!-- Table -->
@@ -49,8 +54,7 @@
                                 <th class="whitespace-nowrap px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">No</th>
                                 <th class="whitespace-nowrap px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">Type</th>
                                 <th class="whitespace-nowrap px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">Use Case</th>
-                                <th class="whitespace-nowrap px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">Project Owner</th>
-                                <th class="whitespace-nowrap px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">Urgency</th>
+                                <th class="whitespace-nowrap px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">Timelines</th>
                                 <th class="whitespace-nowrap px-4 py-3 text-right font-semibold text-slate-700 dark:text-slate-300">Actions</th>
                             </tr>
                         </thead>
@@ -68,14 +72,35 @@
                                         {{ item.type }}
                                     </span>
                                 </td>
-                                <td class="max-w-xs truncate px-4 py-3 text-slate-600 dark:text-slate-400">{{ item.useCase || '-' }}</td>
-                                <td class="whitespace-nowrap px-4 py-3 text-slate-600 dark:text-slate-400">{{ item.projectOwner || '-' }}</td>
-                                <td class="whitespace-nowrap px-4 py-3">
-                                    <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize"
-                                        :class="urgencyBadgeClass(item.urgency)"
-                                    >
-                                        {{ item.urgency || '-' }}
-                                    </span>
+                                <td class="max-w-xs truncate px-4 py-3 text-slate-600 dark:text-slate-400">
+                                    <div class="flex flex-col">
+                                        <span class="font-medium text-slate-900 dark:text-white">{{ item.useCase || '-' }}</span>
+                                        <span class="text-xs text-slate-500 dark:text-slate-400">{{ item.projectOwner || '-' }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center w-full max-w-xs">
+                                        <template v-for="(step, index) in statusFlow" :key="`${item.id}-${step.key}`">
+                                            <!-- Line -->
+                                            <div v-if="index > 0" class="flex-1 mx-0.5 h-0.5 rounded-full" :class="stepLineClass(item.status, index - 1)"></div>
+                                            
+                                            <!-- Circle -->
+                                            <div class="relative flex flex-col items-center group/tooltip">
+                                                <span
+                                                    class="inline-flex h-2.5 w-2.5 flex-shrink-0 rounded-full border"
+                                                    :class="stepCircleClass(item.status, index)"
+                                                ></span>
+                                                
+                                                <!-- Tooltip -->
+                                                <div class="absolute bottom-full mb-1 hidden w-max rounded bg-slate-800 px-1.5 py-0.5 text-[8px] text-white shadow-sm group-hover/tooltip:block dark:bg-white dark:text-slate-900">
+                                                    {{ step.label }}
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <div class="mt-1 text-[10px] text-slate-500 dark:text-slate-400">
+                                        Status: <span class="font-medium capitalize">{{ item.status?.replace('_', ' ') || 'Draft' }}</span>
+                                    </div>
                                 </td>
                                 <td class="whitespace-nowrap px-4 py-3 text-right">
                                     <div class="flex items-center justify-end gap-1">
@@ -157,7 +182,43 @@ const props = defineProps({
 const filters = ref({
     search: props.filters?.search || '',
     type: props.filters?.type || '',
+    status: props.filters?.status || '',
 });
+
+const statusFlow = [
+    { key: 'draft', label: 'Draft' },
+    { key: 'on_hold', label: 'Review' },
+    { key: 'active', label: 'Approved' },
+    { key: 'completed', label: 'Complete' },
+];
+
+const statusStepIndex = (status) => {
+    const normalized = String(status || 'draft').toLowerCase();
+    if (normalized === 'on_hold') return 1;
+    if (normalized === 'active') return 2;
+    if (normalized === 'completed') return 3;
+    return 0;
+};
+
+const stepCircleClass = (status, stepIndex) => {
+    const current = statusStepIndex(status);
+    const normalized = String(status || 'draft').toLowerCase();
+
+    if (stepIndex < current || (normalized === 'completed' && stepIndex === current)) {
+        return 'border-emerald-500 bg-emerald-500';
+    }
+    if (stepIndex === current) {
+        return 'border-amber-500 bg-amber-500 ring-1 ring-amber-200 dark:ring-amber-500/30';
+    }
+    return 'border-slate-300 bg-slate-100 dark:border-white/20 dark:bg-white/5';
+};
+
+const stepLineClass = (status, stepIndex) => {
+    const current = statusStepIndex(status);
+    return stepIndex < current
+        ? 'bg-emerald-300 dark:bg-emerald-500/40'
+        : 'bg-slate-200 dark:bg-white/10';
+};
 
 const typeBadgeClass = (type) => {
     const t = String(type || '').toLowerCase();

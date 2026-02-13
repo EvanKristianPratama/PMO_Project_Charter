@@ -23,6 +23,7 @@ class DigitalInitiativeController extends Controller
                     ->orWhere('desc', 'like', "%{$search}%");
             }))
             ->when($type, fn ($q, $type) => $q->where('type', $type))
+            ->when($request->input('status'), fn ($q, $status) => $q->where('status', $status))
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -32,6 +33,7 @@ class DigitalInitiativeController extends Controller
             'filters' => [
                 'search' => $search,
                 'type' => $type,
+                'status' => $request->input('status'),
             ],
         ]);
     }
@@ -53,6 +55,7 @@ class DigitalInitiativeController extends Controller
             'urgency' => 'nullable|string|max:255',
             'rjjp' => 'nullable|string|max:255',
             'coe' => 'nullable|string|max:255',
+            'status' => 'nullable|string|in:draft,on_hold,active,completed',
         ]);
 
         DigitalInitiative::create($validated);
@@ -86,6 +89,7 @@ class DigitalInitiativeController extends Controller
             'urgency' => 'nullable|string|max:255',
             'rjjp' => 'nullable|string|max:255',
             'coe' => 'nullable|string|max:255',
+            'status' => 'nullable|string|in:draft,on_hold,active,completed',
         ]);
 
         $digitalInitiative->update($validated);

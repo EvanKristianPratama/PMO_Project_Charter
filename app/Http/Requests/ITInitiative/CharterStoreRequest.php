@@ -14,6 +14,7 @@ class CharterStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'version_label' => ['nullable', 'string', 'max:255'],
             'category' => ['nullable', 'string', 'max:255'],
             'duration' => ['nullable', 'string', 'max:255'],
             'background' => ['nullable', 'string'],

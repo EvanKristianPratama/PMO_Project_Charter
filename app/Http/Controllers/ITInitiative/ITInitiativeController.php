@@ -69,9 +69,8 @@ class ITInitiativeController extends Controller
                     ->orWhere('owner_name', 'like', "%{$search}%");
             }))
             ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+            ->orderBy('id', 'asc')
+            ->get();
 
         return Inertia::render('ITInitiative/Index', [
             'itInitiatives' => $projects,
@@ -96,7 +95,14 @@ class ITInitiativeController extends Controller
 
     public function show(Project $project): Response
     {
-        $project->load(['charter', 'milestones', 'programs', 'goals', 'owner']);
+        $project->load([
+            'charter',
+            'charters' => static fn ($query) => $query->latest(),
+            'milestones',
+            'programs',
+            'goals',
+            'owner',
+        ]);
 
         return Inertia::render('ITInitiative/Show', [
             'itInitiative' => $project,
