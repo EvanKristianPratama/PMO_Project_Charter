@@ -52,20 +52,24 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
-                        <tr v-for="project in itInitiatives" :key="project.id" class="group transition-colors hover:bg-slate-50 dark:hover:bg-white/5">
+                        <tr v-for="(project, index) in itInitiatives" :key="project.id" class="group transition-colors hover:bg-slate-50 dark:hover:bg-white/5">
                             <td class="whitespace-nowrap px-6 py-4 text-xs font-medium text-slate-600 dark:text-slate-400">
                                 {{ project.code }}
                             </td>
-                            <td class="whitespace-nowrap px-6 py-4">
-                                <span class="inline-flex rounded-full bg-blue-100 px-2 text-xs font-semibold leading-5 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300">
+                            <td 
+                                v-if="shouldShowCategory(index)"
+                                :rowspan="getCategoryRowspan(index)"
+                                class="whitespace-nowrap px-6 py-4 align-top border-r border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02]"
+                            >
+                                <span class="inline-flex rounded-full bg-blue-100 px-2 text-[10px] font-semibold leading-5 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300">
                                     {{ project.charter?.category || 'Uncategorized' }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4">
-                                <span class="font-medium text-slate-900 dark:text-white">{{ project.name }}</span>
+                            <td class="px-6 py-4 text-xs">
+                                <span class="font-medium text-slate-700 dark:text-slate-200">{{ project.name }}</span>
                             </td>
                             <td class="whitespace-nowrap px-6 py-4">
-                                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize"
+                                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-medium capitalize"
                                     :class="{
                                         'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-400': project.status === 'completed',
                                         'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-400': project.status === 'active',
@@ -137,6 +141,26 @@ const months = [
     { value: '11', label: 'November' },
     { value: '12', label: 'December' },
 ];
+
+const shouldShowCategory = (index) => {
+    if (index === 0) return true;
+    const current = props.itInitiatives[index].charter?.category || 'Uncategorized';
+    const previous = props.itInitiatives[index - 1].charter?.category || 'Uncategorized';
+    return current !== previous;
+};
+
+const getCategoryRowspan = (index) => {
+    let count = 1;
+    const current = props.itInitiatives[index].charter?.category || 'Uncategorized';
+    for (let i = index + 1; i < props.itInitiatives.length; i++) {
+        if ((props.itInitiatives[i].charter?.category || 'Uncategorized') === current) {
+            count++;
+        } else {
+            break;
+        }
+    }
+    return count;
+};
 
 let timeout = null;
 const debouncedSearch = () => {
