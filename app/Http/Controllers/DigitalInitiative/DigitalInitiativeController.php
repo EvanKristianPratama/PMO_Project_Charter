@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\DigitalInitiative;
 
+use App\Http\Controllers\Controller;
 use App\Models\DigitalInitiative;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
