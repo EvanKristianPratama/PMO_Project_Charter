@@ -15,8 +15,10 @@ class DigitalInitiativeController extends Controller
     {
         $search = $request->input('search');
         $type = $request->input('type');
+        $status = 'completed';
 
         $initiatives = DigitalInitiative::query()
+            ->where('status', $status)
             ->when($search, fn ($q, $search) => $q->where(function ($inner) use ($search) {
                 $inner->where('no', 'like', "%{$search}%")
                     ->orWhere('useCase', 'like', "%{$search}%")
@@ -25,14 +27,14 @@ class DigitalInitiativeController extends Controller
             }))
             ->when($type, fn ($q, $type) => $q->where('type', $type))
             ->latest()
-            ->paginate(10)
-            ->withQueryString();
+            ->get();
 
         return Inertia::render('DigitalInitiatives/Index', [
             'initiatives' => $initiatives,
             'filters' => [
                 'search' => $search,
                 'type' => $type,
+                'status' => $status,
             ],
         ]);
     }
@@ -54,6 +56,7 @@ class DigitalInitiativeController extends Controller
             'urgency' => 'nullable|string|max:255',
             'rjjp' => 'nullable|string|max:255',
             'coe' => 'nullable|string|max:255',
+            'status' => 'nullable|string|in:draft,on_hold,active,completed',
         ]);
 
         DigitalInitiative::create($validated);
@@ -87,6 +90,7 @@ class DigitalInitiativeController extends Controller
             'urgency' => 'nullable|string|max:255',
             'rjjp' => 'nullable|string|max:255',
             'coe' => 'nullable|string|max:255',
+            'status' => 'nullable|string|in:draft,on_hold,active,completed',
         ]);
 
         $digitalInitiative->update($validated);

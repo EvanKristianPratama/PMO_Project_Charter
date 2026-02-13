@@ -60,24 +60,24 @@ class ITInitiativeController extends Controller
     public function index(ITInitiativeIndexRequest $request): Response
     {
         $filters = $request->validated();
+        $status = 'completed';
 
         $projects = Project::query()
             ->with(['owner', 'charter'])
+            ->where('status', $status)
             ->when($filters['search'] ?? null, fn ($q, $search) => $q->where(function ($inner) use ($search): void {
                 $inner->where('name', 'like', "%{$search}%")
                     ->orWhere('code', 'like', "%{$search}%")
                     ->orWhere('owner_name', 'like', "%{$search}%");
             }))
-            ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+            ->orderBy('id', 'asc')
+            ->get();
 
         return Inertia::render('ITInitiative/Index', [
             'itInitiatives' => $projects,
             'filters'  => [
                 'search' => $filters['search'] ?? null,
-                'status' => $filters['status'] ?? null,
+                'status' => $status,
             ],
         ]);
     }
@@ -96,7 +96,14 @@ class ITInitiativeController extends Controller
 
     public function show(Project $project): Response
     {
-        $project->load(['charter', 'milestones', 'programs', 'goals', 'owner']);
+        $project->load([
+            'charter',
+            'charters' => static fn ($query) => $query->latest(),
+            'milestones',
+            'programs',
+            'goals',
+            'owner',
+        ]);
 
         return Inertia::render('ITInitiative/Show', [
             'itInitiative' => $project,

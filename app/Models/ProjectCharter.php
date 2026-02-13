@@ -11,6 +11,7 @@ class ProjectCharter extends Model
 
     protected $fillable = [
         'project_id',
+        'version_label',
         'category',
         'duration',
         'background',

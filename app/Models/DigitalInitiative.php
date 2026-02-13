@@ -21,5 +21,6 @@ class DigitalInitiative extends Model
         'urgency',
         'rjjp',
         'coe',
+        'status',
     ];
 }

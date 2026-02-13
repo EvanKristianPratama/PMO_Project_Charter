@@ -184,6 +184,7 @@ const form = useForm({
     urgency: '',
     rjjp: '',
     coe: '',
+    status: 'draft',
 });
 
 const submit = () => {

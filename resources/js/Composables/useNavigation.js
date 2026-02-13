@@ -39,6 +39,12 @@ export function useNavigation() {
                 icon: FolderIcon,
                 active: (url) => url.startsWith('/it-initiatives'),
             },
+            {
+                label: 'Dashboard Monitoring',
+                href: '/dashboard-monitoring',
+                icon: HomeIcon,
+                active: (url) => url.startsWith('/dashboard-monitoring'),
+            },
         ];
 
         if (isAdmin.value) {

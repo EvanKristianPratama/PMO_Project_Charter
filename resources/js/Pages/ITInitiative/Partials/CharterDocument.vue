@@ -21,6 +21,9 @@ const showScope = () => props.editable || Boolean(String(props.form.scope || '')
             <h1 class="text-2xl font-extrabold leading-tight tracking-tight text-[#0f63b5]">
                 IT Initiative Charter: {{ itInitiative.name || '-' }}
             </h1>
+            <p class="mt-1 text-sm font-semibold text-slate-700">
+                Version: {{ form.version_label || 'Draft' }}
+            </p>
         </header>
 
         <section class="charter-block mt-4 grid gap-5 lg:grid-cols-3">
@@ -62,9 +65,9 @@ const showScope = () => props.editable || Boolean(String(props.form.scope || '')
                 <span class="meta-icon">
                     <DocumentTextIcon class="h-5 w-5" />
                 </span>
-                <div class="meta-label">IT Initiative Owner</div>
+                <div class="meta-label">Company Owner</div>
                 <div class="meta-value font-semibold">
-                    {{ itInitiative.owner_name || itInitiative.owner?.name || 'Unassigned' }}
+                    {{ itInitiative.owner_name || itInitiative.owner?.name || '-' }}
                 </div>
             </div>
         </section>

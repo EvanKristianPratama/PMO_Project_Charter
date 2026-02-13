@@ -34,7 +34,12 @@ class Project extends Model
 
     public function charter(): HasOne
     {
-        return $this->hasOne(ProjectCharter::class);
+        return $this->hasOne(ProjectCharter::class)->latestOfMany();
+    }
+
+    public function charters(): HasMany
+    {
+        return $this->hasMany(ProjectCharter::class);
     }
 
     public function milestones(): HasMany

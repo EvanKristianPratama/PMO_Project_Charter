@@ -41,12 +41,12 @@
                     <!-- Owner & Status -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">IT Initiative Owner</label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Company Owner</label>
                             <input
                                 v-model="form.owner_name"
                                 type="text"
                                 class="w-full rounded-lg border-slate-300 dark:border-white/10 bg-white dark:bg-[#131313] text-slate-900 dark:text-slate-100 focus:ring-indigo-500 focus:border-indigo-500"
-                                placeholder="e.g., VP EIT SARM"
+                                placeholder="e.g., PT Example Indonesia"
                             />
                             <p v-if="form.errors.owner_name" class="text-red-500 text-xs mt-1">{{ form.errors.owner_name }}</p>
                         </div>
@@ -58,14 +58,6 @@
                                 <option value="on_hold">On Hold</option>
                                 <option value="completed">Completed</option>
                             </select>
-                        </div>
-                        <div>
-                             <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Status (Mock Text)</label>
-                             <input
-                                 type="text"
-                                 class="w-full rounded-lg border-slate-300 dark:border-white/10 bg-white dark:bg-[#131313] text-slate-900 dark:text-slate-100 focus:ring-indigo-500 focus:border-indigo-500"
-                                 placeholder="Enter status text (e.g., On Track)"
-                             />
                         </div>
                     </div>
 

@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Auth\SsoController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DashboardMonitoringController;
 use App\Http\Controllers\DigitalInitiative\DigitalInitiativeController;
 use App\Http\Controllers\ITInitiative\CharterController;
 use App\Http\Controllers\ITInitiative\ITInitiativeController;
@@ -43,6 +44,7 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::get('/dashboard-monitoring', DashboardMonitoringController::class)->name('dashboard-monitoring');
     Route::get('/strategic-pillars', [StrategicPillarController::class, 'index'])->name('strategic-pillars.index');
 
     // Digital Initiatives
