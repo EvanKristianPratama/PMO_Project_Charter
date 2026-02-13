@@ -54,7 +54,7 @@
                                 <th class="whitespace-nowrap px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">No</th>
                                 <th class="whitespace-nowrap px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">Type</th>
                                 <th class="whitespace-nowrap px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">Use Case</th>
-                                <th class="whitespace-nowrap px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">Timelines</th>
+                                <th class="whitespace-nowrap px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">Status</th>
                                 <th class="whitespace-nowrap px-4 py-3 text-right font-semibold text-slate-700 dark:text-slate-300">Actions</th>
                             </tr>
                         </thead>
@@ -78,29 +78,17 @@
                                         <span class="text-xs text-slate-500 dark:text-slate-400">{{ item.projectOwner || '-' }}</span>
                                     </div>
                                 </td>
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center w-full max-w-xs">
-                                        <template v-for="(step, index) in statusFlow" :key="`${item.id}-${step.key}`">
-                                            <!-- Line -->
-                                            <div v-if="index > 0" class="flex-1 mx-0.5 h-0.5 rounded-full" :class="stepLineClass(item.status, index - 1)"></div>
-                                            
-                                            <!-- Circle -->
-                                            <div class="relative flex flex-col items-center group/tooltip">
-                                                <span
-                                                    class="inline-flex h-2.5 w-2.5 flex-shrink-0 rounded-full border"
-                                                    :class="stepCircleClass(item.status, index)"
-                                                ></span>
-                                                
-                                                <!-- Tooltip -->
-                                                <div class="absolute bottom-full mb-1 hidden w-max rounded bg-slate-800 px-1.5 py-0.5 text-[8px] text-white shadow-sm group-hover/tooltip:block dark:bg-white dark:text-slate-900">
-                                                    {{ step.label }}
-                                                </div>
-                                            </div>
-                                        </template>
-                                    </div>
-                                    <div class="mt-1 text-[10px] text-slate-500 dark:text-slate-400">
-                                        Status: <span class="font-medium capitalize">{{ item.status?.replace('_', ' ') || 'Draft' }}</span>
-                                    </div>
+                                <td class="whitespace-nowrap px-4 py-3">
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize"
+                                        :class="{
+                                            'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-400': item.status === 'completed',
+                                            'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-400': item.status === 'active',
+                                            'bg-slate-100 text-slate-800 dark:bg-white/10 dark:text-slate-400': item.status === 'draft' || !item.status,
+                                            'bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-400': item.status === 'on_hold',
+                                        }"
+                                    >
+                                        {{ item.status?.replace('_', ' ') || 'Draft' }}
+                                    </span>
                                 </td>
                                 <td class="whitespace-nowrap px-4 py-3 text-right">
                                     <div class="flex items-center justify-end gap-1">
@@ -123,16 +111,6 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                             </svg>
                                         </Link>
-                                        <button
-                                            type="button"
-                                            class="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:text-slate-500 dark:hover:bg-red-500/10 dark:hover:text-red-400"
-                                            title="Delete"
-                                            @click="confirmDelete(item)"
-                                        >
-                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -184,41 +162,6 @@ const filters = ref({
     type: props.filters?.type || '',
     status: props.filters?.status || '',
 });
-
-const statusFlow = [
-    { key: 'draft', label: 'Draft' },
-    { key: 'on_hold', label: 'Review' },
-    { key: 'active', label: 'Approved' },
-    { key: 'completed', label: 'Complete' },
-];
-
-const statusStepIndex = (status) => {
-    const normalized = String(status || 'draft').toLowerCase();
-    if (normalized === 'on_hold') return 1;
-    if (normalized === 'active') return 2;
-    if (normalized === 'completed') return 3;
-    return 0;
-};
-
-const stepCircleClass = (status, stepIndex) => {
-    const current = statusStepIndex(status);
-    const normalized = String(status || 'draft').toLowerCase();
-
-    if (stepIndex < current || (normalized === 'completed' && stepIndex === current)) {
-        return 'border-emerald-500 bg-emerald-500';
-    }
-    if (stepIndex === current) {
-        return 'border-amber-500 bg-amber-500 ring-1 ring-amber-200 dark:ring-amber-500/30';
-    }
-    return 'border-slate-300 bg-slate-100 dark:border-white/20 dark:bg-white/5';
-};
-
-const stepLineClass = (status, stepIndex) => {
-    const current = statusStepIndex(status);
-    return stepIndex < current
-        ? 'bg-emerald-300 dark:bg-emerald-500/40'
-        : 'bg-slate-200 dark:bg-white/10';
-};
 
 const typeBadgeClass = (type) => {
     const t = String(type || '').toLowerCase();

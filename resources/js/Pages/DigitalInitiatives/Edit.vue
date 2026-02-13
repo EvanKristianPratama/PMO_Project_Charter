@@ -152,6 +152,20 @@
                                     <p v-if="form.errors.coe" class="mt-1 text-xs text-red-500">{{ form.errors.coe }}</p>
                                 </div>
                             </div>
+
+                            <div>
+                                <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Status</label>
+                                <select
+                                    v-model="form.status"
+                                    class="w-full rounded-md border-slate-300 bg-slate-50 shadow-sm focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-200 sm:text-sm"
+                                >
+                                    <option value="draft">Draft / Usulan</option>
+                                    <option value="on_hold">On Hold / Review</option>
+                                    <option value="active">Active / Persetujuan</option>
+                                    <option value="completed">Completed / Selesai</option>
+                                </select>
+                                <p v-if="form.errors.status" class="mt-1 text-xs text-red-500">{{ form.errors.status }}</p>
+                            </div>
                         </div>
                     </div>
 
