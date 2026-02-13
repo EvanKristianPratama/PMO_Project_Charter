@@ -15,6 +15,9 @@ import {
     ChevronDownIcon,
     ArrowRightOnRectangleIcon,
     RectangleStackIcon,
+    FlagIcon,
+    ComputerDesktopIcon,
+    ChevronRightIcon,
 } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
@@ -38,22 +41,34 @@ const mobileMenuOpen = ref(false);
 const navItems = computed(() => {
     const items = [
         {
+            label: 'Program Planning',
+            href: '/dashboard',
+            icon: HomeIcon,
+            active: (url) => url.startsWith('/dashboard'),
+        },
+        {
             label: 'Dashboard',
             href: '/dashboard',
             icon: HomeIcon,
             active: (url) => url.startsWith('/dashboard'),
         },
         {
-            label: 'Projects',
+            label: 'Strategic Pillars',
+            href: '/goals',
+            icon: FlagIcon,
+            active: (url) => url.startsWith('/goals'),
+        },
+        {
+            label: 'Digital Initiatives',
             href: '/projects',
             icon: FolderIcon,
             active: (url) => url.startsWith('/projects'),
         },
         {
-            label: 'Roadmap',
-            href: '/roadmap',
-            icon: CalendarDaysIcon,
-            active: (url) => url.startsWith('/roadmap'),
+            label: 'IT Initiatives',
+            href: '/projects',
+            icon: FolderIcon,
+            active: (url) => url.startsWith('/projects'),
         },
     ];
 
@@ -89,37 +104,23 @@ const logout = () => {
     <div class="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-[#0f0f0f] dark:text-slate-100">
         <Head :title="title" />
 
+        <!-- ═══ Top Navbar ═══ -->
         <nav class="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-white/5 dark:bg-[#171717]/90 print:hidden">
             <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-                <div class="flex items-center gap-6">
-                    <!-- Logo -->
-                    <Link href="/dashboard" class="inline-flex items-center gap-3">
-                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm shadow-indigo-500/40">
-                            <RectangleStackIcon class="h-5 w-5" />
+                <!-- Left: Logo -->
+                <div class="flex items-center gap-3">
+                    <Link href="/dashboard" class="group inline-flex items-center gap-3">
+                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-md shadow-blue-500/20 transition-transform group-hover:scale-105">
+                            <ComputerDesktopIcon class="h-5 w-5" />
                         </span>
                         <div class="hidden md:block">
-                            <p class="text-sm font-semibold tracking-tight text-slate-900 dark:text-white">PMO Portal</p>
-                            <p class="text-[11px] uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">Workspace</p>
+                            <p class="text-sm font-bold tracking-tight text-slate-900 dark:text-white">IT Strategic Planning System</p>
+                            <p class="text-[10px] font-medium uppercase tracking-widest text-slate-400 dark:text-slate-500">Workspace</p>
                         </div>
                     </Link>
-
-                    <!-- Desktop Nav -->
-                    <div class="hidden items-center gap-1 md:flex">
-                        <Link
-                            v-for="item in navItems"
-                            :key="item.href"
-                            :href="item.href"
-                            class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
-                            :class="item.active(currentUrl)
-                                ? 'bg-slate-100 text-slate-900 dark:bg-white/10 dark:text-white'
-                                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200'"
-                        >
-                            <component :is="item.icon" class="h-4 w-4" />
-                            {{ item.label }}
-                        </Link>
-                    </div>
                 </div>
 
+                <!-- Right: Actions -->
                 <div class="flex items-center gap-2">
                     <!-- Dark Mode -->
                     <button
@@ -193,22 +194,20 @@ const logout = () => {
             <!-- Mobile Menu -->
             <div v-if="mobileMenuOpen" class="border-t border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-white/5 dark:bg-[#171717]/90 md:hidden">
                 <div class="space-y-1 px-4 py-4">
-                    <!-- Nav Items -->
                     <Link
                         v-for="item in navItems"
                         :key="`mobile-${item.href}`"
                         :href="item.href"
                         class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
                         :class="item.active(currentUrl)
-                            ? 'bg-indigo-50 text-indigo-600 dark:bg-white/10 dark:text-white'
-                            : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5'"
+                            ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
+                            : 'text-slate-600 hover:bg-blue-50 hover:text-blue-600 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-blue-300'"
                         @click="mobileMenuOpen = false"
                     >
                         <component :is="item.icon" class="h-5 w-5" />
                         {{ item.label }}
                     </Link>
 
-                    <!-- Divider -->
                     <div class="my-2 border-t border-slate-200 dark:border-white/5"></div>
 
                     <!-- User Info & Logout -->
@@ -235,13 +234,34 @@ const logout = () => {
             </div>
         </nav>
 
+        <!-- ═══ Breadcrumb Navigation Bar ═══ -->
+        <div class="sticky top-16 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl shadow-sm dark:border-white/5 dark:bg-[#171717]/90 print:hidden">
+            <div class="mx-auto flex items-center gap-0.5 overflow-x-auto px-4 py-1.5 sm:px-6 lg:px-8">
+                <template v-for="(item, index) in navItems" :key="`bc-${item.href}-${index}`">
+                    <!-- Separator -->
+                    <span v-if="index > 0" class="mx-1 text-[11px] text-slate-300 dark:text-slate-600">/</span>
+                    <!-- Breadcrumb Item -->
+                    <Link
+                        :href="item.href"
+                        class="inline-flex shrink-0 items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-medium transition-colors"
+                        :class="item.active(currentUrl)
+                            ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
+                            : 'text-slate-500 hover:bg-slate-100 hover:text-blue-600 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-blue-300'"
+                    >
+                        <component :is="item.icon" class="h-3 w-3" />
+                        <span>{{ item.label }}</span>
+                    </Link>
+                </template>
+            </div>
+        </div>
+
         <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 print:max-w-none print:px-0 print:py-0">
             <slot />
         </main>
 
         <footer class="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8 print:hidden">
             <div class="border-t border-slate-200/70 pt-5 dark:border-white/5">
-                <p class="text-center text-xs text-slate-400 dark:text-slate-500">PMO Portal Workspace</p>
+                <p class="text-center text-xs text-slate-400 dark:text-slate-500">IT Strategic Planning System Workspace</p>
             </div>
         </footer>
     </div>

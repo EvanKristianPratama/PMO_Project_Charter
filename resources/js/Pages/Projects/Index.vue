@@ -3,7 +3,7 @@
         <div class="animate-fade-in">
             <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Projects</h2>
+                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white">IT Initiatives</h2>
                     <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Manage projects and charters</p>
                 </div>
                 <Link
@@ -68,12 +68,14 @@
                             <span>{{ ownerName(project) }}</span>
                         </div>
 
-                        <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-white/5">
-                            <div class="flex items-center">
+                        <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 pb-8 dark:border-white/10 dark:bg-white/5">
+                            <div class="flex items-start justify-between">
                                 <template v-for="(step, index) in statusFlow" :key="`${project.id}-${step.key}`">
-                                    <div class="flex items-center">
+                                    <div v-if="index > 0" class="flex-1 mx-1 mt-[13px] h-0.5 rounded-full" :class="stepLineClass(project.status, index - 1)"></div>
+                                    
+                                    <div class="relative flex flex-col items-center z-10 w-7">
                                         <span
-                                            class="inline-flex h-7 w-7 items-center justify-center rounded-full border-2 text-[11px] font-bold"
+                                            class="inline-flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border-2 text-[11px] font-bold"
                                             :class="stepCircleClass(project.status, index)"
                                         >
                                             <svg
@@ -87,23 +89,11 @@
                                             </svg>
                                             <span v-else>{{ index + 1 }}</span>
                                         </span>
-                                        <span
-                                            v-if="index < statusFlow.length - 1"
-                                            class="mx-1 h-0.5 w-7 rounded-full"
-                                            :class="stepLineClass(project.status, index)"
-                                        ></span>
+                                        <span class="absolute top-8 left-1/2 -translate-x-1/2 w-max text-center text-[10px] font-semibold text-slate-600 dark:text-slate-300">
+                                            {{ step.label }}
+                                        </span>
                                     </div>
                                 </template>
-                            </div>
-
-                            <div class="mt-2 grid grid-cols-4 gap-1 text-center">
-                                <span
-                                    v-for="step in statusFlow"
-                                    :key="`label-${project.id}-${step.key}`"
-                                    class="text-[10px] font-semibold text-slate-600 dark:text-slate-300"
-                                >
-                                    {{ step.label }}
-                                </span>
                             </div>
                         </div>
 

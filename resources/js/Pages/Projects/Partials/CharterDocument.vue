@@ -16,17 +16,17 @@ const showScope = () => props.editable || Boolean(String(props.form.scope || '')
 </script>
 
 <template>
-    <article class="charter-sheet mx-auto w-full max-w-[1400px] border border-slate-300 bg-[#e9e9e9] p-8 text-slate-900 shadow-sm dark:border-white/20 dark:bg-[#d7d7d7]">
+    <article class="charter-sheet mx-auto w-full max-w-[1200px] border border-slate-300 bg-[#e9e9e9] p-5 text-slate-900 shadow-sm dark:border-white/20 dark:bg-[#d7d7d7]">
         <header class="charter-block border-b-2 border-[#2e6ea2] pb-3">
-            <h1 class="text-5xl font-extrabold leading-tight tracking-tight">
+            <h1 class="text-2xl font-extrabold leading-tight tracking-tight text-[#0f63b5]">
                 Project Charter: {{ project.name || '-' }}
             </h1>
         </header>
 
-        <section class="charter-block mt-5 grid gap-5 xl:grid-cols-3">
+        <section class="charter-block mt-4 grid gap-5 lg:grid-cols-3">
             <div class="meta-item">
                 <span class="meta-icon">
-                    <Squares2X2Icon class="h-7 w-7" />
+                    <Squares2X2Icon class="h-5 w-5" />
                 </span>
                 <div class="meta-label">Category</div>
                 <div class="meta-value">
@@ -43,7 +43,7 @@ const showScope = () => props.editable || Boolean(String(props.form.scope || '')
 
             <div class="meta-item">
                 <span class="meta-icon">
-                    <ClockIcon class="h-7 w-7" />
+                    <ClockIcon class="h-5 w-5" />
                 </span>
                 <div class="meta-label">Duration</div>
                 <div class="meta-value">
@@ -60,7 +60,7 @@ const showScope = () => props.editable || Boolean(String(props.form.scope || '')
 
             <div class="meta-item">
                 <span class="meta-icon">
-                    <DocumentTextIcon class="h-7 w-7" />
+                    <DocumentTextIcon class="h-5 w-5" />
                 </span>
                 <div class="meta-label">Project Owner</div>
                 <div class="meta-value font-semibold">
@@ -69,10 +69,10 @@ const showScope = () => props.editable || Boolean(String(props.form.scope || '')
             </div>
         </section>
 
-        <section class="charter-block mt-5">
+        <section class="charter-block mt-4">
             <div class="bar-main">Project Information</div>
 
-            <div class="mt-2 grid gap-4 lg:grid-cols-2">
+            <div class="mt-2 grid gap-3 lg:grid-cols-2">
                 <article class="panel">
                     <div class="bar-sub">Background - Current gap / opportunities</div>
                     <div class="panel-body">
@@ -106,7 +106,7 @@ const showScope = () => props.editable || Boolean(String(props.form.scope || '')
                 </article>
             </div>
 
-            <article v-if="showScope()" class="panel mt-4">
+            <article v-if="showScope()" class="panel mt-3">
                 <div class="bar-sub">Scope</div>
                 <div class="panel-body">
                     <textarea
@@ -123,10 +123,10 @@ const showScope = () => props.editable || Boolean(String(props.form.scope || '')
             </article>
         </section>
 
-        <section class="charter-block mt-5 grid gap-4 xl:grid-cols-[46%_54%]">
+        <section class="charter-block mt-4 grid gap-3 lg:grid-cols-[49%_50%] items-start">
             <article class="panel">
-                <div class="bar-sub h-12 !text-4xl !font-bold leading-[1.2]">Impact and value</div>
-                <div class="panel-body min-h-[180px]">
+                <div class="bar-sub h-10 !text-xl !font-bold leading-[1.2]">Impact and value</div>
+                <div class="panel-body min-h-[140px]">
                     <textarea
                         v-if="editable"
                         v-model="form.impact_value"
@@ -140,12 +140,12 @@ const showScope = () => props.editable || Boolean(String(props.form.scope || '')
                 </div>
             </article>
 
-            <article class="panel">
+            <article>
                 <div class="bar-main">Required resources</div>
-                <div class="mt-2 grid gap-3 md:grid-cols-3">
+                <div class="mt-2 grid gap-2 md:grid-cols-3">
                     <div class="panel">
-                        <div class="bar-sub">Key Personnel</div>
-                        <div class="panel-body min-h-[156px]">
+                        <div class="bar-sub !py-1 !px-2 !text-[13px]">Key Personnel</div>
+                        <div class="panel-body min-h-[40px] !p-1.5">
                             <textarea
                                 v-if="editable"
                                 v-model="form.key_personnel"
@@ -160,8 +160,8 @@ const showScope = () => props.editable || Boolean(String(props.form.scope || '')
                     </div>
 
                     <div class="panel">
-                        <div class="bar-sub">Key Items</div>
-                        <div class="panel-body min-h-[156px]">
+                        <div class="bar-sub !py-1 !px-2 !text-[13px]">Key Items</div>
+                        <div class="panel-body min-h-[40px] !p-1.5">
                             <textarea
                                 v-if="editable"
                                 v-model="form.key_items"
@@ -176,8 +176,8 @@ const showScope = () => props.editable || Boolean(String(props.form.scope || '')
                     </div>
 
                     <div class="panel">
-                        <div class="bar-sub">Indicative budget requirement</div>
-                        <div class="panel-body min-h-[156px]">
+                        <div class="bar-sub !py-1 !px-2 !text-[13px]">Indicative budget requirement</div>
+                        <div class="panel-body min-h-[40px] !p-1.5">
                             <input
                                 v-if="editable"
                                 v-model="form.budget"
@@ -185,20 +185,20 @@ const showScope = () => props.editable || Boolean(String(props.form.scope || '')
                                 class="field-input"
                                 placeholder="~ 3 - 8 mn USD"
                             />
-                            <p v-else class="text-3xl font-semibold text-slate-900">{{ form.budget || '-' }}</p>
+                            <p v-else class="text-xl font-semibold text-slate-900">{{ form.budget || '-' }}</p>
                         </div>
                     </div>
                 </div>
             </article>
         </section>
 
-        <section class="charter-block mt-5">
+        <section class="charter-block mt-4">
             <div class="bar-main">Potential risks</div>
 
-            <div class="mt-2 grid gap-4 lg:grid-cols-2">
+            <div class="mt-2 grid gap-3 lg:grid-cols-2">
                 <article class="panel">
                     <div class="bar-sub">Risk identified</div>
-                    <div class="panel-body min-h-[172px]">
+                    <div class="panel-body min-h-[130px]">
                         <textarea
                             v-if="editable"
                             v-model="form.risks_identified"
@@ -214,7 +214,7 @@ const showScope = () => props.editable || Boolean(String(props.form.scope || '')
 
                 <article class="panel">
                     <div class="bar-sub">Risk mitigation</div>
-                    <div class="panel-body min-h-[172px]">
+                    <div class="panel-body min-h-[130px]">
                         <textarea
                             v-if="editable"
                             v-model="form.risk_mitigation"
@@ -244,47 +244,53 @@ const showScope = () => props.editable || Boolean(String(props.form.scope || '')
 }
 
 .meta-item {
-    display: grid;
-    grid-template-columns: 76px 1fr;
+    display: flex;
     align-items: center;
-    column-gap: 12px;
 }
 
 .meta-icon {
     display: inline-flex;
-    height: 72px;
-    width: 72px;
+    height: 48px;
+    width: 48px;
     align-items: center;
     justify-content: center;
     border-radius: 9999px;
     background: #0f63b5;
     color: #fff;
+    border: 3px solid #fff;
+    box-shadow: 0 0 0 1px #e2e8f0;
+    z-index: 10;
+    flex-shrink: 0;
 }
 
 .meta-label {
-    height: 40px;
+    height: 32px;
     display: flex;
     align-items: center;
-    padding: 0 14px;
+    padding: 0 12px 0 24px;
+    margin-left: -18px;
     background: #0f63b5;
     color: #fff;
-    font-size: 31px;
+    font-size: 15px;
     font-weight: 700;
+    border-radius: 0 4px 4px 0;
+    z-index: 1;
 }
 
 .meta-value {
-    grid-column: 2;
-    margin-top: 8px;
-    font-size: 36px;
+    flex: 1;
+    margin-left: 12px;
+    font-size: 15px;
     line-height: 1.25;
+    font-weight: 600;
 }
 
 .meta-input {
     width: 100%;
     border: 1px solid #2e6ea2;
     border-radius: 0;
-    padding: 8px 10px;
-    font-size: 24px;
+    padding: 4px 8px;
+    font-size: 14px;
     font-weight: 600;
     background: #fff;
     outline: none;
@@ -293,8 +299,8 @@ const showScope = () => props.editable || Boolean(String(props.form.scope || '')
 .bar-main {
     background: #0f63b5;
     color: #fff;
-    padding: 10px 14px;
-    font-size: 39px;
+    padding: 8px 12px;
+    font-size: 18px;
     font-weight: 700;
     line-height: 1.2;
 }
@@ -302,8 +308,8 @@ const showScope = () => props.editable || Boolean(String(props.form.scope || '')
 .bar-sub {
     background: #3f6f9f;
     color: #fff;
-    padding: 9px 14px;
-    font-size: 35px;
+    padding: 6px 12px;
+    font-size: 15px;
     font-weight: 700;
     line-height: 1.2;
 }
@@ -315,45 +321,47 @@ const showScope = () => props.editable || Boolean(String(props.form.scope || '')
 }
 
 .panel-body {
-    padding: 13px 14px;
+    padding: 10px;
     background: #e9e9e9;
 }
 
 .bullet-list {
     margin: 0;
-    padding-left: 24px;
-    list-style: disc;
-    font-size: 38px;
-    line-height: 1.35;
+    padding-left: 0;
+    list-style: none;
+    font-size: 14px;
+    line-height: 1.4;
 }
 
 .bullet-list li + li {
-    margin-top: 5px;
+    margin-top: 2px;
 }
 
 .field-area {
     width: 100%;
-    min-height: 160px;
+    min-height: 100px;
     border: 1px solid #2e6ea2;
     border-radius: 0;
-    padding: 10px 12px;
+    padding: 8px;
     resize: vertical;
     background: #fff;
-    font-size: 24px;
-    line-height: 1.45;
+    font-size: 14px;
+    line-height: 1.4;
     outline: none;
 }
 
 .field-area-sm {
-    min-height: 130px;
+    min-height: 40px;
+    font-size: 12px;
+    line-height: 1.25;
 }
 
 .field-input {
     width: 100%;
     border: 1px solid #2e6ea2;
     border-radius: 0;
-    padding: 8px 10px;
-    font-size: 24px;
+    padding: 6px 8px;
+    font-size: 14px;
     font-weight: 600;
     background: #fff;
     outline: none;
@@ -361,39 +369,7 @@ const showScope = () => props.editable || Boolean(String(props.form.scope || '')
 
 .empty {
     color: #6b7280;
-    font-size: 24px;
-}
-
-@media (max-width: 1536px) {
-    .meta-label {
-        font-size: 18px;
-    }
-
-    .meta-value {
-        font-size: 20px;
-    }
-
-    .bar-main {
-        font-size: 23px;
-    }
-
-    .bar-sub {
-        font-size: 20px;
-    }
-
-    .bullet-list {
-        font-size: 16px;
-    }
-
-    .field-area,
-    .field-input,
-    .meta-input {
-        font-size: 15px;
-    }
-
-    .empty {
-        font-size: 15px;
-    }
+    font-size: 14px;
 }
 
 @media print {

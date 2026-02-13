@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Goal extends Model
@@ -17,5 +18,10 @@ class Goal extends Model
     public function projects(): BelongsToMany
     {
         return $this->belongsToMany(Project::class, 'trs_goal_project');
+    }
+
+    public function themes(): HasMany
+    {
+        return $this->hasMany(Theme::class, 'idGoal');
     }
 }
