@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 class StrategicPillarController extends Controller
 {
-    public function index(Request $request, $goal = null): Response
+    public function index(Request $request, $goal = null)
     {
         $strategicPillars = Goal::with(['themes' => function ($query) {
                 $query->orderBy('theme_number', 'asc');
