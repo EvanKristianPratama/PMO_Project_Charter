@@ -10,6 +10,15 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+<<<<<<< Updated upstream
+=======
+        $this->call([
+            InitiativeStatusSeeder::class,
+            GoalSeeder::class,
+            ThemeSeeder::class,
+        ]);
+
+>>>>>>> Stashed changes
         $this->seedRoles();
         $this->seedAdminUser();
     }
@@ -28,9 +37,9 @@ class DatabaseSeeder extends Seeder
         $admin = User::firstOrCreate(
             ['email' => 'admin@pmo.local'],
             [
-                'name'     => 'Admin PMO',
+                'name' => 'Admin PMO',
                 'password' => bcrypt('password'),
-                'status'   => 'approved',
+                'status' => 'approved',
                 'app_role' => User::APP_ROLE_ADMIN,
             ]
         );

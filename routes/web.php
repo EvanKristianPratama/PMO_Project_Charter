@@ -47,6 +47,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
 
     // Digital Initiatives
     Route::resource('digital-initiatives', DigitalInitiativeController::class);
+    
     // IT Initiatives & Charters
     Route::get('/roadmap', [ITInitiativeController::class, 'roadmapIndex'])->name('roadmap.index');
     Route::resource('it-initiatives', ITInitiativeController::class)

@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('mst_goals', function (Blueprint $table) {
-            // Add soft deletes if not exists
-            if (!Schema::hasColumn('mst_goals', 'deleted_at')) {
-                $table->softDeletes();
-            }
+        Schema::table('trs_themes', function (Blueprint $table) {
+            $table->integer('theme_number')->after('idGoal');
         });
     }
 
@@ -24,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('mst_goals', function (Blueprint $table) {
-            $table->dropSoftDeletes();
+        Schema::table('trs_themes', function (Blueprint $table) {
+            $table->dropColumn('theme_number');
         });
     }
 };

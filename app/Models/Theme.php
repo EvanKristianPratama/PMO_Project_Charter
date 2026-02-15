@@ -8,7 +8,7 @@ class Theme extends Model
 {
     protected $table = 'trs_themes';
 
-    protected $fillable = ['idGoal', 'name'];
+    protected $fillable = ['idGoal', 'theme_number', 'name'];
 
     public function goal()
     {
