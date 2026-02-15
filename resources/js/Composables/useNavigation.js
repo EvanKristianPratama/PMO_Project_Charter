@@ -19,7 +19,13 @@ export function useNavigation() {
                 label: 'Program Planning',
                 href: '/dashboard',
                 icon: HomeIcon,
-                active: (url) => url.startsWith('/dashboard'),
+                active: (url) => url === '/dashboard',
+            },
+            {
+                label: 'Dashboard Monitoring',
+                href: '/dashboard-monitoring',
+                icon: HomeIcon,
+                active: (url) => url.startsWith('/dashboard-monitoring'),
             },
             {
                 label: 'Strategic Pillars',
@@ -38,12 +44,6 @@ export function useNavigation() {
                 href: '/it-initiatives',
                 icon: FolderIcon,
                 active: (url) => url.startsWith('/it-initiatives'),
-            },
-            {
-                label: 'Dashboard Monitoring',
-                href: '/dashboard-monitoring',
-                icon: HomeIcon,
-                active: (url) => url.startsWith('/dashboard-monitoring'),
             },
         ];
 

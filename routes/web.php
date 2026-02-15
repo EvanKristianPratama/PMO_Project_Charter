@@ -45,11 +45,11 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/dashboard-monitoring', DashboardMonitoringController::class)->name('dashboard-monitoring');
-    Route::get('/strategic-pillars', [StrategicPillarController::class, 'index'])->name('strategic-pillars.index');
+    Route::get('/strategic-pillars/{goal?}', [StrategicPillarController::class, 'index'])->name('strategic-pillars.index');
 
     // Digital Initiatives
     Route::resource('digital-initiatives', DigitalInitiativeController::class);
-    
+
     // IT Initiatives & Charters
     Route::get('/roadmap', [ITInitiativeController::class, 'roadmapIndex'])->name('roadmap.index');
     Route::resource('it-initiatives', ITInitiativeController::class)
