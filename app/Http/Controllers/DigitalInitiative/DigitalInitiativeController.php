@@ -17,6 +17,7 @@ class DigitalInitiativeController extends Controller
     {
         $search = $request->input('search');
         $type = $request->input('type');
+        $filterStatus = $request->integer('status');
 
         $statusOptions = InitiativeStatus::ordered()
             ->map(fn (InitiativeStatus $status) => [
@@ -31,7 +32,7 @@ class DigitalInitiativeController extends Controller
 
         $initiatives = DigitalInitiative::query()
             ->with(['statusRef:id,name'])
-            ->where('status', $baselineStatusId)
+            ->when($filterStatus, fn ($q, $status) => $q->where('status', $status))
             ->when($search, fn ($q, $search) => $q->where(function ($inner) use ($search) {
                 $inner->where('no', 'like', "%{$search}%")
                     ->orWhere('useCase', 'like', "%{$search}%")
@@ -49,7 +50,7 @@ class DigitalInitiativeController extends Controller
             'filters' => [
                 'search' => $search,
                 'type' => $type,
-                'status' => $baselineStatusId,
+                'status' => $filterStatus ?: null,
             ],
         ]);
     }
