@@ -73,7 +73,6 @@
                                     :aria-label="`Go to slide ${index + 1}`"
                                 ></button>
                             </div>
-                            <p class="text-[11px] uppercase tracking-[0.14em] text-white/55">Photos: Unsplash</p>
                         </div>
                     </div>
                 </div>

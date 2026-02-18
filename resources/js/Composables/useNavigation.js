@@ -5,6 +5,10 @@ import {
     FlagIcon,
     FolderIcon,
     ShieldCheckIcon,
+    Squares2X2Icon,
+    BuildingOffice2Icon,
+    CubeIcon,
+    DocumentTextIcon,
 } from '@heroicons/vue/24/outline';
 
 export function useNavigation() {
@@ -18,7 +22,7 @@ export function useNavigation() {
             {
                 label: 'Program Planning',
                 href: '/dashboard',
-                icon: HomeIcon,
+                icon: Squares2X2Icon,
                 active: (url) => url === '/dashboard',
             },
             {
@@ -44,6 +48,24 @@ export function useNavigation() {
                 href: '/it-initiatives',
                 icon: FolderIcon,
                 active: (url) => url.startsWith('/it-initiatives'),
+            },
+            {
+                label: 'Asitecture',
+                href: '/',
+                icon: CubeIcon,
+                active: (url) => url === '/',
+            },
+            {
+                label: 'Policy',
+                href: '/',
+                icon: DocumentTextIcon,
+                active: (url) => url === '/',
+            },
+            {
+                label: 'Company Profile',
+                href: '/companies',
+                icon: BuildingOffice2Icon,
+                active: (url) => url === '/companies',
             },
         ];
 
