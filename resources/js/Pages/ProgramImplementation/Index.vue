@@ -61,13 +61,13 @@ const projectCharterActions = [
     {
         key: 'digital',
         label: 'Digital Initiative',
-        buttonLabel: 'New Digital Project Charter',
+        buttonLabel: 'New Project Charter',
         href: '/digital-initiatives/create',
     },
     {
         key: 'it',
         label: 'IT Initiative',
-        buttonLabel: 'New IT Project Charter',
+        buttonLabel: 'New Project Charter',
         href: '/it-initiatives/create',
     },
 ];

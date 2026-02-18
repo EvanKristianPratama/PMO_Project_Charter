@@ -73,6 +73,7 @@ class DigitalInitiativeController extends Controller
     {
         $validated = $request->validate([
             'type' => 'required|string|max:255',
+            'tipe_inisiative' => 'nullable|string|max:255',
             'no' => 'required|string|max:255',
             'projectOwner' => 'nullable|string|max:255',
             'useCase' => 'nullable|string|max:255',
@@ -117,6 +118,7 @@ class DigitalInitiativeController extends Controller
     {
         $validated = $request->validate([
             'type' => 'required|string|max:255',
+            'tipe_inisiative' => 'nullable|string|max:255',
             'no' => 'required|string|max:255',
             'projectOwner' => 'nullable|string|max:255',
             'useCase' => 'nullable|string|max:255',

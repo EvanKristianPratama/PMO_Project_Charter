@@ -56,7 +56,15 @@
                                 <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Rjjp</th>
                                 <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Coe</th>
                                 <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</th>
-                                <th class="sticky right-0 z-10 whitespace-nowrap bg-slate-50 px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500 dark:bg-white/5 dark:text-slate-400">Action</th>
+                                <th class="sticky right-0 z-10 bg-slate-50 p-0 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:bg-white/5 dark:text-slate-400">
+                                    <div class="w-[180px] border-l border-slate-200 dark:border-white/10">
+                                        <div class="border-b border-slate-200 px-2 py-1.5 text-center dark:border-white/10">Action</div>
+                                        <div class="grid grid-cols-2 divide-x divide-slate-200 text-[10px] font-semibold normal-case dark:divide-white/10">
+                                            <span class="px-2 py-1 text-center">Scope Charter</span>
+                                            <span class="px-2 py-1 text-center">Project Charter</span>
+                                        </div>
+                                    </div>
+                                </th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 dark:divide-white/5">
@@ -81,17 +89,21 @@
                                         {{ statusLabelFromOptions(item.status, statusOptions) }}
                                     </span>
                                 </td>
-                                <td class="sticky right-0 z-10 whitespace-nowrap bg-white px-4 py-3 text-right shadow-[-4px_0_8px_rgba(0,0,0,0.05)] dark:bg-[#171717] dark:shadow-[-4px_0_8px_rgba(0,0,0,0.2)]">
-                                    <div class="flex items-center justify-end gap-1">
+                                <td class="sticky right-0 z-10 bg-white p-0 shadow-[-4px_0_8px_rgba(0,0,0,0.05)] dark:bg-[#171717] dark:shadow-[-4px_0_8px_rgba(0,0,0,0.2)]">
+                                    <div class="grid w-[180px] grid-cols-2 divide-x divide-slate-200 border-l border-slate-200 dark:divide-white/10 dark:border-white/10">
                                         <Link
                                             :href="`/digital-initiatives/${item.id}`"
-                                            class="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-indigo-600 dark:text-slate-500 dark:hover:bg-white/5 dark:hover:text-indigo-400"
-                                            title="View"
+                                            :class="actionCellClass(hasScopeCharter(item))"
+                                            title="View Scope Charter"
                                         >
-                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
+                                            View
+                                        </Link>
+                                        <Link
+                                            :href="`/digital-initiatives/${item.id}`"
+                                            :class="actionCellClass(hasProjectCharter(item))"
+                                            title="View Project Charter"
+                                        >
+                                            View
                                         </Link>
                                     </div>
                                 </td>
@@ -193,5 +205,31 @@ function cellVal(item, ...keys) {
         if (v !== undefined && v !== null && String(v).trim() !== '') return v;
     }
     return '-';
+}
+
+function hasFilled(val) {
+    return val !== null && val !== undefined && String(val).trim() !== '' && String(val) !== '-';
+}
+
+function hasScopeCharter(item) {
+    return hasFilled(cellVal(item, 'useCase', 'use_case')) && hasFilled(cellVal(item, 'desc', 'description'));
+}
+
+function hasProjectCharter(item) {
+    return [
+        cellVal(item, 'projectOwner', 'project_owner'),
+        cellVal(item, 'value'),
+        cellVal(item, 'urgency'),
+        cellVal(item, 'rjjp'),
+        cellVal(item, 'coe'),
+    ].every(hasFilled);
+}
+
+function actionCellClass(isReady) {
+    if (isReady) {
+        return 'block bg-emerald-500 px-2 py-1.5 text-center text-xs font-semibold text-white transition-colors hover:bg-emerald-600';
+    }
+
+    return 'block bg-rose-500 px-2 py-1.5 text-center text-xs font-semibold text-white transition-colors hover:bg-rose-600';
 }
 </script>

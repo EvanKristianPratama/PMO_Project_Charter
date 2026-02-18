@@ -14,6 +14,7 @@ class DigitalInitiative extends Model
 
     protected $fillable = [
         'type',
+        'tipe_inisiative',
         'no',
         'projectOwner',
         'useCase',

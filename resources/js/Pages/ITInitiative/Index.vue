@@ -1,22 +1,22 @@
 <template>
     <UserLayout title="IT Initiatives">
         <div class="animate-fade-in">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-white">IT Initiatives</h3>
+                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white">IT Initiatives</h2>
                 </div>
             </div>
 
-            <div class="mb-4 flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-2.5 dark:border-white/5 dark:bg-[#1a1a1a] sm:flex-row">
+            <div class="mb-6 flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-white/5 dark:bg-[#1a1a1a] sm:flex-row">
                 <div class="relative flex-1">
                     <input
                         v-model="filters.search"
                         type="text"
                         placeholder="Search by name or code..."
-                        class="w-full rounded-lg border border-slate-300 bg-white py-1.5 pl-9 pr-3 text-sm text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-100 dark:placeholder-slate-500"
+                        class="w-full rounded-lg border border-slate-300 bg-white py-2 pl-10 pr-4 text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-100 dark:placeholder-slate-500"
                         @input="debouncedSearch"
                     />
-                    <svg class="absolute left-3 top-2 h-4 w-4 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="absolute left-3 top-2.5 h-5 w-5 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
@@ -48,7 +48,15 @@
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">IT Arsitektur Building Blok</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Daftar Inisiatif</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</th>
-                                <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
+                                <th scope="col" class="p-0 text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                    <div class="w-[180px] border-l border-slate-200 dark:border-white/10">
+                                        <div class="border-b border-slate-200 px-2 py-1.5 text-center dark:border-white/10">Action</div>
+                                        <div class="grid grid-cols-2 divide-x divide-slate-200 text-[10px] font-semibold normal-case dark:divide-white/10">
+                                            <span class="px-2 py-1 text-center">Scope Charter</span>
+                                            <span class="px-2 py-1 text-center">Project Charter</span>
+                                        </div>
+                                    </div>
+                                </th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
@@ -76,17 +84,21 @@
                                         {{ statusLabelFromOptions(project.status, statusOptions) }}
                                     </span>
                                 </td>
-                                <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-                                    <div class="flex items-center justify-end gap-3 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
+                                <td class="p-0 text-sm font-medium">
+                                    <div class="grid w-[180px] grid-cols-2 divide-x divide-slate-200 border-l border-slate-200 dark:divide-white/10 dark:border-white/10">
                                         <Link
                                             :href="`/it-initiatives/${project.id}`"
-                                            class="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-indigo-600 dark:text-slate-500 dark:hover:bg-white/5 dark:hover:text-indigo-400"
-                                            title="View"
+                                            :class="actionCellClass(hasScopeCharter(project))"
+                                            title="View Scope Charter"
                                         >
-                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
+                                            View
+                                        </Link>
+                                        <Link
+                                            :href="`/it-initiatives/${project.id}`"
+                                            :class="actionCellClass(hasProjectCharter(project))"
+                                            title="View Project Charter"
+                                        >
+                                            View
                                         </Link>
                                     </div>
                                 </td>
@@ -200,4 +212,37 @@ const debouncedSearch = () => {
 const applyFilters = () => {
     router.get('/it-initiatives', filters.value, { preserveState: true, replace: true });
 };
+
+function hasFilled(val) {
+    return val !== null && val !== undefined && String(val).trim() !== '';
+}
+
+function hasScopeCharter(project) {
+    return hasFilled(project?.code) && hasFilled(project?.name);
+}
+
+function hasProjectCharter(project) {
+    const charter = project?.charter;
+
+    if (!charter || typeof charter !== 'object') {
+        return false;
+    }
+
+    return [
+        charter.category,
+        charter.duration,
+        charter.background,
+        charter.objectives,
+        charter.scope,
+        charter.impact_value,
+    ].some(hasFilled);
+}
+
+function actionCellClass(isReady) {
+    if (isReady) {
+        return 'block bg-emerald-500 px-2 py-1.5 text-center text-xs font-semibold text-white transition-colors hover:bg-emerald-600';
+    }
+
+    return 'block bg-rose-500 px-2 py-1.5 text-center text-xs font-semibold text-white transition-colors hover:bg-rose-600';
+}
 </script>
