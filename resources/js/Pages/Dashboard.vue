@@ -24,7 +24,7 @@
 
                     <div class="mt-4">
                         <Link
-                            :href="item.key === 'total' ? '/it-initiatives/create' : '/digital-initiatives/create'"
+                            :href="item.createHref"
                             class="inline-flex w-full items-center justify-center rounded-lg border border-transparent bg-sky-400 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white transition hover:bg-sky-500 focus:bg-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:ring-offset-2 active:bg-sky-600"
                         >
                             New
@@ -339,12 +339,14 @@ const metricCards = computed(() => [
         label: 'Total Usulan Digital Initiatives',
         value: props.overview.total_digital_initiatives,
         note: 'Semua digital initiatives yang sudah terdaftar di sistem.',
+        createHref: '/digital-initiatives/create',
     },
     {   
-        key: 'total',
+        key: 'it',
         label: 'Total Usulan IT Initiatives',
         value: props.overview.total_projects,
         note: 'Semua usulan initiatives yang sudah terdaftar di sistem.',
+        createHref: '/it-initiatives/create',
     },
 
 ]);

@@ -49,7 +49,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/strategic-pillars/{goal?}', [StrategicPillarController::class, 'index'])->name('strategic-pillars.index');
 
     // Digital Initiatives
-    Route::get('digital-initiatives', [DigitalInitiativeController::class, 'index'])->name('digital-initiatives.index');
+    Route::resource('digital-initiatives', DigitalInitiativeController::class);
 
     // IT Initiatives & Charters
     Route::get('/roadmap', [ITInitiativeController::class, 'roadmapIndex'])->name('roadmap.index');
