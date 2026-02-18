@@ -7,11 +7,11 @@ const { navItems } = useNavigation();
 const page = usePage();
 const currentUrl = computed(() => page.url);
 
-// Menu kanan mulai dari area architecture, tanpa Company Profile.
+const rightScopeLabels = ['Architecture', 'Policy', 'Admin'];
+
+// Menu kanan khusus scope architecture/policy (+ admin jika ada).
 const rightNavItems = computed(() => {
-    return navItems.value
-        .slice(5)
-        .filter((item) => item.label !== 'Company Profile');
+    return navItems.value.filter((item) => rightScopeLabels.includes(item.label));
 });
 </script>
 

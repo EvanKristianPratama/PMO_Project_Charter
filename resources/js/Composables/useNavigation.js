@@ -1,7 +1,6 @@
 import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import {
-    HomeIcon,
     FlagIcon,
     FolderIcon,
     ChartBarIcon,
@@ -24,7 +23,38 @@ export function useNavigation() {
                 label: 'Program Planning',
                 href: '/dashboard',
                 icon: Squares2X2Icon,
-                active: (url) => url === '/dashboard',
+                active: (url) =>
+                    url === '/dashboard'
+                    || url.startsWith('/program-planning')
+                    || url.startsWith('/dashboard-monitoring'),
+            },
+            {
+                label: 'RSTI Sub Holding',
+                href: '/program-planning/rsti-sub-holding',
+                icon: BuildingOffice2Icon,
+                active: (url) => url.startsWith('/program-planning/rsti-sub-holding'),
+            },
+            {
+                label: 'Program Definition',
+                href: '/program-planning/program-definition',
+                icon: DocumentTextIcon,
+                active: (url) => url.startsWith('/program-planning/program-definition'),
+            },
+            {
+                label: 'Dashboard Usulan',
+                href: '/dashboard-monitoring',
+                icon: ChartBarIcon,
+                active: (url) => url.startsWith('/dashboard-monitoring'),
+            },
+            {
+                label: 'Program Implementation',
+                href: '/program-implementation',
+                icon: ChartBarIcon,
+                active: (url) =>
+                    url.startsWith('/program-implementation')
+                    || url.startsWith('/strategic-pillars')
+                    || url.startsWith('/digital-initiatives')
+                    || url.startsWith('/it-initiatives'),
             },
             {
                 label: 'Strategic Pillars',
@@ -45,28 +75,28 @@ export function useNavigation() {
                 active: (url) => url.startsWith('/it-initiatives'),
             },
             {
-                label: 'Program Implementation',
-                href: '/dashboard-monitoring',
-                icon: ChartBarIcon,
-                active: (url) => url.startsWith('/dashboard-monitoring'),
+                label: 'Budgeting',
+                href: '/program-implementation/budgeting',
+                icon: DocumentTextIcon,
+                active: (url) => url.startsWith('/program-implementation/budgeting'),
             },
             {
                 label: 'Architecture',
-                href: '/',
+                href: '/architecture',
                 icon: CubeIcon,
-                active: (url) => url === '/',
+                active: (url) => url.startsWith('/architecture'),
             },
             {
                 label: 'Policy',
-                href: '/',
+                href: '/policy',
                 icon: DocumentTextIcon,
-                active: (url) => url === '/',
+                active: (url) => url.startsWith('/policy'),
             },
             {
                 label: 'Company Profile',
                 href: '/companies',
                 icon: BuildingOffice2Icon,
-                active: (url) => url === '/companies',
+                active: (url) => url.startsWith('/companies'),
             },
         ];
 

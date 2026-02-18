@@ -178,11 +178,11 @@ const logout = () => {
 
         <div class="sticky top-16 z-40 print:hidden">
             <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-2 bg-white/40 dark:bg-white/5 backdrop-blur-md border-b border-white/50 dark:border-white/10">
-                <!-- Kiri: Program Planning - IT Initiatives -->
+                <!-- Kiri: Program Planning -->
                 <div class="shrink-0 bg-white/60 dark:bg-white/5 backdrop-blur-md rounded-full border border-white/70 dark:border-white/10 shadow-sm px-3 py-1">
                     <BreadcrumbLeft />
                 </div>
-                <!-- Kanan: Arsitektur - Company Profile -->
+                <!-- Kanan: Architecture / Policy -->
                 <div class="shrink-0 bg-white/60 dark:bg-white/5 backdrop-blur-md rounded-full border border-white/70 dark:border-white/10 shadow-sm px-3 py-1">
                     <BreadcrumbRight />
                 </div>
