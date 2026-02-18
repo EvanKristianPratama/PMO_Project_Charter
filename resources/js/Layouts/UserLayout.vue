@@ -3,7 +3,8 @@ import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
-import Breadcrumb from '@/Components/Breadcrumb.vue';
+import BreadcrumbLeft from '@/Components/BreadcrumbLeft.vue';
+import BreadcrumbRight from '@/Components/BreadcrumbRight.vue';
 import { useNavigation } from '@/Composables/useNavigation';
 import {
     Bars3Icon,
@@ -175,7 +176,18 @@ const logout = () => {
             </div>
         </nav>
 
-        <Breadcrumb />
+        <div class="sticky top-16 z-40 print:hidden">
+            <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-2 bg-white/40 dark:bg-white/5 backdrop-blur-md border-b border-white/50 dark:border-white/10">
+                <!-- Kiri: Program Planning - IT Initiatives -->
+                <div class="shrink-0 bg-white/60 dark:bg-white/5 backdrop-blur-md rounded-full border border-white/70 dark:border-white/10 shadow-sm px-3 py-1">
+                    <BreadcrumbLeft />
+                </div>
+                <!-- Kanan: Arsitektur - Company Profile -->
+                <div class="shrink-0 bg-white/60 dark:bg-white/5 backdrop-blur-md rounded-full border border-white/70 dark:border-white/10 shadow-sm px-3 py-1">
+                    <BreadcrumbRight />
+                </div>
+            </div>
+        </div>
 
         <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 print:max-w-none print:px-0 print:py-0">
             <slot />
@@ -183,7 +195,7 @@ const logout = () => {
 
         <footer class="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8 print:hidden">
             <div class="border-t border-slate-200/70 pt-5 dark:border-white/5">
-                <p class="text-center text-xs text-slate-400 dark:text-slate-500">IT Strategic Planning System power by Divusi</p>
+                <p class="text-center text-xs text-slate-400 dark:text-slate-500">IT Strategic Planning System power by <a href="https://divusi.co.id/" target="_blank" class="hover:text-slate-600 dark:hover:text-slate-300 underline transition-colors">Divusi</a></p>
             </div>
         </footer>
     </div>
