@@ -4,7 +4,6 @@
             <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Digital Initiatives</h2>
-                    <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Completed digital initiative entries</p>
                 </div>
             </div>
 
