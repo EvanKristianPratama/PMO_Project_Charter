@@ -35,43 +35,41 @@
                     <div class="space-y-8">
                         <!-- Digital Initiatives Flow -->
                         <div>
-                            <div class="flex flex-col items-start justify-between gap-1.5 sm:flex-row sm:items-center sm:gap-3">
+                            <div class="flex items-center justify-between gap-3">
                                 <h2 class="text-base font-semibold text-slate-900 dark:text-white">Status Usulan Digital Initiatives</h2>
                                 <span class="text-xs text-slate-500 dark:text-slate-400">{{ statusFlowLegend }}</span>
                             </div>
 
-                            <div class="mt-5 overflow-x-auto pb-1">
-                                <div class="px-1 sm:px-0" :style="{ minWidth: statusFlowMinWidth }">
+                            <div class="mt-5">
+                                <div
+                                    class="grid"
+                                    :style="{ gridTemplateColumns: `repeat(${Math.max(digitalStatusFlow.length, 1)}, minmax(0, 1fr))` }"
+                                >
                                     <div
-                                        class="grid"
-                                        :style="{ gridTemplateColumns: `repeat(${Math.max(digitalStatusFlow.length, 1)}, minmax(0, 1fr))` }"
+                                        v-for="(step, index) in digitalStatusFlow"
+                                        :key="step.key"
+                                        class="relative flex justify-center"
                                     >
-                                        <div
-                                            v-for="(step, index) in digitalStatusFlow"
-                                            :key="step.key"
-                                            class="relative flex justify-center"
+                                        <span
+                                            class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold"
+                                            :class="step.circleClass"
                                         >
-                                            <span
-                                                class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold"
-                                                :class="step.circleClass"
-                                            >
-                                                {{ step.count }}
-                                            </span>
-                                            <span
-                                                v-if="index < digitalStatusFlow.length - 1"
-                                                class="absolute left-1/2 top-1/2 ml-[1.2rem] h-[3px] w-[calc(100%_-_2.4rem)] -translate-y-1/2 rounded-full"
-                                                :class="step.lineClass"
-                                            ></span>
-                                        </div>
+                                            {{ step.count }}
+                                        </span>
+                                        <span
+                                            v-if="index < digitalStatusFlow.length - 1"
+                                            class="absolute left-1/2 top-1/2 ml-[1.2rem] h-[3px] w-[calc(100%_-_2.4rem)] -translate-y-1/2 rounded-full"
+                                            :class="step.lineClass"
+                                        ></span>
                                     </div>
+                                </div>
 
-                                    <div
-                                        class="mt-3 grid gap-2 text-center"
-                                        :style="{ gridTemplateColumns: `repeat(${Math.max(digitalStatusFlow.length, 1)}, minmax(0, 1fr))` }"
-                                    >
-                                        <div v-for="step in digitalStatusFlow" :key="`label-digital-${step.key}`">
-                                            <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">{{ step.label }}</p>
-                                        </div>
+                                <div
+                                    class="mt-3 grid gap-2 text-center"
+                                    :style="{ gridTemplateColumns: `repeat(${Math.max(digitalStatusFlow.length, 1)}, minmax(0, 1fr))` }"
+                                >
+                                    <div v-for="step in digitalStatusFlow" :key="`label-digital-${step.key}`">
+                                        <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">{{ step.label }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -79,43 +77,41 @@
 
                         <!-- IT Initiatives Flow -->
                         <div>
-                            <div class="flex flex-col items-start justify-between gap-1.5 sm:flex-row sm:items-center sm:gap-3">
+                            <div class="flex items-center justify-between gap-3">
                                 <h2 class="text-base font-semibold text-slate-900 dark:text-white">Status Usulan IT Initiatives</h2>
                                 <span class="text-xs text-slate-500 dark:text-slate-400">{{ statusFlowLegend }}</span>
                             </div>
 
-                            <div class="mt-5 overflow-x-auto pb-1">
-                                <div class="px-1 sm:px-0" :style="{ minWidth: statusFlowMinWidth }">
+                            <div class="mt-5">
+                                <div
+                                    class="grid"
+                                    :style="{ gridTemplateColumns: `repeat(${Math.max(itStatusFlow.length, 1)}, minmax(0, 1fr))` }"
+                                >
                                     <div
-                                        class="grid"
-                                        :style="{ gridTemplateColumns: `repeat(${Math.max(itStatusFlow.length, 1)}, minmax(0, 1fr))` }"
+                                        v-for="(step, index) in itStatusFlow"
+                                        :key="step.key"
+                                        class="relative flex justify-center"
                                     >
-                                        <div
-                                            v-for="(step, index) in itStatusFlow"
-                                            :key="step.key"
-                                            class="relative flex justify-center"
+                                        <span
+                                            class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold"
+                                            :class="step.circleClass"
                                         >
-                                            <span
-                                                class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold"
-                                                :class="step.circleClass"
-                                            >
-                                                {{ step.count }}
-                                            </span>
-                                            <span
-                                                v-if="index < itStatusFlow.length - 1"
-                                                class="absolute left-1/2 top-1/2 ml-[1.2rem] h-[3px] w-[calc(100%_-_2.4rem)] -translate-y-1/2 rounded-full"
-                                                :class="step.lineClass"
-                                            ></span>
-                                        </div>
+                                            {{ step.count }}
+                                        </span>
+                                        <span
+                                            v-if="index < itStatusFlow.length - 1"
+                                            class="absolute left-1/2 top-1/2 ml-[1.2rem] h-[3px] w-[calc(100%_-_2.4rem)] -translate-y-1/2 rounded-full"
+                                            :class="step.lineClass"
+                                        ></span>
                                     </div>
+                                </div>
 
-                                    <div
-                                        class="mt-3 grid gap-2 text-center"
-                                        :style="{ gridTemplateColumns: `repeat(${Math.max(itStatusFlow.length, 1)}, minmax(0, 1fr))` }"
-                                    >
-                                        <div v-for="step in itStatusFlow" :key="`label-it-${step.key}`">
-                                            <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">{{ step.label }}</p>
-                                        </div>
+                                <div
+                                    class="mt-3 grid gap-2 text-center"
+                                    :style="{ gridTemplateColumns: `repeat(${Math.max(itStatusFlow.length, 1)}, minmax(0, 1fr))` }"
+                                >
+                                    <div v-for="step in itStatusFlow" :key="`label-it-${step.key}`">
+                                        <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">{{ step.label }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -130,7 +126,7 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full min-w-[640px] divide-y divide-slate-200 text-sm dark:divide-white/10">
+                    <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-white/10">
                         <thead class="bg-slate-50 dark:bg-white/5">
                             <tr>
                                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</th>
@@ -157,7 +153,7 @@
 
             <section class="grid grid-cols-1 gap-5 xl:grid-cols-2">
                 <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                    <div class="flex flex-col items-start justify-between gap-2 border-b border-slate-200 px-5 py-4 dark:border-white/10 sm:flex-row sm:items-center sm:gap-3">
+                    <div class="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-4 dark:border-white/10">
                         <div>
                             <h2 class="text-base font-semibold text-slate-900 dark:text-white">Digital Initiatives (Belum {{ completedStatusLabel }})</h2>
                         </div>
@@ -169,31 +165,46 @@
                         </Link>
                     </div>
 
-                    <div class="overflow-x-auto">
-                        <table class="w-full min-w-[720px] divide-y divide-slate-200 text-sm dark:divide-white/10">
+                    <div class="overflow-x-auto overflow-y-visible">
+                        <table class="min-w-max w-full divide-y divide-slate-200 text-sm dark:divide-white/10">
                             <thead class="bg-slate-50 dark:bg-white/5">
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">No</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Use Case</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Action</th>
+                                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">No</th>
+                                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Type</th>
+                                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Project Owner</th>
+                                    <th class="min-w-[180px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Use Case</th>
+                                    <th class="min-w-[280px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Desc</th>
+                                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Value</th>
+                                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Urgency</th>
+                                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Rjjp</th>
+                                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Coe</th>
+                                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</th>
+                                    <th class="sticky right-0 z-10 whitespace-nowrap bg-slate-50 px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500 dark:bg-white/5 dark:text-slate-400">Action</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 dark:divide-white/5">
                                 <tr v-for="item in openDigitalInitiatives" :key="`digital-open-${item.id}`">
-                                    <td class="whitespace-nowrap px-4 py-3 font-medium text-slate-900 dark:text-white">{{ item.no || '-' }}</td>
-                                    <td class="px-4 py-3">
-                                        <div class="max-w-xs">
-                                            <p class="truncate font-medium text-slate-800 dark:text-slate-100">{{ item.useCase || '-' }}</p>
-                                            <p class="truncate text-xs text-slate-500 dark:text-slate-400">{{ item.projectOwner || '-' }}</p>
-                                        </div>
+                                    <td class="whitespace-nowrap px-4 py-3 font-medium text-slate-900 dark:text-white">{{ cellVal(item, 'no') }}</td>
+                                    <td class="whitespace-nowrap px-4 py-3 text-slate-700 dark:text-slate-200">{{ cellVal(item, 'type') }}</td>
+                                    <td class="whitespace-nowrap px-4 py-3 text-slate-700 dark:text-slate-200">{{ cellVal(item, 'projectOwner', 'project_owner') }}</td>
+                                    <td class="min-w-[180px] max-w-[320px] px-4 py-3 text-slate-700 dark:text-slate-200">
+                                        <span class="whitespace-normal break-words">{{ cellVal(item, 'useCase', 'use_case') }}</span>
                                     </td>
+                                    <td class="min-w-[280px] max-w-[400px] px-4 py-3 text-slate-700 dark:text-slate-200">
+                                        <span class="whitespace-normal break-words" :title="cellVal(item, 'desc', 'description')">{{ cellVal(item, 'desc', 'description') }}</span>
+                                    </td>
+                                    <td class="max-w-[150px] px-4 py-3 text-slate-700 dark:text-slate-200">
+                                        <span class="line-clamp-2" :title="cellVal(item, 'value')">{{ cellVal(item, 'value') }}</span>
+                                    </td>
+                                    <td class="whitespace-nowrap px-4 py-3 text-slate-700 dark:text-slate-200">{{ cellVal(item, 'urgency') }}</td>
+                                    <td class="whitespace-nowrap px-4 py-3 text-slate-700 dark:text-slate-200">{{ cellVal(item, 'rjjp') }}</td>
+                                    <td class="whitespace-nowrap px-4 py-3 text-slate-700 dark:text-slate-200">{{ cellVal(item, 'coe') }}</td>
                                     <td class="whitespace-nowrap px-4 py-3">
                                         <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize" :class="statusBadgeClassById(item.status)">
                                             {{ statusLabelFromOptions(item.status, statusOptions) }}
                                         </span>
                                     </td>
-                                    <td class="whitespace-nowrap px-4 py-3 text-right">
+                                    <td class="sticky right-0 z-10 whitespace-nowrap bg-white px-4 py-3 text-right shadow-[-4px_0_8px_rgba(0,0,0,0.05)] dark:bg-[#171717] dark:shadow-[-4px_0_8px_rgba(0,0,0,0.2)]">
                                         <div class="flex items-center justify-end gap-1">
                                             <Link
                                                 :href="`/digital-initiatives/${item.id}`"
@@ -219,7 +230,7 @@
                                 </tr>
 
                                 <tr v-if="openDigitalInitiatives.length === 0">
-                                    <td colspan="4" class="px-4 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
+                                    <td colspan="11" class="px-4 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
                                         Semua digital initiatives sudah {{ completedStatusLabel.toLowerCase() }}.
                                     </td>
                                 </tr>
@@ -229,7 +240,7 @@
                 </article>
 
                 <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                    <div class="flex flex-col items-start justify-between gap-2 border-b border-slate-200 px-5 py-4 dark:border-white/10 sm:flex-row sm:items-center sm:gap-3">
+                    <div class="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-4 dark:border-white/10">
                         <div>
                             <h2 class="text-base font-semibold text-slate-900 dark:text-white">IT Initiatives (Belum {{ completedStatusLabel }})</h2>
                         </div>
@@ -242,7 +253,7 @@
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="w-full min-w-[720px] divide-y divide-slate-200 text-sm dark:divide-white/10">
+                        <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-white/10">
                             <thead class="bg-slate-50 dark:bg-white/5">
                                 <tr>
                                     <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Code</th>
@@ -364,12 +375,6 @@ const statusFlowLegend = computed(() => {
         .join(' → ');
 });
 
-const statusFlowMinWidth = computed(() => {
-    const totalSteps = Math.max(statusOptions.value.length, 1);
-
-    return `${totalSteps * 120}px`;
-});
-
 const statusRows = computed(() => {
     return statusOptions.value.map((status) => {
         const key = String(status.id);
@@ -420,4 +425,14 @@ const mapFlowData = (counts = {}) => {
 
 const itStatusFlow = computed(() => mapFlowData(props.overview?.status_counts || {}));
 const digitalStatusFlow = computed(() => mapFlowData(props.overview?.digital_status_counts || {}));
+
+/** Ambil nilai dari item, coba beberapa key (camelCase / snake_case). */
+function cellVal(item, ...keys) {
+    if (!item || typeof item !== 'object') return '-';
+    for (const key of keys) {
+        const v = item[key];
+        if (v !== undefined && v !== null && String(v).trim() !== '') return v;
+    }
+    return '-';
+}
 </script>
