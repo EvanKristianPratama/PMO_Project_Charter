@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('trs_status_digital_initiative', function (Blueprint $table) {
-            $table->id();
+        Schema::create('mst_status_digital', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name', 50);
             $table->timestamps();
         });
     }
@@ -22,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('trs_status_digital_initiative');
+        Schema::dropIfExists('mst_status_digital');
     }
 };

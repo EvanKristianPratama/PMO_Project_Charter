@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             CompanySeeder::class,
             GroubSeeder::class,
             OrganizationSeeder::class,
+            StatusDigitalSeeder::class,
         ]);
         $this->seedRoles();
         $this->seedAdminUser();
