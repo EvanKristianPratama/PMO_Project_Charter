@@ -7,7 +7,7 @@ const { navItems } = useNavigation();
 const page = usePage();
 const currentUrl = computed(() => page.url);
 
-const rightScopeLabels = ['Architecture', 'Policy', 'Admin'];
+const rightScopeLabels = ['Architecture', 'Resources Management', 'Policy', 'Admin'];
 
 // Menu kanan khusus scope architecture/policy (+ admin jika ada).
 const rightNavItems = computed(() => {

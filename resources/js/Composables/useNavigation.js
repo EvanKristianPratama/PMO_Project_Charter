@@ -82,7 +82,7 @@ export function useNavigation() {
                 active: (url) => url.startsWith('/it-initiatives'),
             },
             {
-                label: 'Budgeting',
+                label: 'RKAP',
                 href: '/program-implementation/budgeting',
                 icon: DocumentTextIcon,
                 active: (url) => url.startsWith('/program-implementation/budgeting'),
@@ -100,11 +100,18 @@ export function useNavigation() {
                 active: (url) => url.startsWith('/architecture'),
             },
             {
+                label: 'Resources Management',
+                href: '/resources-management',
+                icon: CubeIcon,
+                active: (url) => url.startsWith('/resources-management'),
+            },
+            {
                 label: 'Policy',
                 href: '/policy',
                 icon: DocumentTextIcon,
                 active: (url) => url.startsWith('/policy'),
             },
+            
             {
                 label: 'Company Profile',
                 href: '/companies',
