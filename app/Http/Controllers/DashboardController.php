@@ -32,7 +32,6 @@ class DashboardController extends Controller
             ->pluck('total', 'status');
 
         $openDigitalInitiatives = DigitalInitiative::query()
-            ->select(['id', 'no', 'type', 'projectOwner', 'useCase', 'status', 'updated_at'])
             ->with(['statusRef:id,name'])
             ->where(static function ($query) use ($baselineStatusId): void {
                 $query
