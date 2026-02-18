@@ -397,14 +397,12 @@ const metricCards = computed(() => [
         key: 'digital',
         label: 'Total Usulan Digital Initiatives',
         value: props.overview.total_digital_initiatives,
-        note: 'Semua digital initiatives yang sudah terdaftar di sistem.',
         createHref: '/digital-initiatives/create',
     },
     {   
         key: 'it',
         label: 'Total Usulan IT Initiatives',
         value: props.overview.total_projects,
-        note: 'Semua usulan initiatives yang sudah terdaftar di sistem.',
         createHref: '/it-initiatives/create',
     },
 
