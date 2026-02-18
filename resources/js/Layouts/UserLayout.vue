@@ -183,7 +183,7 @@ const logout = () => {
 
         <footer class="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8 print:hidden">
             <div class="border-t border-slate-200/70 pt-5 dark:border-white/5">
-                <p class="text-center text-xs text-slate-400 dark:text-slate-500">IT Strategic Planning System Workspace</p>
+                <p class="text-center text-xs text-slate-400 dark:text-slate-500">IT Strategic Planning System power by Divusi</p>
             </div>
         </footer>
     </div>

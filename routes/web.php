@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Auth\SsoController;
+use App\Http\Controllers\CompanyProfile\CompanyController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DashboardMonitoringController;
 use App\Http\Controllers\DigitalInitiative\DigitalInitiativeController;
@@ -48,7 +49,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/strategic-pillars/{goal?}', [StrategicPillarController::class, 'index'])->name('strategic-pillars.index');
 
     // Digital Initiatives
-    Route::resource('digital-initiatives', DigitalInitiativeController::class);
+    Route::get('digital-initiatives', [DigitalInitiativeController::class, 'index'])->name('digital-initiatives.index');
 
     // IT Initiatives & Charters
     Route::get('/roadmap', [ITInitiativeController::class, 'roadmapIndex'])->name('roadmap.index');
@@ -57,6 +58,9 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::post('/it-initiatives/{project}/charter', [CharterController::class, 'store'])->name('it-initiatives.charter.store');
     Route::post('/it-initiatives/{project}/milestones', [MilestoneController::class, 'store'])->name('it-initiatives.milestones.store');
     Route::delete('/it-initiatives/{project}/milestones/{milestone}', [MilestoneController::class, 'destroy'])->name('it-initiatives.milestones.destroy');
+
+    // Company Profile
+    Route::resource('companies', CompanyController::class)->only(['index']);
 });
 
 /*
