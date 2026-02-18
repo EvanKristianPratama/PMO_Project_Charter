@@ -62,7 +62,7 @@ const logout = () => {
                         />
                         <div class="hidden md:block">
                             <p class="text-sm font-semibold tracking-tight text-slate-900 dark:text-white">IT Strategic Planning System</p>
-                            <p class="text-[11px] text-slate-400 dark:text-slate-500">Divusi Workspace</p>
+                            <p class="text-[11px] text-slate-400 dark:text-slate-500">Review ITSP Pertamina 2025-2029 Workspace</p>
                         </div>
                     </Link>
                 </div>

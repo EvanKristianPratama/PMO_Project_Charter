@@ -50,7 +50,7 @@ export function useNavigation() {
                 active: (url) => url.startsWith('/it-initiatives'),
             },
             {
-                label: 'Asitecture',
+                label: 'Architecture',
                 href: '/',
                 icon: CubeIcon,
                 active: (url) => url === '/',

@@ -36,10 +36,10 @@ return new class extends Migration
 
             DB::statement('UPDATE trs_status_initiative SET id = id + 10 WHERE id BETWEEN 1 AND 4');
 
-            DB::statement("UPDATE trs_status_initiative SET id = 2, name = 'propose', updated_at = NOW() WHERE id = 11");
-            DB::statement("UPDATE trs_status_initiative SET id = 3, name = 'review', updated_at = NOW() WHERE id = 12");
-            DB::statement("UPDATE trs_status_initiative SET id = 4, name = 'approve', updated_at = NOW() WHERE id = 13");
-            DB::statement("UPDATE trs_status_initiative SET id = 5, name = 'baseline', updated_at = NOW() WHERE id = 14");
+            DB::statement("UPDATE trs_status_initiative SET id = 2, name = 'propose' WHERE id = 11");
+            DB::statement("UPDATE trs_status_initiative SET id = 3, name = 'review' WHERE id = 12");
+            DB::statement("UPDATE trs_status_initiative SET id = 4, name = 'approve' WHERE id = 13");
+            DB::statement("UPDATE trs_status_initiative SET id = 5, name = 'baseline' WHERE id = 14");
 
             DB::table('trs_status_initiative')->upsert([
                 ['id' => 1, 'name' => 'drafting', 'created_at' => now(), 'updated_at' => now()],
@@ -85,14 +85,14 @@ return new class extends Migration
 
             DB::statement('UPDATE trs_status_initiative SET id = id + 10 WHERE id BETWEEN 2 AND 5');
 
-            DB::statement("UPDATE trs_status_initiative SET id = 1, name = 'propose', updated_at = NOW() WHERE id = 12");
-            DB::statement("UPDATE trs_status_initiative SET id = 2, name = 'review', updated_at = NOW() WHERE id = 13");
-            DB::statement("UPDATE trs_status_initiative SET id = 3, name = 'approve', updated_at = NOW() WHERE id = 14");
-            DB::statement("UPDATE trs_status_initiative SET id = 4, name = 'baseline', updated_at = NOW() WHERE id = 15");
-
             DB::table('trs_status_initiative')
                 ->where('name', 'drafting')
                 ->delete();
+
+            DB::statement("UPDATE trs_status_initiative SET id = 1, name = 'propose' WHERE id = 12");
+            DB::statement("UPDATE trs_status_initiative SET id = 2, name = 'review' WHERE id = 13");
+            DB::statement("UPDATE trs_status_initiative SET id = 3, name = 'approve' WHERE id = 14");
+            DB::statement("UPDATE trs_status_initiative SET id = 4, name = 'baseline' WHERE id = 15");
 
             DB::table('trs_status_initiative')
                 ->whereBetween('id', [12, 15])
