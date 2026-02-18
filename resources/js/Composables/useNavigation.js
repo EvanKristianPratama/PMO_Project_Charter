@@ -26,12 +26,6 @@ export function useNavigation() {
                 active: (url) => url === '/dashboard',
             },
             {
-                label: 'Dashboard Monitoring',
-                href: '/dashboard-monitoring',
-                icon: HomeIcon,
-                active: (url) => url.startsWith('/dashboard-monitoring'),
-            },
-            {
                 label: 'Strategic Pillars',
                 href: '/strategic-pillars',
                 icon: FlagIcon,
@@ -49,8 +43,14 @@ export function useNavigation() {
                 icon: FolderIcon,
                 active: (url) => url.startsWith('/it-initiatives'),
             },
+              {
+                label: 'Dashboard Monitoring',
+                href: '/dashboard-monitoring',
+                icon: HomeIcon,
+                active: (url) => url.startsWith('/dashboard-monitoring'),
+            },
             {
-                label: 'Asitecture',
+                label: 'Architecture',
                 href: '/',
                 icon: CubeIcon,
                 active: (url) => url === '/',

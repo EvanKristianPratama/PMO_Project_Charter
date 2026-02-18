@@ -5,9 +5,6 @@
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div>
                         <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Program Planing Summary</h1>
-                        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                            Halo, {{ auth?.user?.name }}. Ini ringkasan proyek dan roadmap terbaru.
-                        </p>
                     </div>
                 </div>
             </section>
@@ -24,7 +21,7 @@
 
                     <div class="mt-4">
                         <Link
-                            :href="item.key === 'total' ? '/it-initiatives/create' : '/digital-initiatives/create'"
+                            :href="item.createHref"
                             class="inline-flex w-full items-center justify-center rounded-lg border border-transparent bg-sky-400 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white transition hover:bg-sky-500 focus:bg-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:ring-offset-2 active:bg-sky-600"
                         >
                             New
@@ -61,7 +58,7 @@
                                         </span>
                                         <span
                                             v-if="index < digitalStatusFlow.length - 1"
-                                            class="absolute left-1/2 top-1/2 ml-[1.2rem] h-[3px] w-[calc(100%-2.4rem)] -translate-y-1/2 rounded-full"
+                                            class="absolute left-1/2 top-1/2 ml-[1.2rem] h-[3px] w-[calc(100%_-_2.4rem)] -translate-y-1/2 rounded-full"
                                             :class="step.lineClass"
                                         ></span>
                                     </div>
@@ -103,7 +100,7 @@
                                         </span>
                                         <span
                                             v-if="index < itStatusFlow.length - 1"
-                                            class="absolute left-1/2 top-1/2 ml-[1.2rem] h-[3px] w-[calc(100%-2.4rem)] -translate-y-1/2 rounded-full"
+                                            class="absolute left-1/2 top-1/2 ml-[1.2rem] h-[3px] w-[calc(100%_-_2.4rem)] -translate-y-1/2 rounded-full"
                                             :class="step.lineClass"
                                         ></span>
                                     </div>
@@ -311,7 +308,7 @@ const props = defineProps({
     },
     completedStatusId: {
         type: Number,
-        default: 4,
+        default: 5,
     },
     openDigitalInitiatives: {
         type: Array,
@@ -324,10 +321,11 @@ const props = defineProps({
 });
 
 const fallbackStatusOptions = [
-    { id: 1, name: 'propose', label: 'Propose' },
-    { id: 2, name: 'review', label: 'Review' },
-    { id: 3, name: 'approve', label: 'Approve' },
-    { id: 4, name: 'baseline', label: 'Baseline' },
+    { id: 1, name: 'drafting', label: 'Drafting' },
+    { id: 2, name: 'propose', label: 'Propose' },
+    { id: 3, name: 'review', label: 'Review' },
+    { id: 4, name: 'approve', label: 'Approve' },
+    { id: 5, name: 'baseline', label: 'Baseline' },
 ];
 
 const statusOptions = computed(() => {
@@ -336,7 +334,7 @@ const statusOptions = computed(() => {
         : fallbackStatusOptions;
 });
 
-const completedStatusId = computed(() => Number(props.completedStatusId || 4));
+const completedStatusId = computed(() => Number(props.completedStatusId || 5));
 
 const completedStatusLabel = computed(() => {
     return statusLabelFromOptions(completedStatusId.value, statusOptions.value);
@@ -354,12 +352,14 @@ const metricCards = computed(() => [
         label: 'Total Usulan Digital Initiatives',
         value: props.overview.total_digital_initiatives,
         note: 'Semua digital initiatives yang sudah terdaftar di sistem.',
+        createHref: '/digital-initiatives/create',
     },
     {   
-        key: 'total',
+        key: 'it',
         label: 'Total Usulan IT Initiatives',
         value: props.overview.total_projects,
         note: 'Semua usulan initiatives yang sudah terdaftar di sistem.',
+        createHref: '/it-initiatives/create',
     },
 
 ]);

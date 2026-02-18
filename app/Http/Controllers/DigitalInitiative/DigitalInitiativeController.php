@@ -65,7 +65,7 @@ class DigitalInitiativeController extends Controller
                     'label' => ucfirst($status->name),
                 ])
                 ->values(),
-            'defaultStatusId' => InitiativeStatus::PROPOSE,
+            'defaultStatusId' => InitiativeStatus::DRAFTING,
         ]);
     }
 
@@ -109,7 +109,7 @@ class DigitalInitiativeController extends Controller
                     'label' => ucfirst($status->name),
                 ])
                 ->values(),
-            'defaultStatusId' => InitiativeStatus::PROPOSE,
+            'defaultStatusId' => InitiativeStatus::DRAFTING,
         ]);
     }
 

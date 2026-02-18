@@ -56,13 +56,13 @@ const logout = () => {
                 <div class="flex items-center gap-3">
                     <Link href="/dashboard" class="group inline-flex items-center gap-3">
                         <img
-                            src="/logo-divusi.png"
-                            alt="Divusi Logo"
-                            class="h-9 w-auto transition-opacity group-hover:opacity-90"
+                            src="/logo.png"
+                            alt="Logo"
+                            class="h-8 w-auto transition-opacity group-hover:opacity-90"
                         />
                         <div class="hidden md:block">
                             <p class="text-sm font-semibold tracking-tight text-slate-900 dark:text-white">IT Strategic Planning System</p>
-                            <p class="text-[11px] text-slate-400 dark:text-slate-500">Divusi Workspace</p>
+                            <p class="text-[11px] text-slate-400 dark:text-slate-500">Review ITSP Pertamina 2025-2029 Workspace</p>
                         </div>
                     </Link>
                 </div>

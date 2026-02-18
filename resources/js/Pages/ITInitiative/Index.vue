@@ -4,7 +4,6 @@
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h3 class="text-xl font-bold text-slate-900 dark:text-white">IT Initiatives</h3>
-                    <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Completed IT initiative entries</p>
                 </div>
             </div>
 
@@ -123,7 +122,7 @@ const props = defineProps({
     },
     completedStatusId: {
         type: Number,
-        default: 4,
+        default: 5,
     },
 });
 
@@ -133,15 +132,16 @@ const statusOptions = computed(() => {
     }
 
     return [
-        { id: 1, name: 'propose', label: 'Propose' },
-        { id: 2, name: 'review', label: 'Review' },
-        { id: 3, name: 'approve', label: 'Approve' },
-        { id: 4, name: 'baseline', label: 'Baseline' },
+        { id: 1, name: 'drafting', label: 'Drafting' },
+        { id: 2, name: 'propose', label: 'Propose' },
+        { id: 3, name: 'review', label: 'Review' },
+        { id: 4, name: 'approve', label: 'Approve' },
+        { id: 5, name: 'baseline', label: 'Baseline' },
     ];
 });
 
 const completedStatusId = computed(() => {
-    return Number(props.completedStatusId || 4);
+    return Number(props.completedStatusId || 5);
 });
 
 const completedStatusLabel = computed(() => {

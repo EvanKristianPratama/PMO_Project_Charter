@@ -107,7 +107,7 @@ class ITInitiativeController extends Controller
                     'label' => ucfirst($status->name),
                 ])
                 ->values(),
-            'defaultStatusId' => InitiativeStatus::PROPOSE,
+            'defaultStatusId' => InitiativeStatus::DRAFTING,
         ]);
     }
 
@@ -146,7 +146,7 @@ class ITInitiativeController extends Controller
                     'label' => ucfirst($status->name),
                 ])
                 ->values(),
-            'defaultStatusId' => InitiativeStatus::PROPOSE,
+            'defaultStatusId' => InitiativeStatus::DRAFTING,
         ]);
     }
 

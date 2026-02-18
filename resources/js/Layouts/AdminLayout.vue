@@ -90,9 +90,9 @@ const logout = () => {
 
                     <Link href="/admin/dashboard" class="inline-flex items-center gap-2">
                         <img
-                            src="/logo-divusi.png"
-                            alt="Divusi Logo"
-                            class="h-9 w-auto"
+                            src="/logo.png"
+                            alt="Logo"
+                            class="h-8 w-auto"
                         />
                         <div class="hidden sm:block">
                             <p class="text-sm font-semibold text-slate-900 dark:text-white">PMO Admin</p>

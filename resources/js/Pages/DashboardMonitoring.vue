@@ -3,9 +3,6 @@
         <div class="space-y-6">
             <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Dashboard Monitoring</h1>
-                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                    Ringkasan total semua initiatives dan statusnya (view only).
-                </p>
             </section>
 
             <section class="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -81,10 +78,11 @@ const props = defineProps({
 });
 
 const fallbackStatusOptions = [
-    { id: 1, name: 'propose', label: 'Propose' },
-    { id: 2, name: 'review', label: 'Review' },
-    { id: 3, name: 'approve', label: 'Approve' },
-    { id: 4, name: 'baseline', label: 'Baseline' },
+    { id: 1, name: 'drafting', label: 'Drafting' },
+    { id: 2, name: 'propose', label: 'Propose' },
+    { id: 3, name: 'review', label: 'Review' },
+    { id: 4, name: 'approve', label: 'Approve' },
+    { id: 5, name: 'baseline', label: 'Baseline' },
 ];
 
 const statusOptions = computed(() => {
