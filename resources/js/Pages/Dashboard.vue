@@ -61,7 +61,7 @@
                                         </span>
                                         <span
                                             v-if="index < digitalStatusFlow.length - 1"
-                                            class="absolute left-1/2 top-1/2 ml-[1.2rem] h-[3px] w-[calc(100%-2.4rem)] -translate-y-1/2 rounded-full"
+                                            class="absolute left-1/2 top-1/2 ml-[1.2rem] h-[3px] w-[calc(100%_-_2.4rem)] -translate-y-1/2 rounded-full"
                                             :class="step.lineClass"
                                         ></span>
                                     </div>
@@ -103,7 +103,7 @@
                                         </span>
                                         <span
                                             v-if="index < itStatusFlow.length - 1"
-                                            class="absolute left-1/2 top-1/2 ml-[1.2rem] h-[3px] w-[calc(100%-2.4rem)] -translate-y-1/2 rounded-full"
+                                            class="absolute left-1/2 top-1/2 ml-[1.2rem] h-[3px] w-[calc(100%_-_2.4rem)] -translate-y-1/2 rounded-full"
                                             :class="step.lineClass"
                                         ></span>
                                     </div>
