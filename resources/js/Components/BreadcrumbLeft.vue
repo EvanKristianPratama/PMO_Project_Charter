@@ -7,7 +7,7 @@ const { navItems } = useNavigation();
 const page = usePage();
 const currentUrl = computed(() => page.url);
 
-const planningChildLabels = ['RSTI Sub Holding', 'Program Definition', 'Dashboard Usulan'];
+const planningChildLabels = ['RSTI Sub Holding', 'Program Definition', 'Matrix', 'Dashboard Usulan'];
 const implementationChildLabels = ['Strategic Pillars', 'Digital Initiatives', 'IT Initiatives', 'Budgeting'];
 
 const programPlanningItem = computed(() => {

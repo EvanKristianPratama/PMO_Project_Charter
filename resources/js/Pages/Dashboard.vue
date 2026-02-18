@@ -35,41 +35,43 @@
                     <div class="space-y-8">
                         <!-- Digital Initiatives Flow -->
                         <div>
-                            <div class="flex items-center justify-between gap-3">
+                            <div class="flex flex-col items-start justify-between gap-1.5 sm:flex-row sm:items-center sm:gap-3">
                                 <h2 class="text-base font-semibold text-slate-900 dark:text-white">Status Usulan Digital Initiatives</h2>
                                 <span class="text-xs text-slate-500 dark:text-slate-400">{{ statusFlowLegend }}</span>
                             </div>
 
-                            <div class="mt-5">
-                                <div
-                                    class="grid"
-                                    :style="{ gridTemplateColumns: `repeat(${Math.max(digitalStatusFlow.length, 1)}, minmax(0, 1fr))` }"
-                                >
+                            <div class="mt-5 overflow-x-auto pb-1">
+                                <div class="px-1 sm:px-0" :style="{ minWidth: statusFlowMinWidth }">
                                     <div
-                                        v-for="(step, index) in digitalStatusFlow"
-                                        :key="step.key"
-                                        class="relative flex justify-center"
+                                        class="grid"
+                                        :style="{ gridTemplateColumns: `repeat(${Math.max(digitalStatusFlow.length, 1)}, minmax(0, 1fr))` }"
                                     >
-                                        <span
-                                            class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold"
-                                            :class="step.circleClass"
+                                        <div
+                                            v-for="(step, index) in digitalStatusFlow"
+                                            :key="step.key"
+                                            class="relative flex justify-center"
                                         >
-                                            {{ step.count }}
-                                        </span>
-                                        <span
-                                            v-if="index < digitalStatusFlow.length - 1"
-                                            class="absolute left-1/2 top-1/2 ml-[1.2rem] h-[3px] w-[calc(100%_-_2.4rem)] -translate-y-1/2 rounded-full"
-                                            :class="step.lineClass"
-                                        ></span>
+                                            <span
+                                                class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold"
+                                                :class="step.circleClass"
+                                            >
+                                                {{ step.count }}
+                                            </span>
+                                            <span
+                                                v-if="index < digitalStatusFlow.length - 1"
+                                                class="absolute left-1/2 top-1/2 ml-[1.2rem] h-[3px] w-[calc(100%_-_2.4rem)] -translate-y-1/2 rounded-full"
+                                                :class="step.lineClass"
+                                            ></span>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div
-                                    class="mt-3 grid gap-2 text-center"
-                                    :style="{ gridTemplateColumns: `repeat(${Math.max(digitalStatusFlow.length, 1)}, minmax(0, 1fr))` }"
-                                >
-                                    <div v-for="step in digitalStatusFlow" :key="`label-digital-${step.key}`">
-                                        <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">{{ step.label }}</p>
+                                    <div
+                                        class="mt-3 grid gap-2 text-center"
+                                        :style="{ gridTemplateColumns: `repeat(${Math.max(digitalStatusFlow.length, 1)}, minmax(0, 1fr))` }"
+                                    >
+                                        <div v-for="step in digitalStatusFlow" :key="`label-digital-${step.key}`">
+                                            <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">{{ step.label }}</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -77,41 +79,43 @@
 
                         <!-- IT Initiatives Flow -->
                         <div>
-                            <div class="flex items-center justify-between gap-3">
+                            <div class="flex flex-col items-start justify-between gap-1.5 sm:flex-row sm:items-center sm:gap-3">
                                 <h2 class="text-base font-semibold text-slate-900 dark:text-white">Status Usulan IT Initiatives</h2>
                                 <span class="text-xs text-slate-500 dark:text-slate-400">{{ statusFlowLegend }}</span>
                             </div>
 
-                            <div class="mt-5">
-                                <div
-                                    class="grid"
-                                    :style="{ gridTemplateColumns: `repeat(${Math.max(itStatusFlow.length, 1)}, minmax(0, 1fr))` }"
-                                >
+                            <div class="mt-5 overflow-x-auto pb-1">
+                                <div class="px-1 sm:px-0" :style="{ minWidth: statusFlowMinWidth }">
                                     <div
-                                        v-for="(step, index) in itStatusFlow"
-                                        :key="step.key"
-                                        class="relative flex justify-center"
+                                        class="grid"
+                                        :style="{ gridTemplateColumns: `repeat(${Math.max(itStatusFlow.length, 1)}, minmax(0, 1fr))` }"
                                     >
-                                        <span
-                                            class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold"
-                                            :class="step.circleClass"
+                                        <div
+                                            v-for="(step, index) in itStatusFlow"
+                                            :key="step.key"
+                                            class="relative flex justify-center"
                                         >
-                                            {{ step.count }}
-                                        </span>
-                                        <span
-                                            v-if="index < itStatusFlow.length - 1"
-                                            class="absolute left-1/2 top-1/2 ml-[1.2rem] h-[3px] w-[calc(100%_-_2.4rem)] -translate-y-1/2 rounded-full"
-                                            :class="step.lineClass"
-                                        ></span>
+                                            <span
+                                                class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold"
+                                                :class="step.circleClass"
+                                            >
+                                                {{ step.count }}
+                                            </span>
+                                            <span
+                                                v-if="index < itStatusFlow.length - 1"
+                                                class="absolute left-1/2 top-1/2 ml-[1.2rem] h-[3px] w-[calc(100%_-_2.4rem)] -translate-y-1/2 rounded-full"
+                                                :class="step.lineClass"
+                                            ></span>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div
-                                    class="mt-3 grid gap-2 text-center"
-                                    :style="{ gridTemplateColumns: `repeat(${Math.max(itStatusFlow.length, 1)}, minmax(0, 1fr))` }"
-                                >
-                                    <div v-for="step in itStatusFlow" :key="`label-it-${step.key}`">
-                                        <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">{{ step.label }}</p>
+                                    <div
+                                        class="mt-3 grid gap-2 text-center"
+                                        :style="{ gridTemplateColumns: `repeat(${Math.max(itStatusFlow.length, 1)}, minmax(0, 1fr))` }"
+                                    >
+                                        <div v-for="step in itStatusFlow" :key="`label-it-${step.key}`">
+                                            <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">{{ step.label }}</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -126,7 +130,7 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-white/10">
+                    <table class="w-full min-w-[640px] divide-y divide-slate-200 text-sm dark:divide-white/10">
                         <thead class="bg-slate-50 dark:bg-white/5">
                             <tr>
                                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</th>
@@ -153,7 +157,7 @@
 
             <section class="grid grid-cols-1 gap-5 xl:grid-cols-2">
                 <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                    <div class="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-4 dark:border-white/10">
+                    <div class="flex flex-col items-start justify-between gap-2 border-b border-slate-200 px-5 py-4 dark:border-white/10 sm:flex-row sm:items-center sm:gap-3">
                         <div>
                             <h2 class="text-base font-semibold text-slate-900 dark:text-white">Digital Initiatives (Belum {{ completedStatusLabel }})</h2>
                         </div>
@@ -166,7 +170,7 @@
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-white/10">
+                        <table class="w-full min-w-[720px] divide-y divide-slate-200 text-sm dark:divide-white/10">
                             <thead class="bg-slate-50 dark:bg-white/5">
                                 <tr>
                                     <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">No</th>
@@ -225,7 +229,7 @@
                 </article>
 
                 <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                    <div class="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-4 dark:border-white/10">
+                    <div class="flex flex-col items-start justify-between gap-2 border-b border-slate-200 px-5 py-4 dark:border-white/10 sm:flex-row sm:items-center sm:gap-3">
                         <div>
                             <h2 class="text-base font-semibold text-slate-900 dark:text-white">IT Initiatives (Belum {{ completedStatusLabel }})</h2>
                         </div>
@@ -238,7 +242,7 @@
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-white/10">
+                        <table class="w-full min-w-[720px] divide-y divide-slate-200 text-sm dark:divide-white/10">
                             <thead class="bg-slate-50 dark:bg-white/5">
                                 <tr>
                                     <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Code</th>
@@ -358,6 +362,12 @@ const statusFlowLegend = computed(() => {
     return statusOptions.value
         .map((status) => statusLabelFromOptions(status.id, statusOptions.value))
         .join(' → ');
+});
+
+const statusFlowMinWidth = computed(() => {
+    const totalSteps = Math.max(statusOptions.value.length, 1);
+
+    return `${totalSteps * 120}px`;
 });
 
 const statusRows = computed(() => {

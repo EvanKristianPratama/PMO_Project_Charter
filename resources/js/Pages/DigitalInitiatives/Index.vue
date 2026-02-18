@@ -23,7 +23,7 @@
                 </div>
                 <select
                     v-model="filters.type"
-                    class="rounded-lg border-slate-300 bg-white text-slate-700 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-200"
+                    class="w-full rounded-lg border-slate-300 bg-white text-slate-700 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-200 sm:w-auto"
                     @change="applyFilters"
                 >
                     <option value="">All Types</option>
@@ -34,7 +34,7 @@
                 <select
                     v-model="filters.status"
                     disabled
-                    class="rounded-lg border-slate-300 bg-white text-slate-700 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-200"
+                    class="w-full rounded-lg border-slate-300 bg-white text-slate-700 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-200 sm:w-auto"
                 >
                     <option :value="completedStatusId">{{ completedStatusLabel }}</option>
                 </select>
@@ -43,7 +43,7 @@
             <!-- Table -->
             <div class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/5 dark:bg-[#1a1a1a]">
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
+                    <table class="w-full min-w-[760px] text-left text-sm">
                         <thead>
                             <tr class="border-b border-slate-200 bg-slate-50 dark:border-white/5 dark:bg-white/5">
                                 <th class="whitespace-nowrap px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">No</th>

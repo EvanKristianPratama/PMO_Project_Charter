@@ -26,4 +26,13 @@ class ProgramPlanningController extends Controller
 
         return Inertia::render('ProgramPlanning/ProgramDefinition');
     }
+
+    public function matrix(): Response|RedirectResponse
+    {
+        if (request()->user()?->isAdminUser()) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        return Inertia::render('ProgramPlanning/Matrix');
+    }
 }

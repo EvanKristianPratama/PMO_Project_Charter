@@ -50,18 +50,16 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/dashboard-monitoring', DashboardMonitoringController::class)->name('dashboard-monitoring');
     Route::get('/program-planning/rsti-sub-holding', [ProgramPlanningController::class, 'rstiSubHolding'])->name('program-planning.rsti-sub-holding');
     Route::get('/program-planning/program-definition', [ProgramPlanningController::class, 'programDefinition'])->name('program-planning.program-definition');
+    Route::get('/program-planning/matrix', [ProgramPlanningController::class, 'matrix'])->name('program-planning.matrix');
     Route::get('/program-implementation', fn () => Inertia::render('ProgramImplementation/Index'))->name('program-implementation.index');
     Route::get('/program-implementation/budgeting', fn () => Inertia::render('Placeholder/Index', [
         'title' => 'Budgeting',
-        'description' => 'Halaman Budgeting (placeholder).',
     ]))->name('program-implementation.budgeting');
     Route::get('/architecture', fn () => Inertia::render('Placeholder/Index', [
         'title' => 'Architecture',
-        'description' => 'Template halaman Architecture. Konten akan diisi pada tahap berikutnya.',
     ]))->name('architecture.index');
     Route::get('/policy', fn () => Inertia::render('Placeholder/Index', [
         'title' => 'Policy',
-        'description' => 'Template halaman Policy. Konten akan diisi pada tahap berikutnya.',
     ]))->name('policy.index');
     Route::get('/strategic-pillars/{goal?}', [StrategicPillarController::class, 'index'])->name('strategic-pillars.index');
 

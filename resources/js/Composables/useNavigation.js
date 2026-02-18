@@ -9,6 +9,7 @@ import {
     BuildingOffice2Icon,
     CubeIcon,
     DocumentTextIcon,
+    TableCellsIcon,
 } from '@heroicons/vue/24/outline';
 
 export function useNavigation() {
@@ -45,6 +46,12 @@ export function useNavigation() {
                 href: '/dashboard-monitoring',
                 icon: ChartBarIcon,
                 active: (url) => url.startsWith('/dashboard-monitoring'),
+            },
+            {
+                label: 'Matrix',
+                href: '/program-planning/matrix',
+                icon: TableCellsIcon,
+                active: (url) => url.startsWith('/program-planning/matrix'),
             },
             {
                 label: 'Program Implementation',

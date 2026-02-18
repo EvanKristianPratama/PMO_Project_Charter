@@ -2,20 +2,20 @@
     <UserLayout title="Strategic Pillars">
         <div class="animate-fade-in">
             <div class="mb-6">
-                <div class="flex items-center justify-between">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Strategic Pillars & Themes</h2>
                     </div>
 
                     <!-- Filter Dropdown -->
-                    <div class="flex items-center gap-3">
-                        <label class="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    <div class="flex w-full flex-col items-start gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
+                        <label class="text-sm font-medium text-slate-700 dark:text-slate-300 sm:whitespace-nowrap">
                             View by Goal:
                         </label>
                         <select 
                             v-model="selectedGoalId" 
                             @change="applyFilter"
-                            class="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm min-w-[250px]"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800 dark:text-white sm:min-w-[250px] sm:w-auto"
                         >
                             <option :value="null">All Strategic Pillars</option>
                             <option v-for="goal in allGoals" :key="goal.id" :value="goal.id">
@@ -27,58 +27,60 @@
             </div>
 
             <!-- Goals Table -->
-            <div class="bg-white dark:bg-[#1a1a1a] rounded-xl border border-slate-300 dark:border-slate-600 overflow-hidden shadow-sm">
-                <table class="w-full border-collapse">
-                    <thead>
-                        <tr class="bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-300 dark:border-slate-600">
-                            <th class="px-6 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300 border-r border-slate-300 dark:border-slate-600 w-24">
-                                Code
-                            </th>
-                            <th class="px-6 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300 border-r border-slate-300 dark:border-slate-600">
-                                Strategic Pillar Title
-                            </th>
-                            <th class="px-6 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300">
-                                Themes
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="pillar in strategicPillars" :key="pillar.id" class="border-b border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                            <td class="px-6 py-4 border-r border-slate-300 dark:border-slate-600 text-center">
-                                <span class="text-base font-bold text-slate-900 dark:text-white">
-                                    {{ pillar.code }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 border-r border-slate-300 dark:border-slate-600 text-center align-center">
-                                <div class="text-sm font-medium text-slate-900 dark:text-white">
-                                    {{ pillar.title }}
-                                </div>
-                            </td>
-                            <td class="p-0 align-top">
-                                <!-- Themes Table -->
-                                <div v-if="pillar.themes && pillar.themes.length > 0" class="w-full">
-                                    <table class="w-full border-collapse">
-                                        <tbody>
-                                            <tr v-for="theme in pillar.themes" :key="theme.id" class="border-b border-slate-300 dark:border-slate-600 last:border-b-0">
-                                                <td class="px-6 py-3 text-sm font-medium text-slate-700 dark:text-slate-300 text-center w-16 border-r border-slate-300 dark:border-slate-600">
-                                                    {{ theme.theme_number }}
-                                                </td>
-                                                <td class="px-6 py-3 text-sm text-slate-700 dark:text-slate-200">
-                                                    {{ theme.name }}
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div v-else class="px-6 py-4">
-                                    <span class="text-sm text-slate-400 dark:text-slate-500 italic">
-                                        No themes available
+            <div class="overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm dark:border-slate-600 dark:bg-[#1a1a1a]">
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-[760px] border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-300 dark:border-slate-600">
+                                <th class="px-6 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300 border-r border-slate-300 dark:border-slate-600 w-24">
+                                    Code
+                                </th>
+                                <th class="px-6 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300 border-r border-slate-300 dark:border-slate-600">
+                                    Strategic Pillar Title
+                                </th>
+                                <th class="px-6 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                    Themes
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="pillar in strategicPillars" :key="pillar.id" class="border-b border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                <td class="px-6 py-4 border-r border-slate-300 dark:border-slate-600 text-center">
+                                    <span class="text-base font-bold text-slate-900 dark:text-white">
+                                        {{ pillar.code }}
                                     </span>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                                </td>
+                                <td class="px-6 py-4 border-r border-slate-300 dark:border-slate-600 text-center align-center">
+                                    <div class="text-sm font-medium text-slate-900 dark:text-white">
+                                        {{ pillar.title }}
+                                    </div>
+                                </td>
+                                <td class="p-0 align-top">
+                                    <!-- Themes Table -->
+                                    <div v-if="pillar.themes && pillar.themes.length > 0" class="w-full">
+                                        <table class="w-full border-collapse">
+                                            <tbody>
+                                                <tr v-for="theme in pillar.themes" :key="theme.id" class="border-b border-slate-300 dark:border-slate-600 last:border-b-0">
+                                                    <td class="px-6 py-3 text-sm font-medium text-slate-700 dark:text-slate-300 text-center w-16 border-r border-slate-300 dark:border-slate-600">
+                                                        {{ theme.theme_number }}
+                                                    </td>
+                                                    <td class="px-6 py-3 text-sm text-slate-700 dark:text-slate-200">
+                                                        {{ theme.name }}
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div v-else class="px-6 py-4">
+                                        <span class="text-sm text-slate-400 dark:text-slate-500 italic">
+                                            No themes available
+                                        </span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Empty State -->

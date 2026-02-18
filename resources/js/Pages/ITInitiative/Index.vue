@@ -23,13 +23,13 @@
                 <select
                     v-model="filters.status"
                     disabled
-                    class="rounded-lg border-slate-300 bg-white py-1.5 text-sm text-slate-700 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-200"
+                    class="w-full rounded-lg border-slate-300 bg-white py-1.5 text-sm text-slate-700 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-200 sm:w-auto"
                 >
                     <option :value="completedStatusId">{{ completedStatusLabel }}</option>
                 </select>
                 <select
                     v-model="filters.month"
-                    class="rounded-lg border-slate-300 bg-white py-1.5 text-sm text-slate-700 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-200"
+                    class="w-full rounded-lg border-slate-300 bg-white py-1.5 text-sm text-slate-700 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-200 sm:w-auto"
                     @change="applyFilters"
                 >
                     <option value="">All Months</option>
@@ -40,58 +40,60 @@
             </div>
 
             <div class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/5 dark:bg-[#1a1a1a]">
-                <table class="min-w-full divide-y divide-slate-200 dark:divide-white/5">
-                    <thead class="bg-slate-50 dark:bg-white/5">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Code</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">IT Arsitektur Building Blok</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Daftar Inisiatif</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</th>
-                            <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
-                        <tr v-for="(project, index) in itInitiatives" :key="project.id" class="group transition-colors hover:bg-slate-50 dark:hover:bg-white/5">
-                            <td class="whitespace-nowrap px-6 py-4 text-xs font-medium text-slate-600 dark:text-slate-400">
-                                {{ project.code }}
-                            </td>
-                            <td 
-                                v-if="shouldShowCategory(index)"
-                                :rowspan="getCategoryRowspan(index)"
-                                class="whitespace-nowrap px-6 py-4 align-top border-r border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02]"
-                            >
-                                <span class="inline-flex rounded-full bg-blue-100 px-2 text-[10px] font-semibold leading-5 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300">
-                                    {{ project.charter?.category || 'Uncategorized' }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-xs">
-                                <span class="font-medium text-slate-700 dark:text-slate-200">{{ project.name }}</span>
-                            </td>
-                            <td class="whitespace-nowrap px-6 py-4">
-                                <span
-                                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-medium capitalize"
-                                    :class="statusBadgeClassById(project.status)"
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-[920px] divide-y divide-slate-200 dark:divide-white/5">
+                        <thead class="bg-slate-50 dark:bg-white/5">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Code</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">IT Arsitektur Building Blok</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Daftar Inisiatif</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</th>
+                                <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
+                            <tr v-for="(project, index) in itInitiatives" :key="project.id" class="group transition-colors hover:bg-slate-50 dark:hover:bg-white/5">
+                                <td class="whitespace-nowrap px-6 py-4 text-xs font-medium text-slate-600 dark:text-slate-400">
+                                    {{ project.code }}
+                                </td>
+                                <td 
+                                    v-if="shouldShowCategory(index)"
+                                    :rowspan="getCategoryRowspan(index)"
+                                    class="whitespace-nowrap px-6 py-4 align-top border-r border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02]"
                                 >
-                                    {{ statusLabelFromOptions(project.status, statusOptions) }}
-                                </span>
-                            </td>
-                            <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-                                <div class="flex items-center justify-end gap-3 opacity-0 transition-opacity group-hover:opacity-100">
-                                    <Link
-                                        :href="`/it-initiatives/${project.id}`"
-                                        class="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-indigo-600 dark:text-slate-500 dark:hover:bg-white/5 dark:hover:text-indigo-400"
-                                        title="View"
+                                    <span class="inline-flex rounded-full bg-blue-100 px-2 text-[10px] font-semibold leading-5 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300">
+                                        {{ project.charter?.category || 'Uncategorized' }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-xs">
+                                    <span class="font-medium text-slate-700 dark:text-slate-200">{{ project.name }}</span>
+                                </td>
+                                <td class="whitespace-nowrap px-6 py-4">
+                                    <span
+                                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-medium capitalize"
+                                        :class="statusBadgeClassById(project.status)"
                                     >
-                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                    </Link>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                                        {{ statusLabelFromOptions(project.status, statusOptions) }}
+                                    </span>
+                                </td>
+                                <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
+                                    <div class="flex items-center justify-end gap-3 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
+                                        <Link
+                                            :href="`/it-initiatives/${project.id}`"
+                                            class="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-indigo-600 dark:text-slate-500 dark:hover:bg-white/5 dark:hover:text-indigo-400"
+                                            title="View"
+                                        >
+                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </Link>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div

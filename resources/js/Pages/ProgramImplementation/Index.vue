@@ -2,10 +2,7 @@
     <UserLayout title="Program Implementation">
         <div class="space-y-6 animate-fade-in-up">
             <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Program Implementation</h1>
-                <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                    Halaman ini masih dummy. Data akan ditambahkan pada iterasi berikutnya.
-                </p>
+                <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Program Implementation Summary</h1>
             </section>
 
             <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
@@ -14,7 +11,7 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-white/10">
+                    <table class="w-full min-w-[640px] divide-y divide-slate-200 text-sm dark:divide-white/10">
                         <thead class="bg-slate-50 dark:bg-white/5">
                             <tr>
                                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">BUs</th>

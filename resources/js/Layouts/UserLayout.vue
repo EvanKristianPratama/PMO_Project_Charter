@@ -58,7 +58,7 @@ const logout = () => {
                         <img
                             src="/logo.png"
                             alt="Logo"
-                            class="h-8 w-auto transition-opacity group-hover:opacity-90"
+                            class="h-7 w-auto transition-opacity group-hover:opacity-90"
                         />
                         <div class="hidden md:block">
                             <p class="text-sm font-semibold tracking-tight text-slate-900 dark:text-white">IT Strategic Planning System</p>
@@ -177,25 +177,33 @@ const logout = () => {
         </nav>
 
         <div class="sticky top-16 z-40 print:hidden">
-            <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-2 bg-white/40 dark:bg-white/5 backdrop-blur-md border-b border-white/50 dark:border-white/10">
-                <!-- Kiri: Program Planning -->
-                <div class="shrink-0 bg-white/60 dark:bg-white/5 backdrop-blur-md rounded-full border border-white/70 dark:border-white/10 shadow-sm px-3 py-1">
-                    <BreadcrumbLeft />
+            <div class="flex flex-col gap-2 border-b border-white/50 bg-white/40 px-4 py-2 backdrop-blur-md dark:border-white/10 dark:bg-white/5 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+                <!-- Kiri: Program Planning / Program Implementation -->
+                <div class="w-full min-w-0 rounded-full border border-white/70 bg-white/60 px-2.5 py-1 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/5 sm:w-auto">
+                    <div class="overflow-x-auto">
+                        <div class="min-w-max">
+                            <BreadcrumbLeft />
+                        </div>
+                    </div>
                 </div>
                 <!-- Kanan: Architecture / Policy -->
-                <div class="shrink-0 bg-white/60 dark:bg-white/5 backdrop-blur-md rounded-full border border-white/70 dark:border-white/10 shadow-sm px-3 py-1">
-                    <BreadcrumbRight />
+                <div class="w-full min-w-0 rounded-full border border-white/70 bg-white/60 px-2.5 py-1 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/5 sm:w-auto">
+                    <div class="overflow-x-auto sm:flex sm:justify-end">
+                        <div class="min-w-max">
+                            <BreadcrumbRight />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 print:max-w-none print:px-0 print:py-0">
+        <main class="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 print:max-w-none print:px-0 print:py-0">
             <slot />
         </main>
 
-        <footer class="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8 print:hidden">
+        <footer class="mx-auto w-full max-w-7xl px-4 pb-8 sm:px-6 lg:px-8 print:hidden">
             <div class="border-t border-slate-200/70 pt-5 dark:border-white/5">
-                <p class="text-center text-xs text-slate-400 dark:text-slate-500">IT Strategic Planning System power by <a href="https://divusi.co.id/" target="_blank" class="hover:text-slate-600 dark:hover:text-slate-300 underline transition-colors">Divusi</a></p>
+                <p class="text-center text-xs text-slate-400 dark:text-slate-500">IT Strategic Planning System</p>
             </div>
         </footer>
     </div>
