@@ -23,7 +23,7 @@
                 </div>
                 <select
                     v-model="filters.type"
-                    class="w-full rounded-lg border-slate-300 bg-white text-slate-700 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-200 sm:w-auto"
+                    class="rounded-lg border-slate-300 bg-white text-slate-700 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-200"
                     @change="applyFilters"
                 >
                     <option value="">All Types</option>
@@ -34,54 +34,54 @@
                 <select
                     v-model="filters.status"
                     disabled
-                    class="w-full rounded-lg border-slate-300 bg-white text-slate-700 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-200 sm:w-auto"
+                    class="rounded-lg border-slate-300 bg-white text-slate-700 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-200"
                 >
                     <option :value="completedStatusId">{{ completedStatusLabel }}</option>
                 </select>
             </div>
 
             <!-- Table -->
-            <div class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/5 dark:bg-[#1a1a1a]">
-                <div class="overflow-x-auto">
-                    <table class="w-full min-w-[760px] text-left text-sm">
-                        <thead>
-                            <tr class="border-b border-slate-200 bg-slate-50 dark:border-white/5 dark:bg-white/5">
-                                <th class="whitespace-nowrap px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">No</th>
-                                <th class="whitespace-nowrap px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">Type</th>
-                                <th class="whitespace-nowrap px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">Use Case</th>
-                                <th class="whitespace-nowrap px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">Status</th>
-                                <th class="whitespace-nowrap px-4 py-3 text-right font-semibold text-slate-700 dark:text-slate-300">Actions</th>
+            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                <div class="overflow-x-auto overflow-y-visible">
+                    <table class="min-w-max w-full divide-y divide-slate-200 text-sm dark:divide-white/10">
+                        <thead class="bg-slate-50 dark:bg-white/5">
+                            <tr>
+                                <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">No</th>
+                                <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Type</th>
+                                <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Project Owner</th>
+                                <th class="min-w-[180px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Use Case</th>
+                                <th class="min-w-[280px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Desc</th>
+                                <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Value</th>
+                                <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Urgency</th>
+                                <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Rjjp</th>
+                                <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Coe</th>
+                                <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</th>
+                                <th class="sticky right-0 z-10 whitespace-nowrap bg-slate-50 px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500 dark:bg-white/5 dark:text-slate-400">Action</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 dark:divide-white/5">
-                            <tr
-                                v-for="item in initiatives"
-                                :key="item.id"
-                                class="transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.02]"
-                            >
-                                <td class="whitespace-nowrap px-4 py-3 font-medium text-slate-900 dark:text-white">{{ item.no }}</td>
-                                <td class="whitespace-nowrap px-4 py-3">
-                                    <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize"
-                                        :class="typeBadgeClass(item.type)"
-                                    >
-                                        {{ item.type }}
-                                    </span>
+                            <tr v-for="item in initiatives" :key="`digital-${item.id}`" class="transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.02]">
+                                <td class="whitespace-nowrap px-4 py-3 font-medium text-slate-900 dark:text-white">{{ cellVal(item, 'no') }}</td>
+                                <td class="whitespace-nowrap px-4 py-3 text-slate-700 dark:text-slate-200">{{ cellVal(item, 'type') }}</td>
+                                <td class="whitespace-nowrap px-4 py-3 text-slate-700 dark:text-slate-200">{{ cellVal(item, 'projectOwner', 'project_owner') }}</td>
+                                <td class="min-w-[180px] max-w-[320px] px-4 py-3 text-slate-700 dark:text-slate-200">
+                                    <span class="whitespace-normal break-words">{{ cellVal(item, 'useCase', 'use_case') }}</span>
                                 </td>
-                                <td class="max-w-xs truncate px-4 py-3 text-slate-600 dark:text-slate-400">
-                                    <div class="flex flex-col">
-                                        <span class="font-medium text-slate-900 dark:text-white">{{ item.useCase || '-' }}</span>
-                                        <span class="text-xs text-slate-500 dark:text-slate-400">{{ item.projectOwner || '-' }}</span>
-                                    </div>
+                                <td class="min-w-[280px] max-w-[400px] px-4 py-3 text-slate-700 dark:text-slate-200">
+                                    <span class="whitespace-normal break-words" :title="cellVal(item, 'desc', 'description')">{{ cellVal(item, 'desc', 'description') }}</span>
                                 </td>
+                                <td class="max-w-[150px] px-4 py-3 text-slate-700 dark:text-slate-200">
+                                    <span class="line-clamp-2" :title="cellVal(item, 'value')">{{ cellVal(item, 'value') }}</span>
+                                </td>
+                                <td class="whitespace-nowrap px-4 py-3 text-slate-700 dark:text-slate-200">{{ cellVal(item, 'urgency') }}</td>
+                                <td class="whitespace-nowrap px-4 py-3 text-slate-700 dark:text-slate-200">{{ cellVal(item, 'rjjp') }}</td>
+                                <td class="whitespace-nowrap px-4 py-3 text-slate-700 dark:text-slate-200">{{ cellVal(item, 'coe') }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">
-                                    <span
-                                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize"
-                                        :class="statusBadgeClassById(item.status)"
-                                    >
+                                    <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize" :class="statusBadgeClassById(item.status)">
                                         {{ statusLabelFromOptions(item.status, statusOptions) }}
                                     </span>
                                 </td>
-                                <td class="whitespace-nowrap px-4 py-3 text-right">
+                                <td class="sticky right-0 z-10 whitespace-nowrap bg-white px-4 py-3 text-right shadow-[-4px_0_8px_rgba(0,0,0,0.05)] dark:bg-[#171717] dark:shadow-[-4px_0_8px_rgba(0,0,0,0.2)]">
                                     <div class="flex items-center justify-end gap-1">
                                         <Link
                                             :href="`/digital-initiatives/${item.id}`"
@@ -94,6 +94,12 @@
                                             </svg>
                                         </Link>
                                     </div>
+                                </td>
+                            </tr>
+
+                            <tr v-if="initiatives.length === 0">
+                                <td colspan="11" class="px-4 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
+                                    Semua digital initiatives sudah {{ completedStatusLabel.toLowerCase() }}.
                                 </td>
                             </tr>
                         </tbody>
@@ -178,4 +184,14 @@ const debouncedSearch = () => {
 const applyFilters = () => {
     router.get('/digital-initiatives', filters.value, { preserveState: true, replace: true });
 };
+
+/** Ambil nilai dari item, coba beberapa key (camelCase / snake_case). */
+function cellVal(item, ...keys) {
+    if (!item || typeof item !== 'object') return '-';
+    for (const key of keys) {
+        const v = item[key];
+        if (v !== undefined && v !== null && String(v).trim() !== '') return v;
+    }
+    return '-';
+}
 </script>
