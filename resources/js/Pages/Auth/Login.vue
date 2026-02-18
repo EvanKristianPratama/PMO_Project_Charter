@@ -5,9 +5,9 @@
                 <div class="w-full max-w-md">
                     <div class="mb-8 text-center">
                         <img
-                            src="/logo-divusi.png"
-                            alt="Divusi Logo"
-                            class="mx-auto h-14 w-auto"
+                            src="/logo.png"
+                            alt="Logo"
+                            class="mx-auto h-12 w-auto"
                         />
                         <p class="mt-5 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">
                             IT Strategic Planning System

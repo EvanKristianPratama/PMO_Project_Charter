@@ -94,7 +94,7 @@ const props = defineProps({
 
 const statusOptions = props.statusOptions.length > 0
     ? props.statusOptions
-    : [{ id: 1, label: 'Propose' }];
+    : [{ id: 1, label: 'Drafting' }];
 
 const form = useForm({
     code: '',

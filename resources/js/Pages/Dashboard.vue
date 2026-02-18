@@ -296,7 +296,7 @@ const props = defineProps({
     },
     completedStatusId: {
         type: Number,
-        default: 4,
+        default: 5,
     },
     openDigitalInitiatives: {
         type: Array,
@@ -309,10 +309,11 @@ const props = defineProps({
 });
 
 const fallbackStatusOptions = [
-    { id: 1, name: 'propose', label: 'Propose' },
-    { id: 2, name: 'review', label: 'Review' },
-    { id: 3, name: 'approve', label: 'Approve' },
-    { id: 4, name: 'baseline', label: 'Baseline' },
+    { id: 1, name: 'drafting', label: 'Drafting' },
+    { id: 2, name: 'propose', label: 'Propose' },
+    { id: 3, name: 'review', label: 'Review' },
+    { id: 4, name: 'approve', label: 'Approve' },
+    { id: 5, name: 'baseline', label: 'Baseline' },
 ];
 
 const statusOptions = computed(() => {
@@ -321,7 +322,7 @@ const statusOptions = computed(() => {
         : fallbackStatusOptions;
 });
 
-const completedStatusId = computed(() => Number(props.completedStatusId || 4));
+const completedStatusId = computed(() => Number(props.completedStatusId || 5));
 
 const completedStatusLabel = computed(() => {
     return statusLabelFromOptions(completedStatusId.value, statusOptions.value);
