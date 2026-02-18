@@ -11,8 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('mst_digitalInitiative')) {
+            return;
+        }
+
+        if (Schema::hasColumn('mst_digitalInitiative', 'tipe_inisiative')) {
+            return;
+        }
+
         Schema::table('mst_digitalInitiative', function (Blueprint $table) {
-            $table->string('tipe_initiative')->nullable()->after('type');
+            $table->string('tipe_inisiative')->nullable()->after('type');
         });
     }
 
@@ -21,8 +29,16 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasTable('mst_digitalInitiative')) {
+            return;
+        }
+
+        if (!Schema::hasColumn('mst_digitalInitiative', 'tipe_inisiative')) {
+            return;
+        }
+
         Schema::table('mst_digitalInitiative', function (Blueprint $table) {
-            $table->dropColumn('tipe_initiative');
+            $table->dropColumn('tipe_inisiative');
         });
     }
 };

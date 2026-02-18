@@ -11,8 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('trs_projects')) {
+            return;
+        }
+
+        if (Schema::hasColumn('trs_projects', 'tipe_inisiative')) {
+            return;
+        }
+
         Schema::table('trs_projects', function (Blueprint $table): void {
-            $table->string('tipe_initiative')->nullable()->after('code');
+            $table->string('tipe_inisiative')->nullable()->after('code');
         });
     }
 
@@ -21,8 +29,16 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasTable('trs_projects')) {
+            return;
+        }
+
+        if (!Schema::hasColumn('trs_projects', 'tipe_inisiative')) {
+            return;
+        }
+
         Schema::table('trs_projects', function (Blueprint $table): void {
-            $table->dropColumn('tipe_initiative');
+            $table->dropColumn('tipe_inisiative');
         });
     }
 };

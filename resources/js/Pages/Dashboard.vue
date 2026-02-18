@@ -36,7 +36,7 @@
                         <!-- Digital Initiatives Flow -->
                         <div>
                             <div class="flex items-center justify-between gap-3">
-                                <h2 class="text-base font-semibold text-slate-900 dark:text-white">Status Usulan Digital Initiatives</h2>
+                                <h2 class="text-base font-semibold text-slate-900 dark:text-white">Scope Charter Digital Initiative Status</h2>
                                 <span class="text-xs text-slate-500 dark:text-slate-400">{{ statusFlowLegend }}</span>
                             </div>
 
@@ -78,7 +78,7 @@
                         <!-- IT Initiatives Flow -->
                         <div>
                             <div class="flex items-center justify-between gap-3">
-                                <h2 class="text-base font-semibold text-slate-900 dark:text-white">Status Usulan IT Initiatives</h2>
+                                <h2 class="text-base font-semibold text-slate-900 dark:text-white">Scope Charter IT Initiative Status</h2>
                                 <span class="text-xs text-slate-500 dark:text-slate-400">{{ statusFlowLegend }}</span>
                             </div>
 
@@ -122,7 +122,6 @@
 
             <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="border-b border-slate-200 px-5 py-4 dark:border-white/10">
-                    <h2 class="text-base font-semibold text-slate-900 dark:text-white">Status Summary</h2>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -147,6 +146,14 @@
                                 <td class="px-4 py-3 text-right font-semibold text-slate-900 dark:text-white">{{ row.total }}</td>
                             </tr>
                         </tbody>
+                        <tfoot class="bg-slate-50 dark:bg-white/5">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Jumlah</th>
+                                <th class="px-4 py-3 text-right text-sm font-bold text-slate-900 dark:text-white">{{ statusTotals.digital }}</th>
+                                <th class="px-4 py-3 text-right text-sm font-bold text-slate-900 dark:text-white">{{ statusTotals.it }}</th>
+                                <th class="px-4 py-3 text-right text-sm font-bold text-slate-900 dark:text-white">{{ statusTotals.total }}</th>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
             </section>
@@ -390,6 +397,17 @@ const statusRows = computed(() => {
             total: itCount + digitalCount,
         };
     });
+});
+
+const statusTotals = computed(() => {
+    return statusRows.value.reduce(
+        (accumulator, row) => ({
+            digital: accumulator.digital + Number(row.digital ?? 0),
+            it: accumulator.it + Number(row.it ?? 0),
+            total: accumulator.total + Number(row.total ?? 0),
+        }),
+        { digital: 0, it: 0, total: 0 }
+    );
 });
 
 const metricCards = computed(() => [
