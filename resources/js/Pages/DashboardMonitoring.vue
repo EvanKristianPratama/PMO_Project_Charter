@@ -2,7 +2,7 @@
     <UserLayout title="Dashboard Monitoring">
         <div class="space-y-6">
             <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Dashboard Monitoring</h1>
+                <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Dashboard Program Planing Monitoring</h1>
             </section>
 
             <section class="grid grid-cols-1 gap-4 md:grid-cols-3">

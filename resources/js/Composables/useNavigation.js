@@ -4,6 +4,7 @@ import {
     HomeIcon,
     FlagIcon,
     FolderIcon,
+    ChartBarIcon,
     ShieldCheckIcon,
     Squares2X2Icon,
     BuildingOffice2Icon,
@@ -43,10 +44,10 @@ export function useNavigation() {
                 icon: FolderIcon,
                 active: (url) => url.startsWith('/it-initiatives'),
             },
-              {
-                label: 'Dashboard Monitoring',
+            {
+                label: 'Program Implementation',
                 href: '/dashboard-monitoring',
-                icon: HomeIcon,
+                icon: ChartBarIcon,
                 active: (url) => url.startsWith('/dashboard-monitoring'),
             },
             {

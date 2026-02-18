@@ -120,12 +120,42 @@
                 </article>
             </section>
 
+            <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                <div class="border-b border-slate-200 px-5 py-4 dark:border-white/10">
+                    <h2 class="text-base font-semibold text-slate-900 dark:text-white">Status Summary</h2>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-white/10">
+                        <thead class="bg-slate-50 dark:bg-white/5">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</th>
+                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Digital</th>
+                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">IT</th>
+                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-white/5">
+                            <tr v-for="row in statusRows" :key="row.key">
+                                <td class="px-4 py-3">
+                                    <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize" :class="statusBadgeClassById(row.id)">
+                                        {{ row.label }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-right font-semibold text-slate-800 dark:text-slate-100">{{ row.digital }}</td>
+                                <td class="px-4 py-3 text-right font-semibold text-slate-800 dark:text-slate-100">{{ row.it }}</td>
+                                <td class="px-4 py-3 text-right font-semibold text-slate-900 dark:text-white">{{ row.total }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
             <section class="grid grid-cols-1 gap-5 xl:grid-cols-2">
                 <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                     <div class="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-4 dark:border-white/10">
                         <div>
                             <h2 class="text-base font-semibold text-slate-900 dark:text-white">Digital Initiatives (Belum {{ completedStatusLabel }})</h2>
-                            <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Hanya initiative dengan status selain {{ completedStatusLabel.toLowerCase() }}.</p>
                         </div>
                         <Link
                             :href="`/digital-initiatives?status=${completedStatusId}`"
@@ -198,7 +228,6 @@
                     <div class="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-4 dark:border-white/10">
                         <div>
                             <h2 class="text-base font-semibold text-slate-900 dark:text-white">IT Initiatives (Belum {{ completedStatusLabel }})</h2>
-                            <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Hanya initiative dengan status selain {{ completedStatusLabel.toLowerCase() }}.</p>
                         </div>
                         <Link
                             :href="`/it-initiatives?status=${completedStatusId}`"
@@ -329,6 +358,23 @@ const statusFlowLegend = computed(() => {
     return statusOptions.value
         .map((status) => statusLabelFromOptions(status.id, statusOptions.value))
         .join(' → ');
+});
+
+const statusRows = computed(() => {
+    return statusOptions.value.map((status) => {
+        const key = String(status.id);
+        const itCount = Number(props.overview?.status_counts?.[key] ?? 0);
+        const digitalCount = Number(props.overview?.digital_status_counts?.[key] ?? 0);
+
+        return {
+            key,
+            id: Number(status.id),
+            label: statusLabelFromOptions(status.id, statusOptions.value),
+            it: itCount,
+            digital: digitalCount,
+            total: itCount + digitalCount,
+        };
+    });
 });
 
 const metricCards = computed(() => [
