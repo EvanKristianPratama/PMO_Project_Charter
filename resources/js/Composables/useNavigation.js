@@ -48,10 +48,10 @@ export function useNavigation() {
                 active: (url) => url.startsWith('/dashboard-monitoring'),
             },
             {
-                label: 'Matrix',
-                href: '/program-planning/matrix',
+                label: 'Matrix Dependency',
+                href: '/program-planning/matrix-dependency',
                 icon: TableCellsIcon,
-                active: (url) => url.startsWith('/program-planning/matrix'),
+                active: (url) => url.startsWith('/program-planning/matrix-dependency'),
             },
             {
                 label: 'Program Implementation',
@@ -86,6 +86,12 @@ export function useNavigation() {
                 href: '/program-implementation/budgeting',
                 icon: DocumentTextIcon,
                 active: (url) => url.startsWith('/program-implementation/budgeting'),
+            },
+            {
+                label: 'Matrix Dependency',
+                href: '/program-implementation/matrix-dependency',
+                icon: TableCellsIcon,
+                active: (url) => url.startsWith('/program-implementation/matrix-dependency'),
             },
             {
                 label: 'Architecture',

@@ -7,15 +7,26 @@ const { navItems } = useNavigation();
 const page = usePage();
 const currentUrl = computed(() => page.url);
 
-const planningChildLabels = ['RSTI Sub Holding', 'Program Definition', 'Matrix', 'Dashboard Usulan'];
-const implementationChildLabels = ['Strategic Pillars', 'Digital Initiatives', 'IT Initiatives', 'Budgeting'];
+const planningChildHrefs = [
+    '/program-planning/rsti-sub-holding',
+    '/program-planning/program-definition',
+    '/program-planning/matrix-dependency',
+    '/dashboard-monitoring',
+];
+const implementationChildHrefs = [
+    '/strategic-pillars',
+    '/digital-initiatives',
+    '/it-initiatives',
+    '/program-implementation/budgeting',
+    '/program-implementation/matrix-dependency',
+];
 
 const programPlanningItem = computed(() => {
     return navItems.value.find((item) => item.label === 'Program Planning') ?? null;
 });
 
 const programPlanningChildren = computed(() => {
-    return navItems.value.filter((item) => planningChildLabels.includes(item.label));
+    return navItems.value.filter((item) => planningChildHrefs.includes(item.href));
 });
 
 const programImplementationItem = computed(() => {
@@ -23,7 +34,7 @@ const programImplementationItem = computed(() => {
 });
 
 const programImplementationChildren = computed(() => {
-    return navItems.value.filter((item) => implementationChildLabels.includes(item.label));
+    return navItems.value.filter((item) => implementationChildHrefs.includes(item.href));
 });
 
 const showPlanningChildren = computed(() => {
