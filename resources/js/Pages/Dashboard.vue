@@ -115,7 +115,6 @@
 
 <script setup>
 import { computed, ref } from 'vue';
-import { Link } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import ScopeCharterFlowSection from '@/Components/Dashboard/ScopeCharterFlowSection.vue';
 import ScopeCharterDigitalTable from '@/Components/Dashboard/ScopeCharterDigitalTable.vue';
@@ -253,14 +252,13 @@ const metricCards = computed(() => [
         value: props.overview.total_digital_initiatives,
         createHref: '/digital-initiatives/create',
     },
-    {   
+    {
         key: 'it',
         label: 'Total Usulan IT Initiatives',
         value: props.overview.total_projects,
         createHref: '/it-initiatives/create',
     },
-
-]);
+ ]);
 
 const mapFlowData = (counts = {}) => {
     return scopeStatusOptions.value.map((status, index) => {

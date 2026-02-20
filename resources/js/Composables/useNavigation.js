@@ -54,7 +54,7 @@ export function useNavigation() {
                 active: (url) => url.startsWith('/program-planning/matrix-dependency'),
             },
             {
-                label: 'Program Information',
+                label: 'Program Evaluation',
                 href: '/program-information',
                 icon: DocumentTextIcon,
                 active: (url) => url.startsWith('/program-information'),

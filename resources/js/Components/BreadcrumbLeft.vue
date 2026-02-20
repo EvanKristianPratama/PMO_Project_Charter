@@ -34,7 +34,7 @@ const programImplementationItem = computed(() => {
 });
 
 const programInformationItem = computed(() => {
-    return navItems.value.find((item) => item.label === 'Program Information') ?? null;
+    return navItems.value.find((item) => item.label === 'Program Evaluation') ?? null;
 });
 
 const programImplementationChildren = computed(() => {

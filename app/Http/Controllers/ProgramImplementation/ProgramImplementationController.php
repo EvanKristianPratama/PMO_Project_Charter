@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\ProgramImplementation;
 
 use App\Http\Controllers\Controller;
-use App\Models\DigitalInitiative;
 use App\Models\InitiativeStatus;
+use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -20,9 +19,8 @@ class ProgramImplementationController extends Controller
         }
 
         $statusOptions = $this->statusOptions();
-        $typeColumn = $this->resolveInitiativeTypeColumn();
         $digitalStatusCountsRaw = collect();
-        $itStatusCountsRaw = $this->statusCountsRawByType($typeColumn, '2');
+        $itStatusCountsRaw = $this->statusCountsRawFromProjects();
 
         return Inertia::render('ProgramImplementation/Index', [
             'projectCharterOverview' => [
@@ -45,34 +43,9 @@ class ProgramImplementationController extends Controller
             ->all();
     }
 
-    private function resolveInitiativeTypeColumn(): ?string
+    private function statusCountsRawFromProjects(): Collection
     {
-        foreach (['tipe_inisiative', 'tipe_initiative', 'tipe_inisiatif'] as $column) {
-            if (Schema::hasColumn('mst_digitalInitiative', $column)) {
-                return $column;
-            }
-        }
-
-        return null;
-    }
-
-    private function statusCountsRawByType(?string $typeColumn, string $typeValue): Collection
-    {
-        if ($typeColumn === null) {
-            return collect();
-        }
-
-        $numericTypeValue = (int) $typeValue;
-
-        return DigitalInitiative::query()
-            ->whereNotNull($typeColumn)
-            ->whereRaw("NULLIF(TRIM(`{$typeColumn}`), '') IS NOT NULL")
-            ->where(function ($query) use ($typeColumn, $typeValue, $numericTypeValue): void {
-                $query
-                    ->where($typeColumn, (string) $typeValue)
-                    ->orWhere($typeColumn, $numericTypeValue)
-                    ->orWhereRaw("CAST(TRIM(`{$typeColumn}`) AS UNSIGNED) = ?", [$numericTypeValue]);
-            })
+        return Project::query()
             ->selectRaw('status, COUNT(*) as total')
             ->groupBy('status')
             ->pluck('total', 'status');

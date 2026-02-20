@@ -22,6 +22,12 @@
                 </article>
             </section>
 
+            <ScopeCharterFlowSection
+                :digital-steps="digitalStatusFlow"
+                :it-steps="itStatusFlow"
+                :legend="statusFlowLegend"
+            />
+
             <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="border-b border-slate-200 px-5 py-4 dark:border-white/10">
                     <h2 class="text-base font-semibold text-slate-900 dark:text-white">Scope Charter Status Summary</h2>
@@ -67,7 +73,8 @@
 <script setup>
 import { computed } from 'vue';
 import UserLayout from '@/Layouts/UserLayout.vue';
-import { statusBadgeClassById, statusLabelFromOptions } from '@/Composables/initiativeStatus';
+import ScopeCharterFlowSection from '@/Components/Dashboard/ScopeCharterFlowSection.vue';
+import { statusBadgeClassById, statusFlowClassByIndex, statusLabelFromOptions } from '@/Composables/initiativeStatus';
 
 const props = defineProps({
     summary: {
@@ -99,6 +106,62 @@ const statusOptions = computed(() => {
         : fallbackStatusOptions;
 });
 
+// ── Scope flow: only show 4 statuses (exclude Baseline) ──────────────────────
+const scopeStatusOrder = ['drafting', 'propose', 'review', 'approve'];
+
+const normalizeStatusName = (value) => String(value ?? '').trim().toLowerCase();
+
+const scopeStatusOptions = computed(() => {
+    const sourceOptions = Array.isArray(statusOptions.value) ? statusOptions.value : [];
+    const mappedStatusByName = new Map();
+
+    sourceOptions.forEach((status) => {
+        const candidateNames = [normalizeStatusName(status?.name), normalizeStatusName(status?.label)];
+
+        if (candidateNames.includes('baseline')) return;
+
+        candidateNames.forEach((candidateName) => {
+            if (scopeStatusOrder.includes(candidateName) && !mappedStatusByName.has(candidateName)) {
+                mappedStatusByName.set(candidateName, status);
+            }
+        });
+    });
+
+    return scopeStatusOrder.map((statusName, index) => {
+        const matchedStatus = mappedStatusByName.get(statusName);
+        const fallback = fallbackStatusOptions[index];
+
+        return {
+            id: Number(matchedStatus?.id ?? fallback.id),
+            name: statusName,
+            label: fallback.label,
+        };
+    });
+});
+
+const statusFlowLegend = computed(() =>
+    scopeStatusOptions.value.map((s) => s.label).join(' → ')
+);
+
+const mapFlowData = (counts = {}) => {
+    return scopeStatusOptions.value.map((status, index) => {
+        const flowClass = statusFlowClassByIndex(index);
+        const key = String(status.id);
+
+        return {
+            key,
+            label: status.label,
+            count: Number(counts?.[key] ?? 0),
+            circleClass: flowClass.circleClass,
+            lineClass: flowClass.lineClass,
+        };
+    });
+};
+
+const digitalStatusFlow = computed(() => mapFlowData(props.summary?.digital_status_counts || {}));
+const itStatusFlow      = computed(() => mapFlowData(props.summary?.it_status_counts || {}));
+
+// ── Status summary table ──────────────────────────────────────────────────────
 const statusRows = computed(() => {
     if (Array.isArray(props.summary?.status_rows) && props.summary.status_rows.length > 0) {
         return props.summary.status_rows.map((row) => ({
@@ -113,7 +176,7 @@ const statusRows = computed(() => {
 
     return statusOptions.value.map((status) => {
         const key = String(status.id);
-        const itCount = Number(props.summary.it_status_counts?.[key] ?? 0);
+        const itCount      = Number(props.summary.it_status_counts?.[key] ?? 0);
         const digitalCount = Number(props.summary.digital_status_counts?.[key] ?? 0);
 
         return {
@@ -129,10 +192,10 @@ const statusRows = computed(() => {
 
 const statusTotals = computed(() => {
     return statusRows.value.reduce(
-        (accumulator, row) => ({
-            digital: accumulator.digital + Number(row.digital ?? 0),
-            it: accumulator.it + Number(row.it ?? 0),
-            total: accumulator.total + Number(row.total ?? 0),
+        (acc, row) => ({
+            digital: acc.digital + Number(row.digital ?? 0),
+            it: acc.it + Number(row.it ?? 0),
+            total: acc.total + Number(row.total ?? 0),
         }),
         { digital: 0, it: 0, total: 0 }
     );

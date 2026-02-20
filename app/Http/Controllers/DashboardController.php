@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\DigitalInitiative;
 use App\Models\InitiativeStatus;
-use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
@@ -25,6 +24,7 @@ class DashboardController extends Controller
         $typeColumn = $this->resolveInitiativeTypeColumn();
         $typeOneScopeStatusCounts = $this->statusCountsRawByType($typeColumn, '1');
         $emptyItScopeStatusCounts = collect();
+        $emptyItScopeInitiatives = collect();
 
         $openDigitalInitiatives = DigitalInitiative::query()
             ->with(['statusRef:id,name'])
@@ -36,29 +36,9 @@ class DashboardController extends Controller
             ->latest()
             ->get();
 
-        $openItInitiatives = Project::query()
-            ->select(['id', 'code', 'name', 'status', 'updated_at'])
-            ->with([
-                'charter' => static function ($query): void {
-                    $query->select([
-                        'trs_project_charters.id',
-                        'trs_project_charters.project_id',
-                        'trs_project_charters.category',
-                    ]);
-                },
-                'statusRef:id,name',
-            ])
-            ->where(static function ($query) use ($baselineStatusId): void {
-                $query
-                    ->whereNull('status')
-                    ->orWhere('status', '!=', $baselineStatusId);
-            })
-            ->latest()
-            ->get();
-
         return Inertia::render('Dashboard', [
             'overview' => [
-                'total_projects' => Project::query()->count(),
+                'total_projects' => 0,
                 'total_digital_initiatives' => DigitalInitiative::query()->count(),
                 'status_options' => $statusOptions,
                 'status_counts' => $this->mapCountsByStatus($statusOptions, $emptyItScopeStatusCounts),
@@ -66,7 +46,7 @@ class DashboardController extends Controller
             ],
             'completedStatusId' => $baselineStatusId,
             'openDigitalInitiatives' => $openDigitalInitiatives,
-            'openItInitiatives' => $openItInitiatives,
+            'openItInitiatives' => $emptyItScopeInitiatives,
         ]);
     }
 
