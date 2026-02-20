@@ -67,17 +67,21 @@ const props = defineProps({
         type: String,
         default: '',
     },
+    charterLabel: {
+        type: String,
+        default: 'Scope Charter',
+    },
 });
 
 const flowItems = computed(() => [
     {
         key: 'digital',
-        title: 'Scope Charter Digital Initiative Status',
+        title: `${props.charterLabel} Digital Initiative Status`,
         steps: props.digitalSteps,
     },
     {
         key: 'it',
-        title: 'Scope Charter IT Initiative Status',
+        title: `${props.charterLabel} IT Initiative Status`,
         steps: props.itSteps,
     },
 ]);

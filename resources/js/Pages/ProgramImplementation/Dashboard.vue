@@ -25,11 +25,12 @@
                 :digital-steps="digitalStatusFlow"
                 :it-steps="itStatusFlow"
                 :legend="statusFlowLegend"
+                charter-label="Project Charter"
             />
-            <!-- Scope Charter Status Summary -->
+            <!-- Project Charter Status Summary -->
             <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="border-b border-slate-200 px-5 py-4 dark:border-white/10">
-                    <h2 class="text-base font-semibold text-slate-900 dark:text-white">Scope Charter Status Summary</h2>
+                    <h2 class="text-base font-semibold text-slate-900 dark:text-white">Project Charter Status Summary</h2>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -82,7 +83,7 @@
                     </table>
                 </div>
             </section>
-            <!-- Scope Charter Tables -->
+            <!-- Project Charter Tables -->
             <section class="grid grid-cols-1 gap-5">
                 <article
                     v-if="selectedInitiative === null"
@@ -99,6 +100,7 @@
                     :completed-status-id="completedStatusId"
                     :completed-status-label="completedStatusLabel"
                     :status-options="statusOptions"
+                    charter-label="Project Charter"
                 />
 
                 <ScopeCharterItTable
@@ -107,6 +109,7 @@
                     :completed-status-id="completedStatusId"
                     :completed-status-label="completedStatusLabel"
                     :status-options="statusOptions"
+                    charter-label="Project Charter"
                 />
             </section>
         </div>
