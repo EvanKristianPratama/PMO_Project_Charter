@@ -54,6 +54,12 @@ export function useNavigation() {
                 active: (url) => url.startsWith('/program-planning/matrix-dependency'),
             },
             {
+                label: 'Program Information',
+                href: '/program-information',
+                icon: DocumentTextIcon,
+                active: (url) => url.startsWith('/program-information'),
+            },
+            {
                 label: 'Program Implementation',
                 href: '/program-implementation',
                 icon: ChartBarIcon,
@@ -111,7 +117,7 @@ export function useNavigation() {
                 icon: DocumentTextIcon,
                 active: (url) => url.startsWith('/policy'),
             },
-            
+
             {
                 label: 'Company Profile',
                 href: '/companies',

@@ -33,6 +33,10 @@ const programImplementationItem = computed(() => {
     return navItems.value.find((item) => item.label === 'Program Implementation') ?? null;
 });
 
+const programInformationItem = computed(() => {
+    return navItems.value.find((item) => item.label === 'Program Information') ?? null;
+});
+
 const programImplementationChildren = computed(() => {
     return navItems.value.filter((item) => implementationChildHrefs.includes(item.href));
 });
@@ -71,7 +75,12 @@ const showImplementationChildren = computed(() => {
                 <span>{{ programPlanningItem.label }}</span>
             </Link>
 
-            <span v-if="programPlanningItem && programImplementationItem" class="select-none px-0.5 text-slate-300 dark:text-slate-600">·</span>
+            <span
+                v-if="programPlanningItem && (programImplementationItem || programInformationItem)"
+                class="select-none px-0.5 text-slate-300 dark:text-slate-600"
+            >
+                ·
+            </span>
 
             <Link
                 v-if="programImplementationItem"
@@ -85,6 +94,27 @@ const showImplementationChildren = computed(() => {
             >
                 <component :is="programImplementationItem.icon" v-if="programImplementationItem.icon" class="h-3.5 w-3.5 shrink-0" />
                 <span>{{ programImplementationItem.label }}</span>
+            </Link>
+
+            <span
+                v-if="programImplementationItem && programInformationItem"
+                class="select-none px-0.5 text-slate-300 dark:text-slate-600"
+            >
+                ·
+            </span>
+
+            <Link
+                v-if="programInformationItem"
+                :href="programInformationItem.href"
+                class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
+                :class="[
+                    programInformationItem.active(currentUrl)
+                        ? 'bg-blue-500 text-white shadow-sm'
+                        : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200'
+                ]"
+            >
+                <component :is="programInformationItem.icon" v-if="programInformationItem.icon" class="h-3.5 w-3.5 shrink-0" />
+                <span>{{ programInformationItem.label }}</span>
             </Link>
         </div>
 

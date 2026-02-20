@@ -9,10 +9,11 @@ const currentUrl = computed(() => page.url);
 
 const rightScopeLabels = ['Architecture', 'Resources Management', 'Policy', 'Admin'];
 
-// Menu kanan khusus scope architecture/policy (+ admin jika ada).
+// Menu kanan khusus scope arsitektur/policy (+ admin jika ada).
 const rightNavItems = computed(() => {
     return navItems.value.filter((item) => rightScopeLabels.includes(item.label));
 });
+const hasResourceManagement = computed(() => rightNavItems.value.some((i) => i.label === 'Resources Management'));
 </script>
 
 <template>
@@ -31,6 +32,15 @@ const rightNavItems = computed(() => {
                 <component :is="item.icon" v-if="item.icon" class="h-3.5 w-3.5 shrink-0" />
                 <span>{{ item.label }}</span>
             </Link>
+        </template>
+        <!-- Placeholder for Resources Management when it's not present in navItems -->
+        <template v-if="!hasResourceManagement">
+            <span v-if="rightNavItems.length > 0" class="select-none px-0.5 text-indigo-200 dark:text-indigo-900">·</span>
+            <span
+                class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium text-indigo-500 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-900/10"
+            >
+                <span>Resources Management</span>
+            </span>
         </template>
     </div>
 </template>
