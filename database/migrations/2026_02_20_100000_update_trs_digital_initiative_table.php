@@ -18,7 +18,11 @@ return new class extends Migration
             $table->integer('urgency')->default(4)
                 ->comment('1 = Low, 2 = Medium, 3 = High, 4 = TBC (To be Discussed)')
                 ->change();
-                
+
+            $table->string('dataSoource', 255);
+            $table->month('dataMonth')->nullable;
+            $table->year('dataYear')->nullable;
+
             $table->dropForeign(['organization_id']);
             $table->dropColumn('organization_id');
             $table->dropForeign(['rjpp_tagging']);
