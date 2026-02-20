@@ -11,7 +11,6 @@ const planningChildHrefs = [
     '/program-planning/rsti-sub-holding',
     '/program-planning/program-definition',
     '/program-planning/matrix-dependency',
-    '/dashboard-monitoring',
 ];
 const implementationChildHrefs = [
     '/strategic-pillars',

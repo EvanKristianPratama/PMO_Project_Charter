@@ -4,7 +4,7 @@
             <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div>
-                        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Program Planing Summary</h1>
+                        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Program Planning Summary</h1>
                     </div>
                 </div>
             </section>
@@ -26,6 +26,7 @@
                 :it-steps="itStatusFlow"
                 :legend="statusFlowLegend"
             />
+
             <!-- Scope Charter Status Summary -->
             <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="border-b border-slate-200 px-5 py-4 dark:border-white/10">
@@ -82,6 +83,7 @@
                     </table>
                 </div>
             </section>
+
             <!-- Scope Charter Tables -->
             <section class="grid grid-cols-1 gap-5">
                 <article
@@ -122,13 +124,14 @@ import ScopeCharterItTable from '@/Components/Dashboard/ScopeCharterItTable.vue'
 import { statusFlowClassByIndex, statusLabelFromOptions } from '@/Composables/initiativeStatus';
 
 const props = defineProps({
-    overview: {
+    summary: {
         type: Object,
         default: () => ({
-            total_projects: 0,
+            total_it_initiatives: 0,
             total_digital_initiatives: 0,
+            total_all_initiatives: 0,
             status_options: [],
-            status_counts: {},
+            it_status_counts: {},
             digital_status_counts: {},
         }),
     },
@@ -154,8 +157,8 @@ const fallbackStatusOptions = [
 ];
 
 const statusOptions = computed(() => {
-    return Array.isArray(props.overview?.status_options) && props.overview.status_options.length > 0
-        ? props.overview.status_options
+    return Array.isArray(props.summary?.status_options) && props.summary.status_options.length > 0
+        ? props.summary.status_options
         : fallbackStatusOptions;
 });
 
@@ -234,8 +237,8 @@ const statusSummaryRows = computed(() => {
     };
 
     return [
-        buildRow('digital', 'Digital initiative', props.overview?.digital_status_counts || {}),
-        buildRow('it', 'IT Initiative', props.overview?.status_counts || {}),
+        buildRow('digital', 'Digital Initiative', props.summary?.digital_status_counts || {}),
+        buildRow('it', 'IT Initiative', props.summary?.it_status_counts || {}),
     ];
 });
 
@@ -248,17 +251,20 @@ const toggleInitiativeTable = (initiativeKey) => {
 const metricCards = computed(() => [
     {
         key: 'digital',
-        label: 'Total Usulan Digital Initiatives',
-        value: props.overview.total_digital_initiatives,
-        createHref: '/digital-initiatives/create',
+        label: 'Total Digital Initiatives',
+        value: props.summary.total_digital_initiatives,
     },
     {
         key: 'it',
-        label: 'Total Usulan IT Initiatives',
-        value: props.overview.total_projects,
-        createHref: '/it-initiatives/create',
+        label: 'Total IT Initiatives',
+        value: props.summary.total_it_initiatives,
     },
- ]);
+    {
+        key: 'all',
+        label: 'Total Semua Initiatives',
+        value: props.summary.total_all_initiatives,
+    },
+]);
 
 const mapFlowData = (counts = {}) => {
     return scopeStatusOptions.value.map((status, index) => {
@@ -275,6 +281,6 @@ const mapFlowData = (counts = {}) => {
     });
 };
 
-const itStatusFlow = computed(() => mapFlowData(props.overview?.status_counts || {}));
-const digitalStatusFlow = computed(() => mapFlowData(props.overview?.digital_status_counts || {}));
+const itStatusFlow = computed(() => mapFlowData(props.summary?.it_status_counts || {}));
+const digitalStatusFlow = computed(() => mapFlowData(props.summary?.digital_status_counts || {}));
 </script>
