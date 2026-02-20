@@ -11,10 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('mst_status_digital', function (Blueprint $table) {
+        Schema::create('trs_status_digital', function (Blueprint $table) {
             $table->increments('id');
+            $table->unsignedInteger('phase_id');
             $table->string('name', 50);
             $table->timestamps();
+
+            $table->foreign('phase_id')
+                ->references('id')
+                ->on('mst_phase_digital')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
         });
     }
 

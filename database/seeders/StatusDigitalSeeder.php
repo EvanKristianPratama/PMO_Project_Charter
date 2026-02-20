@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\PhaseDigital;
 use App\Models\StatusDigital;
 use Illuminate\Database\Seeder;
 
@@ -12,34 +13,41 @@ class StatusDigitalSeeder extends Seeder
      */
     public function run(): void
     {
-        $statusDigitals = [
-            [
-                'name' => 'draft',
-            ],
-            [
-                'name' => 'purpose',
-            ],
-            [
-                'name' => 'review',
-            ],
-            [
-                'name' => 'approve',
-            ],
-            [
-                'name' => 'cancel',
-            ],
-            [
-                'name' => 'baseline',
-            ],
-            [
-                'name' => 'TBC',
-            ]
-        ];
+        $phasePropose = PhaseDigital::where('name', 'propose')->first();
+        $phaseReview = PhaseDigital::where('name', 'review')->first();
+        $phaseApprove = PhaseDigital::where('name', 'approve')->first();
+        $phaseFinish = PhaseDigital::where('name', 'finish')->first();
 
-        foreach ($statusDigitals as $statusDigital) {
-            StatusDigital::Create(
-                ['name' => $statusDigital['name']],
-                $statusDigital
+        $proposeStatuses = ['drafting', 'submitted', 'canceled'];
+        $reviewStatuses = ['on review', 'perlu perbaikan', 'hold', 'reject', 'accepted'];
+        $approveStatuses = ['on process', 'accept', 'reject'];
+        $finishStatuses = ['baseline', 'hold'];
+
+        foreach ($proposeStatuses as $name) {
+            StatusDigital::updateOrCreate(
+                ['phase_id' => $phasePropose->id, 'name' => $name],
+                ['phase_id' => $phasePropose->id, 'name' => $name]
+            );
+        }
+
+        foreach ($reviewStatuses as $name) {
+            StatusDigital::updateOrCreate(
+                ['phase_id' => $phaseReview->id, 'name' => $name],
+                ['phase_id' => $phaseReview->id, 'name' => $name]
+            );
+        }
+
+        foreach ($approveStatuses as $name) {
+            StatusDigital::updateOrCreate(
+                ['phase_id' => $phaseApprove->id, 'name' => $name],
+                ['phase_id' => $phaseApprove->id, 'name' => $name]
+            );
+        }
+
+        foreach ($finishStatuses as $name) {
+            StatusDigital::updateOrCreate(
+                ['phase_id' => $phaseFinish->id, 'name' => $name],
+                ['phase_id' => $phaseFinish->id, 'name' => $name]
             );
         }
     }
