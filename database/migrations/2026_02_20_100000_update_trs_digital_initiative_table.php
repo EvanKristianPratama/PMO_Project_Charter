@@ -12,9 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('trs_digital_initiative', function (Blueprint $table) {
-            $table->integer('value')->default(4)->change();
-            $table->integer('urgency')->default(4)->change();
-
+            $table->integer('value')->default(4)
+                ->comment('1 = Low, 2 = Medium, 3 = High, 4 = TBC (To be Discussed)')
+                ->change();
+            $table->integer('urgency')->default(4)
+                ->comment('1 = Low, 2 = Medium, 3 = High, 4 = TBC (To be Discussed)')
+                ->change();
+                
+            $table->dropForeign(['organization_id']);
+            $table->dropColumn('organization_id');
             $table->dropForeign(['rjpp_tagging']);
             $table->dropColumn('rjpp_tagging');
         });
@@ -40,4 +46,3 @@ return new class extends Migration
         });
     }
 };
-
