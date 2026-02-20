@@ -19,9 +19,12 @@ return new class extends Migration
                 ->comment('1 = Low, 2 = Medium, 3 = High, 4 = TBC (To be Discussed)')
                 ->change();
 
-            $table->string('dataSoource', 255);
-            $table->month('dataMonth')->nullable;
-            $table->year('dataYear')->nullable;
+            $table->unsignedInteger('source_id')->after('urgency')->nullable();
+            $table->foreign('source_id')
+                ->references('id')
+                ->on('mst_data_source')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
 
             $table->dropForeign(['organization_id']);
             $table->dropColumn('organization_id');
