@@ -11,16 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('trs_use_case', function (Blueprint $table) {
+        Schema::create('trs_status_digital', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('coe_id');
-            $table->string('name', 100);
-            $table->string('description', 500);
+            $table->unsignedInteger('phase_id');
+            $table->string('name', 50);
             $table->timestamps();
 
-            $table->foreign('coe_id')
+            $table->foreign('phase_id')
                 ->references('id')
-                ->on('mst_coe')
+                ->on('mst_phase_digital')
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
         });
@@ -31,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('trs_use_case');
+        Schema::dropIfExists('mst_status_digital');
     }
 };
