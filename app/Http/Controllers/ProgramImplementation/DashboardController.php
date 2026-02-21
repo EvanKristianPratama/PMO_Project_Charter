@@ -25,12 +25,12 @@ class DashboardController extends Controller
         $baselineStatusId = $this->baselineStatusId($statusOptions);
 
         $itStatusCounts          = $this->mapCountsByStatus($statusOptions, $this->statusCountsRaw());
-        $digitalStatusCounts     = $this->mapCountsByStatus($statusOptions, $this->digitalStatusCountsRaw());
+        $digitalStatusCounts     = $this->mapCountsByStatus($statusOptions, collect());
 
         return Inertia::render('ProgramImplementation/Dashboard', [
             'overview' => [
                 'total_projects'            => Project::query()->count(),
-                'total_digital_initiatives' => DigitalInitiative::query()->count(),
+                'total_digital_initiatives' => 0,
                 'status_options'            => $statusOptions,
                 'status_counts'             => $itStatusCounts,
                 'digital_status_counts'     => $digitalStatusCounts,
@@ -46,14 +46,6 @@ class DashboardController extends Controller
     private function statusCountsRaw(): Collection
     {
         return Project::query()
-            ->selectRaw('status, COUNT(*) as total')
-            ->groupBy('status')
-            ->pluck('total', 'status');
-    }
-
-    private function digitalStatusCountsRaw(): Collection
-    {
-        return DigitalInitiative::query()
             ->selectRaw('status, COUNT(*) as total')
             ->groupBy('status')
             ->pluck('total', 'status');

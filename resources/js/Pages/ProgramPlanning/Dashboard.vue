@@ -1,23 +1,44 @@
 <template>
     <UserLayout title="Dashboard">
         <div class="space-y-6 animate-fade-in-up">
-            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717]">
+            <section class="rounded-2xl border border-[#E42313] bg-[#E42313] p-6 shadow-sm">
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div>
-                        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Program Planning Summary</h1>
+                        <h1 class="text-2xl font-bold text-white">Program Planning Summary</h1>
                     </div>
                 </div>
             </section>
 
-            <section class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <section class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <article
                     v-for="item in metricCards"
                     :key="item.key"
-                    class="relative flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#171717]"
+                    class="relative flex flex-col rounded-2xl border p-5 shadow-sm"
+                    :class="item.cardClass || 'bg-white border-slate-200 dark:border-white/10 dark:bg-[#171717]'"
                 >
-                    <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">{{ item.label }}</p>
-                    <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">{{ item.value }}</p>
-                    <p class="mt-2 flex-1 text-xs text-slate-500 dark:text-slate-400">{{ item.note }}</p>
+                    <p
+                        class="text-xs font-semibold uppercase tracking-[0.08em]"
+                        :class="item.labelClass || 'text-slate-500 dark:text-slate-400'"
+                        :style="item.textShadow ? { textShadow: '0 1px 3px rgba(0,0,0,0.3)' } : {}"
+                    >
+                        {{ item.label }}
+                    </p>
+                    <p
+                        class="mt-2 flex items-center justify-between text-3xl font-bold"
+                        :class="item.textClass || 'text-slate-900 dark:text-white'"
+                        :style="item.textShadow ? { textShadow: '0 2px 6px rgba(0,0,0,0.35)' } : {}"
+                    >
+                        <span>{{ item.value }}</span>
+                        <button
+                            v-if="item.actionMethod"
+                            class="text-sm font-semibold opacity-80 transition-colors hover:opacity-100"
+                            :class="item.labelClass"
+                            @click="item.actionMethod"
+                        >
+                            {{ item.actionLabel }}
+                        </button>
+                    </p>
+                    <p v-if="item.note" class="mt-2 flex-1 text-xs" :class="item.labelClass || 'text-slate-500 dark:text-slate-400'">{{ item.note }}</p>
                 </article>
             </section>
 
@@ -278,21 +299,68 @@ const filteredItInitiatives = computed(() => {
     );
 });
 
+const approveStatusId = computed(() => {
+    const approveStatus = statusOptions.value.find(s => 
+        String(s.name).trim().toLowerCase() === 'approve' || 
+        String(s.label).trim().toLowerCase() === 'approve' ||
+        String(s.name).trim().toLowerCase() === 'baseline' ||
+        String(s.label).trim().toLowerCase() === 'baseline'
+    );
+    return approveStatus ? String(approveStatus.id) : null;
+});
+
+const totalDigitalDisetujui = computed(() => {
+    if (!approveStatusId.value) return 0;
+    return Number(props.summary?.digital_status_counts?.[approveStatusId.value] ?? 0);
+});
+
+const totalItDisetujui = computed(() => {
+    if (!approveStatusId.value) return 0;
+    return Number(props.summary?.it_status_counts?.[approveStatusId.value] ?? 0);
+});
+
+const showApprovedDigitalInitiatives = () => {
+    selectedInitiative.value = 'digital';
+    selectedStatusFilter.value = approveStatusId.value;
+
+    window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: 'smooth',
+    });
+};
+
+const showApprovedItInitiatives = () => {
+    selectedInitiative.value = 'it';
+    selectedStatusFilter.value = approveStatusId.value;
+
+    window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: 'smooth',
+    });
+};
+
 const metricCards = computed(() => [
     {
-        key: 'digital',
-        label: 'Total Digital Initiatives',
-        value: props.summary.total_digital_initiatives,
+        key: 'digital-approved',
+        label: 'Total Digital Inisiatif Disetujui',
+        value: totalDigitalDisetujui.value,
+        actionLabel: 'Show',
+        actionMethod: showApprovedDigitalInitiatives,
+        cardClass: 'bg-[#1C75BC] border-[#1C75BC] shadow-[0_4px_16px_rgba(28,117,188,0.3)]',
+        textClass: 'text-white',
+        labelClass: 'text-white',
+        textShadow: true,
     },
     {
-        key: 'it',
-        label: 'Total IT Initiatives',
-        value: props.summary.total_it_initiatives,
-    },
-    {
-        key: 'all',
-        label: 'Total Semua Initiatives',
-        value: props.summary.total_all_initiatives,
+        key: 'it-approved',
+        label: 'Total IT Inisiatif Disetujui',
+        value: totalItDisetujui.value,
+        actionLabel: 'Show',
+        actionMethod: showApprovedItInitiatives,
+        cardClass: 'bg-[#A7C942] border-[#A7C942] shadow-[0_4px_16px_rgba(167,201,66,0.3)]',
+        textClass: 'text-white',
+        labelClass: 'text-white',
+        textShadow: true,
     },
 ]);
 
