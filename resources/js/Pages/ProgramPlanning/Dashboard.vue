@@ -24,7 +24,6 @@
             <ScopeCharterFlowSection
                 :digital-steps="digitalStatusFlow"
                 :it-steps="itStatusFlow"
-                :legend="statusFlowLegend"
             />
 
             <!-- Scope Charter Status Summary -->
@@ -52,32 +51,48 @@
                             <tr
                                 v-for="row in statusSummaryRows"
                                 :key="row.key"
-                                role="button"
-                                tabindex="0"
-                                class="cursor-pointer transition-colors"
-                                :class="selectedInitiative === row.key
-                                    ? 'bg-blue-50/70 dark:bg-blue-500/10'
-                                    : 'hover:bg-slate-50 dark:hover:bg-white/5'"
-                                @click="toggleInitiativeTable(row.key)"
-                                @keydown.enter.prevent="toggleInitiativeTable(row.key)"
-                                @keydown.space.prevent="toggleInitiativeTable(row.key)"
+                                class="transition-colors hover:bg-slate-50 dark:hover:bg-white/5"
                             >
-                                <td class="px-4 py-3 font-semibold text-slate-900 dark:text-white">
+                                <td
+                                    role="button"
+                                    tabindex="0"
+                                    class="cursor-pointer px-4 py-3 font-semibold text-slate-900 dark:text-white"
+                                    :class="selectedInitiative === row.key && selectedStatusFilter === null ? 'bg-blue-50/70 dark:bg-blue-500/10' : ''"
+                                    @click="toggleInitiativeTable(row.key, null)"
+                                    @keydown.enter.prevent="toggleInitiativeTable(row.key, null)"
+                                    @keydown.space.prevent="toggleInitiativeTable(row.key, null)"
+                                >
                                     <div class="flex items-center gap-2">
                                         <span>{{ row.label }}</span>
                                         <span class="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                                            {{ selectedInitiative === row.key ? 'Hide' : 'Show' }}
+                                            {{ selectedInitiative === row.key && selectedStatusFilter === null ? 'Hide' : 'Show All' }}
                                         </span>
                                     </div>
                                 </td>
                                 <td
                                     v-for="column in statusSummaryColumns"
                                     :key="`status-summary-cell-${row.key}-${column.key}`"
-                                    class="px-4 py-3 text-right font-semibold text-slate-800 dark:text-slate-100"
+                                    role="button"
+                                    tabindex="0"
+                                    class="cursor-pointer px-4 py-3 text-right font-semibold text-slate-800 transition-colors hover:bg-slate-100 dark:text-slate-100 dark:hover:bg-white/10"
+                                    :class="selectedInitiative === row.key && String(selectedStatusFilter) === String(column.key) ? 'bg-blue-50/70 dark:bg-blue-500/10' : ''"
+                                    @click="toggleInitiativeTable(row.key, column.key)"
+                                    @keydown.enter.prevent="toggleInitiativeTable(row.key, column.key)"
+                                    @keydown.space.prevent="toggleInitiativeTable(row.key, column.key)"
                                 >
                                     {{ row.counts[column.key] }}
                                 </td>
-                                <td class="px-4 py-3 text-right font-bold text-slate-900 dark:text-white">{{ row.total }}</td>
+                                <td
+                                    role="button"
+                                    tabindex="0"
+                                    class="cursor-pointer px-4 py-3 text-right font-bold text-slate-900 transition-colors hover:bg-slate-100 dark:text-white dark:hover:bg-white/10"
+                                    :class="selectedInitiative === row.key && selectedStatusFilter === null ? 'bg-blue-50/70 dark:bg-blue-500/10' : ''"
+                                    @click="toggleInitiativeTable(row.key, null)"
+                                    @keydown.enter.prevent="toggleInitiativeTable(row.key, null)"
+                                    @keydown.space.prevent="toggleInitiativeTable(row.key, null)"
+                                >
+                                    {{ row.total }}
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -97,7 +112,7 @@
 
                 <ScopeCharterDigitalTable
                     v-else-if="selectedInitiative === 'digital'"
-                    :items="openDigitalInitiatives"
+                    :items="filteredDigitalInitiatives"
                     :completed-status-id="completedStatusId"
                     :completed-status-label="completedStatusLabel"
                     :status-options="statusOptions"
@@ -105,7 +120,7 @@
 
                 <ScopeCharterItTable
                     v-else-if="selectedInitiative === 'it'"
-                    :items="openItInitiatives"
+                    :items="filteredItInitiatives"
                     :completed-status-id="completedStatusId"
                     :completed-status-label="completedStatusLabel"
                     :status-options="statusOptions"
@@ -202,12 +217,6 @@ const completedStatusLabel = computed(() => {
     return statusLabelFromOptions(completedStatusId.value, statusOptions.value);
 });
 
-const statusFlowLegend = computed(() => {
-    return scopeStatusOptions.value
-        .map((status) => status.label)
-        .join(' → ');
-});
-
 const statusSummaryColumns = computed(() => {
     return scopeStatusOptions.value.map((status) => ({
         key: String(status.id),
@@ -243,10 +252,31 @@ const statusSummaryRows = computed(() => {
 });
 
 const selectedInitiative = ref(null);
+const selectedStatusFilter = ref(null);
 
-const toggleInitiativeTable = (initiativeKey) => {
-    selectedInitiative.value = selectedInitiative.value === initiativeKey ? null : initiativeKey;
+const toggleInitiativeTable = (initiativeKey, statusId = null) => {
+    if (selectedInitiative.value === initiativeKey && selectedStatusFilter.value === statusId) {
+        selectedInitiative.value = null;
+        selectedStatusFilter.value = null;
+    } else {
+        selectedInitiative.value = initiativeKey;
+        selectedStatusFilter.value = statusId;
+    }
 };
+
+const filteredDigitalInitiatives = computed(() => {
+    if (!selectedStatusFilter.value) return props.openDigitalInitiatives;
+    return props.openDigitalInitiatives.filter(
+        item => String(item.status) === String(selectedStatusFilter.value)
+    );
+});
+
+const filteredItInitiatives = computed(() => {
+    if (!selectedStatusFilter.value) return props.openItInitiatives;
+    return props.openItInitiatives.filter(
+        item => String(item.status) === String(selectedStatusFilter.value)
+    );
+});
 
 const metricCards = computed(() => [
     {

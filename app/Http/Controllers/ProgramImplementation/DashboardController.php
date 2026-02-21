@@ -4,6 +4,7 @@ namespace App\Http\Controllers\ProgramImplementation;
 
 use App\Http\Controllers\Concerns\ResolvesInitiativeStatus;
 use App\Http\Controllers\Controller;
+use App\Models\DigitalInitiative;
 use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
@@ -24,15 +25,15 @@ class DashboardController extends Controller
         $baselineStatusId = $this->baselineStatusId($statusOptions);
 
         $itStatusCounts          = $this->mapCountsByStatus($statusOptions, $this->statusCountsRaw());
-        $emptyDigitalStatusCounts = $this->mapCountsByStatus($statusOptions, collect());
+        $digitalStatusCounts     = $this->mapCountsByStatus($statusOptions, $this->digitalStatusCountsRaw());
 
         return Inertia::render('ProgramImplementation/Dashboard', [
             'overview' => [
                 'total_projects'            => Project::query()->count(),
-                'total_digital_initiatives' => 0,
+                'total_digital_initiatives' => DigitalInitiative::query()->count(),
                 'status_options'            => $statusOptions,
                 'status_counts'             => $itStatusCounts,
-                'digital_status_counts'     => $emptyDigitalStatusCounts,
+                'digital_status_counts'     => $digitalStatusCounts,
             ],
             'completedStatusId'      => $baselineStatusId,
             'openDigitalInitiatives' => collect(),
@@ -45,6 +46,14 @@ class DashboardController extends Controller
     private function statusCountsRaw(): Collection
     {
         return Project::query()
+            ->selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+    }
+
+    private function digitalStatusCountsRaw(): Collection
+    {
+        return DigitalInitiative::query()
             ->selectRaw('status, COUNT(*) as total')
             ->groupBy('status')
             ->pluck('total', 'status');

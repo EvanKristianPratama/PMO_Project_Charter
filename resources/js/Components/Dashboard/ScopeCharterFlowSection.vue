@@ -9,7 +9,6 @@
                 >
                     <div class="flex items-center justify-between gap-2">
                         <h2 class="text-sm font-semibold text-slate-900 dark:text-white">{{ item.title }}</h2>
-                        <span class="text-[10px] text-slate-500 dark:text-slate-400">{{ legend }}</span>
                     </div>
 
                     <div class="mt-3">
@@ -62,10 +61,6 @@ const props = defineProps({
     itSteps: {
         type: Array,
         default: () => [],
-    },
-    legend: {
-        type: String,
-        default: '',
     },
     charterLabel: {
         type: String,
