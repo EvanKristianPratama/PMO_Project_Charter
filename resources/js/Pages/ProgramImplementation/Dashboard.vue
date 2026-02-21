@@ -4,7 +4,7 @@
             <section class="rounded-2xl border border-[#E42313] bg-[#E42313] p-6 shadow-sm">
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div>
-                        <h1 class="text-2xl font-bold text-white">Program Implementation Summary</h1>
+                        <h1 class="text-2xl font-bold text-white">Program <span class="text-green-400">Implementation</span> Summary</h1>
                     </div>
                 </div>
             </section>
