@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Roadmap;
 
 use App\Http\Controllers\Controller;
 use App\Models\Milestone;
-use App\Models\Program;
-use App\Models\Project;
+use App\Models\MstProgram;
+use App\Models\TrsProject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -39,7 +39,7 @@ class RoadmapController extends Controller
     /**
      * Display a single program with all its projects.
      */
-    public function show(Program $program): Response
+    public function show(MstProgram $program): Response
     {
         $program->load(['projects' => function (Builder $query): void {
             $this->applyRoadmapProjectRelations($query);
@@ -102,7 +102,7 @@ class RoadmapController extends Controller
      */
     private function buildRoadmapOverviewPayload(): array
     {
-        $projects = Project::query();
+        $projects = TrsProject::query();
         $this->applyRoadmapProjectRelations($projects);
         $projects = $projects
             ->orderBy('trs_projects.id')
@@ -124,7 +124,7 @@ class RoadmapController extends Controller
         $selectedProjectId = $request->integer('project_id');
         $selectedVersion = $request->query('version');
 
-        $projects = Project::query();
+        $projects = TrsProject::query();
         $this->applyRoadmapProjectRelations($projects);
         $projects = $projects
             ->orderBy('trs_projects.id')
@@ -149,7 +149,7 @@ class RoadmapController extends Controller
 
     private function decorateProjectsWithRoadmapVersionMeta(Collection $projects): Collection
     {
-        return $projects->map(function (Project $project): Project {
+        return $projects->map(function (TrsProject $project): TrsProject {
             $milestones = $project->milestones ?? collect();
             $milestones = $milestones->map(function ($milestone) {
                 $milestone->version = $this->normalizeVersionLabel($milestone->version);
@@ -173,7 +173,7 @@ class RoadmapController extends Controller
         });
     }
 
-    private function resolveRoadmapVersion(?Project $project, mixed $requestedVersion): ?string
+    private function resolveRoadmapVersion(?TrsProject $project, mixed $requestedVersion): ?string
     {
         if ($project === null) {
             return null;
@@ -193,7 +193,7 @@ class RoadmapController extends Controller
         return $project->active_roadmap_version ?? $versions->first() ?? 'v1';
     }
 
-    private function extractRoadmapVersions(Project $project, Collection $milestones): Collection
+    private function extractRoadmapVersions(TrsProject $project, Collection $milestones): Collection
     {
         $labelsFromMilestones = $milestones
             ->pluck('version')
@@ -215,7 +215,7 @@ class RoadmapController extends Controller
         return $labels;
     }
 
-    private function roadmapVersionLabelsFromMeta(Project $project): Collection
+    private function roadmapVersionLabelsFromMeta(TrsProject $project): Collection
     {
         $metadata = is_array($project->metadata) ? $project->metadata : [];
         $labels = $metadata['roadmap_versions'] ?? [];
@@ -227,7 +227,7 @@ class RoadmapController extends Controller
         return collect($labels);
     }
 
-    private function resolveActiveRoadmapVersion(Project $project, Collection $versions): string
+    private function resolveActiveRoadmapVersion(TrsProject $project, Collection $versions): string
     {
         if ($versions->isEmpty()) {
             return 'v1';

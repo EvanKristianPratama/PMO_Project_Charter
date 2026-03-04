@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\ITInitiative;
 
-use App\Models\Project;
+use App\Models\TrsProject;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -15,7 +15,7 @@ class ITInitiativeUpdateRequest extends FormRequest
 
     public function rules(): array
     {
-        /** @var Project|null $project */
+        /** @var TrsProject|null $project */
         $project = $this->route('project');
 
         return [

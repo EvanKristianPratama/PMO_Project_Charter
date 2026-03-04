@@ -6,7 +6,7 @@ use App\Http\Controllers\Concerns\ResolvesInitiativeStatus;
 use App\Http\Controllers\Controller;
 use App\Models\DigitalInitiative;
 use App\Models\MstInitiative;
-use App\Models\Project;
+use App\Models\TrsProject;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -29,7 +29,7 @@ class ProgramImplementationController extends Controller
             ->groupBy('status')
             ->pluck('total', 'status');
 
-        $itStatusCountsRaw     = Project::query()
+        $itStatusCountsRaw     = TrsProject::query()
             ->selectRaw('status, COUNT(*) as total')
             ->groupBy('status')
             ->pluck('total', 'status');
@@ -56,7 +56,7 @@ class ProgramImplementationController extends Controller
 
     private function openItInitiatives(int $baselineStatusId)
     {
-        return Project::query()
+        return TrsProject::query()
             ->with([
                 'charter',
                 'statusRef:id,name',

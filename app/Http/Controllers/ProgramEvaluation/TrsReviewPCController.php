@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\ProgramEvaluation;
 
 use App\Http\Controllers\Controller;
-use App\Models\Project;
+use App\Models\TrsProject;
 use App\Models\TrsReviewPC;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -77,7 +77,7 @@ class TrsReviewPCController extends Controller
                 $mappedProjectIds = $query->pluck($projectColumn)->filter()->unique()->values();
 
                 if ($mappedProjectIds->isNotEmpty()) {
-                    $mappedProjects = Project::query()
+                    $mappedProjects = TrsProject::query()
                         ->with([
                             'charter',
                             'charters' => static fn ($q) => $q

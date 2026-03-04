@@ -5,7 +5,7 @@ namespace App\Http\Controllers\ITInitiative;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ITInitiative\MilestoneStoreRequest;
 use App\Models\Milestone;
-use App\Models\Project;
+use App\Models\TrsProject;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -13,7 +13,7 @@ use Illuminate\Validation\Rule;
 
 class MilestoneController extends Controller
 {
-    public function store(MilestoneStoreRequest $request, Project $project): RedirectResponse
+    public function store(MilestoneStoreRequest $request, TrsProject $project): RedirectResponse
     {
         $payload = $request->validated();
         $targetVersion = $this->resolveVersionForProject($project, $payload['version'] ?? null);
@@ -36,7 +36,7 @@ class MilestoneController extends Controller
         return back()->with('success', 'Roadmap activity added.');
     }
 
-    public function update(MilestoneStoreRequest $request, Project $project, Milestone $milestone): RedirectResponse
+    public function update(MilestoneStoreRequest $request, TrsProject $project, Milestone $milestone): RedirectResponse
     {
         if ((int) $milestone->project_id !== (int) $project->id) {
             abort(404);
@@ -60,7 +60,7 @@ class MilestoneController extends Controller
         return back()->with('success', 'Roadmap activity updated.');
     }
 
-    public function destroy(Project $project, Milestone $milestone): RedirectResponse
+    public function destroy(TrsProject $project, Milestone $milestone): RedirectResponse
     {
         if ((int) $milestone->project_id !== (int) $project->id) {
             abort(404);
@@ -71,7 +71,7 @@ class MilestoneController extends Controller
         return back()->with('success', 'Roadmap activity removed.');
     }
 
-    public function createVersion(Request $request, Project $project): RedirectResponse
+    public function createVersion(Request $request, TrsProject $project): RedirectResponse
     {
         $payload = $request->validate([
             'redirect_to' => ['nullable', 'string', Rule::in(['add', 'edit'])],
@@ -99,7 +99,7 @@ class MilestoneController extends Controller
             ->with('success', sprintf('Roadmap version %s berhasil dibuat.', $newVersion));
     }
 
-    private function resolveVersionForProject(Project $project, mixed $requestedVersion): string
+    private function resolveVersionForProject(TrsProject $project, mixed $requestedVersion): string
     {
         $this->normalizeLegacyVersionDataForProject($project);
         $existingVersions = $this->projectVersionLabels($project, false);
@@ -125,7 +125,7 @@ class MilestoneController extends Controller
         return 'v1';
     }
 
-    private function projectVersionLabels(Project $project, bool $withDefault = true): Collection
+    private function projectVersionLabels(TrsProject $project, bool $withDefault = true): Collection
     {
         $labelsFromMilestones = $project->milestones()
             ->reorder()
@@ -164,7 +164,7 @@ class MilestoneController extends Controller
         return 'v'.($maxVersionNumber + 1);
     }
 
-    private function normalizeLegacyVersionDataForProject(Project $project): void
+    private function normalizeLegacyVersionDataForProject(TrsProject $project): void
     {
         $project->milestones()
             ->where(function ($query): void {
@@ -173,7 +173,7 @@ class MilestoneController extends Controller
             ->update(['version' => 'v1']);
     }
 
-    private function roadmapVersionLabelsFromMeta(Project $project): Collection
+    private function roadmapVersionLabelsFromMeta(TrsProject $project): Collection
     {
         $metadata = is_array($project->metadata) ? $project->metadata : [];
         $labels = $metadata['roadmap_versions'] ?? [];
@@ -185,7 +185,7 @@ class MilestoneController extends Controller
         return collect($labels);
     }
 
-    private function persistRoadmapVersionMeta(Project $project, Collection $labels, ?string $activeVersion = null): void
+    private function persistRoadmapVersionMeta(TrsProject $project, Collection $labels, ?string $activeVersion = null): void
     {
         $normalizedLabels = $labels
             ->map(fn ($label) => $this->normalizeVersionLabel($label))
@@ -215,7 +215,7 @@ class MilestoneController extends Controller
         ]);
     }
 
-    private function milestonesForVersion(Project $project, string $version)
+    private function milestonesForVersion(TrsProject $project, string $version)
     {
         $normalizedVersion = $this->normalizeVersionLabel($version);
 
