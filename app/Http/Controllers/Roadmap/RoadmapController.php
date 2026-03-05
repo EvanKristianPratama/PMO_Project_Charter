@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Roadmap;
 
 use App\Http\Controllers\Controller;
 use App\Models\Milestone;
-use App\Models\MstProgram;
+use App\Models\MstInitiative;
 use App\Models\TrsProject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -37,21 +37,23 @@ class RoadmapController extends Controller
     }
 
     /**
-     * Display a single program with all its projects.
+     * Display a single initiative with all its related projects.
      */
-    public function show(MstProgram $program): Response
+    public function show(MstInitiative $initiative): Response
     {
-        $program->load(['projects' => function (Builder $query): void {
+        $initiative->load(['mappedProjects' => function ($query): void {
             $this->applyRoadmapProjectRelations($query);
             $query->orderBy('trs_projects.id');
         }]);
-        $program->setRelation(
-            'projects',
-            $this->decorateProjectsWithRoadmapVersionMeta($program->projects)
+
+        $initiative->setRelation(
+            'mappedProjects',
+            $this->decorateProjectsWithRoadmapVersionMeta($initiative->mappedProjects)
         );
 
         return Inertia::render('ProgramImplementation/RoadMap/Show', [
-            'program' => $program,
+            'initiative' => $initiative,
+            'projects' => $initiative->mappedProjects,
             'milestoneTypeOptions' => Milestone::roadmapTypeOptions(),
             ...$this->roadmapYearRange(),
         ]);
@@ -60,7 +62,7 @@ class RoadmapController extends Controller
     /**
      * Base project relations for roadmap pages.
      */
-    private function applyRoadmapProjectRelations(Builder $query): void
+    private function applyRoadmapProjectRelations($query): void
     {
         $query
             ->select(['trs_projects.id', 'trs_projects.name', 'trs_projects.code', 'trs_projects.metadata'])

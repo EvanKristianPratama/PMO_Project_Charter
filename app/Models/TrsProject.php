@@ -75,9 +75,4 @@ class TrsProject extends Model
     {
         return $this->belongsToMany(MstInitiative::class, 'trs_pc_initiative', 'pc_id', 'initiative_id');
     }
-
-    public function programs(): BelongsToMany
-    {
-        return $this->belongsToMany(MstProgram::class, 'trs_program_project', 'project_id', 'program_id');
-    }
 }
