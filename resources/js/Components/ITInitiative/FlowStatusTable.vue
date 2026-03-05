@@ -100,7 +100,7 @@
                                     Project Charter
                                 </Link>
                                 <Link
-                                    :href="`/roadmap?project_id=${project.id}`"
+                                    :href="project?.charter?.id ? `/roadmap?pc_id=${project.charter.id}` : '/roadmap'"
                                     class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-sky-100 text-sky-700 transition-colors hover:bg-sky-200 dark:bg-sky-500/20 dark:text-sky-300 dark:hover:bg-sky-500/30"
                                     title="Open Roadmap"
                                 >

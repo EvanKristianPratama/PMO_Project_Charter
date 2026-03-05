@@ -48,11 +48,6 @@ class TrsProject extends Model
         return $this->hasMany(ProjectCharter::class, 'project_id');
     }
 
-    public function milestones(): HasMany
-    {
-        return $this->hasMany(Milestone::class, 'project_id');
-    }
-
     public function statusRef(): BelongsTo
     {
         return $this->belongsTo(InitiativeStatus::class, 'status');
@@ -75,4 +70,5 @@ class TrsProject extends Model
     {
         return $this->belongsToMany(MstInitiative::class, 'trs_pc_initiative', 'pc_id', 'initiative_id');
     }
+
 }

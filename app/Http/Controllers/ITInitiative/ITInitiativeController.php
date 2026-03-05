@@ -32,7 +32,7 @@ class ITInitiativeController extends Controller
                             ->whereNotNull('duration')
                             ->where('duration', '!=', '');
                     })
-                    ->orWhereHas('milestones', static function ($milestones): void {
+                    ->orWhereHas('charter.milestones', static function ($milestones): void {
                         $milestones
                             ->whereNotNull('start_date')
                             ->orWhereNotNull('end_date');
@@ -52,7 +52,7 @@ class ITInitiativeController extends Controller
 
         $selectedProject = $resolvedProjectId
             ? TrsProject::query()
-                ->with(['charter', 'milestones', 'owner'])
+                ->with(['charter', 'charter.milestones', 'owner'])
                 ->find($resolvedProjectId)
             : null;
 
@@ -79,7 +79,7 @@ class ITInitiativeController extends Controller
         $filterStatus = $filters['status'] ?? null;
 
         $projects = TrsProject::query()
-            ->with(['owner', 'charter', 'statusRef:id,name', 'pcStatusImplementations', 'milestones'])
+            ->with(['owner', 'charter', 'charter.milestones', 'statusRef:id,name', 'pcStatusImplementations'])
             ->when($filterStatus, fn ($q, $status) => $q->where('status', $status))
             ->when($filters['search'] ?? null, fn ($q, $search) => $q->where(function ($inner) use ($search): void {
                 $inner->where('name', 'like', "%{$search}%")
@@ -283,8 +283,7 @@ class ITInitiativeController extends Controller
         $project = TrsProject::query()
             ->with([
                 'charter',
-                'charters' => static fn ($query) => $query->latest(),
-                'milestones',
+                'charters' => static fn ($query) => $query->latest()->with('milestones'),
                 'owner',
                 'statusRef:id,name',
                 'pcStatusImplementations',
@@ -300,9 +299,9 @@ class ITInitiativeController extends Controller
                     ->whereIn('initiative_id', $project->mappedInitiatives->pluck('id'));
             })
             ->with([
-                'charter' => static fn ($q) => $q->select('trs_project_charters.id', 'trs_project_charters.project_id', 'trs_project_charters.category', 'trs_project_charters.status', 'trs_project_charters.tgl_dokumen'),
+                'charter' => static fn ($q) => $q->select('trs_project_charters.id', 'trs_project_charters.project_id', 'trs_project_charters.category', 'trs_project_charters.status', 'trs_project_charters.tgl_dokumen', 'trs_project_charters.duration'),
                 'charters' => static fn ($q) => $q
-                    ->select('trs_project_charters.id', 'trs_project_charters.project_id', 'trs_project_charters.version_label', 'trs_project_charters.category', 'trs_project_charters.status', 'trs_project_charters.tgl_dokumen')
+                    ->select('trs_project_charters.id', 'trs_project_charters.project_id', 'trs_project_charters.version_label', 'trs_project_charters.category', 'trs_project_charters.status', 'trs_project_charters.tgl_dokumen', 'trs_project_charters.duration')
                     ->latest(),
                 'statusRef:id,name',
                 'pcStatusImplementations' => static fn ($q) => $q->orderBy('date', 'desc')->orderBy('time_start', 'desc')->limit(1),

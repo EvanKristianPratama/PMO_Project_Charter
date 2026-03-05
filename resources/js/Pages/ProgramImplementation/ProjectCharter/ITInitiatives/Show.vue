@@ -41,7 +41,7 @@
                 </div>
             </section>
 
-            <!-- Project Charter Section -->
+            <!-- Project Charter + Roadmap Section -->
             <template v-if="activeTab === 'charter'">
                 <section
                     class="print:hidden rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-white/10 dark:bg-[#171717]">
@@ -61,8 +61,19 @@
                                     </option>
                                 </select>
                                 <button type="button"
-                                    class="shrink-0 rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5">
-                                    Go to Roadmap
+                                    class="shrink-0 rounded-lg px-3 py-2 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60"
+                                    :class="showRoadmapPanel 
+                                        ? 'border border-red-300 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400 dark:hover:bg-red-950/40' 
+                                        : 'border border-slate-200 bg-blue-50 text-blue-700 hover:bg-blue-100 dark:border-slate-600 dark:bg-blue-950/20 dark:text-blue-400 dark:hover:bg-blue-950/40'"
+                                    :disabled="!resolvedRoadmapPcId"
+                                    @click="toggleRoadmapView">
+                                    {{ showRoadmapPanel ? 'Close Roadmap' : 'View Roadmap' }}
+                                </button>
+                                <button type="button"
+                                    class="shrink-0 rounded-lg border border-slate-200 bg-green-50 px-3 py-2 text-xs font-medium text-green-700 hover:bg-green-100 transition disabled:cursor-not-allowed disabled:opacity-60 dark:border-green-900/30 dark:bg-green-950/20 dark:text-green-400 dark:hover:bg-green-950/40"
+                                    :disabled="!resolvedRoadmapPcId"
+                                    @click="addRoadmap">
+                                    Add Roadmap
                                 </button>
                             </div>
                         </div>
@@ -145,18 +156,19 @@
 
                 </section>
 
-                <main class="print:m-0 print:p-0">
+                <main v-if="!showRoadmapPanel" class="print:m-0 print:p-0">
                     <CharterDocument :it-initiative="editableItInitiative" :form="form" :status-timeline="form.status"
                         :editable="isEditing" />
                 </main>
+                <section v-if="showRoadmapPanel" class="print:hidden rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                    <div class="mb-3 flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Project Roadmap</h3>
+                    </div>
+                    <ProjectRoadmap :project="roadmapProject"
+                        :form="{ objectives: roadmapProject?.charter?.objectives ?? '', duration: roadmapProject?.charter?.duration ?? '' }"
+                        :sequence="1" :year-start="2025" :year-end="2029" />
+                </section>
             </template>
-
-            <!-- Roadmap Section -->
-            <section v-if="activeTab === 'roadmap'" class="print:hidden">
-                <ProjectRoadmap :project="itInitiative"
-                    :form="{ objectives: itInitiative.charter?.objectives ?? '', duration: itInitiative.charter?.duration ?? '' }"
-                    :sequence="1" :year-start="2025" :year-end="2029" />
-            </section>
         </div>
     </UserLayout>
 </template>
@@ -208,7 +220,6 @@ const statusOptions = [
 const tabs = [
     { key: 'detail', label: 'Status Implementation' },
     { key: 'charter', label: 'Project Charter' },
-    { key: 'roadmap', label: 'Roadmap' },
 ];
 const parseTabFromUrl = () => {
     const query = String(page.url ?? '').split('?')[1] ?? '';
@@ -221,10 +232,6 @@ const parseTabFromUrl = () => {
 
     if (['charter', 'project-charter', 'project_charter'].includes(tab)) {
         return 'charter';
-    }
-
-    if (tab === 'roadmap') {
-        return 'roadmap';
     }
 
     return 'charter';
@@ -310,6 +317,46 @@ const selectedCharter = computed(() => {
     if (!selectedCharterId.value) return null;
     return charterVersions.value.find((c) => String(c.id) === String(selectedCharterId.value)) || null;
 });
+
+const selectedCharterForRoadmap = computed(() => selectedCharter.value ?? defaultCharter.value ?? null);
+
+const roadmapProject = computed(() => {
+    const base = props.itInitiative ?? {};
+    const charter = selectedCharterForRoadmap.value ?? null;
+    const milestones = Array.isArray(charter?.milestones) ? charter.milestones : [];
+
+    return {
+        ...base,
+        charter,
+        milestones,
+    };
+});
+
+const resolvedRoadmapPcId = computed(() => {
+    const selectedId = Number(selectedCharter.value?.id ?? 0);
+    if (selectedId > 0) {
+        return selectedId;
+    }
+
+    const fallbackId = Number(defaultCharter.value?.id ?? 0);
+    return fallbackId > 0 ? fallbackId : null;
+});
+
+const showRoadmapPanel = ref(false);
+
+const toggleRoadmapView = () => {
+    if (!resolvedRoadmapPcId.value) return;
+    showRoadmapPanel.value = !showRoadmapPanel.value;
+};
+
+const addRoadmap = () => {
+    if (!resolvedRoadmapPcId.value) return;
+    router.get('/roadmap/edit', {
+        pc_id: resolvedRoadmapPcId.value,
+    }, {
+        preserveScroll: true,
+    });
+};
 
 // A reactive proxy of itInitiative that reflects the in-form owner when editing
 const editableItInitiative = computed(() => {
