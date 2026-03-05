@@ -21,20 +21,16 @@
                 <div class="grid max-w-4xl gap-3 md:grid-cols-3">
                     <div class="md:col-span-2">
                         <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
-                            Pilih Project Charter
+                            Pilih Project
                         </label>
                         <select
-                            v-model="selectedProjectIdLocal"
+                            v-model.number="selectedProjectIdLocal"
                             class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#101826] dark:text-slate-100"
                             @change="handleProjectChange"
                         >
                             <option :value="null">-- Pilih Project --</option>
                             <option v-for="proj in projects" :key="proj.id" :value="proj.id">
-                                {{
-                                    proj.code
-                                        ? `${proj.code} - ${proj.name}${proj.charter?.version_label ? ` (${proj.charter.version_label})` : ''}`
-                                        : `${proj.name}${proj.charter?.version_label ? ` (${proj.charter.version_label})` : ''}`
-                                }}
+                                {{ proj.code ? `${proj.code} - ${proj.name}` : proj.name }}
                             </option>
                         </select>
                     </div>
@@ -42,19 +38,24 @@
                         <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
                             Versi Project Charter
                         </label>
-                        <input
-                            :value="activeProject?.charter?.version_label ?? activeProject?.version_label ?? '-'"
-                            type="text"
-                            class="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-700 dark:border-white/10 dark:bg-[#0f1623] dark:text-slate-100"
-                            readonly
-                        />
+                        <select
+                            v-model.number="selectedCharterIdLocal"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#101826] dark:text-slate-100"
+                            :disabled="charterOptions.length === 0"
+                            @change="handleCharterChange"
+                        >
+                            <option v-if="charterOptions.length === 0" :value="null">-- Tidak ada versi --</option>
+                            <option v-for="charter in charterOptions" :key="charter.id" :value="charter.id">
+                                {{ charter.version_label || `v${charter.id}` }}
+                            </option>
+                        </select>
                     </div>
                 </div>
             </section>
 
-            <main v-if="activeProject" class="space-y-5">
+            <main v-if="roadmapProject" class="space-y-5">
                 <ActivityQuarterManager
-                    :project="activeProject"
+                    :project="roadmapProject"
                     :selected-roadmap-version-id="selectedRoadmapVersionIdLocal"
                     :milestone-type-options="milestoneTypeOptionsDisplay"
                 />
@@ -85,12 +86,12 @@ import ActivityQuarterManager from '@/Components/Roadmap/ActivityQuarterManager.
 
 const props = defineProps({
     projects: { type: Array, default: () => [] },
-    selectedProject: { type: Object, default: null },
     selectedProjectId: { type: Number, default: null },
-    selectedRoadmapVersion: { type: String, default: null },
+    selectedCharterId: { type: Number, default: null },
 });
 
 const selectedProjectIdLocal = ref(props.selectedProjectId ?? null);
+const selectedCharterIdLocal = ref(props.selectedCharterId ?? null);
 
 const milestoneTypeOptionsDisplay = [
     { value: 1, label: 'Blok', timeline_style: 'block' },
@@ -101,9 +102,18 @@ watch(() => props.selectedProjectId, (nextProjectId) => {
     selectedProjectIdLocal.value = nextProjectId ?? null;
 }, { immediate: true });
 
+watch(() => props.selectedCharterId, (nextCharterId) => {
+    selectedCharterIdLocal.value = nextCharterId ?? null;
+}, { immediate: true });
+
 const handleProjectChange = () => {
+    const selectedId = Number(selectedProjectIdLocal.value);
+    const project = props.projects.find((item) => Number(item.id) === selectedId) ?? null;
+    const firstCharterId = project?.charters?.[0]?.id ?? null;
+    selectedCharterIdLocal.value = firstCharterId;
+
     router.get('/roadmap/add', {
-        pc_id: selectedProjectIdLocal.value || undefined,
+        pc_id: Number.isFinite(Number(firstCharterId)) && Number(firstCharterId) > 0 ? firstCharterId : undefined,
     }, {
         preserveState: true,
         preserveScroll: true,
@@ -111,12 +121,56 @@ const handleProjectChange = () => {
     });
 };
 
-const activeProject = computed(() =>
-    props.projects.find((project) => project.id === selectedProjectIdLocal.value) ?? null
-);
+const handleCharterChange = () => {
+    const selectedId = Number(selectedCharterIdLocal.value);
+    router.get('/roadmap/add', {
+        pc_id: Number.isFinite(selectedId) && selectedId > 0 ? selectedId : undefined,
+    }, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+    });
+};
+
+const activeProject = computed(() => {
+    const selectedId = Number(selectedProjectIdLocal.value);
+    return props.projects.find((project) => Number(project.id) === selectedId) ?? null;
+});
+
+const charterOptions = computed(() => activeProject.value?.charters ?? []);
+
+const activeCharter = computed(() => {
+    const selectedId = Number(selectedCharterIdLocal.value);
+    const found = charterOptions.value.find((charter) => Number(charter.id) === selectedId);
+    return found ?? charterOptions.value[0] ?? null;
+});
+
+watch(charterOptions, (options) => {
+    if (!options.length) {
+        selectedCharterIdLocal.value = null;
+        return;
+    }
+
+    const selectedId = Number(selectedCharterIdLocal.value);
+    if (!options.some((charter) => Number(charter.id) === selectedId)) {
+        selectedCharterIdLocal.value = options[0].id;
+    }
+}, { immediate: true });
+
+const roadmapProject = computed(() => {
+    if (!activeProject.value || !activeCharter.value) {
+        return null;
+    }
+
+    return {
+        ...activeProject.value,
+        charter: activeCharter.value,
+        milestones: Array.isArray(activeCharter.value.milestones) ? activeCharter.value.milestones : [],
+    };
+});
 
 const selectedRoadmapVersionIdLocal = computed(() => (
-    activeProject.value?.charter?.version_label ?? activeProject.value?.version_label ?? null
+    activeCharter.value?.version_label ?? null
 ));
 
 </script>

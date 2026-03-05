@@ -10,7 +10,6 @@ class Milestone extends Model
     protected $table = 'trs_milestones';
 
     protected $fillable = [
-        'project_id',
         'pc_id',
         'version',
         'title',
@@ -58,11 +57,6 @@ class Milestone extends Model
             'end_date'   => 'date',
             'milestone_type' => 'integer',
         ];
-    }
-
-    public function project(): BelongsTo
-    {
-        return $this->belongsTo(TrsProject::class);
     }
 
     public function charter(): BelongsTo

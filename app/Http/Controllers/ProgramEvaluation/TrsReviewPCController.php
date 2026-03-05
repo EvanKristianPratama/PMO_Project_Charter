@@ -79,17 +79,28 @@ class TrsReviewPCController extends Controller
                 if ($mappedProjectIds->isNotEmpty()) {
                     $mappedProjects = TrsProject::query()
                         ->with([
-                            'charter',
                             'charters' => static fn ($q) => $q
                                 ->select('trs_project_charters.id', 'trs_project_charters.project_id', 'trs_project_charters.version_label', 'trs_project_charters.status', 'trs_project_charters.category', 'trs_project_charters.owner', 'trs_project_charters.tgl_dokumen', 'trs_project_charters.duration', 'trs_project_charters.background', 'trs_project_charters.objectives', 'trs_project_charters.scope', 'trs_project_charters.impact_value', 'trs_project_charters.key_personnel', 'trs_project_charters.key_items', 'trs_project_charters.budget', 'trs_project_charters.risks_identified', 'trs_project_charters.risk_mitigation')
-                                ->latest(),
+                                ->latest()
+                                ->with('milestones'),
                             'owner',
-                            'milestones',
                             'statusRef:id,name',
                             'pcStatusImplementations',
                         ])
                         ->whereIn('id', $mappedProjectIds)
                         ->get()
+                        ->map(static function (TrsProject $project): TrsProject {
+                            $charter = $project->charters->first() ?? null;
+
+                            if ($charter) {
+                                $project->setRelation('charter', $charter);
+                                $project->setAttribute('milestones', $charter->milestones ?? collect());
+                            } else {
+                                $project->setAttribute('milestones', collect());
+                            }
+
+                            return $project;
+                        })
                         ->values()
                         ->all();
 
