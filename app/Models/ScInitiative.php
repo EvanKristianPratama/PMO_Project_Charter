@@ -12,6 +12,7 @@ use App\Models\Theme;
 use App\Models\ScStatusImplementation;
 use App\Models\UseCase;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -79,5 +80,15 @@ class ScInitiative extends Model
     public function digitalDetail()
     {
         return $this->hasMany(DigitalDetail::class, 'digital_id');
+    }
+
+    public function masterInitiative(): BelongsTo
+    {
+        return $this->belongsTo(MstInitiative::class, 'initiative_id');
+    }
+
+    public function scDetails(): HasMany
+    {
+        return $this->hasMany(ScDetail::class, 'digital_id');
     }
 }

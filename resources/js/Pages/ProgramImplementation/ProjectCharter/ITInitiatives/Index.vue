@@ -139,6 +139,13 @@
                                     </option>
                                 </select>
                             </div>
+                            <button
+                                type="button"
+                                class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#171717] dark:text-slate-300 dark:hover:bg-white/5"
+                                @click="toggleAllProjects"
+                            >
+                                {{ allExpanded ? 'Collapse All' : 'Expand All' }}
+                            </button>
                             <Link
                                 :href="addRoadmapHref"
                                 class="inline-flex items-center justify-center rounded-lg bg-[#0B2A8A] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#102f95]"
@@ -149,18 +156,40 @@
                     </div>
                 </div>
 
-                <ProjectRoadmap
-                    v-for="(project, roadmapIndex) in roadmapItems"
-                    :key="`it-roadmap-${project.id}`"
-                    :project="project"
-                    :form="{
-                        objectives: project.charter?.objectives ?? '',
-                        duration: project.charter?.duration ?? '',
-                    }"
-                    :sequence="roadmapIndex + 1"
-                    :year-start="roadmapYearStart"
-                    :year-end="roadmapYearEnd"
-                />
+                <div v-for="(project, roadmapIndex) in roadmapItems" :key="`it-roadmap-${project.id}`">
+                    <!-- Summary bar (collapsed) -->
+                    <ProjectRoadmapSummary
+                        v-if="!expandedProjects.has(project.id)"
+                        :project="project"
+                        :sequence="roadmapIndex + 1"
+                        :year-start="roadmapYearStart"
+                        :year-end="roadmapYearEnd"
+                        :expanded="false"
+                        @toggle="toggleProjectExpand(project.id)"
+                    />
+
+                    <!-- Detail view (expanded) -->
+                    <div v-else>
+                        <ProjectRoadmapSummary
+                            :project="project"
+                            :sequence="roadmapIndex + 1"
+                            :year-start="roadmapYearStart"
+                            :year-end="roadmapYearEnd"
+                            :expanded="true"
+                            @toggle="toggleProjectExpand(project.id)"
+                        />
+                        <ProjectRoadmap
+                            :project="project"
+                            :form="{
+                                objectives: project.charter?.objectives ?? '',
+                                duration: project.charter?.duration ?? '',
+                            }"
+                            :sequence="roadmapIndex + 1"
+                            :year-start="roadmapYearStart"
+                            :year-end="roadmapYearEnd"
+                        />
+                    </div>
+                </div>
 
                 <section
                     v-if="roadmapItems.length === 0"
@@ -176,7 +205,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, reactive } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import { statusFlowClassByIndex } from '@/Composables/initiativeStatus';
@@ -184,6 +213,7 @@ import { useFlowFilter } from '@/Composables/useFlowFilter';
 import FlowStatusTable from '@/Components/ITInitiative/FlowStatusTable.vue';
 import MasterInitiativeTable from '@/Components/ITInitiative/MasterInitiativeTable.vue';
 import ProjectRoadmap from '@/Components/Roadmap/ProjectRoadmap.vue';
+import ProjectRoadmapSummary from '@/Components/Roadmap/ProjectRoadmapSummary.vue';
 
 const props = defineProps({
     itInitiatives: {
@@ -245,6 +275,31 @@ const showAllCharter = ref(false);
 const selectedRoadmapProjectId = ref('all');
 const roadmapYearStart = 2025;
 const roadmapYearEnd = 2029;
+
+// ── Expand / Collapse per project ──
+const expandedProjects = reactive(new Set());
+
+const toggleProjectExpand = (projectId) => {
+    if (expandedProjects.has(projectId)) {
+        expandedProjects.delete(projectId);
+    } else {
+        expandedProjects.add(projectId);
+    }
+};
+
+const allExpanded = computed(() => {
+    const items = roadmapItems.value;
+    return items.length > 0 && items.every((p) => expandedProjects.has(p.id));
+});
+
+const toggleAllProjects = () => {
+    const items = roadmapItems.value;
+    if (allExpanded.value) {
+        expandedProjects.clear();
+    } else {
+        items.forEach((p) => expandedProjects.add(p.id));
+    }
+};
 
 const showAllProjectCharter = () => {
     hasTableSelection.value = true;

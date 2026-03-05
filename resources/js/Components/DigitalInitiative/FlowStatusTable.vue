@@ -1,4 +1,9 @@
 <template>
+    <div class="mb-2 flex items-center justify-end">
+        <p class="text-[10px] text-slate-500 dark:text-slate-400">
+            1 = Low, 2 = Medium, 3 = High, 4 = TBC (To be Discussed)
+        </p>
+    </div>
     <div class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/5 dark:bg-[#1a1a1a]">
         <div class="overflow-x-hidden">
             <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
@@ -42,9 +47,9 @@
                             <span class="break-words" :title="cellVal(item, 'desc', 'description')">{{ cellVal(item, 'desc', 'description') }}</span>
                         </td>
                         <td class="px-3 py-3 text-[11px] text-slate-700 dark:text-slate-200">
-                            <span class="line-clamp-2" :title="cellVal(item, 'value')">{{ cellVal(item, 'value') }}</span>
+                            <span class="line-clamp-2" :title="displayScore(item, 'value')">{{ displayScore(item, 'value') }}</span>
                         </td>
-                        <td class="px-3 py-3 text-[11px] text-slate-700 dark:text-slate-200">{{ cellVal(item, 'urgency') }}</td>
+                        <td class="px-3 py-3 text-[11px] text-slate-700 dark:text-slate-200">{{ displayScore(item, 'urgency') }}</td>
                         <td class="px-3 py-3 text-[11px] text-slate-700 dark:text-slate-200">{{ cellVal(item, 'rjjp') }}</td>
                         <td class="px-3 py-3 text-[11px] text-slate-700 dark:text-slate-200">{{ cellVal(item, 'coe') }}</td>
                         <td class="px-3 py-3">
@@ -118,6 +123,23 @@ function cellVal(item, ...keys) {
     }
 
     return '-';
+}
+
+const scoreLabel = (value) => {
+    const map = { 1: 'Low', 2: 'Medium', 3: 'High', 4: 'TBC' };
+    return map[Number(value)] ?? '-';
+};
+
+function displayScore(item, field) {
+    const rawValue = cellVal(item, field);
+    if (rawValue === '-' || rawValue == null) return rawValue;
+    
+    // If it's a number 1-4, map it. Otherwise return the value directly (some statuses might already be mapped from parent)
+    const num = Number(rawValue);
+    if (!isNaN(num) && num >= 1 && num <= 4) {
+        return scoreLabel(num);
+    }
+    return rawValue;
 }
 
 function hasFilled(value) {

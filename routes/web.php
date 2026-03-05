@@ -18,6 +18,16 @@ use App\Http\Controllers\ProgramEvaluation\TrsReviewPCController;
 use App\Http\Controllers\ProgramImplementation\DashboardController;
 use App\Http\Controllers\ProgramImplementation\ProgramImplementationController;
 use App\Http\Controllers\ProgramPlanning\DashboardController as PlanningDashboardController;
+use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Appendix\CreateController as ProgramDefinitionDigitalInitiativesAppendixCreateController;
+use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Appendix\EditController as ProgramDefinitionDigitalInitiativesAppendixEditController;
+use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Appendix\IndexController as ProgramDefinitionDigitalInitiativesAppendixIndexController;
+use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Appendix\StoreController as ProgramDefinitionDigitalInitiativesAppendixStoreController;
+use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Appendix\UpdateController as ProgramDefinitionDigitalInitiativesAppendixUpdateController;
+use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Compendium\CreateController as ProgramDefinitionDigitalInitiativesCompendiumCreateController;
+use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Compendium\EditController as ProgramDefinitionDigitalInitiativesCompendiumEditController;
+use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Compendium\IndexController as ProgramDefinitionDigitalInitiativesCompendiumIndexController;
+use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Compendium\StoreController as ProgramDefinitionDigitalInitiativesCompendiumStoreController;
+use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Compendium\UpdateController as ProgramDefinitionDigitalInitiativesCompendiumUpdateController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\IndexController as ProgramDefinitionDigitalInitiativesController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\EditController as ProgramDefinitionDigitalInitiativesEditController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\UpdateController as ProgramDefinitionDigitalInitiativesUpdateController;
@@ -66,6 +76,20 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/program-planning/program-definition/digital-initiatives', ProgramDefinitionDigitalInitiativesController::class)->name('program-planning.program-definition.digital-initiatives');
     Route::get('/program-planning/program-definition/digital-initiatives/{digitalInitiative}/edit', ProgramDefinitionDigitalInitiativesEditController::class)->name('program-planning.program-definition.digital-initiatives.edit');
     Route::put('/program-planning/program-definition/digital-initiatives/{digitalInitiative}', ProgramDefinitionDigitalInitiativesUpdateController::class)->name('program-planning.program-definition.digital-initiatives.update');
+    Route::prefix('/program-planning/program-definition/digital-initiatives/appendix')->name('program-planning.program-definition.digital-initiatives.appendix.')->group(function () {
+        Route::get('/', ProgramDefinitionDigitalInitiativesAppendixIndexController::class)->name('index');
+        Route::get('/create', ProgramDefinitionDigitalInitiativesAppendixCreateController::class)->name('create');
+        Route::post('/', ProgramDefinitionDigitalInitiativesAppendixStoreController::class)->name('store');
+        Route::get('/{scInitiative}/edit', ProgramDefinitionDigitalInitiativesAppendixEditController::class)->name('edit');
+        Route::put('/{scInitiative}', ProgramDefinitionDigitalInitiativesAppendixUpdateController::class)->name('update');
+    });
+    Route::prefix('/program-planning/program-definition/digital-initiatives/compendium')->name('program-planning.program-definition.digital-initiatives.compendium.')->group(function () {
+        Route::get('/', ProgramDefinitionDigitalInitiativesCompendiumIndexController::class)->name('index');
+        Route::get('/create', ProgramDefinitionDigitalInitiativesCompendiumCreateController::class)->name('create');
+        Route::post('/', ProgramDefinitionDigitalInitiativesCompendiumStoreController::class)->name('store');
+        Route::get('/{scInitiative}/edit', ProgramDefinitionDigitalInitiativesCompendiumEditController::class)->name('edit');
+        Route::put('/{scInitiative}', ProgramDefinitionDigitalInitiativesCompendiumUpdateController::class)->name('update');
+    });
 
     // ═══ Master Data ═══════════════════════════════════════════════
     Route::get('/master-data', MasterDataController::class)->name('master-data.index');

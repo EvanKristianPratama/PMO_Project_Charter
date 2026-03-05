@@ -12,7 +12,7 @@ class MstInitiativeController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'code'           => 'nullable|string|max:100',
+            'code'           => 'nullable|integer|min:0',
             'name'           => 'required|string|max:255',
             'description'    => 'nullable|string',
             'tipe_initiative' => 'required|integer|in:1,2',
@@ -31,7 +31,7 @@ class MstInitiativeController extends Controller
     public function update(Request $request, MstInitiative $mstInitiative): RedirectResponse
     {
         $validated = $request->validate([
-            'code'           => 'nullable|string|max:100',
+            'code'           => 'nullable|integer|min:0',
             'name'           => 'required|string|max:255',
             'description'    => 'nullable|string',
             'tipe_initiative' => 'required|integer|in:1,2',

@@ -4,6 +4,9 @@
             <div class="flex items-center justify-between gap-3">
                 <div>
                     <h2 class="text-base font-semibold text-slate-900 dark:text-white">{{ charterLabel }} Digital Initiatives</h2>
+                    <p class="mt-1 text-[10px] text-slate-500 dark:text-slate-400">
+                        1 = Low, 2 = Medium, 3 = High, 4 = TBC (To be Discussed)
+                    </p>
                 </div>
                 <Link
                     :href="`/digital-initiatives?status=${completedStatusId}`"

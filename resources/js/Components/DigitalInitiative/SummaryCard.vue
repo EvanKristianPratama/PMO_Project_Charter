@@ -36,14 +36,16 @@
                     Digital Initiative
                 </button>
                 <Link
-                    href="/digital-initiatives"
+                    href="/program-planning/program-definition/digital-initiatives/compendium"
                     class="inline-flex items-center rounded-full border border-white/30 bg-white/15 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/25"
+                    @click.stop
                 >
-                    Compedium List
+                    Compendium List
                 </Link>
                 <Link
-                    href="/digital-initiatives"
+                    href="/program-planning/program-definition/digital-initiatives/appendix"
                     class="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/90 transition hover:bg-white/20"
+                    @click.stop
                 >
                     Appendix List
                 </Link>

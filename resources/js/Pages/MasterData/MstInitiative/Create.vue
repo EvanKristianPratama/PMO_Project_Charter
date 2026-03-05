@@ -27,8 +27,8 @@
                 <div class="overflow-x-auto">
                     <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
                         <colgroup>
-                            <col class="w-[8%]"><col class="w-[10%]"><col class="w-[14%]">
-                            <col class="w-[14%]"><col class="w-[22%]"><col class="w-[32%]">
+                            <col class="w-[8%]"><col class="w-[10%]"><col class="w-[12%]">
+                            <col class="w-[12%]"><col class="w-[12%]"><col class="w-[20%]"><col class="w-[26%]">
                         </colgroup>
                         <thead class="bg-slate-50 dark:bg-white/5">
                             <tr>
@@ -38,7 +38,7 @@
                         <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
                             <tr class="transition-colors hover:bg-slate-50 dark:hover:bg-white/5">
                                 <td class="px-3 py-2.5">
-                                    <input v-model="form.code" type="text" placeholder="DI-001" class="form-input-sm" />
+                                    <input v-model="form.code" type="number" min="0" placeholder="1001" class="form-input-sm" />
                                 </td>
                                 <td class="px-3 py-2.5">
                                     <select v-model="form.tipe_initiative" class="form-input-sm">
@@ -58,6 +58,12 @@
                                         <option v-for="opt in organizationOptions" :key="opt.id" :value="opt.id">
                                             {{ opt.groub ? `${opt.groub} — ` : '' }}{{ opt.name }}
                                         </option>
+                                    </select>
+                                </td>
+                                <td class="px-3 py-2.5">
+                                    <select v-model="form.source" class="form-input-sm">
+                                        <option :value="null">—</option>
+                                        <option v-for="opt in sourceOptions" :key="opt.id" :value="opt.id">{{ opt.name }}</option>
                                     </select>
                                 </td>
                                 <td class="px-3 py-2.5">
@@ -168,13 +174,14 @@ defineProps({
     coeOptions:          { type: Array, default: () => [] },
     organizationOptions: { type: Array, default: () => [] },
     tipeOptions:         { type: Array, default: () => [] },
+    sourceOptions:       { type: Array, default: () => [] },
 });
 
-const masterHeaders = ['Code', 'Tipe', 'CoE', 'Organisasi', 'Nama', 'Deskripsi'];
+const masterHeaders = ['Code', 'Tipe', 'CoE', 'Organisasi', 'Sumber Data', 'Nama', 'Deskripsi'];
 const statusHeaders = ['No', 'Status', 'Tanggal', 'Notes', 'Action'];
 
 const form = useForm({
-    code: '', name: '', description: '', tipe_initiative: '', coe_id: null, business_unit: null,
+    code: '', name: '', description: '', tipe_initiative: '', coe_id: null, business_unit: null, source: null,
 });
 
 // ── Local status management ──

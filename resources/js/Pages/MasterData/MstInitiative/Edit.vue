@@ -29,8 +29,8 @@
                 <div class="overflow-x-auto">
                     <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
                         <colgroup>
-                            <col class="w-[8%]"><col class="w-[10%]"><col class="w-[14%]">
-                            <col class="w-[14%]"><col class="w-[22%]"><col class="w-[32%]">
+                            <col class="w-[8%]"><col class="w-[10%]"><col class="w-[12%]">
+                            <col class="w-[12%]"><col class="w-[12%]"><col class="w-[20%]"><col class="w-[26%]">
                         </colgroup>
                         <thead class="bg-slate-50 dark:bg-white/5">
                             <tr>
@@ -40,7 +40,7 @@
                         <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
                             <tr class="transition-colors hover:bg-slate-50 dark:hover:bg-white/5">
                                 <td class="px-3 py-2.5">
-                                    <input v-model="masterForm.code" type="text" placeholder="DI-001" class="form-input-sm" />
+                                    <input v-model="masterForm.code" type="number" min="0" placeholder="1001" class="form-input-sm" />
                                 </td>
                                 <td class="px-3 py-2.5">
                                     <select v-model="masterForm.tipe_initiative" class="form-input-sm">
@@ -60,6 +60,12 @@
                                         <option v-for="opt in organizationOptions" :key="opt.id" :value="opt.id">
                                             {{ opt.groub ? `${opt.groub} — ` : '' }}{{ opt.name }}
                                         </option>
+                                    </select>
+                                </td>
+                                <td class="px-3 py-2.5">
+                                    <select v-model="masterForm.source" class="form-input-sm">
+                                        <option :value="null">—</option>
+                                        <option v-for="opt in sourceOptions" :key="opt.id" :value="opt.id">{{ opt.name }}</option>
                                     </select>
                                 </td>
                                 <td class="px-3 py-2.5">
@@ -92,28 +98,74 @@
                 <div class="overflow-x-auto">
                     <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
                         <colgroup>
-                            <col class="w-[6%]"><col class="w-[28%]"><col class="w-[22%]"><col class="w-[44%]">
+                            <col class="w-[5%]"><col class="w-[22%]"><col class="w-[18%]"><col class="w-[38%]"><col class="w-[17%]">
                         </colgroup>
                         <thead class="bg-slate-50 dark:bg-white/5">
                             <tr>
                                 <th v-for="h in statusHeaders" :key="h" class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">{{ h }}</th>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
                             <tr v-for="(entry, idx) in initiative.status_history" :key="entry.id"
                                 class="transition-colors hover:bg-slate-50 dark:hover:bg-white/5">
                                 <td class="px-3 py-2.5 text-slate-500">{{ idx + 1 }}</td>
-                                <td class="px-3 py-2.5">
-                                    <span :class="['inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold capitalize', getStatusClass(entry.status)]">
-                                        {{ entry.status }}
-                                    </span>
-                                </td>
-                                <td class="px-3 py-2.5 text-slate-600 dark:text-slate-300">{{ formatDate(entry.tanggal) }}</td>
-                                <td class="px-3 py-2.5 text-slate-600 dark:text-slate-300">{{ entry.notes ?? '-' }}</td>
+
+                                <!-- View mode -->
+                                <template v-if="editingId !== entry.id">
+                                    <td class="px-3 py-2.5">
+                                        <span :class="['inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold capitalize', getStatusClass(entry.status)]">
+                                            {{ entry.status }}
+                                        </span>
+                                    </td>
+                                    <td class="px-3 py-2.5 text-slate-600 dark:text-slate-300">{{ formatDate(entry.tanggal) }}</td>
+                                    <td class="px-3 py-2.5 text-slate-600 dark:text-slate-300">{{ entry.notes ?? '-' }}</td>
+                                    <td class="px-3 py-2.5">
+                                        <div class="flex gap-1">
+                                            <button type="button" @click="startEdit(entry)"
+                                                class="inline-flex items-center rounded-md bg-amber-50 px-2 py-1 text-[10px] font-semibold text-amber-700 ring-1 ring-amber-200 hover:bg-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:ring-amber-700/40">
+                                                ✏️ Edit
+                                            </button>
+                                            <button type="button" @click="deleteStatus(entry.id)" :disabled="deletingId === entry.id"
+                                                class="inline-flex items-center rounded-md bg-rose-50 px-2 py-1 text-[10px] font-semibold text-rose-700 ring-1 ring-rose-200 hover:bg-rose-100 disabled:opacity-50 dark:bg-rose-900/20 dark:text-rose-400 dark:ring-rose-700/40">
+                                                🗑️ Hapus
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
+
+                                <!-- Edit mode -->
+                                <template v-else>
+                                    <td class="px-3 py-2.5">
+                                        <select v-model="editRow.status" class="form-input-sm">
+                                            <option value="">— Pilih —</option>
+                                            <option v-for="opt in statusList" :key="opt" :value="opt">{{ opt }}</option>
+                                        </select>
+                                        <p v-if="editErrors.status" class="mt-0.5 text-[10px] text-rose-500">{{ editErrors.status }}</p>
+                                    </td>
+                                    <td class="px-3 py-2.5">
+                                        <input v-model="editRow.tanggal" type="date" class="form-input-sm" />
+                                    </td>
+                                    <td class="px-3 py-2.5">
+                                        <input v-model="editRow.notes" type="text" placeholder="Catatan..." class="form-input-sm" />
+                                    </td>
+                                    <td class="px-3 py-2.5">
+                                        <div class="flex gap-1">
+                                            <button type="button" @click="saveEdit(entry.id)" :disabled="editProcessing"
+                                                class="inline-flex items-center rounded-md bg-emerald-500 px-2 py-1 text-[10px] font-semibold text-white hover:bg-emerald-600 disabled:opacity-50">
+                                                Simpan
+                                            </button>
+                                            <button type="button" @click="cancelEdit"
+                                                class="inline-flex items-center rounded-md border border-slate-200 px-2 py-1 text-[10px] font-semibold text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:text-slate-300">
+                                                Batal
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
                             </tr>
 
                             <tr v-if="!initiative.status_history?.length && !showNewRow">
-                                <td colspan="4" class="px-6 py-8 text-center text-xs text-slate-500">Belum ada riwayat status.</td>
+                                <td colspan="5" class="px-6 py-8 text-center text-xs text-slate-500">Belum ada riwayat status.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -163,9 +215,10 @@ const props = defineProps({
     coeOptions:          { type: Array, default: () => [] },
     organizationOptions: { type: Array, default: () => [] },
     tipeOptions:         { type: Array, default: () => [] },
+    sourceOptions:       { type: Array, default: () => [] },
 });
 
-const masterHeaders = ['Code', 'Tipe', 'CoE', 'Organisasi', 'Nama', 'Deskripsi'];
+const masterHeaders = ['Code', 'Tipe', 'CoE', 'Organisasi', 'Sumber Data', 'Nama', 'Deskripsi'];
 const statusHeaders = ['No', 'Status', 'Tanggal', 'Notes'];
 
 // ── Master form ──
@@ -176,6 +229,7 @@ const masterForm = useForm({
     tipe_initiative: props.initiative.tipe_initiative ?? '',
     coe_id:          props.initiative.coe_id ?? null,
     business_unit:   props.initiative.business_unit ?? null,
+    source:          props.initiative.source ?? null,
 });
 
 const submitMaster = () => {
@@ -207,6 +261,50 @@ const saveNewRow = () => {
     }, {
         preserveScroll: true,
         onFinish: () => { newRowProcessing.value = false; showNewRow.value = false; },
+    });
+};
+
+// ── Edit status ──
+const editingId = ref(null);
+const editRow = reactive({ status: '', tanggal: '', notes: '' });
+const editErrors = reactive({ status: '' });
+const editProcessing = ref(false);
+
+const startEdit = (entry) => {
+    editingId.value = entry.id;
+    editRow.status = entry.status ?? '';
+    editRow.tanggal = entry.tanggal ?? '';
+    editRow.notes = entry.notes ?? '';
+    editErrors.status = '';
+};
+
+const cancelEdit = () => {
+    editingId.value = null;
+};
+
+const saveEdit = (statusId) => {
+    editErrors.status = '';
+    if (!editRow.status.trim()) { editErrors.status = 'Status wajib diisi.'; return; }
+    editProcessing.value = true;
+    router.put(`/master-data/master-initiatives/status/${statusId}`, {
+        status: editRow.status,
+        tanggal: editRow.tanggal || null,
+        notes: editRow.notes || null,
+    }, {
+        preserveScroll: true,
+        onFinish: () => { editProcessing.value = false; editingId.value = null; },
+    });
+};
+
+// ── Delete status ──
+const deletingId = ref(null);
+
+const deleteStatus = (statusId) => {
+    if (!window.confirm('Hapus riwayat status ini?')) return;
+    deletingId.value = statusId;
+    router.delete(`/master-data/master-initiatives/status/${statusId}`, {
+        preserveScroll: true,
+        onFinish: () => { deletingId.value = null; },
     });
 };
 

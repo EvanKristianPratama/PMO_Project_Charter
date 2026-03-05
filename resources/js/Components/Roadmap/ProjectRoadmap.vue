@@ -94,26 +94,42 @@ const selectedRoadmapVersionIdNormalized = computed(() => {
     return normalizeVersionLabel(props.selectedRoadmapVersionId);
 });
 
-const sortedMilestones = computed(() =>
-    [...(props.project?.milestones ?? [])]
-        .filter((item) => {
-            const selectedVersionId = selectedRoadmapVersionIdNormalized.value;
+const availableVersions = computed(() => {
+    const milestones = props.project?.milestones ?? [];
+    if (milestones.length === 0) return ['v1'];
 
-            if (!selectedVersionId) {
-                return true;
-            }
+    const labels = new Set(milestones.map((m) => normalizeVersionLabel(m.version)));
+    if (labels.size === 0) return ['v1'];
 
-            return normalizeVersionLabel(item.version) === selectedVersionId;
-        })
+    return Array.from(labels).sort((a, b) => {
+        const numA = Number(a.replace(/\D/g, '')) || 0;
+        const numB = Number(b.replace(/\D/g, '')) || 0;
+        return numA - numB; // Ascending (v1, v2)
+    });
+});
+
+const versionsToRender = computed(() => {
+    // If a specific version is selected, only render that one.
+    // Otherwise, render all available versions.
+    const selected = selectedRoadmapVersionIdNormalized.value;
+    if (selected) {
+        return availableVersions.value.includes(selected) ? [selected] : availableVersions.value;
+    }
+    return availableVersions.value;
+});
+
+const getMilestonesForVersion = (versionId) => {
+    return [...(props.project?.milestones ?? [])]
+        .filter((item) => normalizeVersionLabel(item.version) === versionId)
         .sort((a, b) => {
-        const od = (Number(a.order ?? 0)) - (Number(b.order ?? 0));
-        return od !== 0 ? od : String(a.start_date ?? '').localeCompare(String(b.start_date ?? ''));
-    })
-);
+            const od = (Number(a.order ?? 0)) - (Number(b.order ?? 0));
+            return od !== 0 ? od : String(a.start_date ?? '').localeCompare(String(b.start_date ?? ''));
+        });
+};
 
-const buildRowsFromMilestones = () => {
+const buildRowsFromMilestones = (milestones) => {
     const sections = new Map();
-    for (const ms of sortedMilestones.value) {
+    for (const ms of milestones) {
         const sectionLabel = String(ms.type || 'Roadmap Activity').trim() || 'Roadmap Activity';
         const typeCode = normalizeMilestoneType(ms.milestone_type ?? ms.type);
         const si     = toQuarterIndex(ms.start_date ?? ms.end_date);
@@ -132,12 +148,25 @@ const buildRowsFromMilestones = () => {
     return [...sections.entries()].map(([label, rows]) => ({ label, rows }));
 };
 
-const roadmapSections = computed(() => {
-    if (sortedMilestones.value.length > 0) return buildRowsFromMilestones();
-    const rows = objectives.value.length
-        ? objectives.value.map((obj) => ({ activity: obj, output: [obj], hasTimeline: false, start: null, end: null, timelineStyle: 'block' }))
-        : [{ activity: 'Belum ada activity roadmap', output: [], hasTimeline: false, start: null, end: null, timelineStyle: 'block' }];
-    return [{ label: objectives.value.length ? 'Objectives' : 'Roadmap Activity', rows }];
+const versionedRoadmaps = computed(() => {
+    return versionsToRender.value.map((versionId) => {
+        const milestones = getMilestonesForVersion(versionId);
+        let sections = [];
+
+        if (milestones.length > 0) {
+            sections = buildRowsFromMilestones(milestones);
+        } else {
+            const rows = objectives.value.length
+                ? objectives.value.map((obj) => ({ activity: obj, output: [obj], hasTimeline: false, start: null, end: null, timelineStyle: 'block' }))
+                : [{ activity: 'Belum ada activity roadmap', output: [], hasTimeline: false, start: null, end: null, timelineStyle: 'block' }];
+            sections = [{ label: objectives.value.length ? 'Objectives' : 'Roadmap Activity', rows }];
+        }
+
+        return {
+            versionId,
+            sections,
+        };
+    });
 });
 
 const isActive = (row, idx) => row.hasTimeline && idx >= row.start && idx <= row.end;
@@ -151,79 +180,84 @@ const timelineCellClass = (row, quarterIndex, cell) => ({
 
 <template>
     <div class="roadmap-wrap overflow-x-auto">
-        <table class="roadmap-table" :style="{ '--qcount': Math.max(totalCells, 1) }">
-            <colgroup>
-                <col class="col-no">
-                <col class="col-initiative">
-                <col v-for="(_, i) in quarterCells" :key="`cq-${i}`" class="col-quarter">
-                <col class="col-output">
-            </colgroup>
+        <div v-for="roadmap in versionedRoadmaps" :key="`rm-v-${roadmap.versionId}`" class="roadmap-version-block">
+            <table class="roadmap-table" :style="{ '--qcount': Math.max(totalCells, 1) }">
+                <colgroup>
+                    <col class="col-no">
+                    <col class="col-initiative">
+                    <col v-for="(_, i) in quarterCells" :key="`cq-${roadmap.versionId}-${i}`" class="col-quarter">
+                    <col class="col-output">
+                </colgroup>
 
-            <!-- ── HEAD ── -->
-            <thead>
-                <tr>
-                    <th rowspan="2" class="th">No</th>
-                    <th rowspan="2" class="th th-left">IT Initiative Roadmap {{ yStart }}–{{ yEnd }}</th>
-                    <th v-for="year in years" :key="`y-${year}`" colspan="4" class="th th-year">{{ year }}</th>
-                    <th rowspan="2" class="th">Output</th>
-                </tr>
-                <tr>
-                    <th
-                        v-for="(cell, i) in quarterCells"
-                        :key="`qh-${i}`"
-                        class="th-q"
-                        :class="{ 'border-r-blue': cell.quarter === 4 }"
-                    >Q{{ cell.quarter }}</th>
-                </tr>
-            </thead>
+                <!-- ── HEAD ── -->
+                <thead>
+                    <tr>
+                        <th rowspan="2" class="th">No</th>
+                        <th rowspan="2" class="th th-left">IT Initiative Roadmap {{ yStart }}–{{ yEnd }}</th>
+                        <th v-for="year in years" :key="`y-${roadmap.versionId}-${year}`" colspan="4" class="th th-year">{{ year }}</th>
+                        <th rowspan="2" class="th">Output</th>
+                    </tr>
+                    <tr>
+                        <th
+                            v-for="(cell, i) in quarterCells"
+                            :key="`qh-${roadmap.versionId}-${i}`"
+                            class="th-q"
+                            :class="{ 'border-r-blue': cell.quarter === 4 }"
+                        >Q{{ cell.quarter }}</th>
+                    </tr>
+                </thead>
 
-            <!-- ── BODY ── -->
-            <tbody>
-                <!-- Project name row -->
-                <tr class="row-project">
-                    <td class="cell-no">{{ sequence ?? '' }}</td>
-                    <td class="cell-project-name">{{ project.name || '-' }}</td>
-                    <td
-                        v-for="(cell, i) in quarterCells" :key="`pg-${i}`"
-                        class="cell-tl"
-                        :class="{ 'border-r-blue': cell.quarter === 4 }"
-                    ></td>
-                    <td class="cell-output">–</td>
-                </tr>
-
-                <!-- Sections & activities -->
-                <template v-for="(section, si) in roadmapSections" :key="`sec-${si}`">
-                    <!-- Section header row -->
-                    <tr class="row-section">
-                        <td class="cell-no"></td>
-                        <td class="cell-section">{{ section.label }}</td>
+                <!-- ── BODY ── -->
+                <tbody>
+                    <!-- Project name row -->
+                    <tr class="row-project">
+                        <td class="cell-no">{{ sequence ?? '' }}</td>
+                        <td class="cell-project-name">
+                            {{ project.name || '-' }} 
+                            <span v-if="versionedRoadmaps.length > 1" class="version-badge">[{{ roadmap.versionId }}]</span>
+                        </td>
                         <td
-                            v-for="(cell, i) in quarterCells" :key="`sg-${si}-${i}`"
-                            class="cell-section-gap"
+                            v-for="(cell, i) in quarterCells" :key="`pg-${roadmap.versionId}-${i}`"
+                            class="cell-tl"
                             :class="{ 'border-r-blue': cell.quarter === 4 }"
                         ></td>
-                        <td class="cell-section-gap"></td>
+                        <td class="cell-output">–</td>
                     </tr>
 
-                    <!-- Activity rows -->
-                    <tr v-for="(row, ri) in section.rows" :key="`row-${si}-${ri}`" class="row-data">
-                        <td class="cell-no"></td>
-                        <td class="cell-activity">{{ row.activity }}</td>
-                        <td
-                            v-for="(cell, i) in quarterCells" :key="`tl-${si}-${ri}-${i}`"
-                            class="cell-tl"
-                            :class="timelineCellClass(row, i, cell)"
-                        ></td>
-                        <td class="cell-output">
-                            <ul v-if="row.output.length" class="output-list">
-                                <li v-for="(item, oi) in row.output" :key="`out-${si}-${ri}-${oi}`">{{ item }}</li>
-                            </ul>
-                            <span v-else>–</span>
-                        </td>
-                    </tr>
-                </template>
-            </tbody>
-        </table>
+                    <!-- Sections & activities -->
+                    <template v-for="(section, si) in roadmap.sections" :key="`sec-${roadmap.versionId}-${si}`">
+                        <!-- Section header row -->
+                        <tr class="row-section">
+                            <td class="cell-no"></td>
+                            <td class="cell-section">{{ section.label }}</td>
+                            <td
+                                v-for="(cell, i) in quarterCells" :key="`sg-${roadmap.versionId}-${si}-${i}`"
+                                class="cell-section-gap"
+                                :class="{ 'border-r-blue': cell.quarter === 4 }"
+                            ></td>
+                            <td class="cell-section-gap"></td>
+                        </tr>
+
+                        <!-- Activity rows -->
+                        <tr v-for="(row, ri) in section.rows" :key="`row-${roadmap.versionId}-${si}-${ri}`" class="row-data">
+                            <td class="cell-no"></td>
+                            <td class="cell-activity">{{ row.activity }}</td>
+                            <td
+                                v-for="(cell, i) in quarterCells" :key="`tl-${roadmap.versionId}-${si}-${ri}-${i}`"
+                                class="cell-tl"
+                                :class="timelineCellClass(row, i, cell)"
+                            ></td>
+                            <td class="cell-output">
+                                <ul v-if="row.output.length" class="output-list">
+                                    <li v-for="(item, oi) in row.output" :key="`out-${roadmap.versionId}-${si}-${ri}-${oi}`">{{ item }}</li>
+                                </ul>
+                                <span v-else>–</span>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
     </div>
 </template>
 
@@ -239,6 +273,10 @@ const timelineCellClass = (row, quarterIndex, cell) => ({
     --bg-row: #f9fbff;
     --active: #000000;
     font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.roadmap-version-block + .roadmap-version-block {
+    margin-top: 24px;
 }
 
 /* ── Table shell ────────────────────────────────── */
@@ -311,6 +349,18 @@ const timelineCellClass = (row, quarterIndex, cell) => ({
     padding: 5px 8px;
     vertical-align: middle;
     line-height: 1.3;
+}
+
+.version-badge {
+    display: inline-block;
+    margin-left: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--blue);
+    background: var(--blue-lt);
+    padding: 2px 6px;
+    border-radius: 4px;
+    vertical-align: middle;
 }
 
 .cell-section {

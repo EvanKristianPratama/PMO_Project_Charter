@@ -42,7 +42,7 @@ class DashboardController extends Controller
         $totalIt      = MstInitiative::where('tipe_initiative', 2)->count();
 
         // All mst_initiative with relationships for the unified table
-        $mstInitiatives = MstInitiative::with(['coe', 'organization.groub', 'latestStatus'])
+        $mstInitiatives = MstInitiative::with(['coe', 'organization.groub', 'latestStatus', 'sourceData:id,name'])
             ->orderBy('tipe_initiative')
             ->orderBy('id')
             ->get();

@@ -114,8 +114,8 @@ const displayOwner = (value) => {
             <div class="info-cell info-cell-last">
                 <span class="info-label info-label-dark">Project Owner</span>
                 <span class="info-sep"></span>
-                <span class="info-value font-semibold">
-                    <input v-if="editable" v-model="form.owner" type="text" class="info-input font-semibold"
+                <span class="info-value">
+                    <input v-if="editable" v-model="form.owner" type="text" class="info-input"
                         placeholder="Nama project owner" />
                     <template v-else>{{ displayOwner(form.owner) }}</template>
                 </span>

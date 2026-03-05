@@ -83,7 +83,6 @@ export function useNavigation() {
                 active: (url) =>
                     url.startsWith('/program-implementation')
                     || url === '/dashboard'
-                    || url.startsWith('/strategic-pillars')
                     || url.startsWith('/digital-initiatives')
                     || url.startsWith('/it-initiatives')
                     || url.startsWith('/roadmap'),
