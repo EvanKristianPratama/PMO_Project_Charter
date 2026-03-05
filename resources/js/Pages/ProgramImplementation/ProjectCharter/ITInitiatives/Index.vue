@@ -135,7 +135,11 @@
                                         :key="`roadmap-filter-${project.id}`"
                                         :value="String(project.id)"
                                     >
-                                        {{ project.code ? `${project.code} - ${project.name}` : project.name }}
+                                        {{
+                                            project.code
+                                                ? `${project.code} - ${project.name}${project.charter?.version_label ? ` (${project.charter.version_label})` : ''}`
+                                                : `${project.name}${project.charter?.version_label ? ` (${project.charter.version_label})` : ''}`
+                                        }}
                                     </option>
                                 </select>
                             </div>
@@ -302,9 +306,12 @@ const addRoadmapHref = computed(() => {
         return '/roadmap/add';
     }
 
-    const projectId = Number(selectedRoadmapProjectId.value);
+    const selectedProject = roadmapSourceItems.value.find(
+        (project) => Number(project.id) === Number(selectedRoadmapProjectId.value)
+    );
+    const selectedPcId = Number(selectedProject?.charter?.id ?? 0);
 
-    return projectId > 0 ? `/roadmap/add?project_id=${projectId}` : '/roadmap/add';
+    return selectedPcId > 0 ? `/roadmap/add?pc_id=${selectedPcId}` : '/roadmap/add';
 });
 
 const statusOptions = computed(() => {

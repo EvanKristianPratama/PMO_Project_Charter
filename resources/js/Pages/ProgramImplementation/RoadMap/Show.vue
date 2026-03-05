@@ -22,7 +22,7 @@
                     <div class="mb-3 flex items-center justify-between gap-2">
                         <h2 class="text-sm font-semibold text-slate-800 dark:text-slate-100">{{ project.name }}</h2>
                         <Link
-                            :href="`/roadmap/edit?project_id=${project.id}${project.active_roadmap_version ? `&version=${project.active_roadmap_version}` : ''}`"
+                            :href="`/roadmap/edit?pc_id=${project.charter?.id ?? project.id}${project.active_roadmap_version ? `&version=${project.active_roadmap_version}` : ''}`"
                             class="inline-flex items-center rounded-lg bg-[#0B2A8A] px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-[#08226F]"
                         >
                             Input / Edit

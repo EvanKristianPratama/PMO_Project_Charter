@@ -11,6 +11,7 @@ class Milestone extends Model
 
     protected $fillable = [
         'project_id',
+        'pc_id',
         'version',
         'title',
         'output',
@@ -62,6 +63,11 @@ class Milestone extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(TrsProject::class);
+    }
+
+    public function charter(): BelongsTo
+    {
+        return $this->belongsTo(ProjectCharter::class, 'pc_id');
     }
 
     public static function roadmapTypeCodes(): array

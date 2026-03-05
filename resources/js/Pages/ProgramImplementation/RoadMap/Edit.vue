@@ -21,7 +21,7 @@
                 <div class="grid max-w-4xl gap-3 md:grid-cols-3">
                     <div class="md:col-span-2">
                         <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
-                            Pilih Project
+                            Pilih Project Charter
                         </label>
                         <select
                             v-model="selectedProjectIdLocal"
@@ -30,40 +30,25 @@
                         >
                             <option :value="null">-- Pilih Project --</option>
                             <option v-for="proj in projects" :key="proj.id" :value="proj.id">
-                                {{ proj.code ? `${proj.code} - ${proj.name}` : proj.name }}
+                                {{
+                                    proj.code
+                                        ? `${proj.code} - ${proj.name}${proj.charter?.version_label ? ` (${proj.charter.version_label})` : ''}`
+                                        : `${proj.name}${proj.charter?.version_label ? ` (${proj.charter.version_label})` : ''}`
+                                }}
                             </option>
                         </select>
                     </div>
                     <div>
                         <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
-                            Versi Roadmap
+                            Versi Project Charter
                         </label>
-                        <select
-                            v-model="selectedRoadmapVersionIdLocal"
-                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:bg-slate-100 disabled:text-slate-400 dark:border-white/10 dark:bg-[#101826] dark:text-slate-100 dark:disabled:bg-[#0f1623]"
-                            :disabled="!activeProject"
-                            @change="handleVersionChange"
-                        >
-                            <option :value="null">-- Pilih Versi --</option>
-                            <option
-                                v-for="version in activeRoadmapVersions"
-                                :key="`roadmap-version-${version.id}`"
-                                :value="version.id"
-                            >
-                                {{ version.version_label }}
-                            </option>
-                        </select>
+                        <input
+                            :value="activeProject?.charter?.version_label ?? activeProject?.version_label ?? '-'"
+                            type="text"
+                            class="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-700 dark:border-white/10 dark:bg-[#0f1623] dark:text-slate-100"
+                            readonly
+                        />
                     </div>
-                </div>
-                <div class="mt-3">
-                    <button
-                        type="button"
-                        :disabled="!activeProject"
-                        class="inline-flex items-center rounded-lg bg-[#0B2A8A] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#102f95] disabled:cursor-not-allowed disabled:opacity-60"
-                        @click="createRoadmapVersion"
-                    >
-                        Buat Versi Baru
-                    </button>
                 </div>
             </section>
 
@@ -117,7 +102,6 @@ const props = defineProps({
 });
 
 const selectedProjectIdLocal = ref(props.selectedProjectId ?? null);
-const selectedRoadmapVersionIdLocal = ref(props.selectedRoadmapVersion ?? null);
 
 const milestoneTypeOptionsDisplay = [
     { value: 1, label: 'Blok', timeline_style: 'block' },
@@ -128,28 +112,9 @@ watch(() => props.selectedProjectId, (nextProjectId) => {
     selectedProjectIdLocal.value = nextProjectId ?? null;
 }, { immediate: true });
 
-watch(() => props.selectedRoadmapVersion, (nextVersionId) => {
-    selectedRoadmapVersionIdLocal.value = nextVersionId ?? null;
-}, { immediate: true });
-
 const handleProjectChange = () => {
     router.get('/roadmap/edit', {
-        project_id: selectedProjectIdLocal.value || undefined,
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-        replace: true,
-    });
-};
-
-const handleVersionChange = () => {
-    if (!selectedProjectIdLocal.value) {
-        return;
-    }
-
-    router.get('/roadmap/edit', {
-        project_id: selectedProjectIdLocal.value,
-        version: selectedRoadmapVersionIdLocal.value || undefined,
+        pc_id: selectedProjectIdLocal.value || undefined,
     }, {
         preserveState: true,
         preserveScroll: true,
@@ -161,19 +126,8 @@ const activeProject = computed(() =>
     props.projects.find((project) => project.id === selectedProjectIdLocal.value) ?? null
 );
 
-const activeRoadmapVersions = computed(() =>
-    Array.isArray(activeProject.value?.roadmap_versions) ? activeProject.value.roadmap_versions : []
-);
+const selectedRoadmapVersionIdLocal = computed(() => (
+    activeProject.value?.charter?.version_label ?? activeProject.value?.version_label ?? null
+));
 
-const createRoadmapVersion = () => {
-    if (!selectedProjectIdLocal.value) {
-        return;
-    }
-
-    router.post(`/it-initiatives/${selectedProjectIdLocal.value}/milestones/versions`, {
-        redirect_to: 'edit',
-    }, {
-        preserveScroll: true,
-    });
-};
 </script>

@@ -61,8 +61,16 @@
                                     </option>
                                 </select>
                                 <button type="button"
-                                    class="shrink-0 rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5">
-                                    Go to Roadmap
+                                    class="shrink-0 rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5"
+                                    :disabled="!resolvedRoadmapPcId"
+                                    @click="goToRoadmap">
+                                    View Roadmap
+                                </button>
+                                <button type="button"
+                                    class="shrink-0 rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5"
+                                    :disabled="!resolvedRoadmapPcId"
+                                    @click="goToRoadmap">
+                                    Add Roadmap
                                 </button>
                             </div>
                         </div>
@@ -310,6 +318,26 @@ const selectedCharter = computed(() => {
     if (!selectedCharterId.value) return null;
     return charterVersions.value.find((c) => String(c.id) === String(selectedCharterId.value)) || null;
 });
+
+const resolvedRoadmapPcId = computed(() => {
+    const selectedId = Number(selectedCharter.value?.id ?? 0);
+    if (selectedId > 0) {
+        return selectedId;
+    }
+
+    const fallbackId = Number(defaultCharter.value?.id ?? 0);
+    return fallbackId > 0 ? fallbackId : null;
+});
+
+const goToRoadmap = () => {
+    if (!resolvedRoadmapPcId.value) return;
+
+    router.get('/roadmap/edit', {
+        pc_id: resolvedRoadmapPcId.value,
+    }, {
+        preserveScroll: true,
+    });
+};
 
 // A reactive proxy of itInitiative that reflects the in-form owner when editing
 const editableItInitiative = computed(() => {

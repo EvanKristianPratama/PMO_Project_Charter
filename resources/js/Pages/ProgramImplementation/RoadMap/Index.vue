@@ -10,7 +10,7 @@
                     <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end">
                         <div class="w-full sm:w-72">
                             <label class="mb-1 block text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
-                                Filter Project
+                                Filter Project Charter
                             </label>
                             <select
                                 v-model="selectedProjectId"
@@ -22,7 +22,11 @@
                                     :key="`filter-project-${project.id}`"
                                     :value="String(project.id)"
                                 >
-                                    {{ project.code ? `${project.code} - ${project.name}` : project.name }}
+                                    {{
+                                        project.code
+                                            ? `${project.code} - ${project.name}${project.charter?.version_label ? ` (${project.charter.version_label})` : ''}`
+                                            : `${project.name}${project.charter?.version_label ? ` (${project.charter.version_label})` : ''}`
+                                    }}
                                 </option>
                             </select>
                         </div>
@@ -84,6 +88,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    selectedProjectId: {
+        type: Number,
+        default: null,
+    },
     yearStart: {
         type: Number,
         default: 2025,
@@ -98,7 +106,11 @@ const props = defineProps({
     },
 });
 
-const selectedProjectId = ref('all');
+const selectedProjectId = ref(
+    Number.isFinite(props.selectedProjectId) && props.selectedProjectId > 0
+        ? String(props.selectedProjectId)
+        : 'all'
+);
 
 const displayedProjects = computed(() => {
     const allProjects = Array.isArray(props.projects) ? props.projects : [];

@@ -5,7 +5,8 @@ namespace App\Http\Controllers\ITInitiative;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ITInitiative\MilestoneStoreRequest;
 use App\Models\Milestone;
-use App\Models\TrsProject;
+use App\Models\ProjectCharter;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -13,14 +14,17 @@ use Illuminate\Validation\Rule;
 
 class MilestoneController extends Controller
 {
-    public function store(MilestoneStoreRequest $request, TrsProject $project): RedirectResponse
+    public function store(MilestoneStoreRequest $request, ProjectCharter $project): RedirectResponse
     {
+        $charter = $project;
         $payload = $request->validated();
-        $targetVersion = $this->resolveVersionForProject($project, $payload['version'] ?? null);
-        $nextOrder = (int) ($this->milestonesForVersion($project, $targetVersion)
+        $targetVersion = $this->normalizeVersionLabel($charter->version_label);
+        $nextOrder = (int) ($this->milestonesForVersion($charter, $targetVersion)
             ->max('order') ?? 0) + 1;
 
-        $project->milestones()->create([
+        Milestone::query()->create([
+            'project_id' => (int) $charter->project_id,
+            'pc_id' => (int) $charter->id,
             'version' => $targetVersion,
             'title' => $payload['title'],
             'output' => $payload['output'] ?? null,
@@ -31,21 +35,25 @@ class MilestoneController extends Controller
             'order' => $nextOrder,
         ]);
 
-        $this->persistRoadmapVersionMeta($project, $this->projectVersionLabels($project, false));
+        $this->persistRoadmapVersionMeta($charter, $this->charterVersionLabels($charter, false));
 
         return back()->with('success', 'Roadmap activity added.');
     }
 
-    public function update(MilestoneStoreRequest $request, TrsProject $project, Milestone $milestone): RedirectResponse
+    public function update(MilestoneStoreRequest $request, ProjectCharter $project, Milestone $milestone): RedirectResponse
     {
-        if ((int) $milestone->project_id !== (int) $project->id) {
+        $charter = $project;
+
+        if ((int) ($milestone->pc_id ?? 0) !== (int) $charter->id) {
             abort(404);
         }
 
         $payload = $request->validated();
-        $targetVersion = $this->resolveVersionForProject($project, $payload['version'] ?? $milestone->version);
+        $targetVersion = $this->normalizeVersionLabel($charter->version_label);
 
         $milestone->update([
+            'project_id' => (int) $charter->project_id,
+            'pc_id' => (int) $charter->id,
             'version' => $targetVersion,
             'title' => $payload['title'],
             'output' => $payload['output'] ?? null,
@@ -55,14 +63,16 @@ class MilestoneController extends Controller
             'end_date' => $payload['end_date'] ?? null,
         ]);
 
-        $this->persistRoadmapVersionMeta($project, $this->projectVersionLabels($project, false));
+        $this->persistRoadmapVersionMeta($charter, $this->charterVersionLabels($charter, false));
 
         return back()->with('success', 'Roadmap activity updated.');
     }
 
-    public function destroy(TrsProject $project, Milestone $milestone): RedirectResponse
+    public function destroy(ProjectCharter $project, Milestone $milestone): RedirectResponse
     {
-        if ((int) $milestone->project_id !== (int) $project->id) {
+        $charter = $project;
+
+        if ((int) ($milestone->pc_id ?? 0) !== (int) $charter->id) {
             abort(404);
         }
 
@@ -71,82 +81,24 @@ class MilestoneController extends Controller
         return back()->with('success', 'Roadmap activity removed.');
     }
 
-    public function createVersion(Request $request, TrsProject $project): RedirectResponse
+    public function createVersion(Request $request, ProjectCharter $project): RedirectResponse
     {
-        $payload = $request->validate([
-            'redirect_to' => ['nullable', 'string', Rule::in(['add', 'edit'])],
-        ]);
-
-        $this->normalizeLegacyVersionDataForProject($project);
-
-        $versions = $this->projectVersionLabels($project, false);
-        $newVersion = $this->nextVersionLabel($versions);
-        $this->persistRoadmapVersionMeta(
-            $project,
-            $versions->push($newVersion)->unique()->values(),
-            $newVersion
-        );
-
-        $redirectTo = ($payload['redirect_to'] ?? 'edit') === 'add'
-            ? 'roadmap.add'
-            : 'roadmap.edit';
-
-        return redirect()
-            ->route($redirectTo, [
-                'project_id' => $project->id,
-                'version' => $newVersion,
-            ])
-            ->with('success', sprintf('Roadmap version %s berhasil dibuat.', $newVersion));
+        return back()->with('warning', 'Versi roadmap mengikuti versi Project Charter. Buat versi charter baru untuk roadmap baru.');
     }
 
-    private function resolveVersionForProject(TrsProject $project, mixed $requestedVersion): string
+    private function resolveVersionForCharter(ProjectCharter $charter, mixed $requestedVersion): string
     {
-        $this->normalizeLegacyVersionDataForProject($project);
-        $existingVersions = $this->projectVersionLabels($project, false);
-
-        if ($requestedVersion !== null && trim((string) $requestedVersion) !== '') {
-            $normalizedRequested = $this->normalizeVersionLabel($requestedVersion);
-
-            if ($existingVersions->isEmpty() && $normalizedRequested === 'v1') {
-                return 'v1';
-            }
-
-            if (!$existingVersions->contains($normalizedRequested)) {
-                abort(422, 'Roadmap version tidak valid untuk project ini.');
-            }
-
-            return $normalizedRequested;
-        }
-
-        if ($existingVersions->isNotEmpty()) {
-            return (string) $existingVersions->first();
-        }
-
-        return 'v1';
+        return $this->normalizeVersionLabel($charter->version_label);
     }
 
-    private function projectVersionLabels(TrsProject $project, bool $withDefault = true): Collection
+    private function charterVersionLabels(ProjectCharter $charter, bool $withDefault = true): Collection
     {
-        $labelsFromMilestones = $project->milestones()
-            ->reorder()
-            ->select('version')
-            ->distinct()
-            ->pluck('version')
-            ->values();
+        return collect([$this->normalizeVersionLabel($charter->version_label)]);
+    }
 
-        $labels = $labelsFromMilestones
-            ->merge($this->roadmapVersionLabelsFromMeta($project))
-            ->map(fn ($label) => $this->normalizeVersionLabel($label))
-            ->filter()
-            ->unique()
-            ->sortByDesc(fn (string $label): int => $this->extractVersionNumber($label))
-            ->values();
-
-        if ($withDefault && $labels->isEmpty()) {
-            return collect(['v1']);
-        }
-
-        return $labels;
+    private function milestonesQueryForCharter(ProjectCharter $charter): Builder
+    {
+        return Milestone::query()->where('pc_id', $charter->id);
     }
 
     private function nextVersionLabel(Collection $existingLabels): string
@@ -164,28 +116,36 @@ class MilestoneController extends Controller
         return 'v'.($maxVersionNumber + 1);
     }
 
-    private function normalizeLegacyVersionDataForProject(TrsProject $project): void
+    private function normalizeLegacyVersionDataForCharter(ProjectCharter $charter): void
     {
-        $project->milestones()
+        $this->milestonesQueryForCharter($charter)
             ->where(function ($query): void {
                 $query->whereNull('version')->orWhere('version', '');
             })
             ->update(['version' => 'v1']);
     }
 
-    private function roadmapVersionLabelsFromMeta(TrsProject $project): Collection
+    private function roadmapVersionLabelsFromMeta(ProjectCharter $charter): Collection
     {
-        $metadata = is_array($project->metadata) ? $project->metadata : [];
+        $metadata = is_array($charter->metadata) ? $charter->metadata : [];
         $labels = $metadata['roadmap_versions'] ?? [];
 
-        if (!is_array($labels)) {
+        if (is_array($labels) && !empty($labels)) {
+            return collect($labels);
+        }
+
+        // Compatibility fallback for older data stored in project metadata.
+        $projectMetadata = is_array($charter->project?->metadata) ? $charter->project->metadata : [];
+        $projectLabels = $projectMetadata['roadmap_versions'] ?? [];
+
+        if (!is_array($projectLabels)) {
             return collect();
         }
 
-        return collect($labels);
+        return collect($projectLabels);
     }
 
-    private function persistRoadmapVersionMeta(TrsProject $project, Collection $labels, ?string $activeVersion = null): void
+    private function persistRoadmapVersionMeta(ProjectCharter $charter, Collection $labels, ?string $activeVersion = null): void
     {
         $normalizedLabels = $labels
             ->map(fn ($label) => $this->normalizeVersionLabel($label))
@@ -198,7 +158,7 @@ class MilestoneController extends Controller
             $normalizedLabels = collect(['v1']);
         }
 
-        $metadata = is_array($project->metadata) ? $project->metadata : [];
+        $metadata = is_array($charter->metadata) ? $charter->metadata : [];
         $resolvedActive = $activeVersion !== null
             ? $this->normalizeVersionLabel($activeVersion)
             : $this->normalizeVersionLabel($metadata['active_roadmap_version'] ?? '');
@@ -210,22 +170,23 @@ class MilestoneController extends Controller
         $metadata['roadmap_versions'] = $normalizedLabels->all();
         $metadata['active_roadmap_version'] = $resolvedActive;
 
-        $project->update([
+        $charter->update([
             'metadata' => $metadata,
         ]);
     }
 
-    private function milestonesForVersion(TrsProject $project, string $version)
+    private function milestonesForVersion(ProjectCharter $charter, string $version): Builder
     {
         $normalizedVersion = $this->normalizeVersionLabel($version);
+        $query = $this->milestonesQueryForCharter($charter);
 
         if ($normalizedVersion === 'v1') {
-            return $project->milestones()->where(function ($query): void {
-                $query->where('version', 'v1')->orWhereNull('version')->orWhere('version', '');
+            return $query->where(function ($innerQuery): void {
+                $innerQuery->where('version', 'v1')->orWhereNull('version')->orWhere('version', '');
             });
         }
 
-        return $project->milestones()->where('version', $normalizedVersion);
+        return $query->where('version', $normalizedVersion);
     }
 
     private function normalizeVersionLabel(mixed $value): string
