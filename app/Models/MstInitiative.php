@@ -20,6 +20,7 @@ class MstInitiative extends Model
         'name',
         'description',
         'status',
+        'source',
     ];
 
     public function coe(): BelongsTo
@@ -66,5 +67,15 @@ class MstInitiative extends Model
     public function mappedProjects(): BelongsToMany
     {
         return $this->belongsToMany(Project::class, 'trs_pc_initiative', 'initiative_id', 'pc_id');
+    }
+
+    public function sourceData(): BelongsTo
+    {
+        return $this->belongsTo(DataSource::class, 'source');
+    }
+
+    public function scInitiatives(): HasMany
+    {
+        return $this->hasMany(ScInitiative::class, 'initiative_id');
     }
 }

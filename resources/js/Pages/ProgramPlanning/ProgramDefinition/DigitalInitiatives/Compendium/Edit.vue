@@ -1,0 +1,213 @@
+<template>
+    <UserLayout title="Program Definition Digital Initiatives — Edit Compendium">
+        <div class="animate-fade-in-up space-y-4">
+            <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Edit Compendium</h1>
+                        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Mode tabel (WYSIWYG) untuk `trs_sc_initiative` + `trs_sc_details`.</p>
+                    </div>
+                    <Link
+                        href="/program-planning/program-definition/digital-initiatives/compendium"
+                        class="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5"
+                    >
+                        ← Kembali
+                    </Link>
+                </div>
+            </section>
+
+            <form class="space-y-4" @submit.prevent="submit">
+                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/5 dark:bg-[#1a1a1a]">
+                    <div class="border-b border-slate-200 px-4 py-2.5 dark:border-white/10">
+                        <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Scope Initiative</h2>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
+                            <colgroup>
+                                <col class="w-[28%]">
+                                <col class="w-[14%]">
+                                <col class="w-[34%]">
+                                <col class="w-[12%]">
+                                <col class="w-[12%]">
+                            </colgroup>
+                            <thead class="bg-slate-50 dark:bg-white/5">
+                                <tr>
+                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Master Initiative</th>
+                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Alias</th>
+                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Use Case Description</th>
+                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Value</th>
+                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Urgency</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
+                                <tr>
+                                    <td class="px-3 py-2.5">
+                                        <select v-model="form.initiative_id" class="form-input-sm">
+                                            <option value="">— Pilih Initiative —</option>
+                                            <option v-for="initiative in initiativeOptions" :key="initiative.id" :value="initiative.id">
+                                                {{ initiative.code ?? '-' }} - {{ initiative.name }}
+                                            </option>
+                                        </select>
+                                    </td>
+                                    <td class="px-3 py-2.5"><input v-model="form.alias" type="text" class="form-input-sm" placeholder="Alias" /></td>
+                                    <td class="px-3 py-2.5"><input v-model="form.useCase_description" type="text" class="form-input-sm" placeholder="Use case description" /></td>
+                                    <td class="px-3 py-2.5">
+                                        <select v-model.number="form.value" class="form-input-sm">
+                                            <option v-for="score in scoreOptions" :key="`value-${score}`" :value="score">{{ score }}</option>
+                                        </select>
+                                    </td>
+                                    <td class="px-3 py-2.5">
+                                        <select v-model.number="form.urgency" class="form-input-sm">
+                                            <option v-for="score in scoreOptions" :key="`urgency-${score}`" :value="score">{{ score }}</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/5 dark:bg-[#1a1a1a]">
+                    <div class="border-b border-slate-200 px-4 py-2.5 dark:border-white/10">
+                        <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Compendium Detail</h2>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
+                            <colgroup>
+                                <col class="w-[20%]">
+                                <col class="w-[20%]">
+                                <col class="w-[20%]">
+                                <col class="w-[20%]">
+                                <col class="w-[20%]">
+                            </colgroup>
+                            <thead class="bg-slate-50 dark:bg-white/5">
+                                <tr>
+                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Use Case Detail</th>
+                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Current Situation</th>
+                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Key Functionalities</th>
+                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Value Detail</th>
+                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Urgency Detail</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
+                                <tr>
+                                    <td class="px-3 py-2.5"><input v-model="form.detail_useCase_description" type="text" class="form-input-sm" /></td>
+                                    <td class="px-3 py-2.5"><input v-model="form.current_situation" type="text" class="form-input-sm" /></td>
+                                    <td class="px-3 py-2.5"><input v-model="form.key_functionalities" type="text" class="form-input-sm" /></td>
+                                    <td class="px-3 py-2.5"><input v-model="form.value_detail" type="text" class="form-input-sm" /></td>
+                                    <td class="px-3 py-2.5"><input v-model="form.urgency_detail" type="text" class="form-input-sm" /></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="overflow-x-auto border-t border-slate-200 dark:border-white/10">
+                        <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
+                            <colgroup>
+                                <col class="w-[16%]">
+                                <col class="w-[17%]">
+                                <col class="w-[16%]">
+                                <col class="w-[17%]">
+                                <col class="w-[17%]">
+                                <col class="w-[17%]">
+                            </colgroup>
+                            <thead class="bg-slate-50 dark:bg-white/5">
+                                <tr>
+                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Ease Impl</th>
+                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Ease Detail</th>
+                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Resource Req</th>
+                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Resource Detail</th>
+                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Interpendencies</th>
+                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Sign By</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
+                                <tr>
+                                    <td class="px-3 py-2.5">
+                                        <select v-model.number="form.ease_implementation" class="form-input-sm">
+                                            <option v-for="score in scoreOptions" :key="`ease-${score}`" :value="score">{{ score }}</option>
+                                        </select>
+                                    </td>
+                                    <td class="px-3 py-2.5"><input v-model="form.ease_detail" type="text" class="form-input-sm" /></td>
+                                    <td class="px-3 py-2.5">
+                                        <select v-model.number="form.resource_requirement" class="form-input-sm">
+                                            <option v-for="score in scoreOptions" :key="`resource-${score}`" :value="score">{{ score }}</option>
+                                        </select>
+                                    </td>
+                                    <td class="px-3 py-2.5"><input v-model="form.resource_detail" type="text" class="form-input-sm" /></td>
+                                    <td class="px-3 py-2.5"><input v-model="form.interpendencies" type="text" class="form-input-sm" /></td>
+                                    <td class="px-3 py-2.5"><input v-model="form.sign_by" type="text" class="form-input-sm" /></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/5 dark:bg-[#1a1a1a]">
+                    <div class="flex items-center justify-between px-4 py-2.5">
+                        <div class="text-[10px] text-slate-500">Update semua data scope + detail</div>
+                        <button
+                            type="submit"
+                            :disabled="form.processing"
+                            class="inline-flex items-center gap-1 rounded-lg bg-[#0f63b5] px-4 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-[#0c4e8f] disabled:opacity-50"
+                        >
+                            <span v-if="form.processing">Menyimpan...</span>
+                            <span v-else>Update</span>
+                        </button>
+                    </div>
+                    <div v-if="Object.keys(form.errors).length" class="border-t border-slate-200 px-4 py-2 dark:border-white/10">
+                        <p v-for="(msg, field) in form.errors" :key="field" class="text-[10px] text-rose-500">{{ field }}: {{ msg }}</p>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </UserLayout>
+</template>
+
+<script setup>
+import { Link, useForm } from '@inertiajs/vue3';
+import UserLayout from '@/Layouts/UserLayout.vue';
+
+const props = defineProps({
+    compendium: {
+        type: Object,
+        required: true,
+    },
+    initiativeOptions: {
+        type: Array,
+        default: () => [],
+    },
+});
+
+const scoreOptions = [1, 2, 3, 4, 5];
+
+const form = useForm({
+    initiative_id: props.compendium.initiative_id ?? '',
+    alias: props.compendium.alias ?? '',
+    useCase_description: props.compendium.useCase_description ?? '',
+    value: props.compendium.value ?? 4,
+    urgency: props.compendium.urgency ?? 4,
+    detail_useCase_description: props.compendium.detail_useCase_description ?? '',
+    current_situation: props.compendium.current_situation ?? '',
+    key_functionalities: props.compendium.key_functionalities ?? '',
+    value_detail: props.compendium.value_detail ?? '',
+    urgency_detail: props.compendium.urgency_detail ?? '',
+    ease_implementation: props.compendium.ease_implementation ?? 4,
+    ease_detail: props.compendium.ease_detail ?? '',
+    resource_requirement: props.compendium.resource_requirement ?? 4,
+    resource_detail: props.compendium.resource_detail ?? '',
+    interpendencies: props.compendium.interpendencies ?? '',
+    sign_by: props.compendium.sign_by ?? '',
+});
+
+const submit = () => {
+    form.put(`/program-planning/program-definition/digital-initiatives/compendium/${props.compendium.id}`);
+};
+</script>
+
+<style scoped>
+@reference "tailwindcss";
+
+.form-input-sm {
+    @apply w-full rounded border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-700 shadow-sm focus:border-[#0f63b5] focus:ring-[#0f63b5];
+}
+</style>
