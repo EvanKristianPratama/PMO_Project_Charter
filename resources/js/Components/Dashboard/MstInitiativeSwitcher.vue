@@ -36,6 +36,34 @@
         />
 
         <section v-else class="space-y-4">
+            <section class="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Group By</h4>
+                    <div class="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 p-1 dark:border-white/10 dark:bg-[#1f1f1f]">
+                        <button
+                            type="button"
+                            class="rounded-md px-3 py-1.5 text-xs font-semibold transition-colors"
+                            :class="blockGroupBy === 'coe'
+                                ? 'bg-white text-slate-900 shadow-sm dark:bg-[#2a2a2a] dark:text-white'
+                                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
+                            @click="blockGroupBy = 'coe'"
+                        >
+                            CoE
+                        </button>
+                        <button
+                            type="button"
+                            class="rounded-md px-3 py-1.5 text-xs font-semibold transition-colors"
+                            :class="blockGroupBy === 'organization'
+                                ? 'bg-white text-slate-900 shadow-sm dark:bg-[#2a2a2a] dark:text-white'
+                                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
+                            @click="blockGroupBy = 'organization'"
+                        >
+                            Project Owner / Organisasi
+                        </button>
+                    </div>
+                </div>
+            </section>
+
             <article
                 v-for="section in boardSections"
                 :key="`board-section-${section.key}`"
@@ -57,7 +85,7 @@
                         <div class="mb-2 flex items-center justify-between gap-2">
                             <h4 class="text-[12px] font-bold uppercase tracking-tight text-[#132f66] dark:text-[#9ec8ff]">{{ column.title }}</h4>
                             <span class="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-700 dark:bg-white/10 dark:text-slate-300">
-                                {{ column.items.length }} initiative
+                                {{ column.items.length }} initiatives
                             </span>
                         </div>
 
@@ -115,8 +143,11 @@ const props = defineProps({
 });
 
 const viewMode = ref('table');
+const blockGroupBy = ref('coe');
 
 const normalizeStatus = (value) => String(value ?? '').trim().toLowerCase();
+const normalizeLabel = (value) => String(value ?? '').trim();
+const slugify = (value) => normalizeLabel(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
 const itemsWithInitialType = computed(() => {
     const baseItems = Array.isArray(props.items) ? props.items : [];
@@ -152,6 +183,14 @@ const sectionKey = (item) => {
     const groupName = String(item?.organization?.groub?.name ?? '').toLowerCase();
 
     if (sourceName.includes('new')) {
+        if (groupName.includes('sub')) {
+            return 'new-subholding';
+        }
+
+        if (groupName.includes('holding')) {
+            return 'new-holding';
+        }
+
         return 'new';
     }
 
@@ -166,11 +205,43 @@ const sectionKey = (item) => {
     return 'new';
 };
 
-const sectionOrder = ['holding', 'subholding', 'new'];
+const sectionOrder = ['holding', 'subholding', 'new-holding', 'new-subholding', 'new'];
 const sectionTitleMap = {
     holding: 'Holding',
     subholding: 'SubHolding',
+    'new-holding': 'New Initiatives Holding',
+    'new-subholding': 'New Initiatives SubHolding',
     new: 'New Initiatives',
+};
+
+const organizationLabel = (initiative) => {
+    const organizationName = normalizeLabel(initiative?.organization?.name);
+    const groubName = normalizeLabel(initiative?.organization?.groub?.name);
+    return [organizationName, groubName].filter(Boolean).join(' - ') || 'Unassigned';
+};
+
+const groupMeta = (initiative) => {
+    if (blockGroupBy.value === 'organization') {
+        const title = organizationLabel(initiative);
+        const organizationId = Number(initiative?.organization?.id ?? initiative?.organization_id ?? 0);
+
+        return {
+            key: organizationId > 0 ? `org-${organizationId}` : `org-${slugify(title) || 'unassigned'}`,
+            title,
+            sortNumber: Number.MAX_SAFE_INTEGER,
+            sortText: title.toLowerCase(),
+        };
+    }
+
+    const coeId = Number(initiative?.coe?.id ?? initiative?.coe_id ?? 0);
+    const title = normalizeLabel(initiative?.coe?.name) || 'Unassigned';
+
+    return {
+        key: coeId > 0 ? `coe-${coeId}` : `coe-${slugify(title) || 'unassigned'}`,
+        title,
+        sortNumber: coeId > 0 ? coeId : Number.MAX_SAFE_INTEGER,
+        sortText: title.toLowerCase(),
+    };
 };
 
 const boardSections = computed(() => {
@@ -193,20 +264,26 @@ const boardSections = computed(() => {
             const columnMap = new Map();
 
             for (const initiative of initiatives) {
-                const coeName = String(initiative?.coe?.name ?? '').trim() || 'Unassigned';
-                if (!columnMap.has(coeName)) {
-                    columnMap.set(coeName, []);
+                const meta = groupMeta(initiative);
+                if (!columnMap.has(meta.key)) {
+                    columnMap.set(meta.key, {
+                        key: meta.key,
+                        title: meta.title,
+                        sortNumber: meta.sortNumber,
+                        sortText: meta.sortText,
+                        items: [],
+                    });
                 }
-                columnMap.get(coeName).push(initiative);
+                columnMap.get(meta.key).items.push(initiative);
             }
 
-            const columns = Array.from(columnMap.entries())
-                .sort((left, right) => left[0].localeCompare(right[0]))
-                .map(([name, items]) => ({
-                    key: name.toLowerCase().replace(/\s+/g, '-'),
-                    title: name,
-                    items,
-                }));
+            const columns = Array.from(columnMap.values()).sort((left, right) => {
+                if (blockGroupBy.value === 'coe' && left.sortNumber !== right.sortNumber) {
+                    return left.sortNumber - right.sortNumber;
+                }
+
+                return left.sortText.localeCompare(right.sortText);
+            });
 
             return {
                 key,
