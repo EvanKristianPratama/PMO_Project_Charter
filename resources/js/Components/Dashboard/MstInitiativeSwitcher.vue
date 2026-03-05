@@ -48,15 +48,20 @@
                     </span>
                 </header>
 
-                <div v-if="section.columns.length > 0" class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+                <div v-if="section.columns.length > 0" class="space-y-3">
                     <article
                         v-for="column in section.columns"
                         :key="`board-column-${section.key}-${column.key}`"
                         class="rounded-xl border border-slate-300 bg-slate-50 p-2.5 dark:border-white/10 dark:bg-[#1d1d1d]"
                     >
-                        <h4 class="mb-2 text-[12px] font-bold uppercase tracking-tight text-[#132f66] dark:text-[#9ec8ff]">{{ column.title }}</h4>
+                        <div class="mb-2 flex items-center justify-between gap-2">
+                            <h4 class="text-[12px] font-bold uppercase tracking-tight text-[#132f66] dark:text-[#9ec8ff]">{{ column.title }}</h4>
+                            <span class="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-700 dark:bg-white/10 dark:text-slate-300">
+                                {{ column.items.length }} initiative
+                            </span>
+                        </div>
 
-                        <div class="space-y-1.5">
+                        <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
                             <div
                                 v-for="initiative in column.items"
                                 :key="`board-item-${initiative.id}`"
