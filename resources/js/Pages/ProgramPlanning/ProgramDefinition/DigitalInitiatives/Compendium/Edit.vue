@@ -20,6 +20,7 @@
                 <div class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/5 dark:bg-[#1a1a1a]">
                     <div class="border-b border-slate-200 px-4 py-2.5 dark:border-white/10">
                         <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Scope Initiative</h2>
+                        <p class="mt-1 text-[10px] text-slate-500">Skala: 1 = Low, 2 = Medium, 3 = High, 4 = TBC (To be Discussed)</p>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
@@ -53,12 +54,12 @@
                                     <td class="px-3 py-2.5"><input v-model="form.useCase_description" type="text" class="form-input-sm" placeholder="Use case description" /></td>
                                     <td class="px-3 py-2.5">
                                         <select v-model.number="form.value" class="form-input-sm">
-                                            <option v-for="score in scoreOptions" :key="`value-${score}`" :value="score">{{ score }}</option>
+                                            <option v-for="score in scoreOptions" :key="`value-${score.value}`" :value="score.value">{{ score.label }}</option>
                                         </select>
                                     </td>
                                     <td class="px-3 py-2.5">
                                         <select v-model.number="form.urgency" class="form-input-sm">
-                                            <option v-for="score in scoreOptions" :key="`urgency-${score}`" :value="score">{{ score }}</option>
+                                            <option v-for="score in scoreOptions" :key="`urgency-${score.value}`" :value="score.value">{{ score.label }}</option>
                                         </select>
                                     </td>
                                 </tr>
@@ -124,13 +125,13 @@
                                 <tr>
                                     <td class="px-3 py-2.5">
                                         <select v-model.number="form.ease_implementation" class="form-input-sm">
-                                            <option v-for="score in scoreOptions" :key="`ease-${score}`" :value="score">{{ score }}</option>
+                                            <option v-for="score in scoreOptions" :key="`ease-${score.value}`" :value="score.value">{{ score.label }}</option>
                                         </select>
                                     </td>
                                     <td class="px-3 py-2.5"><input v-model="form.ease_detail" type="text" class="form-input-sm" /></td>
                                     <td class="px-3 py-2.5">
                                         <select v-model.number="form.resource_requirement" class="form-input-sm">
-                                            <option v-for="score in scoreOptions" :key="`resource-${score}`" :value="score">{{ score }}</option>
+                                            <option v-for="score in scoreOptions" :key="`resource-${score.value}`" :value="score.value">{{ score.label }}</option>
                                         </select>
                                     </td>
                                     <td class="px-3 py-2.5"><input v-model="form.resource_detail" type="text" class="form-input-sm" /></td>
@@ -178,7 +179,12 @@ const props = defineProps({
     },
 });
 
-const scoreOptions = [1, 2, 3, 4, 5];
+const scoreOptions = [
+    { value: 1, label: '1 - Low' },
+    { value: 2, label: '2 - Medium' },
+    { value: 3, label: '3 - High' },
+    { value: 4, label: '4 - TBC (To be Discussed)' },
+];
 
 const form = useForm({
     initiative_id: props.compendium.initiative_id ?? '',

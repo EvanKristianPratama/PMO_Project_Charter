@@ -16,135 +16,13 @@
                 </div>
             </section>
 
-            <form class="space-y-4" @submit.prevent="submit">
+            <form @submit.prevent="submit">
                 <div class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/5 dark:bg-[#1a1a1a]">
-                    <div class="border-b border-slate-200 px-4 py-2.5 dark:border-white/10">
-                        <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Scope Initiative</h2>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
-                            <colgroup>
-                                <col class="w-[28%]">
-                                <col class="w-[14%]">
-                                <col class="w-[34%]">
-                                <col class="w-[12%]">
-                                <col class="w-[12%]">
-                            </colgroup>
-                            <thead class="bg-slate-50 dark:bg-white/5">
-                                <tr>
-                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Master Initiative</th>
-                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Alias</th>
-                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Use Case Description</th>
-                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Value</th>
-                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Urgency</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
-                                <tr>
-                                    <td class="px-3 py-2.5">
-                                        <select v-model="form.initiative_id" class="form-input-sm">
-                                            <option value="">— Pilih Initiative —</option>
-                                            <option v-for="initiative in initiativeOptions" :key="initiative.id" :value="initiative.id">
-                                                {{ initiative.code ?? '-' }} - {{ initiative.name }}
-                                            </option>
-                                        </select>
-                                    </td>
-                                    <td class="px-3 py-2.5"><input v-model="form.alias" type="text" class="form-input-sm" placeholder="Alias" /></td>
-                                    <td class="px-3 py-2.5"><input v-model="form.useCase_description" type="text" class="form-input-sm" placeholder="Use case description" /></td>
-                                    <td class="px-3 py-2.5">
-                                        <select v-model.number="form.value" class="form-input-sm">
-                                            <option v-for="score in scoreOptions" :key="`value-${score}`" :value="score">{{ score }}</option>
-                                        </select>
-                                    </td>
-                                    <td class="px-3 py-2.5">
-                                        <select v-model.number="form.urgency" class="form-input-sm">
-                                            <option v-for="score in scoreOptions" :key="`urgency-${score}`" :value="score">{{ score }}</option>
-                                        </select>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/5 dark:bg-[#1a1a1a]">
-                    <div class="border-b border-slate-200 px-4 py-2.5 dark:border-white/10">
-                        <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Compendium Detail</h2>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
-                            <colgroup>
-                                <col class="w-[20%]">
-                                <col class="w-[20%]">
-                                <col class="w-[20%]">
-                                <col class="w-[20%]">
-                                <col class="w-[20%]">
-                            </colgroup>
-                            <thead class="bg-slate-50 dark:bg-white/5">
-                                <tr>
-                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Use Case Detail</th>
-                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Current Situation</th>
-                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Key Functionalities</th>
-                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Value Detail</th>
-                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Urgency Detail</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
-                                <tr>
-                                    <td class="px-3 py-2.5"><input v-model="form.detail_useCase_description" type="text" class="form-input-sm" /></td>
-                                    <td class="px-3 py-2.5"><input v-model="form.current_situation" type="text" class="form-input-sm" /></td>
-                                    <td class="px-3 py-2.5"><input v-model="form.key_functionalities" type="text" class="form-input-sm" /></td>
-                                    <td class="px-3 py-2.5"><input v-model="form.value_detail" type="text" class="form-input-sm" /></td>
-                                    <td class="px-3 py-2.5"><input v-model="form.urgency_detail" type="text" class="form-input-sm" /></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="overflow-x-auto border-t border-slate-200 dark:border-white/10">
-                        <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
-                            <colgroup>
-                                <col class="w-[16%]">
-                                <col class="w-[17%]">
-                                <col class="w-[16%]">
-                                <col class="w-[17%]">
-                                <col class="w-[17%]">
-                                <col class="w-[17%]">
-                            </colgroup>
-                            <thead class="bg-slate-50 dark:bg-white/5">
-                                <tr>
-                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Ease Impl</th>
-                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Ease Detail</th>
-                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Resource Req</th>
-                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Resource Detail</th>
-                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Interpendencies</th>
-                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Sign By</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
-                                <tr>
-                                    <td class="px-3 py-2.5">
-                                        <select v-model.number="form.ease_implementation" class="form-input-sm">
-                                            <option v-for="score in scoreOptions" :key="`ease-${score}`" :value="score">{{ score }}</option>
-                                        </select>
-                                    </td>
-                                    <td class="px-3 py-2.5"><input v-model="form.ease_detail" type="text" class="form-input-sm" /></td>
-                                    <td class="px-3 py-2.5">
-                                        <select v-model.number="form.resource_requirement" class="form-input-sm">
-                                            <option v-for="score in scoreOptions" :key="`resource-${score}`" :value="score">{{ score }}</option>
-                                        </select>
-                                    </td>
-                                    <td class="px-3 py-2.5"><input v-model="form.resource_detail" type="text" class="form-input-sm" /></td>
-                                    <td class="px-3 py-2.5"><input v-model="form.interpendencies" type="text" class="form-input-sm" /></td>
-                                    <td class="px-3 py-2.5"><input v-model="form.sign_by" type="text" class="form-input-sm" /></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/5 dark:bg-[#1a1a1a]">
-                    <div class="flex items-center justify-between px-4 py-2.5">
-                        <div class="text-[10px] text-slate-500">Simpan semua data scope + detail</div>
+                    <div class="flex items-center justify-between border-b border-slate-200 px-4 py-2.5 dark:border-white/10">
+                        <div>
+                            <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Compendium Data Entry</h2>
+                            <p class="mt-1 text-[10px] text-slate-500">Skala: 1 = Low, 2 = Medium, 3 = High, 4 = TBC (To be Discussed)</p>
+                        </div>
                         <button
                             type="submit"
                             :disabled="form.processing"
@@ -154,6 +32,77 @@
                             <span v-else>Simpan</span>
                         </button>
                     </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
+                            <colgroup>
+                                <col class="w-[4%]">
+                                <col class="w-[8%]">
+                                <col class="w-[7%]">
+                                <col class="w-[14%]">
+                                <col class="w-[16%]">
+                                <col class="w-[19%]">
+                                <col class="w-[7%]">
+                                <col class="w-[7%]">
+                                <col class="w-[8%]">
+                                <col class="w-[8%]">
+                                <col class="w-[14%]">
+                                <col class="w-[8%]">
+                            </colgroup>
+                            <thead class="bg-slate-50 dark:bg-white/5">
+                                <tr>
+                                    <th class="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">No</th>
+                                    <th class="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Group</th>
+                                    <th class="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">No</th>
+                                    <th class="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Project Owner</th>
+                                    <th class="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Use Case</th>
+                                    <th class="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Desc</th>
+                                    <th class="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Value</th>
+                                    <th class="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Urgency</th>
+                                    <th class="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">RJPP</th>
+                                    <th class="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">CoE</th>
+                                    <th class="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">DataSource</th>
+                                    <th class="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Waktu DataSource Created</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
+                                <tr>
+                                    <td class="px-2 py-2.5 text-slate-600">1</td>
+                                    <td class="px-2 py-2.5 text-slate-700 dark:text-slate-200">{{ selectedInitiative?.group ?? '-' }}</td>
+                                    <td class="px-2 py-2.5">
+                                        <select v-model.number="form.initiative_id" class="form-input-sm">
+                                            <option value="">-</option>
+                                            <option v-for="initiative in initiativeOptions" :key="initiative.id" :value="initiative.id">
+                                                {{ initiative.code ?? '-' }}
+                                            </option>
+                                        </select>
+                                    </td>
+                                    <td class="px-2 py-2.5 text-slate-700 dark:text-slate-200">{{ selectedInitiative?.project_owner ?? '-' }}</td>
+                                    <td class="px-2 py-2.5 text-slate-700 dark:text-slate-200">{{ selectedInitiative?.name ?? '-' }}</td>
+                                    <td class="px-2 py-2.5">
+                                        <input v-model="form.useCase_description" type="text" class="form-input-sm" placeholder="Description" />
+                                    </td>
+                                    <td class="px-2 py-2.5">
+                                        <select v-model.number="form.value" class="form-input-sm">
+                                            <option v-for="score in scoreOptions" :key="`value-${score.value}`" :value="score.value">{{ score.labelShort }}</option>
+                                        </select>
+                                    </td>
+                                    <td class="px-2 py-2.5">
+                                        <select v-model.number="form.urgency" class="form-input-sm">
+                                            <option v-for="score in scoreOptions" :key="`urgency-${score.value}`" :value="score.value">{{ score.labelShort }}</option>
+                                        </select>
+                                    </td>
+                                    <td class="px-2 py-2.5">
+                                        <input v-model="form.rjpp" type="text" class="form-input-sm" placeholder="RJPP" />
+                                    </td>
+                                    <td class="px-2 py-2.5 text-slate-700 dark:text-slate-200">{{ selectedInitiative?.coe ?? '-' }}</td>
+                                    <td class="px-2 py-2.5 text-slate-700 dark:text-slate-200">{{ selectedInitiative?.data_source ?? '-' }}</td>
+                                    <td class="px-2 py-2.5 text-slate-700 dark:text-slate-200">{{ selectedInitiative?.data_source_created ?? '-' }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
                     <div v-if="Object.keys(form.errors).length" class="border-t border-slate-200 px-4 py-2 dark:border-white/10">
                         <p v-for="(msg, field) in form.errors" :key="field" class="text-[10px] text-rose-500">{{ field }}: {{ msg }}</p>
                     </div>
@@ -164,17 +113,23 @@
 </template>
 
 <script setup>
+import { computed, watch } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
-defineProps({
+const props = defineProps({
     initiativeOptions: {
         type: Array,
         default: () => [],
     },
 });
 
-const scoreOptions = [1, 2, 3, 4, 5];
+const scoreOptions = [
+    { value: 1, labelShort: 'Low', labelLong: 'Low' },
+    { value: 2, labelShort: 'Medium', labelLong: 'Medium' },
+    { value: 3, labelShort: 'High', labelLong: 'High' },
+    { value: 4, labelShort: 'TBC', labelLong: 'TBC (To be Discussed)' },
+];
 
 const form = useForm({
     initiative_id: '',
@@ -182,6 +137,7 @@ const form = useForm({
     useCase_description: '',
     value: 4,
     urgency: 4,
+    rjpp: '',
     detail_useCase_description: '',
     current_situation: '',
     key_functionalities: '',
@@ -195,7 +151,61 @@ const form = useForm({
     sign_by: '',
 });
 
+const selectedInitiative = computed(() => {
+    const selectedId = Number(form.initiative_id);
+    if (!selectedId) {
+        return null;
+    }
+
+    return props.initiativeOptions.find((item) => Number(item.id) === selectedId) ?? null;
+});
+
+const scoreToLabel = (value) => {
+    const found = scoreOptions.find((item) => item.value === Number(value));
+    return found ? found.labelLong : '-';
+};
+
+watch(() => form.initiative_id, () => {
+    if (!selectedInitiative.value) {
+        return;
+    }
+
+    if (!String(form.alias ?? '').trim()) {
+        form.alias = String(selectedInitiative.value.code ?? '');
+    }
+
+    if (!String(form.useCase_description ?? '').trim()) {
+        form.useCase_description = String(
+            selectedInitiative.value.description
+                ?? selectedInitiative.value.name
+                ?? ''
+        );
+    }
+});
+
 const submit = () => {
+    const desc = String(form.useCase_description ?? '').trim()
+        || String(selectedInitiative.value?.description ?? '').trim()
+        || String(selectedInitiative.value?.name ?? '').trim()
+        || '-';
+
+    form.alias = String(form.alias ?? '').trim()
+        || String(selectedInitiative.value?.code ?? '').trim()
+        || '-';
+
+    form.useCase_description = desc;
+    form.detail_useCase_description = desc;
+    form.current_situation = String(form.current_situation ?? '').trim() || '-';
+    form.key_functionalities = String(form.key_functionalities ?? '').trim() || '-';
+    form.value_detail = String(form.rjpp ?? '').trim() || '-';
+    form.urgency_detail = scoreToLabel(form.urgency);
+    form.ease_implementation = Number(form.ease_implementation || 4);
+    form.ease_detail = String(form.ease_detail ?? '').trim() || '-';
+    form.resource_requirement = Number(form.resource_requirement || 4);
+    form.resource_detail = String(form.resource_detail ?? '').trim() || '-';
+    form.interpendencies = String(form.interpendencies ?? '').trim() || '-';
+    form.sign_by = String(form.sign_by ?? '').trim() || 'SYSTEM';
+
     form.post('/program-planning/program-definition/digital-initiatives/compendium');
 };
 </script>

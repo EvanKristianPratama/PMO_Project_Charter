@@ -44,24 +44,46 @@ const toQuarterIndex = (dateValue) => {
     return Math.max(0, Math.min(raw, totalQuarters.value - 1));
 };
 
+const TYPE_BLOCK = 1;
+const TYPE_DASHED = 2;
+
+const normalizeMilestoneType = (value) => {
+    const raw = Number(value);
+    return raw === TYPE_DASHED || raw === 4 ? TYPE_DASHED : TYPE_BLOCK;
+};
+
 /* ── Compute combined milestone range ────────────────── */
 
 const milestoneRange = computed(() => {
     const milestones = props.project?.milestones ?? [];
-    if (milestones.length === 0) return null;
+    if (milestones.length === 0) return { solid: null, dashed: null };
 
-    let minIndex = totalQuarters.value;
-    let maxIndex = -1;
+    let sMin = totalQuarters.value, sMax = -1;
+    let dMin = totalQuarters.value, dMax = -1;
 
     for (const ms of milestones) {
+        const type = normalizeMilestoneType(ms.milestone_type ?? ms.type);
         const si = toQuarterIndex(ms.start_date ?? ms.end_date);
         const ei = toQuarterIndex(ms.end_date ?? ms.start_date);
-        if (si !== null) minIndex = Math.min(minIndex, si);
-        if (ei !== null) maxIndex = Math.max(maxIndex, ei);
+        
+        if (si === null && ei === null) continue;
+        
+        const startIdx = si ?? ei;
+        const endIdx = ei ?? si;
+
+        if (type === TYPE_BLOCK) {
+            sMin = Math.min(sMin, startIdx);
+            sMax = Math.max(sMax, endIdx);
+        } else {
+            dMin = Math.min(dMin, startIdx);
+            dMax = Math.max(dMax, endIdx);
+        }
     }
 
-    if (minIndex > maxIndex) return null;
-    return { start: minIndex, end: maxIndex };
+    return {
+        solid: sMin <= sMax ? { start: sMin, end: sMax } : null,
+        dashed: dMin <= dMax ? { start: dMin, end: dMax } : null,
+    };
 });
 
 const milestoneCount = computed(() => (props.project?.milestones ?? []).length);
@@ -69,9 +91,18 @@ const milestoneCount = computed(() => (props.project?.milestones ?? []).length);
 /* ── Bar as percentage ──────────────────────────────── */
 
 const barStyle = computed(() => {
-    if (!milestoneRange.value || totalQuarters.value === 0) return null;
-    const left = (milestoneRange.value.start / totalQuarters.value) * 100;
-    const width = ((milestoneRange.value.end - milestoneRange.value.start + 1) / totalQuarters.value) * 100;
+    const range = milestoneRange.value.solid;
+    if (!range || totalQuarters.value === 0) return null;
+    const left = (range.start / totalQuarters.value) * 100;
+    const width = ((range.end - range.start + 1) / totalQuarters.value) * 100;
+    return { left: `${left}%`, width: `${width}%` };
+});
+
+const dashedBarStyle = computed(() => {
+    const range = milestoneRange.value.dashed;
+    if (!range || totalQuarters.value === 0) return null;
+    const left = (range.start / totalQuarters.value) * 100;
+    const width = ((range.end - range.start + 1) / totalQuarters.value) * 100;
     return { left: `${left}%`, width: `${width}%` };
 });
 </script>
@@ -112,7 +143,10 @@ const barStyle = computed(() => {
                     :style="{ left: `${((yi + 1) / years.length) * 100}%` }"
                 ></span>
 
-                <!-- The bar -->
+                <!-- The dashed bar (painted first, under the solid block if overlapping) -->
+                <div v-if="dashedBarStyle" class="bar-dashed" :style="dashedBarStyle"></div>
+
+                <!-- The solid bar -->
                 <div v-if="barStyle" class="bar-fill" :style="barStyle"></div>
             </div>
         </div>
@@ -241,6 +275,18 @@ const barStyle = computed(() => {
     border-radius: 2px;
     background: linear-gradient(90deg, #1c75bc, #2b87cc);
     transition: width 0.25s ease, left 0.25s ease;
+    z-index: 2;
+}
+
+.bar-dashed {
+    position: absolute;
+    top: 50%;
+    height: 0;
+    border-top: 2px dashed #1c75bc;
+    opacity: 0.8;
+    transform: translateY(-50%);
+    transition: width 0.25s ease, left 0.25s ease;
+    z-index: 1;
 }
 
 /* ── Toggle column ─── */

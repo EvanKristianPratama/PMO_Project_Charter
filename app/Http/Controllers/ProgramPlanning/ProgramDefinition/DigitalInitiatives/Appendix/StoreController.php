@@ -18,8 +18,8 @@ class StoreController extends Controller
             'initiative_id' => 'required|integer|exists:mst_initiative,id',
             'alias' => 'nullable|string|max:255',
             'useCase_description' => 'nullable|string',
-            'value' => 'required|integer|min:1|max:5',
-            'urgency' => 'required|integer|min:1|max:5',
+            'value' => 'required|integer|in:1,2,3,4',
+            'urgency' => 'required|integer|in:1,2,3,4',
         ]);
 
         DB::transaction(function () use ($validated): void {

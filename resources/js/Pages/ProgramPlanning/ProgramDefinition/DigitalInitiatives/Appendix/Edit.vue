@@ -19,7 +19,10 @@
             <form @submit.prevent="submit">
                 <div class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/5 dark:bg-[#1a1a1a]">
                     <div class="flex items-center justify-between border-b border-slate-200 px-4 py-2.5 dark:border-white/10">
-                        <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Data Appendix</h2>
+                        <div>
+                            <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Data Appendix</h2>
+                            <p class="mt-1 text-[10px] text-slate-500">Skala: 1 = Low, 2 = Medium, 3 = High, 4 = TBC (To be Discussed)</p>
+                        </div>
                         <button
                             type="submit"
                             :disabled="form.processing"
@@ -66,12 +69,12 @@
                                     </td>
                                     <td class="px-3 py-2.5">
                                         <select v-model.number="form.value" class="form-input-sm">
-                                            <option v-for="score in scoreOptions" :key="`value-${score}`" :value="score">{{ score }}</option>
+                                            <option v-for="score in scoreOptions" :key="`value-${score.value}`" :value="score.value">{{ score.label }}</option>
                                         </select>
                                     </td>
                                     <td class="px-3 py-2.5">
                                         <select v-model.number="form.urgency" class="form-input-sm">
-                                            <option v-for="score in scoreOptions" :key="`urgency-${score}`" :value="score">{{ score }}</option>
+                                            <option v-for="score in scoreOptions" :key="`urgency-${score.value}`" :value="score.value">{{ score.label }}</option>
                                         </select>
                                     </td>
                                 </tr>
@@ -103,7 +106,12 @@ const props = defineProps({
     },
 });
 
-const scoreOptions = [1, 2, 3, 4, 5];
+const scoreOptions = [
+    { value: 1, label: '1 - Low' },
+    { value: 2, label: '2 - Medium' },
+    { value: 3, label: '3 - High' },
+    { value: 4, label: '4 - TBC (To be Discussed)' },
+];
 
 const form = useForm({
     initiative_id: props.appendix.initiative_id ?? '',
