@@ -100,7 +100,7 @@
                 </div>
             </section>
 
-            <!-- Initiative Table -->
+            <!-- Initiative View -->
             <section class="grid grid-cols-1 gap-5">
                 <article v-if="selectedInitiative === null"
                     class="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-center shadow-sm dark:border-white/15 dark:bg-[#171717]">
@@ -110,7 +110,7 @@
                     </p>
                 </article>
 
-                <InitiativeStatusTable
+                <MstInitiativeSwitcher
                     v-else
                     :items="filteredTableItems"
                     :title="selectedInitiative === 'digital' ? 'Digital Initiatives' : selectedInitiative === 'it' ? 'IT Initiatives' : 'All Initiatives'"
@@ -125,7 +125,7 @@
 import { computed, ref } from 'vue';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import ScopeCharterFlowSection from '@/Components/Dashboard/ScopeCharterFlowSection.vue';
-import InitiativeStatusTable from '@/Components/Dashboard/InitiativeStatusTable.vue';
+import MstInitiativeSwitcher from '@/Components/Dashboard/MstInitiativeSwitcher.vue';
 import { statusFlowClassByIndex } from '@/Composables/initiativeStatus';
 
 const props = defineProps({
