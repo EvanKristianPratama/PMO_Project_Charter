@@ -5,25 +5,37 @@
                 <div>
                     <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Review Timeline</h1>
                 </div>
-                <div class="w-full sm:w-[360px]">
-                    <label
-                        class="mb-1 block text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400"
-                    >
-                        Filter Initiative
-                    </label>
-                    <select
-                        v-model="selectedInitiativeId"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-2 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#101826] dark:text-slate-100"
-                    >
-                        <option value="all">Semua Initiative</option>
-                        <option
-                            v-for="initiative in initiativeItems"
-                            :key="`initiative-filter-${initiative.id}`"
-                            :value="String(initiative.id)"
+                <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end">
+                    <div class="w-full sm:w-[360px]">
+                        <label
+                            class="mb-1 block text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400"
                         >
-                            {{ initiativeLabel(initiative) }}
-                        </option>
-                    </select>
+                            Filter Initiative
+                        </label>
+                        <select
+                            v-model="selectedInitiativeId"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-2 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#101826] dark:text-slate-100"
+                        >
+                            <option value="all">Semua Initiative</option>
+                            <option
+                                v-for="initiative in initiativeItems"
+                                :key="`initiative-filter-${initiative.id}`"
+                                :value="String(initiative.id)"
+                            >
+                                {{ initiativeLabel(initiative) }}
+                            </option>
+                        </select>
+                    </div>
+                    <button
+                        type="button"
+                        class="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-semibold transition"
+                        :class="showRoadmap
+                            ? 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-300 dark:hover:bg-amber-900/30'
+                            : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700/40 dark:bg-emerald-900/20 dark:text-emerald-300 dark:hover:bg-emerald-900/30'"
+                        @click="toggleRoadmapVisibility"
+                    >
+                        {{ showRoadmap ? 'Hide Roadmap' : 'Show Roadmap' }}
+                    </button>
                 </div>
             </div>
 
@@ -48,7 +60,7 @@
 
                     <StatusImplementationTable :projects="initiative.projects" />
 
-                    <div v-if="roadmapProjectsFor(initiative).length > 0" class="mt-4 space-y-2">
+                    <div v-if="showRoadmap && roadmapProjectsFor(initiative).length > 0" class="mt-4 space-y-2">
                         <div
                             v-for="(roadmapProject, roadmapIndex) in roadmapProjectsFor(initiative)"
                             :key="roadmapEntryKey(initiative, roadmapProject)"
@@ -58,11 +70,12 @@
                                 :sequence="roadmapIndex + 1"
                                 :year-start="roadmapYearStart"
                                 :year-end="roadmapYearEnd"
-                                :expanded="isRoadmapExpanded(initiative.id, roadmapProject.id)"
-                                @toggle="toggleRoadmapExpand(initiative.id, roadmapProject.id)"
+                                :expanded="isRoadmapExpanded(initiative.id, roadmapProject.roadmap_key)"
+                                :display-version-label="roadmapProject.roadmap_version_label ?? null"
+                                @toggle="toggleRoadmapExpand(initiative.id, roadmapProject.roadmap_key)"
                             />
                             <div
-                                v-if="isRoadmapExpanded(initiative.id, roadmapProject.id)"
+                                v-if="isRoadmapExpanded(initiative.id, roadmapProject.roadmap_key)"
                                 class="rounded-b-xl border border-t-0 border-slate-200 bg-white p-3 dark:border-white/10 dark:bg-[#171717]"
                             >
                                 <ProjectRoadmap
@@ -71,7 +84,7 @@
                                         objectives: roadmapProject.charter?.objectives ?? '',
                                         duration: roadmapProject.charter?.duration ?? '',
                                     }"
-                                    :selected-roadmap-version-id="null"
+                                    :selected-roadmap-version-id="roadmapProject.roadmap_version_label ?? null"
                                     :sequence="roadmapIndex + 1"
                                     :year-start="roadmapYearStart"
                                     :year-end="roadmapYearEnd"
@@ -112,6 +125,7 @@ const initiativeItems = computed(() => (
     Array.isArray(props.initiatives) ? props.initiatives : []
 ));
 const selectedInitiativeId = ref('all');
+const showRoadmap = ref(true);
 const roadmapYearStart = 2025;
 const roadmapYearEnd = 2029;
 const expandedRoadmapItems = reactive(new Set());
@@ -158,45 +172,70 @@ const normalizeVersionLabel = (value) => {
 const roadmapProjectsFor = (initiative) => {
     const projects = Array.isArray(initiative?.projects) ? initiative.projects : [];
 
-    return projects.map((project) => {
+    return projects.flatMap((project) => {
         const charters = Array.isArray(project?.charters) && project.charters.length > 0
             ? [...project.charters].sort((a, b) => Number(b?.id || 0) - Number(a?.id || 0))
             : (project?.charter ? [project.charter] : []);
 
-        const latestCharter = charters[0] ?? null;
+        if (charters.length === 0) {
+            return [{
+                ...project,
+                charters: [],
+                charter: null,
+                milestones: [],
+                roadmap_version_label: null,
+                roadmap_version_key: 'v1',
+                roadmap_key: `project-${project?.id ?? 'x'}-charter-none`,
+            }];
+        }
 
-        const milestones = charters.flatMap((charter) => {
-            const versionLabel = normalizeVersionLabel(charter?.version_label);
+        return charters.map((charter, charterIndex) => {
+            const versionLabelRaw = String(charter?.version_label ?? '').trim();
+            const versionLabelDisplay = versionLabelRaw || `v${Math.max(charters.length - charterIndex, 1)}`;
+            const versionKey = normalizeVersionLabel(versionLabelDisplay);
             const charterMilestones = Array.isArray(charter?.milestones) ? charter.milestones : [];
 
-            return charterMilestones.map((milestone) => ({
+            const milestones = charterMilestones.map((milestone) => ({
                 ...milestone,
-                version: versionLabel || milestone?.version || null,
+                version: versionKey || milestone?.version || null,
             }));
-        });
 
-        return {
-            ...project,
-            charters,
-            charter: latestCharter,
-            milestones,
-        };
+            return {
+                ...project,
+                charters: [charter],
+                charter,
+                milestones,
+                roadmap_version_label: versionLabelDisplay,
+                roadmap_version_key: versionKey,
+                roadmap_key: `project-${project?.id ?? 'x'}-charter-${charter?.id ?? charterIndex}`,
+            };
+        });
     });
 };
 
-const roadmapEntryKey = (initiative, project) => `initiative-${initiative?.id ?? 'x'}-project-${project?.id ?? 'x'}`;
+const roadmapEntryKey = (initiative, project) => (
+    `initiative-${initiative?.id ?? 'x'}-${project?.roadmap_key ?? `project-${project?.id ?? 'x'}`}`
+);
 
-const isRoadmapExpanded = (initiativeId, projectId) => {
-    return expandedRoadmapItems.has(`initiative-${initiativeId}-project-${projectId}`);
+const isRoadmapExpanded = (initiativeId, roadmapKey) => {
+    return expandedRoadmapItems.has(`initiative-${initiativeId}-${roadmapKey}`);
 };
 
-const toggleRoadmapExpand = (initiativeId, projectId) => {
-    const key = `initiative-${initiativeId}-project-${projectId}`;
+const toggleRoadmapExpand = (initiativeId, roadmapKey) => {
+    const key = `initiative-${initiativeId}-${roadmapKey}`;
 
     if (expandedRoadmapItems.has(key)) {
         expandedRoadmapItems.delete(key);
     } else {
         expandedRoadmapItems.add(key);
+    }
+};
+
+const toggleRoadmapVisibility = () => {
+    showRoadmap.value = !showRoadmap.value;
+
+    if (!showRoadmap.value) {
+        expandedRoadmapItems.clear();
     }
 };
 </script>

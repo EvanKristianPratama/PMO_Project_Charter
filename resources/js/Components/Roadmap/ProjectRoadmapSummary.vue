@@ -3,21 +3,20 @@ import { computed } from 'vue';
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
-    project:   { type: Object, required: true },
-    sequence:  { type: [Number, String], default: null },
+    project: { type: Object, required: true },
+    sequence: { type: [Number, String], default: null },
     yearStart: { type: Number, default: 2025 },
-    yearEnd:   { type: Number, default: 2029 },
-    expanded:  { type: Boolean, default: false },
+    yearEnd: { type: Number, default: 2029 },
+    expanded: { type: Boolean, default: false },
+    displayVersionLabel: { type: [String, Number], default: null },
 });
 
 const emit = defineEmits(['toggle']);
 
-/* ── Year / Quarter grid ─────────────────────────────── */
-
 const yStart = computed(() => Number(props.yearStart) || 2025);
-const yEnd   = computed(() => {
-    const e = Number(props.yearEnd) || 2029;
-    return e >= yStart.value ? e : yStart.value;
+const yEnd = computed(() => {
+    const end = Number(props.yearEnd) || 2029;
+    return end >= yStart.value ? end : yStart.value;
 });
 
 const years = computed(() =>
@@ -26,84 +25,175 @@ const years = computed(() =>
 
 const totalQuarters = computed(() => years.value.length * 4);
 
-/* ── Date helpers ────────────────────────────────────── */
+const TYPE_BLOCK = 1;
+const TYPE_DASHED = 2;
 
 const parseDateMeta = (value) => {
     if (!value) return null;
-    const m = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if (m) return { year: +m[1], monthIndex: +m[2] - 1 };
-    const d = new Date(value);
-    if (Number.isNaN(d.getTime())) return null;
-    return { year: d.getUTCFullYear(), monthIndex: d.getUTCMonth() };
+    const matched = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (matched) {
+        return { year: Number(matched[1]), monthIndex: Number(matched[2]) - 1 };
+    }
+
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return null;
+
+    return { year: parsed.getUTCFullYear(), monthIndex: parsed.getUTCMonth() };
 };
 
 const toQuarterIndex = (dateValue) => {
     const meta = parseDateMeta(dateValue);
     if (!meta || totalQuarters.value === 0) return null;
+
     const raw = (meta.year - yStart.value) * 4 + Math.floor(meta.monthIndex / 3);
     return Math.max(0, Math.min(raw, totalQuarters.value - 1));
 };
-
-const TYPE_BLOCK = 1;
-const TYPE_DASHED = 2;
 
 const normalizeMilestoneType = (value) => {
     const raw = Number(value);
     return raw === TYPE_DASHED || raw === 4 ? TYPE_DASHED : TYPE_BLOCK;
 };
 
-/* ── Compute combined milestone range ────────────────── */
+const normalizeVersionKey = (value) => {
+    const raw = String(value ?? '').trim();
+    const lower = raw.toLowerCase();
 
-const milestoneRange = computed(() => {
-    const milestones = props.project?.milestones ?? [];
-    if (milestones.length === 0) return { solid: null, dashed: null };
-
-    let sMin = totalQuarters.value, sMax = -1;
-    let dMin = totalQuarters.value, dMax = -1;
-
-    for (const ms of milestones) {
-        const type = normalizeMilestoneType(ms.milestone_type ?? ms.type);
-        const si = toQuarterIndex(ms.start_date ?? ms.end_date);
-        const ei = toQuarterIndex(ms.end_date ?? ms.start_date);
-        
-        if (si === null && ei === null) continue;
-        
-        const startIdx = si ?? ei;
-        const endIdx = ei ?? si;
-
-        if (type === TYPE_BLOCK) {
-            sMin = Math.min(sMin, startIdx);
-            sMax = Math.max(sMax, endIdx);
-        } else {
-            dMin = Math.min(dMin, startIdx);
-            dMax = Math.max(dMax, endIdx);
-        }
+    if (!raw || lower === 'v') {
+        return 'v1';
     }
 
-    return {
-        solid: sMin <= sMax ? { start: sMin, end: sMax } : null,
-        dashed: dMin <= dMax ? { start: dMin, end: dMax } : null,
+    if (/^v\d+$/.test(lower)) {
+        return `v${Math.max(Number(lower.slice(1)) || 1, 1)}`;
+    }
+
+    if (/^\d+$/.test(raw)) {
+        return `v${Math.max(Number(raw) || 1, 1)}`;
+    }
+
+    return lower;
+};
+
+const toDisplayVersionLabel = (value) => {
+    const raw = String(value ?? '').trim();
+    const lower = raw.toLowerCase();
+
+    if (!raw || lower === 'v') {
+        return 'v1';
+    }
+
+    if (/^\d+$/.test(raw)) {
+        return `v${Math.max(Number(raw) || 1, 1)}`;
+    }
+
+    return raw;
+};
+
+const versionEntries = computed(() => {
+    const versions = new Map();
+    const registerVersion = (value) => {
+        const key = normalizeVersionKey(value);
+        if (!versions.has(key)) {
+            versions.set(key, toDisplayVersionLabel(value));
+        }
     };
+
+    (props.project?.milestones ?? []).forEach((milestone) => {
+        registerVersion(milestone?.version);
+    });
+
+    (Array.isArray(props.project?.charters) ? props.project.charters : []).forEach((charter) => {
+        registerVersion(charter?.version_label);
+    });
+
+    if (props.project?.charter?.version_label) {
+        registerVersion(props.project.charter.version_label);
+    }
+
+    if (versions.size === 0) {
+        registerVersion('v1');
+    }
+
+    return Array.from(versions.entries())
+        .map(([key, label]) => ({ key, label }))
+        .sort((a, b) => {
+            const numA = Number(a.key.replace(/\D/g, '')) || 0;
+            const numB = Number(b.key.replace(/\D/g, '')) || 0;
+
+            if (numA !== numB) {
+                return numA - numB;
+            }
+
+            return a.key.localeCompare(b.key);
+        });
 });
 
-const milestoneCount = computed(() => (props.project?.milestones ?? []).length);
+const versionTimelineRanges = computed(() => {
+    const ranges = versionEntries.value.map((version) => ({
+        ...version,
+        solid: null,
+        dashed: null,
+    }));
 
-/* ── Bar as percentage ──────────────────────────────── */
+    const rangeByVersion = new Map(ranges.map((item) => [item.key, item]));
 
-const barStyle = computed(() => {
-    const range = milestoneRange.value.solid;
-    if (!range || totalQuarters.value === 0) return null;
-    const left = (range.start / totalQuarters.value) * 100;
-    const width = ((range.end - range.start + 1) / totalQuarters.value) * 100;
-    return { left: `${left}%`, width: `${width}%` };
+    (props.project?.milestones ?? []).forEach((milestone) => {
+        const key = normalizeVersionKey(milestone?.version);
+        const bucket = rangeByVersion.get(key);
+        if (!bucket) return;
+
+        const si = toQuarterIndex(milestone.start_date ?? milestone.end_date);
+        const ei = toQuarterIndex(milestone.end_date ?? milestone.start_date);
+        if (si === null && ei === null) return;
+
+        const range = {
+            start: Math.min(si ?? ei, ei ?? si),
+            end: Math.max(si ?? ei, ei ?? si),
+        };
+
+        const target = normalizeMilestoneType(milestone.milestone_type ?? milestone.type) === TYPE_DASHED
+            ? 'dashed'
+            : 'solid';
+
+        if (!bucket[target]) {
+            bucket[target] = range;
+            return;
+        }
+
+        bucket[target] = {
+            start: Math.min(bucket[target].start, range.start),
+            end: Math.max(bucket[target].end, range.end),
+        };
+    });
+
+    return ranges;
 });
 
-const dashedBarStyle = computed(() => {
-    const range = milestoneRange.value.dashed;
+const rangeStyle = (range) => {
     if (!range || totalQuarters.value === 0) return null;
+
     const left = (range.start / totalQuarters.value) * 100;
     const width = ((range.end - range.start + 1) / totalQuarters.value) * 100;
+
     return { left: `${left}%`, width: `${width}%` };
+};
+
+const projectVersionLabel = computed(() => {
+    const explicit = String(props.displayVersionLabel ?? '').trim();
+    if (explicit) {
+        return explicit;
+    }
+
+    const fromCharter = String(props.project?.charter?.version_label ?? '').trim();
+    if (fromCharter) {
+        return fromCharter;
+    }
+
+    const firstVersion = versionEntries.value[0]?.label ?? '';
+    return String(firstVersion).trim();
+});
+
+const hideInlineVersionPills = computed(() => {
+    return String(props.displayVersionLabel ?? '').trim().length > 0;
 });
 </script>
 
@@ -116,42 +206,45 @@ const dashedBarStyle = computed(() => {
         @click="emit('toggle')"
         @keydown.enter.prevent="emit('toggle')"
     >
-        <!-- No -->
         <div class="col-no">
             <span class="seq-badge">{{ sequence ?? '' }}</span>
         </div>
 
-        <!-- Name -->
         <div class="col-name">
-            <span class="project-name">{{ project.name || '-' }}</span>
+            <div class="project-name-wrap">
+                <span class="project-name">{{ project.name || '-' }}</span>
+                <span v-if="projectVersionLabel" class="project-version-capsule">{{ projectVersionLabel }}</span>
+            </div>
         </div>
 
-        <!-- Timeline grid -->
         <div class="col-timeline">
-            <!-- Year headers -->
             <div class="year-row">
                 <div v-for="year in years" :key="`y-${year}`" class="year-cell">{{ year }}</div>
             </div>
 
-            <!-- Bar track -->
-            <div class="bar-track">
-                <!-- Year divider lines -->
-                <span
-                    v-for="(year, yi) in years"
-                    :key="`div-${year}`"
-                    class="year-divider"
-                    :style="{ left: `${((yi + 1) / years.length) * 100}%` }"
-                ></span>
+            <div class="timeline-version-list">
+                <div
+                    v-for="version in versionTimelineRanges"
+                    :key="`timeline-version-${version.key}`"
+                    class="timeline-version-row"
+                >
+                    <span v-if="!hideInlineVersionPills" class="version-pill">{{ version.label }}</span>
 
-                <!-- The dashed bar (painted first, under the solid block if overlapping) -->
-                <div v-if="dashedBarStyle" class="bar-dashed" :style="dashedBarStyle"></div>
+                    <div class="bar-track">
+                        <span
+                            v-for="(year, yi) in years"
+                            :key="`div-${version.key}-${year}`"
+                            class="year-divider"
+                            :style="{ left: `${((yi + 1) / years.length) * 100}%` }"
+                        ></span>
 
-                <!-- The solid bar -->
-                <div v-if="barStyle" class="bar-fill" :style="barStyle"></div>
+                        <div v-if="rangeStyle(version.dashed)" class="bar-dashed" :style="rangeStyle(version.dashed)"></div>
+                        <div v-if="rangeStyle(version.solid)" class="bar-fill" :style="rangeStyle(version.solid)"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Toggle -->
         <div class="col-toggle">
             <span class="toggle-btn">
                 <ChevronUpIcon v-if="expanded" class="toggle-icon" />
@@ -173,22 +266,25 @@ const dashedBarStyle = computed(() => {
     min-height: 38px;
     font-family: "Segoe UI", Arial, sans-serif;
 }
+
 .summary-row:last-child,
 .summary-row--expanded {
     border-bottom: 1px solid #d0dce8;
 }
+
 .summary-row:first-child {
     border-radius: 6px 6px 0 0;
 }
+
 .summary-row:hover {
     background: #f0f7ff;
 }
+
 .summary-row--expanded {
     background: #eaf3fb;
     border-color: #1c75bc;
 }
 
-/* ── No column ─── */
 .col-no {
     display: flex;
     align-items: center;
@@ -197,13 +293,13 @@ const dashedBarStyle = computed(() => {
     flex-shrink: 0;
     border-right: 1px solid #d0dce8;
 }
+
 .seq-badge {
     font-size: 10px;
     font-weight: 700;
     color: #1c75bc;
 }
 
-/* ── Name column ─── */
 .col-name {
     display: flex;
     align-items: center;
@@ -213,6 +309,7 @@ const dashedBarStyle = computed(() => {
     border-right: 1px solid #d0dce8;
     min-width: 0;
 }
+
 .project-name {
     font-size: 11px;
     font-weight: 600;
@@ -223,7 +320,29 @@ const dashedBarStyle = computed(() => {
     line-height: 1.3;
 }
 
-/* ── Timeline column ─── */
+.project-name-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.project-version-capsule {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 10px;
+    border-radius: 999px;
+    border: 1px solid #9ca3af;
+    background: #e5e7eb;
+    color: #374151;
+    font-size: 9px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+}
+
 .col-timeline {
     flex: 1 1 auto;
     display: flex;
@@ -238,6 +357,7 @@ const dashedBarStyle = computed(() => {
     display: flex;
     padding: 0 2px;
 }
+
 .year-cell {
     flex: 1;
     text-align: center;
@@ -248,10 +368,39 @@ const dashedBarStyle = computed(() => {
     padding-bottom: 3px;
 }
 
+.timeline-version-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.timeline-version-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.version-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    border: 1px solid #94a3b8;
+    background: #f1f5f9;
+    color: #334155;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
 .bar-track {
+    flex: 1;
     position: relative;
     height: 12px;
-    margin: 0 2px;
+    margin: 0 2px 0 0;
     background: #f1f5f9;
     border-radius: 3px;
 }
@@ -264,6 +413,7 @@ const dashedBarStyle = computed(() => {
     background: #cbd5e1;
     pointer-events: none;
 }
+
 .year-divider:last-of-type {
     display: none;
 }
@@ -289,7 +439,6 @@ const dashedBarStyle = computed(() => {
     z-index: 1;
 }
 
-/* ── Toggle column ─── */
 .col-toggle {
     display: flex;
     align-items: center;
@@ -298,6 +447,7 @@ const dashedBarStyle = computed(() => {
     flex-shrink: 0;
     border-left: 1px solid #d0dce8;
 }
+
 .toggle-btn {
     display: inline-flex;
     align-items: center;
@@ -308,9 +458,11 @@ const dashedBarStyle = computed(() => {
     color: #1c75bc;
     transition: background 0.12s ease;
 }
+
 .summary-row:hover .toggle-btn {
     background: #dbeafe;
 }
+
 .toggle-icon {
     width: 14px;
     height: 14px;
