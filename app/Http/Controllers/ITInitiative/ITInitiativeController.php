@@ -79,7 +79,14 @@ class ITInitiativeController extends Controller
         $filterStatus = $filters['status'] ?? null;
 
         $projects = TrsProject::query()
-            ->with(['owner', 'charter', 'charter.milestones', 'statusRef:id,name', 'pcStatusImplementations'])
+            ->with([
+                'owner',
+                'charter',
+                'charter.milestones',
+                'charters' => static fn ($query) => $query->latest('id')->with('milestones'),
+                'statusRef:id,name',
+                'pcStatusImplementations',
+            ])
             ->when($filterStatus, fn ($q, $status) => $q->where('status', $status))
             ->when($filters['search'] ?? null, fn ($q, $search) => $q->where(function ($inner) use ($search): void {
                 $inner->where('name', 'like', "%{$search}%")

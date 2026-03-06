@@ -68,15 +68,31 @@ const objectives = computed(() =>
     String(props.form?.objectives || '').split(/\r?\n/).map((l) => l.trim()).filter(Boolean)
 );
 
-const normalizeVersionLabel = (value) => {
-    const raw = String(value ?? '').trim().toLowerCase();
+const normalizeVersionKey = (value) => {
+    const raw = String(value ?? '').trim();
+    const lower = raw.toLowerCase();
 
-    if (!raw || raw === 'v') {
+    if (!raw || lower === 'v') {
         return 'v1';
     }
 
-    if (/^v\d+$/.test(raw)) {
-        return `v${Math.max(Number(raw.slice(1)) || 1, 1)}`;
+    if (/^v\d+$/.test(lower)) {
+        return `v${Math.max(Number(lower.slice(1)) || 1, 1)}`;
+    }
+
+    if (/^\d+$/.test(raw)) {
+        return `v${Math.max(Number(raw) || 1, 1)}`;
+    }
+
+    return lower;
+};
+
+const toDisplayVersionLabel = (value) => {
+    const raw = String(value ?? '').trim();
+    const lower = raw.toLowerCase();
+
+    if (!raw || lower === 'v') {
+        return 'v1';
     }
 
     if (/^\d+$/.test(raw)) {
@@ -86,24 +102,46 @@ const normalizeVersionLabel = (value) => {
     return raw;
 };
 
-const selectedRoadmapVersionIdNormalized = computed(() => {
+const selectedRoadmapVersionKey = computed(() => {
     if (props.selectedRoadmapVersionId === null || props.selectedRoadmapVersionId === undefined || String(props.selectedRoadmapVersionId).trim() === '') {
         return null;
     }
 
-    return normalizeVersionLabel(props.selectedRoadmapVersionId);
+    return normalizeVersionKey(props.selectedRoadmapVersionId);
 });
 
 const availableVersions = computed(() => {
+    const labels = new Map();
+    const registerVersion = (value) => {
+        const key = normalizeVersionKey(value);
+        if (!labels.has(key)) {
+            labels.set(key, toDisplayVersionLabel(value));
+        }
+    };
     const milestones = props.project?.milestones ?? [];
-    if (milestones.length === 0) return ['v1'];
 
-    const labels = new Set(milestones.map((m) => normalizeVersionLabel(m.version)));
-    if (labels.size === 0) return ['v1'];
+    milestones.forEach((milestone) => {
+        registerVersion(milestone?.version);
+    });
 
-    return Array.from(labels).sort((a, b) => {
-        const numA = Number(a.replace(/\D/g, '')) || 0;
-        const numB = Number(b.replace(/\D/g, '')) || 0;
+    const projectCharters = Array.isArray(props.project?.charters) ? props.project.charters : [];
+    projectCharters.forEach((charter) => {
+        registerVersion(charter?.version_label);
+    });
+
+    if (props.project?.charter?.version_label) {
+        registerVersion(props.project.charter.version_label);
+    }
+
+    if (labels.size === 0) {
+        registerVersion('v1');
+    }
+
+    return Array.from(labels.entries())
+        .map(([key, label]) => ({ key, label }))
+        .sort((a, b) => {
+        const numA = Number(a.key.replace(/\D/g, '')) || 0;
+        const numB = Number(b.key.replace(/\D/g, '')) || 0;
         return numA - numB; // Ascending (v1, v2)
     });
 });
@@ -111,20 +149,44 @@ const availableVersions = computed(() => {
 const versionsToRender = computed(() => {
     // If a specific version is selected, only render that one.
     // Otherwise, render all available versions.
-    const selected = selectedRoadmapVersionIdNormalized.value;
+    const selected = selectedRoadmapVersionKey.value;
     if (selected) {
-        return availableVersions.value.includes(selected) ? [selected] : availableVersions.value;
+        const selectedVersion = availableVersions.value.find((version) => version.key === selected);
+        return selectedVersion ? [selectedVersion] : availableVersions.value;
     }
     return availableVersions.value;
 });
 
-const getMilestonesForVersion = (versionId) => {
+const getMilestonesForVersion = (versionKey) => {
     return [...(props.project?.milestones ?? [])]
-        .filter((item) => normalizeVersionLabel(item.version) === versionId)
+        .filter((item) => normalizeVersionKey(item.version) === versionKey)
         .sort((a, b) => {
             const od = (Number(a.order ?? 0)) - (Number(b.order ?? 0));
             return od !== 0 ? od : String(a.start_date ?? '').localeCompare(String(b.start_date ?? ''));
         });
+};
+
+const getObjectivesForVersion = (versionKey) => {
+    const charters = Array.isArray(props.project?.charters) ? props.project.charters : [];
+    const matchedCharter = charters.find(
+        (charter) => normalizeVersionKey(charter?.version_label) === versionKey
+    );
+
+    if (matchedCharter) {
+        return String(matchedCharter.objectives || '')
+            .split(/\r?\n/)
+            .map((line) => line.trim())
+            .filter(Boolean);
+    }
+
+    if (normalizeVersionKey(props.project?.charter?.version_label) === versionKey) {
+        return String(props.project?.charter?.objectives || '')
+            .split(/\r?\n/)
+            .map((line) => line.trim())
+            .filter(Boolean);
+    }
+
+    return objectives.value;
 };
 
 const buildRowsFromMilestones = (milestones) => {
@@ -149,21 +211,23 @@ const buildRowsFromMilestones = (milestones) => {
 };
 
 const versionedRoadmaps = computed(() => {
-    return versionsToRender.value.map((versionId) => {
-        const milestones = getMilestonesForVersion(versionId);
+    return versionsToRender.value.map((version) => {
+        const milestones = getMilestonesForVersion(version.key);
         let sections = [];
+        const versionObjectives = getObjectivesForVersion(version.key);
 
         if (milestones.length > 0) {
             sections = buildRowsFromMilestones(milestones);
         } else {
-            const rows = objectives.value.length
-                ? objectives.value.map((obj) => ({ activity: obj, output: [obj], hasTimeline: false, start: null, end: null, timelineStyle: 'block' }))
+            const rows = versionObjectives.length
+                ? versionObjectives.map((obj) => ({ activity: obj, output: [obj], hasTimeline: false, start: null, end: null, timelineStyle: 'block' }))
                 : [{ activity: 'Belum ada activity roadmap', output: [], hasTimeline: false, start: null, end: null, timelineStyle: 'block' }];
-            sections = [{ label: objectives.value.length ? 'Objectives' : 'Roadmap Activity', rows }];
+            sections = [{ label: versionObjectives.length ? 'Objectives' : 'Roadmap Activity', rows }];
         }
 
         return {
-            versionId,
+            versionKey: version.key,
+            versionLabel: version.label,
             sections,
         };
     });
@@ -180,12 +244,12 @@ const timelineCellClass = (row, quarterIndex, cell) => ({
 
 <template>
     <div class="roadmap-wrap overflow-x-auto">
-        <div v-for="roadmap in versionedRoadmaps" :key="`rm-v-${roadmap.versionId}`" class="roadmap-version-block">
+        <div v-for="roadmap in versionedRoadmaps" :key="`rm-v-${roadmap.versionKey}`" class="roadmap-version-block">
             <table class="roadmap-table" :style="{ '--qcount': Math.max(totalCells, 1) }">
                 <colgroup>
                     <col class="col-no">
                     <col class="col-initiative">
-                    <col v-for="(_, i) in quarterCells" :key="`cq-${roadmap.versionId}-${i}`" class="col-quarter">
+                    <col v-for="(_, i) in quarterCells" :key="`cq-${roadmap.versionKey}-${i}`" class="col-quarter">
                     <col class="col-output">
                 </colgroup>
 
@@ -194,13 +258,13 @@ const timelineCellClass = (row, quarterIndex, cell) => ({
                     <tr>
                         <th rowspan="2" class="th">No</th>
                         <th rowspan="2" class="th th-left">IT Initiative Roadmap {{ yStart }}–{{ yEnd }}</th>
-                        <th v-for="year in years" :key="`y-${roadmap.versionId}-${year}`" colspan="4" class="th th-year">{{ year }}</th>
+                        <th v-for="year in years" :key="`y-${roadmap.versionKey}-${year}`" colspan="4" class="th th-year">{{ year }}</th>
                         <th rowspan="2" class="th">Output</th>
                     </tr>
                     <tr>
                         <th
                             v-for="(cell, i) in quarterCells"
-                            :key="`qh-${roadmap.versionId}-${i}`"
+                            :key="`qh-${roadmap.versionKey}-${i}`"
                             class="th-q"
                             :class="{ 'border-r-blue': cell.quarter === 4 }"
                         >Q{{ cell.quarter }}</th>
@@ -214,10 +278,10 @@ const timelineCellClass = (row, quarterIndex, cell) => ({
                         <td class="cell-no">{{ sequence ?? '' }}</td>
                         <td class="cell-project-name">
                             {{ project.name || '-' }} 
-                            <span v-if="versionedRoadmaps.length > 1" class="version-badge">[{{ roadmap.versionId }}]</span>
+                            <span v-if="versionedRoadmaps.length > 1 || !selectedRoadmapVersionKey" class="version-badge">{{ roadmap.versionLabel }}</span>
                         </td>
                         <td
-                            v-for="(cell, i) in quarterCells" :key="`pg-${roadmap.versionId}-${i}`"
+                            v-for="(cell, i) in quarterCells" :key="`pg-${roadmap.versionKey}-${i}`"
                             class="cell-tl"
                             :class="{ 'border-r-blue': cell.quarter === 4 }"
                         ></td>
@@ -225,13 +289,13 @@ const timelineCellClass = (row, quarterIndex, cell) => ({
                     </tr>
 
                     <!-- Sections & activities -->
-                    <template v-for="(section, si) in roadmap.sections" :key="`sec-${roadmap.versionId}-${si}`">
+                    <template v-for="(section, si) in roadmap.sections" :key="`sec-${roadmap.versionKey}-${si}`">
                         <!-- Section header row -->
                         <tr class="row-section">
                             <td class="cell-no"></td>
                             <td class="cell-section">{{ section.label }}</td>
                             <td
-                                v-for="(cell, i) in quarterCells" :key="`sg-${roadmap.versionId}-${si}-${i}`"
+                                v-for="(cell, i) in quarterCells" :key="`sg-${roadmap.versionKey}-${si}-${i}`"
                                 class="cell-section-gap"
                                 :class="{ 'border-r-blue': cell.quarter === 4 }"
                             ></td>
@@ -239,17 +303,17 @@ const timelineCellClass = (row, quarterIndex, cell) => ({
                         </tr>
 
                         <!-- Activity rows -->
-                        <tr v-for="(row, ri) in section.rows" :key="`row-${roadmap.versionId}-${si}-${ri}`" class="row-data">
+                        <tr v-for="(row, ri) in section.rows" :key="`row-${roadmap.versionKey}-${si}-${ri}`" class="row-data">
                             <td class="cell-no"></td>
                             <td class="cell-activity">{{ row.activity }}</td>
                             <td
-                                v-for="(cell, i) in quarterCells" :key="`tl-${roadmap.versionId}-${si}-${ri}-${i}`"
+                                v-for="(cell, i) in quarterCells" :key="`tl-${roadmap.versionKey}-${si}-${ri}-${i}`"
                                 class="cell-tl"
                                 :class="timelineCellClass(row, i, cell)"
                             ></td>
                             <td class="cell-output">
                                 <ul v-if="row.output.length" class="output-list">
-                                    <li v-for="(item, oi) in row.output" :key="`out-${roadmap.versionId}-${si}-${ri}-${oi}`">{{ item }}</li>
+                                    <li v-for="(item, oi) in row.output" :key="`out-${roadmap.versionKey}-${si}-${ri}-${oi}`">{{ item }}</li>
                                 </ul>
                                 <span v-else>–</span>
                             </td>
@@ -352,14 +416,18 @@ const timelineCellClass = (row, quarterIndex, cell) => ({
 }
 
 .version-badge {
-    display: inline-block;
-    margin-left: 6px;
+    display: inline-flex;
+    align-items: center;
+    margin-left: 8px;
     font-size: 10px;
     font-weight: 700;
-    color: var(--blue);
-    background: var(--blue-lt);
-    padding: 2px 6px;
-    border-radius: 4px;
+    color: #111827;
+    background: #e5e7eb;
+    border: 1px solid #6b7280;
+    padding: 2px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.01em;
+    line-height: 1.15;
     vertical-align: middle;
 }
 

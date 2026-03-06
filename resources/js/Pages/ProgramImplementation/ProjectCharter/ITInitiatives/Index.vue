@@ -130,21 +130,19 @@
                 <div v-for="(project, roadmapIndex) in roadmapItems" :key="`it-roadmap-${project.id}`">
                     <!-- Summary bar (collapsed) -->
                     <ProjectRoadmapSummary v-if="!expandedProjects.has(project.id)" :project="project"
-                        :selected-roadmap-version-id="project.charter?.version_label ?? null"
                         :sequence="roadmapIndex + 1" :year-start="roadmapYearStart" :year-end="roadmapYearEnd"
                         :expanded="false" @toggle="toggleProjectExpand(project.id)" />
 
                     <!-- Detail view (expanded) -->
                     <div v-else>
                         <ProjectRoadmapSummary :project="project"
-                            :selected-roadmap-version-id="project.charter?.version_label ?? null"
                             :sequence="roadmapIndex + 1" :year-start="roadmapYearStart" :year-end="roadmapYearEnd"
                             :expanded="true" @toggle="toggleProjectExpand(project.id)" />
                         <ProjectRoadmap :project="project" :form="{
                             objectives: project.charter?.objectives ?? '',
                             duration: project.charter?.duration ?? '',
-                        }" :selected-roadmap-version-id="project.charter?.version_label ?? null"
-                            :sequence="roadmapIndex + 1" :year-start="roadmapYearStart" :year-end="roadmapYearEnd" />
+                        }" :selected-roadmap-version-id="null" :sequence="roadmapIndex + 1"
+                            :year-start="roadmapYearStart" :year-end="roadmapYearEnd" />
                     </div>
                 </div>
 
@@ -304,20 +302,26 @@ const roadmapItems = computed(() => {
     }
 
     return projects.map((project) => {
-        const charters = Array.isArray(project?.charters) ? project.charters : [];
-        const latestCharter = charters.length
-            ? [...charters].sort((a, b) => Number(b.id || 0) - Number(a.id || 0))[0]
-            : (project?.charter ?? null);
+        const charters = Array.isArray(project?.charters) && project.charters.length > 0
+            ? [...project.charters]
+                .sort((a, b) => Number(b.id || 0) - Number(a.id || 0))
+            : (project?.charter ? [project.charter] : []);
 
-        const milestones = Array.isArray(latestCharter?.milestones)
-            ? latestCharter.milestones.map((milestone) => ({
+        const latestCharter = charters[0] ?? null;
+
+        const milestones = charters.flatMap((charter) => {
+            const versionLabel = String(charter?.version_label ?? '').trim();
+            const charterMilestones = Array.isArray(charter?.milestones) ? charter.milestones : [];
+
+            return charterMilestones.map((milestone) => ({
                 ...milestone,
-                version: latestCharter?.version_label ?? milestone?.version ?? null,
-            }))
-            : [];
+                version: versionLabel || milestone?.version || null,
+            }));
+        });
 
         return {
             ...project,
+            charters,
             charter: latestCharter,
             milestones,
         };
