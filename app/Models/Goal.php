@@ -17,7 +17,7 @@ class Goal extends Model
 
     public function projects(): BelongsToMany
     {
-        return $this->belongsToMany(Project::class, 'trs_goal_project');
+        return $this->belongsToMany(TrsProject::class, 'trs_goal_project');
     }
 
     public function themes(): HasMany

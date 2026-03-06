@@ -5,7 +5,7 @@ namespace App\Http\Controllers\ProgramImplementation;
 use App\Http\Controllers\Concerns\ResolvesInitiativeStatus;
 use App\Http\Controllers\Controller;
 use App\Models\MstInitiative;
-use App\Models\Project;
+use App\Models\TrsProject;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
@@ -30,7 +30,7 @@ class DashboardController extends Controller
 
         return Inertia::render('ProgramImplementation/Dashboard', [
             'overview' => [
-                'total_projects'              => Project::query()->count(),
+                'total_projects'              => TrsProject::query()->count(),
                 'total_digital_initiatives'   => MstInitiative::where('tipe_initiative', 1)->count(),
                 'total_it_initiatives'        => MstInitiative::where('tipe_initiative', 2)->count(),
                 'status_options'              => $statusOptions,
@@ -81,7 +81,7 @@ class DashboardController extends Controller
 
     private function openItInitiatives(int $baselineStatusId): Collection
     {
-        return Project::query()
+        return TrsProject::query()
             ->with([
                 'charter',
                 'statusRef:id,name',

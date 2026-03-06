@@ -16,22 +16,19 @@
                             Code</th>
                         <th
                             class="px-2 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-                            Month/Year</th>
+                            Review Implementation</th>
                         <th
                             class="px-2 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-                            Review Implementation</th>
+                            Month/Year</th>
                         <th
                             class="px-2 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
                             Notes</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-[#1a1a1a]">
-                    <tr v-for="proj in projectList" :key="`t1-status-${proj.id}`">
+                    <tr v-for="(proj, projIndex) in projectList" :key="`t1-status-${proj?.id ?? projIndex}`">
                         <td class="px-2 py-2 text-[11px] font-semibold text-slate-700 dark:text-slate-200">
                             {{ proj.code || '-' }}
-                        </td>
-                        <td class="px-2 py-2 text-[10px] font-medium text-slate-600 dark:text-slate-300">
-                            {{ getLatestImplementationMonthYear(proj) || '-' }}
                         </td>
                         <td class="px-2 py-2">
                             <span v-if="getLatestReviewStatus(proj)"
@@ -40,6 +37,9 @@
                                 {{ getLatestReviewStatus(proj) }}
                             </span>
                             <span v-else class="text-[10px] italic text-slate-400">-</span>
+                        </td>
+                        <td class="px-2 py-2 text-[10px] font-medium text-slate-600 dark:text-slate-300">
+                            {{ getLatestImplementationMonthYear(proj) || '-' }}
                         </td>
                         <td class="px-2 py-2">
                             <span v-if="getLatestImplementationStatus(proj)"
@@ -63,7 +63,7 @@
             <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
                 <colgroup>
                     <col class="w-[20%]">
-                    <col class="w-[25%]">
+                    <col class="w-[20%]">
                     <col class="w-[20%]">
                     <col class="w-[20%]">
                     <col class="w-[20%]">
@@ -75,31 +75,22 @@
                             History Timeline</th>
                         <th
                             class="px-2 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-                            IT Building Block</th>
-                        <th
-                            class="px-2 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-                            Initiative</th>
-                        <th
-                            class="px-2 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
                             Timeline Status</th>
                         <th
                             class="px-2 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                            Duration</th>
+                        <th
+                            class="px-2 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
                             Document Date</th>
+                        <th
+                            class="px-2 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                            Duration Processing (Month)</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-[#1a1a1a]">
                     <tr v-for="row in projectCharterRows" :key="row.key">
                         <td class="px-2 py-2 text-[11px] font-semibold text-slate-700 dark:text-slate-200">
                             {{ row.versionLabel }}
-                        </td>
-                        <td class="px-2 py-2 text-[11px] text-slate-700 dark:text-slate-200">
-                            <span
-                                class="inline-flex rounded-full bg-blue-100 px-2 py-0.5 text-[9px] font-semibold text-blue-800 dark:bg-blue-500/20 dark:text-blue-300">
-                                {{ getArchitectureBlockLabel(row.charter) }}
-                            </span>
-                        </td>
-                        <td class="px-2 py-2 text-[11px] font-medium text-slate-700 break-words dark:text-slate-200">
-                            {{ row.project?.name || '-' }}
                         </td>
                         <td class="px-2 py-2">
                             <span
@@ -108,8 +99,14 @@
                                 {{ statusLabelFromOptions(getRowStatus(row), statusOptions) }}
                             </span>
                         </td>
+                        <td class="px-2 py-2 text-[11px] text-slate-700 dark:text-slate-200">
+                            {{ row.charter?.duration || '-' }}
+                        </td>
                         <td class="px-2 py-2 text-[10px] font-medium text-slate-600 dark:text-slate-300">
                             {{ formatDateLong(row.charter?.tgl_dokumen) }}
+                        </td>
+                        <td class="px-2 py-2 text-[11px] text-slate-700 dark:text-slate-200">
+                            {{ getTimelineDurationMonths(row.project, row.charter) }}
                         </td>
                     </tr>
                     <tr v-if="projectCharterRows.length === 0">
@@ -177,16 +174,16 @@ const statusOptions = computed(() => {
 });
 
 const projectCharterRows = computed(() => {
-    return projectList.value.flatMap((project, projectIndex) => {
-        const charters = Array.isArray(project?.charters) && project.charters.length > 0
-            ? project.charters
-            : project?.charter
-                ? [project.charter]
-                : [];
+        return projectList.value.flatMap((project, projectIndex) => {
+            const charters = Array.isArray(project?.charters) && project.charters.length > 0
+                ? project.charters
+                : project?.charter
+                    ? [project.charter]
+                    : [];
 
         if (charters.length === 0) {
             return [{
-                key: `proj-${project?.id ?? projectIndex}-charter-empty`,
+                key: `proj-${project?.id ?? projectIndex}-${projectIndex}-charter-empty`,
                 project,
                 charter: null,
                 versionLabel: '-',
@@ -194,7 +191,7 @@ const projectCharterRows = computed(() => {
         }
 
         return charters.map((charter, charterIndex) => ({
-            key: `proj-${project?.id ?? projectIndex}-charter-${charter?.id ?? charterIndex}`,
+            key: `proj-${project?.id ?? projectIndex}-${projectIndex}-charter-${charter?.id ?? charterIndex}`,
             project,
             charter,
             versionLabel: getCharterVersionLabel(charter, charterIndex, charters.length),
@@ -210,11 +207,6 @@ const getCharterVersionLabel = (charter, index, total) => {
         return `v${total - index}`;
     }
     return '-';
-};
-
-const getArchitectureBlockLabel = (charter) => {
-    const text = String(charter?.category ?? '').trim();
-    return text.length > 0 ? text : '-';
 };
 
 const getImplementationHistory = (project) => {
@@ -258,6 +250,61 @@ const formatDateLong = (value) => {
         month: 'long',
         year: 'numeric',
     }).format(parsed);
+};
+
+const parseDateValue = (value) => {
+    const raw = String(value ?? '').trim();
+    if (!raw) return null;
+    const parsed = new Date(raw);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const monthsBetween = (fromDate, toDate) => {
+    const from = parseDateValue(fromDate);
+    const to = parseDateValue(toDate);
+    if (!from || !to) return null;
+    const fromIndex = from.getUTCFullYear() * 12 + from.getUTCMonth();
+    const toIndex = to.getUTCFullYear() * 12 + to.getUTCMonth();
+    return Math.max(toIndex - fromIndex, 0);
+};
+
+const projectChartersFor = (project) => {
+    if (Array.isArray(project?.charters) && project.charters.length > 0) {
+        return project.charters;
+    }
+    if (project?.charter) {
+        return [project.charter];
+    }
+    return [];
+};
+
+const getTimelineDurationMonths = (project, charter) => {
+    const charters = projectChartersFor(project);
+    if (!charters.length) return '-';
+
+    const sorted = [...charters].sort((a, b) => {
+        const dateA = parseDateValue(a?.tgl_dokumen);
+        const dateB = parseDateValue(b?.tgl_dokumen);
+        if (dateA && dateB) return dateB - dateA;
+        if (dateB && !dateA) return 1;
+        if (dateA && !dateB) return -1;
+        return Number(b?.id || 0) - Number(a?.id || 0);
+    });
+
+    if (sorted.length === 1) {
+        return '0';
+    }
+
+    const latest = sorted[0];
+    const previous = sorted[1];
+    if (!latest || !previous) return '-';
+
+    if (String(charter?.id ?? '') !== String(latest?.id ?? '')) {
+        return '-';
+    }
+
+    const diff = monthsBetween(previous?.tgl_dokumen, latest?.tgl_dokumen);
+    return diff === null ? '-' : String(diff);
 };
 
 const getRowStatus = (row) => {

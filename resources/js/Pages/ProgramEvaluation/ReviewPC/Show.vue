@@ -73,6 +73,11 @@
                 <section v-if="activeNav === 'review'" id="review" class="space-y-0">
                     <div class="px-3 py-3">
                         <StatusImplementationTable :projects="mappedProjects" />
+                        <div v-if="mappedProjects.length > 0" class="mt-3 flex flex-col gap-2">
+                            <ProjectRoadmapSummaryReadonly v-for="(proj, idx) in mappedProjects"
+                                :key="`rm-rev-${proj.id}`" :project="roadmapProjectFrom(proj)" :sequence="idx + 1"
+                                :show-header="idx === 0" />
+                        </div>
                     </div>
                     <ReviewContent :review="review" :penjelasan-items="penjelasanItems" :why-items="whyItems"
                         :how-parsed="howParsed" :project-profile-items="projectProfileItems" />
@@ -94,51 +99,31 @@
                             {{ opt.label }}
                         </button>
                     </div>
-                    
-                    <div v-if="versionFilterOptions.length > 0"
-                        class="flex flex-wrap items-center gap-2 px-3 py-2 bg-white border-b border-slate-100 dark:bg-[#171717] dark:border-white/10">
-                        <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Filter
-                            Versi:</span>
-                        <button type="button"
-                            :class="[
-                                'inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold transition',
-                                versionFilter === ''
-                                    ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900'
-                                    : 'bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-white/10 dark:text-slate-400 dark:hover:bg-white/20'
-                            ]"
-                            @click="versionFilter = ''">
-                            Semua
-                        </button>
-                        <button v-for="label in versionFilterOptions" :key="`ver-${label}`" type="button"
-                            @click="versionFilter = label" :class="[
-                                'inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold transition',
-                                versionFilter === label
-                                    ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900'
-                                    : 'bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-white/10 dark:text-slate-400 dark:hover:bg-white/20'
-                            ]">
-                            {{ label }}
-                        </button>
-                    </div>
+
                     <div v-if="filteredProjectCharterGroups.length > 0" class="space-y-4">
                         <div v-for="group in filteredProjectCharterGroups" :key="group.project.id"
                             class="border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                             <div class="px-3 py-3">
                                 <StatusImplementationTable :projects="[group.project]" />
+                                <div class="mt-3 flex flex-col gap-2">
+                                    <ProjectRoadmapSummaryReadonly :project="roadmapProjectFrom(group.project)"
+                                        :sequence="1" :show-header="true" />
+                                </div>
                             </div>
                             <div class="space-y-3 pb-3">
                                 <template v-for="(charter, charterIndex) in group.charters"
                                     :key="charter?.id ?? `charter-${group.project.id}-${charterIndex}`">
                                     <ItCharterDocument :it-initiative="group.project"
                                         :form="charterFormFor(group.project, charter)"
-                                        :status-timeline="getProjectReviewStatus(group.project, charter)" :editable="false" />
+                                        :status-timeline="getProjectReviewStatus(group.project, charter)"
+                                        :editable="false" />
                                 </template>
                             </div>
                         </div>
                     </div>
                     <div v-else-if="mappedProjects.length > 0"
                         class="border border-slate-200 bg-white px-4 py-6 text-center text-xs text-slate-500 dark:border-white/10 dark:bg-[#171717] dark:text-slate-400">
-                        Tidak ada project charter dengan status <strong>{{ pcStatusFilter || 'dipilih' }}</strong><span
-                            v-if="versionFilter"> dan versi <strong>{{ versionFilter }}</strong></span>.
+                        Tidak ada project charter dengan status <strong>{{ pcStatusFilter || 'dipilih' }}</strong>.
                     </div>
                     <div v-else
                         class="border border-slate-200 bg-white px-4 py-6 text-center text-xs text-slate-500 dark:border-white/10 dark:bg-[#171717] dark:text-slate-400">
@@ -151,6 +136,11 @@
                         class="overflow-hidden border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717] p-6">
                         <div class="px-3 py-3">
                             <StatusImplementationTable :projects="mappedProjects" />
+                            <div v-if="mappedProjects.length > 0" class="mt-3 flex flex-col gap-2">
+                                <ProjectRoadmapSummaryReadonly v-for="(proj, idx) in mappedProjects"
+                                    :key="`rm-rel-${proj.id}`" :project="roadmapProjectFrom(proj)" :sequence="idx + 1"
+                                    :show-header="idx === 0" />
+                            </div>
                         </div>
                         <InitiativeDetailsWithRelations :initiative="trsReviewPC.initiative"
                             :relations="initiativeRelations" variant="emerald" status-label="Status"
@@ -166,9 +156,15 @@
                 <section v-if="activeNav === 'roadmap'" id="roadmap" class="print:hidden">
                     <div class="px-3 py-3">
                         <StatusImplementationTable :projects="mappedProjects" />
+                        <div v-if="mappedProjects.length > 0" class="mt-3 flex flex-col gap-2">
+                            <ProjectRoadmapSummaryReadonly v-for="(proj, idx) in mappedProjects"
+                                :key="`rm-road-${proj.id}`" :project="roadmapProjectFrom(proj)" :sequence="idx + 1"
+                                :show-header="idx === 0" />
+                        </div>
                     </div>
-                    <ProjectRoadmap v-if="mappedProject" :project="mappedProject"
-                        :form="{ objectives: mappedProject?.charter?.objectives ?? '', duration: mappedProject?.charter?.duration ?? '' }"
+                    <ProjectRoadmap v-if="mappedRoadmapProject" :project="mappedRoadmapProject"
+                        :form="{ objectives: mappedRoadmapProject?.charter?.objectives ?? '', duration: mappedRoadmapProject?.charter?.duration ?? '' }"
+                        :selected-roadmap-version-id="mappedRoadmapProject?.charter?.version_label ?? null"
                         :sequence="1" :year-start="2025" :year-end="2029" />
                     <div v-else
                         class="border border-slate-200 bg-white px-4 py-6 text-center text-xs text-slate-500 dark:border-white/10 dark:bg-[#171717] dark:text-slate-400">
@@ -186,6 +182,7 @@ import { Link, router } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import ItCharterDocument from '@/Components/ProjectCharter/ItCharterDocument.vue';
 import ProjectRoadmap from '@/Components/Roadmap/ProjectRoadmap.vue';
+import ProjectRoadmapSummaryReadonly from '@/Components/Roadmap/ProjectRoadmapSummaryReadonly.vue';
 import StatusImplementationTable from '@/Components/ITInitiative/StatusImplementationTable.vue';
 import ReviewContent from '@/Components/ReviewPC/ReviewContent.vue';
 import InitiativeDetailsWithRelations from '@/Components/InitiativeRelation/InitiativeDetailsWithRelations.vue';
@@ -306,6 +303,29 @@ const formatReviewLabel = (option) => {
     return `${code} - ${name}`;
 };
 
+const roadmapProjectFrom = (project) => {
+    if (!project) return null;
+
+    const charters = Array.isArray(project?.charters) ? project.charters : [];
+    const latestCharter = charters.length
+        ? [...charters].sort((a, b) => Number(b.id || 0) - Number(a.id || 0))[0]
+        : (project?.charter ?? null);
+    const milestones = Array.isArray(latestCharter?.milestones)
+        ? latestCharter.milestones.map((milestone) => ({
+            ...milestone,
+            version: latestCharter?.version_label ?? milestone?.version ?? null,
+        }))
+        : [];
+
+    return {
+        ...project,
+        charter: latestCharter,
+        milestones,
+    };
+};
+
+const mappedRoadmapProject = computed(() => roadmapProjectFrom(props.mappedProject));
+
 // ---- Per-project charter form helper ----
 const charterFormFor = (proj, charterOverride = null) => {
     const charter = charterOverride ?? proj?.charter ?? {};
@@ -340,27 +360,8 @@ const projectChartersFor = (proj) => {
     return [];
 };
 
-const getCharterVersionLabel = (charter, index, total) => {
-    const label = String(charter?.resolved_version_label ?? charter?.version_label ?? '').trim();
-    if (label) return label;
-    if (Number.isFinite(total) && total > 0) {
-        return `v${total - index}`;
-    }
-    return '-';
-};
-
-const normalizeVersionLabel = (value) => String(value ?? '').trim().toLowerCase();
-
-const getCharterVersionLabelForProject = (proj, charter) => {
-    const charters = projectChartersFor(proj);
-    const charterId = charter?.id ?? charter;
-    const index = charters.findIndex((item) => String(item?.id ?? item) === String(charterId));
-    return getCharterVersionLabel(charter, index >= 0 ? index : 0, charters.length);
-};
-
 // ---- Status Timeline Filter ----
 const pcStatusFilter = ref('');
-const versionFilter = ref('');
 
 const statusTimelineFilterOptions = [
     { value: '', label: 'Semua', activeClass: 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900' },
@@ -385,33 +386,13 @@ const filteredProjects = computed(() => {
     });
 });
 
-const versionFilterOptions = computed(() => {
-    const labels = new Map();
-    props.mappedProjects.forEach((proj) => {
-        const charters = projectChartersFor(proj);
-        charters.forEach((charter) => {
-            const label = getCharterVersionLabelForProject(proj, charter);
-            if (!label || label === '-') return;
-            const key = normalizeVersionLabel(label);
-            if (!labels.has(key)) {
-                labels.set(key, label);
-            }
-        });
-    });
-    return Array.from(labels.values());
-});
-
 const filteredProjectCharterGroups = computed(() => {
-    const selected = normalizeVersionLabel(versionFilter.value);
     return filteredProjects.value
         .map((proj) => {
             const charters = projectChartersFor(proj);
-            const filteredCharters = selected
-                ? charters.filter((charter) => normalizeVersionLabel(getCharterVersionLabelForProject(proj, charter)) === selected)
-                : charters;
             return {
                 project: proj,
-                charters: filteredCharters,
+                charters,
             };
         })
         .filter((group) => group.charters.length > 0);

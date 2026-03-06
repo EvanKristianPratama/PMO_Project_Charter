@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Roadmap;
 
 use App\Http\Controllers\Controller;
 use App\Models\Milestone;
-use App\Models\Program;
-use App\Models\Project;
+use App\Models\MstInitiative;
+use App\Models\ProjectCharter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -15,13 +15,12 @@ use Inertia\Response;
 class RoadmapController extends Controller
 {
     /**
-     * View-only roadmap page with all projects.
+     * View-only roadmap page with all project charters.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        return Inertia::render('ProgramImplementation/RoadMap/Index', $this->buildRoadmapOverviewPayload());
+        return Inertia::render('ProgramImplementation/RoadMap/Index', $this->buildRoadmapOverviewPayload($request));
     }
-
 
     public function add(Request $request): Response
     {
@@ -37,43 +36,48 @@ class RoadmapController extends Controller
     }
 
     /**
-     * Display a single program with all its projects.
+     * Display roadmap by initiative (all mapped project charters).
      */
-    public function show(Program $program): Response
+    public function show(MstInitiative $initiative): Response
     {
-        $program->load(['projects' => function (Builder $query): void {
-            $this->applyRoadmapProjectRelations($query);
-            $query->orderBy('trs_projects.id');
-        }]);
-        $program->setRelation(
-            'projects',
-            $this->decorateProjectsWithRoadmapVersionMeta($program->projects)
-        );
+        $projectIds = $initiative->mappedProjects()->pluck('trs_projects.id')->values();
+
+        $sources = $projectIds->isEmpty()
+            ? collect()
+            : $this->roadmapSourceQuery()
+                ->whereIn('trs_project_charters.project_id', $projectIds)
+                ->orderByDesc('trs_project_charters.id')
+                ->get();
+
+        $projects = $this->flattenRoadmapCharters($sources);
 
         return Inertia::render('ProgramImplementation/RoadMap/Show', [
-            'program' => $program,
+            'program' => [
+                'id' => (int) $initiative->id,
+                'name' => $initiative->name,
+                'projects' => $projects,
+            ],
             'milestoneTypeOptions' => Milestone::roadmapTypeOptions(),
             ...$this->roadmapYearRange(),
         ]);
     }
 
-    /**
-     * Base project relations for roadmap pages.
-     */
-    private function applyRoadmapProjectRelations(Builder $query): void
+    private function roadmapSourceQuery(): Builder
     {
-        $query
-            ->select(['trs_projects.id', 'trs_projects.name', 'trs_projects.code', 'trs_projects.metadata'])
+        return ProjectCharter::query()
+            ->select([
+                'trs_project_charters.id',
+                'trs_project_charters.project_id',
+                'trs_project_charters.version_label',
+                'trs_project_charters.objectives',
+                'trs_project_charters.duration',
+                'trs_project_charters.metadata',
+            ])
             ->with([
-                'charter' => fn ($charterQuery) => $charterQuery->select(
-                    'trs_project_charters.id',
-                    'trs_project_charters.project_id',
-                    'trs_project_charters.objectives',
-                    'trs_project_charters.duration',
-                ),
+                'project:id,code,name,metadata',
                 'milestones' => fn ($milestoneQuery) => $milestoneQuery->select(
                     'trs_milestones.id',
-                    'trs_milestones.project_id',
+                    'trs_milestones.pc_id',
                     'trs_milestones.version',
                     'trs_milestones.title',
                     'trs_milestones.output',
@@ -81,7 +85,7 @@ class RoadmapController extends Controller
                     'trs_milestones.end_date',
                     'trs_milestones.type',
                     'trs_milestones.milestone_type',
-                    'trs_milestones.order',
+                    'trs_milestones.order'
                 )->orderBy('trs_milestones.order')->orderBy('trs_milestones.id'),
             ]);
     }
@@ -98,19 +102,21 @@ class RoadmapController extends Controller
     }
 
     /**
-     * Payload for roadmap view-only page from project source table.
+     * Payload for roadmap view-only page from project charter source table.
      */
-    private function buildRoadmapOverviewPayload(): array
+    private function buildRoadmapOverviewPayload(Request $request): array
     {
-        $projects = Project::query();
-        $this->applyRoadmapProjectRelations($projects);
-        $projects = $projects
-            ->orderBy('trs_projects.id')
+        $sources = $this->roadmapSourceQuery()
+            ->orderByDesc('trs_project_charters.id')
             ->get();
-        $projects = $this->decorateProjectsWithRoadmapVersionMeta($projects);
+        $projects = $this->groupRoadmapSources($sources);
+        $requestedPcId = $this->requestedPcId($request);
+        [$resolvedProjectId, $resolvedCharterId] = $this->resolveSelectedIds($sources, $projects, $requestedPcId, false);
 
         return [
             'projects' => $projects,
+            'selectedProjectId' => $resolvedProjectId,
+            'selectedCharterId' => $resolvedCharterId,
             'milestoneTypeOptions' => Milestone::roadmapTypeOptions(),
             ...$this->roadmapYearRange(),
         ];
@@ -121,126 +127,124 @@ class RoadmapController extends Controller
      */
     private function buildRoadmapEditorPayload(Request $request): array
     {
-        $selectedProjectId = $request->integer('project_id');
-        $selectedVersion = $request->query('version');
+        $selectedPcId = $this->requestedPcId($request);
 
-        $projects = Project::query();
-        $this->applyRoadmapProjectRelations($projects);
-        $projects = $projects
-            ->orderBy('trs_projects.id')
+        $sources = $this->roadmapSourceQuery()
+            ->orderByDesc('trs_project_charters.id')
             ->get();
-        $projects = $this->decorateProjectsWithRoadmapVersionMeta($projects);
-
-        $resolvedProjectId = $projects->contains('id', $selectedProjectId)
-            ? $selectedProjectId
-            : $projects->first()?->id;
-        $selectedProject = $projects->firstWhere('id', $resolvedProjectId);
-        $resolvedRoadmapVersion = $this->resolveRoadmapVersion($selectedProject, $selectedVersion);
+        $projects = $this->groupRoadmapSources($sources);
+        [$resolvedProjectId, $resolvedCharterId] = $this->resolveSelectedIds($sources, $projects, $selectedPcId, true);
 
         return [
             'projects' => $projects,
-            'selectedProject' => $selectedProject,
             'selectedProjectId' => $resolvedProjectId,
-            'selectedRoadmapVersion' => $resolvedRoadmapVersion,
+            'selectedCharterId' => $resolvedCharterId,
             'milestoneTypeOptions' => Milestone::roadmapTypeOptions(),
             ...$this->roadmapYearRange(),
         ];
     }
 
-    private function decorateProjectsWithRoadmapVersionMeta(Collection $projects): Collection
+    private function groupRoadmapSources(Collection $sources): Collection
     {
-        return $projects->map(function (Project $project): Project {
-            $milestones = $project->milestones ?? collect();
-            $milestones = $milestones->map(function ($milestone) {
-                $milestone->version = $this->normalizeVersionLabel($milestone->version);
-                return $milestone;
-            });
-            $project->setRelation('milestones', $milestones);
+        return $sources
+            ->groupBy('project_id')
+            ->map(function (Collection $charters): array {
+                $project = $charters->first()?->project;
 
-            $versions = $this->extractRoadmapVersions($project, $milestones);
-            $activeVersion = $this->resolveActiveRoadmapVersion($project, $versions);
+                return [
+                    'id' => (int) ($project?->id ?? 0),
+                    'code' => $project?->code,
+                    'name' => $project?->name,
+                    'charters' => $charters
+                        ->map(fn (ProjectCharter $charter): array => $this->mapCharterForRoadmap($charter))
+                        ->values()
+                        ->all(),
+                ];
+            })
+            ->values();
+    }
 
-            $project->setAttribute('roadmap_versions', $versions
-                ->map(fn (string $label): array => [
-                    'id' => $label,
-                    'version_label' => $label,
-                ])
-                ->values()
-                ->all());
-            $project->setAttribute('active_roadmap_version', $activeVersion);
+    private function flattenRoadmapCharters(Collection $sources): Collection
+    {
+        return $sources->map(function (ProjectCharter $charter): array {
+            $payload = $this->mapCharterForRoadmap($charter);
+            $payload['code'] = $charter->project?->code;
+            $payload['name'] = $charter->project?->name;
 
-            return $project;
+            return $payload;
         });
     }
 
-    private function resolveRoadmapVersion(?Project $project, mixed $requestedVersion): ?string
+    private function mapCharterForRoadmap(ProjectCharter $charter): array
     {
-        if ($project === null) {
-            return null;
-        }
+        $charterVersion = $this->normalizeVersionLabel($charter->version_label);
+        $milestones = ($charter->milestones ?? collect())
+            ->map(function ($milestone) use ($charterVersion) {
+                $milestone->version = $charterVersion;
+                return $milestone;
+            })
+            ->values();
 
-        $versions = collect($project->roadmap_versions ?? [])->pluck('id')->values();
-        $rawRequested = trim((string) $requestedVersion);
+        return [
+            'id' => (int) $charter->id,
+            'project_id' => (int) $charter->project_id,
+            'version_label' => $charter->version_label,
+            'objectives' => $charter->objectives,
+            'duration' => $charter->duration,
+            'milestones' => $milestones,
+            'charter' => [
+                'id' => (int) $charter->id,
+                'project_id' => (int) $charter->project_id,
+                'version_label' => $charter->version_label,
+                'objectives' => $charter->objectives,
+                'duration' => $charter->duration,
+            ],
+        ];
+    }
 
-        if ($rawRequested !== '') {
-            $normalizedRequested = $this->normalizeVersionLabel($rawRequested);
+    private function resolveSelectedIds(Collection $sources, Collection $projects, ?int $requestedPcId, bool $fallbackToFirst): array
+    {
+        if ($requestedPcId !== null) {
+            $matched = $sources->firstWhere('id', $requestedPcId);
 
-            if ($versions->contains($normalizedRequested)) {
-                return $normalizedRequested;
+            if ($matched) {
+                return [(int) $matched->project_id, (int) $matched->id];
             }
         }
 
-        return $project->active_roadmap_version ?? $versions->first() ?? 'v1';
+        if (!$fallbackToFirst) {
+            return [null, null];
+        }
+
+        $firstProject = $projects->first();
+        if (!$firstProject) {
+            return [null, null];
+        }
+        $firstCharterId = $firstProject['charters'][0]['id'] ?? null;
+
+        return [$firstProject['id'] ?? null, $firstCharterId ? (int) $firstCharterId : null];
     }
 
-    private function extractRoadmapVersions(Project $project, Collection $milestones): Collection
+    private function requestedPcId(Request $request): ?int
     {
-        $labelsFromMilestones = $milestones
-            ->pluck('version')
-            ->values();
-        $labelsFromMetadata = $this->roadmapVersionLabelsFromMeta($project);
+        $pcId = $request->integer('pc_id');
 
-        $labels = $labelsFromMilestones
-            ->merge($labelsFromMetadata)
-            ->map(fn ($label) => $this->normalizeVersionLabel($label))
-            ->filter()
-            ->unique()
-            ->sortByDesc(fn (string $label): int => $this->extractVersionNumber($label))
-            ->values();
-
-        if ($labels->isEmpty()) {
-            return collect(['v1']);
+        if ($pcId > 0) {
+            return $pcId;
         }
 
-        return $labels;
-    }
+        // Backward compatibility for old links that still send project_id.
+        $legacyProjectId = $request->integer('project_id');
 
-    private function roadmapVersionLabelsFromMeta(Project $project): Collection
-    {
-        $metadata = is_array($project->metadata) ? $project->metadata : [];
-        $labels = $metadata['roadmap_versions'] ?? [];
-
-        if (!is_array($labels)) {
-            return collect();
+        if ($legacyProjectId <= 0) {
+            return null;
         }
 
-        return collect($labels);
-    }
+        $resolvedPcId = ProjectCharter::query()
+            ->where('project_id', $legacyProjectId)
+            ->max('id');
 
-    private function resolveActiveRoadmapVersion(Project $project, Collection $versions): string
-    {
-        if ($versions->isEmpty()) {
-            return 'v1';
-        }
-
-        $metadata = is_array($project->metadata) ? $project->metadata : [];
-        $metadataActive = $this->normalizeVersionLabel($metadata['active_roadmap_version'] ?? '');
-
-        if ($versions->contains($metadataActive)) {
-            return $metadataActive;
-        }
-
-        return $versions->first() ?? 'v1';
+        return $resolvedPcId ? (int) $resolvedPcId : null;
     }
 
     private function normalizeVersionLabel(mixed $value): string
@@ -260,14 +264,5 @@ class RoadmapController extends Controller
         }
 
         return $raw;
-    }
-
-    private function extractVersionNumber(string $label): int
-    {
-        if (preg_match('/^v(\d+)$/i', trim($label), $matches) === 1) {
-            return max((int) $matches[1], 1);
-        }
-
-        return 1;
     }
 }

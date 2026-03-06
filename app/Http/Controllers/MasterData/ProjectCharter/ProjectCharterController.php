@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\InitiativeStatus;
 use App\Models\MstInitiative;
 use App\Models\PcStatusImplementation;
-use App\Models\Project;
+use App\Models\TrsProject;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -63,7 +63,7 @@ class ProjectCharterController extends Controller
 
     public function index(): Response
     {
-        $projects = Project::with([
+        $projects = TrsProject::with([
             'owner:id,name',
             'charter',
             'statusRef:id,name',
@@ -85,7 +85,7 @@ class ProjectCharterController extends Controller
         }
         unset($validated['owner'], $validated['owner_name']);
 
-        $project = Project::create($validated);
+        $project = TrsProject::create($validated);
         if ($owner !== '') {
             $project->charters()->create([
                 'owner' => $owner,
@@ -110,7 +110,7 @@ class ProjectCharterController extends Controller
             ->with('success', 'Project Charter berhasil ditambahkan.');
     }
 
-    public function update(Request $request, Project $projectCharter): RedirectResponse
+    public function update(Request $request, TrsProject $projectCharter): RedirectResponse
     {
         $validated = $request->validate($this->projectRules());
         $owner = trim((string) ($validated['owner'] ?? ''));
@@ -156,7 +156,7 @@ class ProjectCharterController extends Controller
             ->with('success', 'Project Charter berhasil diperbarui.');
     }
 
-    public function destroy(Project $projectCharter): RedirectResponse
+    public function destroy(TrsProject $projectCharter): RedirectResponse
     {
         $projectCharter->pcStatusImplementations()->delete();
         $projectCharter->delete();

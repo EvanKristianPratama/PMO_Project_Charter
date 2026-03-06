@@ -3,7 +3,7 @@
         <div class="mb-4">
             <h2 class="text-base font-semibold text-slate-900 dark:text-white">Roadmap Activity & Quarter</h2>
             <p class="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
-                Versi aktif: {{ selectedVersionLabel }}
+                Versi aktif: {{ displayVersionLabel }}
             </p>
         </div>
 
@@ -239,7 +239,6 @@ const milestoneForm = useForm({
     output: '',
     type: '',
     milestone_type: defaultMilestoneType,
-    version: null,
     start_date: '',
     end_date: '',
 });
@@ -325,7 +324,6 @@ const resetForm = () => {
     milestoneForm.clearErrors();
     milestoneForm.type = '';
     milestoneForm.milestone_type = defaultMilestoneType;
-    milestoneForm.version = selectedRoadmapVersionLabel.value;
     editingMilestoneId.value = null;
     useQuarterRange.value = false;
     resetMilestoneRange();
@@ -357,16 +355,13 @@ const selectedRoadmapVersionLabel = computed(() => {
     return normalizeVersionLabel(props.selectedRoadmapVersionId);
 });
 
-const selectedVersionLabel = computed(() => {
-    const versions = Array.isArray(props.project?.roadmap_versions) ? props.project.roadmap_versions : [];
-    const selectedId = selectedRoadmapVersionLabel.value;
-
-    if (!selectedId) {
-        return versions[0]?.version_label || 'v1 (otomatis saat simpan pertama)';
+const displayVersionLabel = computed(() => {
+    if (selectedRoadmapVersionLabel.value) {
+        return selectedRoadmapVersionLabel.value;
     }
 
-    const selected = versions.find((item) => normalizeVersionLabel(item.id) === selectedId);
-    return selected?.version_label || selectedId;
+    const fallback = normalizeVersionLabel(props.project?.charter?.version_label ?? props.project?.version_label ?? '');
+    return fallback || 'v1';
 });
 
 watch(
@@ -452,7 +447,6 @@ const startEdit = (item) => {
     milestoneForm.title = item.title || '';
     milestoneForm.type = item.type || '';
     milestoneForm.milestone_type = normalizeMilestoneType(item.milestone_type ?? item.type);
-    milestoneForm.version = selectedRoadmapVersionLabel.value;
     milestoneForm.output = item.output || '';
     milestoneForm.start_date = item.start_date || '';
     milestoneForm.end_date = item.end_date || '';
@@ -512,7 +506,6 @@ const submitForm = () => {
 
     milestoneForm.clearErrors();
     milestoneForm.milestone_type = normalizeMilestoneType(milestoneForm.milestone_type);
-    milestoneForm.version = selectedRoadmapVersionLabel.value;
 
     if (!buildDates()) {
         return;

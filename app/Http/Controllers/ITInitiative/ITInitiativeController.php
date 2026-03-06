@@ -9,7 +9,7 @@ use App\Http\Requests\ITInitiative\ITInitiativeUpdateRequest;
 use App\Models\InitiativeStatus;
 use App\Models\MstInitiative;
 use App\Models\PcStatusImplementation;
-use App\Models\Project;
+use App\Models\TrsProject;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -32,7 +32,7 @@ class ITInitiativeController extends Controller
                             ->whereNotNull('duration')
                             ->where('duration', '!=', '');
                     })
-                    ->orWhereHas('milestones', static function ($milestones): void {
+                    ->orWhereHas('charter.milestones', static function ($milestones): void {
                         $milestones
                             ->whereNotNull('start_date')
                             ->orWhereNotNull('end_date');
@@ -40,7 +40,7 @@ class ITInitiativeController extends Controller
             });
         };
 
-        $projects = Project::query()
+        $projects = TrsProject::query()
             ->select(['id', 'name', 'code'])
             ->where($roadmapScope)
             ->orderBy('name')
@@ -51,8 +51,8 @@ class ITInitiativeController extends Controller
             : $projects->first()?->id;
 
         $selectedProject = $resolvedProjectId
-            ? Project::query()
-                ->with(['charter', 'milestones', 'owner'])
+            ? TrsProject::query()
+                ->with(['charter', 'charter.milestones', 'owner'])
                 ->find($resolvedProjectId)
             : null;
 
@@ -78,8 +78,8 @@ class ITInitiativeController extends Controller
         $baselineStatusId = (int) ($baselineStatus['id'] ?? InitiativeStatus::baselineId());
         $filterStatus = $filters['status'] ?? null;
 
-        $projects = Project::query()
-            ->with(['owner', 'charter', 'statusRef:id,name', 'pcStatusImplementations', 'milestones'])
+        $projects = TrsProject::query()
+            ->with(['owner', 'charter', 'charter.milestones', 'statusRef:id,name', 'pcStatusImplementations'])
             ->when($filterStatus, fn ($q, $status) => $q->where('status', $status))
             ->when($filters['search'] ?? null, fn ($q, $search) => $q->where(function ($inner) use ($search): void {
                 $inner->where('name', 'like', "%{$search}%")
@@ -195,7 +195,7 @@ class ITInitiativeController extends Controller
         unset($validated['initiative_ids']);
         unset($validated['owner'], $validated['owner_name']);
 
-        $project = Project::create($validated);
+        $project = TrsProject::create($validated);
         $this->syncProjectInitiativeMappings($project, $initiativeIds);
 
         if ($owner !== '') {
@@ -221,7 +221,7 @@ class ITInitiativeController extends Controller
         return redirect()->route('it-initiatives.index')->with('success', 'Project created successfully.');
     }
 
-    private function syncProjectInitiativeMappings(Project $project, array $initiativeIds): void
+    private function syncProjectInitiativeMappings(TrsProject $project, array $initiativeIds): void
     {
         if (empty($initiativeIds) || !Schema::hasTable('trs_pc_initiative')) {
             return;
@@ -278,13 +278,12 @@ class ITInitiativeController extends Controller
         }
     }
 
-    public function show(Project $project): Response
+    public function show(TrsProject $project): Response
     {
-        $project = Project::query()
+        $project = TrsProject::query()
             ->with([
                 'charter',
-                'charters' => static fn ($query) => $query->latest(),
-                'milestones',
+                'charters' => static fn ($query) => $query->latest()->with('milestones'),
                 'owner',
                 'statusRef:id,name',
                 'pcStatusImplementations',
@@ -293,16 +292,16 @@ class ITInitiativeController extends Controller
             ->findOrFail($project->id);
 
         // Get all related projects through mapped initiatives
-        $relatedProjects = Project::query()
+        $relatedProjects = TrsProject::query()
             ->whereIn('id', function ($query) use ($project) {
                 $query->select('pc_id')
                     ->from('trs_pc_initiative')
                     ->whereIn('initiative_id', $project->mappedInitiatives->pluck('id'));
             })
             ->with([
-                'charter' => static fn ($q) => $q->select('trs_project_charters.id', 'trs_project_charters.project_id', 'trs_project_charters.category', 'trs_project_charters.status', 'trs_project_charters.tgl_dokumen'),
+                'charter' => static fn ($q) => $q->select('trs_project_charters.id', 'trs_project_charters.project_id', 'trs_project_charters.category', 'trs_project_charters.status', 'trs_project_charters.tgl_dokumen', 'trs_project_charters.duration'),
                 'charters' => static fn ($q) => $q
-                    ->select('trs_project_charters.id', 'trs_project_charters.project_id', 'trs_project_charters.version_label', 'trs_project_charters.category', 'trs_project_charters.status', 'trs_project_charters.tgl_dokumen')
+                    ->select('trs_project_charters.id', 'trs_project_charters.project_id', 'trs_project_charters.version_label', 'trs_project_charters.category', 'trs_project_charters.status', 'trs_project_charters.tgl_dokumen', 'trs_project_charters.duration')
                     ->latest(),
                 'statusRef:id,name',
                 'pcStatusImplementations' => static fn ($q) => $q->orderBy('date', 'desc')->orderBy('time_start', 'desc')->limit(1),
@@ -310,12 +309,12 @@ class ITInitiativeController extends Controller
             ->orderBy('code')
             ->get();
 
-        $projectOptions = Project::query()
+        $projectOptions = TrsProject::query()
             ->select(['id', 'code', 'name'])
             ->with(['charter'])
             ->orderBy('id')
             ->get()
-            ->map(static fn (Project $item): array => [
+            ->map(static fn (TrsProject $item): array => [
                 'id' => (int) $item->id,
                 'code' => $item->code,
                 'name' => $item->name,
@@ -330,7 +329,7 @@ class ITInitiativeController extends Controller
         ]);
     }
 
-    public function edit(Project $project): Response
+    public function edit(TrsProject $project): Response
     {
         $project->load(['pcStatusImplementations', 'charter']);
 
@@ -378,7 +377,7 @@ class ITInitiativeController extends Controller
         ]);
     }
 
-    public function update(ITInitiativeUpdateRequest $request, Project $project): RedirectResponse
+    public function update(ITInitiativeUpdateRequest $request, TrsProject $project): RedirectResponse
     {
         $validated = $request->validated();
         $owner = trim((string) ($validated['owner'] ?? ''));
@@ -428,14 +427,14 @@ class ITInitiativeController extends Controller
         return redirect()->route('it-initiatives.index')->with('success', 'Project updated successfully.');
     }
 
-    public function destroy(Project $project): RedirectResponse
+    public function destroy(TrsProject $project): RedirectResponse
     {
         $project->delete();
 
         return redirect()->route('it-initiatives.index')->with('success', 'Project deleted successfully.');
     }
 
-    public function storeImplementationStatus(Request $request, Project $project): RedirectResponse
+    public function storeImplementationStatus(Request $request, TrsProject $project): RedirectResponse
     {
         $validated = $request->validate([
             'status' => 'required|string|max:255',
@@ -480,7 +479,7 @@ class ITInitiativeController extends Controller
         return redirect()->back()->with('success', 'Status deleted successfully.');
     }
 
-    public function updateMapping(Request $request, Project $project): RedirectResponse
+    public function updateMapping(Request $request, TrsProject $project): RedirectResponse
     {
         $validated = $request->validate([
             'initiative_ids' => 'nullable|array',

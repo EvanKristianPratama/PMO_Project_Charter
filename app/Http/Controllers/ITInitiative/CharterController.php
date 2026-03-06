@@ -4,14 +4,14 @@ namespace App\Http\Controllers\ITInitiative;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ITInitiative\CharterStoreRequest;
-use App\Models\Project;
+use App\Models\TrsProject;
 use App\Models\ProjectCharter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Arr;
 
 class CharterController extends Controller
 {
-    public function store(CharterStoreRequest $request, Project $project): RedirectResponse
+    public function store(CharterStoreRequest $request, TrsProject $project): RedirectResponse
     {
         $validated = $request->validated();
         $versionLabel = trim((string) ($validated['version_label'] ?? ''));
@@ -36,7 +36,7 @@ class CharterController extends Controller
         return back()->with('success', sprintf('Project Charter %s saved successfully.', $versionLabel));
     }
 
-    public function update(CharterStoreRequest $request, Project $project, ProjectCharter $charter): RedirectResponse
+    public function update(CharterStoreRequest $request, TrsProject $project, ProjectCharter $charter): RedirectResponse
     {
         // Ensure the charter belongs to this project
         abort_if($charter->project_id !== $project->id, 403, 'Charter does not belong to this project.');

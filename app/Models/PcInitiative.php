@@ -13,7 +13,7 @@ class PcInitiative extends Model
 
     public function project(): BelongsTo
     {
-        return $this->belongsTo(Project::class, 'pc_id');
+        return $this->belongsTo(TrsProject::class, 'pc_id');
     }
 
     public function initiative(): BelongsTo
