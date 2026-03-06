@@ -72,7 +72,15 @@ export function useNavigation() {
                         label: 'Review PC',
                         href: '/program-evalution/review',
                         icon: ClipboardDocumentCheckIcon,
-                        active: (url) => url.startsWith('/program-evalution/review'),
+                        active: (url) =>
+                            url.startsWith('/program-evalution/review')
+                            && !url.startsWith('/program-evalution/review-timeline'),
+                    },
+                    {
+                        label: 'Review Timeline',
+                        href: '/program-evalution/review-timeline',
+                        icon: ClipboardDocumentCheckIcon,
+                        active: (url) => url.startsWith('/program-evalution/review-timeline'),
                     },
                 ],
             },
