@@ -69,7 +69,7 @@
                             <div class="mt-2 grid gap-1 text-center" :style="gridStyle(digitalSteps)">
                                 <div v-for="step in digitalSteps" :key="`label-${step.key}`">
                                     <p class="text-[9px] font-semibold text-slate-700 dark:text-slate-200">{{ step.label
-                                        }}</p>
+                                    }}</p>
                                 </div>
                             </div>
                         </div>
@@ -83,14 +83,15 @@
             <MasterInitiativeTable v-else-if="hasTableSelection && tableMode === TABLE_MODE.MASTER"
                 :items="masterItems" />
 
-            <section v-else-if="hasTableSelection && tableMode === TABLE_MODE.ROADMAP" class="space-y-3">
+            <section v-else-if="hasTableSelection && tableMode === TABLE_MODE.ROADMAP" class="space-y-6">
                 <div
                     class="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                            <h3 class="text-[15px] font-bold text-slate-800 dark:text-slate-100 sm:text-base">
+                            <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">
                                 Roadmap Project Charter IT Initiatives
                             </h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">View and manage implementation timelines across project versions</p>
                         </div>
 
                         <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end">
@@ -127,22 +128,50 @@
                     </div>
                 </div>
 
-                <div v-for="(project, roadmapIndex) in roadmapItems" :key="`it-roadmap-${project.id}`">
-                    <!-- Summary bar (collapsed) -->
-                    <ProjectRoadmapSummary v-if="!expandedProjects.has(project.id)" :project="project"
-                        :sequence="roadmapIndex + 1" :year-start="roadmapYearStart" :year-end="roadmapYearEnd"
-                        :expanded="false" @toggle="toggleProjectExpand(project.id)" />
+                <div v-for="(projectGroup, roadmapIndex) in roadmapItems" :key="`it-roadmap-group-${projectGroup.id}`"
+                    class="space-y-3">
+                    <!-- Project Group Header -->
+                    <div class="flex items-center gap-3 px-1">
+                        <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-600 dark:bg-white/10 dark:text-slate-400">
+                            {{ roadmapIndex + 1 }}
+                        </span>
+                        <h4 class="text-base font-bold text-slate-800 dark:text-slate-200">
+                            {{ projectGroup.name }}
+                        </h4>
+                    </div>
 
-                    <!-- Detail view (expanded) -->
-                    <div v-else>
-                        <ProjectRoadmapSummary :project="project"
-                            :sequence="roadmapIndex + 1" :year-start="roadmapYearStart" :year-end="roadmapYearEnd"
-                            :expanded="true" @toggle="toggleProjectExpand(project.id)" />
-                        <ProjectRoadmap :project="project" :form="{
-                            objectives: project.charter?.objectives ?? '',
-                            duration: project.charter?.duration ?? '',
-                        }" :selected-roadmap-version-id="null" :sequence="roadmapIndex + 1"
-                            :year-start="roadmapYearStart" :year-end="roadmapYearEnd" />
+                    <!-- Version Rows Container -->
+                    <div class="flex flex-col overflow-hidden rounded-xl border border-[#d0dce8] shadow-sm dark:border-white/10">
+                        <template v-for="(versionProject, versionIndex) in projectGroup.versions"
+                            :key="`version-${versionProject.uniqueId}`">
+                            
+                            <!-- Summary Row -->
+                            <ProjectRoadmapSummary 
+                                :project="versionProject"
+                                :sequence="versionIndex + 1"
+                                :year-start="roadmapYearStart"
+                                :year-end="roadmapYearEnd"
+                                :expanded="expandedProjects.has(versionProject.uniqueId)"
+                                @toggle="toggleProjectExpand(versionProject.uniqueId)"
+                            />
+
+                            <!-- Detail content (ProjectRoadmap) -->
+                            <div v-if="expandedProjects.has(versionProject.uniqueId)" 
+                                 class="border-b border-[#d0dce8] bg-slate-50/50 p-4 dark:border-white/10 dark:bg-white/5"
+                            >
+                                <ProjectRoadmap 
+                                    :project="versionProject" 
+                                    :form="{
+                                        objectives: versionProject.charter?.objectives ?? '',
+                                        duration: versionProject.charter?.duration ?? '',
+                                    }" 
+                                    :selected-roadmap-version-id="versionProject.charter?.id"
+                                    :sequence="versionIndex + 1" 
+                                    :year-start="roadmapYearStart"
+                                    :year-end="roadmapYearEnd" 
+                                />
+                            </div>
+                        </template>
                     </div>
                 </div>
 
@@ -232,25 +261,25 @@ const roadmapYearEnd = 2029;
 // ── Expand / Collapse per project ──
 const expandedProjects = reactive(new Set());
 
-const toggleProjectExpand = (projectId) => {
-    if (expandedProjects.has(projectId)) {
-        expandedProjects.delete(projectId);
+const toggleProjectExpand = (uniqueId) => {
+    if (expandedProjects.has(uniqueId)) {
+        expandedProjects.delete(uniqueId);
     } else {
-        expandedProjects.add(projectId);
+        expandedProjects.add(uniqueId);
     }
 };
 
 const allExpanded = computed(() => {
-    const items = roadmapItems.value;
-    return items.length > 0 && items.every((p) => expandedProjects.has(p.id));
+    const allIds = roadmapItems.value.flatMap((p) => p.versions.map((v) => v.uniqueId));
+    return allIds.length > 0 && allIds.every((id) => expandedProjects.has(id));
 });
 
 const toggleAllProjects = () => {
-    const items = roadmapItems.value;
+    const allIds = roadmapItems.value.flatMap((p) => p.versions.map((v) => v.uniqueId));
     if (allExpanded.value) {
         expandedProjects.clear();
     } else {
-        items.forEach((p) => expandedProjects.add(p.id));
+        allIds.forEach((id) => expandedProjects.add(id));
     }
 };
 
@@ -303,27 +332,40 @@ const roadmapItems = computed(() => {
 
     return projects.map((project) => {
         const charters = Array.isArray(project?.charters) && project.charters.length > 0
-            ? [...project.charters]
-                .sort((a, b) => Number(b.id || 0) - Number(a.id || 0))
+            ? [...project.charters].sort((a, b) => Number(b.id || 0) - Number(a.id || 0))
             : (project?.charter ? [project.charter] : []);
 
-        const latestCharter = charters[0] ?? null;
-
-        const milestones = charters.flatMap((charter) => {
+        const versions = charters.map((charter) => {
             const versionLabel = String(charter?.version_label ?? '').trim();
             const charterMilestones = Array.isArray(charter?.milestones) ? charter.milestones : [];
-
-            return charterMilestones.map((milestone) => ({
-                ...milestone,
-                version: versionLabel || milestone?.version || null,
+            const milestones = charterMilestones.map((m) => ({
+                ...m,
+                version: versionLabel || m?.version || null,
             }));
+
+            return {
+                ...project,
+                charters: [charter],
+                charter: charter,
+                milestones,
+                uniqueId: `${project.id}-${charter.id}`,
+            };
         });
 
+        if (versions.length === 0) {
+            versions.push({
+                ...project,
+                charters: [],
+                charter: null,
+                milestones: [],
+                uniqueId: `${project.id}-empty`,
+            });
+        }
+
         return {
-            ...project,
-            charters,
-            charter: latestCharter,
-            milestones,
+            id: project.id,
+            name: project.name,
+            versions,
         };
     });
 });

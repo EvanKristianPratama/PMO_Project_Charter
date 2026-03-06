@@ -60,8 +60,10 @@
 
                     <StatusImplementationTable :projects="initiative.projects" />
 
-                    <div v-if="showRoadmap && roadmapProjectsFor(initiative).length > 0" class="mt-4 space-y-2">
-                        <div
+                    <div v-if="showRoadmap && roadmapProjectsFor(initiative).length > 0" 
+                         class="mt-5 flex flex-col overflow-hidden rounded-xl border border-[#d0dce8] shadow-sm dark:border-white/10"
+                    >
+                        <template
                             v-for="(roadmapProject, roadmapIndex) in roadmapProjectsFor(initiative)"
                             :key="roadmapEntryKey(initiative, roadmapProject)"
                         >
@@ -74,9 +76,11 @@
                                 :display-version-label="roadmapProject.roadmap_version_label ?? null"
                                 @toggle="toggleRoadmapExpand(initiative.id, roadmapProject.roadmap_key)"
                             />
+                            
+                            <!-- Detail content (ProjectRoadmap) -->
                             <div
                                 v-if="isRoadmapExpanded(initiative.id, roadmapProject.roadmap_key)"
-                                class="rounded-b-xl border border-t-0 border-slate-200 bg-white p-3 dark:border-white/10 dark:bg-[#171717]"
+                                class="border-b border-[#d0dce8] bg-slate-50/50 p-4 dark:border-white/10 dark:bg-white/5"
                             >
                                 <ProjectRoadmap
                                     :project="roadmapProject"
@@ -90,7 +94,7 @@
                                     :year-end="roadmapYearEnd"
                                 />
                             </div>
-                        </div>
+                        </template>
                     </div>
                 </article>
             </section>

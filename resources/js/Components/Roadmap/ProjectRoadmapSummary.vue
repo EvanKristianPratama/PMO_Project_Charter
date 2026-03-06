@@ -191,10 +191,6 @@ const projectVersionLabel = computed(() => {
     const firstVersion = versionEntries.value[0]?.label ?? '';
     return String(firstVersion).trim();
 });
-
-const hideInlineVersionPills = computed(() => {
-    return String(props.displayVersionLabel ?? '').trim().length > 0;
-});
 </script>
 
 <template>
@@ -228,8 +224,6 @@ const hideInlineVersionPills = computed(() => {
                     :key="`timeline-version-${version.key}`"
                     class="timeline-version-row"
                 >
-                    <span v-if="!hideInlineVersionPills" class="version-pill">{{ version.label }}</span>
-
                     <div class="bar-track">
                         <span
                             v-for="(year, yi) in years"
