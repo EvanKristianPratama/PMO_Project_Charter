@@ -67,9 +67,11 @@ const displayOwner = (value) => {
                     Project Charter:
                     {{ itInitiative.name || '-' }}
                 </h1>
-                <span v-if="formatVersionLabel(form.version_label || itInitiative.charter?.version_label)"
+                <span
+                    v-if="formatVersionLabel(editable ? form.version_label : (form.version_label || itInitiative.charter?.version_label))"
                     class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600 ring-1 ring-slate-300">
-                    {{ formatVersionLabel(form.version_label || itInitiative.charter?.version_label) }}
+                    {{ formatVersionLabel(editable ? form.version_label : (form.version_label ||
+                        itInitiative.charter?.version_label)) }}
                 </span>
                 <span v-if="statusTimeline !== null && statusTimeline !== ''"
                     :class="statusTimelineBadgeClass(statusTimeline)"

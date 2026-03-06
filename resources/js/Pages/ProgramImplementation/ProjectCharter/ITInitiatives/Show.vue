@@ -52,7 +52,8 @@
                                 Charter Version
                             </label>
                             <div class="flex items-center gap-2">
-                                <select v-model="selectedCharterId" :disabled="charterVersions.length === 0 || isEditing"
+                                <select v-model="selectedCharterId"
+                                    :disabled="charterVersions.length === 0 || isEditing"
                                     class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-white/10 dark:bg-[#131313] dark:text-slate-100 dark:disabled:bg-white/5">
                                     <option v-if="charterVersions.length === 0" value="">No saved version yet</option>
                                     <option v-for="charter in charterVersions" :key="charter.id"
@@ -62,17 +63,15 @@
                                 </select>
                                 <button type="button"
                                     class="shrink-0 rounded-lg px-3 py-2 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60"
-                                    :class="showRoadmapPanel 
-                                        ? 'border border-red-300 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400 dark:hover:bg-red-950/40' 
+                                    :class="showRoadmapPanel
+                                        ? 'border border-red-300 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400 dark:hover:bg-red-950/40'
                                         : 'border border-slate-200 bg-blue-50 text-blue-700 hover:bg-blue-100 dark:border-slate-600 dark:bg-blue-950/20 dark:text-blue-400 dark:hover:bg-blue-950/40'"
-                                    :disabled="!resolvedRoadmapPcId"
-                                    @click="toggleRoadmapView">
+                                    :disabled="!resolvedRoadmapPcId" @click="toggleRoadmapView">
                                     {{ showRoadmapPanel ? 'Close Roadmap' : 'View Roadmap' }}
                                 </button>
                                 <button type="button"
                                     class="shrink-0 rounded-lg border border-slate-200 bg-green-50 px-3 py-2 text-xs font-medium text-green-700 hover:bg-green-100 transition disabled:cursor-not-allowed disabled:opacity-60 dark:border-green-900/30 dark:bg-green-950/20 dark:text-green-400 dark:hover:bg-green-950/40"
-                                    :disabled="!resolvedRoadmapPcId"
-                                    @click="addRoadmap">
+                                    :disabled="!resolvedRoadmapPcId" @click="addRoadmap">
                                     Add Roadmap
                                 </button>
                             </div>
@@ -160,7 +159,8 @@
                     <CharterDocument :it-initiative="editableItInitiative" :form="form" :status-timeline="form.status"
                         :editable="isEditing" />
                 </main>
-                <section v-if="showRoadmapPanel" class="print:hidden rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                <section v-if="showRoadmapPanel"
+                    class="print:hidden rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-white/10 dark:bg-[#171717]">
                     <div class="mb-3 flex items-center justify-between">
                         <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Project Roadmap</h3>
                     </div>
@@ -369,8 +369,8 @@ const editableItInitiative = computed(() => {
 
 const setFormValues = (charter, project = null) => {
     const values = mapCharterToForm(charter, project ?? props.itInitiative);
+    Object.keys(values).forEach(key => form[key] = values[key]);
     form.defaults(values);
-    form.reset();
     form.clearErrors();
 };
 
@@ -398,9 +398,18 @@ const startEdit = () => {
 const startNewVersion = () => {
     const base = selectedCharter.value ?? defaultCharter.value;
     const values = mapCharterToForm(base, props.itInitiative);
+
+    // Explicitly empty out form values for a new version
     values.version_label = '';
+    CHARTER_FIELDS.forEach(field => {
+        values[field] = '';
+    });
+    values.owner = '';
+    values.status = '';
+    values.tgl_dokumen = '';
+
+    Object.keys(values).forEach(key => form[key] = values[key]);
     form.defaults(values);
-    form.reset();
     form.clearErrors();
     isNewVersion.value = true;
     isEditing.value = true;

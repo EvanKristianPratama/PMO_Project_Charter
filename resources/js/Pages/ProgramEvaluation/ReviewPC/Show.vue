@@ -73,6 +73,11 @@
                 <section v-if="activeNav === 'review'" id="review" class="space-y-0">
                     <div class="px-3 py-3">
                         <StatusImplementationTable :projects="mappedProjects" />
+                        <div v-if="mappedProjects.length > 0" class="mt-3 flex flex-col gap-2">
+                            <ProjectRoadmapSummaryReadonly v-for="(proj, idx) in mappedProjects"
+                                :key="`rm-rev-${proj.id}`" :project="roadmapProjectFrom(proj)" :sequence="idx + 1"
+                                :show-header="idx === 0" />
+                        </div>
                     </div>
                     <ReviewContent :review="review" :penjelasan-items="penjelasanItems" :why-items="whyItems"
                         :how-parsed="howParsed" :project-profile-items="projectProfileItems" />
@@ -94,19 +99,24 @@
                             {{ opt.label }}
                         </button>
                     </div>
-                    
+
                     <div v-if="filteredProjectCharterGroups.length > 0" class="space-y-4">
                         <div v-for="group in filteredProjectCharterGroups" :key="group.project.id"
                             class="border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                             <div class="px-3 py-3">
                                 <StatusImplementationTable :projects="[group.project]" />
+                                <div class="mt-3 flex flex-col gap-2">
+                                    <ProjectRoadmapSummaryReadonly :project="roadmapProjectFrom(group.project)"
+                                        :sequence="1" :show-header="true" />
+                                </div>
                             </div>
                             <div class="space-y-3 pb-3">
                                 <template v-for="(charter, charterIndex) in group.charters"
                                     :key="charter?.id ?? `charter-${group.project.id}-${charterIndex}`">
                                     <ItCharterDocument :it-initiative="group.project"
                                         :form="charterFormFor(group.project, charter)"
-                                        :status-timeline="getProjectReviewStatus(group.project, charter)" :editable="false" />
+                                        :status-timeline="getProjectReviewStatus(group.project, charter)"
+                                        :editable="false" />
                                 </template>
                             </div>
                         </div>
@@ -126,6 +136,11 @@
                         class="overflow-hidden border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717] p-6">
                         <div class="px-3 py-3">
                             <StatusImplementationTable :projects="mappedProjects" />
+                            <div v-if="mappedProjects.length > 0" class="mt-3 flex flex-col gap-2">
+                                <ProjectRoadmapSummaryReadonly v-for="(proj, idx) in mappedProjects"
+                                    :key="`rm-rel-${proj.id}`" :project="roadmapProjectFrom(proj)" :sequence="idx + 1"
+                                    :show-header="idx === 0" />
+                            </div>
                         </div>
                         <InitiativeDetailsWithRelations :initiative="trsReviewPC.initiative"
                             :relations="initiativeRelations" variant="emerald" status-label="Status"
@@ -141,6 +156,11 @@
                 <section v-if="activeNav === 'roadmap'" id="roadmap" class="print:hidden">
                     <div class="px-3 py-3">
                         <StatusImplementationTable :projects="mappedProjects" />
+                        <div v-if="mappedProjects.length > 0" class="mt-3 flex flex-col gap-2">
+                            <ProjectRoadmapSummaryReadonly v-for="(proj, idx) in mappedProjects"
+                                :key="`rm-road-${proj.id}`" :project="roadmapProjectFrom(proj)" :sequence="idx + 1"
+                                :show-header="idx === 0" />
+                        </div>
                     </div>
                     <ProjectRoadmap v-if="mappedRoadmapProject" :project="mappedRoadmapProject"
                         :form="{ objectives: mappedRoadmapProject?.charter?.objectives ?? '', duration: mappedRoadmapProject?.charter?.duration ?? '' }"
@@ -162,6 +182,7 @@ import { Link, router } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import ItCharterDocument from '@/Components/ProjectCharter/ItCharterDocument.vue';
 import ProjectRoadmap from '@/Components/Roadmap/ProjectRoadmap.vue';
+import ProjectRoadmapSummaryReadonly from '@/Components/Roadmap/ProjectRoadmapSummaryReadonly.vue';
 import StatusImplementationTable from '@/Components/ITInitiative/StatusImplementationTable.vue';
 import ReviewContent from '@/Components/ReviewPC/ReviewContent.vue';
 import InitiativeDetailsWithRelations from '@/Components/InitiativeRelation/InitiativeDetailsWithRelations.vue';
@@ -282,8 +303,7 @@ const formatReviewLabel = (option) => {
     return `${code} - ${name}`;
 };
 
-const mappedRoadmapProject = computed(() => {
-    const project = props.mappedProject;
+const roadmapProjectFrom = (project) => {
     if (!project) return null;
 
     const charters = Array.isArray(project?.charters) ? project.charters : [];
@@ -302,7 +322,9 @@ const mappedRoadmapProject = computed(() => {
         charter: latestCharter,
         milestones,
     };
-});
+};
+
+const mappedRoadmapProject = computed(() => roadmapProjectFrom(props.mappedProject));
 
 // ---- Per-project charter form helper ----
 const charterFormFor = (proj, charterOverride = null) => {

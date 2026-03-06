@@ -89,7 +89,7 @@
                     <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h3 class="text-[15px] font-bold text-slate-800 dark:text-slate-100 sm:text-base">
-                                Roadmap Project Charter IT Initiativesss
+                                Roadmap Project Charter IT Initiatives
                             </h3>
                         </div>
 
