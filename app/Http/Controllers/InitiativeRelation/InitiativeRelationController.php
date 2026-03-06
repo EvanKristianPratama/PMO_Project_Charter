@@ -24,6 +24,7 @@ class InitiativeRelationController extends Controller
             'initiativeRelationsRow',
             'initiativeRelationsColumn',
             'coe:id,name',
+            'latestStatus',
         ])
             ->get();
         $initiativeRelations = MstInitiativeRelation::query()
