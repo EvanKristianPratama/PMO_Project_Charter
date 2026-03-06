@@ -56,12 +56,12 @@ export function useNavigation() {
                 icon: DocumentTextIcon,
                 active: (url) => url.startsWith('/program-planning/program-definition/it-initiatives'),
             },
-            // {
-            //     label: 'Initiative Relation',
-            //     href: '/program-planning/initiative-relation',
-            //     icon: TableCellsIcon,
-            //     active: (url) => url.startsWith('/program-planning/initiative-relation'),
-            // },
+            {
+                label: 'Initiative Relation',
+                href: '/program-planning/initiative-relation',
+                icon: TableCellsIcon,
+                active: (url) => url.startsWith('/program-planning/initiative-relation'),
+            },
             {
                 label: 'Program Evaluation',
                 href: '/program-evalution/review',
@@ -99,12 +99,12 @@ export function useNavigation() {
                 icon: FolderIcon,
                 active: (url) => url.startsWith('/it-initiatives') || url.startsWith('/roadmap'),
             },
-            // {
-            //     label: 'Initiatives Relations',
-            //     href: '/program-implementation/initiative-relation',
-            //     icon: TableCellsIcon,
-            //     active: (url) => url.startsWith('/program-implementation/initiative-relation'),
-            // },
+            {
+                label: 'Initiatives Relations',
+                href: '/program-implementation/initiative-relation',
+                icon: TableCellsIcon,
+                active: (url) => url.startsWith('/program-implementation/initiative-relation'),
+            },
             {
                 label: 'RKAP',
                 href: '/program-implementation/budgeting',

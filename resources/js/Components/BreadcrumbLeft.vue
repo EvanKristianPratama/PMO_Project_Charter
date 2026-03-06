@@ -12,14 +12,14 @@ const planningChildHrefs = [
     '/strategic-pillars',
     '/program-planning/program-definition/digital-initiatives',
     '/program-planning/program-definition/it-initiatives',
-    // '/program-planning/initiative-relation',
+    '/program-planning/initiative-relation',
 ];
 const implementationChildHrefs = [
     '/digital-initiatives',
     '/it-initiatives',
     '/roadmap',
     '/program-implementation/budgeting',
-    // '/program-implementation/initiative-relation',
+    '/program-implementation/initiative-relation',
 ];
 
 const programPlanningItem = computed(() => {
