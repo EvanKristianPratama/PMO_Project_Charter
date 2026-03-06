@@ -179,20 +179,7 @@ const typeLabel = computed(() => {
 });
 
 const sectionKey = (item) => {
-    const sourceName = String(item?.source_data?.name ?? item?.sourceData?.name ?? '').toLowerCase();
     const groupName = String(item?.organization?.groub?.name ?? '').toLowerCase();
-
-    if (sourceName.includes('new')) {
-        if (groupName.includes('sub')) {
-            return 'new-subholding';
-        }
-
-        if (groupName.includes('holding')) {
-            return 'new-holding';
-        }
-
-        return 'new';
-    }
 
     if (groupName.includes('sub')) {
         return 'subholding';
@@ -205,13 +192,11 @@ const sectionKey = (item) => {
     return 'new';
 };
 
-const sectionOrder = ['holding', 'subholding', 'new-holding', 'new-subholding', 'new'];
+const sectionOrder = ['holding', 'subholding', 'new'];
 const sectionTitleMap = {
     holding: 'Holding',
     subholding: 'SubHolding',
-    'new-holding': 'New Initiatives Holding',
-    'new-subholding': 'New Initiatives SubHolding',
-    new: 'New Initiatives',
+    new: 'Unassigned',
 };
 
 const organizationLabel = (initiative) => {
