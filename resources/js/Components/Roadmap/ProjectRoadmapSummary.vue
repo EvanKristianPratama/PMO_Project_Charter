@@ -9,6 +9,7 @@ const props = defineProps({
     yearEnd: { type: Number, default: 2029 },
     expanded: { type: Boolean, default: false },
     displayVersionLabel: { type: [String, Number], default: null },
+    showDate: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['toggle']);
@@ -235,13 +236,13 @@ const documentDateLabel = computed(() => {
         </div>
 
         <div class="col-name">
-            <div class="w-full flex items-center justify-between gap-3 min-w-0">
+            <div class="w-full flex items-center gap-2 min-w-0" :class="showDate ? 'justify-between' : 'justify-start'">
                 <span class="project-name truncate" :title="project.name">{{ project.name || '-' }}</span>
                 <div class="flex items-center gap-2 flex-shrink-0">
                     <span v-if="currentStatus" class="project-version-capsule" :class="currentStatus.class">
                         {{ currentStatus.label }}
                     </span>
-                    <div class="project-version-capsule" :class="currentStatus?.class || 'bg-slate-100 text-slate-500 ring-1 ring-slate-200'">
+                    <div v-if="showDate" class="project-version-capsule" :class="currentStatus?.class || 'bg-slate-100 text-slate-500 ring-1 ring-slate-200'">
                         <span>{{ documentDateLabel }}</span>
                     </div>
                 </div>
@@ -360,10 +361,10 @@ const documentDateLabel = computed(() => {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 2.5px 12px;
+    padding: 1px 7px;
     border-radius: 999px;
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.2;
     letter-spacing: 0.01em;
     white-space: nowrap;

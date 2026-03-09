@@ -280,6 +280,7 @@ class ITInitiativeController extends Controller
         $project = TrsProject::query()
             ->with([
                 'charter',
+                'charter.milestones',
                 'charters' => static fn ($query) => $query->latest()->with('milestones'),
                 'owner',
                 'statusRef:id,name',

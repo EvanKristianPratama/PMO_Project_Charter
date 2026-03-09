@@ -49,7 +49,7 @@
                         <div class="w-full lg:max-w-sm">
                             <label
                                 class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                                Charter Version
+                                Charter Status Timeline
                             </label>
                             <div class="flex items-center gap-2">
                                 <select v-model="selectedCharterId"
@@ -72,7 +72,7 @@
                                 <button type="button"
                                     class="shrink-0 rounded-lg border border-slate-200 bg-green-50 px-3 py-2 text-xs font-medium text-green-700 hover:bg-green-100 transition disabled:cursor-not-allowed disabled:opacity-60 dark:border-green-900/30 dark:bg-green-950/20 dark:text-green-400 dark:hover:bg-green-950/40"
                                     :disabled="!resolvedRoadmapPcId" @click="addRoadmap">
-                                    Add Roadmap
+                                    {{ hasRoadmap ? 'Edit Roadmap' : 'Add Roadmap' }}
                                 </button>
                             </div>
                         </div>
@@ -166,6 +166,7 @@
                     </div>
                     <ProjectRoadmap :project="roadmapProject"
                         :form="{ objectives: roadmapProject?.charter?.objectives ?? '', duration: roadmapProject?.charter?.duration ?? '' }"
+                        :selected-roadmap-version-id="roadmapVersionId"
                         :sequence="1" :year-start="2025" :year-end="2029" />
                 </section>
             </template>
@@ -298,12 +299,37 @@ const mapCharterToForm = (charter = null, project = null) => {
     return payload;
 };
 
+const roadmapMilestonesForCharter = (charter) => {
+    if (!charter || !Array.isArray(charter.milestones)) {
+        return [];
+    }
+
+    const versionLabel = String(charter.version_label ?? '').trim();
+
+    return charter.milestones.map((milestone) => ({
+        ...milestone,
+        version: versionLabel || milestone?.version || null,
+    }));
+};
+
 const charterVersions = computed(() => {
     const items = Array.isArray(props.itInitiative?.charters) ? props.itInitiative.charters : [];
-    return items.map((charter, index) => ({
-        ...charter,
-        resolved_version_label: String(charter?.version_label || '').trim() || `v${items.length - index}`,
-    }));
+    
+    // Group by status and take the latest one for each status
+    const uniqueStatusMap = new Map();
+    items.forEach((charter) => {
+        const statusId = Number(charter.status);
+        if (!uniqueStatusMap.has(statusId)) {
+            const statusObj = statusOptions.find(s => s.value === statusId);
+            uniqueStatusMap.set(statusId, {
+                ...charter,
+                resolved_status_label: statusObj ? statusObj.label : `Status ${statusId}`,
+            });
+        }
+    });
+
+    // Sort by status ID to keep order consistent (Draft, Propose, etc)
+    return Array.from(uniqueStatusMap.values()).sort((a, b) => Number(a.status) - Number(b.status));
 });
 
 const defaultCharter = computed(() => props.itInitiative?.charter ?? charterVersions.value[0] ?? null);
@@ -318,28 +344,59 @@ const selectedCharter = computed(() => {
     return charterVersions.value.find((c) => String(c.id) === String(selectedCharterId.value)) || null;
 });
 
-const selectedCharterForRoadmap = computed(() => selectedCharter.value ?? defaultCharter.value ?? null);
+const selectedCharterForRoadmap = computed(() => {
+    if (selectedCharter.value) {
+        return selectedCharter.value;
+    }
+
+    const fallbackId = Number(defaultCharter.value?.id ?? 0);
+    if (fallbackId > 0) {
+        const matchedFallback = charterVersions.value.find((charter) => Number(charter?.id ?? 0) === fallbackId);
+        if (matchedFallback) {
+            return matchedFallback;
+        }
+    }
+
+    return defaultCharter.value ?? null;
+});
 
 const roadmapProject = computed(() => {
     const base = props.itInitiative ?? {};
     const charter = selectedCharterForRoadmap.value ?? null;
-    const milestones = Array.isArray(charter?.milestones) ? charter.milestones : [];
+    const normalizedCharter = charter
+        ? {
+            ...charter,
+            milestones: roadmapMilestonesForCharter(charter),
+        }
+        : null;
+    const milestones = normalizedCharter?.milestones ?? [];
 
     return {
         ...base,
-        charter,
+        charter: normalizedCharter,
+        charters: normalizedCharter ? [normalizedCharter] : [],
         milestones,
     };
 });
 
 const resolvedRoadmapPcId = computed(() => {
-    const selectedId = Number(selectedCharter.value?.id ?? 0);
+    const selectedId = Number(selectedCharterForRoadmap.value?.id ?? 0);
     if (selectedId > 0) {
         return selectedId;
     }
 
     const fallbackId = Number(defaultCharter.value?.id ?? 0);
     return fallbackId > 0 ? fallbackId : null;
+});
+
+const hasRoadmap = computed(() => {
+    const milestones = selectedCharterForRoadmap.value?.milestones;
+    return Array.isArray(milestones) && milestones.length > 0;
+});
+
+const roadmapVersionId = computed(() => {
+    const versionLabel = String(selectedCharterForRoadmap.value?.version_label ?? '').trim();
+    return versionLabel !== '' ? versionLabel : null;
 });
 
 const showRoadmapPanel = ref(false);
@@ -447,6 +504,6 @@ const cancelEdit = () => {
 const printCharter = () => window.print();
 
 const charterOptionLabel = (charter) => {
-    return charter.resolved_version_label;
+    return charter.resolved_status_label;
 };
 </script>
