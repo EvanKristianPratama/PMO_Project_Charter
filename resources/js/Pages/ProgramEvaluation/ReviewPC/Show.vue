@@ -73,10 +73,24 @@
                 <section v-if="activeNav === 'review'" id="review" class="space-y-0">
                     <div class="px-3 py-3">
                         <StatusImplementationTable :projects="mappedProjects" />
-                        <div v-if="mappedProjects.length > 0" class="mt-3 flex flex-col gap-2">
-                            <ProjectRoadmapSummaryReadonly v-for="(proj, idx) in mappedProjects"
-                                :key="`rm-rev-${proj.id}`" :project="roadmapProjectFrom(proj)" :sequence="idx + 1"
-                                :show-header="idx === 0" />
+                        <div v-if="allRoadmapVersions.length > 0" class="mt-3 flex flex-col overflow-hidden rounded-xl border border-[#d0dce8] shadow-sm dark:border-white/10">
+                            <template v-for="(roadmapProject, idx) in allRoadmapVersions" :key="`rm-rev-${roadmapProject.roadmap_key}`">
+                                <ProjectRoadmapSummary 
+                                    :project="roadmapProject" 
+                                    :sequence="idx + 1"
+                                    :expanded="isRoadmapExpanded(roadmapProject.roadmap_key)"
+                                    :display-version-label="roadmapProject.roadmap_version_label"
+                                    @toggle="toggleRoadmapExpand(roadmapProject.roadmap_key)"
+                                />
+                                <div v-if="isRoadmapExpanded(roadmapProject.roadmap_key)" class="border-b border-[#d0dce8] bg-slate-50/50 p-4 dark:border-white/10 dark:bg-white/5">
+                                    <ProjectRoadmap
+                                        :project="roadmapProject"
+                                        :form="{ objectives: roadmapProject.charter?.objectives ?? '', duration: roadmapProject.charter?.duration ?? '' }"
+                                        :selected-roadmap-version-id="roadmapProject.roadmap_version_label"
+                                        :sequence="idx + 1"
+                                    />
+                                </div>
+                            </template>
                         </div>
                     </div>
                     <ReviewContent :review="review" :penjelasan-items="penjelasanItems" :why-items="whyItems"
@@ -105,9 +119,24 @@
                             class="border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                             <div class="px-3 py-3">
                                 <StatusImplementationTable :projects="[group.project]" />
-                                <div class="mt-3 flex flex-col gap-2">
-                                    <ProjectRoadmapSummaryReadonly :project="roadmapProjectFrom(group.project)"
-                                        :sequence="1" :show-header="true" />
+                                <div class="mt-3 flex flex-col overflow-hidden rounded-xl border border-[#d0dce8] shadow-sm dark:border-white/10">
+                                    <template v-for="(roadmapProject, idx) in roadmapVersionsForGroup(group)" :key="`rm-pc-${roadmapProject.roadmap_key}`">
+                                        <ProjectRoadmapSummary 
+                                            :project="roadmapProject" 
+                                            :sequence="idx + 1"
+                                            :expanded="isRoadmapExpanded(roadmapProject.roadmap_key)"
+                                            :display-version-label="roadmapProject.roadmap_version_label"
+                                            @toggle="toggleRoadmapExpand(roadmapProject.roadmap_key)"
+                                        />
+                                        <div v-if="isRoadmapExpanded(roadmapProject.roadmap_key)" class="border-b border-[#d0dce8] bg-slate-50/50 p-4 dark:border-white/10 dark:bg-white/5">
+                                            <ProjectRoadmap
+                                                :project="roadmapProject"
+                                                :form="{ objectives: roadmapProject.charter?.objectives ?? '', duration: roadmapProject.charter?.duration ?? '' }"
+                                                :selected-roadmap-version-id="roadmapProject.roadmap_version_label"
+                                                :sequence="idx + 1"
+                                            />
+                                        </div>
+                                    </template>
                                 </div>
                             </div>
                             <div class="space-y-3 pb-3">
@@ -136,10 +165,24 @@
                         class="overflow-hidden border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717] p-6">
                         <div class="px-3 py-3">
                             <StatusImplementationTable :projects="mappedProjects" />
-                            <div v-if="mappedProjects.length > 0" class="mt-3 flex flex-col gap-2">
-                                <ProjectRoadmapSummaryReadonly v-for="(proj, idx) in mappedProjects"
-                                    :key="`rm-rel-${proj.id}`" :project="roadmapProjectFrom(proj)" :sequence="idx + 1"
-                                    :show-header="idx === 0" />
+                            <div v-if="allRoadmapVersions.length > 0" class="mt-3 flex flex-col overflow-hidden rounded-xl border border-[#d0dce8] shadow-sm dark:border-white/10">
+                                <template v-for="(roadmapProject, idx) in allRoadmapVersions" :key="`rm-rel-${roadmapProject.roadmap_key}`">
+                                    <ProjectRoadmapSummary 
+                                        :project="roadmapProject" 
+                                        :sequence="idx + 1"
+                                        :expanded="isRoadmapExpanded(roadmapProject.roadmap_key)"
+                                        :display-version-label="roadmapProject.roadmap_version_label"
+                                        @toggle="toggleRoadmapExpand(roadmapProject.roadmap_key)"
+                                    />
+                                    <div v-if="isRoadmapExpanded(roadmapProject.roadmap_key)" class="border-b border-[#d0dce8] bg-slate-50/50 p-4 dark:border-white/10 dark:bg-white/5">
+                                        <ProjectRoadmap
+                                            :project="roadmapProject"
+                                            :form="{ objectives: roadmapProject.charter?.objectives ?? '', duration: roadmapProject.charter?.duration ?? '' }"
+                                            :selected-roadmap-version-id="roadmapProject.roadmap_version_label"
+                                            :sequence="idx + 1"
+                                        />
+                                    </div>
+                                </template>
                             </div>
                         </div>
                         <InitiativeDetailsWithRelations :initiative="trsReviewPC.initiative"
@@ -156,19 +199,25 @@
                 <section v-if="activeNav === 'roadmap'" id="roadmap" class="print:hidden">
                     <div class="px-3 py-3">
                         <StatusImplementationTable :projects="mappedProjects" />
-                        <div v-if="mappedProjects.length > 0" class="mt-3 flex flex-col gap-2">
-                            <ProjectRoadmapSummaryReadonly v-for="(proj, idx) in mappedProjects"
-                                :key="`rm-road-${proj.id}`" :project="roadmapProjectFrom(proj)" :sequence="idx + 1"
-                                :show-header="idx === 0" />
+                        <div v-if="allRoadmapVersions.length > 0" class="mt-3 flex flex-col overflow-hidden rounded-xl border border-[#d0dce8] shadow-sm dark:border-white/10">
+                            <template v-for="(roadmapProject, idx) in allRoadmapVersions" :key="`rm-road-${roadmapProject.roadmap_key}`">
+                                <ProjectRoadmapSummary 
+                                    :project="roadmapProject" 
+                                    :sequence="idx + 1"
+                                    :expanded="isRoadmapExpanded(roadmapProject.roadmap_key)"
+                                    :display-version-label="roadmapProject.roadmap_version_label"
+                                    @toggle="toggleRoadmapExpand(roadmapProject.roadmap_key)"
+                                />
+                                <div v-if="isRoadmapExpanded(roadmapProject.roadmap_key)" class="border-b border-[#d0dce8] bg-slate-50/50 p-4 dark:border-white/10 dark:bg-white/5">
+                                    <ProjectRoadmap
+                                        :project="roadmapProject"
+                                        :form="{ objectives: roadmapProject.charter?.objectives ?? '', duration: roadmapProject.charter?.duration ?? '' }"
+                                        :selected-roadmap-version-id="roadmapProject.roadmap_version_label"
+                                        :sequence="idx + 1"
+                                    />
+                                </div>
+                            </template>
                         </div>
-                    </div>
-                    <ProjectRoadmap v-if="mappedRoadmapProject" :project="mappedRoadmapProject"
-                        :form="{ objectives: mappedRoadmapProject?.charter?.objectives ?? '', duration: mappedRoadmapProject?.charter?.duration ?? '' }"
-                        :selected-roadmap-version-id="mappedRoadmapProject?.charter?.version_label ?? null"
-                        :sequence="1" :year-start="2025" :year-end="2029" />
-                    <div v-else
-                        class="border border-slate-200 bg-white px-4 py-6 text-center text-xs text-slate-500 dark:border-white/10 dark:bg-[#171717] dark:text-slate-400">
-                        Data roadmap belum tersedia untuk initiative ini.
                     </div>
                 </section>
             </div>
@@ -177,12 +226,12 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, reactive } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import ItCharterDocument from '@/Components/ProjectCharter/ItCharterDocument.vue';
 import ProjectRoadmap from '@/Components/Roadmap/ProjectRoadmap.vue';
-import ProjectRoadmapSummaryReadonly from '@/Components/Roadmap/ProjectRoadmapSummaryReadonly.vue';
+import ProjectRoadmapSummary from '@/Components/Roadmap/ProjectRoadmapSummary.vue';
 import StatusImplementationTable from '@/Components/ITInitiative/StatusImplementationTable.vue';
 import ReviewContent from '@/Components/ReviewPC/ReviewContent.vue';
 import InitiativeDetailsWithRelations from '@/Components/InitiativeRelation/InitiativeDetailsWithRelations.vue';
@@ -303,25 +352,77 @@ const formatReviewLabel = (option) => {
     return `${code} - ${name}`;
 };
 
-const roadmapProjectFrom = (project) => {
-    if (!project) return null;
+// --- Roadmap Per Version Logic ---
+const expandedRoadmapItems = reactive(new Set());
 
-    const charters = Array.isArray(project?.charters) ? project.charters : [];
-    const latestCharter = charters.length
-        ? [...charters].sort((a, b) => Number(b.id || 0) - Number(a.id || 0))[0]
-        : (project?.charter ?? null);
-    const milestones = Array.isArray(latestCharter?.milestones)
-        ? latestCharter.milestones.map((milestone) => ({
+const isRoadmapExpanded = (roadmapKey) => {
+    return expandedRoadmapItems.has(roadmapKey);
+};
+
+const toggleRoadmapExpand = (roadmapKey) => {
+    if (expandedRoadmapItems.has(roadmapKey)) {
+        expandedRoadmapItems.delete(roadmapKey);
+    } else {
+        expandedRoadmapItems.add(roadmapKey);
+    }
+};
+
+const normalizeVersionLabel = (value) => {
+    const raw = String(value ?? '').trim();
+    const lower = raw.toLowerCase();
+    if (!raw || lower === 'v') return 'v1';
+    if (/^v\d+$/.test(lower)) return `v${Math.max(Number(lower.slice(1)) || 1, 1)}`;
+    if (/^\d+$/.test(raw)) return `v${Math.max(Number(raw) || 1, 1)}`;
+    return raw;
+};
+
+const roadmapVersionsFor = (project) => {
+    if (!project) return [];
+
+    const charters = Array.isArray(project?.charters) && project.charters.length > 0
+        ? [...project.charters].sort((a, b) => Number(b?.id || 0) - Number(a?.id || 0))
+        : (project?.charter ? [project.charter] : []);
+
+    if (charters.length === 0) {
+        return [{
+            ...project,
+            charter: null,
+            milestones: [],
+            roadmap_version_label: null,
+            roadmap_key: `project-${project.id}-no-charter`,
+        }];
+    }
+
+    return charters.map((charter, charterIndex) => {
+        const versionLabelRaw = String(charter?.version_label ?? '').trim();
+        const versionLabelDisplay = versionLabelRaw || `v${Math.max(charters.length - charterIndex, 1)}`;
+        const versionKey = normalizeVersionLabel(versionLabelDisplay);
+        const charterMilestones = Array.isArray(charter?.milestones) ? charter.milestones : [];
+
+        const milestones = charterMilestones.map((milestone) => ({
             ...milestone,
-            version: latestCharter?.version_label ?? milestone?.version ?? null,
-        }))
-        : [];
+            version: versionKey || milestone?.version || null,
+        }));
 
-    return {
-        ...project,
-        charter: latestCharter,
-        milestones,
-    };
+        return {
+            ...project,
+            charters: [charter], // Tambahkan ini agar komponen summary hanya merender 1 baris bar
+            charter,
+            milestones,
+            roadmap_version_label: versionLabelDisplay,
+            roadmap_key: `project-${project.id}-charter-${charter?.id ?? charterIndex}`,
+        };
+    });
+};
+
+const allRoadmapVersions = computed(() => {
+    return props.mappedProjects.flatMap((proj) => roadmapVersionsFor(proj));
+});
+
+const roadmapProjectFrom = (project) => {
+    // Keep for backward compatibility if needed, but we prefer allRoadmapVersions
+    const versions = roadmapVersionsFor(project);
+    return versions.length > 0 ? versions[0] : null;
 };
 
 const mappedRoadmapProject = computed(() => roadmapProjectFrom(props.mappedProject));
@@ -379,24 +480,37 @@ const getProjectReviewStatus = (proj, charter = null) => {
     return Number(raw);
 };
 
-const filteredProjects = computed(() => {
-    if (pcStatusFilter.value === '' || pcStatusFilter.value === null) return props.mappedProjects;
-    return props.mappedProjects.filter((proj) => {
-        return Number(getProjectReviewStatus(proj)) === Number(pcStatusFilter.value);
-    });
-});
-
 const filteredProjectCharterGroups = computed(() => {
-    return filteredProjects.value
+    const filterVal = pcStatusFilter.value;
+    
+    return props.mappedProjects
         .map((proj) => {
-            const charters = projectChartersFor(proj);
+            const allCharters = projectChartersFor(proj);
+            
+            // Filter individual charter versions based on the selected status
+            const filteredCharters = (filterVal === '' || filterVal === null)
+                ? allCharters
+                : allCharters.filter(c => {
+                    const status = c?.status ?? proj?.status;
+                    return Number(status) === Number(filterVal);
+                });
+            
             return {
                 project: proj,
-                charters,
+                charters: filteredCharters,
             };
         })
         .filter((group) => group.charters.length > 0);
 });
+
+const roadmapVersionsForGroup = (group) => {
+    // Return only roadmap versions that match the filtered charters in the group
+    const allVersions = roadmapVersionsFor(group.project);
+    if (pcStatusFilter.value === '' || pcStatusFilter.value === null) return allVersions;
+    
+    const allowedCharterIds = new Set(group.charters.map(c => c.id));
+    return allVersions.filter(v => v.charter && allowedCharterIds.has(v.charter.id));
+};
 
 const initiativeLabel = (initiative) => {
     const code = initiative?.code ?? initiative?.id ?? '-';

@@ -38,7 +38,7 @@ class EditController extends Controller
 
         return Inertia::render('ProgramPlanning/ProgramDefinition/DigitalInitiatives/Compendium/Show', [
             'compendium' => [
-                'id',
+                'id' => (int) $scInitiative->id,
                 'initiative_ids' => $scInitiative->mstInitiatives->pluck('id')->toArray(),
                 'owner' => $scInitiative->owner,
                 'usecase' => $scInitiative->usecase,
@@ -64,4 +64,3 @@ class EditController extends Controller
         ]);
     }
 }
-
