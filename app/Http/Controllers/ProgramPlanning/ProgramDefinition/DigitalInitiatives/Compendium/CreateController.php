@@ -4,6 +4,9 @@ namespace App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiati
 
 use App\Http\Controllers\Controller;
 use App\Models\MstInitiative;
+use App\Models\MstScSource;
+use App\Models\Theme;
+use App\Models\TrsScInitiative;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -31,9 +34,9 @@ class CreateController extends Controller
 
                 $sourceCreated = '-';
                 if ($source) {
-                    if (!empty($source->month) && !empty($source->year)) {
+                    if (! empty($source->month) && ! empty($source->year)) {
                         $sourceCreated = $source->month . ' ' . $source->year;
-                    } elseif (!empty($source->created_at)) {
+                    } elseif (! empty($source->created_at)) {
                         $sourceCreated = $source->created_at->format('M Y');
                     }
                 }
@@ -54,8 +57,52 @@ class CreateController extends Controller
 
         return Inertia::render('ProgramPlanning/ProgramDefinition/DigitalInitiatives/Compendium/Show', [
             'initiativeOptions' => $initiativeOptions,
-            'sourceOptions' => \App\Models\MstScSource::orderBy('name')->get(['id', 'name'])->values(),
+            'sourceOptions' => MstScSource::orderBy('name')->get(['id', 'name'])->values(),
+            'themeOptions' => $this->themeOptions(),
+            'compendiumOptions' => $this->compendiumOptions(),
         ]);
     }
-}
 
+    private function compendiumOptions()
+    {
+        return TrsScInitiative::query()
+            ->with(['mstInitiatives:id,code,name'])
+            ->whereHas('mstInitiatives')
+            ->orderBy('id')
+            ->get(['id', 'owner', 'usecase'])
+            ->map(function (TrsScInitiative $item): array {
+                $firstInitiative = $item->mstInitiatives->first();
+                $code = trim((string) ($firstInitiative?->code ?? ''));
+                $name = trim((string) ($item->usecase ?: ($firstInitiative?->name ?? '-')));
+                $owner = trim((string) ($item->owner ?? ''));
+
+                $label = ($code !== '' ? "[{$code}] " : '') . ($name !== '' ? $name : '-');
+                if ($owner !== '') {
+                    $label .= " - {$owner}";
+                }
+
+                return [
+                    'id' => (int) $item->id,
+                    'label' => $label,
+                ];
+            })
+            ->values();
+    }
+
+    private function themeOptions()
+    {
+        return Theme::with('goal:id,title')
+            ->orderBy('id')
+            ->get()
+            ->map(function (Theme $theme): array {
+                $goalTitle = $theme->goal?->title ?? 'No Pillar';
+                $themeNum = $theme->theme_number ?? 'N/A';
+
+                return [
+                    'id' => (int) $theme->id,
+                    'name' => "[$goalTitle] #$themeNum - $theme->name",
+                ];
+            })
+            ->values();
+    }
+}

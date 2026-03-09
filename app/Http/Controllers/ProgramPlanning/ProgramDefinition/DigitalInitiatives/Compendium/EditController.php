@@ -5,8 +5,11 @@ namespace App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiati
 use App\Http\Controllers\Controller;
 use App\Models\MstInitiative;
 use App\Models\MstScSource;
+use App\Models\Theme;
 use App\Models\TrsScInitiative;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -47,6 +50,7 @@ class EditController extends Controller
                 'value' => (int) $scInitiative->value,
                 'urgency' => (int) $scInitiative->urgency,
                 'status' => $scInitiative->status,
+                'rjpp_tagging_ids' => $this->rjppTaggingIds((int) $scInitiative->id),
                 'detail_useCase_description' => $detail?->useCase_description ?? '',
                 'current_situation' => $detail?->current_situation ?? '',
                 'key_functionalities' => $detail?->key_functionalities ?? '',
@@ -61,6 +65,63 @@ class EditController extends Controller
             ],
             'initiativeOptions' => $initiativeOptions,
             'sourceOptions' => MstScSource::orderBy('name')->get(['id', 'name'])->values(),
+            'themeOptions' => $this->themeOptions(),
+            'compendiumOptions' => $this->compendiumOptions(),
         ]);
+    }
+
+    private function compendiumOptions()
+    {
+        return TrsScInitiative::query()
+            ->with(['mstInitiatives:id,code,name'])
+            ->whereHas('mstInitiatives')
+            ->orderBy('id')
+            ->get(['id', 'owner', 'usecase'])
+            ->map(function (TrsScInitiative $item): array {
+                $firstInitiative = $item->mstInitiatives->first();
+                $code = trim((string) ($firstInitiative?->code ?? ''));
+                $name = trim((string) ($item->usecase ?: ($firstInitiative?->name ?? '-')));
+                $owner = trim((string) ($item->owner ?? ''));
+
+                $label = ($code !== '' ? "[{$code}] " : '') . ($name !== '' ? $name : '-');
+                if ($owner !== '') {
+                    $label .= " - {$owner}";
+                }
+
+                return [
+                    'id' => (int) $item->id,
+                    'label' => $label,
+                ];
+            })
+            ->values();
+    }
+
+    private function themeOptions()
+    {
+        return Theme::with('goal:id,title')
+            ->orderBy('id')
+            ->get()
+            ->map(function (Theme $theme): array {
+                $goalTitle = $theme->goal?->title ?? 'No Pillar';
+                $themeNum = $theme->theme_number ?? 'N/A';
+
+                return [
+                    'id' => (int) $theme->id,
+                    'name' => "[$goalTitle] #$themeNum - $theme->name",
+                ];
+            })
+            ->values();
+    }
+
+    private function rjppTaggingIds(int $scInitiativeId): array
+    {
+        $scColumn = Schema::hasColumn('trs_rjpp', 'sc_id') ? 'sc_id' : 'digital_id';
+
+        return DB::table('trs_rjpp')
+            ->where($scColumn, $scInitiativeId)
+            ->pluck('theme_id')
+            ->map(fn ($id) => (int) $id)
+            ->values()
+            ->all();
     }
 }
