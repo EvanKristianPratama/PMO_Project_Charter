@@ -112,26 +112,36 @@ const selectedRoadmapVersionKey = computed(() => {
 
 const availableVersions = computed(() => {
     const labels = new Map();
-    const registerVersion = (value) => {
+    const registerVersion = (value, displayLabel = null) => {
         const key = normalizeVersionKey(value);
+        const fallbackLabel = displayLabel || toDisplayVersionLabel(value);
+
         if (!labels.has(key)) {
-            labels.set(key, toDisplayVersionLabel(value));
+            labels.set(key, fallbackLabel);
+            return;
+        }
+
+        if (displayLabel) {
+            labels.set(key, displayLabel);
         }
     };
     const milestones = props.project?.milestones ?? [];
+    const projectCharters = Array.isArray(props.project?.charters) ? props.project.charters : [];
+
+    projectCharters.forEach((charter) => {
+        const statusLabel = charter?.resolved_status_label || charter?.status_label;
+        registerVersion(charter?.version_label, statusLabel);
+    });
+
+    if (props.project?.charter?.version_label) {
+        const charter = props.project.charter;
+        const statusLabel = charter?.resolved_status_label || charter?.status_label;
+        registerVersion(charter.version_label, statusLabel);
+    }
 
     milestones.forEach((milestone) => {
         registerVersion(milestone?.version);
     });
-
-    const projectCharters = Array.isArray(props.project?.charters) ? props.project.charters : [];
-    projectCharters.forEach((charter) => {
-        registerVersion(charter?.version_label);
-    });
-
-    if (props.project?.charter?.version_label) {
-        registerVersion(props.project.charter.version_label);
-    }
 
     if (labels.size === 0) {
         registerVersion('v1');
@@ -225,9 +235,19 @@ const versionedRoadmaps = computed(() => {
             sections = [{ label: versionObjectives.length ? 'Objectives' : 'Roadmap Activity', rows }];
         }
 
+        // Determine status color class for the badge
+        let statusClass = 'bg-slate-100 text-slate-700 border-slate-300';
+        const labelLower = String(version.label).toLowerCase();
+        if (labelLower.includes('draft')) statusClass = 'bg-slate-100 text-slate-600 border-slate-300';
+        else if (labelLower.includes('propose')) statusClass = 'bg-blue-100 text-blue-700 border-blue-300';
+        else if (labelLower.includes('review')) statusClass = 'bg-amber-100 text-amber-700 border-amber-300';
+        else if (labelLower.includes('approve')) statusClass = 'bg-emerald-100 text-emerald-700 border-emerald-300';
+        else if (labelLower.includes('baseline')) statusClass = 'bg-purple-100 text-purple-700 border-purple-300';
+
         return {
             versionKey: version.key,
             versionLabel: version.label,
+            statusClass,
             sections,
         };
     });
@@ -278,7 +298,9 @@ const timelineCellClass = (row, quarterIndex, cell) => ({
                         <td class="cell-no">{{ sequence ?? '' }}</td>
                         <td class="cell-project-name">
                             {{ project.name || '-' }} 
-                            <span v-if="versionedRoadmaps.length > 1 || !selectedRoadmapVersionKey" class="version-badge">{{ roadmap.versionLabel }}</span>
+                            <span v-if="roadmap.versionLabel" class="version-badge" :class="roadmap.statusClass">
+                                {{ roadmap.versionLabel }}
+                            </span>
                         </td>
                         <td
                             v-for="(cell, i) in quarterCells" :key="`pg-${roadmap.versionKey}-${i}`"
@@ -421,11 +443,9 @@ const timelineCellClass = (row, quarterIndex, cell) => ({
     margin-left: 8px;
     font-size: 10px;
     font-weight: 700;
-    color: #111827;
-    background: #e5e7eb;
-    border: 1px solid #6b7280;
-    padding: 2px 8px;
+    padding: 2px 10px;
     border-radius: 999px;
+    border: 1px solid transparent;
     letter-spacing: 0.01em;
     line-height: 1.15;
     vertical-align: middle;
