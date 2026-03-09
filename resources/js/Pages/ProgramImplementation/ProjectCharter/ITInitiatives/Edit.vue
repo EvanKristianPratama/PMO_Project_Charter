@@ -115,35 +115,116 @@
                 <div class="overflow-x-hidden">
                     <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
                         <colgroup>
+                            <col class="w-[8%]">
                             <col class="w-[12%]">
-                            <col class="w-[18%]">
-                            <col class="w-[36%]">
-                            <col class="w-[16%]">
-                            <col class="w-[18%]">
+                            <col class="w-[12%]">
+                            <col class="w-[28%]">
+                            <col class="w-[12%]">
+                            <col class="w-[14%]">
+                            <col class="w-[14%]">
                         </colgroup>
                         <thead class="bg-slate-50 dark:bg-white/5">
                             <tr>
                                 <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Versi</th>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</th>
                                 <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Tanggal</th>
                                 <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Notes</th>
                                 <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Versi Charter</th>
                                 <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Tercatat Pada</th>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Action</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
                             <tr
-                                v-for="entry in projectStatusHistories"
+                                v-for="entry in sortedProjectStatusHistories"
                                 :key="`project-status-history-${entry.id}`"
                                 class="transition-colors hover:bg-slate-50 dark:hover:bg-white/5"
                             >
                                 <td class="px-3 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-200">v{{ historyVersion(entry) }}</td>
-                                <td class="px-3 py-3 text-[11px] text-slate-700 dark:text-slate-200">{{ formatDateOnly(historyTanggal(entry)) }}</td>
-                                <td class="px-3 py-3 text-[11px] text-slate-600 dark:text-slate-300">{{ historyNotes(entry) }}</td>
+                                <td class="px-3 py-3">
+                                    <span
+                                        class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium capitalize"
+                                        :class="statusBadgeClassById(entry.status)"
+                                    >
+                                        {{ statusLabelFromOptions(entry.status, statusOptions) }}
+                                    </span>
+                                </td>
+                                <td class="px-3 py-3 align-top">
+                                    <input
+                                        v-if="getProjectStatusHistoryDraft(entry).editing"
+                                        v-model="getProjectStatusHistoryDraft(entry).tanggal"
+                                        type="date"
+                                        class="table-input"
+                                    >
+                                    <span v-else class="text-[11px] text-slate-700 dark:text-slate-300">{{ formatDateOnly(historyTanggal(entry)) }}</span>
+                                </td>
+                                <td class="px-3 py-3 align-top">
+                                    <template v-if="getProjectStatusHistoryDraft(entry).editing">
+                                        <textarea
+                                            v-model="getProjectStatusHistoryDraft(entry).notes"
+                                            rows="3"
+                                            class="table-input table-textarea"
+                                        />
+                                        <p class="mt-1 text-[10px] text-slate-400 dark:text-slate-500">
+                                            Hanya tanggal dan notes yang bisa diubah.
+                                        </p>
+                                    </template>
+                                    <span v-else class="text-[11px] text-slate-700 dark:text-slate-300 whitespace-pre-line">{{ entry.notes || '-' }}</span>
+                                    <p v-if="getProjectStatusHistoryDraft(entry).error" class="mt-1 text-[10px] text-rose-600">
+                                        {{ getProjectStatusHistoryDraft(entry).error }}
+                                    </p>
+                                </td>
                                 <td class="px-3 py-3 text-[11px] text-slate-600 dark:text-slate-300">{{ historyCharterLabel(entry) }}</td>
                                 <td class="px-3 py-3 text-[11px] text-slate-500 dark:text-slate-400">{{ formatDateTime(entry.updated_at ?? entry.updatedAt ?? entry.created_at ?? entry.createdAt) }}</td>
+                                <td class="px-3 py-3 text-[10px] font-medium align-top">
+                                    <div class="flex flex-col items-start gap-1">
+                                        <Link
+                                            v-if="historyCharterId(entry)"
+                                            :href="`/it-initiatives/${props.itInitiative.id}?tab=detail`"
+                                            class="inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-[9px] font-semibold text-indigo-700 transition-colors hover:bg-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:hover:bg-indigo-500/30"
+                                        >
+                                            Project Charter
+                                        </Link>
+                                        <template v-if="getProjectStatusHistoryDraft(entry).editing">
+                                            <button
+                                                type="button"
+                                                :disabled="getProjectStatusHistoryDraft(entry).processing || deleteProcessing"
+                                                class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[9px] font-semibold text-sky-700 transition-colors hover:bg-sky-200 disabled:opacity-50 dark:bg-sky-500/20 dark:text-sky-300 dark:hover:bg-sky-500/30"
+                                                @click="updateProjectStatusHistory(entry.id)"
+                                            >
+                                                Update
+                                            </button>
+                                            <button
+                                                type="button"
+                                                class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-semibold text-slate-600 transition-colors hover:bg-slate-200 dark:bg-white/10 dark:text-slate-300 dark:hover:bg-white/15"
+                                                @click="cancelEditing(entry)"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </template>
+                                        <template v-else>
+                                            <button
+                                                type="button"
+                                                :disabled="deleteProcessing"
+                                                class="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-semibold text-amber-700 transition-colors hover:bg-amber-200 disabled:opacity-50 dark:bg-amber-500/20 dark:text-amber-300 dark:hover:bg-amber-500/30"
+                                                @click="toggleEditing(entry)"
+                                            >
+                                                Edit
+                                            </button>
+                                        </template>
+                                        <button
+                                            type="button"
+                                            :disabled="getProjectStatusHistoryDraft(entry).processing || deleteProcessing"
+                                            class="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-[9px] font-semibold text-rose-700 transition-colors hover:bg-rose-200 disabled:opacity-50 dark:bg-rose-500/20 dark:text-rose-300 dark:hover:bg-rose-500/30"
+                                            @click="openDeleteModal(entry.id)"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </td>
                             </tr>
                             <tr v-if="projectStatusHistories.length === 0">
-                                <td colspan="5" class="px-6 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
+                                <td colspan="7" class="px-6 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
                                     Belum ada riwayat perubahan status project.
                                 </td>
                             </tr>
@@ -152,211 +233,14 @@
                 </div>
             </article>
 
-            <article v-if="showImplementationStatus" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                <div class="border-b border-slate-200 px-5 py-4 dark:border-white/10">
-                    <div class="flex items-center justify-between gap-3">
-                        <h3 class="text-base font-semibold text-slate-900 dark:text-white">Implementation Status</h3>
-                        <span class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ implementationLogs.length }} entry</span>
-                    </div>
-                </div>
-
-                <div class="overflow-x-hidden">
-                    <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
-                        <colgroup>
-                            <col class="w-[10%]">
-                            <col class="w-[16%]">
-                            <col class="w-[18%]">
-                            <col class="w-[32%]">
-                            <col class="w-[14%]">
-                            <col class="w-[10%]">
-                        </colgroup>
-                        <thead class="bg-slate-50 dark:bg-white/5">
-                            <tr>
-                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Versi</th>
-                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Bulan / Tahun</th>
-                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status Review</th>
-                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status Implementasi</th>
-                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Tercatat Pada</th>
-                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
-                            <tr class="bg-slate-50/50 dark:bg-white/[0.03]">
-                                <td class="px-3 py-3 text-[11px] font-medium text-slate-600 dark:text-slate-400">{{ nextImplementationVersionNumber }}</td>
-                                <td class="px-3 py-3 align-top">
-                                    <input v-model="historyForm.month_year" type="month" class="table-input">
-                                    <p v-if="historyForm.errors.month_year" class="mt-1 text-[10px] text-rose-600">{{ historyForm.errors.month_year }}</p>
-                                </td>
-                                <td class="px-3 py-3 align-top">
-                                    <select v-model="historyForm.review_status" class="table-input">
-                                        <option v-for="reviewStatusOption in reviewStatusOptions" :key="`new-${reviewStatusOption}`" :value="reviewStatusOption">
-                                            {{ reviewStatusOption }}
-                                        </option>
-                                    </select>
-                                    <p v-if="historyForm.errors.review_status" class="mt-1 text-[10px] text-rose-600">{{ historyForm.errors.review_status }}</p>
-                                </td>
-                                <td class="px-3 py-3 align-top">
-                                    <textarea
-                                        v-model="historyForm.status"
-                                        rows="3"
-                                        class="table-input table-textarea"
-                                        placeholder="Contoh: Mulai Tahun 2026"
-                                    />
-                                    <p v-if="historyForm.errors.status" class="mt-1 text-[10px] text-rose-600">{{ historyForm.errors.status }}</p>
-                                </td>
-                                <td class="px-3 py-3 text-[11px] text-slate-500 dark:text-slate-400">{{ formatDateTime(new Date()) }}</td>
-                                <td class="px-3 py-3 text-[10px] font-medium align-top">
-                                    <button
-                                        type="button"
-                                        :disabled="historyForm.processing"
-                                        class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-semibold text-emerald-700 transition-colors hover:bg-emerald-200 disabled:opacity-50 dark:bg-emerald-500/20 dark:text-emerald-300 dark:hover:bg-emerald-500/30"
-                                        @click="submitHistory"
-                                    >
-                                        Tambah Status
-                                    </button>
-                                </td>
-                            </tr>
-
-                            <tr
-                                v-for="(log, index) in implementationLogs"
-                                :key="`implementation-history-${log.id}`"
-                                class="transition-colors hover:bg-slate-50 dark:hover:bg-white/5"
-                            >
-                                <td class="px-3 py-3 text-[11px] font-medium text-slate-600 dark:text-slate-400">{{ implementationVersionNumber(index) }}</td>
-                                <td class="px-3 py-3 align-top">
-                                    <input v-model="getHistoryDraft(log).month_year" type="month" class="table-input">
-                                </td>
-                                <td class="px-3 py-3 align-top">
-                                    <select v-model="getHistoryDraft(log).review_status" class="table-input">
-                                        <option v-for="reviewStatusOption in reviewStatusOptions" :key="`${log.id}-${reviewStatusOption}`" :value="reviewStatusOption">
-                                            {{ reviewStatusOption }}
-                                        </option>
-                                    </select>
-                                </td>
-                                <td class="px-3 py-3 align-top">
-                                    <textarea
-                                        v-model="getHistoryDraft(log).status"
-                                        rows="3"
-                                        class="table-input table-textarea"
-                                    />
-                                </td>
-                                <td class="px-3 py-3 text-[11px] text-slate-500 dark:text-slate-400">{{ formatDateTime(log.updated_at ?? log.updatedAt ?? log.created_at ?? log.createdAt) }}</td>
-                                <td class="px-3 py-3 text-[10px] font-medium align-top">
-                                    <div class="flex flex-col items-start gap-1">
-                                        <button
-                                            type="button"
-                                            :disabled="getHistoryDraft(log).processing"
-                                            class="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-semibold text-amber-700 transition-colors hover:bg-amber-200 disabled:opacity-50 dark:bg-amber-500/20 dark:text-amber-300 dark:hover:bg-amber-500/30"
-                                            @click="updateHistory(log.id)"
-                                        >
-                                            Update
-                                        </button>
-                                        <button
-                                            type="button"
-                                            :disabled="getHistoryDraft(log).processing"
-                                            class="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-[9px] font-semibold text-rose-700 transition-colors hover:bg-rose-200 disabled:opacity-50 dark:bg-rose-500/20 dark:text-rose-300 dark:hover:bg-rose-500/30"
-                                            @click="openDeleteModal(log.id)"
-                                        >
-                                            Delete
-                                        </button>
-                                    </div>
-                                    <p v-if="getHistoryDraft(log).error" class="mt-1 text-[10px] text-rose-600">
-                                        {{ getHistoryDraft(log).error }}
-                                    </p>
-                                </td>
-                            </tr>
-
-                            <tr v-if="implementationLogs.length === 0">
-                                <td colspan="6" class="px-6 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
-                                    Belum ada implementation status. Tambahkan entry baru jika perlu.
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </article>
-
-            <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                <div class="border-b border-slate-200 px-5 py-4 dark:border-white/10">
-                    <div class="flex items-center justify-between gap-3">
-                        <h3 class="text-base font-semibold text-slate-900 dark:text-white">Mapping IT Definition (Planning)</h3>
-                        <div class="flex items-center gap-3">
-                            <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Terpilih: {{ mappingForm.initiative_ids.length }}</span>
-                            <button
-                                type="button"
-                                class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-semibold text-slate-700 transition-colors hover:bg-slate-200 dark:bg-white/10 dark:text-slate-300 dark:hover:bg-white/15"
-                                @click="showMapping = !showMapping"
-                            >
-                                {{ showMapping ? 'Hide Mapping' : 'Show Mapping' }}
-                            </button>
-                            <button
-                                v-if="showMapping"
-                                type="button"
-                                :disabled="mappingForm.processing"
-                                class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[9px] font-semibold text-sky-700 disabled:opacity-50 dark:bg-sky-500/20 dark:text-sky-300"
-                                @click="saveMapping"
-                            >
-                                Save Mapping
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div v-if="showMapping" class="max-h-72 overflow-y-auto">
-                    <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
-                        <colgroup>
-                            <col class="w-[5%]">
-                            <col class="w-[15%]">
-                            <col class="w-[35%]">
-                            <col class="w-[45%]">
-                        </colgroup>
-                        <thead class="sticky top-0 bg-slate-50 dark:bg-white/5">
-                            <tr>
-                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400"></th>
-                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Code</th>
-                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Nama Inisiatif</th>
-                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Deskripsi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
-                            <tr
-                                v-for="initiative in planningDefinitions"
-                                :key="`mapping-it-${initiative.id}`"
-                                class="cursor-pointer"
-                                @click="toggleMapping(initiative.id)"
-                            >
-                                <td class="px-3 py-2 text-center">
-                                    <input
-                                        v-model="mappingForm.initiative_ids"
-                                        type="checkbox"
-                                        :value="Number(initiative.id)"
-                                        class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 dark:border-white/20"
-                                        @click.stop
-                                    />
-                                </td>
-                                <td class="px-3 py-2 text-[11px] font-medium text-slate-700 dark:text-slate-200">{{ initiative.code || '-' }}</td>
-                                <td class="px-3 py-2 text-[11px] font-medium text-slate-700 dark:text-slate-200">{{ initiative.name || '-' }}</td>
-                                <td class="px-3 py-2 text-[11px] text-slate-500 dark:text-slate-400">{{ initiative.description || '-' }}</td>
-                            </tr>
-                            <tr v-if="planningDefinitions.length === 0">
-                                <td colspan="4" class="px-6 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
-                                    Belum ada data IT Definition (tipe 2) di mst_initiative.
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </article>
-
-            <StatusModal
-                v-if="showImplementationStatus"
+            <ConfirmationModal
                 :show="showDeleteModal"
-                mode="confirm"
-                title="Hapus Status Implementasi"
+                title="Hapus Project Status History"
                 :message="deleteModalMessage"
                 confirm-text="Ya, Hapus"
                 cancel-text="Batal"
-                confirm-tone="danger"
+                type="danger"
+                :loading="deleteProcessing"
                 @close="closeDeleteModal"
                 @confirm="confirmDeleteHistory"
             />
@@ -368,7 +252,7 @@
 import { computed, reactive, ref } from 'vue';
 import { Link, router, useForm } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
-import StatusModal from '@/Components/StatusModal.vue';
+import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import { statusBadgeClassById, statusLabelFromOptions } from '@/Composables/initiativeStatus';
 
 const props = defineProps({
@@ -384,47 +268,46 @@ const props = defineProps({
         type: Number,
         default: 1,
     },
-    planningItDefinitions: {
-        type: Array,
-        default: () => [],
-    },
-    mappedInitiativeIds: {
-        type: Array,
-        default: () => [],
-    },
 });
 
-const statusOptions = props.statusOptions.length > 0
+const baseStatusOptions = props.statusOptions.length > 0
     ? props.statusOptions
     : [{ id: 1, label: 'Drafting' }];
-
-const reviewStatusOptions = ['On Track', 'At Risk', 'Not Started', 'Not Signed'];
+const statusOptions = baseStatusOptions.some((statusOption) => Number(statusOption.id) === 0)
+    ? baseStatusOptions
+    : [{ id: 0, label: 'Not Start', name: 'not_start' }, ...baseStatusOptions];
 
 const resolvedDefaultStatusId = statusOptions.some((statusOption) => Number(statusOption.id) === Number(props.defaultStatusId))
     ? props.defaultStatusId
     : statusOptions[0].id;
 
-const currentMonthYear = () => new Date().toISOString().slice(0, 7);
+const latestProjectStatusHistory = () => {
+    const source = props.itInitiative?.project_status_histories ?? props.itInitiative?.projectStatusHistories ?? [];
+    return Array.isArray(source) && source.length > 0 ? source[0] : null;
+};
+
+const resolvedInitialStatusId = (() => {
+    const historyStatus = Number(latestProjectStatusHistory()?.status);
+    if (Number.isInteger(historyStatus) && historyStatus >= 0) {
+        return historyStatus;
+    }
+
+    const projectStatus = Number(props.itInitiative.status);
+    if (Number.isInteger(projectStatus) && projectStatus >= 0) {
+        return projectStatus;
+    }
+
+    return resolvedDefaultStatusId;
+})();
 
 const form = useForm({
     code: props.itInitiative.code ?? '',
     name: props.itInitiative.name ?? '',
     owner_name: props.itInitiative.owner_name ?? '',
-    status: props.itInitiative.status ?? resolvedDefaultStatusId,
+    status: resolvedInitialStatusId,
     charter_category: props.itInitiative.charter?.category ?? '',
     project_status_changed_at: '',
     project_status_notes: '',
-});
-
-const historyForm = useForm({
-    status: '',
-    review_status: 'Not Started',
-    month_year: currentMonthYear(),
-});
-
-const implementationLogs = computed(() => {
-    const source = props.itInitiative?.pc_status_implementations ?? props.itInitiative?.pcStatusImplementations ?? [];
-    return Array.isArray(source) ? source : [];
 });
 
 const projectStatusHistories = computed(() => {
@@ -432,25 +315,24 @@ const projectStatusHistories = computed(() => {
     return Array.isArray(source) ? source : [];
 });
 
-const nextImplementationVersionNumber = computed(() => implementationLogs.value.length + 1);
-const selectedStatusLabel = computed(() => statusLabelFromOptions(form.status, statusOptions));
-const showImplementationStatus = computed(() => Number(form.status) === 4);
+const sortedProjectStatusHistories = computed(() => {
+    return [...projectStatusHistories.value].sort((a, b) => {
+        const versionA = Number(a.version ?? 0);
+        const versionB = Number(b.version ?? 0);
+        if (versionB !== versionA) return versionB - versionA;
 
-const historyDrafts = reactive({});
+        const dateA = new Date(a.tanggal ?? 0);
+        const dateB = new Date(b.tanggal ?? 0);
+        return dateB - dateA;
+    });
+});
+
+const selectedStatusLabel = computed(() => statusLabelFromOptions(form.status, statusOptions));
+
+const projectStatusHistoryDrafts = reactive({});
 const showDeleteModal = ref(false);
 const pendingDeleteId = ref(null);
-const showMapping = ref(false);
-
-const toMonthInput = (rawDate) => {
-    const normalized = String(rawDate ?? '').trim();
-    const match = normalized.match(/^(\d{4})-(\d{2})/);
-
-    if (match) {
-        return `${match[1]}-${match[2]}`;
-    }
-
-    return currentMonthYear();
-};
+const deleteProcessing = ref(false);
 
 const formatDateTime = (rawValue) => {
     if (!rawValue) return '-';
@@ -483,30 +365,8 @@ const formatDateOnly = (rawValue) => {
 const historyVersion = (entry) => entry?.version ?? entry?.version_number ?? '-';
 const historyTanggal = (entry) => entry?.tanggal ?? entry?.changed_at ?? entry?.changedAt ?? null;
 
-const historyNotes = (entry) => {
-    if (entry?.notes) {
-        return entry.notes;
-    }
-
-    const fromStatusRef = entry?.from_status_ref ?? entry?.fromStatusRef ?? null;
-    const toStatusRef = entry?.to_status_ref ?? entry?.toStatusRef ?? null;
-    const fromStatusId = fromStatusRef?.id ?? entry?.from_status_id ?? entry?.fromStatusId ?? null;
-    const toStatusId = toStatusRef?.id ?? entry?.to_status_id ?? entry?.toStatusId ?? null;
-    const fromLabel = fromStatusId != null ? statusLabelFromOptions(fromStatusId, statusOptions) : null;
-    const toLabel = toStatusId != null ? statusLabelFromOptions(toStatusId, statusOptions) : null;
-
-    if (fromLabel && toLabel) {
-        return `Status project charter berubah dari ${fromLabel} menjadi ${toLabel}.`;
-    }
-
-    if (toLabel) {
-        return `Status project charter menjadi ${toLabel}.`;
-    }
-
-    return '-';
-};
-
 const historyCharter = (entry) => entry?.project_charter ?? entry?.projectCharter ?? null;
+const historyCharterId = (entry) => historyCharter(entry)?.id ?? entry?.project_charter_id ?? null;
 
 const historyCharterLabel = (entry) => {
     const charter = historyCharter(entry);
@@ -525,22 +385,42 @@ const historyCharterLabel = (entry) => {
     return `Charter #${charter.id ?? '-'}`;
 };
 
-const getHistoryDraft = (log) => {
-    if (!historyDrafts[log.id]) {
-        historyDrafts[log.id] = {
-            month_year: toMonthInput(log.date),
-            review_status: log.review_status || 'Not Started',
-            status: log.status || '',
+const toDateInput = (rawValue) => {
+    const normalized = String(rawValue ?? '').trim();
+    const match = normalized.match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+    if (match) {
+        return `${match[1]}-${match[2]}-${match[3]}`;
+    }
+
+    return '';
+};
+
+const getProjectStatusHistoryDraft = (entry) => {
+    if (!projectStatusHistoryDrafts[entry.id]) {
+        projectStatusHistoryDrafts[entry.id] = {
+            tanggal: toDateInput(historyTanggal(entry)),
+            notes: entry?.notes ?? '',
             processing: false,
             error: '',
+            editing: false,
         };
     }
 
-    return historyDrafts[log.id];
+    return projectStatusHistoryDrafts[entry.id];
 };
 
-const implementationVersionNumber = (index) => {
-    return Math.max(implementationLogs.value.length - index, 1);
+const toggleEditing = (entry) => {
+    const draft = getProjectStatusHistoryDraft(entry);
+    draft.editing = true;
+};
+
+const cancelEditing = (entry) => {
+    const draft = getProjectStatusHistoryDraft(entry);
+    draft.tanggal = toDateInput(historyTanggal(entry));
+    draft.notes = entry?.notes ?? '';
+    draft.error = '';
+    draft.editing = false;
 };
 
 const submitProject = () => {
@@ -549,32 +429,23 @@ const submitProject = () => {
     });
 };
 
-const submitHistory = () => {
-    historyForm.post(`/it-initiatives/${props.itInitiative.id}/implementation-status`, {
-        preserveScroll: true,
-        onSuccess: () => {
-            historyForm.reset('status');
-            historyForm.review_status = 'Not Started';
-            historyForm.month_year = currentMonthYear();
-        },
-    });
-};
-
-const updateHistory = (id) => {
-    const draft = historyDrafts[id];
+const updateProjectStatusHistory = (id) => {
+    const draft = projectStatusHistoryDrafts[id];
     if (!draft) return;
 
     draft.processing = true;
     draft.error = '';
 
-    router.put(`/implementation-status/${id}`, {
-        month_year: draft.month_year,
-        review_status: draft.review_status,
-        status: draft.status,
+    router.put(`/it-initiatives/${props.itInitiative.id}/project-status-history/${id}`, {
+        tanggal: draft.tanggal,
+        notes: draft.notes,
     }, {
         preserveScroll: true,
+        onSuccess: () => {
+            draft.editing = false;
+        },
         onError: (errors) => {
-            draft.error = errors.month_year || errors.review_status || errors.status || 'Gagal memperbarui status implementasi.';
+            draft.error = errors.tanggal || errors.notes || 'Gagal memperbarui project status history.';
         },
         onFinish: () => {
             draft.processing = false;
@@ -584,16 +455,18 @@ const updateHistory = (id) => {
 
 const deleteModalMessage = computed(() => {
     if (!pendingDeleteId.value) {
-        return 'Apakah Anda yakin ingin menghapus status implementasi ini?';
+        return 'Apakah Anda yakin ingin menghapus riwayat status project ini?';
     }
 
-    const selectedLog = implementationLogs.value.find((log) => Number(log.id) === Number(pendingDeleteId.value));
-    if (!selectedLog) {
-        return 'Apakah Anda yakin ingin menghapus status implementasi ini?';
+    const selectedHistory = projectStatusHistories.value.find((entry) => Number(entry.id) === Number(pendingDeleteId.value));
+    if (!selectedHistory) {
+        return 'Apakah Anda yakin ingin menghapus riwayat status project ini?';
     }
 
-    const monthYear = toMonthInput(selectedLog.date);
-    return `Data status implementasi periode ${monthYear} akan dihapus permanen. Lanjutkan?`;
+    const statusLabel = statusLabelFromOptions(selectedHistory.status, statusOptions);
+    const tanggal = formatDateOnly(historyTanggal(selectedHistory));
+
+    return `Riwayat status ${statusLabel} pada ${tanggal} akan dihapus permanen. Lanjutkan?`;
 });
 
 const openDeleteModal = (id) => {
@@ -604,31 +477,7 @@ const openDeleteModal = (id) => {
 const closeDeleteModal = () => {
     showDeleteModal.value = false;
     pendingDeleteId.value = null;
-};
-
-const planningDefinitions = Array.isArray(props.planningItDefinitions) ? props.planningItDefinitions : [];
-
-const mappingForm = useForm({
-    initiative_ids: Array.isArray(props.mappedInitiativeIds)
-        ? props.mappedInitiativeIds.map((id) => Number(id))
-        : [],
-});
-
-const toggleMapping = (id) => {
-    const numId = Number(id);
-    const idx = mappingForm.initiative_ids.indexOf(numId);
-
-    if (idx >= 0) {
-        mappingForm.initiative_ids.splice(idx, 1);
-    } else {
-        mappingForm.initiative_ids.push(numId);
-    }
-};
-
-const saveMapping = () => {
-    mappingForm.put(`/it-initiatives/${props.itInitiative.id}/mapping`, {
-        preserveScroll: true,
-    });
+    deleteProcessing.value = false;
 };
 
 const confirmDeleteHistory = () => {
@@ -637,13 +486,12 @@ const confirmDeleteHistory = () => {
         return;
     }
 
-    const deletedId = pendingDeleteId.value;
-    showDeleteModal.value = false;
+    deleteProcessing.value = true;
 
-    router.delete(`/implementation-status/${deletedId}`, {
+    router.delete(`/it-initiatives/${props.itInitiative.id}/project-status-history/${pendingDeleteId.value}`, {
         preserveScroll: true,
         onFinish: () => {
-            pendingDeleteId.value = null;
+            closeDeleteModal();
         },
     });
 };

@@ -65,17 +65,31 @@ class DashboardController extends Controller
 
     private function projectsByType(int $tipeInitiative): Collection
     {
-        return TrsProject::query()
+        $projects = TrsProject::query()
             ->with([
                 'charter',
                 'statusRef:id,name',
                 'latestPcStatusImplementation',
                 'pcStatusImplementations',
                 'mappedInitiatives:id,code,name',
+                'projectStatusHistories',
             ])
             ->where('tipe_inisiative', $tipeInitiative)
             ->latest()
             ->get();
+
+        $projects->each(function (TrsProject $project): void {
+            $statusId = $this->resolvedProjectStatusId($project);
+            $statusKey = $this->projectStatusKeyFromId($statusId);
+            $latestHistory = $this->latestProjectStatusHistoryEntry($project);
+
+            $project->setAttribute('project_status_id', $statusId);
+            $project->setAttribute('project_status_key', $statusKey);
+            $project->setAttribute('project_status_label', $this->projectStatusLabel($statusKey));
+            $project->setAttribute('project_status_date', $latestHistory?->tanggal?->toDateString() ?? $latestHistory?->tanggal);
+        });
+
+        return $projects;
     }
 
     private function projectStatusCounts(Collection $projects): array
@@ -90,39 +104,51 @@ class DashboardController extends Controller
         ];
 
         foreach ($projects as $project) {
-            $statusId = is_numeric($project->status) ? (int) $project->status : null;
-
-            if ($statusId === null || $statusId === 0) {
-                $counts['not_start']++;
-                continue;
-            }
-
-            if ($statusId === 1) {
-                $counts['drafting']++;
-                continue;
-            }
-
-            if ($statusId === 2) {
-                $counts['propose']++;
-                continue;
-            }
-
-            if ($statusId === 3) {
-                $counts['review']++;
-                continue;
-            }
-
-            if ($statusId === 5) {
-                $counts['baseline']++;
-                continue;
-            }
-
-            if ($statusId === 4) {
-                $counts['approved']++;
-            }
+            $statusKey = $this->projectStatusKeyFromId($this->resolvedProjectStatusId($project));
+            $counts[$statusKey] = ($counts[$statusKey] ?? 0) + 1;
         }
 
         return $counts;
+    }
+
+    private function latestProjectStatusHistoryEntry(TrsProject $project): ?\App\Models\ProjectStatusHistory
+    {
+        if ($project->relationLoaded('projectStatusHistories')) {
+            return $project->projectStatusHistories->first();
+        }
+
+        return $project->projectStatusHistories()->first();
+    }
+
+    private function resolvedProjectStatusId(TrsProject $project): int
+    {
+        $historyStatus = $this->latestProjectStatusHistoryEntry($project)?->status;
+
+        return is_numeric($historyStatus) ? (int) $historyStatus : 0;
+    }
+
+    private function projectStatusKeyFromId(?int $statusId): string
+    {
+        return match ((int) $statusId) {
+            1 => 'drafting',
+            2 => 'propose',
+            3 => 'review',
+            5 => 'baseline',
+            4 => 'approved',
+            default => 'not_start',
+        };
+    }
+
+    private function projectStatusLabel(string $statusKey): string
+    {
+        return match ($statusKey) {
+            'drafting' => 'Drafting',
+            'propose' => 'Propose',
+            'review' => 'Review',
+            'baseline' => 'Baseline',
+            'approved' => 'Approved',
+            default => 'Not Start',
+        };
     }
 
     private function mstApprovedCountByType(int $tipeInitiative): int

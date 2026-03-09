@@ -18,8 +18,9 @@
                     <col class="w-[6%]">
                     <col class="w-[12%]">
                     <col class="w-[14%]">
-                    <col class="w-[14%]">
+                    <col class="w-[12%]">
                     <col class="w-[8%]">
+                    <col class="w-[10%]">
                     <col class="w-[11%]">
                 </colgroup>
                 <thead class="bg-slate-50 dark:bg-white/5">
@@ -29,7 +30,8 @@
                         <th scope="col" class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">IT Arsitektur Building Blok</th>
                         <th scope="col" class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Daftar Inisiatif</th>
                         <th scope="col" class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Mapping</th>
-                        <th scope="col" class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status Usulan</th>
+                        <th scope="col" class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status Project Charter</th>
+                        <th scope="col" class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Tanggal Status</th>
                         <th scope="col" class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Action</th>
                     </tr>
                 </thead>
@@ -57,9 +59,12 @@
                                 <span v-else class="text-[10px] italic text-slate-400">-</span>
                             </td>
                             <td class="px-3 py-3">
-                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium capitalize" :class="statusBadgeClassById(item.status)">
-                                    {{ statusLabelFromOptions(item.status, statusOptions) }}
+                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium capitalize" :class="statusBadgeClassById(item.project_status_id ?? 0)">
+                                    {{ statusLabelFromOptions(item.project_status_id ?? 0, statusOptions) }}
                                 </span>
+                            </td>
+                            <td class="px-3 py-3 text-[11px] text-slate-600 dark:text-slate-300">
+                                {{ statusDateText(item) }}
                             </td>
                             <td class="px-3 py-3 text-[10px] font-medium">
                                 <div class="flex flex-col items-start gap-1">
@@ -146,6 +151,25 @@ const sortedItems = computed(() => {
 const itemMappings = (item) => {
     const source = item?.mapped_initiatives ?? item?.mappedInitiatives ?? [];
     return Array.isArray(source) ? source : [];
+};
+
+const statusDateText = (item) => {
+    const rawValue = String(item?.project_status_date ?? '').trim();
+
+    if (!rawValue) {
+        return '-';
+    }
+
+    const date = new Date(rawValue);
+    if (Number.isNaN(date.getTime())) {
+        return rawValue;
+    }
+
+    return date.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+    });
 };
 
 </script>

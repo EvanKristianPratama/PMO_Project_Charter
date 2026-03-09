@@ -5,6 +5,8 @@ namespace App\Http\Controllers\ProgramPlanning;
 use App\Http\Controllers\Concerns\ResolvesInitiativeStatus;
 use App\Http\Controllers\Controller;
 use App\Models\MstInitiative;
+use App\Models\TrsProject;
+use Illuminate\Support\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -34,9 +36,11 @@ class DashboardController extends Controller
         $statusOptions = $this->statusOptions();
         $baselineStatusId = $this->baselineStatusId($statusOptions);
 
-        // Status counts from mst_initiative + latestStatus relation
-        $digitalStatusCounts = $this->mstStatusCountsFromCollection(1);
-        $itStatusCounts      = $this->mstStatusCountsFromCollection(2);
+        $projects = TrsProject::query()
+            ->select(['id', 'code', 'name', 'status', 'metadata', 'tipe_inisiative'])
+            ->with('projectStatusHistories')
+            ->whereIn('tipe_inisiative', [1, 2])
+            ->get();
 
         $totalDigital = MstInitiative::where('tipe_initiative', 1)->count();
         $totalIt      = MstInitiative::where('tipe_initiative', 2)->count();
@@ -46,6 +50,13 @@ class DashboardController extends Controller
             ->orderBy('tipe_initiative')
             ->orderBy('id')
             ->get();
+        $this->decorateInitiativesWithProjectStatus($mstInitiatives, $projects);
+        $digitalStatusCounts = $this->initiativeProjectStatusCounts(
+            $mstInitiatives->where('tipe_initiative', 1)->values()
+        );
+        $itStatusCounts = $this->initiativeProjectStatusCounts(
+            $mstInitiatives->where('tipe_initiative', 2)->values()
+        );
 
         return Inertia::render('ProgramPlanning/Dashboard', [
             'summary' => [
@@ -78,36 +89,119 @@ class DashboardController extends Controller
         ];
     }
 
-    /**
-     * Count statuses from mst_initiative collection, using latestStatus
-     * relation when available, falling back to 'drafting'.
-     */
-    private function mstStatusCountsFromCollection(int $tipeInitiative): array
+    private function projectStatusCounts(Collection $projects): array
     {
-        $initiatives = MstInitiative::query()
-            ->select(['id', 'tipe_initiative', 'status'])
-            ->with('latestStatus')
-            ->where('tipe_initiative', $tipeInitiative)
-            ->get();
-
-        $aliasMap = [
-            'draft'   => 'drafting',
-            'approve' => 'approved',
-            'aproved' => 'approved',
+        $counts = [
+            'not_start' => 0,
+            'drafting' => 0,
+            'propose' => 0,
+            'review' => 0,
+            'baseline' => 0,
+            'approved' => 0,
         ];
-        $validStatuses = ['drafting', 'propose', 'review', 'approved', 'postpone'];
 
-        $counts = [];
-        foreach ($initiatives as $initiative) {
-            $raw       = strtolower(trim($initiative->latestStatus?->status ?? $initiative->status ?? 'drafting'));
-            $canonical = $aliasMap[$raw] ?? $raw;
-            if (! in_array($canonical, $validStatuses)) {
-                $canonical = 'drafting';
-            }
-            $counts[$canonical] = ($counts[$canonical] ?? 0) + 1;
+        foreach ($projects as $project) {
+            $key = $this->projectStatusKeyFromId($this->resolvedProjectStatusId($project));
+            $counts[$key] = ($counts[$key] ?? 0) + 1;
         }
 
         return $counts;
+    }
+
+    private function initiativeProjectStatusCounts(Collection $initiatives): array
+    {
+        $counts = [
+            'not_start' => 0,
+            'drafting' => 0,
+            'propose' => 0,
+            'review' => 0,
+            'baseline' => 0,
+            'approved' => 0,
+        ];
+
+        foreach ($initiatives as $initiative) {
+            $key = (string) ($initiative->getAttribute('project_status_key') ?? 'not_start');
+            $counts[$key] = ($counts[$key] ?? 0) + 1;
+        }
+
+        return $counts;
+    }
+
+    private function decorateInitiativesWithProjectStatus(Collection $initiatives, Collection $projects): void
+    {
+        $projectsByMetadataId = $projects
+            ->filter(static fn (TrsProject $project): bool => (int) ($project->metadata['mst_initiative_id'] ?? 0) > 0)
+            ->keyBy(static fn (TrsProject $project): int => (int) ($project->metadata['mst_initiative_id'] ?? 0));
+
+        $projectsByNameAndType = $projects->groupBy(static function (TrsProject $project): string {
+            return sprintf(
+                '%s|%s',
+                strtolower(trim((string) $project->name)),
+                (string) $project->tipe_inisiative
+            );
+        });
+
+        foreach ($initiatives as $initiative) {
+            $project = $projectsByMetadataId->get((int) $initiative->id);
+
+            if (! $project) {
+                $key = sprintf(
+                    '%s|%s',
+                    strtolower(trim((string) $initiative->name)),
+                    (string) $initiative->tipe_initiative
+                );
+                $project = $projectsByNameAndType->get($key)?->first();
+            }
+
+            $statusId = $project ? $this->resolvedProjectStatusId($project) : 0;
+            $statusKey = $this->projectStatusKeyFromId($statusId);
+            $latestHistory = $project ? $this->latestProjectStatusHistoryEntry($project) : null;
+
+            $initiative->setAttribute('project_status_id', $statusId);
+            $initiative->setAttribute('project_status_key', $statusKey);
+            $initiative->setAttribute('project_status_label', $this->projectStatusLabel($statusKey));
+            $initiative->setAttribute('project_status_date', $latestHistory?->tanggal?->toDateString() ?? $latestHistory?->tanggal);
+        }
+    }
+
+    private function latestProjectStatusHistoryEntry(TrsProject $project): ?\App\Models\ProjectStatusHistory
+    {
+        if ($project->relationLoaded('projectStatusHistories')) {
+            return $project->projectStatusHistories->first();
+        }
+
+        return $project->projectStatusHistories()->first();
+    }
+
+    private function resolvedProjectStatusId(TrsProject $project): int
+    {
+        $historyStatus = $this->latestProjectStatusHistoryEntry($project)?->status;
+
+        return is_numeric($historyStatus) ? (int) $historyStatus : 0;
+    }
+
+    private function projectStatusKeyFromId(?int $statusId): string
+    {
+        return match ((int) $statusId) {
+            1 => 'drafting',
+            2 => 'propose',
+            3 => 'review',
+            5 => 'baseline',
+            4 => 'approved',
+            default => 'not_start',
+        };
+    }
+
+    private function projectStatusLabel(string $statusKey): string
+    {
+        return match ($statusKey) {
+            'drafting' => 'Drafting',
+            'propose' => 'Propose',
+            'review' => 'Review',
+            'baseline' => 'Baseline',
+            'approved' => 'Approved',
+            default => 'Not Start',
+        };
     }
 
     private function categoryOptions(): array

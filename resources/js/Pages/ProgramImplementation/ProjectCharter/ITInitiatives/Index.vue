@@ -261,9 +261,23 @@ const normalizeProjectStatusId = (value) => {
     return Number.isInteger(parsed) && parsed > 0 ? parsed : FLOW_NOT_YET_ID;
 };
 
+const latestProjectStatusHistory = (item) => {
+    const histories = item?.project_status_histories ?? item?.projectStatusHistories ?? [];
+    return Array.isArray(histories) && histories.length > 0 ? histories[0] : null;
+};
+
+const resolvedProjectStatusId = (item) => {
+    const historyStatus = latestProjectStatusHistory(item)?.status;
+    if (historyStatus !== null && historyStatus !== undefined && historyStatus !== '') {
+        return normalizeProjectStatusId(historyStatus);
+    }
+
+    return FLOW_NOT_YET_ID;
+};
+
 const { activeFlowFilter, filteredItems, toggleFilter } = useFlowFilter(
     () => itProjectItems.value,
-    (item) => normalizeProjectStatusId(item?.status)
+    (item) => resolvedProjectStatusId(item)
 );
 
 const TABLE_MODE = {
@@ -426,7 +440,7 @@ const statusOptions = computed(() => {
 
 const countProjectsByStatus = (statusId) => {
     return itProjectItems.value.filter(
-        (item) => normalizeProjectStatusId(item?.status) === Number(statusId)
+        (item) => resolvedProjectStatusId(item) === Number(statusId)
     ).length;
 };
 

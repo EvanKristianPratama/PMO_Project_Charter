@@ -25,19 +25,21 @@
                         <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
                             <colgroup>
                                 <col class="w-[10%]">
-                                <col class="w-[25%]">
-                                <col class="w-[20%]">
-                                <col class="w-[15%]">
-                                <col class="w-[15%]">
-                                <col class="w-[15%]">
+                                <col class="w-[22%]">
+                                <col class="w-[16%]">
+                                <col class="w-[14%]">
+                                <col class="w-[14%]">
+                                <col class="w-[14%]">
+                                <col class="w-[10%]">
                             </colgroup>
                             <thead class="bg-slate-50 dark:bg-white/5">
                                 <tr>
                                     <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Code</th>
                                     <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Nama Inisiatif</th>
-                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Company Owner</th>
                                     <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">IT Arsitektur Building Blok</th>
                                     <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</th>
+                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Tanggal Status</th>
+                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Notes</th>
                                     <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Action</th>
                                 </tr>
                             </thead>
@@ -52,10 +54,6 @@
                                         <p v-if="form.errors.name" class="mt-1 text-[10px] text-rose-600">{{ form.errors.name }}</p>
                                     </td>
                                     <td class="px-3 py-3 align-top">
-                                        <input v-model="form.owner" type="text" class="table-input" placeholder="e.g., PT Example Indonesia">
-                                        <p v-if="form.errors.owner" class="mt-1 text-[10px] text-rose-600">{{ form.errors.owner }}</p>
-                                    </td>
-                                    <td class="px-3 py-3 align-top">
                                         <input v-model="form.charter_category" type="text" class="table-input" placeholder="e.g., Integration">
                                         <p v-if="form.errors.charter_category" class="mt-1 text-[10px] text-rose-600">{{ form.errors.charter_category }}</p>
                                     </td>
@@ -65,6 +63,24 @@
                                                 {{ statusOption.label }}
                                             </option>
                                         </select>
+                                        <p v-if="form.errors.status" class="mt-1 text-[10px] text-rose-600">{{ form.errors.status }}</p>
+                                    </td>
+                                    <td class="px-3 py-3 align-top">
+                                        <input v-model="form.project_status_changed_at" type="date" class="table-input">
+                                        <p v-if="form.errors.project_status_changed_at" class="mt-1 text-[10px] text-rose-600">
+                                            {{ form.errors.project_status_changed_at }}
+                                        </p>
+                                    </td>
+                                    <td class="px-3 py-3 align-top">
+                                        <textarea
+                                            v-model="form.project_status_notes"
+                                            rows="3"
+                                            class="table-input table-textarea"
+                                            placeholder="Catatan status awal"
+                                        />
+                                        <p v-if="form.errors.project_status_notes" class="mt-1 text-[10px] text-rose-600">
+                                            {{ form.errors.project_status_notes }}
+                                        </p>
                                     </td>
                                     <td class="px-3 py-3 align-top">
                                         <button
@@ -80,67 +96,10 @@
                         </table>
                     </div>
                 </article>
-
-                <!-- Mapping IT Definition (Planning) -->
-                <article class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                    <div class="border-b border-slate-200 px-5 py-4 dark:border-white/10">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-base font-semibold text-slate-900 dark:text-white">Mapping IT Definition (Planning)</h3>
-                            <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Terpilih: {{ form.initiative_ids.length }}</span>
-                        </div>
-                    </div>
-
-                    <div class="max-h-72 overflow-y-auto">
-                        <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
-                            <colgroup>
-                                <col class="w-[5%]">
-                                <col class="w-[15%]">
-                                <col class="w-[35%]">
-                                <col class="w-[45%]">
-                            </colgroup>
-                            <thead class="bg-slate-50 dark:bg-white/5 sticky top-0">
-                                <tr>
-                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400"></th>
-                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Code</th>
-                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Nama Inisiatif</th>
-                                    <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Deskripsi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
-                                <tr
-                                    v-for="initiative in planningDefinitions"
-                                    :key="`planning-it-${initiative.id}`"
-                                    class="cursor-pointer"
-                                    @click="toggleInitiative(initiative.id)"
-                                >
-                                    <td class="px-3 py-2 text-center">
-                                        <input
-                                            v-model="form.initiative_ids"
-                                            type="checkbox"
-                                            :value="Number(initiative.id)"
-                                            class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 dark:border-white/20"
-                                            @click.stop
-                                        />
-                                    </td>
-                                    <td class="px-3 py-2 text-[11px] font-medium text-slate-700 dark:text-slate-200">{{ initiative.code || '-' }}</td>
-                                    <td class="px-3 py-2 text-[11px] font-medium text-slate-700 dark:text-slate-200">{{ initiative.name || '-' }}</td>
-                                    <td class="px-3 py-2 text-[11px] text-slate-500 dark:text-slate-400">{{ initiative.description || '-' }}</td>
-                                </tr>
-                                <tr v-if="planningDefinitions.length === 0">
-                                    <td colspan="4" class="px-6 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
-                                        Belum ada data IT Definition (tipe 2) di mst_initiative.
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <p v-if="form.errors.initiative_ids" class="px-5 py-2 text-xs text-rose-600">{{ form.errors.initiative_ids }}</p>
-                    <p v-else-if="form.errors['initiative_ids.0']" class="px-5 py-2 text-xs text-rose-600">{{ form.errors['initiative_ids.0'] }}</p>
-                </article>
             </form>
         </div>
     </UserLayout>
+
 </template>
 
 <script setup>
@@ -156,16 +115,12 @@ const props = defineProps({
         type: Number,
         default: 1,
     },
-    planningItDefinitions: {
-        type: Array,
-        default: () => [],
-    },
 });
 
 const statusOptions = props.statusOptions.length > 0
     ? props.statusOptions
     : [{ id: 1, label: 'Drafting' }];
-const planningDefinitions = Array.isArray(props.planningItDefinitions) ? props.planningItDefinitions : [];
+const currentDate = () => new Date().toISOString().slice(0, 10);
 
 const form = useForm({
     code: '',
@@ -175,18 +130,9 @@ const form = useForm({
     status: statusOptions.some((statusOption) => statusOption.id === props.defaultStatusId)
         ? props.defaultStatusId
         : statusOptions[0].id,
-    initiative_ids: [],
+    project_status_changed_at: currentDate(),
+    project_status_notes: '',
 });
-
-const toggleInitiative = (id) => {
-    const numId = Number(id);
-    const idx = form.initiative_ids.indexOf(numId);
-    if (idx >= 0) {
-        form.initiative_ids.splice(idx, 1);
-    } else {
-        form.initiative_ids.push(numId);
-    }
-};
 
 const submit = () => {
     form.post('/it-initiatives');
@@ -208,6 +154,12 @@ const submit = () => {
     border-color: rgb(99 102 241);
     outline: none;
     box-shadow: 0 0 0 1px rgb(99 102 241 / 0.35);
+}
+
+.table-textarea {
+    min-height: 64px;
+    resize: vertical;
+    line-height: 1.35;
 }
 
 :global(.dark) .table-input {

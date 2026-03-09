@@ -72,9 +72,10 @@ class TrsProject extends Model
             'id',
             'id'
         )
-            ->orderByDesc('version')
-            ->orderByDesc('tanggal')
-            ->orderByDesc('id');
+            ->select('trs_project_status_history.*')
+            ->orderByDesc('trs_project_status_history.version')
+            ->orderByDesc('trs_project_status_history.tanggal')
+            ->orderByDesc('trs_project_status_history.id');
     }
 
     public function latestPcStatusImplementation(): HasOne

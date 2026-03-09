@@ -96,7 +96,10 @@
                                 class="rounded-lg border px-2 py-1.5 text-center text-[10px] font-semibold leading-tight"
                                 :class="initiativeBlockClass(initiative)"
                             >
-                                {{ initiative.code ?? '-' }}. {{ initiative.name ?? '-' }}
+                                <div>{{ initiative.code ?? '-' }}. {{ initiative.name ?? '-' }}</div>
+                                <div class="mt-1 text-[9px] font-medium opacity-80">
+                                    {{ initiativeStatusDate(initiative) }}
+                                </div>
                             </div>
                         </div>
                     </article>
@@ -148,6 +151,7 @@ const blockGroupBy = ref('coe');
 const normalizeStatus = (value) => String(value ?? '').trim().toLowerCase();
 const normalizeLabel = (value) => String(value ?? '').trim();
 const slugify = (value) => normalizeLabel(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+const resolvedStatusKey = (initiative) => normalizeStatus(initiative?.project_status_key) || 'not_start';
 
 const itemsWithInitialType = computed(() => {
     const baseItems = Array.isArray(props.items) ? props.items : [];
@@ -281,9 +285,11 @@ const boardSections = computed(() => {
 });
 
 const statusClassMap = {
+    not_start: 'border-slate-300 bg-slate-100 text-slate-700',
     drafting: 'border-[#D97706] bg-[#F59E0B] text-white',
     propose: 'border-[#0EA5E9] bg-[#0284C7] text-white',
     review: 'border-[#DC2626] bg-[#F87171] text-white',
+    baseline: 'border-[#84cc16] bg-[#d9f99d] text-[#3f6212]',
     approved: 'border-[#22C55E] bg-[#BBF7D0] text-[#0f5132]',
     postpone: 'border-[#EAB308] bg-[#FEF08A] text-[#7a6000]',
 };
@@ -291,18 +297,38 @@ const statusClassMap = {
 const defaultBlockClass = 'border-[#0284C7] bg-[#0284C7] text-white';
 
 const initiativeBlockClass = (initiative) => {
-    const status = normalizeStatus(initiative?.latest_status?.status);
+    const status = resolvedStatusKey(initiative);
     return statusClassMap[status] ?? defaultBlockClass;
 };
 
+const initiativeStatusDate = (initiative) => {
+    const normalized = String(initiative?.project_status_date ?? '').trim();
+
+    if (!normalized) {
+        return 'Tanggal status belum ada';
+    }
+
+    const date = new Date(normalized);
+    if (Number.isNaN(date.getTime())) {
+        return normalized;
+    }
+
+    return date.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+    });
+};
+
 const statusLegend = computed(() => {
-    const order = ['drafting', 'propose', 'review', 'approved', 'postpone'];
+    const order = ['not_start', 'drafting', 'propose', 'review', 'baseline', 'approved'];
     const labels = {
+        not_start: 'Not Start',
         drafting: 'Drafting',
         propose: 'Propose',
         review: 'Review',
+        baseline: 'Baseline',
         approved: 'Approved',
-        postpone: 'Postpone',
     };
 
     const counts = order.reduce((accumulator, key) => {
@@ -311,7 +337,7 @@ const statusLegend = computed(() => {
     }, {});
 
     for (const item of sortedItems.value) {
-        const key = normalizeStatus(item?.latest_status?.status);
+        const key = resolvedStatusKey(item);
         if (counts[key] !== undefined) {
             counts[key] += 1;
         }

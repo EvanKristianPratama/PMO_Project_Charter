@@ -89,6 +89,7 @@
                     <col class="w-[10%]">
                     <col class="w-[10%]">
                     <col class="w-[10%]">
+                    <col class="w-[8%]">
                     <col class="w-[11%]">
                 </colgroup>
                 <thead class="bg-slate-50 dark:bg-white/5">
@@ -101,6 +102,7 @@
                         <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Holding / Sub Holding</th>
                         <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Organisasi</th>
                         <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status Timeline</th>
+                        <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Tanggal Status</th>
                         <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Action</th>
                         <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Sumber</th>
                     </tr>
@@ -122,6 +124,9 @@
                             </span>
                             <span v-else>-</span>
                         </td>
+                        <td class="px-3 py-3 text-[11px] text-slate-700 dark:text-slate-200">
+                            {{ statusDateText(item) }}
+                        </td>
                         <td class="px-3 py-3 text-[10px] font-medium">
                             <div class="flex flex-col items-start gap-1">
                                 <Link
@@ -141,7 +146,7 @@
                     </tr>
 
                     <tr v-if="filteredItems.length === 0">
-                        <td colspan="10" class="px-6 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
+                        <td colspan="11" class="px-6 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
                             Tidak ada data initiative.
                         </td>
                     </tr>
@@ -181,7 +186,29 @@ const organizationName = (item) => normalizeText(item?.organization?.name ?? ite
 const groubName = (item) => normalizeText(item?.organization?.groub?.name);
 
 const latestStatusText = (item) => {
-    return normalizeText(item?.latest_status?.status);
+    return normalizeText(item?.project_status_label ?? 'Not Start');
+};
+
+const formatDate = (value) => {
+    const normalized = String(value ?? '').trim();
+    if (!normalized) {
+        return '-';
+    }
+
+    const date = new Date(normalized);
+    if (Number.isNaN(date.getTime())) {
+        return normalized;
+    }
+
+    return date.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+    });
+};
+
+const statusDateText = (item) => {
+    return formatDate(item?.project_status_date);
 };
 
 const tipeLabel = (tipe) => {
@@ -199,9 +226,11 @@ const tipeBadgeClass = (tipe) => {
 const statusBadgeClass = (status) => {
     const key = String(status ?? '').trim().toLowerCase();
     const map = {
+        'not start': 'bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-300',
         drafting:  'bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-300',
         propose:   'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
         review:    'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300',
+        baseline:  'bg-lime-100 text-lime-700 dark:bg-lime-500/20 dark:text-lime-300',
         approved:  'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
         postpone:  'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300',
     };

@@ -89,19 +89,9 @@ class ITInitiativeController extends Controller
                 'charters' => static fn ($query) => $query->latest('id')->with('milestones'),
                 'statusRef:id,name',
                 'pcStatusImplementations',
+                'projectStatusHistories.projectCharter:id,project_id,version_label,tgl_dokumen',
             ])
             ->where('tipe_inisiative', 2)
-            ->when($filterStatus !== null, static function ($q) use ($filterStatus): void {
-                if ($filterStatus === 0) {
-                    $q->where(static function ($builder): void {
-                        $builder->whereNull('status')->orWhere('status', 0);
-                    });
-
-                    return;
-                }
-
-                $q->where('status', $filterStatus);
-            })
             ->when($filters['search'] ?? null, fn ($q, $search) => $q->where(function ($inner) use ($search): void {
                 $inner->where('name', 'like', "%{$search}%")
                     ->orWhere('code', 'like', "%{$search}%")
@@ -109,7 +99,21 @@ class ITInitiativeController extends Controller
             }))
             ->when($filters['month'] ?? null, fn ($q, $month) => $q->whereMonth('updated_at', $month))
             ->orderBy('id', 'asc')
-            ->get();
+            ->get()
+            ->filter(function (TrsProject $project) use ($filterStatus): bool {
+                if ($filterStatus === null) {
+                    return true;
+                }
+
+                $resolvedStatusId = $this->resolvedProjectStatusId($project);
+
+                if ($filterStatus === 0) {
+                    return $resolvedStatusId === null || $resolvedStatusId === 0;
+                }
+
+                return $resolvedStatusId === $filterStatus;
+            })
+            ->values();
 
         $masterSelectColumns = [
             'id',
@@ -205,6 +209,9 @@ class ITInitiativeController extends Controller
         if ($owner === '') {
             $owner = trim((string) ($validated['owner_name'] ?? ''));
         }
+        $charterCategory = trim((string) ($validated['charter_category'] ?? ''));
+        $projectStatusChangedAt = $validated['project_status_changed_at'] ?? null;
+        $projectStatusNotes = $validated['project_status_notes'] ?? null;
 
         $initiativeIds = collect($validated['initiative_ids'] ?? [])
             ->map(static fn ($id) => (int) $id)
@@ -214,17 +221,24 @@ class ITInitiativeController extends Controller
             ->all();
 
         unset($validated['initiative_ids']);
+        unset($validated['charter_category']);
+        unset($validated['project_status_changed_at']);
+        unset($validated['project_status_notes']);
         unset($validated['owner'], $validated['owner_name']);
 
         $project = TrsProject::create($validated);
         $this->syncProjectInitiativeMappings($project, $initiativeIds);
 
+        $charterPayload = ['version_label' => 'v1'];
         if ($owner !== '') {
-            $project->charters()->create([
-                'owner' => $owner,
-                'version_label' => 'v1',
-            ]);
+            $charterPayload['owner'] = $owner;
         }
+        if ($charterCategory !== '') {
+            $charterPayload['category'] = $charterCategory;
+        }
+        $project->charters()->create($charterPayload);
+
+        $this->recordProjectStatusHistory($project->fresh(), null, $project->status, $projectStatusChangedAt, $projectStatusNotes);
 
         return redirect()->route('it-initiatives.index')->with('success', 'Project created successfully.');
     }
@@ -405,7 +419,7 @@ class ITInitiativeController extends Controller
             $owner = trim((string) ($validated['owner_name'] ?? ''));
         }
 
-        $oldStatus = $project->status;
+        $oldStatus = $this->resolvedProjectStatusId($project);
         $charterCategory = trim((string) ($validated['charter_category'] ?? ''));
         $projectStatusChangedAt = $validated['project_status_changed_at'] ?? null;
         $projectStatusNotes = $validated['project_status_notes'] ?? null;
@@ -437,7 +451,9 @@ class ITInitiativeController extends Controller
 
         $this->recordProjectStatusHistory($project->fresh(), $oldStatus, $project->status, $projectStatusChangedAt, $projectStatusNotes);
 
-        return redirect()->route('it-initiatives.index')->with('success', 'Project updated successfully.');
+        return redirect()
+            ->route('it-initiatives.edit', $project)
+            ->with('success', 'Project updated successfully.');
     }
 
     public function destroy(TrsProject $project): RedirectResponse
@@ -492,6 +508,40 @@ class ITInitiativeController extends Controller
         return redirect()->back()->with('success', 'Status deleted successfully.');
     }
 
+    public function updateProjectStatusHistory(Request $request, TrsProject $project, ProjectStatusHistory $history): RedirectResponse
+    {
+        $history->loadMissing('projectCharter:id,project_id');
+
+        abort_unless((int) ($history->projectCharter?->project_id ?? 0) === (int) $project->id, 404);
+
+        $validated = $request->validate([
+            'tanggal' => ['required', 'date'],
+            'notes' => ['nullable', 'string', 'max:5000'],
+        ]);
+
+        $history->update([
+            'tanggal' => \Carbon\Carbon::parse($validated['tanggal'])->toDateString(),
+            'notes' => filled($validated['notes'] ?? null) ? trim((string) $validated['notes']) : null,
+        ]);
+
+        return redirect()->back()->with('success', 'Project status history updated successfully.');
+    }
+
+    public function destroyProjectStatusHistory(TrsProject $project, ProjectStatusHistory $history): RedirectResponse
+    {
+        $history->loadMissing('projectCharter:id,project_id');
+
+        abort_unless((int) ($history->projectCharter?->project_id ?? 0) === (int) $project->id, 404);
+
+        $history->delete();
+
+        $project->unsetRelation('projectStatusHistories');
+        $this->resequenceProjectStatusHistories($project);
+        $this->syncProjectStatusFromHistory($project);
+
+        return redirect()->back()->with('success', 'Project status history deleted successfully.');
+    }
+
     public function updateMapping(Request $request, TrsProject $project): RedirectResponse
     {
         $validated = $request->validate([
@@ -522,6 +572,7 @@ class ITInitiativeController extends Controller
         if (
             ! Schema::hasTable('trs_project_status_history')
             || ! Schema::hasColumn('trs_project_status_history', 'project_charter_id')
+            || ! Schema::hasColumn('trs_project_status_history', 'status')
             || ! Schema::hasColumn('trs_project_status_history', 'version')
             || ! Schema::hasColumn('trs_project_status_history', 'tanggal')
             || ! Schema::hasColumn('trs_project_status_history', 'notes')
@@ -545,7 +596,7 @@ class ITInitiativeController extends Controller
         }
 
         $nextVersion = (int) $project->projectStatusHistories()->max('version') + 1;
-        $projectCharterId = $project->charters()->latest('id')->value('id');
+        $projectCharterId = $this->resolveProjectStatusHistoryCharterId($project);
 
         if ($projectCharterId === null) {
             return;
@@ -553,10 +604,70 @@ class ITInitiativeController extends Controller
 
         ProjectStatusHistory::query()->create([
             'project_charter_id' => $projectCharterId,
+            'status' => $normalizedToStatusId,
             'version' => $nextVersion,
             'tanggal' => \Carbon\Carbon::createFromFormat('Y-m-d', $changedAt)->toDateString(),
             'notes' => $this->buildProjectStatusHistoryNotes($normalizedFromStatusId, $normalizedToStatusId, $notes),
         ]);
+    }
+
+    private function latestProjectStatusHistoryEntry(TrsProject $project): ?ProjectStatusHistory
+    {
+        if ($project->relationLoaded('projectStatusHistories')) {
+            return $project->projectStatusHistories->first();
+        }
+
+        return $project->projectStatusHistories()->first();
+    }
+
+    private function resolvedProjectStatusId(TrsProject $project): ?int
+    {
+        $historyStatus = $this->latestProjectStatusHistoryEntry($project)?->status;
+        if (is_numeric($historyStatus)) {
+            return (int) $historyStatus;
+        }
+
+        return 0;
+    }
+
+    private function resolveProjectStatusHistoryCharterId(TrsProject $project): ?int
+    {
+        $projectCharterId = $project->charters()->latest('id')->value('id');
+        if ($projectCharterId !== null) {
+            return (int) $projectCharterId;
+        }
+
+        $charter = $project->charters()->create([
+            'version_label' => 'v1',
+        ]);
+
+        return (int) $charter->id;
+    }
+
+    private function resequenceProjectStatusHistories(TrsProject $project): void
+    {
+        $project->projectStatusHistories()
+            ->orderBy('version')
+            ->orderBy('id')
+            ->get()
+            ->values()
+            ->each(static function (ProjectStatusHistory $history, int $index): void {
+                $expectedVersion = $index + 1;
+
+                if ((int) $history->version !== $expectedVersion) {
+                    $history->update(['version' => $expectedVersion]);
+                }
+            });
+    }
+
+    private function syncProjectStatusFromHistory(TrsProject $project): void
+    {
+        $project->refresh();
+        $resolvedStatusId = $this->resolvedProjectStatusId($project);
+
+        if ((int) $project->status !== $resolvedStatusId) {
+            $project->update(['status' => $resolvedStatusId]);
+        }
     }
 
     private function buildProjectStatusHistoryNotes(?int $fromStatusId, ?int $toStatusId, ?string $notes = null): string

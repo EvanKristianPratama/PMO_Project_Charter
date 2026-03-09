@@ -11,6 +11,7 @@ class ProjectStatusHistory extends Model
 
     protected $fillable = [
         'project_charter_id',
+        'status',
         'version',
         'tanggal',
         'notes',
@@ -20,6 +21,7 @@ class ProjectStatusHistory extends Model
     {
         return [
             'project_charter_id' => 'integer',
+            'status' => 'integer',
             'version' => 'integer',
             'tanggal' => 'date',
         ];
@@ -28,5 +30,10 @@ class ProjectStatusHistory extends Model
     public function projectCharter(): BelongsTo
     {
         return $this->belongsTo(ProjectCharter::class, 'project_charter_id');
+    }
+
+    public function statusRef(): BelongsTo
+    {
+        return $this->belongsTo(InitiativeStatus::class, 'status');
     }
 }

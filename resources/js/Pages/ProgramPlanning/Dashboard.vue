@@ -155,12 +155,18 @@ const props = defineProps({
 });
 
 const normalizeStatusName = (value) => String(value ?? '').trim().toLowerCase();
+const resolvePlanningStatusKey = (item) => {
+    const projectStatusKey = normalizeStatusName(item?.project_status_key);
+    return projectStatusKey || 'not_start';
+};
 
 const statusSummaryColumns = computed(() => {
     return [
+        { key: 'not_start', label: 'Not Start' },
         { key: 'drafting', label: 'Drafting' },
         { key: 'propose',  label: 'Propose' },
         { key: 'review',   label: 'Review' },
+        { key: 'baseline', label: 'Baseline' },
         { key: 'approved', label: 'Approved' },
     ];
 });
@@ -222,15 +228,10 @@ const filteredTableItems = computed(() => {
         // No additional filtering
     } else if (selectedStatusFilter.value) {
         items = items.filter((i) => {
-            const latestStatus = normalizeStatusName(i.latest_status?.status ?? '');
-            return latestStatus === selectedStatusFilter.value;
+            return resolvePlanningStatusKey(i) === selectedStatusFilter.value;
         });
     } else {
-        // Summary table "Show All" / "Total" click — only show items that have a status entry
-        items = items.filter((i) => {
-            const latestStatus = normalizeStatusName(i.latest_status?.status ?? '');
-            return latestStatus.length > 0;
-        });
+        items = items.filter((i) => resolvePlanningStatusKey(i).length > 0);
     }
 
     return items;
@@ -297,9 +298,11 @@ const metricCards = computed(() => [
 
 const mapFlowData = (counts = {}) => {
     const flowSteps = [
+        { key: 'not_start', label: 'Not Start' },
         { key: 'drafting',  label: 'Drafting' },
         { key: 'propose',   label: 'Propose' },
         { key: 'review',    label: 'Review' },
+        { key: 'baseline',  label: 'Baseline' },
         { key: 'approved',  label: 'Approved' },
     ];
 

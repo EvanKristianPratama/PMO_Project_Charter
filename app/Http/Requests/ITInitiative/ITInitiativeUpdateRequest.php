@@ -17,9 +17,25 @@ class ITInitiativeUpdateRequest extends FormRequest
     {
         /** @var TrsProject|null $project */
         $project = $this->route('project');
+        $latestHistoryStatusId = $project?->projectStatusHistories()->value('trs_project_status_history.status');
+        $currentStatusId = is_numeric($latestHistoryStatusId) ? (int) $latestHistoryStatusId : 0;
         $statusChanged = $project !== null
             && $this->filled('status')
-            && (int) $this->input('status') !== (int) $project->status;
+            && (int) $this->input('status') !== $currentStatusId;
+        $statusRule = static function (string $attribute, mixed $value, \Closure $fail): void {
+            $statusId = is_numeric($value) ? (int) $value : null;
+
+            if ($statusId === 0) {
+                return;
+            }
+
+            if (
+                $statusId === null
+                || ! \App\Models\InitiativeStatus::query()->whereKey($statusId)->exists()
+            ) {
+                $fail('Status project charter tidak valid.');
+            }
+        };
 
         return [
             'name' => ['required', 'string', 'max:255'],
@@ -28,7 +44,7 @@ class ITInitiativeUpdateRequest extends FormRequest
                 'string',
                 Rule::unique('trs_projects', 'code')->ignore($project?->id),
             ],
-            'status' => ['required', 'integer', Rule::exists('trs_status_initiative', 'id')],
+            'status' => ['required', 'integer', $statusRule],
             'project_status_changed_at' => [
                 Rule::requiredIf($statusChanged),
                 'nullable',

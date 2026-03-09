@@ -206,7 +206,31 @@ const normalizeProjectStatusId = (value) => {
     }
 
     const parsed = Number(value);
-    return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+    return Number.isInteger(parsed) && parsed >= 0 ? parsed : null;
+};
+
+const resolvedProjectStatusId = (item) => {
+    const candidates = [
+        item?.project_status_id,
+        item?.projectStatusId,
+        item?.status,
+        item?.status_id,
+        item?.statusRef?.id,
+    ];
+
+    const histories = item?.project_status_histories ?? item?.projectStatusHistories ?? [];
+    if (Array.isArray(histories) && histories.length > 0) {
+        candidates.unshift(histories[0]?.status);
+    }
+
+    for (const candidate of candidates) {
+        const normalized = normalizeProjectStatusId(candidate);
+        if (normalized !== null) {
+            return normalized;
+        }
+    }
+
+    return FLOW_NOT_YET_ID;
 };
 
 const statusOptions = computed(() => {
@@ -298,22 +322,7 @@ const filteredDigitalInitiatives = computed(() => {
     const selectedStatusId = Number(selectedStatusFilter.value);
 
     return props.openDigitalInitiatives.filter((item) => {
-        const candidates = [
-            item?.status,
-            item?.status_id,
-            item?.statusRef?.id,
-        ];
-
-        if (Array.isArray(item?.statuses)) {
-            item.statuses.forEach((statusItem) => {
-                candidates.push(statusItem?.id);
-                candidates.push(statusItem?.phase_id);
-            });
-        }
-
-        return candidates.some(
-            (statusValue) => normalizeProjectStatusId(statusValue) === selectedStatusId
-        );
+        return resolvedProjectStatusId(item) === selectedStatusId;
     });
 });
 
@@ -323,15 +332,7 @@ const filteredItInitiatives = computed(() => {
     const selectedStatusId = Number(selectedStatusFilter.value);
 
     return props.openItInitiatives.filter((item) => {
-        const candidates = [
-            item?.status,
-            item?.status_id,
-            item?.statusRef?.id,
-        ];
-
-        return candidates.some(
-            (statusValue) => normalizeProjectStatusId(statusValue) === selectedStatusId
-        );
+        return resolvedProjectStatusId(item) === selectedStatusId;
     });
 });
 

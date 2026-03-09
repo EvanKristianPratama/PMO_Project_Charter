@@ -45,16 +45,23 @@
                         <td class="px-3 py-3">
                             <span
                                 class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium capitalize"
-                                :class="statusBadgeClassById(project.status)"
+                                :class="statusBadgeClassById(resolvedProjectStatusId(project))"
                             >
-                                {{ statusLabelFromOptions(project.status, statusOptions) }}
+                                {{ statusLabelFromOptions(resolvedProjectStatusId(project), statusOptions) }}
                             </span>
                         </td>
                         <td class="px-3 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-300">
-                            {{ formatDate(project.charter?.tgl_dokumen) }}
+                            {{ formatDate(resolvedProjectStatusDate(project)) }}
                         </td>
                         <td class="px-3 py-3 text-[10px] font-medium">
                             <div class="flex flex-col items-start gap-1">
+                                <Link
+                                    :href="`/it-initiatives/${project.id}/edit`"
+                                    class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-amber-100 text-amber-700 transition-colors hover:bg-amber-200 dark:bg-amber-500/20 dark:text-amber-300 dark:hover:bg-amber-500/30"
+                                    title="Edit Project Charter"
+                                >
+                                    Edit
+                                </Link>
                                 <Link
                                     :href="`/it-initiatives/${project.id}?tab=detail`"
                                     :class="actionCellClass(hasScopeCharter(project))"
@@ -116,6 +123,25 @@ const props = defineProps({
 });
 
 const tableColspan = 7;
+
+const latestProjectStatusHistory = (project) => {
+    const histories = project?.project_status_histories ?? project?.projectStatusHistories ?? [];
+    return Array.isArray(histories) && histories.length > 0 ? histories[0] : null;
+};
+
+const resolvedProjectStatusId = (project) => {
+    const historyStatus = latestProjectStatusHistory(project)?.status;
+    const parsedHistoryStatus = Number(historyStatus);
+    if (Number.isInteger(parsedHistoryStatus) && parsedHistoryStatus > 0) {
+        return parsedHistoryStatus;
+    }
+
+    return 0;
+};
+
+const resolvedProjectStatusDate = (project) => {
+    return latestProjectStatusHistory(project)?.tanggal ?? null;
+};
 
 const shouldShowCategory = (index) => {
     if (index === 0) return true;
