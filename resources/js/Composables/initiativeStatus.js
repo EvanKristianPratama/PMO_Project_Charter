@@ -1,4 +1,5 @@
 const BADGE_CLASS_BY_STATUS_ID = {
+    0: 'bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-300',
     1: 'bg-slate-100 text-slate-800 dark:bg-white/10 dark:text-slate-300',
     2: 'bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-400',
     3: 'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-400',
@@ -7,6 +8,10 @@ const BADGE_CLASS_BY_STATUS_ID = {
 };
 
 const FLOW_CLASS_BY_INDEX = [
+    {
+        circleClass: 'border-slate-300 bg-slate-300 text-slate-700',
+        lineClass: 'bg-slate-300 dark:bg-slate-500/40',
+    },
     {
         circleClass: 'border-slate-400 bg-slate-500 text-white',
         lineClass: 'bg-blue-300 dark:bg-blue-500/40',
@@ -17,6 +22,10 @@ const FLOW_CLASS_BY_INDEX = [
     },
     {
         circleClass: 'border-amber-500 bg-amber-500 text-white',
+        lineClass: 'bg-emerald-300 dark:bg-emerald-500/40',
+    },
+    {
+        circleClass: 'border-violet-500 bg-violet-500 text-white',
         lineClass: 'bg-emerald-300 dark:bg-emerald-500/40',
     },
     {
@@ -47,6 +56,7 @@ export const resolveStatusOption = (status, statusOptions = []) => {
 
 export const statusLabelFromOptions = (status, statusOptions = []) => {
     const option = resolveStatusOption(status, statusOptions);
+    const statusId = normalizeStatusId(status);
 
     if (option?.label) {
         return option.label;
@@ -56,6 +66,10 @@ export const statusLabelFromOptions = (status, statusOptions = []) => {
         return String(option.name)
             .replace(/_/g, ' ')
             .replace(/\b\w/g, (char) => char.toUpperCase());
+    }
+
+    if (statusId === 0) {
+        return 'Not Start';
     }
 
     return 'Drafting';

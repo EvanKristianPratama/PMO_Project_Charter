@@ -240,9 +240,24 @@ const asList = (value) => {
     return [];
 };
 
+const FLOW_NOT_YET_ID = 0;
+const FLOW_STATUS_STEPS = [
+    { id: FLOW_NOT_YET_ID, name: 'not_start', label: 'Not Start' },
+    { id: 1, name: 'drafting', label: 'Drafting' },
+    { id: 2, name: 'propose', label: 'Propose' },
+    { id: 3, name: 'review', label: 'Review' },
+    { id: 5, name: 'baseline', label: 'Baseline' },
+    { id: 4, name: 'approved', label: 'Approved' },
+];
+
+const normalizeProjectStatusId = (value) => {
+    const parsed = Number(value);
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : FLOW_NOT_YET_ID;
+};
+
 const { activeFlowFilter, filteredItems, toggleFilter } = useFlowFilter(
     () => asList(props.itInitiatives),
-    (item) => item.status
+    (item) => normalizeProjectStatusId(item?.status)
 );
 
 const TABLE_MODE = {
@@ -384,70 +399,40 @@ const addRoadmapHref = computed(() => {
 });
 
 const statusOptions = computed(() => {
-    if (props.statusOptions.length > 0) {
-        return props.statusOptions;
-    }
+    const sourceOptions = Array.isArray(props.statusOptions) ? props.statusOptions : [];
+    const sourceById = new Map(
+        sourceOptions
+            .map((status) => [Number(status?.id), status])
+            .filter(([id]) => Number.isInteger(id))
+    );
 
-    return [
-        { id: 1, name: 'drafting', label: 'Drafting' },
-        { id: 2, name: 'propose', label: 'Propose' },
-        { id: 3, name: 'review', label: 'Review' },
-        { id: 4, name: 'approved', label: 'Approved' },
-        { id: 5, name: 'baseline', label: 'Baseline' },
-    ];
-});
-
-const scopeStatusOrder = ['drafting', 'propose', 'review', 'approved'];
-const normalizeStatusName = (value) => String(value ?? '').trim().toLowerCase();
-
-const scopeStatusOptions = computed(() => {
-    const sourceOptions = Array.isArray(statusOptions.value) ? statusOptions.value : [];
-    const mappedStatusByName = new Map();
-
-    sourceOptions.forEach((status) => {
-        const candidateNames = [normalizeStatusName(status?.name), normalizeStatusName(status?.label)];
-
-        if (candidateNames.includes('baseline')) {
-            return;
-        }
-
-        candidateNames.forEach((candidateName) => {
-            if (scopeStatusOrder.includes(candidateName) && !mappedStatusByName.has(candidateName)) {
-                mappedStatusByName.set(candidateName, status);
-            }
-        });
-    });
-
-    const fallbackStatusOptions = [
-        { id: 1, name: 'drafting', label: 'Drafting' },
-        { id: 2, name: 'propose', label: 'Propose' },
-        { id: 3, name: 'review', label: 'Review' },
-        { id: 4, name: 'approved', label: 'Approved' },
-    ];
-
-    return scopeStatusOrder.map((statusName, index) => {
-        const matchedStatus = mappedStatusByName.get(statusName);
-        const fallbackStatus = fallbackStatusOptions[index];
+    return FLOW_STATUS_STEPS.map((step) => {
+        const matched = sourceById.get(step.id);
 
         return {
-            id: Number(matchedStatus?.id ?? fallbackStatus.id),
-            name: statusName,
-            label: fallbackStatus.label,
+            id: step.id,
+            name: step.name,
+            label: step.label,
+            rawName: matched?.name ?? step.name,
         };
     });
 });
 
+const countProjectsByStatus = (statusId) => {
+    return asList(props.itInitiatives).filter(
+        (item) => normalizeProjectStatusId(item?.status) === Number(statusId)
+    ).length;
+};
+
 const digitalSteps = computed(() => {
-    const counts = props.statusCounts || {};
-    return scopeStatusOptions.value.map((status, index) => {
+    return statusOptions.value.map((status, index) => {
         const flowClass = statusFlowClassByIndex(index);
-        const key = status.name;
 
         return {
-            key,
+            key: status.name,
             statusId: status.id,
             label: status.label,
-            count: Number(counts?.[key] ?? 0),
+            count: countProjectsByStatus(status.id),
             circleClass: flowClass.circleClass,
             lineClass: flowClass.lineClass,
         };
