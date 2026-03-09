@@ -92,7 +92,7 @@ class DashboardController extends Controller
         foreach ($projects as $project) {
             $statusId = is_numeric($project->status) ? (int) $project->status : null;
 
-            if ($statusId === null) {
+            if ($statusId === null || $statusId === 0) {
                 $counts['not_start']++;
                 continue;
             }

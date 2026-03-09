@@ -11,6 +11,13 @@ class StatusMstInitiative extends Model
 
     protected $guarded = ['id'];
 
+    protected static function booted(): void
+    {
+        static::saved(static function (StatusMstInitiative $status): void {
+            $status->initiative?->syncApprovedProjectToImplementation();
+        });
+    }
+
     protected function casts(): array
     {
         return [

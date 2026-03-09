@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MstInitiative extends Model
 {
+    private const APPROVED_ALIASES = ['approved', 'approve', 'aproved'];
+
     protected $table = 'mst_initiative';
 
     protected $fillable = [
@@ -22,6 +24,13 @@ class MstInitiative extends Model
         'status',
         'source',
     ];
+
+    protected static function booted(): void
+    {
+        static::saved(static function (MstInitiative $initiative): void {
+            $initiative->syncApprovedProjectToImplementation();
+        });
+    }
 
     public function coe(): BelongsTo
     {
@@ -87,5 +96,95 @@ class MstInitiative extends Model
     public function mapSc(): HasMany
     {
         return $this->hasMany(TrsMapSc::class, 'initiative_id');
+    }
+
+    public function latestPlanningStatusValue(): ?string
+    {
+        $latestStatus = $this->relationLoaded('latestStatus')
+            ? $this->latestStatus
+            : $this->latestStatus()->first();
+
+        $status = trim((string) ($latestStatus?->status ?? ''));
+        if ($status !== '') {
+            return $status;
+        }
+
+        $fallbackStatus = trim((string) ($this->status ?? ''));
+
+        return $fallbackStatus !== '' ? $fallbackStatus : null;
+    }
+
+    public function isApprovedForImplementation(): bool
+    {
+        $normalizedStatus = strtolower(trim((string) $this->latestPlanningStatusValue()));
+
+        return in_array($normalizedStatus, self::APPROVED_ALIASES, true);
+    }
+
+    public function syncApprovedProjectToImplementation(): ?TrsProject
+    {
+        if (! $this->exists || ! $this->isApprovedForImplementation()) {
+            return null;
+        }
+
+        $project = $this->findAutoSyncedProject();
+        $metadata = is_array($project?->metadata) ? $project->metadata : [];
+        $metadata['mst_initiative_id'] = (int) $this->id;
+        $metadata['auto_synced_from_mst_initiative'] = true;
+
+        if ($project) {
+            $payload = [
+                'name' => $this->name,
+                'tipe_inisiative' => (string) $this->tipe_initiative,
+                'metadata' => $metadata,
+            ];
+
+            if ($this->isAutoSyncedProject($project)) {
+                $payload['status'] = 0;
+            }
+
+            $project->update($payload);
+
+            return $project->fresh();
+        }
+
+        return TrsProject::query()->create([
+            'code' => $this->autoSyncedProjectCode(),
+            'name' => $this->name,
+            'status' => 0,
+            'tipe_inisiative' => (string) $this->tipe_initiative,
+            'metadata' => $metadata,
+        ]);
+    }
+
+    private function findAutoSyncedProject(): ?TrsProject
+    {
+        $project = TrsProject::query()
+            ->where('code', $this->autoSyncedProjectCode())
+            ->orWhere('metadata->mst_initiative_id', $this->id)
+            ->first();
+
+        if ($project) {
+            return $project;
+        }
+
+        return TrsProject::query()
+            ->where('name', $this->name)
+            ->where('tipe_inisiative', (string) $this->tipe_initiative)
+            ->first();
+    }
+
+    private function autoSyncedProjectCode(): string
+    {
+        return sprintf('AUTO-MI-%d', $this->id);
+    }
+
+    private function isAutoSyncedProject(TrsProject $project): bool
+    {
+        $metadata = is_array($project->metadata) ? $project->metadata : [];
+
+        return $project->code === $this->autoSyncedProjectCode()
+            || (bool) ($metadata['auto_synced_from_mst_initiative'] ?? false)
+            || (int) ($metadata['mst_initiative_id'] ?? 0) === (int) $this->id;
     }
 }

@@ -240,6 +240,12 @@ const asList = (value) => {
     return [];
 };
 
+const TYPE_IT_INITIATIVE = 2;
+
+const isItProject = (item) => Number(item?.tipe_inisiative) === TYPE_IT_INITIATIVE;
+
+const itProjectItems = computed(() => asList(props.itInitiatives).filter(isItProject));
+
 const FLOW_NOT_YET_ID = 0;
 const FLOW_STATUS_STEPS = [
     { id: FLOW_NOT_YET_ID, name: 'not_start', label: 'Not Start' },
@@ -256,7 +262,7 @@ const normalizeProjectStatusId = (value) => {
 };
 
 const { activeFlowFilter, filteredItems, toggleFilter } = useFlowFilter(
-    () => asList(props.itInitiatives),
+    () => itProjectItems.value,
     (item) => normalizeProjectStatusId(item?.status)
 );
 
@@ -326,7 +332,7 @@ const handleFlowFilter = (statusId) => {
 
 const flowItems = computed(() => {
     if (showAllCharter.value && activeFlowFilter.value === null) {
-        return asList(props.itInitiatives);
+        return itProjectItems.value;
     }
     return filteredItems.value;
 });
@@ -335,7 +341,7 @@ const masterItems = computed(() => {
     return asList(props.masterItInitiatives);
 });
 
-const roadmapSourceItems = computed(() => asList(props.itInitiatives));
+const roadmapSourceItems = computed(() => itProjectItems.value);
 
 const roadmapItems = computed(() => {
     let projects = roadmapSourceItems.value;
@@ -419,7 +425,7 @@ const statusOptions = computed(() => {
 });
 
 const countProjectsByStatus = (statusId) => {
-    return asList(props.itInitiatives).filter(
+    return itProjectItems.value.filter(
         (item) => normalizeProjectStatusId(item?.status) === Number(statusId)
     ).length;
 };

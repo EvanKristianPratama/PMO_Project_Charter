@@ -77,7 +77,9 @@ class ITInitiativeController extends Controller
 
         $baselineStatus = $statusOptions->firstWhere('name', 'baseline');
         $baselineStatusId = (int) ($baselineStatus['id'] ?? InitiativeStatus::baselineId());
-        $filterStatus = $filters['status'] ?? null;
+        $filterStatus = array_key_exists('status', $filters) && $filters['status'] !== null
+            ? (int) $filters['status']
+            : null;
 
         $projects = TrsProject::query()
             ->with([
@@ -88,7 +90,18 @@ class ITInitiativeController extends Controller
                 'statusRef:id,name',
                 'pcStatusImplementations',
             ])
-            ->when($filterStatus, fn ($q, $status) => $q->where('status', $status))
+            ->where('tipe_inisiative', 2)
+            ->when($filterStatus !== null, static function ($q) use ($filterStatus): void {
+                if ($filterStatus === 0) {
+                    $q->where(static function ($builder): void {
+                        $builder->whereNull('status')->orWhere('status', 0);
+                    });
+
+                    return;
+                }
+
+                $q->where('status', $filterStatus);
+            })
             ->when($filters['search'] ?? null, fn ($q, $search) => $q->where(function ($inner) use ($search): void {
                 $inner->where('name', 'like', "%{$search}%")
                     ->orWhere('code', 'like', "%{$search}%")
