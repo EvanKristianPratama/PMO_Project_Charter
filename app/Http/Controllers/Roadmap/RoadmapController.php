@@ -71,10 +71,9 @@ class RoadmapController extends Controller
                 'trs_project_charters.version_label',
                 'trs_project_charters.objectives',
                 'trs_project_charters.duration',
-                'trs_project_charters.metadata',
             ])
             ->with([
-                'project:id,code,name,metadata',
+                'project:id,code,name',
                 'milestones' => fn ($milestoneQuery) => $milestoneQuery->select(
                     'trs_milestones.id',
                     'trs_milestones.pc_id',
