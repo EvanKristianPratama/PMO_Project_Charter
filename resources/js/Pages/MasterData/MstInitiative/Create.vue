@@ -53,12 +53,21 @@
                                     </select>
                                 </td>
                                 <td class="px-3 py-2.5">
-                                    <select v-model="form.business_unit" class="form-input-sm">
-                                        <option :value="null">—</option>
-                                        <option v-for="opt in organizationOptions" :key="opt.id" :value="opt.id">
-                                            {{ opt.groub ? `${opt.groub} — ` : '' }}{{ opt.name }}
-                                        </option>
-                                    </select>
+                                    <div class="max-h-28 space-y-1 overflow-y-auto rounded border border-slate-200 bg-white p-2 dark:border-white/10 dark:bg-[#131313]">
+                                        <label
+                                            v-for="opt in organizationOptions"
+                                            :key="opt.id"
+                                            class="flex items-start gap-2 text-[10px] text-slate-700 dark:text-slate-200"
+                                        >
+                                            <input
+                                                v-model="form.organization_ids"
+                                                type="checkbox"
+                                                :value="opt.id"
+                                                class="mt-0.5 rounded border-slate-300 text-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10"
+                                            />
+                                            <span>{{ opt.groub ? `${opt.groub} — ` : '' }}{{ opt.name }}</span>
+                                        </label>
+                                    </div>
                                 </td>
                                 <td class="px-3 py-2.5">
                                     <select v-model="form.source" class="form-input-sm">
@@ -181,7 +190,14 @@ const masterHeaders = ['Code', 'Tipe', 'CoE', 'Organisasi', 'Sumber Data', 'Nama
 const statusHeaders = ['No', 'Status', 'Tanggal', 'Notes', 'Action'];
 
 const form = useForm({
-    code: '', name: '', description: '', tipe_initiative: '', coe_id: null, business_unit: null, source: null,
+    code: '',
+    name: '',
+    description: '',
+    tipe_initiative: '',
+    coe_id: null,
+    business_unit: null,
+    organization_ids: [],
+    source: null,
 });
 
 // ── Local status management ──
@@ -210,11 +226,25 @@ const removeStatus = (id) => {
     localStatuses.value = localStatuses.value.filter(s => s._id !== id);
 };
 
+const normalizeOrganizationIds = (ids) => {
+    if (!Array.isArray(ids)) return [];
+
+    return [...new Set(ids
+        .map((id) => Number(id))
+        .filter((id) => Number.isInteger(id) && id > 0))];
+};
+
 const submitForm = () => {
-    form.transform(data => ({
-        ...data,
-        statuses: localStatuses.value.map(s => ({ status: s.status, tanggal: s.tanggal || null, notes: s.notes || null })),
-    })).post('/master-data/master-initiatives');
+    form.transform((data) => {
+        const organizationIds = normalizeOrganizationIds(data.organization_ids);
+
+        return {
+            ...data,
+            organization_ids: organizationIds,
+            business_unit: organizationIds[0] ?? null,
+            statuses: localStatuses.value.map((s) => ({ status: s.status, tanggal: s.tanggal || null, notes: s.notes || null })),
+        };
+    }).post('/master-data/master-initiatives');
 };
 </script>
 

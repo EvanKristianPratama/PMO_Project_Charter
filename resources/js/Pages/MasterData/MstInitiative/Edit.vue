@@ -55,12 +55,21 @@
                                     </select>
                                 </td>
                                 <td class="px-3 py-2.5">
-                                    <select v-model="masterForm.business_unit" class="form-input-sm">
-                                        <option :value="null">—</option>
-                                        <option v-for="opt in organizationOptions" :key="opt.id" :value="opt.id">
-                                            {{ opt.groub ? `${opt.groub} — ` : '' }}{{ opt.name }}
-                                        </option>
-                                    </select>
+                                    <div class="max-h-28 space-y-1 overflow-y-auto rounded border border-slate-200 bg-white p-2 dark:border-white/10 dark:bg-[#131313]">
+                                        <label
+                                            v-for="opt in organizationOptions"
+                                            :key="opt.id"
+                                            class="flex items-start gap-2 text-[10px] text-slate-700 dark:text-slate-200"
+                                        >
+                                            <input
+                                                v-model="masterForm.organization_ids"
+                                                type="checkbox"
+                                                :value="opt.id"
+                                                class="mt-0.5 rounded border-slate-300 text-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10"
+                                            />
+                                            <span>{{ opt.groub ? `${opt.groub} — ` : '' }}{{ opt.name }}</span>
+                                        </label>
+                                    </div>
                                 </td>
                                 <td class="px-3 py-2.5">
                                     <select v-model="masterForm.source" class="form-input-sm">
@@ -216,6 +225,7 @@ const props = defineProps({
     organizationOptions: { type: Array, default: () => [] },
     tipeOptions:         { type: Array, default: () => [] },
     sourceOptions:       { type: Array, default: () => [] },
+    selectedOrganizationIds: { type: Array, default: () => [] },
 });
 
 const masterHeaders = ['Code', 'Tipe', 'CoE', 'Organisasi', 'Sumber Data', 'Nama', 'Deskripsi'];
@@ -229,11 +239,36 @@ const masterForm = useForm({
     tipe_initiative: props.initiative.tipe_initiative ?? '',
     coe_id:          props.initiative.coe_id ?? null,
     business_unit:   props.initiative.business_unit ?? null,
+    organization_ids: Array.isArray(props.selectedOrganizationIds) && props.selectedOrganizationIds.length
+        ? props.selectedOrganizationIds.map((id) => Number(id))
+        : (
+            Array.isArray(props.initiative.organizations) && props.initiative.organizations.length
+                ? props.initiative.organizations.map((item) => Number(item?.id))
+                : (props.initiative.business_unit ? [Number(props.initiative.business_unit)] : [])
+        ),
     source:          props.initiative.source ?? null,
 });
 
+const normalizeOrganizationIds = (ids) => {
+    if (!Array.isArray(ids)) return [];
+
+    return [...new Set(ids
+        .map((id) => Number(id))
+        .filter((id) => Number.isInteger(id) && id > 0))];
+};
+
 const submitMaster = () => {
-    masterForm.put(`/master-data/master-initiatives/${props.initiative.id}`);
+    masterForm
+        .transform((data) => {
+            const organizationIds = normalizeOrganizationIds(data.organization_ids);
+
+            return {
+                ...data,
+                organization_ids: organizationIds,
+                business_unit: organizationIds[0] ?? null,
+            };
+        })
+        .put(`/master-data/master-initiatives/${props.initiative.id}`);
 };
 
 // ── Add new status ──

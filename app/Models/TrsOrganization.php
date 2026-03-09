@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TrsOrganization extends Model
@@ -23,5 +24,15 @@ class TrsOrganization extends Model
     public function initiatives(): HasMany
     {
         return $this->hasMany(MstInitiative::class, 'business_unit');
+    }
+
+    public function collaborationInitiatives(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            MstInitiative::class,
+            'trs_bu_collaboration',
+            'ogranitiation_id',
+            'initiative_id',
+        )->withTimestamps();
     }
 }
