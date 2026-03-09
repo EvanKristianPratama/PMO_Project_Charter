@@ -54,7 +54,7 @@ class DashboardController extends Controller
     private function flowStatusOptions(): array
     {
         return [
-            ['id' => 0, 'name' => 'not_yet', 'label' => 'Not yet'],
+            ['id' => 0, 'name' => 'not_start', 'label' => 'Not Start'],
             ['id' => 1, 'name' => 'drafting', 'label' => 'Drafting'],
             ['id' => 2, 'name' => 'propose', 'label' => 'Propose'],
             ['id' => 3, 'name' => 'review', 'label' => 'Review'],
@@ -81,7 +81,7 @@ class DashboardController extends Controller
     private function projectStatusCounts(Collection $projects): array
     {
         $counts = [
-            'not_yet' => 0,
+            'not_start' => 0,
             'drafting' => 0,
             'propose' => 0,
             'review' => 0,
@@ -93,7 +93,7 @@ class DashboardController extends Controller
             $statusId = is_numeric($project->status) ? (int) $project->status : null;
 
             if ($statusId === null) {
-                $counts['not_yet']++;
+                $counts['not_start']++;
                 continue;
             }
 

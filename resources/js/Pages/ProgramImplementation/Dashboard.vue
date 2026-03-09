@@ -146,6 +146,7 @@
                     :completed-status-id="completedStatusId"
                     :completed-status-label="completedStatusLabel"
                     :status-options="statusOptions"
+                    :selected-status-id="selectedStatusFilter"
                     charter-label="Project Charter"
                 />
             </section>
@@ -191,7 +192,7 @@ const props = defineProps({
 
 const FLOW_NOT_YET_ID = 0;
 const fallbackStatusOptions = [
-    { id: FLOW_NOT_YET_ID, name: 'not_yet', label: 'Not yet' },
+    { id: FLOW_NOT_YET_ID, name: 'not_start', label: 'Not Start' },
     { id: 1, name: 'drafting', label: 'Drafting' },
     { id: 2, name: 'propose', label: 'Propose' },
     { id: 3, name: 'review', label: 'Review' },

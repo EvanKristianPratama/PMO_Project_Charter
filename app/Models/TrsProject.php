@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -59,6 +60,21 @@ class TrsProject extends Model
             ->orderBy('date', 'desc')
             ->orderBy('time_start', 'desc')
             ->orderBy('id', 'desc');
+    }
+
+    public function projectStatusHistories(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            ProjectStatusHistory::class,
+            ProjectCharter::class,
+            'project_id',
+            'project_charter_id',
+            'id',
+            'id'
+        )
+            ->orderByDesc('version')
+            ->orderByDesc('tanggal')
+            ->orderByDesc('id');
     }
 
     public function latestPcStatusImplementation(): HasOne

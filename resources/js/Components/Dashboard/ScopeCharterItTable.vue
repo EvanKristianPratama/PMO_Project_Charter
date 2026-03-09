@@ -20,9 +20,9 @@
                     <col class="w-[14%]">
                     <col class="w-[14%]">
                     <col class="w-[8%]">
-                    <col class="w-[9%]">
-                    <col class="w-[9%]">
-                    <col class="w-[14%]">
+                    <col v-if="showImplementationColumns" class="w-[9%]">
+                    <col v-if="showImplementationColumns" class="w-[9%]">
+                    <col v-if="showImplementationColumns" class="w-[14%]">
                     <col class="w-[11%]">
                 </colgroup>
                 <thead class="bg-slate-50 dark:bg-white/5">
@@ -33,9 +33,9 @@
                         <th scope="col" class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Daftar Inisiatif</th>
                         <th scope="col" class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Mapping</th>
                         <th scope="col" class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status Usulan</th>
-                        <th scope="col" class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Bulan / Tahun</th>
-                        <th scope="col" class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status Review</th>
-                        <th scope="col" class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status Implementasi</th>
+                        <th v-if="showImplementationColumns" scope="col" class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Bulan / Tahun</th>
+                        <th v-if="showImplementationColumns" scope="col" class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status Review</th>
+                        <th v-if="showImplementationColumns" scope="col" class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status Implementasi</th>
                         <th scope="col" class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Action</th>
                     </tr>
                 </thead>
@@ -67,10 +67,10 @@
                                     {{ statusLabelFromOptions(item.status, statusOptions) }}
                                 </span>
                             </td>
-                            <td class="px-3 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                            <td v-if="showImplementationColumns" class="px-3 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-300">
                                 {{ latestItDate(item) || '-' }}
                             </td>
-                            <td class="px-3 py-3 text-[11px] text-slate-700 dark:text-slate-200">
+                            <td v-if="showImplementationColumns" class="px-3 py-3 text-[11px] text-slate-700 dark:text-slate-200">
                                 <span
                                     v-if="latestItReviewStatus(item)"
                                     class="inline-flex items-center rounded-md px-2 py-1 text-[10px] font-medium break-words whitespace-normal leading-relaxed"
@@ -81,7 +81,7 @@
                                 </span>
                                 <span v-else class="text-xs italic text-slate-400 dark:text-slate-500">-</span>
                             </td>
-                            <td class="px-3 py-3 text-[11px] text-slate-700 dark:text-slate-200">
+                            <td v-if="showImplementationColumns" class="px-3 py-3 text-[11px] text-slate-700 dark:text-slate-200">
                                 <span
                                     v-if="latestItStatus(item)"
                                     class="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-[10px] font-medium text-slate-700 capitalize dark:bg-white/10 dark:text-slate-300 break-words whitespace-normal leading-relaxed"
@@ -113,7 +113,7 @@
                     </template>
 
                     <tr v-if="sortedItems.length === 0">
-                        <td colspan="10" class="px-6 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
+                        <td :colspan="tableColspan" class="px-6 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
                             Semua IT initiatives sudah {{ lowerCompletedStatusLabel }}.
                         </td>
                     </tr>
@@ -149,9 +149,19 @@ const props = defineProps({
         type: String,
         default: 'Scope Charter',
     },
+    selectedStatusId: {
+        type: [Number, String, null],
+        default: null,
+    },
 });
 
 const lowerCompletedStatusLabel = computed(() => String(props.completedStatusLabel || '').toLowerCase());
+const approvedStatusId = computed(() => {
+    const matched = (props.statusOptions || []).find((item) => String(item?.name).toLowerCase() === 'approved');
+    return Number(matched?.id ?? 4);
+});
+const showImplementationColumns = computed(() => props.selectedStatusId === null || Number(props.selectedStatusId) === approvedStatusId.value);
+const tableColspan = computed(() => (showImplementationColumns.value ? 10 : 7));
 
 const sortedItems = computed(() => {
     return [...(props.items || [])].sort((a, b) => {
