@@ -152,6 +152,7 @@
                                 :year-start="roadmapYearStart"
                                 :year-end="roadmapYearEnd"
                                 :expanded="expandedProjects.has(versionProject.uniqueId)"
+                                :show-date="true"
                                 @toggle="toggleProjectExpand(versionProject.uniqueId)"
                             />
 
