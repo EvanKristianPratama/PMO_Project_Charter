@@ -15,75 +15,71 @@
 
                     <div class="h-6 w-px bg-slate-200 dark:bg-white/10" />
 
-                    <div class="min-w-0 flex-1">
-                        <h1 class="truncate text-lg font-bold leading-none text-slate-900 dark:text-white">{{ headerTitle }}</h1>
-                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ headerSubtitle }}</p>
-                    </div>
-
-                    <span
-                        v-if="isExisting"
-                        class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-semibold text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300"
+                    <label for="compendium-nav" class="text-xs font-medium text-slate-700 dark:text-slate-200">Pilih Compendium</label>
+                    <select
+                        id="compendium-nav"
+                        v-model="selectedCompendiumId"
+                        class="w-full max-w-sm rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 focus:border-[#1C75BC] focus:outline-none dark:border-white/10 dark:bg-[#101826] dark:text-slate-100"
                     >
-                        ID: {{ compendiumId }}
-                    </span>
+                        <option :value="COMPENDIUM_CREATE_VALUE">+ New Compendium</option>
+                        <option v-for="option in compendiumOptions" :key="`compendium-opt-${option.id}`" :value="String(option.id)">
+                            {{ formatCompendiumLabel(option) }}
+                        </option>
+                    </select>
 
-                    <button
-                        v-if="canStartEdit"
-                        type="button"
-                        @click="startEdit"
-                        class="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-xs font-bold text-amber-700 transition-all hover:bg-amber-100"
-                    >
-                        Edit Compendium
-                    </button>
-
-                    <button
-                        v-if="showCancelEdit"
-                        type="button"
-                        @click="cancelEdit"
-                        class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition-all hover:bg-slate-50 dark:border-white/10 dark:bg-transparent dark:text-slate-300 dark:hover:bg-white/5"
-                    >
-                        Batal
-                    </button>
-
-                    <button
-                        v-if="canSubmit"
-                        type="button"
-                        @click="submit"
-                        :disabled="form.processing"
-                        class="inline-flex items-center gap-2 rounded-lg bg-[#0f63b5] px-6 py-2 text-xs font-bold text-white shadow-md transition-all active:scale-95 hover:bg-[#0c4e8f] disabled:opacity-50"
-                    >
-                        {{ submitLabel }}
-                    </button>
-                </div>
-
-                <div class="flex items-center gap-6 border-t border-slate-100 bg-slate-50/50 px-4 py-3 dark:border-white/5 dark:bg-white/[0.02]">
-                    <div class="w-full sm:max-w-xs">
-                        <label class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-slate-400">Document Status</label>
-                        <select
-                            v-if="isEditing"
-                            v-model="form.status"
-                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
+                    <div class="ml-auto flex items-center gap-2">
+                        <button
+                            v-if="canStartEdit"
+                            type="button"
+                            @click="startEdit"
+                            class="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-xs font-bold text-amber-700 transition-all hover:bg-amber-100"
                         >
-                            <option v-for="s in statusOptions" :key="s.value" :value="s.value">{{ s.label }}</option>
-                        </select>
-                        <div
-                            v-else
-                            class="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
+                            Edit Compendium
+                        </button>
+
+                        <button
+                            v-if="showCancelEdit"
+                            type="button"
+                            @click="cancelEdit"
+                            class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition-all hover:bg-slate-50 dark:border-white/10 dark:bg-transparent dark:text-slate-300 dark:hover:bg-white/5"
                         >
-                            {{ statusLabel }}
-                        </div>
+                            Batal
+                        </button>
+
+                        <button
+                            v-if="canSubmit"
+                            type="button"
+                            @click="submit"
+                            :disabled="form.processing"
+                            class="inline-flex items-center gap-2 rounded-lg bg-[#0f63b5] px-6 py-2 text-xs font-bold text-white shadow-md transition-all active:scale-95 hover:bg-[#0c4e8f] disabled:opacity-50"
+                        >
+                            {{ submitLabel }}
+                        </button>
                     </div>
                 </div>
             </section>
 
-            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717]">
+            <section
+                v-if="isEditing"
+                class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717]"
+            >
+                <div class="mb-4 w-full sm:max-w-xs">
+                    <label class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-slate-400">Document Status</label>
+                    <select
+                        v-model="form.status"
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
+                    >
+                        <option v-for="s in statusOptions" :key="s.value" :value="s.value">{{ s.label }}</option>
+                    </select>
+                </div>
+
                 <div class="mb-4">
                     <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-white">Master Initiative Mapping</h2>
                     <p class="mt-1 text-xs text-slate-500">{{ mappingSubtitle }}</p>
                 </div>
 
                 <div class="space-y-4">
-                    <div v-if="isEditing" class="max-w-xl">
+                    <div class="max-w-xl">
                         <select
                             @change="onSelectInitiative"
                             class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
@@ -109,7 +105,6 @@
                             >
                                 <span class="max-w-[280px] truncate">{{ initiativeTagLabel(item) }}</span>
                                 <button
-                                    v-if="isEditing"
                                     type="button"
                                     @click="removeInitiative(item.id)"
                                     class="text-slate-400 transition-colors hover:text-rose-500"
@@ -133,6 +128,7 @@
             <CompendiumCharterDocument
                 :form="form"
                 :source-options="sourceOptions"
+                :theme-options="themeOptions"
                 :editable="isEditing"
             />
         </div>
@@ -141,14 +137,18 @@
 
 <script setup>
 import { computed, ref } from 'vue';
-import { Link, useForm } from '@inertiajs/vue3';
+import { Link, router, useForm } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import CompendiumCharterDocument from '@/Components/Compendium/CompendiumCharterDocument.vue';
 
+const COMPENDIUM_CREATE_VALUE = '__create__';
+
 const props = defineProps({
     compendium: { type: Object, default: null },
+    compendiumOptions: { type: Array, default: () => [] },
     initiativeOptions: { type: Array, default: () => [] },
     sourceOptions: { type: Array, default: () => [] },
+    themeOptions: { type: Array, default: () => [] },
 });
 
 const statusOptions = [
@@ -164,7 +164,7 @@ const toNumber = (value, fallback = null) => {
     return Number.isFinite(num) ? num : fallback;
 };
 
-const normalizeInitiativeIds = (values) => {
+const normalizeIdList = (values) => {
     if (!Array.isArray(values)) return [];
     return values
         .map((value) => toNumber(value, 0))
@@ -177,13 +177,14 @@ const normalizeSourceId = (value) => {
 };
 
 const buildFormPayload = (compendium = {}) => ({
-    initiative_ids: normalizeInitiativeIds(compendium.initiative_ids),
+    initiative_ids: normalizeIdList(compendium.initiative_ids),
     owner: String(compendium.owner ?? ''),
     usecase: String(compendium.usecase ?? ''),
     description: String(compendium.description ?? ''),
     source_id: normalizeSourceId(compendium.source_id),
     value: toNumber(compendium.value, 1),
     urgency: toNumber(compendium.urgency, 1),
+    rjpp_tagging_ids: normalizeIdList(compendium.rjpp_tagging_ids),
     status: String(compendium.status ?? '1'),
 });
 
@@ -193,34 +194,41 @@ const isEditing = ref(!isExisting.value);
 
 const form = useForm(buildFormPayload(props.compendium ?? {}));
 
+const selectedCompendiumId = computed({
+    get: () => (isExisting.value ? String(compendiumId.value) : COMPENDIUM_CREATE_VALUE),
+    set: (value) => {
+        const selectedValue = String(value ?? '').trim();
+
+        if (!selectedValue) return;
+
+        if (selectedValue === COMPENDIUM_CREATE_VALUE) {
+            if (!isExisting.value) return;
+            router.visit('/program-planning/program-definition/digital-initiatives/compendium/create');
+            return;
+        }
+
+        if (isExisting.value && selectedValue === String(compendiumId.value)) return;
+
+        router.visit(`/program-planning/program-definition/digital-initiatives/compendium/${selectedValue}/edit`);
+    },
+});
+
+const formatCompendiumLabel = (option) => {
+    const text = String(option?.label ?? '').trim();
+    return text !== '' ? text : `Compendium #${option?.id ?? '-'}`;
+};
+
 const pageTitle = computed(() => (
     isExisting.value
         ? 'Program Definition Digital Initiatives - Compendium Detail'
         : 'Program Definition Digital Initiatives - New Compendium'
 ));
 
-const headerTitle = computed(() => {
-    if (!isExisting.value) return 'New Compendium';
-    return form.usecase?.trim() ? `Compendium: ${form.usecase}` : 'Compendium Detail';
-});
-
-const headerSubtitle = computed(() => {
-    if (!isExisting.value) return 'Lengkapi data compendium baru dan simpan.';
-    return isEditing.value
-        ? 'Mode edit aktif. Anda dapat memperbarui detail compendium.'
-        : 'Mode show aktif. Klik Edit Compendium untuk mengubah data.';
-});
-
 const mappingSubtitle = computed(() => (
     isEditing.value
         ? 'Pilih atau sesuaikan inisiatif yang dihubungkan ke dokumen compendium.'
         : 'Daftar inisiatif yang sudah terhubung ke dokumen compendium.'
 ));
-
-const statusLabel = computed(() => {
-    const found = statusOptions.find((opt) => opt.value === String(form.status));
-    return found?.label ?? '-';
-});
 
 const canStartEdit = computed(() => isExisting.value && !isEditing.value);
 const showCancelEdit = computed(() => isExisting.value && isEditing.value);
@@ -239,7 +247,7 @@ const selectedInitiatives = computed(() => {
         (props.initiativeOptions ?? []).map((option) => [toNumber(option.id, 0), option])
     );
 
-    return normalizeInitiativeIds(form.initiative_ids).map((id) => {
+    return normalizeIdList(form.initiative_ids).map((id) => {
         const option = optionsById.get(id);
 
         return {
@@ -267,7 +275,7 @@ const addInitiative = (id) => {
 
 const removeInitiative = (id) => {
     const numericId = toNumber(id, 0);
-    form.initiative_ids = normalizeInitiativeIds(form.initiative_ids).filter((item) => item !== numericId);
+    form.initiative_ids = normalizeIdList(form.initiative_ids).filter((item) => item !== numericId);
 };
 
 const onSelectInitiative = (event) => {
@@ -292,7 +300,8 @@ const submit = () => {
 
     form.transform((data) => ({
         ...data,
-        initiative_ids: normalizeInitiativeIds(data.initiative_ids),
+        initiative_ids: normalizeIdList(data.initiative_ids),
+        rjpp_tagging_ids: normalizeIdList(data.rjpp_tagging_ids),
         source_id: data.source_id === '' ? null : toNumber(data.source_id, null),
         value: toNumber(data.value, 1),
         urgency: toNumber(data.urgency, 1),
@@ -311,4 +320,3 @@ const submit = () => {
     });
 };
 </script>
-

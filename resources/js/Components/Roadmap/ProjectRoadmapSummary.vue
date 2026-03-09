@@ -191,6 +191,34 @@ const projectVersionLabel = computed(() => {
     const firstVersion = versionEntries.value[0]?.label ?? '';
     return String(firstVersion).trim();
 });
+
+const currentStatus = computed(() => {
+    const val = Number(props.project?.charter?.status ?? props.project?.status);
+    switch (val) {
+        case 1: return { label: 'Drafting', class: 'bg-slate-100 text-slate-600 ring-1 ring-slate-300' };
+        case 2: return { label: 'Propose', class: 'bg-blue-100 text-blue-700 ring-1 ring-blue-300' };
+        case 3: return { label: 'Review', class: 'bg-amber-100 text-amber-700 ring-1 ring-amber-300' };
+        case 4: return { label: 'Approved', class: 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-300' };
+        case 5: return { label: 'Baseline', class: 'bg-purple-100 text-purple-700 ring-1 ring-purple-300' };
+        default: return null;
+    }
+});
+
+const documentDateLabel = computed(() => {
+    const raw = props.project?.charter?.tgl_dokumen;
+    if (!raw) return '-';
+    try {
+        const date = new Date(raw);
+        if (isNaN(date.getTime())) return raw;
+        return new Intl.DateTimeFormat('id-ID', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+        }).format(date);
+    } catch (e) {
+        return raw;
+    }
+});
 </script>
 
 <template>
@@ -207,9 +235,16 @@ const projectVersionLabel = computed(() => {
         </div>
 
         <div class="col-name">
-            <div class="project-name-wrap">
-                <span class="project-name">{{ project.name || '-' }}</span>
-                <span v-if="projectVersionLabel" class="project-version-capsule">{{ projectVersionLabel }}</span>
+            <div class="w-full flex items-center justify-between gap-3 min-w-0">
+                <span class="project-name truncate" :title="project.name">{{ project.name || '-' }}</span>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    <span v-if="currentStatus" class="project-version-capsule" :class="currentStatus.class">
+                        {{ currentStatus.label }}
+                    </span>
+                    <div class="project-version-capsule" :class="currentStatus?.class || 'bg-slate-100 text-slate-500 ring-1 ring-slate-200'">
+                        <span>{{ documentDateLabel }}</span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -325,13 +360,10 @@ const projectVersionLabel = computed(() => {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 2px 10px;
+    padding: 2.5px 12px;
     border-radius: 999px;
-    border: 1px solid #9ca3af;
-    background: #e5e7eb;
-    color: #374151;
-    font-size: 9px;
-    font-weight: 600;
+    font-size: 10px;
+    font-weight: 700;
     line-height: 1.2;
     letter-spacing: 0.01em;
     white-space: nowrap;

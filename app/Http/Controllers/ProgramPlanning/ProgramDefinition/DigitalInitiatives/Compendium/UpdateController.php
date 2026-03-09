@@ -4,10 +4,13 @@ namespace App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiati
 
 use App\Http\Controllers\Controller;
 use App\Models\MstInitiative;
+use App\Models\RjppTagging;
 use App\Models\TrsScInitiative;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class UpdateController extends Controller
 {
@@ -22,10 +25,16 @@ class UpdateController extends Controller
             'source_id' => 'nullable|integer|exists:mst_sc_source,id',
             'value' => 'required|integer|in:1,2,3,4',
             'urgency' => 'required|integer|in:1,2,3,4',
+            'rjpp_tagging_ids' => 'nullable|array',
+            'rjpp_tagging_ids.*' => 'integer|exists:trs_themes,id',
             'status' => 'required|string|max:50',
         ]);
 
         DB::transaction(function () use ($validated, $scInitiative): void {
+            $initiativeIds = $this->uniqueIntCollection($validated['initiative_ids']);
+            $themeIds = $this->uniqueIntCollection($validated['rjpp_tagging_ids'] ?? []);
+            $rjppScKey = Schema::hasColumn('trs_rjpp', 'sc_id') ? 'sc_id' : 'digital_id';
+
             $scInitiative->update([
                 'owner' => $validated['owner'],
                 'usecase' => $validated['usecase'],
@@ -36,11 +45,22 @@ class UpdateController extends Controller
                 'status' => $validated['status'],
             ]);
 
-            $scInitiative->mstInitiatives()->sync($validated['initiative_ids']);
+            $scInitiative->mstInitiatives()->sync($initiativeIds->all());
 
-            // Update source for all linked initiatives based on the selected source_id
+            RjppTagging::query()
+                ->where($rjppScKey, $scInitiative->id)
+                ->delete();
+
+            foreach ($themeIds as $themeId) {
+                RjppTagging::create([
+                    $rjppScKey => $scInitiative->id,
+                    'theme_id' => $themeId,
+                ]);
+            }
+
             if ($validated['source_id']) {
-                MstInitiative::whereIn('id', $validated['initiative_ids'])->update(['source' => $validated['source_id']]);
+                MstInitiative::whereIn('id', $initiativeIds->all())
+                    ->update(['source' => $validated['source_id']]);
             }
         });
 
@@ -48,6 +68,13 @@ class UpdateController extends Controller
             ->route('program-planning.program-definition.digital-initiatives.compendium.index')
             ->with('success', 'Compendium berhasil diperbarui.');
     }
+
+    private function uniqueIntCollection(array $items): Collection
+    {
+        return collect($items)
+            ->map(fn ($item) => (int) $item)
+            ->filter(fn (int $item) => $item > 0)
+            ->unique()
+            ->values();
+    }
 }
-
-
