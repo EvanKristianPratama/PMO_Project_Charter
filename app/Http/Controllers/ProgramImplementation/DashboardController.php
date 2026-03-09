@@ -23,63 +23,47 @@ class DashboardController extends Controller
 
         $statusOptions    = $this->statusOptions();
         $baselineStatusId = $this->baselineStatusId($statusOptions);
+        $flowStatusOptions = $this->flowStatusOptions();
 
-        // Build status counts from mst_initiative + latestStatus relation
-        $digitalStatusCounts = $this->mstStatusCountsFromCollection(1);
-        $itStatusCounts      = $this->mstStatusCountsFromCollection(2);
+        $digitalProjects = $this->projectsByType(1);
+        $itProjects = $this->projectsByType(2);
+        $digitalStatusCounts = $this->projectStatusCounts($digitalProjects);
+        $itStatusCounts = $this->projectStatusCounts($itProjects);
+        $digitalApprovedFromMst = $this->mstApprovedCountByType(1);
+        $itApprovedFromMst = $this->mstApprovedCountByType(2);
 
         return Inertia::render('ProgramImplementation/Dashboard', [
             'overview' => [
                 'total_projects'              => TrsProject::query()->count(),
-                'total_digital_initiatives'   => MstInitiative::where('tipe_initiative', 1)->count(),
-                'total_it_initiatives'        => MstInitiative::where('tipe_initiative', 2)->count(),
-                'status_options'              => $statusOptions,
+                'total_digital_initiatives'   => $digitalProjects->count(),
+                'total_it_initiatives'        => $itProjects->count(),
+                'status_options'              => $flowStatusOptions,
                 'it_status_counts'            => $itStatusCounts,
                 'digital_status_counts'       => $digitalStatusCounts,
-                'total_digital_approved'      => (int) ($digitalStatusCounts['approved'] ?? 0),
-                'total_it_approved'           => (int) ($itStatusCounts['approved'] ?? 0),
+                'total_digital_approved'      => $digitalApprovedFromMst,
+                'total_it_approved'           => $itApprovedFromMst,
             ],
             'completedStatusId'      => $baselineStatusId,
-            'openDigitalInitiatives' => collect(),
-            'openItInitiatives'      => $this->openItInitiatives($baselineStatusId),
+            'openDigitalInitiatives' => $digitalProjects,
+            'openItInitiatives'      => $itProjects,
         ]);
     }
 
     // ── Private helpers ──────────────────────────────────────────────────
 
-    /**
-     * Count statuses from mst_initiative collection, using latestStatus
-     * relation when available, falling back to 'drafting'.
-     */
-    private function mstStatusCountsFromCollection(int $tipeInitiative): array
+    private function flowStatusOptions(): array
     {
-        $initiatives = MstInitiative::query()
-            ->select(['id', 'tipe_initiative', 'status'])
-            ->with('latestStatus')
-            ->where('tipe_initiative', $tipeInitiative)
-            ->get();
-
-        $aliasMap = [
-            'draft'   => 'drafting',
-            'approve' => 'approved',
-            'aproved' => 'approved',
+        return [
+            ['id' => 0, 'name' => 'not_yet', 'label' => 'Not yet'],
+            ['id' => 1, 'name' => 'drafting', 'label' => 'Drafting'],
+            ['id' => 2, 'name' => 'propose', 'label' => 'Propose'],
+            ['id' => 3, 'name' => 'review', 'label' => 'Review'],
+            ['id' => 5, 'name' => 'baseline', 'label' => 'Baseline'],
+            ['id' => 4, 'name' => 'approved', 'label' => 'Approved'],
         ];
-        $validStatuses = ['drafting', 'propose', 'review', 'approved', 'postpone'];
-
-        $counts = [];
-        foreach ($initiatives as $initiative) {
-            $raw       = strtolower(trim($initiative->latestStatus?->status ?? $initiative->status ?? 'drafting'));
-            $canonical = $aliasMap[$raw] ?? $raw;
-            if (! in_array($canonical, $validStatuses)) {
-                $canonical = 'drafting';
-            }
-            $counts[$canonical] = ($counts[$canonical] ?? 0) + 1;
-        }
-
-        return $counts;
     }
 
-    private function openItInitiatives(int $baselineStatusId): Collection
+    private function projectsByType(int $tipeInitiative): Collection
     {
         return TrsProject::query()
             ->with([
@@ -89,12 +73,71 @@ class DashboardController extends Controller
                 'pcStatusImplementations',
                 'mappedInitiatives:id,code,name',
             ])
-            ->where(static function ($query) use ($baselineStatusId): void {
-                $query
-                    ->whereNull('status')
-                    ->orWhere('status', '!=', $baselineStatusId);
-            })
+            ->where('tipe_inisiative', $tipeInitiative)
             ->latest()
             ->get();
+    }
+
+    private function projectStatusCounts(Collection $projects): array
+    {
+        $counts = [
+            'not_yet' => 0,
+            'drafting' => 0,
+            'propose' => 0,
+            'review' => 0,
+            'baseline' => 0,
+            'approved' => 0,
+        ];
+
+        foreach ($projects as $project) {
+            $statusId = is_numeric($project->status) ? (int) $project->status : null;
+
+            if ($statusId === null) {
+                $counts['not_yet']++;
+                continue;
+            }
+
+            if ($statusId === 1) {
+                $counts['drafting']++;
+                continue;
+            }
+
+            if ($statusId === 2) {
+                $counts['propose']++;
+                continue;
+            }
+
+            if ($statusId === 3) {
+                $counts['review']++;
+                continue;
+            }
+
+            if ($statusId === 5) {
+                $counts['baseline']++;
+                continue;
+            }
+
+            if ($statusId === 4) {
+                $counts['approved']++;
+            }
+        }
+
+        return $counts;
+    }
+
+    private function mstApprovedCountByType(int $tipeInitiative): int
+    {
+        $approvedAliases = ['approved', 'approve', 'aproved'];
+
+        return MstInitiative::query()
+            ->select(['id', 'status'])
+            ->with('latestStatus')
+            ->where('tipe_initiative', $tipeInitiative)
+            ->get()
+            ->filter(static function (MstInitiative $initiative) use ($approvedAliases): bool {
+                $rawStatus = strtolower(trim((string) ($initiative->latestStatus?->status ?? $initiative->status ?? '')));
+                return in_array($rawStatus, $approvedAliases, true);
+            })
+            ->count();
     }
 }

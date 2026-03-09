@@ -189,51 +189,47 @@ const props = defineProps({
     },
 });
 
+const FLOW_NOT_YET_ID = 0;
 const fallbackStatusOptions = [
+    { id: FLOW_NOT_YET_ID, name: 'not_yet', label: 'Not yet' },
     { id: 1, name: 'drafting', label: 'Drafting' },
     { id: 2, name: 'propose', label: 'Propose' },
     { id: 3, name: 'review', label: 'Review' },
+    { id: 5, name: 'baseline', label: 'Baseline' },
     { id: 4, name: 'approved', label: 'Approved' },
 ];
 
+const normalizeProjectStatusId = (value) => {
+    if (value === null || value === '') {
+        return FLOW_NOT_YET_ID;
+    }
+
+    const parsed = Number(value);
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+};
+
 const statusOptions = computed(() => {
-    return Array.isArray(props.overview?.status_options) && props.overview.status_options.length > 0
-        ? props.overview.status_options
-        : fallbackStatusOptions;
-});
+    const sourceOptions = Array.isArray(props.overview?.status_options) ? props.overview.status_options : [];
+    const sourceById = new Map(
+        sourceOptions
+            .map((status) => [Number(status?.id), status])
+            .filter(([id]) => Number.isInteger(id))
+    );
 
-const scopeStatusOrder = ['drafting', 'propose', 'review', 'approved'];
-
-const normalizeStatusName = (value) => String(value ?? '').trim().toLowerCase();
-
-const scopeStatusOptions = computed(() => {
-    const sourceOptions = Array.isArray(statusOptions.value) ? statusOptions.value : [];
-    const mappedStatusByName = new Map();
-
-    sourceOptions.forEach((status) => {
-        const candidateNames = [normalizeStatusName(status?.name), normalizeStatusName(status?.label)];
-
-        if (candidateNames.includes('baseline')) {
-            return;
-        }
-
-        candidateNames.forEach((candidateName) => {
-            if (scopeStatusOrder.includes(candidateName) && !mappedStatusByName.has(candidateName)) {
-                mappedStatusByName.set(candidateName, status);
-            }
-        });
-    });
-
-    return scopeStatusOrder.map((statusName, index) => {
-        const matchedStatus = mappedStatusByName.get(statusName);
-        const fallbackStatus = fallbackStatusOptions[index];
+    return fallbackStatusOptions.map((fallback) => {
+        const matched = sourceById.get(fallback.id);
 
         return {
-            id: Number(matchedStatus?.id ?? fallbackStatus.id),
-            name: statusName,
-            label: fallbackStatus.label,
+            id: fallback.id,
+            name: fallback.name,
+            label: fallback.label,
+            rawName: matched?.name ?? fallback.name,
         };
     });
+});
+
+const scopeStatusOptions = computed(() => {
+    return statusOptions.value;
 });
 
 const completedStatusId = computed(() => Number(props.completedStatusId || 5));
@@ -242,9 +238,15 @@ const completedStatusLabel = computed(() => {
     return statusLabelFromOptions(completedStatusId.value, statusOptions.value);
 });
 
+const approvedStatusId = computed(() => {
+    const approvedOption = scopeStatusOptions.value.find((status) => status.name === 'approved');
+    return Number(approvedOption?.id ?? 4);
+});
+
 const statusSummaryColumns = computed(() => {
     return scopeStatusOptions.value.map((status) => ({
-        key: status.name,
+        key: status.id,
+        countKey: status.name,
         label: status.label,
     }));
 });
@@ -255,7 +257,7 @@ const statusSummaryRows = computed(() => {
     const buildRow = (rowKey, label, counts) => {
         let total = 0;
         const normalizedCounts = columns.reduce((accumulator, column) => {
-            const value = Number(counts?.[column.key] ?? 0);
+            const value = Number(counts?.[column.countKey] ?? 0);
             accumulator[column.key] = value;
             total += value;
 
@@ -290,31 +292,44 @@ const toggleInitiativeTable = (initiativeKey, statusId = null) => {
 };
 
 const filteredDigitalInitiatives = computed(() => {
-    if (!selectedStatusFilter.value) return props.openDigitalInitiatives;
+    if (selectedStatusFilter.value === null) return props.openDigitalInitiatives;
+
+    const selectedStatusId = Number(selectedStatusFilter.value);
+
     return props.openDigitalInitiatives.filter((item) => {
-        if (item.statuses?.length) {
-            return item.statuses.some(
-                (statusItem) =>
-                    String(statusItem.id) === String(selectedStatusFilter.value) ||
-                    String(statusItem.phase_id) === String(selectedStatusFilter.value)
-            );
+        const candidates = [
+            item?.status,
+            item?.status_id,
+            item?.statusRef?.id,
+        ];
+
+        if (Array.isArray(item?.statuses)) {
+            item.statuses.forEach((statusItem) => {
+                candidates.push(statusItem?.id);
+                candidates.push(statusItem?.phase_id);
+            });
         }
 
-        return (
-            String(item.status) === String(selectedStatusFilter.value) ||
-            String(item.status_id) === String(selectedStatusFilter.value) ||
-            String(item.statusRef?.id) === String(selectedStatusFilter.value)
+        return candidates.some(
+            (statusValue) => normalizeProjectStatusId(statusValue) === selectedStatusId
         );
     });
 });
 
 const filteredItInitiatives = computed(() => {
-    if (!selectedStatusFilter.value) return props.openItInitiatives;
+    if (selectedStatusFilter.value === null) return props.openItInitiatives;
+
+    const selectedStatusId = Number(selectedStatusFilter.value);
+
     return props.openItInitiatives.filter((item) => {
-        return (
-            String(item.status) === String(selectedStatusFilter.value) ||
-            String(item.status_id) === String(selectedStatusFilter.value) ||
-            String(item.statusRef?.id) === String(selectedStatusFilter.value)
+        const candidates = [
+            item?.status,
+            item?.status_id,
+            item?.statusRef?.id,
+        ];
+
+        return candidates.some(
+            (statusValue) => normalizeProjectStatusId(statusValue) === selectedStatusId
         );
     });
 });
@@ -329,7 +344,7 @@ const totalItDisetujui = computed(() => {
 
 const showApprovedDigitalInitiatives = () => {
     selectedInitiative.value = 'digital';
-    selectedStatusFilter.value = String(completedStatusId.value);
+    selectedStatusFilter.value = approvedStatusId.value;
 
     window.scrollTo({
         top: document.body.scrollHeight,
@@ -339,7 +354,7 @@ const showApprovedDigitalInitiatives = () => {
 
 const showApprovedItInitiatives = () => {
     selectedInitiative.value = 'it';
-    selectedStatusFilter.value = String(completedStatusId.value);
+    selectedStatusFilter.value = approvedStatusId.value;
 
     window.scrollTo({
         top: document.body.scrollHeight,
