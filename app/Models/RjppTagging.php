@@ -13,7 +13,7 @@ class RjppTagging extends Model
     public $incrementing = false;
 
     protected $fillable = [
-        'digital_id',
+        'sc_id',
         'theme_id',
     ];
 
@@ -21,7 +21,7 @@ class RjppTagging extends Model
 
     public function digitalInitiative()
     {
-        return $this->belongsTo(TrsDigitalInitiative::class, 'digital_id');
+        return $this->belongsTo(TrsScInitiative::class, 'sc_id');
     }
 
     public function rjpp()

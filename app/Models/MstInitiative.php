@@ -74,8 +74,8 @@ class MstInitiative extends Model
         return $this->belongsTo(DataSource::class, 'source');
     }
 
-    public function scInitiatives(): HasMany
+    public function mapSc(): HasMany
     {
-        return $this->hasMany(ScInitiative::class, 'initiative_id');
+        return $this->hasMany(TrsMapSc::class, 'initiative_id');
     }
 }

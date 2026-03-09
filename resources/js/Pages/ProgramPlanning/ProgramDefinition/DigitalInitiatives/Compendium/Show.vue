@@ -1,23 +1,23 @@
 <template>
-    <UserLayout title="Program Definition Digital Initiatives — Edit Compendium">
+    <UserLayout title="Program Definition Digital Initiatives — New Compendium">
         <div class="animate-fade-in-up space-y-6 pb-20">
             <!-- Header Section -->
             <section class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="flex flex-wrap items-center gap-3 px-4 py-3">
                     <Link href="/program-planning/program-definition/digital-initiatives/compendium"
-                        class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+                        class="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-50 dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/5 transition-colors">
                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 19-7-7 7-7" />
                         </svg>
                         Kembali
                     </Link>
-                    <span class="text-slate-300 dark:text-slate-600">|</span>
+                    <div class="h-6 w-px bg-slate-200 dark:bg-white/10 mx-1"></div>
                     <div class="flex-1">
-                        <h1 class="text-lg font-bold text-slate-900 dark:text-white leading-none">Edit Compendium: {{ compendium.usecase }}</h1>
+                        <h1 class="text-lg font-bold text-slate-900 dark:text-white leading-none">New Compendium</h1>
                     </div>
                     <button type="button" @click="submit" :disabled="form.processing"
                         class="inline-flex items-center gap-2 rounded-lg bg-[#0f63b5] px-6 py-2 text-xs font-bold text-white shadow-md hover:bg-[#0c4e8f] disabled:opacity-50 transition-all active:scale-95">
-                        {{ form.processing ? 'Memperbarui...' : 'Update Compendium' }}
+                        {{ form.processing ? 'Menyimpan...' : 'Simpan Compendium' }}
                     </button>
                 </div>
 
@@ -36,7 +36,7 @@
             <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="mb-4">
                     <h2 class="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider">Master Initiative Mapping</h2>
-                    <p class="text-xs text-slate-500 mt-1">Sesuaikan pemetaan Master Initiative untuk dokumen ini.</p>
+                    <p class="text-xs text-slate-500 mt-1">Pilih inisiatif yang akan dihubungkan dengan dokumen ini.</p>
                 </div>
                 
                 <div class="space-y-4">
@@ -80,8 +80,7 @@ import { Link, useForm } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import CompendiumCharterDocument from '@/Components/Compendium/CompendiumCharterDocument.vue';
 
-const props = defineProps({
-    compendium: { type: Object, required: true },
+defineProps({
     initiativeOptions: { type: Array, default: () => [] },
     sourceOptions: { type: Array, default: () => [] },
 });
@@ -93,15 +92,14 @@ const statusOptions = [
 ];
 
 const form = useForm({
-    id: props.compendium.id,
-    initiative_ids: props.compendium.initiative_ids ?? [],
-    owner: props.compendium.owner ?? '',
-    usecase: props.compendium.usecase ?? '',
-    description: props.compendium.description ?? '',
-    source_id: props.compendium.source_id ?? '',
-    value: props.compendium.value ?? 4,
-    urgency: props.compendium.urgency ?? 4,
-    status: props.compendium.status ?? 'active',
+    initiative_ids: [],
+    owner: '',
+    usecase: '',
+    description: '',
+    source_id: '',
+    value: 4,
+    urgency: 4,
+    status: 'active',
 });
 
 const addInitiative = (id) => {
@@ -115,7 +113,7 @@ const removeInitiative = (id) => {
 };
 
 const submit = () => {
-    form.put(`/program-planning/program-definition/digital-initiatives/compendium/${props.compendium.id}`, {
+    form.post('/program-planning/program-definition/digital-initiatives/compendium', {
         preserveScroll: true,
     });
 };

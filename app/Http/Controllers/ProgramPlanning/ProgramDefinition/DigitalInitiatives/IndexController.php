@@ -3,12 +3,13 @@
 namespace App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives;
 
 use App\Http\Controllers\Controller;
-use App\Models\DigitalInitiative;
 use App\Models\InitiativeStatus;
 use App\Models\MstCoe;
 use App\Models\MstInitiative;
 use App\Models\StatusMstInitiative;
+use App\Models\TrsMapSc;
 use App\Models\TrsOrganization;
+use App\Models\TrsScInitiative;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -59,7 +60,7 @@ class IndexController extends Controller
             ->values();
 
         // Build statusCounts from the loaded collection so every initiative
-        // is accounted for — even those without a trs_status_mstinitiative row.
+        // is accounted for, even those without a trs_status_mstinitiative row.
         $aliasMap = [
             'draft'    => 'drafting',
             'approve'  => 'approved',
@@ -113,10 +114,94 @@ class IndexController extends Controller
             $postponeFromCounts = $normalizedPfc;
         }
 
-        $initiativeItems = DigitalInitiative::query()
-            ->select(['id', 'no', 'useCase'])
-            ->with(['latestScStatusImplementation'])
-            ->get();
+        $statusForeignKey = Schema::hasColumn('trs_sc_status_implementation', 'sc_id')
+            ? 'sc_id'
+            : (Schema::hasColumn('trs_sc_status_implementation', 'sc_initiative_id')
+                ? 'sc_initiative_id'
+                : 'digital_initiative_id');
+
+        $statusValueColumn = Schema::hasColumn('trs_sc_status_implementation', 'status')
+            ? 'status'
+            : (Schema::hasColumn('trs_sc_status_implementation', 'periode_status')
+                ? 'periode_status'
+                : null);
+
+        $statusDateColumn = Schema::hasColumn('trs_sc_status_implementation', 'date')
+            ? 'date'
+            : (Schema::hasColumn('trs_sc_status_implementation', 'created_at')
+                ? 'created_at'
+                : null);
+
+        $statusTimeColumn = Schema::hasColumn('trs_sc_status_implementation', 'time_start')
+            ? 'time_start'
+            : null;
+
+        $latestStatusSelectColumns = [
+            'latest.sc_id',
+            's.id',
+            's.review_status',
+        ];
+
+        if ($statusValueColumn) {
+            $latestStatusSelectColumns[] = "s.{$statusValueColumn} as status_value";
+        }
+
+        if ($statusDateColumn) {
+            $latestStatusSelectColumns[] = "s.{$statusDateColumn} as status_date";
+        }
+
+        if ($statusTimeColumn) {
+            $latestStatusSelectColumns[] = "s.{$statusTimeColumn} as status_time";
+        }
+
+        $latestStatusByScId = DB::table('trs_sc_status_implementation as s')
+            ->joinSub(
+                DB::table('trs_sc_status_implementation')
+                    ->selectRaw("MAX(id) as id, {$statusForeignKey} as sc_id")
+                    ->whereNotNull($statusForeignKey)
+                    ->groupBy($statusForeignKey),
+                'latest',
+                fn ($join) => $join->on('s.id', '=', 'latest.id')
+            )
+            ->select($latestStatusSelectColumns)
+            ->get()
+            ->keyBy(fn ($statusRow) => (int) $statusRow->sc_id);
+
+        $initiativeItems = TrsScInitiative::query()
+            ->select(['id'])
+            ->with([
+                'mapSc' => fn ($query) => $query
+                    ->select(['id', 'sc_id', 'initiative_id'])
+                    ->with([
+                        'Initiative:id,code,name',
+                    ]),
+            ])
+            ->whereHas('mapSc')
+            ->get()
+            ->flatMap(function (TrsScInitiative $scInitiative) use ($latestStatusByScId) {
+                $latestStatus = $latestStatusByScId->get((int) $scInitiative->id);
+
+                return $scInitiative->mapSc
+                    ->map(function (TrsMapSc $mapSc) use ($scInitiative, $latestStatus): array {
+                        $initiative = $mapSc->Initiative;
+
+                        return [
+                            'id' => (int) $scInitiative->id,
+                            'no' => $initiative?->code,
+                            'useCase' => $initiative?->name,
+                            'latest_sc_status_implementation' => $latestStatus ? [
+                                'id' => (int) $latestStatus->id,
+                                'sc_initiative_id' => (int) $scInitiative->id,
+                                'status' => $latestStatus->status_value ?? $latestStatus->review_status,
+                                'review_status' => $latestStatus->review_status,
+                                'date' => $latestStatus->status_date ?? null,
+                                'time_start' => $latestStatus->status_time ?? null,
+                            ] : null,
+                        ];
+                    })
+                    ->filter(fn (array $item) => filled($item['no']) || filled($item['useCase']));
+            })
+            ->values();
 
         return Inertia::render('ProgramPlanning/ProgramDefinition/DigitalInitiatives/Index', [
             'totalDigitalInitiatives' => $masterDigitalInitiatives->count(),
@@ -130,3 +215,4 @@ class IndexController extends Controller
         ]);
     }
 }
+

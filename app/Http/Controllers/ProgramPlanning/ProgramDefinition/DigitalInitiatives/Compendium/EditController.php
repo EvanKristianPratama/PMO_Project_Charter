@@ -4,28 +4,28 @@ namespace App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiati
 
 use App\Http\Controllers\Controller;
 use App\Models\MstInitiative;
-use App\Models\ScInitiative;
+use App\Models\MstScSource;
+use App\Models\TrsScInitiative;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class EditController extends Controller
 {
-    public function __invoke(ScInitiative $scInitiative): Response|RedirectResponse
+    public function __invoke(TrsScInitiative $scInitiative): Response|RedirectResponse
     {
         if (request()->user()?->isAdminUser()) {
             return redirect()->route('admin.dashboard');
         }
 
         $scInitiative->load([
-            'masterInitiative:id,code,name',
+            'mstInitiatives:id,code,name',
             'scDetails' => fn ($query) => $query->latest('id'),
         ]);
 
         $detail = $scInitiative->scDetails->first();
 
-        $initiativeOptions = MstInitiative::query()
-            ->where('tipe_initiative', 1)
+        $initiativeOptions = MstInitiative::where('tipe_initiative', 1)
             ->orderBy('code')
             ->orderBy('name')
             ->get(['id', 'code', 'name'])
@@ -36,14 +36,17 @@ class EditController extends Controller
             ])
             ->values();
 
-        return Inertia::render('ProgramPlanning/ProgramDefinition/DigitalInitiatives/Compendium/Edit', [
+        return Inertia::render('ProgramPlanning/ProgramDefinition/DigitalInitiatives/Compendium/Show', [
             'compendium' => [
-                'id' => (int) $scInitiative->id,
-                'initiative_id' => $scInitiative->initiative_id ? (int) $scInitiative->initiative_id : null,
-                'alias' => $scInitiative->alias,
-                'useCase_description' => $scInitiative->useCase_description,
+                'id',
+                'initiative_ids' => $scInitiative->mstInitiatives->pluck('id')->toArray(),
+                'owner' => $scInitiative->owner,
+                'usecase' => $scInitiative->usecase,
+                'description' => $scInitiative->description,
+                'source_id' => $scInitiative->source_id,
                 'value' => (int) $scInitiative->value,
                 'urgency' => (int) $scInitiative->urgency,
+                'status' => $scInitiative->status,
                 'detail_useCase_description' => $detail?->useCase_description ?? '',
                 'current_situation' => $detail?->current_situation ?? '',
                 'key_functionalities' => $detail?->key_functionalities ?? '',
@@ -57,6 +60,8 @@ class EditController extends Controller
                 'sign_by' => $detail?->sign_by ?? '',
             ],
             'initiativeOptions' => $initiativeOptions,
+            'sourceOptions' => MstScSource::orderBy('name')->get(['id', 'name'])->values(),
         ]);
     }
 }
+

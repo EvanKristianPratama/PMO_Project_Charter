@@ -11,9 +11,6 @@ class StatusMstInitiative extends Model
 
     protected $guarded = ['id'];
 
-    /** Table only has created_at, no updated_at column */
-    const UPDATED_AT = null;
-
     protected function casts(): array
     {
         return [

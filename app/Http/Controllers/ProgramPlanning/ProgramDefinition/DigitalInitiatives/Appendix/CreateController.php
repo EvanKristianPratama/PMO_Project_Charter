@@ -16,8 +16,7 @@ class CreateController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        $initiativeOptions = MstInitiative::query()
-            ->where('tipe_initiative', 1)
+        $initiativeOptions = MstInitiative::where('tipe_initiative', 1)
             ->orderBy('code')
             ->orderBy('name')
             ->get(['id', 'code', 'name'])

@@ -5,14 +5,15 @@ namespace App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiati
 use App\Http\Controllers\Controller;
 use App\Models\DataSource;
 use App\Models\MstInitiative;
-use App\Models\ScInitiative;
+use App\Models\TrsScDetails;
+use App\Models\TrsScInitiative;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class UpdateController extends Controller
 {
-    public function __invoke(Request $request, ScInitiative $scInitiative): RedirectResponse
+    public function __invoke(Request $request, TrsScInitiative $scInitiative): RedirectResponse
     {
         $validated = $request->validate([
             'initiative_id' => 'required|integer|exists:mst_initiative,id',
@@ -23,18 +24,19 @@ class UpdateController extends Controller
         ]);
 
         DB::transaction(function () use ($validated, $scInitiative): void {
-            $initiative = MstInitiative::query()->findOrFail($validated['initiative_id']);
+            $initiative = MstInitiative::findOrFail($validated['initiative_id']);
 
             $scInitiative->update([
-                'initiative_id' => $initiative->id,
-                'alias' => $this->resolveAlias($validated['alias'] ?? null, $initiative),
-                'useCase_description' => $this->resolveDescription($validated['useCase_description'] ?? null, $initiative),
+                'usecase' => $this->resolveAlias($validated['alias'] ?? null, $initiative),
+                'description' => $this->resolveDescription($validated['useCase_description'] ?? null, $initiative),
                 'value' => $validated['value'],
                 'urgency' => $validated['urgency'],
             ]);
 
+            $scInitiative->mstInitiatives()->sync([$initiative->id]);
+
             // Appendix tidak memiliki detail.
-            DB::table('trs_sc_details')->where('digital_id', $scInitiative->id)->delete();
+            TrsScDetails::where('sc_id', $scInitiative->id)->delete();
 
             $appendixSourceId = $this->resolveSourceId('appendix', 2);
             if ($appendixSourceId !== null) {
@@ -49,15 +51,14 @@ class UpdateController extends Controller
 
     private function resolveSourceId(string $keyword, int $fallbackId): ?int
     {
-        $sourceId = DataSource::query()
-            ->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($keyword) . '%'])
+        $sourceId = DataSource::where('name', 'LIKE', '%' . $keyword . '%')
             ->value('id');
 
         if ($sourceId) {
             return (int) $sourceId;
         }
 
-        return DataSource::query()->whereKey($fallbackId)->exists() ? $fallbackId : null;
+        return DataSource::whereKey($fallbackId)->exists() ? $fallbackId : null;
     }
 
     private function resolveAlias(?string $alias, MstInitiative $initiative): string

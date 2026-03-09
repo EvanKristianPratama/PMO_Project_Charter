@@ -5,7 +5,7 @@ namespace App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiati
 use App\Http\Controllers\Controller;
 use App\Models\DataSource;
 use App\Models\MstInitiative;
-use App\Models\ScInitiative;
+use App\Models\TrsScInitiative;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,15 +23,16 @@ class StoreController extends Controller
         ]);
 
         DB::transaction(function () use ($validated): void {
-            $initiative = MstInitiative::query()->findOrFail($validated['initiative_id']);
+            $initiative = MstInitiative::findOrFail($validated['initiative_id']);
 
-            ScInitiative::create([
-                'initiative_id' => $initiative->id,
-                'alias' => $this->resolveAlias($validated['alias'] ?? null, $initiative),
-                'useCase_description' => $this->resolveDescription($validated['useCase_description'] ?? null, $initiative),
+            $scInitiative = TrsScInitiative::create([
+                'usecase' => $this->resolveAlias($validated['alias'] ?? null, $initiative),
+                'description' => $this->resolveDescription($validated['useCase_description'] ?? null, $initiative),
                 'value' => $validated['value'],
                 'urgency' => $validated['urgency'],
             ]);
+
+            $scInitiative->mstInitiatives()->sync([$initiative->id]);
 
             $appendixSourceId = $this->resolveSourceId('appendix', 2);
             if ($appendixSourceId !== null) {
@@ -46,15 +47,14 @@ class StoreController extends Controller
 
     private function resolveSourceId(string $keyword, int $fallbackId): ?int
     {
-        $sourceId = DataSource::query()
-            ->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($keyword) . '%'])
+        $sourceId = DataSource::where('name', 'LIKE', '%' . $keyword . '%')
             ->value('id');
 
         if ($sourceId) {
             return (int) $sourceId;
         }
 
-        return DataSource::query()->whereKey($fallbackId)->exists() ? $fallbackId : null;
+        return DataSource::whereKey($fallbackId)->exists() ? $fallbackId : null;
     }
 
     private function resolveAlias(?string $alias, MstInitiative $initiative): string

@@ -14,18 +14,10 @@ class ScStatusImplementation extends Model
     /* ── Relationships ─────────────────────────────── */
 
     /**
-     * The digital initiative (mst_digitalInitiative) this status belongs to.
-     */
-    public function digitalInitiative(): BelongsTo
-    {
-        return $this->belongsTo(DigitalInitiative::class, 'digital_initiative_id');
-    }
-
-    /**
      * The scope-charter initiative (trs_sc_initiative) this status belongs to.
      */
     public function scInitiative(): BelongsTo
     {
-        return $this->belongsTo(TrsDigitalInitiative::class, 'sc_initiative_id');
+        return $this->belongsTo(TrsScInitiative::class, 'sc_initiative_id');
     }
 }

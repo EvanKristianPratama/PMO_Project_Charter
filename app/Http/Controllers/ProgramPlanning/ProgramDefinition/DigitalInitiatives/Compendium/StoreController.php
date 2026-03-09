@@ -3,92 +3,86 @@
 namespace App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Compendium;
 
 use App\Http\Controllers\Controller;
-use App\Models\DataSource;
 use App\Models\MstInitiative;
-use App\Models\ScDetail;
-use App\Models\ScInitiative;
+use App\Models\RjppTagging;
+use App\Models\TrsMapSc;
+use App\Models\TrsScInitiative;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class StoreController extends Controller
 {
     public function __invoke(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'initiative_id' => 'required|integer|exists:mst_initiative,id',
-            'alias' => 'nullable|string|max:255',
-            'useCase_description' => 'nullable|string',
-            'value' => 'required|integer|in:1,2,3,4',
-            'urgency' => 'required|integer|in:1,2,3,4',
-            'detail_useCase_description' => 'required|string|max:255',
-            'current_situation' => 'required|string|max:255',
-            'key_functionalities' => 'required|string|max:255',
-            'value_detail' => 'required|string|max:255',
-            'urgency_detail' => 'required|string|max:255',
-            'ease_implementation' => 'required|integer|in:1,2,3,4',
-            'ease_detail' => 'required|string|max:255',
-            'resource_requirement' => 'required|integer|in:1,2,3,4',
-            'resource_detail' => 'required|string|max:255',
-            'interpendencies' => 'required|string|max:255',
-            'sign_by' => 'required|string|max:100',
+            'initiative_ids' => 'required|array|min:1',
+            'initiative_ids.*' => 'integer|exists:mst_initiative,id',
+            'owner' => 'nullable|string|max:255',
+            'usecase' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'source_id' => 'required|integer|exists:mst_sc_source,id',
+            'value' => 'required|integer|in:1,2,3',
+            'urgency' => 'required|integer|in:1,2,3',
+            'rjpp_tagging_ids' => 'nullable|array',
+            'rjpp_tagging_ids.*' => 'integer|exists:trs_themes,id',
+            'status' => 'required|integer|in:1,2,3,4,5',
         ]);
 
         DB::transaction(function () use ($validated): void {
-            $initiative = MstInitiative::query()->findOrFail($validated['initiative_id']);
+            $initiativeIds = $this->uniqueIntCollection($validated['initiative_ids']);
+            $themeIds = $this->uniqueIntCollection($validated['rjpp_tagging_ids'] ?? []);
+            $sourceId = (int) $validated['source_id'];
 
-            $scopeInitiative = ScInitiative::query()
-                ->where('initiative_id', $initiative->id)
-                ->latest('id')
-                ->first();
+            $scInitiative = TrsScInitiative::create([
+                'owner' => $validated['owner'] ?? null,
+                'usecase' => $validated['usecase'],
+                'description' => $validated['description'] ?? null,
+                'source_id' => $sourceId,
+                'value' => $validated['value'],
+                'urgency' => $validated['urgency'],
+                'status' => $validated['status'],
+            ]);
 
-            if (!$scopeInitiative) {
-                $scopeInitiative = ScInitiative::create([
-                    'initiative_id' => $initiative->id,
-                    'alias' => $this->resolveAlias($validated['alias'] ?? null, $initiative),
-                    'useCase_description' => $this->resolveDescription($validated['useCase_description'] ?? null, $initiative),
-                    'value' => $validated['value'],
-                    'urgency' => $validated['urgency'],
-                ]);
-            } else {
-                $scopeInitiative->update([
-                    'alias' => $this->resolveAlias($validated['alias'] ?? null, $initiative),
-                    'useCase_description' => $this->resolveDescription($validated['useCase_description'] ?? null, $initiative),
-                    'value' => $validated['value'],
-                    'urgency' => $validated['urgency'],
-                ]);
+            $hasPivotTimestamps =
+                Schema::hasColumn('trs_map_sc', 'created_at')
+                && Schema::hasColumn('trs_map_sc', 'updated_at');
+
+            $rows = $initiativeIds
+                ->map(function (int $initiativeId) use ($scInitiative, $hasPivotTimestamps): array {
+                    $row = [
+                        'sc_id' => $scInitiative->id,
+                        'initiative_id' => $initiativeId,
+                    ];
+
+                    if ($hasPivotTimestamps) {
+                        $row['created_at'] = now();
+                        $row['updated_at'] = now();
+                    }
+
+                    return $row;
+                })
+                ->all();
+
+            if (!empty($rows)) {
+                TrsMapSc::insert($rows);
             }
 
-            $scopeDetail = ScDetail::query()
-                ->where('digital_id', $scopeInitiative->id)
-                ->latest('id')
-                ->first();
+            if ($themeIds->isNotEmpty()) {
+                $digitalKey = Schema::hasColumn('trs_rjpp', 'sc_id') ? 'sc_id' : 'digital_id';
 
-            $detailPayload = [
-                'digital_id' => $scopeInitiative->id,
-                'useCase_description' => $validated['detail_useCase_description'],
-                'current_situation' => $validated['current_situation'],
-                'key_functionalities' => $validated['key_functionalities'],
-                'value_detail' => $validated['value_detail'],
-                'urgency_detail' => $validated['urgency_detail'],
-                'ease_implementation' => $validated['ease_implementation'],
-                'ease_detail' => $validated['ease_detail'],
-                'resource_requirement' => $validated['resource_requirement'],
-                'resource_detail' => $validated['resource_detail'],
-                'interpendencies' => $validated['interpendencies'],
-                'sign_by' => $validated['sign_by'],
-            ];
-
-            if (!$scopeDetail) {
-                ScDetail::create($detailPayload);
-            } else {
-                $scopeDetail->update($detailPayload);
+                foreach ($themeIds as $themeId) {
+                    RjppTagging::create([
+                        $digitalKey => $scInitiative->id,
+                        'theme_id' => $themeId,
+                    ]);
+                }
             }
 
-            $compendiumSourceId = $this->resolveSourceId('compendium', 1);
-            if ($compendiumSourceId !== null) {
-                $initiative->update(['source' => $compendiumSourceId]);
-            }
+            MstInitiative::whereIn('id', $initiativeIds->all())
+                ->update(['source' => $sourceId]);
         });
 
         return redirect()
@@ -96,46 +90,14 @@ class StoreController extends Controller
             ->with('success', 'Compendium berhasil ditambahkan.');
     }
 
-    private function resolveSourceId(string $keyword, int $fallbackId): ?int
+    private function uniqueIntCollection(array $items): Collection
     {
-        $sourceId = DataSource::query()
-            ->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($keyword) . '%'])
-            ->value('id');
-
-        if ($sourceId) {
-            return (int) $sourceId;
-        }
-
-        return DataSource::query()->whereKey($fallbackId)->exists() ? $fallbackId : null;
-    }
-
-    private function resolveAlias(?string $alias, MstInitiative $initiative): string
-    {
-        $cleanAlias = trim((string) $alias);
-        if ($cleanAlias !== '') {
-            return $cleanAlias;
-        }
-
-        $code = trim((string) ($initiative->code ?? ''));
-        if ($code !== '') {
-            return $code;
-        }
-
-        return trim((string) $initiative->name) ?: '-';
-    }
-
-    private function resolveDescription(?string $description, MstInitiative $initiative): string
-    {
-        $cleanDescription = trim((string) $description);
-        if ($cleanDescription !== '') {
-            return $cleanDescription;
-        }
-
-        $initiativeDescription = trim((string) ($initiative->description ?? ''));
-        if ($initiativeDescription !== '') {
-            return $initiativeDescription;
-        }
-
-        return trim((string) $initiative->name) ?: '-';
+        return collect($items)
+            ->map(fn ($item) => (int) $item)
+            ->filter(fn (int $item) => $item > 0)
+            ->unique()
+            ->values();
     }
 }
+
+

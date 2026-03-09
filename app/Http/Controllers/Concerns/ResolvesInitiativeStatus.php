@@ -10,7 +10,7 @@ trait ResolvesInitiativeStatus
     protected function statusOptions(): array
     {
         return InitiativeStatus::ordered()
-            ->map(fn (InitiativeStatus $status) => [
+            ->map(fn ($status) => [
                 'id'    => (int) $status->id,
                 'name'  => $status->name,
                 'label' => ucfirst($status->name),

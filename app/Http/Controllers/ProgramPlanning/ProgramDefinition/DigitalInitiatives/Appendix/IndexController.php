@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Appendix;
 
 use App\Http\Controllers\Controller;
-use App\Models\ScInitiative;
+use App\Models\TrsScInitiative;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -16,27 +16,29 @@ class IndexController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        $appendixItems = ScInitiative::query()
-            ->with(['masterInitiative:id,code,name'])
+        $appendixItems = TrsScInitiative::with(['mstInitiatives:id,code,name'])
             ->orderBy('id')
             ->get([
                 'id',
-                'initiative_id',
-                'alias',
-                'useCase_description',
+                'usecase',
+                'description',
                 'value',
                 'urgency',
             ])
-            ->map(fn (ScInitiative $item) => [
-                'id' => (int) $item->id,
-                'initiative_id' => $item->initiative_id ? (int) $item->initiative_id : null,
-                'initiative_code' => $item->masterInitiative?->code,
-                'initiative_name' => $item->masterInitiative?->name,
-                'alias' => $item->alias,
-                'use_case_description' => $item->useCase_description,
-                'value' => (int) $item->value,
-                'urgency' => (int) $item->urgency,
-            ])
+            ->map(function (TrsScInitiative $item) {
+                $firstMst = $item->mstInitiatives->first();
+
+                return [
+                    'id' => (int) $item->id,
+                    'initiative_id' => $firstMst?->id,
+                    'initiative_code' => $firstMst?->code,
+                    'initiative_name' => $firstMst?->name,
+                    'alias' => $item->usecase,
+                    'use_case_description' => $item->description,
+                    'value' => (int) $item->value,
+                    'urgency' => (int) $item->urgency,
+                ];
+            })
             ->values();
 
         return Inertia::render('ProgramPlanning/ProgramDefinition/DigitalInitiatives/Appendix/Index', [

@@ -16,8 +16,7 @@ class CreateController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        $initiativeOptions = MstInitiative::query()
-            ->where('tipe_initiative', 1)
+        $initiativeOptions = MstInitiative::where('tipe_initiative', 1)
             ->with([
                 'coe:id,name',
                 'organization:id,name,groub_id',
@@ -53,8 +52,10 @@ class CreateController extends Controller
             })
             ->values();
 
-        return Inertia::render('ProgramPlanning/ProgramDefinition/DigitalInitiatives/Compendium/Create', [
+        return Inertia::render('ProgramPlanning/ProgramDefinition/DigitalInitiatives/Compendium/Show', [
             'initiativeOptions' => $initiativeOptions,
+            'sourceOptions' => \App\Models\MstScSource::orderBy('name')->get(['id', 'name'])->values(),
         ]);
     }
 }
+
