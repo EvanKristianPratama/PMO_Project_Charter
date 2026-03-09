@@ -41,12 +41,8 @@
                         <td class="px-2 py-2 text-[10px] font-medium text-slate-600 dark:text-slate-300">
                             {{ getLatestImplementationMonthYear(proj) || '-' }}
                         </td>
-                        <td class="px-2 py-2">
-                            <span v-if="getLatestImplementationStatus(proj)"
-                                class="inline-flex rounded-md bg-slate-100 px-1.5 py-0.5 text-[9px] font-medium text-slate-700 dark:bg-white/10 dark:text-slate-300">
-                                {{ getLatestImplementationStatus(proj) }}
-                            </span>
-                            <span v-else class="text-[10px] italic text-slate-400">-</span>
+                        <td class="px-2 py-2 text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                            {{ getLatestImplementationStatus(proj) || '-' }}
                         </td>
                     </tr>
                     <tr v-if="projectList.length === 0">
