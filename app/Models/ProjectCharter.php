@@ -48,4 +48,9 @@ class ProjectCharter extends Model
     {
         return $this->hasMany(Milestone::class, 'pc_id');
     }
+
+    public function projectStatusHistories(): HasMany
+    {
+        return $this->hasMany(ProjectStatusHistory::class, 'project_charter_id');
+    }
 }

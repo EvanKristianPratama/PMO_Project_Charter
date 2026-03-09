@@ -9,9 +9,9 @@
                     <col class="w-[14%]">
                     <col class="w-[8%]">
                     <col class="w-[10%]">
-                    <col class="w-[9%]">
-                    <col class="w-[10%]">
-                    <col class="w-[18%]">
+                    <col v-if="showImplementationColumns" class="w-[9%]">
+                    <col v-if="showImplementationColumns" class="w-[10%]">
+                    <col v-if="showImplementationColumns" class="w-[18%]">
                     <col class="w-[10%]">
                 </colgroup>
                 <thead class="bg-slate-50 dark:bg-white/5">
@@ -21,10 +21,10 @@
                         <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">IT Arsitektur Building Blok</th>
                         <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Daftar Inisiatif</th>
                         <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status Project Charter</th>
-                        <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Tanggal Project Chartergit </th>
-                        <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Bulan / Tahun</th>
-                        <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status Review</th>
-                        <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status Implementasi</th>
+                        <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Tanggal Project Charter </th>
+                        <th v-if="showImplementationColumns" class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Bulan / Tahun</th>
+                        <th v-if="showImplementationColumns" class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status Review</th>
+                        <th v-if="showImplementationColumns" class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status Implementasi</th>
                         <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Action</th>
                     </tr>
                 </thead>
@@ -59,10 +59,10 @@
                         <td class="px-3 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-300">
                             {{ formatDate(project.charter?.tgl_dokumen) }}
                         </td>
-                        <td class="px-3 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                        <td v-if="showImplementationColumns" class="px-3 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-300">
                             {{ latestImplementationMonthYear(project) || '-' }}
                         </td>
-                        <td class="px-3 py-3 text-[11px] text-slate-700 dark:text-slate-200">
+                        <td v-if="showImplementationColumns" class="px-3 py-3 text-[11px] text-slate-700 dark:text-slate-200">
                             <span
                                 v-if="latestReviewStatus(project)"
                                 class="inline-flex items-center rounded-md px-2 py-1 text-[10px] font-medium break-words whitespace-normal leading-relaxed"
@@ -73,7 +73,7 @@
                             </span>
                             <span v-else class="text-xs italic text-slate-400 dark:text-slate-500">-</span>
                         </td>
-                        <td class="px-3 py-3 text-[11px] text-slate-700 dark:text-slate-200">
+                        <td v-if="showImplementationColumns" class="px-3 py-3 text-[11px] text-slate-700 dark:text-slate-200">
                             <span
                                 v-if="latestImplementationStatus(project)"
                                 class="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-[10px] font-medium text-slate-700 capitalize break-words whitespace-normal leading-relaxed dark:bg-white/10 dark:text-slate-300"
@@ -111,7 +111,7 @@
                     </tr>
 
                     <tr v-if="items.length === 0">
-                        <td colspan="10" class="px-6 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
+                        <td :colspan="tableColspan" class="px-6 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
                             <span v-if="activeFlowFilter === null">
                                 Silakan klik salah satu status di atas untuk menampilkan data inisiatif.
                             </span>
@@ -127,6 +127,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { statusBadgeClassById, statusLabelFromOptions } from '@/Composables/initiativeStatus';
 
@@ -144,6 +145,14 @@ const props = defineProps({
         default: null,
     },
 });
+
+const approvedStatusId = computed(() => {
+    const matched = (props.statusOptions || []).find((item) => String(item?.name).toLowerCase() === 'approved');
+    return Number(matched?.id ?? 4);
+});
+
+const showImplementationColumns = computed(() => props.activeFlowFilter === null || Number(props.activeFlowFilter) === approvedStatusId.value);
+const tableColspan = computed(() => (showImplementationColumns.value ? 10 : 7));
 
 const shouldShowCategory = (index) => {
     if (index === 0) return true;

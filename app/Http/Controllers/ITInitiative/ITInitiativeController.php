@@ -9,6 +9,7 @@ use App\Http\Requests\ITInitiative\ITInitiativeUpdateRequest;
 use App\Models\InitiativeStatus;
 use App\Models\MstInitiative;
 use App\Models\PcStatusImplementation;
+use App\Models\ProjectStatusHistory;
 use App\Models\TrsProject;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -212,19 +213,6 @@ class ITInitiativeController extends Controller
             ]);
         }
 
-        if ($project->status) {
-            $statusModel = InitiativeStatus::find($project->status);
-            $statusName = $statusModel ? $statusModel->name : (string)$project->status;
-            
-            \App\Models\PcStatusImplementation::create([
-                'project_id' => $project->id,
-                'review_status' => 'Not Started',
-                'status' => $statusName,
-                'date' => now()->toDateString(),
-                'time_start' => now()->toTimeString(),
-            ]);
-        }
-
         return redirect()->route('it-initiatives.index')->with('success', 'Project created successfully.');
     }
 
@@ -338,7 +326,19 @@ class ITInitiativeController extends Controller
 
     public function edit(TrsProject $project): Response
     {
-        $project->load(['pcStatusImplementations', 'charter']);
+        $relations = [
+            'pcStatusImplementations',
+            'charter',
+        ];
+
+        if (
+            Schema::hasTable('trs_project_status_history')
+            && Schema::hasColumn('trs_project_status_history', 'project_charter_id')
+        ) {
+            $relations[] = 'projectStatusHistories.projectCharter:id,project_id,version_label,tgl_dokumen';
+        }
+
+        $project->load($relations);
 
         $planningItDefinitions = MstInitiative::query()
             ->select(['id', 'code', 'name', 'description', 'status'])
@@ -394,7 +394,11 @@ class ITInitiativeController extends Controller
 
         $oldStatus = $project->status;
         $charterCategory = trim((string) ($validated['charter_category'] ?? ''));
+        $projectStatusChangedAt = $validated['project_status_changed_at'] ?? null;
+        $projectStatusNotes = $validated['project_status_notes'] ?? null;
         unset($validated['charter_category']);
+        unset($validated['project_status_changed_at']);
+        unset($validated['project_status_notes']);
         unset($validated['owner'], $validated['owner_name']);
 
         $project->update($validated);
@@ -418,18 +422,7 @@ class ITInitiativeController extends Controller
             }
         }
 
-        if ((string)$project->status !== (string)$oldStatus) {
-            $statusModel = InitiativeStatus::find($project->status);
-            $statusName = $statusModel ? $statusModel->name : (string)$project->status;
-            
-            PcStatusImplementation::create([
-                'project_id' => $project->id,
-                'review_status' => 'Not Started',
-                'status' => $statusName,
-                'date' => now()->toDateString(),
-                'time_start' => now()->toTimeString(),
-            ]);
-        }
+        $this->recordProjectStatusHistory($project->fresh(), $oldStatus, $project->status, $projectStatusChangedAt, $projectStatusNotes);
 
         return redirect()->route('it-initiatives.index')->with('success', 'Project updated successfully.');
     }
@@ -503,5 +496,81 @@ class ITInitiativeController extends Controller
         $this->syncProjectInitiativeMappings($project, $initiativeIds);
 
         return redirect()->back()->with('success', 'Mapping updated successfully.');
+    }
+
+    private function recordProjectStatusHistory(
+        TrsProject $project,
+        mixed $fromStatusId,
+        mixed $toStatusId,
+        ?string $changedAt = null,
+        ?string $notes = null,
+    ): void
+    {
+        if (
+            ! Schema::hasTable('trs_project_status_history')
+            || ! Schema::hasColumn('trs_project_status_history', 'project_charter_id')
+            || ! Schema::hasColumn('trs_project_status_history', 'version')
+            || ! Schema::hasColumn('trs_project_status_history', 'tanggal')
+            || ! Schema::hasColumn('trs_project_status_history', 'notes')
+        ) {
+            return;
+        }
+
+        $normalizedToStatusId = is_numeric($toStatusId) ? (int) $toStatusId : null;
+        $normalizedFromStatusId = is_numeric($fromStatusId) ? (int) $fromStatusId : null;
+
+        if ($normalizedToStatusId === null || $normalizedToStatusId <= 0) {
+            return;
+        }
+
+        if ($normalizedFromStatusId === $normalizedToStatusId) {
+            return;
+        }
+
+        if ($changedAt === null || trim($changedAt) === '') {
+            return;
+        }
+
+        $nextVersion = (int) $project->projectStatusHistories()->max('version') + 1;
+        $projectCharterId = $project->charters()->latest('id')->value('id');
+
+        if ($projectCharterId === null) {
+            return;
+        }
+
+        ProjectStatusHistory::query()->create([
+            'project_charter_id' => $projectCharterId,
+            'version' => $nextVersion,
+            'tanggal' => \Carbon\Carbon::createFromFormat('Y-m-d', $changedAt)->toDateString(),
+            'notes' => $this->buildProjectStatusHistoryNotes($normalizedFromStatusId, $normalizedToStatusId, $notes),
+        ]);
+    }
+
+    private function buildProjectStatusHistoryNotes(?int $fromStatusId, ?int $toStatusId, ?string $notes = null): string
+    {
+        $manualNotes = trim((string) $notes);
+        if ($manualNotes !== '') {
+            return $manualNotes;
+        }
+
+        $statusNames = InitiativeStatus::query()
+            ->whereIn('id', array_values(array_filter([$fromStatusId, $toStatusId])))
+            ->pluck('name', 'id');
+
+        $formatStatus = static function (?int $statusId) use ($statusNames): string {
+            $name = $statusId !== null ? $statusNames->get($statusId) : null;
+
+            if ($name === null) {
+                return 'Unknown';
+            }
+
+            return ucwords(str_replace('_', ' ', (string) $name));
+        };
+
+        if ($fromStatusId === null) {
+            return 'Status project charter menjadi '.$formatStatus($toStatusId).'.';
+        }
+
+        return 'Status project charter berubah dari '.$formatStatus($fromStatusId).' menjadi '.$formatStatus($toStatusId).'.';
     }
 }

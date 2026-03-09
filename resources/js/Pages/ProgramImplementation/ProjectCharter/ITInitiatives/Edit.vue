@@ -16,38 +16,33 @@
 
             <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="border-b border-slate-200 px-5 py-4 dark:border-white/10">
-                    <h3 class="text-base font-semibold text-slate-900 dark:text-white">Project Charter IT Initiatives</h3>
+                    <h3 class="text-base font-semibold text-slate-900 dark:text-white">Data Utama Project Charter</h3>
                 </div>
 
                 <div class="overflow-x-hidden">
                     <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
                         <colgroup>
-                            <col class="w-[4%]">
-                            <col class="w-[6%]">
+                            <col class="w-[10%]">
+                            <col class="w-[16%]">
+                            <col class="w-[22%]">
+                            <col class="w-[14%]">
                             <col class="w-[12%]">
-                            <col class="w-[15%]">
-                            <col class="w-[9%]">
-                            <col class="w-[10%]">
-                            <col class="w-[10%]">
-                            <col class="w-[24%]">
+                            <col class="w-[16%]">
                             <col class="w-[10%]">
                         </colgroup>
                         <thead class="bg-slate-50 dark:bg-white/5">
                             <tr>
-                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Versi</th>
                                 <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Code</th>
                                 <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">IT Arsitektur Building Blok</th>
                                 <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Daftar Inisiatif</th>
                                 <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status Project Charter</th>
-                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Bulan / Tahun</th>
-                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status Review</th>
-                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status Implementasi</th>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Tanggal Status</th>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Notes</th>
                                 <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Action</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
                             <tr class="bg-slate-50/50 dark:bg-white/[0.03]">
-                                <td class="px-3 py-3 text-[11px] font-medium text-slate-600 dark:text-slate-400">{{ nextVersionNumber }}</td>
                                 <td class="px-3 py-3 align-top">
                                     <input v-model="form.code" type="text" class="table-input" placeholder="PRJ-001">
                                     <p v-if="form.errors.code" class="mt-1 text-[10px] text-rose-600">{{ form.errors.code }}</p>
@@ -61,13 +56,133 @@
                                     <p v-if="form.errors.name" class="mt-1 text-[10px] text-rose-600">{{ form.errors.name }}</p>
                                 </td>
                                 <td class="px-3 py-3 align-top">
-                                    <select v-model="form.status" class="table-input">
-                                        <option v-for="statusOption in statusOptions" :key="statusOption.id" :value="statusOption.id">
-                                            {{ statusOption.label }}
-                                        </option>
-                                    </select>
+                                    <div class="space-y-2">
+                                        <select v-model="form.status" class="table-input">
+                                            <option v-for="statusOption in statusOptions" :key="statusOption.id" :value="statusOption.id">
+                                                {{ statusOption.label }}
+                                            </option>
+                                        </select>
+                                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium capitalize" :class="statusBadgeClassById(form.status)">
+                                            {{ selectedStatusLabel }}
+                                        </span>
+                                    </div>
                                     <p v-if="form.errors.status" class="mt-1 text-[10px] text-rose-600">{{ form.errors.status }}</p>
                                 </td>
+                                <td class="px-3 py-3 align-top">
+                                    <input v-model="form.project_status_changed_at" type="date" class="table-input">
+                                    <p class="mt-1 text-[10px] text-slate-400 dark:text-slate-500">
+                                        Wajib diisi saat status project charter berubah.
+                                    </p>
+                                    <p v-if="form.errors.project_status_changed_at" class="mt-1 text-[10px] text-rose-600">
+                                        {{ form.errors.project_status_changed_at }}
+                                    </p>
+                                </td>
+                                <td class="px-3 py-3 align-top">
+                                    <textarea
+                                        v-model="form.project_status_notes"
+                                        rows="3"
+                                        class="table-input table-textarea"
+                                        placeholder="Catatan perubahan status"
+                                    />
+                                    <p v-if="form.errors.project_status_notes" class="mt-1 text-[10px] text-rose-600">
+                                        {{ form.errors.project_status_notes }}
+                                    </p>
+                                </td>
+                                <td class="px-3 py-3 text-[10px] font-medium align-top">
+                                    <button
+                                        type="button"
+                                        :disabled="form.processing"
+                                        class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[9px] font-semibold text-sky-700 transition-colors hover:bg-sky-200 disabled:opacity-50 dark:bg-sky-500/20 dark:text-sky-300 dark:hover:bg-sky-500/30"
+                                        @click="submitProject"
+                                    >
+                                        Save Data Utama
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+
+            <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                <div class="border-b border-slate-200 px-5 py-4 dark:border-white/10">
+                    <div class="flex items-center justify-between gap-3">
+                        <h3 class="text-base font-semibold text-slate-900 dark:text-white">Project Status History</h3>
+                        <span class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ projectStatusHistories.length }} perubahan</span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-hidden">
+                    <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
+                        <colgroup>
+                            <col class="w-[12%]">
+                            <col class="w-[18%]">
+                            <col class="w-[36%]">
+                            <col class="w-[16%]">
+                            <col class="w-[18%]">
+                        </colgroup>
+                        <thead class="bg-slate-50 dark:bg-white/5">
+                            <tr>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Versi</th>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Tanggal</th>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Notes</th>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Versi Charter</th>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Tercatat Pada</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
+                            <tr
+                                v-for="entry in projectStatusHistories"
+                                :key="`project-status-history-${entry.id}`"
+                                class="transition-colors hover:bg-slate-50 dark:hover:bg-white/5"
+                            >
+                                <td class="px-3 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-200">v{{ historyVersion(entry) }}</td>
+                                <td class="px-3 py-3 text-[11px] text-slate-700 dark:text-slate-200">{{ formatDateOnly(historyTanggal(entry)) }}</td>
+                                <td class="px-3 py-3 text-[11px] text-slate-600 dark:text-slate-300">{{ historyNotes(entry) }}</td>
+                                <td class="px-3 py-3 text-[11px] text-slate-600 dark:text-slate-300">{{ historyCharterLabel(entry) }}</td>
+                                <td class="px-3 py-3 text-[11px] text-slate-500 dark:text-slate-400">{{ formatDateTime(entry.updated_at ?? entry.updatedAt ?? entry.created_at ?? entry.createdAt) }}</td>
+                            </tr>
+                            <tr v-if="projectStatusHistories.length === 0">
+                                <td colspan="5" class="px-6 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
+                                    Belum ada riwayat perubahan status project.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+
+            <article v-if="showImplementationStatus" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                <div class="border-b border-slate-200 px-5 py-4 dark:border-white/10">
+                    <div class="flex items-center justify-between gap-3">
+                        <h3 class="text-base font-semibold text-slate-900 dark:text-white">Implementation Status</h3>
+                        <span class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ implementationLogs.length }} entry</span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-hidden">
+                    <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
+                        <colgroup>
+                            <col class="w-[10%]">
+                            <col class="w-[16%]">
+                            <col class="w-[18%]">
+                            <col class="w-[32%]">
+                            <col class="w-[14%]">
+                            <col class="w-[10%]">
+                        </colgroup>
+                        <thead class="bg-slate-50 dark:bg-white/5">
+                            <tr>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Versi</th>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Bulan / Tahun</th>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status Review</th>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status Implementasi</th>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Tercatat Pada</th>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
+                            <tr class="bg-slate-50/50 dark:bg-white/[0.03]">
+                                <td class="px-3 py-3 text-[11px] font-medium text-slate-600 dark:text-slate-400">{{ nextImplementationVersionNumber }}</td>
                                 <td class="px-3 py-3 align-top">
                                     <input v-model="historyForm.month_year" type="month" class="table-input">
                                     <p v-if="historyForm.errors.month_year" class="mt-1 text-[10px] text-rose-600">{{ historyForm.errors.month_year }}</p>
@@ -89,48 +204,25 @@
                                     />
                                     <p v-if="historyForm.errors.status" class="mt-1 text-[10px] text-rose-600">{{ historyForm.errors.status }}</p>
                                 </td>
+                                <td class="px-3 py-3 text-[11px] text-slate-500 dark:text-slate-400">{{ formatDateTime(new Date()) }}</td>
                                 <td class="px-3 py-3 text-[10px] font-medium align-top">
-                                    <div class="flex flex-col items-start gap-1">
-                                        <button
-                                            type="button"
-                                            :disabled="form.processing"
-                                            class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[9px] font-semibold text-sky-700 transition-colors hover:bg-sky-200 disabled:opacity-50 dark:bg-sky-500/20 dark:text-sky-300 dark:hover:bg-sky-500/30"
-                                            @click="submitProject"
-                                        >
-                                            Save Data Utama
-                                        </button>
-                                        <button
-                                            type="button"
-                                            :disabled="historyForm.processing"
-                                            class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-semibold text-emerald-700 transition-colors hover:bg-emerald-200 disabled:opacity-50 dark:bg-emerald-500/20 dark:text-emerald-300 dark:hover:bg-emerald-500/30"
-                                            @click="submitHistory"
-                                        >
-                                            Tambah Status
-                                        </button>
-                                    </div>
+                                    <button
+                                        type="button"
+                                        :disabled="historyForm.processing"
+                                        class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-semibold text-emerald-700 transition-colors hover:bg-emerald-200 disabled:opacity-50 dark:bg-emerald-500/20 dark:text-emerald-300 dark:hover:bg-emerald-500/30"
+                                        @click="submitHistory"
+                                    >
+                                        Tambah Status
+                                    </button>
                                 </td>
                             </tr>
 
                             <tr
                                 v-for="(log, index) in implementationLogs"
-                                :key="`history-${log.id}`"
+                                :key="`implementation-history-${log.id}`"
                                 class="transition-colors hover:bg-slate-50 dark:hover:bg-white/5"
                             >
-                                <td class="px-3 py-3 text-[11px] font-medium text-slate-600 dark:text-slate-400">{{ historyVersionNumber(index) }}</td>
-                                <td class="px-3 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-200">{{ form.code || '-' }}</td>
-                                <td class="px-3 py-3 text-[11px] text-slate-700 dark:text-slate-200">
-                                    <span class="inline-flex rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-800 dark:bg-blue-500/20 dark:text-blue-300">
-                                        {{ form.charter_category || '-' }}
-                                    </span>
-                                </td>
-                                <td class="px-3 py-3 text-[11px] text-slate-700 dark:text-slate-200">
-                                    <span class="font-medium break-words">{{ form.name || '-' }}</span>
-                                </td>
-                                <td class="px-3 py-3">
-                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium capitalize" :class="statusBadgeClassById(form.status)">
-                                        {{ selectedStatusLabel }}
-                                    </span>
-                                </td>
+                                <td class="px-3 py-3 text-[11px] font-medium text-slate-600 dark:text-slate-400">{{ implementationVersionNumber(index) }}</td>
                                 <td class="px-3 py-3 align-top">
                                     <input v-model="getHistoryDraft(log).month_year" type="month" class="table-input">
                                 </td>
@@ -148,6 +240,7 @@
                                         class="table-input table-textarea"
                                     />
                                 </td>
+                                <td class="px-3 py-3 text-[11px] text-slate-500 dark:text-slate-400">{{ formatDateTime(log.updated_at ?? log.updatedAt ?? log.created_at ?? log.createdAt) }}</td>
                                 <td class="px-3 py-3 text-[10px] font-medium align-top">
                                     <div class="flex flex-col items-start gap-1">
                                         <button
@@ -174,8 +267,8 @@
                             </tr>
 
                             <tr v-if="implementationLogs.length === 0">
-                                <td colspan="9" class="px-6 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
-                                    Belum ada status implementasi. Gunakan baris pertama untuk menambahkan data.
+                                <td colspan="6" class="px-6 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
+                                    Belum ada implementation status. Tambahkan entry baru jika perlu.
                                 </td>
                             </tr>
                         </tbody>
@@ -183,14 +276,21 @@
                 </div>
             </article>
 
-            <!-- Mapping IT Definition (Planning) -->
             <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="border-b border-slate-200 px-5 py-4 dark:border-white/10">
-                    <div class="flex items-center justify-between">
+                    <div class="flex items-center justify-between gap-3">
                         <h3 class="text-base font-semibold text-slate-900 dark:text-white">Mapping IT Definition (Planning)</h3>
                         <div class="flex items-center gap-3">
                             <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Terpilih: {{ mappingForm.initiative_ids.length }}</span>
                             <button
+                                type="button"
+                                class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-semibold text-slate-700 transition-colors hover:bg-slate-200 dark:bg-white/10 dark:text-slate-300 dark:hover:bg-white/15"
+                                @click="showMapping = !showMapping"
+                            >
+                                {{ showMapping ? 'Hide Mapping' : 'Show Mapping' }}
+                            </button>
+                            <button
+                                v-if="showMapping"
                                 type="button"
                                 :disabled="mappingForm.processing"
                                 class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[9px] font-semibold text-sky-700 disabled:opacity-50 dark:bg-sky-500/20 dark:text-sky-300"
@@ -202,7 +302,7 @@
                     </div>
                 </div>
 
-                <div class="max-h-72 overflow-y-auto">
+                <div v-if="showMapping" class="max-h-72 overflow-y-auto">
                     <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
                         <colgroup>
                             <col class="w-[5%]">
@@ -210,7 +310,7 @@
                             <col class="w-[35%]">
                             <col class="w-[45%]">
                         </colgroup>
-                        <thead class="bg-slate-50 dark:bg-white/5 sticky top-0">
+                        <thead class="sticky top-0 bg-slate-50 dark:bg-white/5">
                             <tr>
                                 <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400"></th>
                                 <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Code</th>
@@ -249,6 +349,7 @@
             </article>
 
             <StatusModal
+                v-if="showImplementationStatus"
                 :show="showDeleteModal"
                 mode="confirm"
                 title="Hapus Status Implementasi"
@@ -265,7 +366,7 @@
 
 <script setup>
 import { computed, reactive, ref } from 'vue';
-import { Link, useForm, router } from '@inertiajs/vue3';
+import { Link, router, useForm } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import StatusModal from '@/Components/StatusModal.vue';
 import { statusBadgeClassById, statusLabelFromOptions } from '@/Composables/initiativeStatus';
@@ -311,6 +412,8 @@ const form = useForm({
     owner_name: props.itInitiative.owner_name ?? '',
     status: props.itInitiative.status ?? resolvedDefaultStatusId,
     charter_category: props.itInitiative.charter?.category ?? '',
+    project_status_changed_at: '',
+    project_status_notes: '',
 });
 
 const historyForm = useForm({
@@ -321,17 +424,22 @@ const historyForm = useForm({
 
 const implementationLogs = computed(() => {
     const source = props.itInitiative?.pc_status_implementations ?? props.itInitiative?.pcStatusImplementations ?? [];
-
     return Array.isArray(source) ? source : [];
 });
 
-const nextVersionNumber = computed(() => implementationLogs.value.length + 1);
+const projectStatusHistories = computed(() => {
+    const source = props.itInitiative?.project_status_histories ?? props.itInitiative?.projectStatusHistories ?? [];
+    return Array.isArray(source) ? source : [];
+});
 
+const nextImplementationVersionNumber = computed(() => implementationLogs.value.length + 1);
 const selectedStatusLabel = computed(() => statusLabelFromOptions(form.status, statusOptions));
+const showImplementationStatus = computed(() => Number(form.status) === 4);
 
 const historyDrafts = reactive({});
 const showDeleteModal = ref(false);
 const pendingDeleteId = ref(null);
+const showMapping = ref(false);
 
 const toMonthInput = (rawDate) => {
     const normalized = String(rawDate ?? '').trim();
@@ -342,6 +450,79 @@ const toMonthInput = (rawDate) => {
     }
 
     return currentMonthYear();
+};
+
+const formatDateTime = (rawValue) => {
+    if (!rawValue) return '-';
+
+    const date = rawValue instanceof Date ? rawValue : new Date(rawValue);
+    if (Number.isNaN(date.getTime())) return String(rawValue);
+
+    return date.toLocaleString('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+};
+
+const formatDateOnly = (rawValue) => {
+    if (!rawValue) return '-';
+
+    const date = rawValue instanceof Date ? rawValue : new Date(rawValue);
+    if (Number.isNaN(date.getTime())) return String(rawValue);
+
+    return date.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+    });
+};
+
+const historyVersion = (entry) => entry?.version ?? entry?.version_number ?? '-';
+const historyTanggal = (entry) => entry?.tanggal ?? entry?.changed_at ?? entry?.changedAt ?? null;
+
+const historyNotes = (entry) => {
+    if (entry?.notes) {
+        return entry.notes;
+    }
+
+    const fromStatusRef = entry?.from_status_ref ?? entry?.fromStatusRef ?? null;
+    const toStatusRef = entry?.to_status_ref ?? entry?.toStatusRef ?? null;
+    const fromStatusId = fromStatusRef?.id ?? entry?.from_status_id ?? entry?.fromStatusId ?? null;
+    const toStatusId = toStatusRef?.id ?? entry?.to_status_id ?? entry?.toStatusId ?? null;
+    const fromLabel = fromStatusId != null ? statusLabelFromOptions(fromStatusId, statusOptions) : null;
+    const toLabel = toStatusId != null ? statusLabelFromOptions(toStatusId, statusOptions) : null;
+
+    if (fromLabel && toLabel) {
+        return `Status project charter berubah dari ${fromLabel} menjadi ${toLabel}.`;
+    }
+
+    if (toLabel) {
+        return `Status project charter menjadi ${toLabel}.`;
+    }
+
+    return '-';
+};
+
+const historyCharter = (entry) => entry?.project_charter ?? entry?.projectCharter ?? null;
+
+const historyCharterLabel = (entry) => {
+    const charter = historyCharter(entry);
+    if (!charter) {
+        return '-';
+    }
+
+    if (charter.version_label) {
+        return charter.version_label;
+    }
+
+    if (charter.tgl_dokumen) {
+        return formatDateOnly(charter.tgl_dokumen);
+    }
+
+    return `Charter #${charter.id ?? '-'}`;
 };
 
 const getHistoryDraft = (log) => {
@@ -358,7 +539,7 @@ const getHistoryDraft = (log) => {
     return historyDrafts[log.id];
 };
 
-const historyVersionNumber = (index) => {
+const implementationVersionNumber = (index) => {
     return Math.max(implementationLogs.value.length - index, 1);
 };
 
@@ -425,7 +606,6 @@ const closeDeleteModal = () => {
     pendingDeleteId.value = null;
 };
 
-// --- Mapping ---
 const planningDefinitions = Array.isArray(props.planningItDefinitions) ? props.planningItDefinitions : [];
 
 const mappingForm = useForm({
@@ -437,6 +617,7 @@ const mappingForm = useForm({
 const toggleMapping = (id) => {
     const numId = Number(id);
     const idx = mappingForm.initiative_ids.indexOf(numId);
+
     if (idx >= 0) {
         mappingForm.initiative_ids.splice(idx, 1);
     } else {
