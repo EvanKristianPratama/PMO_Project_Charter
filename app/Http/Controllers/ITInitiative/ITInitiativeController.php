@@ -43,6 +43,7 @@ class ITInitiativeController extends Controller
 
         $projects = TrsProject::query()
             ->select(['id', 'name', 'code'])
+            ->where('tipe_inisiative', 2)
             ->where($roadmapScope)
             ->orderBy('name')
             ->get();
@@ -88,6 +89,7 @@ class ITInitiativeController extends Controller
                 'statusRef:id,name',
                 'pcStatusImplementations',
             ])
+            ->where('tipe_inisiative', 2)
             ->when($filterStatus, fn ($q, $status) => $q->where('status', $status))
             ->when($filters['search'] ?? null, fn ($q, $search) => $q->where(function ($inner) use ($search): void {
                 $inner->where('name', 'like', "%{$search}%")
