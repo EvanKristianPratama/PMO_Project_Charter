@@ -132,6 +132,13 @@
                                 >
                                     Edit
                                 </Link>
+                                <Link
+                                    :href="`/roadmap/status-implementation?initiative_id=${item.id}`"
+                                    class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-500/20 dark:text-blue-300 dark:hover:bg-blue-500/30 transition-colors cursor-pointer"
+                                    title="Status Implementation"
+                                >
+                                    Status Implementation
+                                </Link>
                             </div>
                         </td>
                         <td class="px-3 py-3 text-[11px] text-slate-700 dark:text-slate-200">

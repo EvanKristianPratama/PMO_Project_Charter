@@ -63,13 +63,6 @@
                                     Edit
                                 </Link>
                                 <Link
-                                    :href="`/it-initiatives/${project.id}?tab=detail`"
-                                    :class="actionCellClass(hasScopeCharter(project))"
-                                    title="View Scope Charter"
-                                >
-                                    Scope Charter
-                                </Link>
-                                <Link
                                     :href="`/it-initiatives/${project.id}?tab=charter`"
                                     :class="actionCellClass(hasProjectCharter(project))"
                                     title="View Project Charter"
@@ -82,6 +75,13 @@
                                     title="Open Roadmap"
                                 >
                                     Roadmap
+                                </Link>
+                                <Link
+                                    :href="`/roadmap/status-implementation?initiative_id=${project.initiative_id || ''}`"
+                                    class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-blue-100 text-blue-700 transition-colors hover:bg-blue-200 dark:bg-blue-500/20 dark:text-blue-300 dark:hover:bg-blue-500/30"
+                                    title="Status Implementation"
+                                >
+                                    Status Implementation
                                 </Link>
                             </div>
                         </td>

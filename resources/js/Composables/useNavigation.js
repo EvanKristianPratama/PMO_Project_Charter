@@ -106,6 +106,20 @@ export function useNavigation() {
                 href: '/it-initiatives',
                 icon: FolderIcon,
                 active: (url) => url.startsWith('/it-initiatives') || url.startsWith('/roadmap'),
+                children: [
+                    {
+                        label: 'Roadmap Project Charter',
+                        href: '/it-initiatives?tableMode=roadmap',
+                        icon: ClipboardDocumentCheckIcon,
+                        active: (url) => url.startsWith('/roadmap') && !url.startsWith('/roadmap/status-implementation'),
+                    },
+                    {
+                        label: 'Status Implementation',
+                        href: '/roadmap/status-implementation',
+                        icon: ClipboardDocumentCheckIcon,
+                        active: (url) => url.startsWith('/roadmap/status-implementation'),
+                    },
+                ],
             },
             {
                 label: 'Initiatives Relations',

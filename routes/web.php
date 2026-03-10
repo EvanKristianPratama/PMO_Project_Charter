@@ -166,6 +166,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/roadmap', [RoadmapController::class, 'index'])->name('roadmap.index');
     Route::get('/roadmap/add', [RoadmapController::class, 'add'])->name('roadmap.add');
     Route::get('/roadmap/edit', [RoadmapController::class, 'edit'])->name('roadmap.edit');
+    Route::get('/roadmap/status-implementation', [\App\Http\Controllers\Roadmap\StatusImplementationController::class, 'index'])->name('roadmap.status-implementation');
     Route::get('/roadmap/initiative/{initiative}', [RoadmapController::class, 'show'])->name('roadmap.show');
     
     Route::resource('it-initiatives', ITInitiativeController::class)
