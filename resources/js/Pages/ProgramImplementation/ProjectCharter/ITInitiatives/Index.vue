@@ -31,7 +31,7 @@
                 </div>
 
                 <div v-if="tableMode === TABLE_MODE.IMPLEMENTATION" class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end">
-                    <div class="w-full sm:w-[360px]">
+                    <div class="w-full sm:w-[220px]">
                         <label
                             class="mb-1 block text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400"
                         >
@@ -49,6 +49,24 @@
                             >
                                 {{ implementationInitiativeLabel(initiative) }}
                             </option>
+                        </select>
+                    </div>
+
+                    <div class="w-full sm:w-[160px]">
+                        <label
+                            class="mb-1 block text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400"
+                        >
+                            Filter Progres Status
+                        </label>
+                        <select
+                            v-model="selectedProgresStatus"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-2 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#101826] dark:text-slate-100"
+                        >
+                            <option value="all">Semua Status</option>
+                            <option value="Not Started">Not Started</option>
+                            <option value="On Track">On Track</option>
+                            <option value="Not Signed">Not Signed</option>
+                            <option value="At Risk">At Risk</option>
                         </select>
                     </div>
                     
@@ -435,19 +453,34 @@ const roadmapYearEnd = 2029;
 
 // ── Implementation View State (Matching ReviewTimeline) ──
 const selectedImplementationInitiativeId = ref('all');
+const selectedProgresStatus = ref('all');
 const showImplementationRoadmap = ref(true);
 const showTimelineHistory = ref(true);
 const showInitiativeLabel = ref(true);
 const expandedImplementationRoadmapItems = reactive(new Set());
 
 const filteredImplementationInitiativeItems = computed(() => {
-    const items = asList(props.masterItInitiatives);
-    if (selectedImplementationInitiativeId.value === 'all') {
-        return items;
+    let items = asList(props.masterItInitiatives);
+
+    // Filter by Initiative
+    if (selectedImplementationInitiativeId.value !== 'all') {
+        const selectedId = Number(selectedImplementationInitiativeId.value);
+        items = items.filter((initiative) => Number(initiative?.id) === selectedId);
     }
 
-    const selectedId = Number(selectedImplementationInitiativeId.value);
-    return items.filter((initiative) => Number(initiative?.id) === selectedId);
+    // Filter by Progres Status
+    if (selectedProgresStatus.value !== 'all') {
+        items = items.map(init => {
+            const projects = (init.projects || []).filter(proj => {
+                const logs = proj.pcStatusImplementations || proj.pc_status_implementations || [];
+                const latestStatus = logs.length > 0 ? String(logs[0].review_status || '').trim() : 'Not Started';
+                return latestStatus === selectedProgresStatus.value;
+            });
+            return { ...init, projects };
+        }).filter(init => init.projects.length > 0);
+    }
+
+    return items;
 });
 
 const implementationInitiativeLabel = (initiative) => {
