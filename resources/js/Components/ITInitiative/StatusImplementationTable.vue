@@ -10,7 +10,7 @@
                     <col :class="codeLabel !== 'Code' ? 'w-[10%]' : 'w-[15%]'">
                     <col :class="codeLabel !== 'Code' ? 'w-[40%]' : 'w-[50%]'">
                 </colgroup>
-                <thead class="bg-slate-50 dark:bg-white/[0.03]">
+                <thead v-if="showHeader" class="bg-slate-50 dark:bg-white/[0.03]">
                     <tr>
                         <th
                             class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
@@ -71,7 +71,7 @@
                     <col class="w-[20%]">
                     <col class="w-[20%]">
                 </colgroup>
-                <thead class="bg-slate-50 dark:bg-white/[0.03]">
+                <thead v-if="showHeader" class="bg-slate-50 dark:bg-white/[0.03]">
                     <tr>
                         <th
                             class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
@@ -141,6 +141,10 @@ const props = defineProps({
         default: 'Code',
     },
     showTimelineHistory: {
+        type: Boolean,
+        default: true,
+    },
+    showHeader: {
         type: Boolean,
         default: true,
     },

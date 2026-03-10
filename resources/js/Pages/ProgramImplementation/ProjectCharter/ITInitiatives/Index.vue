@@ -51,26 +51,39 @@
                             </option>
                         </select>
                     </div>
-                    <button
-                        type="button"
-                        class="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-semibold transition"
-                        :class="showTimelineHistory
-                            ? 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-300 dark:hover:bg-amber-900/30'
-                            : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700/40 dark:bg-emerald-900/20 dark:text-emerald-300 dark:hover:bg-emerald-900/30'"
-                        @click="showTimelineHistory = !showTimelineHistory"
-                    >
-                        {{ showTimelineHistory ? 'Hide Timeline History' : 'Show Timeline History' }}
-                    </button>
-                    <button
-                        type="button"
-                        class="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-semibold transition"
-                        :class="showImplementationRoadmap
-                            ? 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-300 dark:hover:bg-amber-900/30'
-                            : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700/40 dark:bg-emerald-900/20 dark:text-emerald-300 dark:hover:bg-emerald-900/30'"
-                        @click="toggleImplementationRoadmapVisibility"
-                    >
-                        {{ showImplementationRoadmap ? 'Hide Roadmap' : 'Show Roadmap' }}
-                    </button>
+                    
+                    <div class="flex flex-col gap-1.5">
+                        <button
+                            type="button"
+                            class="inline-flex items-center justify-center rounded-lg border px-2 py-1 text-[10px] font-semibold transition"
+                            :class="showInitiativeLabel
+                                ? 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-300 dark:hover:bg-amber-900/30'
+                                : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700/40 dark:bg-emerald-900/20 dark:text-emerald-300 dark:hover:bg-emerald-900/30'"
+                            @click="showInitiativeLabel = !showInitiativeLabel"
+                        >
+                            {{ showInitiativeLabel ? 'Hide Label Initiative' : 'Show Label Initiative' }}
+                        </button>
+                        <button
+                            type="button"
+                            class="inline-flex items-center justify-center rounded-lg border px-2 py-1 text-[10px] font-semibold transition"
+                            :class="showTimelineHistory
+                                ? 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-300 dark:hover:bg-amber-900/30'
+                                : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700/40 dark:bg-emerald-900/20 dark:text-emerald-300 dark:hover:bg-emerald-900/30'"
+                            @click="showTimelineHistory = !showTimelineHistory"
+                        >
+                            {{ showTimelineHistory ? 'Hide Timeline History' : 'Show Timeline History' }}
+                        </button>
+                        <button
+                            type="button"
+                            class="inline-flex items-center justify-center rounded-lg border px-2 py-1 text-[10px] font-semibold transition"
+                            :class="showImplementationRoadmap
+                                ? 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-300 dark:hover:bg-amber-900/30'
+                                : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700/40 dark:bg-emerald-900/20 dark:text-emerald-300 dark:hover:bg-emerald-900/30'"
+                            @click="toggleImplementationRoadmapVisibility"
+                        >
+                            {{ showImplementationRoadmap ? 'Hide Roadmap' : 'Show Roadmap' }}
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -237,11 +250,11 @@
 
             <section v-else-if="hasTableSelection && tableMode === TABLE_MODE.IMPLEMENTATION" class="space-y-4">
                 <article
-                    v-for="initiative in filteredImplementationInitiativeItems"
+                    v-for="(initiative, initiativeIndex) in filteredImplementationInitiativeItems"
                     :key="`initiative-${initiative.id}`"
                     class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#171717]"
                 >
-                    <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+                    <div v-if="showInitiativeLabel" class="mb-3 flex flex-wrap items-center justify-between gap-2">
                         <div>
                             <h2 class="text-sm font-semibold text-slate-800 dark:text-slate-100">
                                 {{ implementationInitiativeLabel(initiative) }}
@@ -254,8 +267,13 @@
                         </span>
                     </div>
 
-                    <div v-for="project in initiative.projects" :key="`project-impl-${project.id}`" class="mb-8 last:mb-0">
-                        <StatusImplementationTable :project="project" codeLabel="Progres status history" :showTimelineHistory="showTimelineHistory" />
+                    <div v-for="(project, projectIndex) in initiative.projects" :key="`project-impl-${project.id}`" class="mb-8 last:mb-0">
+                        <StatusImplementationTable 
+                            :project="project" 
+                            codeLabel="Progres status history" 
+                            :showTimelineHistory="showTimelineHistory"
+                            :showHeader="initiativeIndex === 0 && projectIndex === 0" 
+                        />
                     </div>
 
                     <div v-if="showImplementationRoadmap && roadmapProjectsFor(initiative).length > 0" 
@@ -420,6 +438,7 @@ const roadmapYearEnd = 2029;
 const selectedImplementationInitiativeId = ref('all');
 const showImplementationRoadmap = ref(true);
 const showTimelineHistory = ref(true);
+const showInitiativeLabel = ref(true);
 const expandedImplementationRoadmapItems = reactive(new Set());
 
 const filteredImplementationInitiativeItems = computed(() => {
