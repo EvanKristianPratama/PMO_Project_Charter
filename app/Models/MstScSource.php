@@ -4,8 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+use App\Traits\LogsActivity;
+
 class MstScSource extends Model
 {
+    use LogsActivity;
     protected $table = 'mst_sc_source';
 
     protected $guarded = ['id'];

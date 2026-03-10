@@ -6,8 +6,11 @@ use App\Models\Company;
 use App\Models\Organization;
 use Illuminate\Database\Eloquent\Model;
 
+use App\Traits\LogsActivity;
+
 class Groub extends Model
 {
+    use LogsActivity;
     protected $table = 'trs_groub';
 
     protected $fillable = ['company_id', 'name'];

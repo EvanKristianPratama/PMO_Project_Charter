@@ -5,8 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+use App\Traits\LogsActivity;
+
 class ProjectStatusHistory extends Model
 {
+    use LogsActivity;
     protected $table = 'trs_project_status_history';
 
     protected $fillable = [

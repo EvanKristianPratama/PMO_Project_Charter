@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Milestone extends Model
 {
+    use LogsActivity;
     protected $table = 'trs_milestones';
 
     protected $fillable = [

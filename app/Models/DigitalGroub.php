@@ -6,8 +6,11 @@ use App\Models\Organization;
 use App\Models\TrsDigitalInitiative;
 use Illuminate\Database\Eloquent\Model;
 
+use App\Traits\LogsActivity;
+
 class DigitalGroub extends Model
 {
+    use LogsActivity;
     protected $table = 'trs_digital_groub';
 
     public $incrementing = false;

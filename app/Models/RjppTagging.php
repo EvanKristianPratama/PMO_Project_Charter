@@ -6,8 +6,11 @@ use App\Models\Theme;
 use App\Models\TrsDigitalInitiative;
 use Illuminate\Database\Eloquent\Model;
 
+use App\Traits\LogsActivity;
+
 class RjppTagging extends Model
 {
+    use LogsActivity;
     protected $table = 'trs_rjpp';
 
     public $incrementing = false;

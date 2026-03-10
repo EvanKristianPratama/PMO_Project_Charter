@@ -5,8 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+use App\Traits\LogsActivity;
+
 class MstInitiativeRelation extends Model
 {
+    use LogsActivity;
     protected $table = 'mst_initiative_relation';
 
     protected $fillable = [

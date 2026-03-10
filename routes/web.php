@@ -11,6 +11,7 @@ use App\Http\Controllers\InitiativeRelation\InitiativeRelationController;
 use App\Http\Controllers\ITInitiative\CharterController;
 use App\Http\Controllers\ITInitiative\ITInitiativeController;
 use App\Http\Controllers\ITInitiative\MilestoneController;
+use App\Http\Controllers\MasterData\ActivityLogController as MasterDataActivityLogController;
 use App\Http\Controllers\MasterData\MasterDataController;
 use App\Http\Controllers\MasterData\MstInitiative\MstInitiativeController;
 use App\Http\Controllers\MasterData\ScopeCharter\ScopeCharterController;
@@ -96,6 +97,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
 
     // ═══ Master Data ═══════════════════════════════════════════════
     Route::get('/master-data', MasterDataController::class)->name('master-data.index');
+    Route::get('/master-data/log-aktivitas', [MasterDataActivityLogController::class, 'index'])->name('master-data.activity-log.index');
 
     // Master Data → Master Initiative CRUD
     Route::prefix('/master-data/master-initiatives')->name('master-data.mst-initiatives.')->group(function () {

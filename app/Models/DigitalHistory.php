@@ -4,8 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+use App\Traits\LogsActivity;
+
 class DigitalHistory extends Model
 {
+    use LogsActivity;
     protected $table = 'trs_digital_history';
 
     public $incrementing = false;

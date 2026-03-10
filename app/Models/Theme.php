@@ -6,8 +6,11 @@ use App\Models\Goal;
 use App\Models\RjppTagging;
 use Illuminate\Database\Eloquent\Model;
 
+use App\Traits\LogsActivity;
+
 class Theme extends Model
 {
+    use LogsActivity;
     protected $table = 'trs_themes';
 
     protected $fillable = ['idGoal', 'theme_number', 'name'];
