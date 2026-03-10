@@ -142,26 +142,28 @@ class RoadmapController extends Controller
             ...$this->roadmapYearRange(),
         ];
     }
-private function groupRoadmapSources(Collection $sources): Collection
-{
-    return $sources
-        ->groupBy('project_id')
-        ->map(function (Collection $charters): array {
-            $project = $charters->first()?->project;
 
-            return [
-                'id' => (int) ($project?->id ?? 0),
-                'code' => $project?->code,
-                'name' => $project?->name,
-                'charters' => $charters
-                    ->map(fn (ProjectCharter $charter): array => $this->mapCharterForRoadmap($charter))
-                    ->values()
-                    ->all(),
-            ];
-        })
-        ->sortBy('id')
-        ->values();
-}
+    /**
+     * Group roadmap sources by project.
+     */
+    private function groupRoadmapSources(Collection $sources): Collection
+    {
+        return $sources
+            ->groupBy('project_id')
+            ->map(function (Collection $charters): array {
+                $project = $charters->first()?->project;
+
+                return [
+                    'id' => (int) ($project?->id ?? 0),
+                    'code' => $project?->code,
+                    'name' => $project?->name,
+                    'charters' => $charters
+                        ->map(fn (ProjectCharter $charter): array => $this->mapCharterForRoadmap($charter))
+                        ->values()
+                        ->all(),
+                ];
+            })
+            ->sortBy('id')
             ->values();
     }
 

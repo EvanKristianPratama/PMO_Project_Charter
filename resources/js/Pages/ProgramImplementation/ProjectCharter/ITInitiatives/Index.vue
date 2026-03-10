@@ -51,6 +51,16 @@
                             </option>
                         </select>
                     </div>
+                    <button
+                        type="button"
+                        class="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-semibold transition"
+                        :class="showImplementationRoadmap
+                            ? 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-300 dark:hover:bg-amber-900/30'
+                            : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700/40 dark:bg-emerald-900/20 dark:text-emerald-300 dark:hover:bg-emerald-900/30'"
+                        @click="toggleImplementationRoadmapVisibility"
+                    >
+                        {{ showImplementationRoadmap ? 'Hide Roadmap' : 'Show Roadmap' }}
+                    </button>
                 </div>
             </div>
 
@@ -237,6 +247,43 @@
                     <div v-for="project in initiative.projects" :key="`project-impl-${project.id}`" class="mb-8 last:mb-0">
                         <StatusImplementationTable :project="project" codeLabel="Progres status history" />
                     </div>
+
+                    <div v-if="showImplementationRoadmap && roadmapProjectsFor(initiative).length > 0" 
+                         class="mt-5 flex flex-col overflow-hidden rounded-xl border border-[#d0dce8] shadow-sm dark:border-white/10"
+                    >
+                        <template
+                            v-for="(roadmapProject, roadmapIndex) in roadmapProjectsFor(initiative)"
+                            :key="roadmapEntryKey(initiative, roadmapProject)"
+                        >
+                            <ProjectRoadmapSummary
+                                :project="roadmapProject"
+                                :sequence="roadmapIndex + 1"
+                                :year-start="roadmapYearStart"
+                                :year-end="roadmapYearEnd"
+                                :expanded="isImplementationRoadmapExpanded(initiative.id, roadmapProject.roadmap_key)"
+                                :display-version-label="roadmapProject.roadmap_version_label ?? null"
+                                @toggle="toggleImplementationRoadmapExpand(initiative.id, roadmapProject.roadmap_key)"
+                            />
+                            
+                            <!-- Detail content (ProjectRoadmap) -->
+                            <div
+                                v-if="isImplementationRoadmapExpanded(initiative.id, roadmapProject.roadmap_key)"
+                                class="border-b border-[#d0dce8] bg-slate-50/50 p-4 dark:border-white/10 dark:bg-white/5"
+                            >
+                                <ProjectRoadmap
+                                    :project="roadmapProject"
+                                    :form="{
+                                        objectives: roadmapProject.charter?.objectives ?? '',
+                                        duration: roadmapProject.charter?.duration ?? '',
+                                    }"
+                                    :selected-roadmap-version-id="roadmapProject.roadmap_version_label ?? null"
+                                    :sequence="roadmapIndex + 1"
+                                    :year-start="roadmapYearStart"
+                                    :year-end="roadmapYearEnd"
+                                />
+                            </div>
+                        </template>
+                    </div>
                 </article>
 
                 <section v-if="filteredImplementationInitiativeItems.length === 0"
@@ -361,6 +408,8 @@ const roadmapYearEnd = 2029;
 
 // ── Implementation View State (Matching ReviewTimeline) ──
 const selectedImplementationInitiativeId = ref('all');
+const showImplementationRoadmap = ref(true);
+const expandedImplementationRoadmapItems = reactive(new Set());
 
 const filteredImplementationInitiativeItems = computed(() => {
     const items = asList(props.masterItInitiatives);
@@ -381,6 +430,95 @@ const implementationInitiativeLabel = (initiative) => {
 const projectCountLabel = (projects) => {
     const total = Array.isArray(projects) ? projects.length : 0;
     return `${total} Project${total === 1 ? '' : 's'}`;
+};
+
+const normalizeVersionLabel = (value) => {
+    const raw = String(value ?? '').trim();
+    const lower = raw.toLowerCase();
+
+    if (!raw || lower === 'v') {
+        return 'v1';
+    }
+
+    if (/^v\d+$/.test(lower)) {
+        return `v${Math.max(Number(lower.slice(1)) || 1, 1)}`;
+    }
+
+    if (/^\d+$/.test(raw)) {
+        return `v${Math.max(Number(raw) || 1, 1)}`;
+    }
+
+    return raw;
+};
+
+const roadmapProjectsFor = (initiative) => {
+    const projects = Array.isArray(initiative?.projects) ? initiative.projects : [];
+
+    return projects.flatMap((project) => {
+        const charters = Array.isArray(project?.charters) && project.charters.length > 0
+            ? [...project.charters].sort((a, b) => Number(b?.id || 0) - Number(a?.id || 0))
+            : (project?.charter ? [project.charter] : []);
+
+        if (charters.length === 0) {
+            return [{
+                ...project,
+                charters: [],
+                charter: null,
+                milestones: [],
+                roadmap_version_label: null,
+                roadmap_version_key: 'v1',
+                roadmap_key: `project-${project?.id ?? 'x'}-charter-none`,
+            }];
+        }
+
+        return charters.map((charter, charterIndex) => {
+            const versionLabelRaw = String(charter?.version_label ?? '').trim();
+            const versionLabelDisplay = versionLabelRaw || `v${Math.max(charters.length - charterIndex, 1)}`;
+            const versionKey = normalizeVersionLabel(versionLabelDisplay);
+            const charterMilestones = Array.isArray(charter?.milestones) ? charter.milestones : [];
+
+            const milestones = charterMilestones.map((milestone) => ({
+                ...milestone,
+                version: versionKey || milestone?.version || null,
+            }));
+
+            return {
+                ...project,
+                charters: [charter],
+                charter,
+                milestones,
+                roadmap_version_label: versionLabelDisplay,
+                roadmap_version_key: versionKey,
+                roadmap_key: `project-${project?.id ?? 'x'}-charter-${charter?.id ?? charterIndex}`,
+            };
+        });
+    });
+};
+
+const roadmapEntryKey = (initiative, project) => (
+    `initiative-${initiative?.id ?? 'x'}-${project?.roadmap_key ?? `project-${project?.id ?? 'x'}`}`
+);
+
+const isImplementationRoadmapExpanded = (initiativeId, roadmapKey) => {
+    return expandedImplementationRoadmapItems.has(`initiative-${initiativeId}-${roadmapKey}`);
+};
+
+const toggleImplementationRoadmapExpand = (initiativeId, roadmapKey) => {
+    const key = `initiative-${initiativeId}-${roadmapKey}`;
+
+    if (expandedImplementationRoadmapItems.has(key)) {
+        expandedImplementationRoadmapItems.delete(key);
+    } else {
+        expandedImplementationRoadmapItems.add(key);
+    }
+};
+
+const toggleImplementationRoadmapVisibility = () => {
+    showImplementationRoadmap.value = !showImplementationRoadmap.value;
+
+    if (!showImplementationRoadmap.value) {
+        expandedImplementationRoadmapItems.clear();
+    }
 };
 
 // ── Expand / Collapse per project ──

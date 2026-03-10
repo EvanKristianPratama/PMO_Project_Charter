@@ -4,16 +4,20 @@
         <div class="overflow-x-auto rounded-lg border border-slate-100 dark:border-white/5">
             <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
                 <colgroup>
-                    <col :class="codeLabel !== 'Code' ? 'w-[25%]' : 'w-[10%]'">
+                    <col :class="codeLabel !== 'Code' ? 'w-[15%]' : 'w-[10%]'">
+                    <col class="w-[20%]">
                     <col :class="codeLabel !== 'Code' ? 'w-[15%]' : 'w-[15%]'">
-                    <col :class="codeLabel !== 'Code' ? 'w-[15%]' : 'w-[20%]'">
-                    <col :class="codeLabel !== 'Code' ? 'w-[45%]' : 'w-[55%]'">
+                    <col :class="codeLabel !== 'Code' ? 'w-[10%]' : 'w-[15%]'">
+                    <col :class="codeLabel !== 'Code' ? 'w-[40%]' : 'w-[50%]'">
                 </colgroup>
                 <thead class="bg-slate-50 dark:bg-white/[0.03]">
                     <tr>
                         <th
                             class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
                             {{ codeLabel }}</th>
+                        <th
+                            class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                            Project Name</th>
                         <th
                             class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
                             Progres Status</th>
@@ -29,6 +33,9 @@
                     <tr v-for="(proj, projIndex) in projectList" :key="`t1-status-${proj?.id ?? projIndex}`">
                         <td class="px-1 py-2 text-[11px] font-semibold text-slate-700 dark:text-slate-200">
                             {{ proj.code || '-' }}
+                        </td>
+                        <td class="px-1 py-2 text-[11px] font-medium text-slate-700 dark:text-slate-200 truncate" :title="proj.name">
+                            {{ proj.name || '-' }}
                         </td>
                         <td class="px-1 py-2">
                             <span v-if="getLatestReviewStatus(proj)"
