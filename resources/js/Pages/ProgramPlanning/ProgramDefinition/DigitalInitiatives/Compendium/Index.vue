@@ -1,26 +1,48 @@
 <template>
     <UserLayout title="Digital Initiatives - Compendium List">
         <div class="animate-fade-in space-y-4">
+            <div class="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-white/10 dark:bg-[#171717] w-fit">
+                <Link
+                    href="/program-planning/program-definition/digital-initiatives"
+                    class="group flex h-8 items-center gap-2 rounded-lg px-3 text-xs font-bold text-slate-500 transition-all hover:bg-slate-50 hover:text-[#0f63b5] dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-blue-400"
+                >
+                    <svg class="h-4 w-4 transition-transform group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Kembali
+                </Link>
+
+                <div class="h-4 w-px bg-slate-200 dark:bg-white/10" />
+
+                <Link
+                    href="/program-planning/program-definition/digital-initiatives"
+                    class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
+                >
+                    Digital Initiatives
+                </Link>
+                <Link
+                    href="/program-planning/program-definition/digital-initiatives/appendix"
+                    class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
+                >
+                    Appendix
+                </Link>
+                <div
+                    class="rounded-lg bg-blue-50 px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-blue-600 shadow-sm dark:bg-blue-500/10 dark:text-blue-400"
+                >
+                    Compendium
+                </div>
+            </div>
+
             <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <Link
-                            href="/program-planning/program-definition/digital-initiatives"
-                            class="inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-                        >
-                            <span aria-hidden="true">&larr;</span>
-                            Kembali ke Digital Initiatives
-                        </Link>
-                        <h1 class="mt-1 text-2xl font-bold text-slate-900 dark:text-white">Compendium List</h1>
-                        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                            Data gabungan dari Master Initiative dan Scope Charter Initiative.
-                        </p>
+                        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Compendium List</h1>
                     </div>
                     <div class="flex items-center gap-2">
                         <span
                             class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300"
                         >
-                            Total: {{ totalCompendiumItems }}
+                            Total: {{ filteredCompendiumItems.length }}
                         </span>
                         <button
                             type="button"
@@ -33,9 +55,67 @@
                 </div>
             </section>
 
-            <div class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/5 dark:bg-[#1a1a1a]">
-                <div class="flex flex-wrap items-center gap-2 border-b border-slate-200 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:border-white/10 dark:text-slate-400">
-                    <span>Compendium Data Table</span>
+            <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/5 dark:bg-[#1a1a1a]">
+                <!-- Filters Section (Compact Toolbar Style) -->
+                <div class="flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-slate-100 bg-slate-50/30 px-4 py-2.5 dark:border-white/5 dark:bg-white/5">
+                    <div class="flex items-center gap-2">
+                        <label class="shrink-0 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Owner:</label>
+                        <select
+                            v-model="filters.owner"
+                            class="min-w-[140px] rounded-lg border border-slate-200 bg-white py-1 pl-2 pr-8 text-[11px] text-slate-700 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                        >
+                            <option value="">All Project Owners</option>
+                            <option v-for="owner in uniqueOwners" :key="owner" :value="owner">{{ owner }}</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <label class="shrink-0 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">CoE:</label>
+                        <select
+                            v-model="filters.coe"
+                            class="min-w-[120px] rounded-lg border border-slate-200 bg-white py-1 pl-2 pr-8 text-[11px] text-slate-700 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                        >
+                            <option value="">All CoE</option>
+                            <option v-for="coe in uniqueCoes" :key="coe" :value="coe">{{ coe }}</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <label class="shrink-0 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Value:</label>
+                        <select
+                            v-model="filters.value"
+                            class="min-w-[90px] rounded-lg border border-slate-200 bg-white py-1 pl-2 pr-8 text-[11px] text-slate-700 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                        >
+                            <option value="">All Value</option>
+                            <option value="High">High</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Low">Low</option>
+                            <option value="TBC">TBC</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <label class="shrink-0 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Urgency:</label>
+                        <select
+                            v-model="filters.urgency"
+                            class="min-w-[90px] rounded-lg border border-slate-200 bg-white py-1 pl-2 pr-8 text-[11px] text-slate-700 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                        >
+                            <option value="">All Urgency</option>
+                            <option value="High">High</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Low">Low</option>
+                            <option value="TBC">TBC</option>
+                        </select>
+                    </div>
+
+                    <button
+                        v-if="hasActiveFilters"
+                        type="button"
+                        @click="resetFilters"
+                        class="ml-auto text-[10px] font-bold uppercase tracking-tighter text-rose-500 hover:text-rose-600 dark:text-rose-400"
+                    >
+                        Reset Filters
+                    </button>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -67,11 +147,11 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
-                            <tr v-for="(item, index) in compendiumItems" :key="`compendium-${item.id}`" class="transition-colors hover:bg-slate-50 dark:hover:bg-white/5">
+                            <tr v-for="(item, index) in filteredCompendiumItems" :key="`compendium-${item.id}`" class="transition-colors hover:bg-slate-50 dark:hover:bg-white/5">
                                 <td class="px-3 py-3 text-center text-slate-400 dark:text-slate-500">{{ index + 1 }}</td>
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.project_owner ?? '-' }}</td>
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200 font-medium">{{ item.use_case ?? '-' }}</td>
-                                <td class="px-3 py-3 text-slate-700 dark:text-slate-200 line-clamp-2 hover:line-clamp-none transition-all duration-300">
+                                <td class="px-3 py-3 text-slate-700 dark:text-slate-200">
                                     {{ item.desc ?? '-' }}
                                 </td>
                                 <td class="px-3 py-3">
@@ -86,12 +166,12 @@
                                 </td>
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.rjpp ?? '-' }}</td>
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.coe ?? '-' }}</td>
-                                <td class="px-3 py-3 text-slate-700 dark:text-slate-200">
-                                    <div class="flex flex-col gap-1">
-                                        <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-medium text-slate-700 dark:bg-white/10 dark:text-slate-300">
+                                <td class="px-3 py-3">
+                                    <div class="flex flex-col">
+                                        <span class="font-semibold text-slate-700 dark:text-slate-200">
                                             {{ item.data_source ?? '-' }}
                                         </span>
-                                        <span v-if="item.data_source_created !== '-'" class="px-2 text-[9px] text-slate-500 dark:text-slate-400">
+                                        <span v-if="item.data_source_created !== '-'" class="text-[10px] leading-relaxed text-slate-500 dark:text-slate-400">
                                             {{ item.data_source_created }}
                                         </span>
                                     </div>
@@ -108,9 +188,9 @@
                                     </div>
                                 </td>
                             </tr>
-                            <tr v-if="compendiumItems.length === 0">
+                            <tr v-if="filteredCompendiumItems.length === 0">
                                 <td colspan="10" class="px-6 py-10 text-center text-xs text-slate-500 dark:text-slate-400 italic">
-                                    Belum ada data compendium. Silakan tambahkan data baru.
+                                    Data tidak ditemukan berdasarkan filter yang dipilih.
                                 </td>
                             </tr>
                         </tbody>
@@ -312,7 +392,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
@@ -359,6 +439,49 @@ const statusOptions = [
     { value: 4, label: 'Baseline' },
     { value: 5, label: 'Approved' },
 ];
+
+const filters = ref({
+    owner: '',
+    value: '',
+    urgency: '',
+    coe: '',
+});
+
+const uniqueOwners = computed(() => {
+    const owners = props.compendiumItems
+        .map((item) => item.project_owner)
+        .filter((owner) => owner && owner !== '-');
+    return [...new Set(owners)].sort();
+});
+
+const uniqueCoes = computed(() => {
+    const coes = props.compendiumItems
+        .map((item) => item.coe)
+        .filter((coe) => coe && coe !== '-');
+    return [...new Set(coes)].sort();
+});
+
+const filteredCompendiumItems = computed(() => {
+    return props.compendiumItems.filter((item) => {
+        const matchOwner = !filters.value.owner || item.project_owner === filters.value.owner;
+        const matchValue = !filters.value.value || item.value === filters.value.value;
+        const matchUrgency = !filters.value.urgency || item.urgency === filters.value.urgency;
+        const matchCoe = !filters.value.coe || item.coe === filters.value.coe;
+
+        return matchOwner && matchValue && matchUrgency && matchCoe;
+    });
+});
+
+const hasActiveFilters = computed(() => {
+    return !!(filters.value.owner || filters.value.value || filters.value.urgency || filters.value.coe);
+});
+
+const resetFilters = () => {
+    filters.value.owner = '';
+    filters.value.value = '';
+    filters.value.urgency = '';
+    filters.value.coe = '';
+};
 
 const form = useForm({
     initiative_ids: [],
@@ -481,17 +604,6 @@ const scoreClass = (label) => {
 </script>
 
 <style scoped>
-.line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.hover\:line-clamp-none:hover {
-    -webkit-line-clamp: unset;
-    overflow: visible;
-}
 </style>
 
 
