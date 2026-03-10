@@ -1,7 +1,8 @@
 <template>
-    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/5 dark:bg-[#1a1a1a]">
-        <div class="overflow-x-hidden">
-            <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
+    <div class="space-y-4">
+        <div class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/5 dark:bg-[#1a1a1a]">
+            <div class="overflow-x-hidden">
+                <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
                 <colgroup>
                     <col class="w-[3%]">
                     <col class="w-[6%]">
@@ -13,17 +14,41 @@
                 </colgroup>
                 <thead class="bg-slate-50 dark:bg-white/5">
                     <tr>
-                        <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">No</th>
-                        <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Code</th>
-                        <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">IT Arsitektur Building Blok</th>
-                        <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Daftar Inisiatif</th>
-                        <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status Project Charter</th>
-                        <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Tanggal Project Charter </th>
-                        <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Action</th>
+                        <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 align-top dark:text-slate-400">No</th>
+                        <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 align-top dark:text-slate-400">Code</th>
+                        <th class="px-3 py-2 text-left align-top">
+                            <span class="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">IT Arsitektur</span>
+                            <select v-model="filterCategory" class="mt-1.5 w-full rounded border border-slate-300 bg-white px-1.5 py-1 text-[10px] font-normal text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200">
+                                <option value="">Semua</option>
+                                <option v-for="cat in availableCategories" :key="cat" :value="cat">{{ cat }}</option>
+                            </select>
+                        </th>
+                        <th class="px-3 py-2 text-left align-top">
+                            <span class="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Daftar Inisiatif</span>
+                            <select v-model="filterInitiativeName" class="mt-1.5 w-full rounded border border-slate-300 bg-white px-1.5 py-1 text-[10px] font-normal text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200">
+                                <option value="">Semua</option>
+                                <option v-for="name in availableInitiatives" :key="name" :value="name">{{ name }}</option>
+                            </select>
+                        </th>
+                        <th class="px-3 py-2 text-left align-top">
+                            <span class="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status Project Charter</span>
+                            <select v-model="filterStatus" class="mt-1.5 w-full rounded border border-slate-300 bg-white px-1.5 py-1 text-[10px] font-normal text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200">
+                                <option value="">Semua</option>
+                                <option v-for="status in availableStatuses" :key="status.id" :value="status.id">{{ status.label }}</option>
+                            </select>
+                        </th>
+                        <th class="px-3 py-2 text-left align-top">
+                            <span class="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Tanggal Project</span>
+                            <select v-model="filterDate" class="mt-1.5 w-full rounded border border-slate-300 bg-white px-1.5 py-1 text-[10px] font-normal text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200">
+                                <option value="">Semua</option>
+                                <option v-for="date in availableDates" :key="date" :value="date">{{ date }}</option>
+                            </select>
+                        </th>
+                        <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 align-top dark:text-slate-400">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
-                    <tr v-for="(project, index) in items" :key="project.id" class="group transition-colors hover:bg-slate-50 dark:hover:bg-white/5">
+                    <tr v-for="(project, index) in displayedItems" :key="project.id" class="group transition-colors hover:bg-slate-50 dark:hover:bg-white/5">
                         <td class="px-3 py-3 text-[11px] font-medium text-slate-600 dark:text-slate-400">
                             {{ index + 1 }}
                         </td>
@@ -87,10 +112,13 @@
                         </td>
                     </tr>
 
-                    <tr v-if="items.length === 0">
+                    <tr v-if="displayedItems.length === 0">
                         <td :colspan="tableColspan" class="px-6 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
-                            <span v-if="activeFlowFilter === null">
+                            <span v-if="activeFlowFilter === null && items.length === 0">
                                 Silakan klik salah satu status di atas untuk menampilkan data inisiatif.
+                            </span>
+                            <span v-else-if="items.length > 0 && displayedItems.length === 0">
+                                Tidak ada data yang sesuai dengan filter pencarian ini.
                             </span>
                             <span v-else>
                                 Tidak ada data yang sesuai dengan filter opsi ini.
@@ -100,10 +128,12 @@
                 </tbody>
             </table>
         </div>
+        </div>
     </div>
 </template>
 
 <script setup>
+import { computed, ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { statusBadgeClassById, statusLabelFromOptions } from '@/Composables/initiativeStatus';
 
@@ -145,16 +175,16 @@ const resolvedProjectStatusDate = (project) => {
 
 const shouldShowCategory = (index) => {
     if (index === 0) return true;
-    const current = props.items[index]?.charter?.category || 'Uncategorized';
-    const previous = props.items[index - 1]?.charter?.category || 'Uncategorized';
+    const current = displayedItems.value[index]?.charter?.category || 'Uncategorized';
+    const previous = displayedItems.value[index - 1]?.charter?.category || 'Uncategorized';
     return current !== previous;
 };
 
 const getCategoryRowspan = (index) => {
     let count = 1;
-    const current = props.items[index]?.charter?.category || 'Uncategorized';
-    for (let i = index + 1; i < props.items.length; i += 1) {
-        if ((props.items[i]?.charter?.category || 'Uncategorized') === current) {
+    const current = displayedItems.value[index]?.charter?.category || 'Uncategorized';
+    for (let i = index + 1; i < displayedItems.value.length; i += 1) {
+        if ((displayedItems.value[i]?.charter?.category || 'Uncategorized') === current) {
             count += 1;
         } else {
             break;
@@ -162,6 +192,70 @@ const getCategoryRowspan = (index) => {
     }
     return count;
 };
+
+const filterCategory = ref('');
+const filterInitiativeName = ref('');
+const filterStatus = ref('');
+const filterDate = ref('');
+
+const availableCategories = computed(() => {
+    const cats = new Set(props.items.map(p => p.charter?.category || 'Uncategorized'));
+    return Array.from(cats).sort();
+});
+
+const availableInitiatives = computed(() => {
+    const inits = new Set(props.items.map(p => p.name).filter(Boolean));
+    return Array.from(inits).sort();
+});
+
+const availableStatuses = computed(() => {
+    const statuses = new Map();
+    props.items.forEach(p => {
+        const id = resolvedProjectStatusId(p);
+        const label = statusLabelFromOptions(id, props.statusOptions);
+        if (!statuses.has(id)) {
+            statuses.set(id, { id, label });
+        }
+    });
+    return Array.from(statuses.values()).sort((a,b) => a.id - b.id);
+});
+
+const availableDates = computed(() => {
+    const dates = new Set(props.items.map(p => {
+        const dateStr = resolvedProjectStatusDate(p);
+        if (!dateStr) return null;
+        return dateStr.substring(0, 7); // YYYY-MM
+    }).filter(Boolean));
+    return Array.from(dates).sort((a,b) => b.localeCompare(a));
+});
+
+const displayedItems = computed(() => {
+    return props.items.filter(project => {
+        // Filter by category
+        if (filterCategory.value && filterCategory.value !== '') {
+            const cat = project.charter?.category || 'Uncategorized';
+            if (cat !== filterCategory.value) return false;
+        }
+
+        // Filter by Name
+        if (filterInitiativeName.value && filterInitiativeName.value !== '') {
+            if (project.name !== filterInitiativeName.value) return false;
+        }
+
+        // Filter by Status
+        if (filterStatus.value !== '') {
+            if (resolvedProjectStatusId(project) !== Number(filterStatus.value)) return false;
+        }
+
+        // Filter by date (YYYY-MM)
+        if (filterDate.value && filterDate.value !== '') {
+            const dateStr = resolvedProjectStatusDate(project);
+            if (!dateStr || !String(dateStr).startsWith(filterDate.value)) return false;
+        }
+
+        return true;
+    });
+});
 
 const hasFilled = (value) => value !== null && value !== undefined && String(value).trim() !== '';
 
