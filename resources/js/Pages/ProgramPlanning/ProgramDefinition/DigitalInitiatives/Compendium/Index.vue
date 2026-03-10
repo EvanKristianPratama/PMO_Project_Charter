@@ -81,7 +81,7 @@
                                         {{ item.urgency ?? '-' }}
                                     </span>
                                 </td>
-                                <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.rjpp_ids ?? '-' }}</td>
+                                <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.rjpp ?? '-' }}</td>
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.coe ?? '-' }}</td>
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200">
                                     <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-medium text-slate-700 dark:bg-white/10 dark:text-slate-300">

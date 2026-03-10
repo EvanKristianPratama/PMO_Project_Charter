@@ -365,7 +365,7 @@ const displayVersionLabel = computed(() => {
 });
 
 watch(
-    () => [props.project?.id, props.selectedRoadmapVersionId],
+    () => [props.project?.charter?.id, props.selectedRoadmapVersionId],
     () => resetForm(),
     { immediate: true }
 );
@@ -500,7 +500,8 @@ const buildDates = () => {
 };
 
 const submitForm = () => {
-    if (!props.project?.id) {
+    const charterId = props.project?.charter?.id;
+    if (!charterId) {
         return;
     }
 
@@ -512,13 +513,13 @@ const submitForm = () => {
     }
 
     if (editingMilestoneId.value) {
-        milestoneForm.put(`/it-initiatives/${props.project.id}/milestones/${editingMilestoneId.value}`, {
+        milestoneForm.put(`/it-initiatives/${charterId}/milestones/${editingMilestoneId.value}`, {
             preserveScroll: true,
             preserveState: true,
             onSuccess: () => resetForm(),
         });
     } else {
-        milestoneForm.post(`/it-initiatives/${props.project.id}/milestones`, {
+        milestoneForm.post(`/it-initiatives/${charterId}/milestones`, {
             preserveScroll: true,
             preserveState: true,
             onSuccess: () => resetForm(),
@@ -527,7 +528,8 @@ const submitForm = () => {
 };
 
 const removeMilestone = (milestoneId) => {
-    if (!props.project?.id) {
+    const charterId = props.project?.charter?.id;
+    if (!charterId) {
         return;
     }
 
@@ -539,7 +541,7 @@ const removeMilestone = (milestoneId) => {
         resetForm();
     }
 
-    router.delete(`/it-initiatives/${props.project.id}/milestones/${milestoneId}`, {
+    router.delete(`/it-initiatives/${charterId}/milestones/${milestoneId}`, {
         preserveScroll: true,
         preserveState: true,
     });

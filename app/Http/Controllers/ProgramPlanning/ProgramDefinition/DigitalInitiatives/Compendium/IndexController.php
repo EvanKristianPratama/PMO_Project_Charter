@@ -49,13 +49,14 @@ class IndexController extends Controller
             $rjppMap = DB::table('trs_rjpp as rj')
                 ->join('trs_themes as theme', 'theme.id', '=', 'rj.theme_id')
                 ->whereIn("rj.$rjppScKey", $records->pluck('id')->all())
-                ->selectRaw("rj.$rjppScKey as sc_id, theme.name as theme_name")
-                ->orderBy('theme.name')
+                ->selectRaw("rj.$rjppScKey as sc_id, theme.theme_number")
+                ->orderBy('theme.theme_number')
                 ->get()
                 ->groupBy('sc_id')
                 ->map(fn ($rows) => $rows
-                    ->pluck('theme_name')
-                    ->filter(fn ($name) => is_string($name) && trim($name) !== '')
+                    ->pluck('theme_number')
+                    ->filter(fn ($num) => !empty($num))
+                    ->map(fn ($num) => "#$num")
                     ->values()
                     ->implode(', '));
         }
@@ -103,22 +104,22 @@ class IndexController extends Controller
             ->get(['id', 'name'])
             ->values();
 
-        $themeOptions = Theme::with('goal:id,title')
+        $themeOptions = Theme::with('goal:id,code,title')
             ->orderBy('id')
             ->get()
-            ->map(function ($theme) {
-                $goalTitle = $theme->goal?->title ?? 'No Pillar';
+            ->map(function (Theme $theme): array {
+                $goal = $theme->goal;
+                $goalTitle = $goal?->title ?? 'No Pillar';
+                $goalCode = $goal?->code ?? '-';
                 $themeNum = $theme->theme_number ?? 'N/A';
 
                 return [
                     'id' => (int) $theme->id,
-                    'theme_number' => $themeNum,
-                    'code' => $themeNum,
-                    'strategic_pillar_title' => $goalTitle,
+                    'code' => $goalCode,
                     'strategic_pillar' => $goalTitle,
-                    'theme_name' => $theme->name,
+                    'theme_code' => $themeNum,
                     'name' => $theme->name,
-                    'label' => "[$goalTitle] #$themeNum - $theme->name",
+                    'label' => "[$goalCode - $goalTitle] #$themeNum - $theme->name",
                 ];
             })
             ->values();
