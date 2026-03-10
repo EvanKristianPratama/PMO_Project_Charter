@@ -146,7 +146,7 @@
                                         :value="opt.id"
                                         :disabled="form.initiative_ids.includes(opt.id)"
                                     >
-                                        {{ opt.code ? `[${opt.code}] ` : '' }}{{ opt.name }}
+                                        {{ opt.code ? `[${opt.code}] ` : '' }}{{ themeDisplayLabel(opt) }}
                                     </option>
                                 </select>
                                 <div class="flex min-h-10 flex-wrap gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-2 dark:border-white/10 dark:bg-white/5">
@@ -261,7 +261,7 @@
                                     :value="opt.id"
                                     :disabled="form.rjpp_tagging_ids.includes(opt.id)"
                                 >
-                                    {{ opt.name }}
+                                    {{ themeDisplayLabel(opt) }}
                                 </option>
                             </select>
                             <div class="flex min-h-10 flex-wrap gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-2 dark:border-white/10 dark:bg-white/5">
@@ -406,8 +406,27 @@ const removeRjppTagging = (id) => {
     form.rjpp_tagging_ids = form.rjpp_tagging_ids.filter((item) => item !== id);
 };
 
+const themeDisplayLabel = (theme) => {
+    if (!theme) return '-';
+
+    const strategicPillar = String(theme?.strategic_pillar_title ?? theme?.strategic_pillar ?? '').trim();
+    const themeNumber = String(theme?.theme_number ?? theme?.code ?? '').trim();
+    const themeName = String(theme?.theme_name ?? theme?.name ?? '').trim();
+
+    if (strategicPillar === '' && themeNumber === '') {
+        return themeName || '-';
+    }
+
+    const prefix = strategicPillar !== '' ? `[${strategicPillar}]` : '';
+    const number = themeNumber !== '' ? ` #${themeNumber}` : '';
+    const suffix = themeName !== '' ? ` - ${themeName}` : '';
+
+    return `${prefix}${number}${suffix}`.trim() || '-';
+};
+
 const themeLabel = (id) => {
-    return props.themeOptions.find((item) => item.id === id)?.name ?? String(id);
+    const theme = props.themeOptions.find((item) => item.id === id);
+    return themeDisplayLabel(theme) || String(id);
 };
 
 const submitCreate = () => {

@@ -91,16 +91,22 @@ class CreateController extends Controller
 
     private function themeOptions()
     {
-        return Theme::with('goal:id,title')
+        return Theme::with('goal:id,code,title')
             ->orderBy('id')
             ->get()
             ->map(function (Theme $theme): array {
-                $goalTitle = $theme->goal?->title ?? 'No Pillar';
+                $goal = $theme->goal;
+                $goalTitle = $goal?->title ?? 'No Pillar';
+                $goalCode = $goal?->code ?? '-';
                 $themeNum = $theme->theme_number ?? 'N/A';
 
                 return [
                     'id' => (int) $theme->id,
-                    'name' => "[$goalTitle] #$themeNum - $theme->name",
+                    'code' => $goalCode,
+                    'strategic_pillar' => $goalTitle,
+                    'theme_code' => $themeNum,
+                    'name' => $theme->name,
+                    'label' => "[$goalCode - $goalTitle] #$themeNum - $theme->name",
                 ];
             })
             ->values();

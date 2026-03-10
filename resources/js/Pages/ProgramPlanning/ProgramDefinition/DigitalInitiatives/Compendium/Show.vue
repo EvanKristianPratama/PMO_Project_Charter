@@ -127,6 +127,7 @@
 
             <CompendiumCharterDocument
                 :form="form"
+                :initiative-options="initiativeOptions"
                 :source-options="sourceOptions"
                 :theme-options="themeOptions"
                 :editable="isEditing"
@@ -320,3 +321,4 @@ const submit = () => {
     });
 };
 </script>
+

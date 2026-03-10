@@ -28,17 +28,6 @@ class EditController extends Controller
 
         $detail = $scInitiative->scDetails->first();
 
-        $initiativeOptions = MstInitiative::where('tipe_initiative', 1)
-            ->orderBy('code')
-            ->orderBy('name')
-            ->get(['id', 'code', 'name'])
-            ->map(fn (MstInitiative $initiative) => [
-                'id' => (int) $initiative->id,
-                'code' => $initiative->code,
-                'name' => $initiative->name,
-            ])
-            ->values();
-
         return Inertia::render('ProgramPlanning/ProgramDefinition/DigitalInitiatives/Compendium/Show', [
             'compendium' => [
                 'id' => (int) $scInitiative->id,
@@ -63,7 +52,7 @@ class EditController extends Controller
                 'interpendencies' => $detail?->interpendencies ?? '',
                 'sign_by' => $detail?->sign_by ?? '',
             ],
-            'initiativeOptions' => $initiativeOptions,
+            'initiativeOptions' => $this->initiativeOptions(),
             'sourceOptions' => MstScSource::orderBy('name')->get(['id', 'name'])->values(),
             'themeOptions' => $this->themeOptions(),
             'compendiumOptions' => $this->compendiumOptions(),
@@ -96,22 +85,66 @@ class EditController extends Controller
             ->values();
     }
 
-    private function themeOptions()
+    private function initiativeOptions()
     {
-        return Theme::with('goal:id,title')
-            ->orderBy('id')
-            ->get()
-            ->map(function (Theme $theme): array {
-                $goalTitle = $theme->goal?->title ?? 'No Pillar';
-                $themeNum = $theme->theme_number ?? 'N/A';
+        return MstInitiative::where('tipe_initiative', 1)
+            ->with([
+                'coe:id,name',
+                'organization:id,name,groub_id',
+                'organization.groub:id,name',
+                'sourceData:id,name,month,year,created_at',
+            ])
+            ->orderBy('code')
+            ->orderBy('name')
+            ->get(['id', 'code', 'name', 'description', 'business_unit', 'coe_id', 'source'])
+            ->map(function (MstInitiative $initiative): array {
+                $source = $initiative->sourceData;
+
+                $sourceCreated = '-';
+                if ($source) {
+                    if (!empty($source->month) && !empty($source->year)) {
+                        $sourceCreated = $source->month . ' ' . $source->year;
+                    } elseif (!empty($source->created_at)) {
+                        $sourceCreated = $source->created_at->format('M Y');
+                    }
+                }
 
                 return [
-                    'id' => (int) $theme->id,
-                    'name' => "[$goalTitle] #$themeNum - $theme->name",
+                    'id' => (int) $initiative->id,
+                    'code' => $initiative->code,
+                    'name' => $initiative->name,
+                    'description' => $initiative->description,
+                    'group' => $initiative->organization?->groub?->name ?? '-',
+                    'project_owner' => $initiative->organization?->name ?? '-',
+                    'coe' => $initiative->coe?->name ?? '-',
+                    'data_source' => $source?->name ?? '-',
+                    'data_source_created' => $sourceCreated,
                 ];
             })
             ->values();
     }
+private function themeOptions()
+{
+    return Theme::with('goal:id,code,title')
+        ->orderBy('id')
+        ->get()
+        ->map(function (Theme $theme): array {
+            $goal = $theme->goal;
+            $goalTitle = $goal?->title ?? 'No Pillar';
+            $goalCode = $goal?->code ?? '-';
+            $themeNum = $theme->theme_number ?? 'N/A';
+
+            return [
+                'id' => (int) $theme->id,
+                'code' => $goalCode,
+                'strategic_pillar' => $goalTitle,
+                'theme_code' => $themeNum,
+                'name' => $theme->name,
+                'label' => "[$goalCode - $goalTitle] #$themeNum - $theme->name",
+            ];
+        })
+        ->values();
+}
 
     private function rjppTaggingIds(int $scInitiativeId): array
     {

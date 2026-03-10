@@ -4,6 +4,7 @@ import { computed } from 'vue';
 const props = defineProps({
     form: { type: Object, required: true },
     editable: { type: Boolean, default: false },
+    initiativeOptions: { type: Array, default: () => [] },
     sourceOptions: { type: Array, default: () => [] },
     themeOptions: { type: Array, default: () => [] },
 });
@@ -37,8 +38,20 @@ const normalizedThemeIds = computed(() => {
         .filter((value) => value > 0);
 });
 
+const normalizedInitiativeIds = computed(() => {
+    if (!Array.isArray(props.form.initiative_ids)) return [];
+
+    return props.form.initiative_ids
+        .map((value) => toNumber(value))
+        .filter((value) => value > 0);
+});
+
 const themeMap = computed(() => {
     return new Map((props.themeOptions ?? []).map((option) => [toNumber(option.id), option]));
+});
+
+const initiativeMap = computed(() => {
+    return new Map((props.initiativeOptions ?? []).map((option) => [toNumber(option.id), option]));
 });
 
 const selectedThemes = computed(() => {
@@ -47,10 +60,60 @@ const selectedThemes = computed(() => {
 
         return {
             id,
+            code: option?.code ?? '-',
+            strategicPillar: option?.strategic_pillar ?? '-',
+            themeCode: option?.theme_code ?? '-',
             name: option?.name ?? `Theme ${id}`,
         };
     });
 });
+
+const selectedInitiatives = computed(() => {
+    return normalizedInitiativeIds.value.map((id) => {
+        const option = initiativeMap.value.get(id);
+
+        return {
+            id,
+            code: String(option?.code ?? '').trim(),
+            name: String(option?.name ?? `Initiative ${id}`).trim(),
+            coe: displayValue(option?.coe),
+            projectOwner: displayValue(option?.project_owner),
+            group: displayValue(option?.group),
+            dataSource: displayValue(option?.data_source),
+            dataSourceCreated: displayValue(option?.data_source_created),
+        };
+    });
+});
+
+const selectedCoeNames = computed(() => {
+    return [...new Set(
+        selectedInitiatives.value
+            .map((initiative) => initiative.coe)
+            .filter((value) => value !== '-')
+    )];
+});
+
+const coeCoverageLabel = computed(() => {
+    return selectedCoeNames.value.length ? selectedCoeNames.value.join(', ') : '-';
+});
+
+const themeOptionLabel = (option) => {
+    if (!option) return '-';
+
+    const strategicPillar = String(option?.strategic_pillar_title ?? option?.strategic_pillar ?? '').trim();
+    const themeNumber = String(option?.theme_number ?? option?.code ?? '').trim();
+    const themeName = String(option?.theme_name ?? option?.name ?? '').trim();
+
+    if (strategicPillar === '' && themeNumber === '') {
+        return themeName || '-';
+    }
+
+    const prefix = strategicPillar !== '' ? `[${strategicPillar}]` : '';
+    const number = themeNumber !== '' ? ` #${themeNumber}` : '';
+    const suffix = themeName !== '' ? ` - ${themeName}` : '';
+
+    return `${prefix}${number}${suffix}`.trim() || '-';
+};
 
 const addTheme = (value) => {
     const id = toNumber(value);
@@ -105,36 +168,35 @@ const sourceLabel = computed(() => {
                     </p>
                 </div>
 
-                <div class="flex items-center gap-3">
-                    <div class="flex flex-col items-end">
-                        <span class="text-[10px] font-bold uppercase text-slate-400">Score Value</span>
-                        <template v-if="editable">
-                            <select v-model="form.value" class="score-select bg-emerald-50 text-emerald-700 ring-emerald-200">
-                                <option v-for="option in scoreOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
-                            </select>
-                        </template>
-                        <span v-else class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-300">
-                            {{ getScoreLabel(form.value) }}
-                        </span>
+                <div class="score-panel">
+                    <div class="score-column border-r border-[#1e4f8f]">
+                        <div class="bar-sub text-center !py-1">Value</div>
+                        <div class="panel-body text-center !py-1.5 !px-2.5">
+                            <template v-if="editable">
+                                <select v-model="form.value" class="score-input-simple text-center">
+                                    <option v-for="option in scoreOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
+                                </select>
+                            </template>
+                            <div v-else class="text-[13px] text-slate-900">{{ getScoreLabel(form.value) }}</div>
+                        </div>
                     </div>
-
-                    <div class="flex flex-col items-end">
-                        <span class="text-[10px] font-bold uppercase text-slate-400">Urgency</span>
-                        <template v-if="editable">
-                            <select v-model="form.urgency" class="score-select bg-rose-50 text-rose-700 ring-rose-200">
-                                <option v-for="option in scoreOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
-                            </select>
-                        </template>
-                        <span v-else class="inline-flex items-center rounded-full bg-rose-100 px-2.5 py-0.5 text-[11px] font-bold text-rose-700 ring-1 ring-rose-300">
-                            {{ getScoreLabel(form.urgency) }}
-                        </span>
+                    <div class="score-column">
+                        <div class="bar-sub text-center !py-1">Urgency</div>
+                        <div class="panel-body text-center !py-1.5 !px-2.5">
+                            <template v-if="editable">
+                                <select v-model="form.urgency" class="score-input-simple text-center">
+                                    <option v-for="option in scoreOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
+                                </select>
+                            </template>
+                            <div v-else class="text-[13px] text-slate-900">{{ getScoreLabel(form.urgency) }}</div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="info-bar">
-            <div class="info-cell">
+            <div class="info-cell info-cell-compact">
                 <span class="info-label info-label-dark">Project Owner</span>
                 <span class="info-sep"></span>
                 <span class="info-value">
@@ -148,13 +210,18 @@ const sourceLabel = computed(() => {
                     <template v-else>{{ displayValue(form.owner) }}</template>
                 </span>
             </div>
+            <div class="info-cell info-cell-compact">
+                <span class="info-label">CoE</span>
+                <span class="info-sep"></span>
+                <span class="info-value">{{ coeCoverageLabel }}</span>
+            </div>
             <div class="info-cell info-cell-last">
                 <span class="info-label">Data Source</span>
                 <span class="info-sep"></span>
                 <span class="info-value">
                     <select v-if="editable" v-model="form.source_id" class="info-input">
                         <option value="">- Pilih Source -</option>
-                        <option v-for="option in sourceOptions" :key="option.id" :value="option.id">{{ option.name }}</option>
+                        <option v-for="option in sourceOptions" :key="option.id" :value="option.id">{{ themeOptionLabel(option) }}</option>
                     </select>
                     <template v-else>{{ sourceLabel }}</template>
                 </span>
@@ -162,10 +229,57 @@ const sourceLabel = computed(() => {
         </div>
 
         <div class="charter-section">
-            <div class="bar-main">RJPP Tagging</div>
+            <div class="bar-main">General Information</div>
             <article class="panel border-t-0">
-                <div class="bar-sub">Tema RJPP yang terhubung</div>
-                <div class="panel-body min-h-[130px] space-y-3">
+                <div class="bar-sub">Master Initiative Dependency</div>
+                <div class="panel-body space-y-4">
+                    <div class="table-wrap">
+                        <table class="initiative-table">
+                            <thead>
+                                <tr>
+                                    <th class="w-[45px] text-center">Code</th>
+                                    <th class="text-center">Initiative</th>
+                                    <th class="text-center">CoE</th>
+                                    <th class="text-center">Project Owner</th>
+                                    <th class="text-center">Group</th>
+                                    <th class="text-center">Source</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-if="!selectedInitiatives.length">
+                                    <td colspan="6" class="empty-row text-center">Belum ada initiative yang dimapping.</td>
+                                </tr>
+                                <tr
+                                    v-for="(initiative, index) in selectedInitiatives"
+                                    :key="`selected-initiative-${initiative.id}`"
+                                >
+                                    <td class="cell-center">{{ initiative.code || '-' }}</td>
+                                    <td>
+                                        <div class="font-semibold text-slate-800">
+                                            {{ initiative.name }}
+                                        </div>
+                                    </td>
+                                    <td>{{ initiative.coe }}</td>
+                                    <td>{{ initiative.projectOwner }}</td>
+                                    <td>{{ initiative.group }}</td>
+                                    <td>
+                                        <div>{{ initiative.dataSource }}</div>
+                                        <div v-if="initiative.dataSourceCreated !== '-'" class="text-[10px] text-slate-500">
+                                            {{ initiative.dataSourceCreated }}
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </article>
+        </div>
+
+        <div class="charter-section">
+            <article class="panel border-t-0">
+                <div class="bar-sub">RJPP Tagging</div>
+                <div class="panel-body space-y-3">
                     <div v-if="editable" class="max-w-xl">
                         <select
                             @change="onThemeSelect"
@@ -178,30 +292,45 @@ const sourceLabel = computed(() => {
                                 :value="option.id"
                                 :disabled="normalizedThemeIds.includes(toNumber(option.id))"
                             >
-                                {{ option.name }}
+                                {{ option.label }}
                             </option>
                         </select>
                     </div>
 
-                    <div class="tag-container">
-                        <template v-if="selectedThemes.length">
-                            <div
-                                v-for="theme in selectedThemes"
-                                :key="`theme-${theme.id}`"
-                                class="tag-chip"
-                            >
-                                <span>{{ theme.name }}</span>
-                                <button
-                                    v-if="editable"
-                                    type="button"
-                                    class="tag-remove"
-                                    @click="removeTheme(theme.id)"
+                    <div class="table-wrap">
+                        <table class="initiative-table">
+                            <thead>
+                                <tr>
+                                    <th class="w-[45px] text-center">Code</th>
+                                    <th class="text-center">Strategic Pillar Title</th>
+                                    <th colspan="2" class="text-center">Themes</th>
+                                    <th v-if="editable" class="w-[80px] text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-if="!selectedThemes.length">
+                                    <td :colspan="editable ? 5 : 4" class="empty-row text-center">Belum ada RJPP tagging yang dimapping.</td>
+                                </tr>
+                                <tr
+                                    v-for="theme in selectedThemes"
+                                    :key="`theme-row-${theme.id}`"
                                 >
-                                    x
-                                </button>
-                            </div>
-                        </template>
-                        <p v-else class="empty">Belum ada RJPP tagging.</p>
+                                    <td class="cell-center">{{ theme.code }}</td>
+                                    <td>{{ theme.strategicPillar }}</td>
+                                    <td class="cell-center">{{ theme.themeCode }}</td>
+                                    <td>{{ theme.name }}</td>
+                                    <td v-if="editable" class="cell-center">
+                                        <button
+                                            type="button"
+                                            class="text-red-600 hover:text-red-800 font-bold"
+                                            @click="removeTheme(theme.id)"
+                                        >
+                                            Remove
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </article>
@@ -229,17 +358,42 @@ const sourceLabel = computed(() => {
     padding: 0 0 2px;
 }
 
-.score-select {
-    font-size: 11px;
-    font-weight: 800;
-    padding: 2px 10px;
-    border-radius: 9999px;
+.score-panel {
+    display: flex;
+    border: 1px solid #1e4f8f;
+    min-width: 160px;
+    background: #fff;
+}
+
+.score-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.score-input-simple {
+    width: 100%;
     border: none;
+    background: transparent;
+    font-size: 13px;
     outline: none;
+    cursor: pointer;
+    appearance: none;
+    padding: 0;
+}
+
+.score-input {
+    padding: 0;
     appearance: none;
     cursor: pointer;
-    text-align: center;
-    min-width: 80px;
+}
+
+.score-input-emerald {
+    color: #047857;
+}
+
+.score-input-rose {
+    color: #be123c;
 }
 
 .info-bar {
@@ -255,8 +409,13 @@ const sourceLabel = computed(() => {
     flex: 1;
 }
 
+.info-cell-compact {
+    flex: 0.5;
+}
+
 .info-cell-last {
     border-right: none;
+    flex: 1.2;
 }
 
 .info-label {
@@ -264,7 +423,7 @@ const sourceLabel = computed(() => {
     color: #fff;
     font-size: 12px;
     font-weight: 700;
-    padding: 6px 12px;
+    padding: 6px 10px;
     display: flex;
     align-items: center;
     white-space: nowrap;
@@ -281,11 +440,12 @@ const sourceLabel = computed(() => {
 }
 
 .info-value {
-    padding: 6px 12px;
+    padding: 6px 10px;
     font-size: 13px;
     display: flex;
     align-items: center;
     flex: 1;
+    min-width: 0;
 }
 
 .info-input {
@@ -342,6 +502,43 @@ const sourceLabel = computed(() => {
     font-family: inherit;
 }
 
+.table-wrap {
+    overflow-x: auto;
+    border: 1px solid #cbd5e1;
+}
+
+.initiative-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.initiative-table th,
+.initiative-table td {
+    border: 1px solid #cbd5e1;
+    padding: 8px 10px;
+    vertical-align: middle;
+}
+
+.initiative-table th {
+    background: #eff6ff;
+    color: #1e3a8a;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: left;
+}
+
+.cell-center {
+    text-align: center;
+    white-space: nowrap;
+}
+
+.empty-row {
+    text-align: center;
+    color: #94a3b8;
+    font-style: italic;
+}
+
 .tag-container {
     display: flex;
     flex-wrap: wrap;
@@ -393,13 +590,37 @@ const sourceLabel = computed(() => {
         background: #fff !important;
     }
 
+    .table-wrap {
+        overflow: visible;
+    }
+
     .title-input,
     .info-input,
     .field-select,
-    .score-select {
+    .score-input {
         border: none !important;
         appearance: none !important;
         background: transparent !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .score-grid {
+        grid-template-columns: 1fr;
+        min-width: 100%;
+    }
+
+    .info-bar {
+        flex-direction: column;
+    }
+
+    .info-cell {
+        border-right: none;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .info-cell-last {
+        border-bottom: none;
     }
 }
 </style>

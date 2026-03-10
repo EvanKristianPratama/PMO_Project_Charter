@@ -111,8 +111,14 @@ class IndexController extends Controller
                 $themeNum = $theme->theme_number ?? 'N/A';
 
                 return [
-                    'id' => $theme->id,
-                    'name' => "[$goalTitle] #$themeNum - $theme->name",
+                    'id' => (int) $theme->id,
+                    'theme_number' => $themeNum,
+                    'code' => $themeNum,
+                    'strategic_pillar_title' => $goalTitle,
+                    'strategic_pillar' => $goalTitle,
+                    'theme_name' => $theme->name,
+                    'name' => $theme->name,
+                    'label' => "[$goalTitle] #$themeNum - $theme->name",
                 ];
             })
             ->values();
