@@ -41,6 +41,7 @@
                 <div class="overflow-x-auto">
                     <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
                         <colgroup>
+                            <col class="w-[40px]">
                             <col class="w-[120px]">
                             <col class="w-[150px]">
                             <col class="w-[200px]">
@@ -53,6 +54,7 @@
                         </colgroup>
                         <thead class="bg-slate-50 dark:bg-white/5">
                             <tr>
+                                <th class="px-3 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">No</th>
                                 <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Project Owner</th>
                                 <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Use Case</th>
                                 <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Description</th>
@@ -65,7 +67,8 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
-                            <tr v-for="item in compendiumItems" :key="`compendium-${item.id}`" class="transition-colors hover:bg-slate-50 dark:hover:bg-white/5">
+                            <tr v-for="(item, index) in compendiumItems" :key="`compendium-${item.id}`" class="transition-colors hover:bg-slate-50 dark:hover:bg-white/5">
+                                <td class="px-3 py-3 text-center text-slate-400 dark:text-slate-500">{{ index + 1 }}</td>
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.project_owner ?? '-' }}</td>
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200 font-medium">{{ item.use_case ?? '-' }}</td>
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200 line-clamp-2 hover:line-clamp-none transition-all duration-300">
@@ -106,7 +109,7 @@
                                 </td>
                             </tr>
                             <tr v-if="compendiumItems.length === 0">
-                                <td colspan="9" class="px-6 py-10 text-center text-xs text-slate-500 dark:text-slate-400 italic">
+                                <td colspan="10" class="px-6 py-10 text-center text-xs text-slate-500 dark:text-slate-400 italic">
                                     Belum ada data compendium. Silakan tambahkan data baru.
                                 </td>
                             </tr>
