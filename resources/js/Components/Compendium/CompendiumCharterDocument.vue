@@ -62,9 +62,9 @@ const selectedThemes = computed(() => {
 
         return {
             id,
-            code: option?.code ?? '-',
+            code: String(option?.code ?? '-').replace(/#/g, ''),
             strategicPillar: option?.strategic_pillar ?? '-',
-            themeCode: option?.theme_code ?? '-',
+            themeCode: String(option?.theme_code ?? '-').replace(/#/g, ''),
             name: option?.name ?? `Theme ${id}`,
         };
     });
@@ -76,7 +76,7 @@ const selectedInitiatives = computed(() => {
 
         return {
             id,
-            code: String(option?.code ?? '').trim(),
+            code: String(option?.code ?? '').trim().replace(/#/g, ''),
             name: String(option?.name ?? `Initiative ${id}`).trim(),
             coe: displayValue(option?.coe),
             projectOwner: displayValue(option?.project_owner),
@@ -96,7 +96,7 @@ const themeOptionLabel = (option) => {
     if (!option) return '-';
 
     const strategicPillar = String(option?.strategic_pillar_title ?? option?.strategic_pillar ?? '').trim();
-    const themeNumber = String(option?.theme_number ?? option?.code ?? '').trim();
+    const themeNumber = String(option?.theme_number ?? option?.code ?? '').trim().replace(/#/g, '');
     const themeName = String(option?.theme_name ?? option?.name ?? '').trim();
 
     if (strategicPillar === '' && themeNumber === '') {
@@ -104,7 +104,7 @@ const themeOptionLabel = (option) => {
     }
 
     const prefix = strategicPillar !== '' ? `[${strategicPillar}]` : '';
-    const number = themeNumber !== '' ? ` #${themeNumber}` : '';
+    const number = themeNumber !== '' ? ` ${themeNumber}` : '';
     const suffix = themeName !== '' ? ` - ${themeName}` : '';
 
     return `${prefix}${number}${suffix}`.trim() || '-';
@@ -164,18 +164,7 @@ const sourceLabel = computed(() => {
                 <div class="min-w-0 flex-1">
                     <div class="flex flex-wrap items-center gap-2">
                         <h1 class="text-[18px] font-extrabold leading-tight text-slate-900">
-                            Use Case:
-                            <template v-if="editable">
-                                <input
-                                    v-model="form.usecase"
-                                    type="text"
-                                    class="title-input"
-                                    placeholder="Nama compendium / use case"
-                                >
-                            </template>
-                            <template v-else>
-                                {{ displayValue(form.usecase) }}
-                            </template>
+                            Use Case: {{ displayValue(form.usecase) }}
                         </h1>
                     </div>
                     <p class="mt-1 text-[13px] text-slate-600">
@@ -225,7 +214,7 @@ const sourceLabel = computed(() => {
                     <template v-else>{{ displayValue(form.owner) }}</template>
                 </span>
             </div>
-            <div class="info-cell info-cell-compact">
+            <div class="info-cell info-cell-coe">
                 <span class="info-label">CoE</span>
                 <span class="info-sep"></span>
                 <span class="info-value">
@@ -441,12 +430,16 @@ const sourceLabel = computed(() => {
 }
 
 .info-cell-compact {
-    flex: 0.5;
+    flex: 0.45;
+}
+
+.info-cell-coe {
+    flex: 0.34;
 }
 
 .info-cell-last {
     border-right: none;
-    flex: 1.2;
+    flex: 0.8;
 }
 
 .info-label {

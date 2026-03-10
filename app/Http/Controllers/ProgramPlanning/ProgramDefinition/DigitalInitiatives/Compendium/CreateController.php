@@ -86,7 +86,6 @@ class CreateController extends Controller
     {
         return TrsScInitiative::query()
             ->with(['mstInitiatives:id,code,name'])
-            ->whereHas('mstInitiatives')
             ->orderBy('id')
             ->get(['id', 'owner', 'usecase'])
             ->map(function (TrsScInitiative $item): array {

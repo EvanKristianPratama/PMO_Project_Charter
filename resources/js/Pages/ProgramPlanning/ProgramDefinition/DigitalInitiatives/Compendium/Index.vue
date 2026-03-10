@@ -164,7 +164,7 @@
                                         {{ item.urgency ?? '-' }}
                                     </span>
                                 </td>
-                                <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.rjpp ?? '-' }}</td>
+                                <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ (item.rjpp ?? '-').replace(/#/g, '') }}</td>
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.coe ?? '-' }}</td>
                                 <td class="px-3 py-3">
                                     <div class="flex flex-col">
@@ -234,7 +234,7 @@
                                         :value="opt.id"
                                         :disabled="form.initiative_ids.includes(opt.id)"
                                     >
-                                        {{ opt.code ? `[${opt.code}] ` : '' }}{{ themeDisplayLabel(opt) }}
+                                        {{ opt.code ? `[${String(opt.code).replace(/#/g, '')}] ` : '' }}{{ themeDisplayLabel(opt) }}
                                     </option>
                                 </select>
                                 <div class="flex min-h-10 flex-wrap gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-2 dark:border-white/10 dark:bg-white/5">
@@ -562,7 +562,7 @@ const themeDisplayLabel = (theme) => {
     if (!theme) return '-';
 
     const strategicPillar = String(theme?.strategic_pillar_title ?? theme?.strategic_pillar ?? '').trim();
-    const themeNumber = String(theme?.theme_number ?? theme?.code ?? '').trim();
+    const themeNumber = String(theme?.theme_number ?? theme?.code ?? '').trim().replace(/#/g, '');
     const themeName = String(theme?.theme_name ?? theme?.name ?? '').trim();
 
     if (strategicPillar === '' && themeNumber === '') {
@@ -570,7 +570,7 @@ const themeDisplayLabel = (theme) => {
     }
 
     const prefix = strategicPillar !== '' ? `[${strategicPillar}]` : '';
-    const number = themeNumber !== '' ? ` #${themeNumber}` : '';
+    const number = themeNumber !== '' ? ` ${themeNumber}` : '';
     const suffix = themeName !== '' ? ` - ${themeName}` : '';
 
     return `${prefix}${number}${suffix}`.trim() || '-';
