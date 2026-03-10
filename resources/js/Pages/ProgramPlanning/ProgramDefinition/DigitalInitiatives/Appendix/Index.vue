@@ -20,17 +20,17 @@
                 >
                     Digital Initiatives
                 </Link>
-                <div
-                    class="rounded-lg bg-blue-50 px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-blue-600 shadow-sm dark:bg-blue-500/10 dark:text-blue-400"
-                >
-                    Appendix
-                </div>
                 <Link
                     href="/program-planning/program-definition/digital-initiatives/compendium"
                     class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
                 >
                     Compendium
                 </Link>
+                <div
+                    class="rounded-lg bg-blue-50 px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-blue-600 shadow-sm dark:bg-blue-500/10 dark:text-blue-400"
+                >
+                    Appendix
+                </div>
             </div>
 
             <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#171717]">
