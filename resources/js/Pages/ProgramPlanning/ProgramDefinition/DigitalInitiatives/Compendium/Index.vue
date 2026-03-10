@@ -341,6 +341,7 @@ const scoreOptions = [
     { value: 1, label: 'High' },
     { value: 2, label: 'Medium' },
     { value: 3, label: 'Low' },
+    { value: null, label: 'TBC' },
 ];
 
 const statusOptions = [
@@ -357,8 +358,8 @@ const form = useForm({
     usecase: '',
     description: '',
     source_id: '',
-    value: 1,
-    urgency: 1,
+    value: null,
+    urgency: null,
     rjpp_tagging_ids: [],
     status: 1,
 });
@@ -375,8 +376,8 @@ const resetForm = () => {
     form.owner = '';
     form.source_id = '';
     form.rjpp_tagging_ids = [];
-    form.value = 1;
-    form.urgency = 1;
+    form.value = null;
+    form.urgency = null;
     form.status = 1;
 };
 
@@ -430,7 +431,11 @@ const themeLabel = (id) => {
 };
 
 const submitCreate = () => {
-    form.post('/program-planning/program-definition/digital-initiatives/compendium', {
+    form.transform((data) => ({
+        ...data,
+        value: data.value === '' ? null : data.value,
+        urgency: data.urgency === '' ? null : data.urgency,
+    })).post('/program-planning/program-definition/digital-initiatives/compendium', {
         preserveScroll: true,
         onSuccess: () => {
             isCreateModalOpen.value = false;

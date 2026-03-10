@@ -13,7 +13,7 @@ const scoreOptions = [
     { value: 1, label: 'High' },
     { value: 2, label: 'Medium' },
     { value: 3, label: 'Low' },
-    { value: 4, label: 'TBC' },
+    { value: null, label: 'TBC' },
 ];
 
 const displayValue = (value) => {
@@ -22,7 +22,8 @@ const displayValue = (value) => {
 };
 
 const getScoreLabel = (value) => {
-    return scoreOptions.find((option) => option.value === Number(value))?.label ?? '-';
+    if (value === null || value === undefined || value === '') return 'TBC';
+    return scoreOptions.find((option) => option.value === Number(value))?.label ?? 'TBC';
 };
 
 const toNumber = (value) => {

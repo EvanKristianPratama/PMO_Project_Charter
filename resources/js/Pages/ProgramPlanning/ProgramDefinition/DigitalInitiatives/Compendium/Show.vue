@@ -183,8 +183,8 @@ const buildFormPayload = (compendium = {}) => ({
     usecase: String(compendium.usecase ?? ''),
     description: String(compendium.description ?? ''),
     source_id: normalizeSourceId(compendium.source_id),
-    value: toNumber(compendium.value, 1),
-    urgency: toNumber(compendium.urgency, 1),
+    value: compendium.value === null || compendium.value === undefined ? null : toNumber(compendium.value, null),
+    urgency: compendium.urgency === null || compendium.urgency === undefined ? null : toNumber(compendium.urgency, null),
     rjpp_tagging_ids: normalizeIdList(compendium.rjpp_tagging_ids),
     status: String(compendium.status ?? '1'),
 });
@@ -304,8 +304,8 @@ const submit = () => {
         initiative_ids: normalizeIdList(data.initiative_ids),
         rjpp_tagging_ids: normalizeIdList(data.rjpp_tagging_ids),
         source_id: data.source_id === '' ? null : toNumber(data.source_id, null),
-        value: toNumber(data.value, 1),
-        urgency: toNumber(data.urgency, 1),
+        value: data.value === null || data.value === '' ? null : toNumber(data.value, null),
+        urgency: data.urgency === null || data.urgency === '' ? null : toNumber(data.urgency, null),
         status: String(data.status ?? '1'),
     }));
 

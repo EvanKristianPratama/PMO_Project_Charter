@@ -139,7 +139,7 @@ class IndexController extends Controller
             1 => 'High',
             2 => 'Medium',
             3 => 'Low',
-            default => '-',
+            default => 'TBC',
         };
     }
 }
