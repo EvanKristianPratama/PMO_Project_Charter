@@ -80,9 +80,6 @@ class StoreController extends Controller
                     ]);
                 }
             }
-
-            MstInitiative::whereIn('id', $initiativeIds->all())
-                ->update(['source' => $sourceId]);
         });
 
         return redirect()

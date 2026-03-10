@@ -57,11 +57,6 @@ class UpdateController extends Controller
                     'theme_id' => $themeId,
                 ]);
             }
-
-            if ($validated['source_id']) {
-                MstInitiative::whereIn('id', $initiativeIds->all())
-                    ->update(['source' => $validated['source_id']]);
-            }
         });
 
         return redirect()
