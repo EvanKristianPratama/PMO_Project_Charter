@@ -36,7 +36,7 @@
                 <!-- Detail panel (Status Implementation) -->
                 <div v-if="activeTab === 'detail'" class="border-t border-slate-100 dark:border-white/5">
                     <div class="px-3 py-3">
-                        <StatusImplementationTable :projects="relatedProjects" codeLabel="Status Implementation History" />
+                        <StatusImplementationTable :projects="relatedProjects" codeLabel="Progres status history" />
                     </div>
                 </div>
             </section>

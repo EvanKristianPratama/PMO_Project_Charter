@@ -12,25 +12,25 @@
                 <thead class="bg-slate-50 dark:bg-white/[0.03]">
                     <tr>
                         <th
-                            class="px-2 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                            class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
                             {{ codeLabel }}</th>
                         <th
-                            class="px-2 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-                            Review Implementation</th>
+                            class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                            Progres Status</th>
                         <th
-                            class="px-2 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                            class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
                             Month/Year</th>
                         <th
-                            class="px-2 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                            class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
                             Notes</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-[#1a1a1a]">
                     <tr v-for="(proj, projIndex) in projectList" :key="`t1-status-${proj?.id ?? projIndex}`">
-                        <td class="px-2 py-2 text-[11px] font-semibold text-slate-700 dark:text-slate-200">
+                        <td class="px-1 py-2 text-[11px] font-semibold text-slate-700 dark:text-slate-200">
                             {{ proj.code || '-' }}
                         </td>
-                        <td class="px-2 py-2">
+                        <td class="px-1 py-2">
                             <span v-if="getLatestReviewStatus(proj)"
                                 class="inline-flex rounded-md px-1.5 py-0.5 text-[9px] font-medium"
                                 :class="reviewStatusBadgeClass(getLatestReviewStatus(proj))">
@@ -38,10 +38,10 @@
                             </span>
                             <span v-else class="text-[10px] italic text-slate-400">-</span>
                         </td>
-                        <td class="px-2 py-2 text-[10px] font-medium text-slate-600 dark:text-slate-300">
+                        <td class="px-1 py-2 text-[10px] font-medium text-slate-600 dark:text-slate-300">
                             {{ getLatestImplementationMonthYear(proj) || '-' }}
                         </td>
-                        <td class="px-2 py-2 text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                        <td class="px-1 py-2 text-[11px] font-medium text-slate-700 dark:text-slate-300">
                             {{ getLatestImplementationStatus(proj) || '-' }}
                         </td>
                     </tr>
@@ -67,41 +67,41 @@
                 <thead class="bg-slate-50 dark:bg-white/[0.03]">
                     <tr>
                         <th
-                            class="px-2 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-                            History Timeline</th>
+                            class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                            Timeline History Project Charter</th>
                         <th
-                            class="px-2 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                            class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
                             Timeline Status</th>
                         <th
-                            class="px-2 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                            class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
                             Duration</th>
                         <th
-                            class="px-2 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                            class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
                             Document Date</th>
                         <th
-                            class="px-2 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                            class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
                             Duration Processing (Month)</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-[#1a1a1a]">
                     <tr v-for="row in projectCharterRows" :key="row.key">
-                        <td class="px-2 py-2 text-[11px] font-semibold text-slate-700 dark:text-slate-200">
+                        <td class="px-1 py-2 text-[11px] font-semibold text-slate-700 dark:text-slate-200">
                             {{ row.versionLabel }}
                         </td>
-                        <td class="px-2 py-2">
+                        <td class="px-1 py-2">
                             <span
                                 class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-medium capitalize"
                                 :class="statusBadgeClassById(getRowStatus(row))">
                                 {{ statusLabelFromOptions(getRowStatus(row), statusOptions) }}
                             </span>
                         </td>
-                        <td class="px-2 py-2 text-[11px] text-slate-700 dark:text-slate-200">
+                        <td class="px-1 py-2 text-[11px] text-slate-700 dark:text-slate-200">
                             {{ row.charter?.duration || '-' }}
                         </td>
-                        <td class="px-2 py-2 text-[10px] font-medium text-slate-600 dark:text-slate-300">
+                        <td class="px-1 py-2 text-[10px] font-medium text-slate-600 dark:text-slate-300">
                             {{ formatDateLong(row.charter?.tgl_dokumen) }}
                         </td>
-                        <td class="px-2 py-2 text-[11px] text-slate-700 dark:text-slate-200">
+                        <td class="px-1 py-2 text-[11px] text-slate-700 dark:text-slate-200">
                             {{ getTimelineDurationMonths(row.project, row.charter) }}
                         </td>
                     </tr>
