@@ -47,8 +47,8 @@
                                                 required
                                             >
                                                 <option value="" disabled>Pilih Initiative</option>
-                                                <option v-for="init in initiatives" :key="init.id" :value="init.id">
-                                                    {{ init.code ? `${init.code} — ` : '' }}{{ init.name }}
+                                                <option v-for="init in sortedInitiatives" :key="init.id" :value="init.id">
+                                                    {{ init.code ? `[${init.code}]` : '' }} {{ init.name }}{{ init.organization?.name ? ` · ${init.organization.name}` : '' }}
                                                 </option>
                                             </select>
                                             <div v-if="form.errors.initiative_id" class="mt-1 text-sm text-red-600">{{ form.errors.initiative_id }}</div>
@@ -145,6 +145,11 @@ const form = useForm({
     goal: '',
     themes_id: '',
 });
+
+// Sort initiatives by code numerically
+const sortedInitiatives = computed(() =>
+    [...props.initiatives].sort((a, b) => Number(a.code ?? 99999) - Number(b.code ?? 99999))
+);
 
 // Calculate available themes based on selected Goal
 const availableThemes = computed(() => {

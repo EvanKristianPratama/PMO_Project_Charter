@@ -1,22 +1,22 @@
 <template>
     <UserLayout title="Strategic Pillars">
         <div class="animate-fade-in">
-            <div class="mb-6">
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="mb-4">
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Strategic Pillars & Themes</h2>
+                        <h2 class="text-base font-bold text-slate-900 dark:text-white">Strategic Pillars & Themes</h2>
                     </div>
 
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2">
                         <!-- Filter Dropdown -->
-                        <div class="flex w-full flex-col items-start gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
-                            <label class="text-sm font-medium text-slate-700 dark:text-slate-300 sm:whitespace-nowrap">
+                        <div class="flex w-full flex-col items-start gap-1.5 sm:w-auto sm:flex-row sm:items-center sm:gap-2">
+                            <label class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:whitespace-nowrap">
                                 View by Goal:
                             </label>
-                            <select 
-                                v-model="selectedGoalId" 
+                            <select
+                                v-model="selectedGoalId"
                                 @change="applyFilter"
-                                class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800 dark:text-white sm:min-w-[250px] sm:w-auto"
+                                class="w-full rounded border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-transparent focus:ring-1 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800 dark:text-white sm:min-w-[200px] sm:w-auto"
                             >
                                 <option :value="null">All Strategic Pillars</option>
                                 <option v-for="goal in allGoals" :key="goal.id" :value="goal.id">
@@ -28,9 +28,9 @@
                         <!-- Add Tagging Button -->
                         <button
                             @click="showTaggingModal = true"
-                            class="inline-flex items-center rounded-lg px-3 py-2 text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-sm"
+                            class="inline-flex items-center rounded px-2.5 py-1.5 text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-sm"
                         >
-                            <svg class="mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            <svg class="mr-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                             Add Tagging
                         </button>
                     </div>
@@ -43,49 +43,47 @@
                     <table class="w-full min-w-[1000px] border-collapse">
                         <thead>
                             <tr class="bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-300 dark:border-slate-600">
-                                <th class="px-6 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300 border-r border-slate-300 dark:border-slate-600 w-24">
+                                <th class="px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 border-r border-slate-300 dark:border-slate-600 w-16">
                                     Code
                                 </th>
-                                <th class="px-6 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300 border-r border-slate-300 dark:border-slate-600 w-1/4">
+                                <th class="px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 border-r border-slate-300 dark:border-slate-600 w-1/4">
                                     Strategic Pillar Title
                                 </th>
-                                <th class="px-6 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300 border-r border-slate-300 dark:border-slate-600 w-1/3">
+                                <th class="px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 border-r border-slate-300 dark:border-slate-600 w-1/3">
                                     Themes
                                 </th>
-                                <th class="px-6 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                <th class="px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
                                     IT Initiatives
                                 </th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-for="pillar in strategicPillars" :key="pillar.id" class="border-b border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                                <td class="px-6 py-4 border-r border-slate-300 dark:border-slate-600 text-center align-top">
-                                    <span class="text-base font-bold text-slate-900 dark:text-white">
+                                <td class="px-4 py-3 border-r border-slate-300 dark:border-slate-600 text-center align-top">
+                                    <span class="text-xs font-bold text-slate-900 dark:text-white">
                                         {{ pillar.code }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 border-r border-slate-300 dark:border-slate-600 text-center align-top">
-                                    <div class="text-sm font-medium text-slate-900 dark:text-white">
+                                <td class="px-4 py-3 border-r border-slate-300 dark:border-slate-600 text-center align-top">
+                                    <div class="text-xs font-medium text-slate-900 dark:text-white">
                                         {{ pillar.title }}
                                     </div>
-                                    
-                                    <div v-if="getGoalInitiatives(pillar.code).length > 0" class="mt-4 flex flex-col gap-2 items-center w-full">
-                                        <div class="text-[10px] font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase">Mapped directly to Pillar</div>
-                                        <div class="flex flex-wrap justify-center gap-2 w-full">
-                                            <div 
-                                                v-for="tag in getGoalInitiatives(pillar.code)" 
+
+                                    <div v-if="getGoalInitiatives(pillar.code).length > 0" class="mt-3 flex flex-col gap-1.5 items-center w-full">
+                                        <div class="text-[9px] font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase">Mapped directly to Pillar</div>
+                                        <div class="flex flex-wrap justify-center gap-1.5 w-full">
+                                            <div
+                                                v-for="tag in getGoalInitiatives(pillar.code)"
                                                 :key="tag.id"
-                                                :class="[
-                                                    'inline-flex items-center justify-between gap-2 rounded-full px-3 py-1.5 text-[11px] font-medium border shadow-sm max-w-[280px]',
-                                                    getStatusColor(tag)
-                                                ]"
+                                                :class="['inline-flex items-center gap-1.5 rounded px-2 py-1 text-[10px] font-medium border max-w-[260px]', getStatusColor(tag)]"
                                             >
-                                                <div class="flex items-center gap-1.5 overflow-hidden flex-1" :title="tag.initiative ? `${tag.initiative.code} - ${tag.initiative.name}` : ''">
-                                                    <span class="font-bold flex-shrink-0">{{ tag.initiative ? tag.initiative.code : 'Unknown' }}</span> 
-                                                    <span class="opacity-90 truncate">{{ tag.initiative ? tag.initiative.name : '' }}</span> 
+                                                <div class="flex items-center gap-1 overflow-hidden flex-1 min-w-0" :title="tag.initiative ? `${tag.initiative.code} - ${tag.initiative.name}` : ''">
+                                                    <span class="font-bold flex-shrink-0">{{ tag.initiative ? tag.initiative.code : '?' }}</span>
+                                                    <span class="truncate opacity-90">{{ tag.initiative ? tag.initiative.name : '' }}</span>
+                                                    <span v-if="tag.initiative?.organization?.name" class="shrink-0 opacity-60 text-[9px]">· {{ tag.initiative.organization.name }}</span>
                                                 </div>
-                                                <button @click="confirmDelete(tag)" class="flex-shrink-0 opacity-60 hover:opacity-100 hover:text-red-600 focus:outline-none transition-opacity ml-1" title="Remove Mapping">
-                                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                <button @click="confirmDelete(tag)" class="flex-shrink-0 opacity-50 hover:opacity-100 hover:text-red-600 transition-opacity" title="Remove">
+                                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
                                                 </button>
                                             </div>
                                         </div>
@@ -98,44 +96,39 @@
                                             <tbody>
                                                 <tr v-for="theme in pillar.themes" :key="theme.id" class="border-b border-slate-300 dark:border-slate-600 last:border-b-0">
                                                     <!-- Theme Name -->
-                                                    <td class="px-6 py-3 text-sm text-slate-700 dark:text-slate-200 border-r border-slate-300 dark:border-slate-600 w-1/2 align-top">
-                                                        <span class="font-medium mr-1">{{ theme.theme_number }}.</span>
-                                                        {{ theme.name }}
+                                                    <td class="px-4 py-2 text-xs text-slate-700 dark:text-slate-200 border-r border-slate-300 dark:border-slate-600 w-1/2 align-top">
+                                                        <span class="font-semibold mr-1">{{ theme.theme_number }}.</span>{{ theme.name }}
                                                     </td>
                                                     <!-- Theme-Level Initiatives -->
-                                                    <td class="px-4 py-3 align-top min-w-[300px]">
-                                                        <div v-if="getThemeInitiatives(theme.id).length > 0" class="flex flex-wrap gap-2">
-                                                            <div 
-                                                                v-for="tag in getThemeInitiatives(theme.id)" 
+                                                    <td class="px-3 py-2 align-top min-w-[260px]">
+                                                        <div v-if="getThemeInitiatives(theme.id).length > 0" class="flex flex-wrap gap-1.5">
+                                                            <div
+                                                                v-for="tag in getThemeInitiatives(theme.id)"
                                                                 :key="tag.id"
-                                                                :class="[
-                                                                    'inline-flex items-center justify-between gap-2 rounded-full px-3 py-1.5 text-[11px] font-medium border shadow-sm max-w-[280px]',
-                                                                    getStatusColor(tag)
-                                                                ]"
+                                                                :class="['inline-flex items-center gap-1.5 rounded px-2 py-1 text-[10px] font-medium border max-w-[260px]', getStatusColor(tag)]"
                                                             >
-                                                                <div class="flex items-center gap-1.5 overflow-hidden flex-1" :title="tag.initiative ? `${tag.initiative.code} - ${tag.initiative.name}` : ''">
-                                                                    <span class="font-bold flex-shrink-0">{{ tag.initiative ? tag.initiative.code : 'Unknown' }}</span>
-                                                                    <span class="opacity-90 truncate">{{ tag.initiative ? tag.initiative.name : '' }}</span>
+                                                                <div class="flex items-center gap-1 overflow-hidden flex-1 min-w-0" :title="tag.initiative ? `${tag.initiative.code} - ${tag.initiative.name}` : ''">
+                                                                    <span class="font-bold flex-shrink-0">{{ tag.initiative ? tag.initiative.code : '?' }}</span>
+                                                                    <span class="truncate opacity-90">{{ tag.initiative ? tag.initiative.name : '' }}</span>
+                                                                    <span v-if="tag.initiative?.organization?.name" class="shrink-0 opacity-60 text-[9px]">· {{ tag.initiative.organization.name }}</span>
                                                                 </div>
-                                                                <button @click="confirmDelete(tag)" class="flex-shrink-0 opacity-60 hover:opacity-100 hover:text-red-600 focus:outline-none transition-opacity ml-1" title="Remove Mapping">
-                                                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                                <button @click="confirmDelete(tag)" class="flex-shrink-0 opacity-50 hover:opacity-100 hover:text-red-600 transition-opacity" title="Remove">
+                                                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
                                                                 </button>
                                                             </div>
                                                         </div>
-                                                        <span v-else class="text-[11px] italic text-slate-400 dark:text-slate-500">
-                                                            Pilar Theme belum ada IT Initiative
-                                                        </span>
+                                                        <span v-else class="text-[10px] italic text-slate-400 dark:text-slate-500">—</span>
                                                     </td>
                                                 </tr>
                                             </tbody>
                                         </table>
                                     </div>
-                                    <div v-else class="px-6 py-4 grid grid-cols-2 h-full gap-0 border-collapse">
-                                        <div class="border-r border-slate-300 dark:border-slate-600 flex items-center h-full px-6">
-                                            <span class="text-sm text-slate-400 dark:text-slate-500 italic">No themes available</span>
+                                    <div v-else class="px-4 py-3 grid grid-cols-2 h-full gap-0 border-collapse">
+                                        <div class="border-r border-slate-300 dark:border-slate-600 flex items-center h-full px-4">
+                                            <span class="text-xs text-slate-400 dark:text-slate-500 italic">No themes</span>
                                         </div>
-                                        <div class="flex items-center h-full px-6">
-                                            <span class="text-sm text-slate-400 dark:text-slate-500 italic">No assigned themes</span>
+                                        <div class="flex items-center h-full px-4">
+                                            <span class="text-xs text-slate-400 dark:text-slate-500 italic">—</span>
                                         </div>
                                     </div>
                                 </td>
@@ -235,14 +228,20 @@ watch(() => props.filters.goal_id, (newVal) => {
 });
 
 // --- Initiative Computed Groupings ---
+const sortByCode = (tags) => [...tags].sort((a, b) => {
+    const codeA = Number(a.initiative?.code ?? 99999);
+    const codeB = Number(b.initiative?.code ?? 99999);
+    return codeA - codeB;
+});
+
 const getGoalInitiatives = (pillarCode) => {
     if (!props.taggings) return [];
-    return props.taggings.filter(tag => tag.goal === pillarCode && !tag.themes_id);
+    return sortByCode(props.taggings.filter(tag => tag.goal === pillarCode && !tag.themes_id));
 };
 
 const getThemeInitiatives = (themeId) => {
     if (!props.taggings) return [];
-    return props.taggings.filter(tag => tag.themes_id === themeId);
+    return sortByCode(props.taggings.filter(tag => tag.themes_id === themeId));
 };
 
 // --- Status Styling ---

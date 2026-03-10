@@ -30,14 +30,27 @@ class StrategicPillarController extends Controller
             ->get();
 
         // Initiative Tagging data
-        $taggings = InitiativeTagging::with(['initiative:id,name,code,status', 'initiative.latestStatus', 'theme:id,name,idGoal'])
+        $taggings = InitiativeTagging::with([
+                'initiative:id,name,code,status,business_unit',
+                'initiative.latestStatus',
+                'initiative.organization:id,name',
+                'theme:id,name,idGoal',
+            ])
             ->orderBy('created_at', 'desc')
             ->get();
 
         // All initiatives for dropdown
-        $allInitiatives = MstInitiative::select('id', 'code', 'name')
-            ->orderBy('name', 'asc')
-            ->get();
+        $allInitiatives = MstInitiative::select('id', 'code', 'name', 'business_unit')
+            ->with('organization:id,name')
+            ->orderBy('code', 'asc')
+            ->get()
+            ->map(fn ($i) => [
+                'id'           => $i->id,
+                'code'         => $i->code,
+                'name'         => $i->name,
+                'organization' => $i->organization ? ['id' => $i->organization->id, 'name' => $i->organization->name] : null,
+            ])
+            ->values();
 
         // All themes for dropdown
         $allThemes = Theme::with('goal:id,code,title')
