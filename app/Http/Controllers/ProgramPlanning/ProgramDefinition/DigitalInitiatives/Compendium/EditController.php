@@ -33,6 +33,7 @@ class EditController extends Controller
                 'id' => (int) $scInitiative->id,
                 'initiative_ids' => $scInitiative->mstInitiatives->pluck('id')->toArray(),
                 'owner' => $scInitiative->owner,
+                'coe' => $scInitiative->coe,
                 'usecase' => $scInitiative->usecase,
                 'description' => $scInitiative->description,
                 'source_id' => $scInitiative->source_id,
@@ -53,6 +54,7 @@ class EditController extends Controller
                 'sign_by' => $detail?->sign_by ?? '',
             ],
             'initiativeOptions' => $this->initiativeOptions(),
+            'coeOptions' => \App\Models\MstCoe::orderBy('name')->get(['id', 'name'])->values(),
             'sourceOptions' => MstScSource::orderBy('name')->get(['id', 'name', 'month', 'year'])->map(fn ($s) => [
                 'id' => $s->id,
                 'name' => $s->name,

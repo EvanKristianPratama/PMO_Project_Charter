@@ -5,6 +5,7 @@ const props = defineProps({
     form: { type: Object, required: true },
     editable: { type: Boolean, default: false },
     initiativeOptions: { type: Array, default: () => [] },
+    coeOptions: { type: Array, default: () => [] },
     sourceOptions: { type: Array, default: () => [] },
     themeOptions: { type: Array, default: () => [] },
 });
@@ -87,16 +88,8 @@ const selectedInitiatives = computed(() => {
     });
 });
 
-const selectedCoeNames = computed(() => {
-    return [...new Set(
-        selectedInitiatives.value
-            .map((initiative) => initiative.coe)
-            .filter((value) => value !== '-')
-    )];
-});
-
 const coeCoverageLabel = computed(() => {
-    return selectedCoeNames.value.length ? selectedCoeNames.value.join(', ') : '-';
+    return displayValue(props.form.coe);
 });
 
 const themeOptionLabel = (option) => {
@@ -235,7 +228,17 @@ const sourceLabel = computed(() => {
             <div class="info-cell info-cell-compact">
                 <span class="info-label">CoE</span>
                 <span class="info-sep"></span>
-                <span class="info-value">{{ coeCoverageLabel }}</span>
+                <span class="info-value">
+                    <select
+                        v-if="editable"
+                        v-model="form.coe"
+                        class="info-input"
+                    >
+                        <option value="">- Pilih CoE -</option>
+                        <option v-for="option in coeOptions" :key="option.id" :value="option.name">{{ option.name }}</option>
+                    </select>
+                    <template v-else>{{ coeCoverageLabel }}</template>
+                </span>
             </div>
             <div class="info-cell info-cell-last">
                 <span class="info-label">Data Source</span>

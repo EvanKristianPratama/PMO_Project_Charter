@@ -29,11 +29,11 @@ class IndexController extends Controller
             'mstInitiatives.sourceData:id,name,month,year,created_at',
             'sourceData:id,name,created_at',
         ])
-            ->whereHas('mstInitiatives')
             ->orderBy('id')
             ->get([
                 'id',
                 'owner',
+                'coe',
                 'usecase',
                 'description',
                 'source_id',
@@ -88,7 +88,7 @@ class IndexController extends Controller
                     'value' => $this->scoreLabel($item->value),
                     'urgency' => $this->scoreLabel($item->urgency),
                     'rjpp' => trim($rjpp) !== '' ? $rjpp : '-',
-                    'coe' => $firstMst?->coe?->name ?? '-',
+                    'coe' => $item->coe ?: '-',
                     'data_source' => $source?->name ?? '-',
                     'data_source_created' => $sourceCreatedAt,
                 ];
@@ -99,6 +99,8 @@ class IndexController extends Controller
             ->orderBy('code')
             ->get(['id', 'code', 'name'])
             ->values();
+
+        $coeOptions = \App\Models\MstCoe::orderBy('name')->get(['id', 'name'])->values();
 
         $sourceOptions = MstScSource::orderBy('name')
             ->get(['id', 'name', 'month', 'year'])
@@ -134,6 +136,7 @@ class IndexController extends Controller
             'compendiumItems' => $compendiumItems,
             'totalCompendiumItems' => $compendiumItems->count(),
             'initiativeOptions' => $initiativeOptions,
+            'coeOptions' => $coeOptions,
             'sourceOptions' => $sourceOptions,
             'themeOptions' => $themeOptions,
         ]);

@@ -127,6 +127,7 @@
             <CompendiumCharterDocument
                 :form="form"
                 :initiative-options="initiativeOptions"
+                :coe-options="coeOptions"
                 :source-options="sourceOptions"
                 :theme-options="themeOptions"
                 :editable="isEditing"
@@ -147,6 +148,7 @@ const props = defineProps({
     compendium: { type: Object, default: null },
     compendiumOptions: { type: Array, default: () => [] },
     initiativeOptions: { type: Array, default: () => [] },
+    coeOptions: { type: Array, default: () => [] },
     sourceOptions: { type: Array, default: () => [] },
     themeOptions: { type: Array, default: () => [] },
 });
@@ -179,6 +181,7 @@ const normalizeSourceId = (value) => {
 const buildFormPayload = (compendium = {}) => ({
     initiative_ids: normalizeIdList(compendium.initiative_ids),
     owner: String(compendium.owner ?? ''),
+    coe: String(compendium.coe ?? ''),
     usecase: String(compendium.usecase ?? ''),
     description: String(compendium.description ?? ''),
     source_id: normalizeSourceId(compendium.source_id),
@@ -302,6 +305,10 @@ const submit = () => {
         ...data,
         initiative_ids: normalizeIdList(data.initiative_ids),
         rjpp_tagging_ids: normalizeIdList(data.rjpp_tagging_ids),
+        owner: String(data.owner ?? '').trim(),
+        coe: String(data.coe ?? '').trim(),
+        usecase: String(data.usecase ?? '').trim(),
+        description: String(data.description ?? '').trim(),
         source_id: data.source_id === '' ? null : toNumber(data.source_id, null),
         value: data.value === null || data.value === '' ? null : toNumber(data.value, null),
         urgency: data.urgency === null || data.urgency === '' ? null : toNumber(data.urgency, null),

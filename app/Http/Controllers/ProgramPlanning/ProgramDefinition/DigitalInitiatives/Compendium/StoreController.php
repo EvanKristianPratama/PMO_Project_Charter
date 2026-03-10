@@ -18,9 +18,10 @@ class StoreController extends Controller
     public function __invoke(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'initiative_ids' => 'required|array|min:1',
+            'initiative_ids' => 'nullable|array',
             'initiative_ids.*' => 'integer|exists:mst_initiative,id',
             'owner' => 'nullable|string|max:255',
+            'coe' => 'nullable|string|max:255',
             'usecase' => 'required|string|max:255',
             'description' => 'nullable|string',
             'source_id' => 'required|integer|exists:mst_sc_source,id',
@@ -38,6 +39,7 @@ class StoreController extends Controller
 
             $scInitiative = TrsScInitiative::create([
                 'owner' => $validated['owner'] ?? null,
+                'coe' => $validated['coe'] ?? null,
                 'usecase' => $validated['usecase'],
                 'description' => $validated['description'] ?? null,
                 'source_id' => $sourceId,
