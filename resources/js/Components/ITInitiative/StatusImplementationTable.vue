@@ -1,17 +1,29 @@
 <template>
     <div class="space-y-3">
+        <div class="flex items-center justify-between mb-2">
+            <div>
+                <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200" v-if="projectList.length === 1 && !hideTitle">Status Implementation</h3>
+            </div>
+            
+            <button v-if="projectList.length === 1 && projectList[0]?.id" @click="openAddModal(projectList[0])" class="inline-flex h-[26px] items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-3 text-[10px] font-semibold text-indigo-700 shadow-none transition hover:bg-indigo-100 dark:border-indigo-900/50 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-900/50">
+                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Add Status
+            </button>
+        </div>
+
         <!-- Tabel 1: Code & Status Implementasi -->
-        <div class="overflow-x-auto rounded-lg border border-slate-100 dark:border-white/5">
-            <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
+        <div class="overflow-x-auto rounded-lg border border-slate-200 dark:border-white/10">
+            <table class="w-full table-fixed divide-y divide-x divide-slate-200 text-[11px] dark:divide-white/10">
                 <colgroup>
                     <col :class="codeLabel !== 'Code' ? 'w-[15%]' : 'w-[10%]'">
                     <col class="w-[20%]">
                     <col :class="codeLabel !== 'Code' ? 'w-[15%]' : 'w-[15%]'">
                     <col :class="codeLabel !== 'Code' ? 'w-[10%]' : 'w-[15%]'">
-                    <col :class="codeLabel !== 'Code' ? 'w-[40%]' : 'w-[50%]'">
+                    <col :class="codeLabel !== 'Code' ? 'w-[30%]' : 'w-[40%]'">
+                    <col class="w-[10%]">
                 </colgroup>
                 <thead v-if="showHeader" class="bg-slate-50 dark:bg-white/[0.03]">
-                    <tr>
+                    <tr class="divide-x divide-slate-200 dark:divide-white/10">
                         <th
                             class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
                             {{ codeLabel }}</th>
@@ -27,14 +39,17 @@
                         <th
                             class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
                             Notes</th>
+                        <th
+                            class="w-16 px-1 py-1.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                            Action</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white dark:bg-[#1a1a1a]">
-                    <tr v-for="(proj, projIndex) in projectList" :key="`t1-status-${proj?.id ?? projIndex}`">
-                        <td class="px-1 py-2 text-[11px] font-semibold text-slate-700 dark:text-slate-200">
+                <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/10 dark:bg-[#1a1a1a]">
+                    <tr v-for="(proj, projIndex) in projectList" :key="`t1-status-${proj?.id ?? projIndex}`" class="divide-x divide-slate-200 hover:bg-slate-50 dark:divide-white/10 dark:hover:bg-white/5 transition-colors">
+                        <td class="px-2 py-3 text-[11px] font-semibold text-slate-700 dark:text-slate-200">
                             {{ proj.code || '-' }}
                         </td>
-                        <td class="px-1 py-2 text-[11px] font-medium text-slate-700 dark:text-slate-200 truncate" :title="proj.name">
+                        <td class="px-2 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-200 truncate" :title="proj.name">
                             {{ proj.name || '-' }}
                         </td>
                         <td class="px-1 py-2">
@@ -45,11 +60,18 @@
                             </span>
                             <span v-else class="text-[10px] italic text-slate-400">-</span>
                         </td>
-                        <td class="px-1 py-2 text-[10px] font-medium text-slate-600 dark:text-slate-300">
+                        <td class="px-2 py-3 text-[10px] font-medium text-slate-600 dark:text-slate-300">
                             {{ getLatestImplementationMonthYear(proj) || '-' }}
                         </td>
-                        <td class="px-1 py-2 text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                        <td class="px-2 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-300">
                             {{ getLatestImplementationStatus(proj) || '-' }}
+                        </td>
+                        <td class="px-1 py-1 text-center align-middle">
+                            <div class="flex items-center justify-center">
+                                <button v-if="getLatestImplementationLog(proj)" @click="openEditModal(getLatestImplementationLog(proj))" class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-500/20 dark:text-amber-300 dark:hover:bg-amber-500/30 transition-colors cursor-pointer" title="Edit Status">
+                                    Edit
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     <tr v-if="projectList.length === 0">
@@ -62,8 +84,8 @@
         </div>
 
         <!-- Tabel 2: Informasi Dasar & Timeline -->
-        <div v-if="showTimelineHistory" class="overflow-x-auto rounded-lg border border-slate-100 dark:border-white/5">
-            <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
+        <div v-if="showTimelineHistory" class="overflow-x-auto rounded-lg border border-slate-200 dark:border-white/10">
+            <table class="w-full table-fixed divide-y divide-x divide-slate-200 text-[11px] dark:divide-white/10">
                 <colgroup>
                     <col class="w-[20%]">
                     <col class="w-[20%]">
@@ -72,7 +94,7 @@
                     <col class="w-[20%]">
                 </colgroup>
                 <thead v-if="showHeader" class="bg-slate-50 dark:bg-white/[0.03]">
-                    <tr>
+                    <tr class="divide-x divide-slate-200 dark:divide-white/10">
                         <th
                             class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
                             Timeline History Project Charter</th>
@@ -90,25 +112,25 @@
                             Duration Processing (Month)</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white dark:bg-[#1a1a1a]">
-                    <tr v-for="row in projectCharterRows" :key="row.key">
-                        <td class="px-1 py-2 text-[11px] font-semibold text-slate-700 dark:text-slate-200">
+                <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/10 dark:bg-[#1a1a1a]">
+                    <tr v-for="row in projectCharterRows" :key="row.key" class="divide-x divide-slate-200 hover:bg-slate-50 dark:divide-white/10 dark:hover:bg-white/5 transition-colors">
+                        <td class="px-2 py-3 text-[11px] font-semibold text-slate-700 dark:text-slate-200">
                             {{ row.versionLabel }}
                         </td>
-                        <td class="px-1 py-2">
+                        <td class="px-2 py-3">
                             <span
                                 class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-medium capitalize"
                                 :class="statusBadgeClassById(getRowStatus(row))">
                                 {{ statusLabelFromOptions(getRowStatus(row), statusOptions) }}
                             </span>
                         </td>
-                        <td class="px-1 py-2 text-[11px] text-slate-700 dark:text-slate-200">
+                        <td class="px-2 py-3 text-[11px] text-slate-700 dark:text-slate-200">
                             {{ row.charter?.duration || '-' }}
                         </td>
-                        <td class="px-1 py-2 text-[10px] font-medium text-slate-600 dark:text-slate-300">
+                        <td class="px-2 py-3 text-[10px] font-medium text-slate-600 dark:text-slate-300">
                             {{ formatDateLong(row.charter?.tgl_dokumen) }}
                         </td>
-                        <td class="px-1 py-2 text-[11px] text-slate-700 dark:text-slate-200">
+                        <td class="px-2 py-3 text-[11px] text-slate-700 dark:text-slate-200">
                             {{ getTimelineDurationMonths(row.project, row.charter) }}
                         </td>
                     </tr>
@@ -120,12 +142,20 @@
                 </tbody>
             </table>
         </div>
+
+        <StatusImplementationModal
+            :show="isModalOpen"
+            :status-data="editingStatus"
+            :project-id="selectedProjectIdForModal"
+            @close="closeModal"
+        />
     </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { statusLabelFromOptions } from '@/Composables/initiativeStatus';
+import StatusImplementationModal from './StatusImplementationModal.vue';
 
 const props = defineProps({
     project: {
@@ -148,7 +178,33 @@ const props = defineProps({
         type: Boolean,
         default: true,
     },
+    hideTitle: {
+        type: Boolean,
+        default: false,
+    },
 });
+
+const isModalOpen = ref(false);
+const editingStatus = ref(null);
+const selectedProjectIdForModal = ref(0);
+
+const openAddModal = (proj) => {
+    editingStatus.value = null;
+    selectedProjectIdForModal.value = proj.id;
+    isModalOpen.value = true;
+};
+
+const openEditModal = (log) => {
+    editingStatus.value = log;
+    selectedProjectIdForModal.value = log.project_id;
+    isModalOpen.value = true;
+};
+
+const closeModal = () => {
+    isModalOpen.value = false;
+    editingStatus.value = null;
+    selectedProjectIdForModal.value = 0;
+};
 
 // Normalize to array of projects
 const projectList = computed(() => {

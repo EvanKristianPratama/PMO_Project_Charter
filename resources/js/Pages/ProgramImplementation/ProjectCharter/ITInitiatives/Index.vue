@@ -52,33 +52,33 @@
                         </select>
                     </div>
                     
-                    <div class="flex flex-col gap-1.5">
+                    <div class="flex flex-row items-center gap-1.5">
                         <button
                             type="button"
-                            class="inline-flex items-center justify-center rounded-lg border px-2 py-1 text-[10px] font-semibold transition"
+                            class="inline-flex h-[26px] items-center justify-center rounded-full border px-3 text-[10px] font-semibold shadow-none transition-all focus:outline-none focus:ring-1 focus:ring-offset-1"
                             :class="showInitiativeLabel
-                                ? 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-300 dark:hover:bg-amber-900/30'
-                                : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700/40 dark:bg-emerald-900/20 dark:text-emerald-300 dark:hover:bg-emerald-900/30'"
+                                ? 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-700/40 dark:bg-amber-900/30 dark:text-amber-300 dark:hover:bg-amber-900/50'
+                                : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700/40 dark:bg-emerald-900/30 dark:text-emerald-300 dark:hover:bg-emerald-900/50'"
                             @click="showInitiativeLabel = !showInitiativeLabel"
                         >
-                            {{ showInitiativeLabel ? 'Hide Label Initiative' : 'Show Label Initiative' }}
+                            {{ showInitiativeLabel ? 'Hide Label' : 'Show Label' }}
                         </button>
                         <button
                             type="button"
-                            class="inline-flex items-center justify-center rounded-lg border px-2 py-1 text-[10px] font-semibold transition"
+                            class="inline-flex h-[26px] items-center justify-center rounded-full border px-3 text-[10px] font-semibold shadow-none transition-all focus:outline-none focus:ring-1 focus:ring-offset-1"
                             :class="showTimelineHistory
-                                ? 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-300 dark:hover:bg-amber-900/30'
-                                : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700/40 dark:bg-emerald-900/20 dark:text-emerald-300 dark:hover:bg-emerald-900/30'"
+                                ? 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-700/40 dark:bg-amber-900/30 dark:text-amber-300 dark:hover:bg-amber-900/50'
+                                : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700/40 dark:bg-emerald-900/30 dark:text-emerald-300 dark:hover:bg-emerald-900/50'"
                             @click="showTimelineHistory = !showTimelineHistory"
                         >
-                            {{ showTimelineHistory ? 'Hide Timeline History' : 'Show Timeline History' }}
+                            {{ showTimelineHistory ? 'Hide Timeline' : 'Show Timeline' }}
                         </button>
                         <button
                             type="button"
-                            class="inline-flex items-center justify-center rounded-lg border px-2 py-1 text-[10px] font-semibold transition"
+                            class="inline-flex h-[26px] items-center justify-center rounded-full border px-3 text-[10px] font-semibold shadow-none transition-all focus:outline-none focus:ring-1 focus:ring-offset-1"
                             :class="showImplementationRoadmap
-                                ? 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-300 dark:hover:bg-amber-900/30'
-                                : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700/40 dark:bg-emerald-900/20 dark:text-emerald-300 dark:hover:bg-emerald-900/30'"
+                                ? 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-700/40 dark:bg-amber-900/30 dark:text-amber-300 dark:hover:bg-amber-900/50'
+                                : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700/40 dark:bg-emerald-900/30 dark:text-emerald-300 dark:hover:bg-emerald-900/50'"
                             @click="toggleImplementationRoadmapVisibility"
                         >
                             {{ showImplementationRoadmap ? 'Hide Roadmap' : 'Show Roadmap' }}
@@ -155,7 +155,6 @@
                             <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">
                                 Roadmap Project Charter IT Initiatives
                             </h3>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">View and manage implementation timelines across project versions</p>
                         </div>
 
                         <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end">
