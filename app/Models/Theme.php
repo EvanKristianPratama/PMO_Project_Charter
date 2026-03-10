@@ -26,4 +26,9 @@ class Theme extends Model
     {
         return $this->belongsToMany(TrsDigitalInitiative::class, 'trs_rjpp', 'theme_id', 'digital_id')->withTimestamps();
     }
+
+    public function initiativeTaggings()
+    {
+        return $this->hasMany(InitiativeTagging::class, 'themes_id');
+    }
 }

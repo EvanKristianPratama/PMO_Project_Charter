@@ -37,6 +37,7 @@ use App\Http\Controllers\ProgramPlanning\ProgramDefinition\ITInitiatives\IndexCo
 use App\Http\Controllers\ProgramPlanning\ProgramPlanningController;
 use App\Http\Controllers\Roadmap\RoadmapController;
 use App\Http\Controllers\StrategicPillar\StrategicPillarController;
+use App\Http\Controllers\StrategicPillar\InitiativeTaggingController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -157,6 +158,8 @@ Route::middleware(['auth', 'approved'])->group(function () {
 
     // Strategic Pillars
     Route::get('/strategic-pillars/{goal?}', [StrategicPillarController::class, 'index'])->name('strategic-pillars.index');
+    Route::post('/strategic-pillars/tagging', [InitiativeTaggingController::class, 'store'])->name('strategic-pillars.tagging.store');
+    Route::delete('/strategic-pillars/tagging/{tagging}', [InitiativeTaggingController::class, 'destroy'])->name('strategic-pillars.tagging.destroy');
 
     // Digital Initiatives
     Route::resource('digital-initiatives', DigitalInitiativeController::class);

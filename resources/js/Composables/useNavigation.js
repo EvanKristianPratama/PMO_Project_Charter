@@ -140,6 +140,12 @@ export function useNavigation() {
                 active: (url) => url.startsWith('/architecture'),
             },
             {
+                label: 'Service Portofolio',
+                href: '/service-portofolio',
+                icon: CubeIcon,
+                active: (url) => url.startsWith('/service-portofolio'),
+            },
+            {
                 label: 'Resources Management',
                 href: '/resources-management',
                 icon: CubeIcon,

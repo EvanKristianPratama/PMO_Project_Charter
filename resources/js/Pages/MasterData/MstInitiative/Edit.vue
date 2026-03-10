@@ -17,126 +17,144 @@
                 </div>
             </section>
 
-            <!-- ═══ MASTER DATA — TABLE STYLE ═══ -->
-            <div class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/5 dark:bg-[#1a1a1a]">
-                <div class="flex items-center justify-between border-b border-slate-200 px-4 py-2.5 dark:border-white/10">
-                    <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Data Initiative</h2>
+            <!-- ═══ MASTER DATA — TABLE FORM ═══ -->
+            <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/5 dark:bg-[#1a1a1a]">
+                <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-white/10">
+                    <div>
+                        <h2 class="text-sm font-bold text-slate-800 dark:text-slate-200">Informasi Utama</h2>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-wider mt-0.5">Detail Data Master Initiative</p>
+                    </div>
                     <button type="button" @click="submitMaster" :disabled="masterForm.processing"
-                        class="inline-flex items-center gap-1 rounded-lg bg-[#0f63b5] px-4 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-[#0c4e8f] disabled:opacity-50">
-                        Simpan
+                        class="inline-flex items-center gap-2 rounded-lg bg-[#0f63b5] px-5 py-2 text-xs font-bold text-white shadow-md hover:bg-[#0c4e8f] focus:ring-2 focus:ring-[#0f63b5]/50 active:scale-95 transition-all disabled:opacity-50">
+                        <svg v-if="masterForm.processing" class="animate-spin h-3 w-3 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        Simpan Perubahan
                     </button>
                 </div>
+
                 <div class="overflow-x-auto">
-                    <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
+                    <table class="w-full text-xs border-collapse">
                         <colgroup>
-                            <col class="w-[8%]"><col class="w-[10%]"><col class="w-[12%]">
-                            <col class="w-[12%]"><col class="w-[12%]"><col class="w-[20%]"><col class="w-[26%]">
+                            <col class="w-[180px]">
+                            <col>
                         </colgroup>
-                        <thead class="bg-slate-50 dark:bg-white/5">
-                            <tr>
-                                <th v-for="h in masterHeaders" :key="h" class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">{{ h }}</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
-                            <tr class="transition-colors hover:bg-slate-50 dark:hover:bg-white/5">
-                                <td class="px-3 py-2.5">
-                                    <input v-model="masterForm.code" type="number" min="0" placeholder="1001" class="form-input-sm" />
+                        <tbody>
+                            <tr class="border-b border-slate-100 dark:border-white/5">
+                                <td class="px-4 py-2 bg-slate-50 dark:bg-white/[0.03] text-[11px] font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">Code</td>
+                                <td class="px-3 py-1.5">
+                                    <input v-model="masterForm.code" type="number" min="0" placeholder="—" class="form-input-inline" />
+                                    <p v-if="masterForm.errors.code" class="mt-0.5 text-[10px] text-rose-500">{{ masterForm.errors.code }}</p>
                                 </td>
-                                <td class="px-3 py-2.5">
-                                    <select v-model="masterForm.tipe_initiative" class="form-input-sm">
-                                        <option value="">—</option>
+                            </tr>
+                            <tr class="border-b border-slate-100 dark:border-white/5">
+                                <td class="px-4 py-2 bg-slate-50 dark:bg-white/[0.03] text-[11px] font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">Nama <span class="text-rose-400">*</span></td>
+                                <td class="px-3 py-1.5">
+                                    <input v-model="masterForm.name" type="text" placeholder="—" class="form-input-inline" />
+                                    <p v-if="masterForm.errors.name" class="mt-0.5 text-[10px] text-rose-500">{{ masterForm.errors.name }}</p>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-slate-100 dark:border-white/5">
+                                <td class="px-4 py-2 bg-slate-50 dark:bg-white/[0.03] text-[11px] font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">Tipe <span class="text-rose-400">*</span></td>
+                                <td class="px-3 py-1.5">
+                                    <select v-model="masterForm.tipe_initiative" class="form-input-inline">
+                                        <option value="">— Pilih —</option>
                                         <option v-for="t in tipeOptions" :key="t.id" :value="t.id">{{ t.label }}</option>
                                     </select>
+                                    <p v-if="masterForm.errors.tipe_initiative" class="mt-0.5 text-[10px] text-rose-500">{{ masterForm.errors.tipe_initiative }}</p>
                                 </td>
-                                <td class="px-3 py-2.5">
-                                    <select v-model="masterForm.coe_id" class="form-input-sm">
-                                        <option :value="null">—</option>
+                            </tr>
+                            <tr class="border-b border-slate-100 dark:border-white/5">
+                                <td class="px-4 py-2 bg-slate-50 dark:bg-white/[0.03] text-[11px] font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">CoE</td>
+                                <td class="px-3 py-1.5">
+                                    <select v-model="masterForm.coe_id" class="form-input-inline">
+                                        <option :value="null">— Pilih —</option>
                                         <option v-for="opt in coeOptions" :key="opt.id" :value="opt.id">{{ opt.name }}</option>
                                     </select>
+                                    <p v-if="masterForm.errors.coe_id" class="mt-0.5 text-[10px] text-rose-500">{{ masterForm.errors.coe_id }}</p>
                                 </td>
-                                <td class="px-3 py-2.5">
-                                    <div class="max-h-28 space-y-1 overflow-y-auto rounded border border-slate-200 bg-white p-2 dark:border-white/10 dark:bg-[#131313]">
-                                        <label
-                                            v-for="opt in organizationOptions"
-                                            :key="opt.id"
-                                            class="flex items-start gap-2 text-[10px] text-slate-700 dark:text-slate-200"
-                                        >
-                                            <input
-                                                v-model="masterForm.organization_ids"
-                                                type="checkbox"
-                                                :value="opt.id"
-                                                class="mt-0.5 rounded border-slate-300 text-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10"
-                                            />
-                                            <span>{{ opt.groub ? `${opt.groub} — ` : '' }}{{ opt.name }}</span>
-                                        </label>
-                                    </div>
-                                </td>
-                                <td class="px-3 py-2.5">
-                                    <select v-model="masterForm.source" class="form-input-sm">
-                                        <option :value="null">—</option>
+                            </tr>
+                            <tr class="border-b border-slate-100 dark:border-white/5">
+                                <td class="px-4 py-2 bg-slate-50 dark:bg-white/[0.03] text-[11px] font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">Sumber Data</td>
+                                <td class="px-3 py-1.5">
+                                    <select v-model="masterForm.source" class="form-input-inline">
+                                        <option :value="null">— Pilih —</option>
                                         <option v-for="opt in sourceOptions" :key="opt.id" :value="opt.id">{{ opt.name }}</option>
                                     </select>
+                                    <p v-if="masterForm.errors.source" class="mt-0.5 text-[10px] text-rose-500">{{ masterForm.errors.source }}</p>
                                 </td>
-                                <td class="px-3 py-2.5">
-                                    <input v-model="masterForm.name" type="text" placeholder="Nama initiative" class="form-input-sm" />
+                            </tr>
+                            <tr class="border-b border-slate-100 dark:border-white/5">
+                                <td class="px-4 py-2 bg-slate-50 dark:bg-white/[0.03] text-[11px] font-semibold text-slate-500 dark:text-slate-400 align-top pt-3">Organisasi</td>
+                                <td class="px-3 py-1.5">
+                                    <div class="max-h-32 overflow-y-auto border border-slate-200 dark:border-white/10 rounded divide-y divide-slate-100 dark:divide-white/5">
+                                        <label v-for="opt in organizationOptions" :key="opt.id"
+                                            class="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5">
+                                            <input v-model="masterForm.organization_ids" type="checkbox" :value="opt.id"
+                                                class="h-3 w-3 rounded border-slate-300 text-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10" />
+                                            <span class="text-[11px] text-slate-700 dark:text-slate-300 truncate">{{ opt.name }}</span>
+                                            <span v-if="opt.groub" class="ml-auto shrink-0 text-[9px] text-slate-400 dark:text-slate-500">{{ opt.groub }}</span>
+                                        </label>
+                                    </div>
+                                    <p v-if="masterForm.errors.organization_ids" class="mt-0.5 text-[10px] text-rose-500">{{ masterForm.errors.organization_ids }}</p>
                                 </td>
-                                <td class="px-3 py-2.5">
-                                    <input v-model="masterForm.description" type="text" placeholder="Deskripsi singkat..." class="form-input-sm" />
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-2 bg-slate-50 dark:bg-white/[0.03] text-[11px] font-semibold text-slate-500 dark:text-slate-400 align-top pt-3">Deskripsi</td>
+                                <td class="px-3 py-1.5">
+                                    <textarea v-model="masterForm.description" rows="3" placeholder="—" class="form-input-inline resize-none"></textarea>
+                                    <p v-if="masterForm.errors.description" class="mt-0.5 text-[10px] text-rose-500">{{ masterForm.errors.description }}</p>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <div v-if="Object.keys(masterForm.errors).length" class="border-t border-slate-200 px-4 py-2 dark:border-white/10">
-                    <p v-for="(msg, field) in masterForm.errors" :key="field" class="text-[10px] text-rose-500">{{ field }}: {{ msg }}</p>
-                </div>
             </div>
 
-            <!-- ═══ STATUS HISTORY — READ-ONLY TABLE ═══ -->
-            <div class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/5 dark:bg-[#1a1a1a]">
-                <div class="flex items-center justify-between border-b border-slate-200 px-4 py-2.5 dark:border-white/10">
-                    <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                        Status History
-                        <span class="ml-1 font-normal text-slate-400">({{ initiative.status_history?.length ?? 0 }})</span>
-                    </h2>
+            <!-- ═══ STATUS HISTORY — TABLE ═══ -->
+            <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/5 dark:bg-[#1a1a1a]">
+                <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-white/10">
+                    <div>
+                        <h2 class="text-sm font-bold text-slate-800 dark:text-slate-200">Riwayat Status</h2>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-wider mt-0.5">Track perkembangan inisiatif ({{ initiative.status_history?.length ?? 0 }})</p>
+                    </div>
                     <button v-if="!showNewRow" type="button" @click="openNewRow"
-                        class="inline-flex items-center gap-1 rounded-lg bg-[#0f63b5] px-4 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-[#0c4e8f]">
-                        + Tambah
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-600 transition-all active:scale-95">
+                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                        Tambah Status
                     </button>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
                         <colgroup>
-                            <col class="w-[5%]"><col class="w-[22%]"><col class="w-[18%]"><col class="w-[38%]"><col class="w-[17%]">
+                            <col class="w-[50px]"><col class="w-[150px]"><col class="w-[150px]"><col><col class="w-[150px]">
                         </colgroup>
-                        <thead class="bg-slate-50 dark:bg-white/5">
+                        <thead class="bg-slate-50/50 dark:bg-white/5">
                             <tr>
-                                <th v-for="h in statusHeaders" :key="h" class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">{{ h }}</th>
-                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">Aksi</th>
+                                <th v-for="h in statusHeaders" :key="h" class="px-6 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">{{ h }}</th>
+                                <th class="px-6 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400 text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
                             <tr v-for="(entry, idx) in initiative.status_history" :key="entry.id"
-                                class="transition-colors hover:bg-slate-50 dark:hover:bg-white/5">
-                                <td class="px-3 py-2.5 text-slate-500">{{ idx + 1 }}</td>
+                                class="transition-colors hover:bg-slate-50/50 dark:hover:bg-white/5 group">
+                                <td class="px-6 py-4 text-slate-400 font-medium">{{ idx + 1 }}</td>
 
                                 <!-- View mode -->
                                 <template v-if="editingId !== entry.id">
-                                    <td class="px-3 py-2.5">
-                                        <span :class="['inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold capitalize', getStatusClass(entry.status)]">
+                                    <td class="px-6 py-4">
+                                        <span :class="['inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-tight capitalize', getStatusClass(entry.status)]">
                                             {{ entry.status }}
                                         </span>
                                     </td>
-                                    <td class="px-3 py-2.5 text-slate-600 dark:text-slate-300">{{ formatDate(entry.tanggal) }}</td>
-                                    <td class="px-3 py-2.5 text-slate-600 dark:text-slate-300">{{ entry.notes ?? '-' }}</td>
-                                    <td class="px-3 py-2.5">
-                                        <div class="flex gap-1">
+                                    <td class="px-6 py-4 text-slate-600 dark:text-slate-300 font-medium">{{ formatDate(entry.tanggal) }}</td>
+                                    <td class="px-6 py-4 text-slate-600 dark:text-slate-300 italic">{{ entry.notes ?? '-' }}</td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button type="button" @click="startEdit(entry)"
-                                                class="inline-flex items-center rounded-md bg-amber-50 px-2 py-1 text-[10px] font-semibold text-amber-700 ring-1 ring-amber-200 hover:bg-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:ring-amber-700/40">
+                                                class="inline-flex items-center rounded-lg bg-amber-50 px-2.5 py-1.5 text-[10px] font-bold text-amber-700 ring-1 ring-amber-200 hover:bg-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:ring-amber-700/40 transition-colors">
                                                 ✏️ Edit
                                             </button>
                                             <button type="button" @click="deleteStatus(entry.id)" :disabled="deletingId === entry.id"
-                                                class="inline-flex items-center rounded-md bg-rose-50 px-2 py-1 text-[10px] font-semibold text-rose-700 ring-1 ring-rose-200 hover:bg-rose-100 disabled:opacity-50 dark:bg-rose-900/20 dark:text-rose-400 dark:ring-rose-700/40">
+                                                class="inline-flex items-center rounded-lg bg-rose-50 px-2.5 py-1.5 text-[10px] font-bold text-rose-700 ring-1 ring-rose-200 hover:bg-rose-100 disabled:opacity-50 dark:bg-rose-900/20 dark:text-rose-400 dark:ring-rose-700/40 transition-colors">
                                                 🗑️ Hapus
                                             </button>
                                         </div>
@@ -145,27 +163,27 @@
 
                                 <!-- Edit mode -->
                                 <template v-else>
-                                    <td class="px-3 py-2.5">
-                                        <select v-model="editRow.status" class="form-input-sm">
+                                    <td class="px-6 py-4">
+                                        <select v-model="editRow.status" class="form-input-premium py-1">
                                             <option value="">— Pilih —</option>
                                             <option v-for="opt in statusList" :key="opt" :value="opt">{{ opt }}</option>
                                         </select>
-                                        <p v-if="editErrors.status" class="mt-0.5 text-[10px] text-rose-500">{{ editErrors.status }}</p>
+                                        <p v-if="editErrors.status" class="mt-0.5 text-[10px] text-rose-500 font-medium">{{ editErrors.status }}</p>
                                     </td>
-                                    <td class="px-3 py-2.5">
-                                        <input v-model="editRow.tanggal" type="date" class="form-input-sm" />
+                                    <td class="px-6 py-4">
+                                        <input v-model="editRow.tanggal" type="date" class="form-input-premium py-1" />
                                     </td>
-                                    <td class="px-3 py-2.5">
-                                        <input v-model="editRow.notes" type="text" placeholder="Catatan..." class="form-input-sm" />
+                                    <td class="px-6 py-4">
+                                        <input v-model="editRow.notes" type="text" placeholder="Catatan..." class="form-input-premium py-1" />
                                     </td>
-                                    <td class="px-3 py-2.5">
-                                        <div class="flex gap-1">
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="flex justify-center gap-2">
                                             <button type="button" @click="saveEdit(entry.id)" :disabled="editProcessing"
-                                                class="inline-flex items-center rounded-md bg-emerald-500 px-2 py-1 text-[10px] font-semibold text-white hover:bg-emerald-600 disabled:opacity-50">
+                                                class="inline-flex items-center rounded-lg bg-emerald-500 px-3 py-1.5 text-[10px] font-bold text-white hover:bg-emerald-600 disabled:opacity-50 transition-colors shadow-sm">
                                                 Simpan
                                             </button>
                                             <button type="button" @click="cancelEdit"
-                                                class="inline-flex items-center rounded-md border border-slate-200 px-2 py-1 text-[10px] font-semibold text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:text-slate-300">
+                                                class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-[10px] font-bold text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 transition-colors">
                                                 Batal
                                             </button>
                                         </div>
@@ -174,39 +192,106 @@
                             </tr>
 
                             <tr v-if="!initiative.status_history?.length && !showNewRow">
-                                <td colspan="5" class="px-6 py-8 text-center text-xs text-slate-500">Belum ada riwayat status.</td>
+                                <td colspan="5" class="px-6 py-12 text-center">
+                                    <p class="text-[11px] font-medium text-slate-400 uppercase tracking-widest italic">Belum ada riwayat status yang tercatat.</p>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <!-- Add new status form (below table) -->
-                <div v-if="showNewRow" class="border-t border-slate-200 px-4 py-3 dark:border-white/10">
-                    <div class="flex items-end gap-2">
-                        <div class="flex-1">
-                            <label class="mb-0.5 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Status *</label>
-                            <select v-model="newRow.status" class="form-input-sm">
-                                <option value="">— Pilih Status —</option>
-                                <option v-for="opt in statusList" :key="opt" :value="opt">{{ opt }}</option>
-                            </select>
-                            <p v-if="newRowErrors.status" class="mt-0.5 text-[10px] text-rose-500">{{ newRowErrors.status }}</p>
+                <!-- Add new status form (Inline Card) -->
+                <transition enter-active-class="transition ease-out duration-200" enter-from-class="transform opacity-0 -translate-y-2" enter-to-class="transform opacity-100 translate-y-0">
+                    <div v-if="showNewRow" class="border-t border-slate-200 bg-slate-50/30 p-6 dark:border-white/10 dark:bg-white/2">
+                        <div class="flex flex-col md:flex-row items-end gap-4">
+                            <div class="flex-1 space-y-1.5">
+                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Status Progress *</label>
+                                <select v-model="newRow.status" class="form-input-premium">
+                                    <option value="">— Pilih Progress —</option>
+                                    <option v-for="opt in statusList" :key="opt" :value="opt">{{ opt }}</option>
+                                </select>
+                                <p v-if="newRowErrors.status" class="text-[10px] text-rose-500 font-medium">{{ newRowErrors.status }}</p>
+                            </div>
+                            <div class="w-full md:w-48 space-y-1.5">
+                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Tanggal</label>
+                                <input v-model="newRow.tanggal" type="date" class="form-input-premium" />
+                            </div>
+                            <div class="flex-[2] space-y-1.5">
+                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Catatan Tambahan</label>
+                                <input v-model="newRow.notes" type="text" placeholder="Berikan sedikit konteks..." class="form-input-premium" />
+                            </div>
+                            <div class="flex gap-2">
+                                <button type="button" @click="saveNewRow" :disabled="newRowProcessing"
+                                    class="inline-flex rounded-lg bg-emerald-500 px-5 py-2 text-[11px] font-bold text-white hover:bg-emerald-600 shadow-md transition-all active:scale-95 disabled:opacity-50">
+                                    Simpan
+                                </button>
+                                <button type="button" @click="showNewRow = false"
+                                    class="inline-flex rounded-lg border border-slate-200 bg-white px-5 py-2 text-[11px] font-bold text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 transition-all active:scale-95">
+                                    Batal
+                                </button>
+                            </div>
                         </div>
-                        <div class="w-40">
-                            <label class="mb-0.5 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Tanggal</label>
-                            <input v-model="newRow.tanggal" type="date" class="form-input-sm" />
+                    </div>
+                </transition>
+            </div>
+
+            <!-- ═══ STRATEGIC MAPPING — TAGGING ═══ -->
+            <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/5 dark:bg-[#1a1a1a]">
+                <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-white/10">
+                    <div>
+                        <h2 class="text-sm font-bold text-slate-800 dark:text-slate-200">Strategic Mapping</h2>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-wider mt-0.5">Hubungan ke Strategic Pillar & Theme ({{ initiative.taggings?.length ?? 0 }})</p>
+                    </div>
+                </div>
+                
+                <div class="p-6 space-y-6">
+                    <!-- Current Mappings -->
+                    <div class="space-y-3">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mapping Saat Ini</label>
+                        <div class="flex flex-wrap gap-2.5">
+                            <div v-for="tag in initiative.taggings" :key="tag.id" 
+                                class="inline-flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/50 pl-3 pr-2 py-2 text-[11px] font-bold text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 shadow-sm transition-all hover:bg-white dark:hover:bg-white/10 hover:shadow-md group"
+                            >
+                                <div class="flex flex-col">
+                                    <span class="text-[#0f63b5] dark:text-blue-400 uppercase">{{ tag.goal }}</span>
+                                    <span v-if="tag.theme" class="text-[10px] font-medium text-slate-400 max-w-[200px] truncate leading-tight">{{ tag.theme.name }}</span>
+                                    <span v-else class="text-[9px] font-medium text-slate-300 uppercase italic">Langsung ke Pillar</span>
+                                </div>
+                                <button @click="removeTagging(tag.id)" class="rounded-lg p-1.5 text-slate-300 hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-900/20 transition-all group-hover:text-slate-400">
+                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
+                            <div v-if="!initiative.taggings?.length" class="flex flex-col items-center justify-center py-6 w-full border-2 border-dashed border-slate-100 dark:border-white/5 rounded-2xl">
+                                <p class="text-[11px] font-medium text-slate-400 uppercase tracking-widest italic">Belum ada mapping yang dilakukan.</p>
+                            </div>
                         </div>
-                        <div class="flex-1">
-                            <label class="mb-0.5 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Notes</label>
-                            <input v-model="newRow.notes" type="text" placeholder="Catatan..." class="form-input-sm" />
+                    </div>
+
+                    <!-- Add New Mapping Form -->
+                    <div class="rounded-2xl bg-slate-50/50 p-6 border border-slate-100 dark:bg-white/2 dark:border-white/5">
+                        <h3 class="mb-4 text-[10px] font-bold uppercase tracking-widest text-[#0f63b5]">Tambah Hubungan Baru</h3>
+                        <div class="flex flex-col md:flex-row items-end gap-4">
+                            <div class="flex-1 space-y-1.5 w-full">
+                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-1">Strategic Pillar (Goal)</label>
+                                <select v-model="mappingForm.goalId" @change="onGoalChange" class="form-input-premium">
+                                    <option value="">— Pilih Strategic Pillar —</option>
+                                    <option v-for="g in allGoals" :key="g.id" :value="g.id">[{{ g.code }}] {{ g.title }}</option>
+                                </select>
+                            </div>
+                            <div class="flex-1 space-y-1.5 w-full text-nowrap">
+                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-1">Theme (Opsional)</label>
+                                <select v-model="mappingForm.themes_id" :disabled="!mappingForm.goalId" class="form-input-premium disabled:bg-slate-100/50 dark:disabled:bg-white/5">
+                                    <option value="">— Hubungkan ke Pillar Langsung —</option>
+                                    <option v-for="t in filteredThemes" :key="t.id" :value="t.id">{{ t.theme_number }}. {{ t.name }}</option>
+                                </select>
+                            </div>
+                            <button @click="addTagging" :disabled="!mappingForm.goalId || mappingProcessing"
+                                class="inline-flex h-11 min-w-[160px] items-center justify-center gap-2 rounded-xl bg-[#0f63b5] px-6 text-xs font-bold text-white shadow-lg hover:bg-[#0c4e8f] active:scale-95 transition-all disabled:opacity-50 disabled:scale-100"
+                            >
+                                <svg v-if="mappingProcessing" class="animate-spin h-3.5 w-3.5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                {{ mappingProcessing ? 'Memproses...' : 'Tambah Mapping' }}
+                            </button>
                         </div>
-                        <button type="button" @click="saveNewRow" :disabled="newRowProcessing"
-                            class="inline-flex rounded-lg bg-emerald-500 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-emerald-600 disabled:opacity-50">
-                            Save
-                        </button>
-                        <button type="button" @click="showNewRow = false"
-                            class="inline-flex rounded-lg border border-slate-200 px-3 py-1.5 text-[11px] font-semibold text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5">
-                            Batal
-                        </button>
                     </div>
                 </div>
             </div>
@@ -215,7 +300,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
@@ -226,6 +311,8 @@ const props = defineProps({
     tipeOptions:         { type: Array, default: () => [] },
     sourceOptions:       { type: Array, default: () => [] },
     selectedOrganizationIds: { type: Array, default: () => [] },
+    allGoals:             { type: Array, default: () => [] },
+    allThemes:            { type: Array, default: () => [] },
 });
 
 const masterHeaders = ['Code', 'Tipe', 'CoE', 'Organisasi', 'Sumber Data', 'Nama', 'Deskripsi'];
@@ -343,6 +430,56 @@ const deleteStatus = (statusId) => {
     });
 };
 
+// ── Strategic Mapping (Tagging) ──
+const mappingForm = reactive({
+    goalId: '',
+    themes_id: ''
+});
+const mappingProcessing = ref(false);
+
+const filteredThemes = computed(() => {
+    if (!mappingForm.goalId) return [];
+    return props.allThemes.filter(t => t.idGoal === mappingForm.goalId);
+});
+
+const onGoalChange = () => {
+    mappingForm.themes_id = '';
+};
+
+const addTagging = () => {
+    if (!mappingForm.goalId) {
+        alert('Pilih Strategic Pillar terlebih dahulu.');
+        return;
+    }
+    
+    const goalObj = props.allGoals.find(g => g.id === mappingForm.goalId);
+    if (!goalObj) return;
+
+    mappingProcessing.value = true;
+    router.post('/initiative-tagging', {
+        initiative_id: props.initiative.id,
+        goal: goalObj.code,
+        themes_id: mappingForm.themes_id || null
+    }, {
+        preserveScroll: true,
+        onSuccess: () => {
+            mappingForm.goalId = '';
+            mappingForm.themes_id = '';
+        },
+        onFinish: () => {
+            mappingProcessing.value = false;
+        }
+    });
+};
+
+const removeTagging = (tagId) => {
+    if (!window.confirm('Hapus mapping ini?')) return;
+    
+    router.delete(`/initiative-tagging/${tagId}`, {
+        preserveScroll: true
+    });
+};
+
 // ── Helpers ──
 const getStatusClass = (status) => {
     const s = String(status || '').toLowerCase();
@@ -364,7 +501,21 @@ const formatDate = (d) => {
 
 <style scoped>
 @reference "tailwindcss";
-.form-input-sm {
-    @apply w-full rounded border-slate-300 bg-white px-2 py-1 text-[11px] shadow-sm focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100;
+.form-input-premium {
+    @apply w-full rounded-xl border-slate-200 bg-white px-4 py-2.5 text-xs font-medium shadow-sm transition-all focus:border-[#0f63b5] focus:ring-4 focus:ring-[#0f63b5]/10 hover:border-slate-300 dark:border-white/10 dark:bg-[#131313] dark:text-slate-100 dark:focus:border-[#0f63b5] dark:placeholder-slate-600;
+}
+
+.form-input-inline {
+    @apply w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs font-medium transition-all focus:border-[#0f63b5] focus:ring-1 focus:ring-[#0f63b5]/20 dark:border-white/10 dark:bg-[#131313] dark:text-slate-100 dark:placeholder-slate-500;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20;
 }
 </style>

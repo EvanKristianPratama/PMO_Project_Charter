@@ -265,7 +265,9 @@ const hasLinkedInitiative = (item) => Boolean(resolveLinkedInitiative(item)?.id)
 
 const initiativeHref = (item) => {
     const matchedInitiative = resolveLinkedInitiative(item);
-    return matchedInitiative?.id ? `/digital-initiatives/${matchedInitiative.id}` : '/digital-initiatives';
+    return matchedInitiative?.id
+        ? `/program-planning/program-definition/digital-initiatives/compendium/${matchedInitiative.id}/edit`
+        : '/program-planning/program-definition/digital-initiatives/compendium';
 };
 
 const editHref = (item) => {

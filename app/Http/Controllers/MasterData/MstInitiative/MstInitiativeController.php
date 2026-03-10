@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\DataSource;
 use App\Models\MstCoe;
 use App\Models\MstInitiative;
+use App\Models\Goal;
+use App\Models\Theme;
 use App\Models\ScInitiative;
 use App\Models\StatusMstInitiative;
 use App\Models\TrsOrganization;
@@ -139,8 +141,17 @@ class MstInitiativeController extends Controller
             'organization:id,name,groub_id',
             'organization.groub:id,name',
             'organizations:id,name,groub_id',
+            'taggings' => fn ($q) => $q->with(['theme', 'initiative']),
             'statusHistory' => fn ($q) => $q->orderByDesc('id'),
         ]);
+
+        $allGoals = Goal::select('id', 'code', 'title')
+            ->orderBy('code', 'asc')
+            ->get();
+
+        $allThemes = Theme::select('id', 'name', 'theme_number', 'idGoal')
+            ->orderBy('theme_number', 'asc')
+            ->get();
 
         return Inertia::render('MasterData/MstInitiative/Edit', [
             'initiative' => $mstInitiative,
@@ -149,6 +160,8 @@ class MstInitiativeController extends Controller
                 ->map(fn ($id) => (int) $id)
                 ->values()
                 ->all(),
+            'allGoals' => $allGoals,
+            'allThemes' => $allThemes,
             ...$this->dropdownOptions(),
         ]);
     }

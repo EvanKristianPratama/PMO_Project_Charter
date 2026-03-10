@@ -9,7 +9,7 @@ const currentUrl = computed(() => page.url);
 
 const rightScopeLabels = ['Architecture', 'Resources Management', 'Policy', 'Admin'];
 
-// Menu kanan khusus scope arsitektur/policy (+ admin jika ada).
+// Menu kanan khusus scope architecture/policy (+ admin jika ada).
 const rightNavItems = computed(() => {
     return navItems.value.filter((item) => rightScopeLabels.includes(item.label));
 });

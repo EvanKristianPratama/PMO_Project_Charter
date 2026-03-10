@@ -9,7 +9,7 @@
                     class="text-xs font-semibold uppercase tracking-[0.08em] text-white"
                     style="text-shadow: 0 1px 3px rgba(0,0,0,0.3);"
                 >
-                    Total Digital Inisiatif
+                    Digital Initiatives
                 </p>
                 <p
                     class="mt-2 text-3xl font-bold text-white"
@@ -20,34 +20,20 @@
             </div>
 
             <div class="mt-4 flex flex-wrap items-center gap-2">
-                <button
-                    type="button"
-                    class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/30 bg-white/15 text-lg font-bold text-white transition hover:bg-white/25"
-                    title="New Initiative"
-                    @click.stop="emit('create')"
-                >
-                    +
-                </button>
-                <button
-                    type="button"
-                    class="inline-flex items-center rounded-full border border-white/30 bg-white/15 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/25"
-                    @click="emit('show-all')"
-                >
-                    Digital Initiative
-                </button>
+                <span class="text-xs font-semibold text-white/90" style="text-shadow: 0 1px 2px rgba(0,0,0,0.2);">Digital Initiative :</span>
                 <Link
                     href="/program-planning/program-definition/digital-initiatives/compendium"
                     class="inline-flex items-center rounded-full border border-white/30 bg-white/15 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/25"
                     @click.stop
                 >
-                    Compendium List
+                    Compendium
                 </Link>
                 <Link
                     href="/program-planning/program-definition/digital-initiatives/appendix"
-                    class="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/90 transition hover:bg-white/20"
+                    class="inline-flex items-center rounded-full border border-white/30 bg-white/15 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/25"
                     @click.stop
                 >
-                    Appendix List
+                    Appendix
                 </Link>
             </div>
         </article>

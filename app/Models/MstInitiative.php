@@ -98,6 +98,11 @@ class MstInitiative extends Model
         return $this->hasMany(TrsMapSc::class, 'initiative_id');
     }
 
+    public function taggings(): HasMany
+    {
+        return $this->hasMany(InitiativeTagging::class, 'initiative_id');
+    }
+
     public function latestPlanningStatusValue(): ?string
     {
         $latestStatus = $this->relationLoaded('latestStatus')
