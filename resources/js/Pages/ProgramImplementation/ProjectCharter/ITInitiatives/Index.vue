@@ -234,7 +234,9 @@
                         </span>
                     </div>
 
-                    <StatusImplementationTable :projects="initiative.projects" />
+                    <div v-for="project in initiative.projects" :key="`project-impl-${project.id}`" class="mb-8 last:mb-0">
+                        <StatusImplementationTable :project="project" codeLabel="Status Implementation History" />
+                    </div>
                 </article>
 
                 <section v-if="filteredImplementationInitiativeItems.length === 0"
