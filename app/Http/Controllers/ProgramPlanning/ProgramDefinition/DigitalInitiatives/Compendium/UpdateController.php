@@ -17,9 +17,10 @@ class UpdateController extends Controller
     public function __invoke(Request $request, TrsScInitiative $scInitiative): RedirectResponse
     {
         $validated = $request->validate([
-            'initiative_ids' => 'required|array',
+            'initiative_ids' => 'nullable|array',
             'initiative_ids.*' => 'integer|exists:mst_initiative,id',
             'owner' => 'nullable|string|max:255',
+            'coe' => 'nullable|string|max:255',
             'usecase' => 'required|string|max:255',
             'description' => 'nullable|string',
             'source_id' => 'nullable|integer|exists:mst_sc_source,id',
@@ -37,6 +38,7 @@ class UpdateController extends Controller
 
             $scInitiative->update([
                 'owner' => $validated['owner'],
+                'coe' => $validated['coe'],
                 'usecase' => $validated['usecase'],
                 'description' => $validated['description'],
                 'source_id' => $validated['source_id'],

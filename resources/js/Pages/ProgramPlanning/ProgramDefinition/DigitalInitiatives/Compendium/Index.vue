@@ -266,6 +266,17 @@
                                 <p v-if="form.errors.owner" class="mt-1 text-[10px] text-rose-500">{{ form.errors.owner }}</p>
                             </div>
                             <div>
+                                <label class="mb-1 block text-[11px] font-semibold text-slate-600 dark:text-slate-300">CoE</label>
+                                <select
+                                    v-model="form.coe"
+                                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
+                                >
+                                    <option value="">Pilih CoE...</option>
+                                    <option v-for="coe in coeOptions" :key="coe.id" :value="coe.name">{{ coe.name }}</option>
+                                </select>
+                                <p v-if="form.errors.coe" class="mt-1 text-[10px] text-rose-500">{{ form.errors.coe }}</p>
+                            </div>
+                            <div>
                                 <label class="mb-1 block text-[11px] font-semibold text-slate-600 dark:text-slate-300">Usecase</label>
                                 <input
                                     v-model="form.usecase"
@@ -409,6 +420,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    coeOptions: {
+        type: Array,
+        default: () => [],
+    },
     sourceOptions: {
         type: Array,
         default: () => [],
@@ -449,24 +464,27 @@ const filters = ref({
 
 const uniqueOwners = computed(() => {
     const owners = props.compendiumItems
-        .map((item) => item.project_owner)
-        .filter((owner) => owner && owner !== '-');
+        .map((item) => String(item.project_owner ?? '').trim())
+        .filter((owner) => owner !== '' && owner !== '-');
     return [...new Set(owners)].sort();
 });
 
 const uniqueCoes = computed(() => {
     const coes = props.compendiumItems
-        .map((item) => item.coe)
-        .filter((coe) => coe && coe !== '-');
+        .map((item) => String(item.coe ?? '').trim())
+        .filter((coe) => coe !== '' && coe !== '-');
     return [...new Set(coes)].sort();
 });
 
 const filteredCompendiumItems = computed(() => {
     return props.compendiumItems.filter((item) => {
-        const matchOwner = !filters.value.owner || item.project_owner === filters.value.owner;
+        const ownerVal = String(item.project_owner ?? '').trim() || '-';
+        const coeVal = String(item.coe ?? '').trim() || '-';
+
+        const matchOwner = !filters.value.owner || ownerVal === filters.value.owner;
         const matchValue = !filters.value.value || item.value === filters.value.value;
         const matchUrgency = !filters.value.urgency || item.urgency === filters.value.urgency;
-        const matchCoe = !filters.value.coe || item.coe === filters.value.coe;
+        const matchCoe = !filters.value.coe || coeVal === filters.value.coe;
 
         return matchOwner && matchValue && matchUrgency && matchCoe;
     });
@@ -486,6 +504,7 @@ const resetFilters = () => {
 const form = useForm({
     initiative_ids: [],
     owner: '',
+    coe: '',
     usecase: '',
     description: '',
     source_id: '',
@@ -505,6 +524,7 @@ const resetForm = () => {
     form.clearErrors();
     form.initiative_ids = [];
     form.owner = '';
+    form.coe = '';
     form.source_id = '';
     form.rjpp_tagging_ids = [];
     form.value = null;
@@ -583,6 +603,7 @@ const sourceDisplayLabel = (source) => {
 const submitCreate = () => {
     form.transform((data) => ({
         ...data,
+        initiative_ids: Array.isArray(data.initiative_ids) ? data.initiative_ids : [],
         value: data.value === '' ? null : data.value,
         urgency: data.urgency === '' ? null : data.urgency,
     })).post('/program-planning/program-definition/digital-initiatives/compendium', {

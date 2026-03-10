@@ -57,6 +57,7 @@ class CreateController extends Controller
 
         return Inertia::render('ProgramPlanning/ProgramDefinition/DigitalInitiatives/Compendium/Show', [
             'initiativeOptions' => $initiativeOptions,
+            'coeOptions' => \App\Models\MstCoe::orderBy('name')->get(['id', 'name'])->values(),
             'sourceOptions' => MstScSource::orderBy('name')->get(['id', 'name', 'month', 'year'])->map(fn ($s) => [
                 'id' => $s->id,
                 'name' => $s->name,
