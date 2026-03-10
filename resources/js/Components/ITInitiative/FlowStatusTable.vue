@@ -104,9 +104,9 @@
                                 <Link
                                     :href="`/it-initiatives/${project.id}?tab=detail`"
                                     class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-blue-100 text-blue-700 transition-colors hover:bg-blue-200 dark:bg-blue-500/20 dark:text-blue-300 dark:hover:bg-blue-500/30"
-                                    title="Status Implementation"
+                                    title="View Status Implementation"
                                 >
-                                    Status Implementation
+                                    Status
                                 </Link>
                             </div>
                         </td>

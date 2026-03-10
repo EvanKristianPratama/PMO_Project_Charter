@@ -1,16 +1,5 @@
 <template>
     <div class="space-y-3">
-        <div class="flex items-center justify-between mb-2">
-            <div>
-                <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200" v-if="projectList.length === 1 && !hideTitle">Status Implementation</h3>
-            </div>
-            
-            <button v-if="projectList.length === 1 && projectList[0]?.id" @click="openAddModal(projectList[0])" class="inline-flex h-[26px] items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-3 text-[10px] font-semibold text-indigo-700 shadow-none transition hover:bg-indigo-100 dark:border-indigo-900/50 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-900/50">
-                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                Add Status
-            </button>
-        </div>
-
         <!-- Tabel 1: Code & Status Implementasi -->
         <div class="overflow-x-auto rounded-lg border border-slate-200 dark:border-white/10">
             <table class="w-full table-fixed divide-y divide-x divide-slate-200 text-[11px] dark:divide-white/10">
@@ -67,7 +56,11 @@
                             {{ getLatestImplementationStatus(proj) || '-' }}
                         </td>
                         <td class="px-1 py-1 text-center align-middle">
-                            <div class="flex items-center justify-center">
+                            <div class="flex items-center justify-center gap-1.5 w-max mx-auto">
+                                <button v-if="proj?.id" @click="openAddModal(proj)" class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-indigo-100 text-indigo-800 hover:bg-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:hover:bg-indigo-500/30 transition-colors cursor-pointer" title="Add Status">
+                                    <svg class="mr-0.5 h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                    Add
+                                </button>
                                 <button v-if="getLatestImplementationLog(proj)" @click="openEditModal(getLatestImplementationLog(proj))" class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-500/20 dark:text-amber-300 dark:hover:bg-amber-500/30 transition-colors cursor-pointer" title="Edit Status">
                                     Edit
                                 </button>
