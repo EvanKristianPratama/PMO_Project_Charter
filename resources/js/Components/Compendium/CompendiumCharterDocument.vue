@@ -80,6 +80,7 @@ const selectedInitiatives = computed(() => {
             coe: displayValue(option?.coe),
             projectOwner: displayValue(option?.project_owner),
             group: displayValue(option?.group),
+            description: displayValue(option?.description),
             dataSource: displayValue(option?.data_source),
             dataSourceCreated: displayValue(option?.data_source_created),
         };
@@ -138,8 +139,28 @@ const onThemeSelect = (event) => {
     event.target.value = '';
 };
 
+const sourceOptionLabel = (option) => {
+    if (!option) return '-';
+
+    const name = String(option?.name ?? '').trim();
+    const month = String(option?.month ?? '').trim();
+    const year = String(option?.year ?? '').trim();
+
+    if (name === '') return '-';
+
+    let datePart = '';
+    if (month !== '' && year !== '') {
+        datePart = ` (${month} ${year})`;
+    } else if (year !== '') {
+        datePart = ` (${year})`;
+    }
+
+    return `${name}${datePart}`;
+};
+
 const sourceLabel = computed(() => {
-    return props.sourceOptions.find((option) => toNumber(option.id) === toNumber(props.form.source_id))?.name ?? '-';
+    const option = props.sourceOptions.find((o) => toNumber(o.id) === toNumber(props.form.source_id));
+    return sourceOptionLabel(option);
 });
 </script>
 
@@ -150,7 +171,7 @@ const sourceLabel = computed(() => {
                 <div class="min-w-0 flex-1">
                     <div class="flex flex-wrap items-center gap-2">
                         <h1 class="text-[18px] font-extrabold leading-tight text-slate-900">
-                            Compendium:
+                            Use Case:
                             <template v-if="editable">
                                 <input
                                     v-model="form.usecase"
@@ -165,7 +186,7 @@ const sourceLabel = computed(() => {
                         </h1>
                     </div>
                     <p class="mt-1 text-[13px] text-slate-600">
-                        Penandaan RJPP dan metadata utama untuk scope charter initiative yang terhubung.
+                        {{ displayValue(form.description) }}
                     </p>
                 </div>
 
@@ -222,7 +243,7 @@ const sourceLabel = computed(() => {
                 <span class="info-value">
                     <select v-if="editable" v-model="form.source_id" class="info-input">
                         <option value="">- Pilih Source -</option>
-                        <option v-for="option in sourceOptions" :key="option.id" :value="option.id">{{ themeOptionLabel(option) }}</option>
+                        <option v-for="option in sourceOptions" :key="option.id" :value="option.id">{{ sourceOptionLabel(option) }}</option>
                     </select>
                     <template v-else>{{ sourceLabel }}</template>
                 </span>
@@ -230,7 +251,7 @@ const sourceLabel = computed(() => {
         </div>
 
         <div class="charter-section">
-            <div class="bar-main">General Information</div>
+            <div class="bar-main">Detail Information</div>
             <article class="panel border-t-0">
                 <div class="bar-sub">Master Initiative Dependency</div>
                 <div class="panel-body space-y-4">
@@ -239,7 +260,8 @@ const sourceLabel = computed(() => {
                             <thead>
                                 <tr>
                                     <th class="w-[45px] text-center">Code</th>
-                                    <th class="text-center">Initiative</th>
+                                    <th class="text-center">Master Initiative</th>
+                                    <th class="text-center">Description</th>
                                     <th class="text-center">CoE</th>
                                     <th class="text-center">Project Owner</th>
                                     <th class="text-center">Group</th>
@@ -248,7 +270,7 @@ const sourceLabel = computed(() => {
                             </thead>
                             <tbody>
                                 <tr v-if="!selectedInitiatives.length">
-                                    <td colspan="6" class="empty-row text-center">Belum ada initiative yang dimapping.</td>
+                                    <td colspan="7" class="empty-row text-center">Belum ada initiative yang dimapping.</td>
                                 </tr>
                                 <tr
                                     v-for="(initiative, index) in selectedInitiatives"
@@ -258,6 +280,11 @@ const sourceLabel = computed(() => {
                                     <td>
                                         <div class="font-semibold text-slate-800">
                                             {{ initiative.name }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="text-slate-600">
+                                            {{ initiative.description }}
                                         </div>
                                     </td>
                                     <td>{{ initiative.coe }}</td>

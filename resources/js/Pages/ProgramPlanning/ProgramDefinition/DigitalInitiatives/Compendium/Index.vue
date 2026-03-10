@@ -84,9 +84,14 @@
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.rjpp ?? '-' }}</td>
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.coe ?? '-' }}</td>
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200">
-                                    <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-medium text-slate-700 dark:bg-white/10 dark:text-slate-300">
-                                        {{ item.data_source ?? '-' }}
-                                    </span>
+                                    <div class="flex flex-col gap-1">
+                                        <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-medium text-slate-700 dark:bg-white/10 dark:text-slate-300">
+                                            {{ item.data_source ?? '-' }}
+                                        </span>
+                                        <span v-if="item.data_source_created !== '-'" class="px-2 text-[9px] text-slate-500 dark:text-slate-400">
+                                            {{ item.data_source_created }}
+                                        </span>
+                                    </div>
                                 </td>
                                 <td class="px-3 py-3 text-[10px] font-medium">
                                     <div class="flex items-center gap-2">
@@ -208,7 +213,7 @@
                         >
                             <option value="">Pilih Source...</option>
                             <option v-for="source in sourceOptions" :key="`source-${source.id}`" :value="source.id">
-                                {{ source.name }}
+                                {{ sourceDisplayLabel(source) }}
                             </option>
                         </select>
                         <p v-if="form.errors.source_id" class="mt-1 text-[10px] text-rose-500">{{ form.errors.source_id }}</p>
@@ -428,6 +433,25 @@ const themeDisplayLabel = (theme) => {
 const themeLabel = (id) => {
     const theme = props.themeOptions.find((item) => item.id === id);
     return themeDisplayLabel(theme) || String(id);
+};
+
+const sourceDisplayLabel = (source) => {
+    if (!source) return '-';
+
+    const name = String(source?.name ?? '').trim();
+    const month = String(source?.month ?? '').trim();
+    const year = String(source?.year ?? '').trim();
+
+    if (name === '') return '-';
+
+    let datePart = '';
+    if (month !== '' && year !== '') {
+        datePart = ` (${month} ${year})`;
+    } else if (year !== '') {
+        datePart = ` (${year})`;
+    }
+
+    return `${name}${datePart}`;
 };
 
 const submitCreate = () => {

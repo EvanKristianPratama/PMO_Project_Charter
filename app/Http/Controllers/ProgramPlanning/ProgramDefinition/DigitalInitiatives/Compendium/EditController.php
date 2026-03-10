@@ -53,10 +53,28 @@ class EditController extends Controller
                 'sign_by' => $detail?->sign_by ?? '',
             ],
             'initiativeOptions' => $this->initiativeOptions(),
-            'sourceOptions' => MstScSource::orderBy('name')->get(['id', 'name'])->values(),
+            'sourceOptions' => MstScSource::orderBy('name')->get(['id', 'name', 'month', 'year'])->map(fn ($s) => [
+                'id' => $s->id,
+                'name' => $s->name,
+                'month' => $this->getMonthName($s->month),
+                'year' => $s->year,
+            ])->values(),
             'themeOptions' => $this->themeOptions(),
             'compendiumOptions' => $this->compendiumOptions(),
         ]);
+    }
+
+    private function getMonthName($month): string
+    {
+        if (empty($month)) {
+            return '';
+        }
+
+        if (is_numeric($month) && (int) $month >= 1 && (int) $month <= 12) {
+            return date('F', mktime(0, 0, 0, (int) $month, 10));
+        }
+
+        return (string) $month;
     }
 
     private function compendiumOptions()
@@ -68,18 +86,11 @@ class EditController extends Controller
             ->get(['id', 'owner', 'usecase'])
             ->map(function (TrsScInitiative $item): array {
                 $firstInitiative = $item->mstInitiatives->first();
-                $code = trim((string) ($firstInitiative?->code ?? ''));
-                $name = trim((string) ($item->usecase ?: ($firstInitiative?->name ?? '-')));
-                $owner = trim((string) ($item->owner ?? ''));
-
-                $label = ($code !== '' ? "[{$code}] " : '') . ($name !== '' ? $name : '-');
-                if ($owner !== '') {
-                    $label .= " - {$owner}";
-                }
+                $label = trim((string) ($item->usecase ?: ($firstInitiative?->name ?? '-')));
 
                 return [
                     'id' => (int) $item->id,
-                    'label' => $label,
+                    'label' => $label !== '' ? $label : '-',
                 ];
             })
             ->values();
@@ -103,7 +114,7 @@ class EditController extends Controller
                 $sourceCreated = '-';
                 if ($source) {
                     if (!empty($source->month) && !empty($source->year)) {
-                        $sourceCreated = $source->month . ' ' . $source->year;
+                        $sourceCreated = $this->getMonthName($source->month) . ' ' . $source->year;
                     } elseif (!empty($source->created_at)) {
                         $sourceCreated = $source->created_at->format('M Y');
                     }

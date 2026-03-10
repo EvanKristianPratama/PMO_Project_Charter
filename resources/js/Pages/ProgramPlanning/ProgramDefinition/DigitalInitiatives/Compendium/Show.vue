@@ -15,13 +15,12 @@
 
                     <div class="h-6 w-px bg-slate-200 dark:bg-white/10" />
 
-                    <label for="compendium-nav" class="text-xs font-medium text-slate-700 dark:text-slate-200">Pilih Compendium</label>
+                    <label for="compendium-nav" class="text-xs font-medium text-slate-700 dark:text-slate-200">Pilih Scope Charter</label>
                     <select
                         id="compendium-nav"
                         v-model="selectedCompendiumId"
                         class="w-full max-w-sm rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 focus:border-[#1C75BC] focus:outline-none dark:border-white/10 dark:bg-[#101826] dark:text-slate-100"
                     >
-                        <option :value="COMPENDIUM_CREATE_VALUE">+ New Compendium</option>
                         <option v-for="option in compendiumOptions" :key="`compendium-opt-${option.id}`" :value="String(option.id)">
                             {{ formatCompendiumLabel(option) }}
                         </option>
@@ -34,7 +33,7 @@
                             @click="startEdit"
                             class="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-xs font-bold text-amber-700 transition-all hover:bg-amber-100"
                         >
-                            Edit Compendium
+                            Edit Scope Charter
                         </button>
 
                         <button

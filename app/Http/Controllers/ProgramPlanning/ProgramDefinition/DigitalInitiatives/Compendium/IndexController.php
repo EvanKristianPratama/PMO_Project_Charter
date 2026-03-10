@@ -69,7 +69,7 @@ class IndexController extends Controller
                 $sourceCreatedAt = '-';
                 if ($source) {
                     if (!empty($source->month) && !empty($source->year)) {
-                        $sourceCreatedAt = $source->month . ' ' . $source->year;
+                        $sourceCreatedAt = $this->getMonthName($source->month) . ' ' . $source->year;
                     } elseif (!empty($source->created_at)) {
                         $sourceCreatedAt = $source->created_at->format('M Y');
                     }
@@ -101,7 +101,13 @@ class IndexController extends Controller
             ->values();
 
         $sourceOptions = MstScSource::orderBy('name')
-            ->get(['id', 'name'])
+            ->get(['id', 'name', 'month', 'year'])
+            ->map(fn ($s) => [
+                'id' => $s->id,
+                'name' => $s->name,
+                'month' => $this->getMonthName($s->month),
+                'year' => $s->year,
+            ])
             ->values();
 
         $themeOptions = Theme::with('goal:id,code,title')
@@ -131,6 +137,19 @@ class IndexController extends Controller
             'sourceOptions' => $sourceOptions,
             'themeOptions' => $themeOptions,
         ]);
+    }
+
+    private function getMonthName($month): string
+    {
+        if (empty($month)) {
+            return '';
+        }
+
+        if (is_numeric($month) && (int) $month >= 1 && (int) $month <= 12) {
+            return date('F', mktime(0, 0, 0, (int) $month, 10));
+        }
+
+        return (string) $month;
     }
 
     private function scoreLabel(?int $score): string
