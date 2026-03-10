@@ -54,6 +54,16 @@
                     <button
                         type="button"
                         class="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-semibold transition"
+                        :class="showTimelineHistory
+                            ? 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-300 dark:hover:bg-amber-900/30'
+                            : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700/40 dark:bg-emerald-900/20 dark:text-emerald-300 dark:hover:bg-emerald-900/30'"
+                        @click="showTimelineHistory = !showTimelineHistory"
+                    >
+                        {{ showTimelineHistory ? 'Hide Timeline History' : 'Show Timeline History' }}
+                    </button>
+                    <button
+                        type="button"
+                        class="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-semibold transition"
                         :class="showImplementationRoadmap
                             ? 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-300 dark:hover:bg-amber-900/30'
                             : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700/40 dark:bg-emerald-900/20 dark:text-emerald-300 dark:hover:bg-emerald-900/30'"
@@ -245,7 +255,7 @@
                     </div>
 
                     <div v-for="project in initiative.projects" :key="`project-impl-${project.id}`" class="mb-8 last:mb-0">
-                        <StatusImplementationTable :project="project" codeLabel="Progres status history" />
+                        <StatusImplementationTable :project="project" codeLabel="Progres status history" :showTimelineHistory="showTimelineHistory" />
                     </div>
 
                     <div v-if="showImplementationRoadmap && roadmapProjectsFor(initiative).length > 0" 
@@ -409,6 +419,7 @@ const roadmapYearEnd = 2029;
 // ── Implementation View State (Matching ReviewTimeline) ──
 const selectedImplementationInitiativeId = ref('all');
 const showImplementationRoadmap = ref(true);
+const showTimelineHistory = ref(true);
 const expandedImplementationRoadmapItems = reactive(new Set());
 
 const filteredImplementationInitiativeItems = computed(() => {

@@ -62,7 +62,7 @@
         </div>
 
         <!-- Tabel 2: Informasi Dasar & Timeline -->
-        <div class="overflow-x-auto rounded-lg border border-slate-100 dark:border-white/5">
+        <div v-if="showTimelineHistory" class="overflow-x-auto rounded-lg border border-slate-100 dark:border-white/5">
             <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
                 <colgroup>
                     <col class="w-[20%]">
@@ -139,6 +139,10 @@ const props = defineProps({
     codeLabel: {
         type: String,
         default: 'Code',
+    },
+    showTimelineHistory: {
+        type: Boolean,
+        default: true,
     },
 });
 
