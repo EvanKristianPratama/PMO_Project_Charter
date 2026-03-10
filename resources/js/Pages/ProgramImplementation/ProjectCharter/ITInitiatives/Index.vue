@@ -2,7 +2,7 @@
     <UserLayout title="IT Initiatives">
         <div class="animate-fade-in">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-                :class="tableMode === TABLE_MODE.ROADMAP ? 'mb-3' : 'mb-4'">
+                :class="tableMode === TABLE_MODE.ROADMAP || tableMode === TABLE_MODE.IMPLEMENTATION ? 'mb-3' : 'mb-4'">
                 <div>
                     <h2 class="text-2xl font-bold text-slate-900 dark:text-white">IT Initiatives</h2>
                     <div class="mt-2 flex flex-wrap items-center gap-2">
@@ -19,11 +19,42 @@
                             @click="showRoadmapView">
                             Roadmap Project Charter
                         </button>
+                        <button type="button"
+                            class="inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition"
+                            :class="tableMode === TABLE_MODE.IMPLEMENTATION
+                                ? 'border-[#1C75BC] bg-[#1C75BC] text-white hover:bg-[#0f63b5]'
+                                : 'border-[#1C75BC]/45 bg-[#1C75BC]/10 text-[#1C75BC] hover:bg-[#1C75BC]/20 dark:text-[#7FC0F2]'"
+                            @click="showImplementationView">
+                            Status Implementation
+                        </button>
+                    </div>
+                </div>
+
+                <div v-if="tableMode === TABLE_MODE.IMPLEMENTATION" class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end">
+                    <div class="w-full sm:w-[360px]">
+                        <label
+                            class="mb-1 block text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400"
+                        >
+                            Filter Initiative
+                        </label>
+                        <select
+                            v-model="selectedImplementationInitiativeId"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-2 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#101826] dark:text-slate-100"
+                        >
+                            <option value="all">Semua Initiative</option>
+                            <option
+                                v-for="initiative in masterItInitiatives"
+                                :key="`initiative-filter-${initiative.id}`"
+                                :value="String(initiative.id)"
+                            >
+                                {{ implementationInitiativeLabel(initiative) }}
+                            </option>
+                        </select>
                     </div>
                 </div>
             </div>
 
-            <section v-if="tableMode !== TABLE_MODE.ROADMAP" class="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <section v-if="tableMode !== TABLE_MODE.ROADMAP && tableMode !== TABLE_MODE.IMPLEMENTATION" class="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
                 <article
                     class="relative flex cursor-pointer flex-col justify-center rounded-2xl border border-[#A7C942] bg-[#A7C942] p-4 shadow-[0_4px_16px_rgba(167,201,66,0.3)]"
                     role="button" tabindex="0" @click="showMasterItInitiatives"
@@ -183,18 +214,49 @@
                     </p>
                 </section>
             </section>
+
+            <section v-else-if="hasTableSelection && tableMode === TABLE_MODE.IMPLEMENTATION" class="space-y-4">
+                <article
+                    v-for="initiative in filteredImplementationInitiativeItems"
+                    :key="`initiative-${initiative.id}`"
+                    class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#171717]"
+                >
+                    <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <h2 class="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                                {{ implementationInitiativeLabel(initiative) }}
+                            </h2>
+                        </div>
+                        <span
+                            class="inline-flex items-center rounded-full border border-slate-300 bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-700 dark:border-white/15 dark:bg-white/5 dark:text-slate-300"
+                        >
+                            {{ projectCountLabel(initiative.projects) }}
+                        </span>
+                    </div>
+
+                    <StatusImplementationTable :projects="initiative.projects" />
+                </article>
+
+                <section v-if="filteredImplementationInitiativeItems.length === 0"
+                    class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-white/15 dark:bg-[#171717]">
+                    <p class="text-sm font-medium text-slate-600 dark:text-slate-300">
+                        Belum ada data project untuk ditampilkan.
+                    </p>
+                </section>
+            </section>
         </div>
     </UserLayout>
 </template>
 
 <script setup>
-import { computed, ref, reactive } from 'vue';
-import { Link } from '@inertiajs/vue3';
+import { computed, ref, reactive, onMounted } from 'vue';
+import { Link, usePage } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import { statusFlowClassByIndex } from '@/Composables/initiativeStatus';
 import { useFlowFilter } from '@/Composables/useFlowFilter';
 import FlowStatusTable from '@/Components/ITInitiative/FlowStatusTable.vue';
 import MasterInitiativeTable from '@/Components/ITInitiative/MasterInitiativeTable.vue';
+import StatusImplementationTable from '@/Components/ITInitiative/StatusImplementationTable.vue';
 import ProjectRoadmap from '@/Components/Roadmap/ProjectRoadmap.vue';
 import ProjectRoadmapSummary from '@/Components/Roadmap/ProjectRoadmapSummary.vue';
 
@@ -285,6 +347,7 @@ const TABLE_MODE = {
     FLOW: 'flow',
     MASTER: 'master',
     ROADMAP: 'roadmap',
+    IMPLEMENTATION: 'implementation',
 };
 
 const tableMode = ref(TABLE_MODE.FLOW);
@@ -293,6 +356,30 @@ const showAllCharter = ref(false);
 const selectedRoadmapProjectId = ref('all');
 const roadmapYearStart = 2025;
 const roadmapYearEnd = 2029;
+
+// ── Implementation View State (Matching ReviewTimeline) ──
+const selectedImplementationInitiativeId = ref('all');
+
+const filteredImplementationInitiativeItems = computed(() => {
+    const items = asList(props.masterItInitiatives);
+    if (selectedImplementationInitiativeId.value === 'all') {
+        return items;
+    }
+
+    const selectedId = Number(selectedImplementationInitiativeId.value);
+    return items.filter((initiative) => Number(initiative?.id) === selectedId);
+});
+
+const implementationInitiativeLabel = (initiative) => {
+    const code = String(initiative?.code ?? '').trim();
+    const name = String(initiative?.name ?? '').trim();
+    return `Code: ${code || '-'} | Initiative: ${name || '-'}`;
+};
+
+const projectCountLabel = (projects) => {
+    const total = Array.isArray(projects) ? projects.length : 0;
+    return `${total} Project${total === 1 ? '' : 's'}`;
+};
 
 // ── Expand / Collapse per project ──
 const expandedProjects = reactive(new Set());
@@ -335,6 +422,12 @@ const showMasterItInitiatives = () => {
 const showRoadmapView = () => {
     hasTableSelection.value = true;
     tableMode.value = TABLE_MODE.ROADMAP;
+    activeFlowFilter.value = null;
+};
+
+const showImplementationView = () => {
+    hasTableSelection.value = true;
+    tableMode.value = TABLE_MODE.IMPLEMENTATION;
     activeFlowFilter.value = null;
 };
 
@@ -462,5 +555,14 @@ const digitalSteps = computed(() => {
 
 const gridStyle = (steps = []) => ({
     gridTemplateColumns: `repeat(${Math.max(steps.length, 1)}, minmax(0, 1fr))`,
+});
+
+onMounted(() => {
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get('tableMode');
+    if (mode && Object.values(TABLE_MODE).includes(mode)) {
+        tableMode.value = mode;
+        hasTableSelection.value = true;
+    }
 });
 </script>

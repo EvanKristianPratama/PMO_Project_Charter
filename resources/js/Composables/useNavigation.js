@@ -115,9 +115,9 @@ export function useNavigation() {
                     },
                     {
                         label: 'Status Implementation',
-                        href: '/roadmap/status-implementation',
+                        href: '/it-initiatives?tableMode=implementation',
                         icon: ClipboardDocumentCheckIcon,
-                        active: (url) => url.startsWith('/roadmap/status-implementation'),
+                        active: (url) => url.includes('tableMode=implementation'),
                     },
                 ],
             },
