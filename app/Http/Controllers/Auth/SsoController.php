@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\ActivityLogService;
 use App\Services\UserAccessService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -67,6 +68,13 @@ class SsoController extends Controller
 
     public function logout(): RedirectResponse
     {
+        /** @var User|null $user */
+        $user = Auth::user();
+
+        if ($user) {
+            ActivityLogService::logout($user);
+        }
+
         Auth::logout();
 
         request()->session()->invalidate();
@@ -79,7 +87,7 @@ class SsoController extends Controller
     {
         if ($user->isPending() || $user->isRejected()) {
             Auth::logout();
-            
+
             request()->session()->invalidate();
             request()->session()->regenerateToken();
 
@@ -89,6 +97,9 @@ class SsoController extends Controller
                 'email'  => $user->email,
             ]);
         }
+
+        // Catat login berhasil
+        ActivityLogService::login($user);
 
         if ($user->isAdminUser()) {
             return redirect()->route('admin.dashboard');

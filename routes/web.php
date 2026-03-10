@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminUserController;
@@ -207,6 +208,7 @@ Route::middleware(['auth', 'approved', 'admin'])->prefix('admin')->name('admin.'
     Route::post('/roles/permissions', [AdminRoleController::class, 'storePermission'])->name('roles.permissions.store');
     Route::put('/roles/{role}/permissions', [AdminRoleController::class, 'updatePermissions'])->name('roles.permissions.update');
     Route::delete('/roles/{role}', [AdminRoleController::class, 'destroy'])->name('roles.destroy');
+    Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
 });
 
 /*

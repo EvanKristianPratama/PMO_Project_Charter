@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -9,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MstInitiative extends Model
 {
+    use LogsActivity;
+
     private const APPROVED_ALIASES = ['approved', 'approve', 'aproved'];
 
     protected $table = 'mst_initiative';

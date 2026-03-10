@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -10,7 +11,10 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasFactory, HasRoles, Notifiable;
+    use HasFactory, HasRoles, LogsActivity, Notifiable;
+
+    /** Hanya log perubahan kolom berikut (skip avatar, google_id, dll) */
+    protected array $auditInclude = ['name', 'email', 'status', 'app_role'];
 
     public const APP_ROLE_ADMIN = 'admin';
     public const APP_ROLE_USER = 'user';

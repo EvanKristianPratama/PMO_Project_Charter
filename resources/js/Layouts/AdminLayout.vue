@@ -6,6 +6,7 @@ import {
     ArrowRightOnRectangleIcon,
     Bars3Icon,
     ChevronDownIcon,
+    ClipboardDocumentListIcon,
     HomeIcon,
     KeyIcon,
     MoonIcon,
@@ -48,6 +49,12 @@ const navItems = [
         href: '/admin/roles',
         icon: KeyIcon,
         active: (url) => url.startsWith('/admin/roles'),
+    },
+    {
+        label: 'Log Aktivitas',
+        href: '/admin/activity-log',
+        icon: ClipboardDocumentListIcon,
+        active: (url) => url.startsWith('/admin/activity-log'),
     },
 ];
 

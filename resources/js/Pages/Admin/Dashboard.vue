@@ -5,6 +5,7 @@ import AdminLayout from '@/Layouts/AdminLayout.vue';
 import {
     ArrowTopRightOnSquareIcon,
     ChevronRightIcon,
+    ClipboardDocumentListIcon,
     ClockIcon,
     KeyIcon,
     ShieldCheckIcon,
@@ -79,6 +80,12 @@ const quickActions = [
         description: 'Buat role dan atur permission.',
         href: '/admin/roles',
         icon: KeyIcon,
+    },
+    {
+        label: 'Log Aktivitas',
+        description: 'Audit trail semua aktivitas user.',
+        href: '/admin/activity-log',
+        icon: ClipboardDocumentListIcon,
     },
     {
         label: 'Portal User',
