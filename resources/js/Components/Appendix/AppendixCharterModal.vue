@@ -39,7 +39,7 @@ const appendixForm = useForm({
     rjpp_tagging_ids: [],
 
     // Appendix Fields
-    sc_id: null,
+    sc_id: [],
     current_situation: '',
     key_functionalities: '',
     value_rationale: '',
@@ -57,18 +57,18 @@ const appendixForm = useForm({
 // Sync form when props change or modal opens
 watch(() => props.show, (isShowing) => {
     if (isShowing) {
-        appendixForm.owner = props.compendium?.owner ?? '';
-        appendixForm.coe = props.compendium?.coe ?? '';
-        appendixForm.usecase = props.compendium?.usecase ?? '';
-        appendixForm.description = props.compendium?.description ?? '';
-        appendixForm.source_id = props.compendium?.source_id ?? '';
-        appendixForm.value = props.compendium?.value ?? null;
-        appendixForm.urgency = props.compendium?.urgency ?? null;
-        appendixForm.status = props.compendium?.status ?? 1;
-        appendixForm.initiative_ids = normalizeIdList(props.compendium?.initiative_ids);
-        appendixForm.rjpp_tagging_ids = normalizeIdList(props.compendium?.rjpp_tagging_ids);
+        appendixForm.owner = '';
+        appendixForm.coe = '';
+        appendixForm.usecase = '';
+        appendixForm.description = '';
+        appendixForm.source_id = '';
+        appendixForm.value = null;
+        appendixForm.urgency = null;
+        appendixForm.status = 1;
+        appendixForm.initiative_ids = [];
+        appendixForm.rjpp_tagging_ids = [];
 
-        appendixForm.sc_id = props.appendix?.sc_id ?? props.compendium?.id ?? null;
+        appendixForm.sc_id = props.appendix?.sc_id ? [props.appendix.sc_id] : [];
         appendixForm.current_situation = props.appendix?.current_situation ?? '';
         appendixForm.key_functionalities = props.appendix?.key_functionalities ?? '';
         appendixForm.value_rationale = props.appendix?.value_rationale ?? '';
@@ -196,44 +196,38 @@ const submit = () => {
 
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                          <div class="md:col-span-2">
-                            <label class="mb-1 block text-[11px] font-bold uppercase tracking-wider text-slate-500">Initiative Selection (Link to Existing Compendium) - <span class="font-normal normal-case italic">Opsional</span></label>
-                            <select
-                                v-model="appendixForm.sc_id"
-                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
-                            >
-                                <option :value="null">-- Tanpa Initiative (Opsional) --</option>
-                                <option v-for="option in compendiumOptions" :key="`appendix-sc-opt-${option.id}`" :value="option.id">
-                                    {{ formatCompendiumLabel(option) }}
-                                </option>
-                            </select>
-                        </div>
-
-                        <div class="md:col-span-2">
-                            <label class="mb-1 block text-[11px] font-bold uppercase tracking-wider text-[#0f63b5]">Initiative Mapping (Master Initiative)</label>
+                            <label class="mb-1 block text-[11px] font-bold uppercase tracking-wider text-[#0f63b5]">Compendium Selection - <span class="font-normal normal-case italic">Opsional</span></label>
                             <div class="space-y-2">
                                 <select
-                                    @change="(e) => { addInitiative(e.target.value); e.target.value = ''; }"
+                                    @change="(e) => { 
+                                        const val = toNumber(e.target.value);
+                                        if (val && !(appendixForm.sc_id || []).includes(val)) {
+                                            if (!Array.isArray(appendixForm.sc_id)) appendixForm.sc_id = [];
+                                            appendixForm.sc_id.push(val);
+                                        }
+                                        e.target.value = '';
+                                    }"
                                     class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
                                 >
-                                    <option value="">+ Pilih Initiative...</option>
+                                    <option value="">+ Pilih Initiative (Compendium)...</option>
                                     <option
-                                        v-for="opt in initiativeOptions"
-                                        :key="`appendix-init-opt-${opt.id}`"
-                                        :value="opt.id"
-                                        :disabled="appendixForm.initiative_ids.includes(toNumber(opt.id))"
+                                        v-for="option in compendiumOptions"
+                                        :key="`appendix-sc-opt-${option.id}`"
+                                        :value="option.id"
+                                        :disabled="(appendixForm.sc_id || []).includes(toNumber(option.id))"
                                     >
-                                        {{ opt.code ? `[${String(opt.code).replace(/#/g, '')}] ` : '' }}{{ opt.name }}
+                                        {{ formatCompendiumLabel(option) }}
                                     </option>
                                 </select>
                                 <div class="flex min-h-10 flex-wrap gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-2 dark:border-white/10 dark:bg-white/5">
-                                    <template v-if="appendixForm.initiative_ids.length">
+                                    <template v-if="(appendixForm.sc_id || []).length">
                                         <span
-                                            v-for="id in appendixForm.initiative_ids"
-                                            :key="`appendix-init-tag-${id}`"
+                                            v-for="id in (appendixForm.sc_id || [])"
+                                            :key="`appendix-sc-tag-${id}`"
                                             class="inline-flex items-center gap-2 rounded-full bg-blue-100 px-2.5 py-1 text-[10px] font-semibold text-blue-800 dark:bg-blue-500/20 dark:text-blue-300"
                                         >
-                                            {{ getInitiativeLabel(id) }}
-                                            <button type="button" class="text-blue-700/70 hover:text-rose-500 dark:text-blue-300/80" @click="removeInitiative(id)">x</button>
+                                            {{ formatCompendiumLabel(compendiumOptions.find(opt => toNumber(opt.id) === id)) }}
+                                            <button type="button" class="text-blue-700/70 hover:text-rose-500 dark:text-blue-300/80" @click="appendixForm.sc_id = appendixForm.sc_id.filter(item => item !== id)">x</button>
                                         </span>
                                     </template>
                                     <span v-else class="text-[10px] italic text-slate-500 dark:text-slate-400">Belum ada initiative dipilih.</span>
@@ -333,8 +327,7 @@ const submit = () => {
                     </div>
 
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <!-- Situation & Functionalities -->
-                        <div class="space-y-4">
+                            <!-- Row 1: Situation & Functionalities -->
                             <div>
                                 <label class="mb-1 block text-[11px] font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Current Situation</label>
                                 <textarea v-model="appendixForm.current_situation" rows="3" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100" placeholder="Current situation/ frictions addressed..."></textarea>
@@ -343,10 +336,8 @@ const submit = () => {
                                 <label class="mb-1 block text-[11px] font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Key Functionalities</label>
                                 <textarea v-model="appendixForm.key_functionalities" rows="3" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100" placeholder="Key functionalities/scope..."></textarea>
                             </div>
-                        </div>
 
-                        <!-- Value Rationale -->
-                        <div class="space-y-4">
+                            <!-- Row 2: Value Rationale & Value Metrics -->
                             <div>
                                 <label class="mb-1 block text-[11px] font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Value Rationale</label>
                                 <textarea v-model="appendixForm.value_rationale" rows="3" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100" placeholder="Rationale for the value indication..."></textarea>
@@ -355,63 +346,53 @@ const submit = () => {
                                 <label class="mb-1 block text-[11px] font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Value Metrics</label>
                                 <textarea v-model="appendixForm.value_matrics" rows="3" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100" placeholder="Metrics impacted..."></textarea>
                             </div>
-                        </div>
-                    </div>
 
-                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <!-- Urgency Detail -->
-                        <div class="space-y-4">
+                            <!-- Row 3: Urgency Rationale & (empty space for expected go-live) -->
                             <div>
-                                <label class="mb-1 block text-[11px] font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Urgency Rationale (Urgency Detail)</label>
+                                <label class="mb-1 block text-[11px] font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Urgency Rationale</label>
                                 <textarea v-model="appendixForm.urgency_detail" rows="3" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100" placeholder="Rationale for urgency..."></textarea>
                             </div>
                             <div>
                                 <label class="mb-1 block text-[11px] font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Expected Go-Live</label>
                                 <input v-model="appendixForm.value_detail" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100" placeholder="Expected date or timeframe...">
                             </div>
-                        </div>
 
-                        <!-- Ease of Implementation -->
-                        <div class="space-y-4">
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="mb-1 block text-[11px] font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Ease Level</label>
-                                    <select v-model="appendixForm.ease_implementation" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100">
-                                        <option :value="null">Pilih Level...</option>
-                                        <option :value="1">High</option>
-                                        <option :value="2">Medium</option>
-                                        <option :value="3">Low</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="mb-1 block text-[11px] font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Resource Req.</label>
-                                    <select v-model="appendixForm.resource_requirement" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100">
-                                        <option :value="null">Pilih Level...</option>
-                                        <option :value="1">High</option>
-                                        <option :value="2">Medium</option>
-                                        <option :value="3">Low</option>
-                                    </select>
-                                </div>
+                            <!-- Row 4: Ease Level & Ease Detail -->
+                            <div>
+                                <label class="mb-1 block text-[11px] font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Ease Level</label>
+                                <select v-model="appendixForm.ease_implementation" class="w-full mb-3 rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100">
+                                    <option :value="null">Pilih Level...</option>
+                                    <option :value="1">High</option>
+                                    <option :value="2">Medium</option>
+                                    <option :value="3">Low</option>
+                                </select>
                             </div>
                             <div>
-                                <label class="mb-1 block text-[11px] font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Ease Detail/Notes</label>
-                                <textarea v-model="appendixForm.ease_detail" rows="2" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100" placeholder="Complexity details..."></textarea>
+                                <label class="mb-1 block text-[11px] font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Ease Detail / Notes</label>
+                                <textarea v-model="appendixForm.ease_detail" rows="3" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100" placeholder="Complexity details..."></textarea>
+                            </div>
+
+                            <!-- Row 5: Resource Req. & Resource Detail -->
+                            <div>
+                                <label class="mb-1 block text-[11px] font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Resource Req.</label>
+                                <select v-model="appendixForm.resource_requirement" class="w-full mb-3 rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100">
+                                    <option :value="null">Pilih Level...</option>
+                                    <option :value="1">High</option>
+                                    <option :value="2">Medium</option>
+                                    <option :value="3">Low</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-[11px] font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Resource Detail</label>
+                                <textarea v-model="appendixForm.resource_detail" rows="3" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100" placeholder="Resource requirement details..."></textarea>
+                            </div>
+
+                            <!-- Row 6: Interdependencies -->
+                            <div class="md:col-span-2">
+                                <label class="mb-1 block text-[11px] font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Interdependencies</label>
+                                <textarea v-model="appendixForm.interpendencies" rows="3" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100" placeholder="Predecessor, Successor, etc..."></textarea>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <!-- Resource Detail -->
-                        <div>
-                            <label class="mb-1 block text-[11px] font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Resource Detail</label>
-                            <textarea v-model="appendixForm.resource_detail" rows="3" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100" placeholder="Resource requirement details..."></textarea>
-                        </div>
-                        <!-- Interdependencies -->
-                        <div>
-                            <label class="mb-1 block text-[11px] font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Interdependencies</label>
-                            <textarea v-model="appendixForm.interpendencies" rows="3" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100" placeholder="Predecessor, Successor, etc..."></textarea>
-                        </div>
-                    </div>
 
                     <div>
                         <label class="mb-1 block text-[11px] font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Sign By</label>
