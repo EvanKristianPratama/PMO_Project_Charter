@@ -142,7 +142,7 @@
                                 <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Urgency</th>
                                 <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">RJPP</th>
                                 <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">CoE</th>
-                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Source</th>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Master Initiative</th>
                                 <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Action</th>
                             </tr>
                         </thead>
@@ -166,15 +166,8 @@
                                 </td>
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ (item.rjpp ?? '-').replace(/#/g, '') }}</td>
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.coe ?? '-' }}</td>
-                                <td class="px-3 py-3">
-                                    <div class="flex flex-col">
-                                        <span class="font-semibold text-slate-700 dark:text-slate-200">
-                                            {{ item.data_source ?? '-' }}
-                                        </span>
-                                        <span v-if="item.data_source_created !== '-'" class="text-[10px] leading-relaxed text-slate-500 dark:text-slate-400">
-                                            {{ item.data_source_created }}
-                                        </span>
-                                    </div>
+                                <td class="px-3 py-3 text-slate-700 dark:text-slate-200">
+                                    {{ item.master_initiatives }}
                                 </td>
                                 <td class="px-3 py-3 text-[10px] font-medium">
                                     <div class="flex items-center gap-2">

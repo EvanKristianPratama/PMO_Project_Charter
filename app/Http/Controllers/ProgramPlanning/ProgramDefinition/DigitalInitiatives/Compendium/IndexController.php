@@ -77,11 +77,16 @@ class IndexController extends Controller
 
                 $rjpp = (string) ($rjppMap->get($item->id, '-') ?? '-');
 
+                $masterInitiatives = $item->mstInitiatives->pluck('code')
+                    ->filter()
+                    ->map(fn($code) => str_replace('#', '', $code))
+                    ->implode(', ');
+
                 return [
                     'id' => (int) $item->id,
                     'initiative_id' => $firstMst?->id,
                     'group' => $firstMst?->organization?->groub?->name ?? '-',
-                    'no' => $firstMst?->code ?? '-',
+                    'master_initiatives' => $masterInitiatives ?: '-',
                     'project_owner' => $item->owner ?: ($firstMst?->organization?->name ?? '-'),
                     'use_case' => $item->usecase ?: ($firstMst?->name ?? '-'),
                     'desc' => $item->description ?: ($firstMst?->description ?? '-'),
@@ -89,8 +94,6 @@ class IndexController extends Controller
                     'urgency' => $this->scoreLabel($item->urgency),
                     'rjpp' => trim($rjpp) !== '' ? $rjpp : '-',
                     'coe' => $item->coe ?: '-',
-                    'data_source' => $source?->name ?? '-',
-                    'data_source_created' => $sourceCreatedAt,
                 ];
             })
             ->values();
