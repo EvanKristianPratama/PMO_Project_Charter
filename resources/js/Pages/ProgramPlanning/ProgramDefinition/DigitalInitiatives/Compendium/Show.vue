@@ -15,19 +15,28 @@
 
                     <div class="h-6 w-px bg-slate-200 dark:bg-white/10" />
 
-                    <label for="compendium-nav" class="text-xs font-medium text-slate-700 dark:text-slate-200">Pilih Scope Charter</label>
+                    <label for="compendium-nav" class="text-xs font-medium text-slate-700 dark:text-slate-200">Pilih Use Case</label>
                     <select
                         id="compendium-nav"
                         v-model="selectedCompendiumId"
                         class="w-full max-w-sm rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 focus:border-[#1C75BC] focus:outline-none dark:border-white/10 dark:bg-[#101826] dark:text-slate-100"
                     >
-                        <option value="" disabled>-- Pilih Scope Charter --</option>
+                        <option value="" disabled>-- Pilih Use Case --</option>
                         <option v-for="option in compendiumOptions" :key="`compendium-opt-${option.id}`" :value="String(option.id)">
                             {{ formatCompendiumLabel(option) }}
                         </option>
                     </select>
 
                     <div class="ml-auto flex items-center gap-2">
+                        <button
+                            v-if="canStartEdit"
+                            type="button"
+                            @click="openAppendixModal"
+                            class="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-bold text-blue-700 transition-all hover:bg-blue-100 dark:border-white/10 dark:bg-transparent dark:text-blue-300 dark:hover:bg-white/5"
+                        >
+                            Manage Appendix
+                        </button>
+
                         <button
                             v-if="canStartEdit"
                             type="button"
@@ -158,7 +167,25 @@
                 :theme-options="themeOptions"
                 :editable="isEditing"
             />
+
+            <div class="pt-12">
+                <AppendixCharterDocument :initiative="appendixData" />
+            </div>
         </div>
+
+        <!-- Use the new separate component -->
+        <AppendixCharterModal
+            :show="isAppendixModalOpen"
+            :compendium="compendium"
+            :appendix="appendix"
+            :compendium-options="compendiumOptions"
+            :initiative-options="initiativeOptions"
+            :coe-options="coeOptions"
+            :source-options="sourceOptions"
+            :theme-options="themeOptions"
+            @close="closeAppendixModal"
+            @success="closeAppendixModal"
+        />
     </UserLayout>
 </template>
 
@@ -167,16 +194,57 @@ import { computed, ref } from 'vue';
 import { Link, router, useForm } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import CompendiumCharterDocument from '@/Components/Compendium/CompendiumCharterDocument.vue';
+import AppendixCharterDocument from '@/Components/Appendix/AppendixCharterDocument.vue';
+import AppendixCharterModal from '@/Components/Appendix/AppendixCharterModal.vue';
 
 const COMPENDIUM_CREATE_VALUE = '__create__';
 
 const props = defineProps({
     compendium: { type: Object, default: null },
+    appendix: { type: Object, default: null },
     compendiumOptions: { type: Array, default: () => [] },
     initiativeOptions: { type: Array, default: () => [] },
     coeOptions: { type: Array, default: () => [] },
     sourceOptions: { type: Array, default: () => [] },
     themeOptions: { type: Array, default: () => [] },
+});
+
+const toNumber = (value, fallback = null) => {
+    const num = Number(value);
+    return Number.isFinite(num) ? num : fallback;
+};
+
+const compendiumId = computed(() => toNumber(props.compendium?.id, 0));
+
+const isAppendixModalOpen = ref(false);
+
+const openAppendixModal = () => {
+    isAppendixModalOpen.value = true;
+};
+
+const closeAppendixModal = () => {
+    isAppendixModalOpen.value = false;
+};
+
+const appendixData = computed(() => {
+    const getLabel = (val) => {
+        if (val === 1) return 'High';
+        if (val === 2) return 'Medium';
+        if (val === 3) return 'Low';
+        return 'TBC';
+    };
+
+    return {
+        useCase: props.compendium?.usecase,
+        projectOwner: props.compendium?.owner,
+        type: '-', 
+        coe: props.compendium?.coe,
+        rjjp: '-', 
+        desc: props.compendium?.description,
+        value: props.compendium?.value_label || getLabel(props.compendium?.value),
+        urgency: props.compendium?.urgency_label || getLabel(props.compendium?.urgency),
+        ...props.appendix
+    };
 });
 
 const statusOptions = [
@@ -187,16 +255,9 @@ const statusOptions = [
     { value: '5', label: 'Approved' },
 ];
 
-const toNumber = (value, fallback = null) => {
-    const num = Number(value);
-    return Number.isFinite(num) ? num : fallback;
-};
-
 const normalizeIdList = (values) => {
     if (!Array.isArray(values)) return [];
-    return values
-        .map((value) => toNumber(value, 0))
-        .filter((value) => value > 0);
+    return values.map((value) => toNumber(value, 0)).filter((value) => value > 0);
 };
 
 const normalizeSourceId = (value) => {
@@ -217,7 +278,6 @@ const buildFormPayload = (compendium = {}) => ({
     status: String(compendium.status ?? '1'),
 });
 
-const compendiumId = computed(() => toNumber(props.compendium?.id, 0));
 const isExisting = computed(() => compendiumId.value > 0);
 const isEditing = ref(!isExisting.value);
 
@@ -227,17 +287,13 @@ const selectedCompendiumId = computed({
     get: () => (isExisting.value ? String(compendiumId.value) : ''),
     set: (value) => {
         const selectedValue = String(value ?? '').trim();
-
         if (!selectedValue) return;
-
         if (selectedValue === COMPENDIUM_CREATE_VALUE) {
             if (!isExisting.value) return;
             router.visit('/program-planning/program-definition/digital-initiatives/compendium/create');
             return;
         }
-
         if (isExisting.value && selectedValue === String(compendiumId.value)) return;
-
         router.visit(`/program-planning/program-definition/digital-initiatives/compendium/${selectedValue}/edit`);
     },
 });
@@ -267,7 +323,6 @@ const submitLabel = computed(() => {
     if (form.processing) {
         return isExisting.value ? 'Memperbarui...' : 'Menyimpan...';
     }
-
     return isExisting.value ? 'Simpan Perubahan' : 'Simpan Compendium';
 });
 
@@ -275,10 +330,8 @@ const selectedInitiatives = computed(() => {
     const optionsById = new Map(
         (props.initiativeOptions ?? []).map((option) => [toNumber(option.id, 0), option])
     );
-
     return normalizeIdList(form.initiative_ids).map((id) => {
         const option = optionsById.get(id);
-
         return {
             id,
             code: option?.code ?? '',
@@ -296,7 +349,6 @@ const initiativeTagLabel = (item) => {
 const addInitiative = (id) => {
     const numericId = toNumber(id, 0);
     if (!numericId) return;
-
     if (!form.initiative_ids.includes(numericId)) {
         form.initiative_ids.push(numericId);
     }
@@ -326,7 +378,6 @@ const cancelEdit = () => {
 
 const submit = () => {
     const endpointBase = '/program-planning/program-definition/digital-initiatives/compendium';
-
     form.transform((data) => ({
         ...data,
         initiative_ids: normalizeIdList(data.initiative_ids),
@@ -340,17 +391,14 @@ const submit = () => {
         urgency: data.urgency === null || data.urgency === '' ? null : toNumber(data.urgency, null),
         status: String(data.status ?? '1'),
     }));
-
     if (isExisting.value) {
         form.put(`${endpointBase}/${compendiumId.value}`, {
             preserveScroll: true,
         });
         return;
     }
-
     form.post(endpointBase, {
         preserveScroll: true,
     });
 };
 </script>
-
