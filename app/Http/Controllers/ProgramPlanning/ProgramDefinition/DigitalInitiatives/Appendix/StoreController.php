@@ -50,16 +50,36 @@ class StoreController extends Controller
             $scId = $validated['sc_id'] ?? null;
 
             if ($isNewInitiative) {
-                // Call Compendium controller logic here directly or just create it since it's simple
-                $scInitiativeId = null;
-                \Illuminate\Support\Facades\Event::listen('eloquent.created: App\Models\TrsScInitiative', function($model) use (&$scInitiativeId) {
-                    $scInitiativeId = $model->id;
-                });
+                // Create the ScInitiative directly using Eloquent
+                $scInitiative = \App\Models\TrsScInitiative::create([
+                    'owner' => $validated['owner'] ?? null,
+                    'coe' => $validated['coe'] ?? null,
+                    'usecase' => $validated['usecase'],
+                    'description' => $validated['description'] ?? null,
+                    'source_id' => $validated['source_id'],
+                    'value' => $validated['value'] ?? null,
+                    'urgency' => $validated['urgency'] ?? null,
+                    'status' => 1, // Default Drafting
+                ]);
 
-                // Run the original compendium store method
-                app(\App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Compendium\StoreController::class)->__invoke($request);
-                
-                $scId = $scInitiativeId;
+                // Sync Initiative Mappings
+                if ($request->has('initiative_ids')) {
+                    $initiativeIds = collect($request->input('initiative_ids'))->filter()->toArray();
+                    foreach ($initiativeIds as $initId) {
+                        \App\Models\TrsMapSc::create([
+                            'sc_id' => $scInitiative->id,
+                            'initiative_id' => $initId,
+                        ]);
+                    }
+                }
+
+                // Sync RJPP Taggings
+                if ($request->has('rjpp_tagging_ids')) {
+                    $rjppIds = collect($request->input('rjpp_tagging_ids'))->filter()->toArray();
+                    $scInitiative->rjppTaggings()->sync($rjppIds);
+                }
+
+                $scId = $scInitiative->id;
             }
 
             if ($scId) {

@@ -168,7 +168,7 @@
                 :editable="isEditing"
             />
 
-            <div class="pt-12">
+            <div class="pt-1">
                 <AppendixCharterDocument :initiative="appendixData" />
             </div>
         </div>
@@ -226,6 +226,15 @@ const closeAppendixModal = () => {
     isAppendixModalOpen.value = false;
 };
 
+const selectedThemes = computed(() => {
+    const ids = Array.isArray(props.compendium?.rjpp_tagging_ids) 
+        ? props.compendium.rjpp_tagging_ids 
+        : [];
+        
+    const map = new Map((props.themeOptions ?? []).map(opt => [toNumber(opt.id, 0), opt]));
+    return ids.map(id => map.get(toNumber(id, 0))).filter(Boolean);
+});
+
 const appendixData = computed(() => {
     const getLabel = (val) => {
         if (val === 1) return 'High';
@@ -243,6 +252,9 @@ const appendixData = computed(() => {
         desc: props.compendium?.description,
         value: props.compendium?.value_label || getLabel(props.compendium?.value),
         urgency: props.compendium?.urgency_label || getLabel(props.compendium?.urgency),
+        ease_label: getLabel(props.appendix?.ease_implementation),
+        resource_label: getLabel(props.appendix?.resource_requirement),
+        themes: props.compendium?.themes || selectedThemes.value,
         ...props.appendix
     };
 });
