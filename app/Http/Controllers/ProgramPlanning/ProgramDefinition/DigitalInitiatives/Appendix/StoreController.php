@@ -14,76 +14,74 @@ class StoreController extends Controller
 {
     public function __invoke(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'initiative_id' => 'required|integer|exists:mst_initiative,id',
-            'alias' => 'nullable|string|max:255',
-            'useCase_description' => 'nullable|string',
-            'value' => 'required|integer|in:1,2,3,4',
-            'urgency' => 'required|integer|in:1,2,3,4',
-        ]);
+        // First if sc_id is provided, we use it. Otherwise, we validate and create TrsScInitiative
+        $isNewInitiative = empty($request->input('sc_id'));
 
-        DB::transaction(function () use ($validated): void {
-            $initiative = MstInitiative::findOrFail($validated['initiative_id']);
+        $initiativeRules = [];
+        if ($isNewInitiative) {
+            $initiativeRules = [
+                'owner' => 'nullable|string|max:255',
+                'coe' => 'nullable|string|max:255',
+                'usecase' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'source_id' => 'required|integer|exists:mst_sc_source,id',
+                'value' => 'nullable|integer|in:1,2,3',
+                'urgency' => 'nullable|integer|in:1,2,3',
+            ];
+        }
 
-            $scInitiative = TrsScInitiative::create([
-                'usecase' => $this->resolveAlias($validated['alias'] ?? null, $initiative),
-                'description' => $this->resolveDescription($validated['useCase_description'] ?? null, $initiative),
-                'value' => $validated['value'],
-                'urgency' => $validated['urgency'],
-            ]);
+        $validated = $request->validate(array_merge([
+            'sc_id' => 'nullable|integer|exists:trs_sc_initiative,id',
+            'current_situation' => 'nullable|string',
+            'key_functionalities' => 'nullable|string',
+            'value_rationale' => 'nullable|string',
+            'value_matrics' => 'nullable|string',
+            'value_detail' => 'nullable|string',
+            'urgency_detail' => 'nullable|string',
+            'ease_implementation' => 'nullable|integer|in:1,2,3',
+            'ease_detail' => 'nullable|string',
+            'resource_requirement' => 'nullable|integer|in:1,2,3',
+            'resource_detail' => 'nullable|string',
+            'interpendencies' => 'nullable|string',
+            'sign_by' => 'nullable|string|max:255',
+        ], $initiativeRules));
 
-            $scInitiative->mstInitiatives()->sync([$initiative->id]);
+        DB::transaction(function () use ($validated, $isNewInitiative, $request): void {
+            $scId = $validated['sc_id'] ?? null;
 
-            $appendixSourceId = $this->resolveSourceId('appendix', 2);
-            if ($appendixSourceId !== null) {
-                $initiative->update(['source' => $appendixSourceId]);
+            if ($isNewInitiative) {
+                // Call Compendium controller logic here directly or just create it since it's simple
+                $scInitiativeId = null;
+                \Illuminate\Support\Facades\Event::listen('eloquent.created: App\Models\TrsScInitiative', function($model) use (&$scInitiativeId) {
+                    $scInitiativeId = $model->id;
+                });
+
+                // Run the original compendium store method
+                app(\App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Compendium\StoreController::class)->__invoke($request);
+                
+                $scId = $scInitiativeId;
+            }
+
+            if ($scId) {
+                \App\Models\TrsScDetails::create([
+                    'sc_id' => $scId,
+                    'current_situation' => $validated['current_situation'] ?? null,
+                    'key_functionalities' => $validated['key_functionalities'] ?? null,
+                    'value_rationale' => $validated['value_rationale'] ?? null,
+                    'value_matrics' => $validated['value_matrics'] ?? null,
+                    'value_detail' => $validated['value_detail'] ?? null,
+                    'urgency_detail' => $validated['urgency_detail'] ?? null,
+                    'ease_implementation' => $validated['ease_implementation'] ?? null,
+                    'ease_detail' => $validated['ease_detail'] ?? null,
+                    'resource_requirement' => $validated['resource_requirement'] ?? null,
+                    'resource_detail' => $validated['resource_detail'] ?? null,
+                    'interpendencies' => $validated['interpendencies'] ?? null,
+                    'sign_by' => $validated['sign_by'] ?? null,
+                ]);
             }
         });
 
-        return redirect()
-            ->route('program-planning.program-definition.digital-initiatives.appendix.index')
-            ->with('success', 'Appendix berhasil ditambahkan.');
-    }
-
-    private function resolveSourceId(string $keyword, int $fallbackId): ?int
-    {
-        $sourceId = DataSource::where('name', 'LIKE', '%' . $keyword . '%')
-            ->value('id');
-
-        if ($sourceId) {
-            return (int) $sourceId;
-        }
-
-        return DataSource::whereKey($fallbackId)->exists() ? $fallbackId : null;
-    }
-
-    private function resolveAlias(?string $alias, MstInitiative $initiative): string
-    {
-        $cleanAlias = trim((string) $alias);
-        if ($cleanAlias !== '') {
-            return $cleanAlias;
-        }
-
-        $code = trim((string) ($initiative->code ?? ''));
-        if ($code !== '') {
-            return $code;
-        }
-
-        return trim((string) $initiative->name) ?: '-';
-    }
-
-    private function resolveDescription(?string $description, MstInitiative $initiative): string
-    {
-        $cleanDescription = trim((string) $description);
-        if ($cleanDescription !== '') {
-            return $cleanDescription;
-        }
-
-        $initiativeDescription = trim((string) ($initiative->description ?? ''));
-        if ($initiativeDescription !== '') {
-            return $initiativeDescription;
-        }
-
-        return trim((string) $initiative->name) ?: '-';
+        // Always return back to stay on the same page (modal)
+        return back()->with('success', 'Appendix berhasil ditambahkan.');
     }
 }
