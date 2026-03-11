@@ -22,18 +22,10 @@ class InitiativeTaggingController extends Controller
             $validated['goal'] = $theme?->goal?->code ?? null;
         }
 
-        // Jika themes_id kosong (mapping ke Goal/Pilar langsung), pastikan `goal` terisi, jika tidak reject.
-        if (empty($validated['themes_id']) && empty($validated['goal'])) {
-            if ($request->expectsJson()) {
-                return response()->json(['message' => 'Goal code harus diisi jika tidak memilih theme.'], 422);
-            }
-            return back()->withErrors(['goal' => 'Goal code harus diisi jika tidak memilih theme.']);
-        }
-
-        // Cek duplicate
+        // Cek duplicate (termasuk TBC: goal=null, themes_id=null)
         $exists = InitiativeTagging::where('initiative_id', $validated['initiative_id'])
             ->where('themes_id', $validated['themes_id'] ?? null)
-            ->where('goal', $validated['goal'])
+            ->where('goal', $validated['goal'] ?? null)
             ->exists();
 
         if ($exists) {

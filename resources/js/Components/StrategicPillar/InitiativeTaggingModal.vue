@@ -40,7 +40,7 @@
                                     <form @submit.prevent="submit" class="mt-4 space-y-4">
                                         <!-- 1. Initiative -->
                                         <div>
-                                            <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">IT Initiative</label>
+                                            <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">Digital Initiative</label>
                                             <select
                                                 v-model="form.initiative_id"
                                                 class="mt-1 block w-full rounded-lg border-gray-300 dark:border-white/10 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white"
@@ -63,6 +63,7 @@
                                                 required
                                             >
                                                 <option value="" disabled>Pilih Blok / Goal</option>
+                                                <option value="__TBC__">TBC — Di luar Strategic Pillar</option>
                                                 <option v-for="goal in goals" :key="goal.id" :value="goal.code">
                                                     {{ goal.code }} - {{ goal.title }}
                                                 </option>
@@ -70,13 +71,13 @@
                                             <div v-if="form.errors.goal" class="mt-1 text-sm text-red-600">{{ form.errors.goal }}</div>
                                         </div>
 
-                                        <!-- 3. Theme (Dependent on Goal) -->
-                                        <div>
+                                        <!-- 3. Theme (Dependent on Goal, hidden when TBC) -->
+                                        <div v-if="form.goal && form.goal !== '__TBC__'">
                                             <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">Theme (Opsional)</label>
                                             <select
                                                 v-model="form.themes_id"
                                                 class="mt-1 block w-full rounded-lg border-gray-300 dark:border-white/10 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white disabled:opacity-50"
-                                                :disabled="!form.goal || availableThemes.length === 0"
+                                                :disabled="availableThemes.length === 0"
                                             >
                                                 <option value="">-- Hanya Map ke Blok / Tidak ada Theme --</option>
                                                 <option v-for="theme in availableThemes" :key="theme.id" :value="theme.id">
@@ -84,7 +85,7 @@
                                                 </option>
                                             </select>
                                             <div v-if="form.errors.themes_id" class="mt-1 text-sm text-red-600">{{ form.errors.themes_id }}</div>
-                                            <div v-if="form.goal && availableThemes.length === 0" class="mt-1 text-[11px] text-amber-600">Blok ini tidak memiliki data theme.</div>
+                                            <div v-if="availableThemes.length === 0" class="mt-1 text-[11px] text-amber-600">Blok ini tidak memiliki data theme.</div>
                                         </div>
 
                                         <div class="mt-6 flex justify-end gap-3 pt-2">
@@ -176,7 +177,11 @@ const closeModal = () => {
 };
 
 const submit = () => {
-    form.post('/strategic-pillars/tagging', {
+    form.transform(data => ({
+        ...data,
+        goal: data.goal === '__TBC__' ? null : data.goal,
+        themes_id: data.goal === '__TBC__' ? null : data.themes_id,
+    })).post('/strategic-pillars/tagging', {
         preserveScroll: true,
         onSuccess: () => closeModal(),
     });
