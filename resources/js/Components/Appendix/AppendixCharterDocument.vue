@@ -40,7 +40,7 @@ const valueClass = computed(() => {
                 <h1 class="flex text-2xl font-bold leading-tight text-slate-900">
                     <span class="shrink-0 text-[#3b5e96]">Scope Charter Detail</span>
                     <span class="mx-2 shrink-0 text-slate-400">|</span> 
-                    <span class="block">{{ initiative.useCase || 'Digital Initiative' }}</span>
+                    <span class="block">-</span>
                 </h1>
             </div>
             
@@ -48,41 +48,41 @@ const valueClass = computed(() => {
             <div class="grid grid-cols-1 overflow-hidden border border-[#3b82f6] lg:grid-cols-4">
                  <!-- Project Owner -->
                  <div class="flex border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
-                    <div class="flex w-28 shrink-0 items-center justify-center bg-[#1e4f8f] px-2 py-1.5 text-center text-[10px] font-bold uppercase tracking-wider text-white">
+                    <div class="flex w-28 shrink-0 items-center justify-center bg-[#1e4f8f] px-2 py-1.5 text-center text-[10px] font-bold text-white">
                         Project Owner
                     </div>
                     <div class="flex flex-1 items-center bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-900">
-                        {{ initiative.projectOwner || '-' }}
+                        -
                     </div>
                  </div>
 
                  <!-- H/SH -->
                  <div class="flex border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
-                    <div class="flex w-16 shrink-0 items-center justify-center bg-[#2e6ea2] px-2 py-1.5 text-center text-[10px] font-bold uppercase tracking-wider text-white">
+                    <div class="flex w-16 shrink-0 items-center justify-center bg-[#2e6ea2] px-2 py-1.5 text-center text-[10px] font-bold text-white">
                         H/SH
                     </div>
                     <div class="flex flex-1 items-center bg-white px-3 py-1.5 text-[12px] text-slate-900">
-                        {{ initiative.type || '-' }}
+                        -
                     </div>
                  </div>
 
                  <!-- CoE -->
                  <div class="flex border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
-                    <div class="flex w-16 shrink-0 items-center justify-center bg-[#2e6ea2] px-2 py-1.5 text-center text-[10px] font-bold uppercase tracking-wider text-white">
+                    <div class="flex w-16 shrink-0 items-center justify-center bg-[#2e6ea2] px-2 py-1.5 text-center text-[10px] font-bold text-white">
                         CoE
                     </div>
                     <div class="flex flex-1 items-center bg-white px-3 py-1.5 text-[12px] text-slate-900">
-                        {{ initiative.coe || '-' }}
+                        -
                     </div>
                  </div>
 
                  <!-- RJJP -->
                  <div class="flex">
-                    <div class="flex w-16 shrink-0 items-center justify-center bg-[#2e6ea2] px-2 py-1.5 text-center text-[10px] font-bold uppercase tracking-wider text-white">
+                    <div class="flex w-16 shrink-0 items-center justify-center bg-[#2e6ea2] px-2 py-1.5 text-center text-[10px] font-bold text-white">
                         RJJP
                     </div>
                     <div class="flex flex-1 items-center bg-white px-3 py-1.5 text-[12px] text-slate-900">
-                        {{ initiative.rjjp || '-' }}
+                        -
                     </div>
                  </div>
             </div>
@@ -92,17 +92,17 @@ const valueClass = computed(() => {
         <div class="grid grid-cols-1 border-x border-b border-[#3b82f6] lg:grid-cols-3">
             <!-- Col 1: Use Case Description -->
             <div class="flex flex-col border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
-                <div class="bg-[#1e4f8f] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                <div class="bg-[#1e4f8f] px-3 py-1.5 text-[10px] font-bold text-white">
                     Use Case Description
                 </div>
                 <div class="flex-1 bg-white p-4 text-[12px] text-slate-700 whitespace-pre-line">
-                    {{ initiative.desc || '-' }}
+                    -
                 </div>
             </div>
 
             <!-- Col 2: Current Situation -->
             <div class="flex flex-col border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
-                <div class="bg-[#1e4f8f] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                <div class="bg-[#1e4f8f] px-3 py-1.5 text-[10px] font-bold text-white">
                     Current situation/ frictions addressed
                 </div>
                 <div class="flex-1 bg-white p-4 text-[12px] text-slate-700">
@@ -114,7 +114,7 @@ const valueClass = computed(() => {
 
             <!-- Col 3: Key Functionalities -->
             <div class="flex flex-col">
-                <div class="bg-[#1e4f8f] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                <div class="bg-[#1e4f8f] px-3 py-1.5 text-[10px] font-bold text-white">
                     Key functionalities/scope
                 </div>
                 <div class="flex-1 bg-white p-4 text-[12px] text-slate-700">
@@ -134,16 +134,16 @@ const valueClass = computed(() => {
                         Value Indication
                     </div>
                     <div class="ml-2 px-1.5 py-0 text-[8px] font-bold uppercase rounded-full border border-white/20 shadow-sm" :class="valueClass">
-                        {{ initiative.value ? initiative.value : '-' }}
+                        High
                     </div>
                 </div>
                 <div class="grid grid-cols-2 divide-x divide-[#3b82f6] bg-white text-[10px] text-slate-600">
                     <div class="flex flex-col">
-                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold uppercase tracking-tight text-white border-b border-[#3b82f6]">Rationale</div>
+                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold text-white border-b border-[#3b82f6]">Rationale</div>
                         <p class="px-2 py-1.5 flex-1">-</p>
                     </div>
                     <div class="flex flex-col">
-                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold uppercase tracking-tight text-white border-b border-[#3b82f6]">Metrics Impacted</div>
+                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold text-white border-b border-[#3b82f6]">Metrics Impacted</div>
                         <p class="px-2 py-1.5 flex-1">-</p>
                     </div>
                 </div>
@@ -156,16 +156,16 @@ const valueClass = computed(() => {
                         Urgency
                     </div>
                     <div class="ml-2 px-1.5 py-0 text-[8px] font-bold uppercase rounded-full border border-white/20 shadow-sm" :class="urgencyClass">
-                        {{ initiative.urgency ? initiative.urgency : '-' }}
+                        High
                     </div>
                 </div>
                 <div class="grid grid-cols-2 divide-x divide-[#3b82f6] bg-white text-[10px] text-slate-600">
                     <div class="flex flex-col">
-                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold uppercase tracking-tight text-white border-b border-[#3b82f6]">Rationale</div>
+                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold text-white border-b border-[#3b82f6]">Rationale</div>
                         <p class="px-2 py-1.5 flex-1">-</p>
                     </div>
                     <div class="flex flex-col">
-                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold uppercase tracking-tight text-white border-b border-[#3b82f6]">Expected Go-Live</div>
+                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold text-white border-b border-[#3b82f6]">Expected Go-Live</div>
                         <p class="px-2 py-1.5 flex-1">-</p>
                     </div>
                 </div>
@@ -183,11 +183,11 @@ const valueClass = computed(() => {
                 </div>
                 <div class="grid grid-cols-2 divide-x divide-[#3b82f6] bg-white text-[10px] text-slate-600">
                     <div class="flex flex-col">
-                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold uppercase tracking-tight text-white border-b border-[#3b82f6]">Rationale</div>
+                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold text-white border-b border-[#3b82f6]">Rationale</div>
                         <p class="px-2 py-1.5 flex-1">-</p>
                     </div>
                     <div class="flex flex-col">
-                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold uppercase tracking-tight text-white border-b border-[#3b82f6]">Notes</div>
+                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold text-white border-b border-[#3b82f6]">Notes</div>
                         <p class="px-2 py-1.5 flex-1">-</p>
                     </div>
                 </div>
@@ -207,11 +207,11 @@ const valueClass = computed(() => {
                 </div>
                 <div class="grid grid-cols-2 divide-x divide-[#3b82f6] bg-white text-[10px] text-slate-600">
                     <div class="flex flex-col">
-                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold uppercase tracking-tight text-white border-b border-[#3b82f6]">Rationale</div>
+                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold text-white border-b border-[#3b82f6]">Rationale</div>
                         <p class="px-2 py-1.5 flex-1">-</p>
                     </div>
                     <div class="flex flex-col">
-                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold uppercase tracking-tight text-white border-b border-[#3b82f6]">Notes</div>
+                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold text-white border-b border-[#3b82f6]">Notes</div>
                         <p class="px-2 py-1.5 flex-1">-</p>
                     </div>
                 </div>
@@ -219,20 +219,20 @@ const valueClass = computed(() => {
 
             <!-- Interdependency -->
             <div class="flex flex-col">
-                <div class="bg-[#1e4f8f] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                <div class="bg-[#1e4f8f] px-3 py-1.5 text-[10px] font-bold text-white">
                     Interdependency
                 </div>
                 <div class="grid grid-cols-3 divide-x divide-[#3b82f6] bg-white text-[10px] text-slate-600">
                     <div class="flex flex-col">
-                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold uppercase tracking-tight text-white border-b border-[#3b82f6]">Predecessor</div>
+                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold text-white border-b border-[#3b82f6]">Predecessor</div>
                         <p class="px-2 py-1.5 flex-1">-</p>
                     </div>
                     <div class="flex flex-col">
-                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold uppercase tracking-tight text-white border-b border-[#3b82f6]">Successor</div>
+                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold text-white border-b border-[#3b82f6]">Successor</div>
                         <p class="px-2 py-1.5 flex-1">-</p>
                     </div>
                     <div class="flex flex-col">
-                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold uppercase tracking-tight text-white border-b border-[#3b82f6]">Other BUs</div>
+                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold text-white border-b border-[#3b82f6]">Other BUs</div>
                         <p class="px-2 py-1.5 flex-1">-</p>
                     </div>
                 </div>
