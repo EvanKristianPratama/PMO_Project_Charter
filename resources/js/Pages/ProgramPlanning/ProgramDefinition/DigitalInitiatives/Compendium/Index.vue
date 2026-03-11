@@ -108,6 +108,18 @@
                         </select>
                     </div>
 
+                    <div class="flex items-center gap-2">
+                        <label class="shrink-0 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Master Initiative:</label>
+                        <select
+                            v-model="filters.masterInitiative"
+                            class="min-w-[140px] rounded-lg border border-slate-200 bg-white py-1 pl-2 pr-8 text-[11px] text-slate-700 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                        >
+                            <option value="">All Master Initiative</option>
+                            <option value="none">(No Master Initiative)</option>
+                            <option v-for="mi in uniqueMasterInitiatives" :key="mi" :value="mi">{{ mi }}</option>
+                        </select>
+                    </div>
+
                     <button
                         v-if="hasActiveFilters"
                         type="button"
@@ -425,6 +437,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    uniqueMasterInitiatives: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const isCreateModalOpen = ref(false);
@@ -453,6 +469,7 @@ const filters = ref({
     value: '',
     urgency: '',
     coe: '',
+    masterInitiative: '',
 });
 
 const uniqueOwners = computed(() => {
@@ -478,13 +495,20 @@ const filteredCompendiumItems = computed(() => {
         const matchValue = !filters.value.value || item.value === filters.value.value;
         const matchUrgency = !filters.value.urgency || item.urgency === filters.value.urgency;
         const matchCoe = !filters.value.coe || coeVal === filters.value.coe;
+        
+        let matchMasterInitiative = true;
+        if (filters.value.masterInitiative === 'none') {
+            matchMasterInitiative = item.master_initiatives === '-';
+        } else if (filters.value.masterInitiative) {
+            matchMasterInitiative = (item.master_initiatives ?? '').includes(filters.value.masterInitiative);
+        }
 
-        return matchOwner && matchValue && matchUrgency && matchCoe;
+        return matchOwner && matchValue && matchUrgency && matchCoe && matchMasterInitiative;
     });
 });
 
 const hasActiveFilters = computed(() => {
-    return !!(filters.value.owner || filters.value.value || filters.value.urgency || filters.value.coe);
+    return !!(filters.value.owner || filters.value.value || filters.value.urgency || filters.value.coe || filters.value.masterInitiative);
 });
 
 const resetFilters = () => {
@@ -492,6 +516,7 @@ const resetFilters = () => {
     filters.value.value = '';
     filters.value.urgency = '';
     filters.value.coe = '';
+    filters.value.masterInitiative = '';
 };
 
 const form = useForm({

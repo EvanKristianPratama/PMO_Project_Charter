@@ -77,10 +77,12 @@ class IndexController extends Controller
 
                 $rjpp = (string) ($rjppMap->get($item->id, '-') ?? '-');
 
-                $masterInitiatives = $item->mstInitiatives->pluck('code')
-                    ->filter()
-                    ->map(fn($code) => str_replace('#', '', $code))
-                    ->implode(', ');
+                $masterInitiatives = $item->mstInitiatives->map(function ($mi) {
+                    $code = str_replace('#', '', $mi->code ?? '');
+                    $name = $mi->name ?? '';
+                    if ($code && $name) return "{$code} - {$name}";
+                    return $code ?: ($name ?: null);
+                })->filter()->implode(', ');
 
                 return [
                     'id' => (int) $item->id,
@@ -135,6 +137,13 @@ class IndexController extends Controller
             })
             ->values();
 
+        $uniqueMasterInitiatives = $compendiumItems->pluck('master_initiatives')
+            ->flatMap(fn($mi) => explode(', ', $mi))
+            ->filter(fn($mi) => $mi !== '-')
+            ->unique()
+            ->sort()
+            ->values();
+
         return Inertia::render('ProgramPlanning/ProgramDefinition/DigitalInitiatives/Compendium/Index', [
             'compendiumItems' => $compendiumItems,
             'totalCompendiumItems' => $compendiumItems->count(),
@@ -142,6 +151,7 @@ class IndexController extends Controller
             'coeOptions' => $coeOptions,
             'sourceOptions' => $sourceOptions,
             'themeOptions' => $themeOptions,
+            'uniqueMasterInitiatives' => $uniqueMasterInitiatives,
         ]);
     }
 
