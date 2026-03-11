@@ -6,6 +6,7 @@ use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class TrsScInitiative extends Model
@@ -17,7 +18,22 @@ class TrsScInitiative extends Model
 
     public function scStatusImplementations(): HasMany
     {
-        return $this->hasMany(ScStatusImplementation::class, 'sc_initiative_id')->orderBy('date', 'desc')->orderBy('time_start', 'desc');
+        return $this->hasMany(ScStatusImplementation::class, 'digital_initiative_id')->orderBy('date', 'desc')->orderBy('time_start', 'desc');
+    }
+
+    public function latestScStatusImplementation(): HasOne
+    {
+        return $this->hasOne(ScStatusImplementation::class, 'digital_initiative_id')->latestOfMany('id');
+    }
+
+    public function source(): BelongsTo
+    {
+        return $this->belongsTo(DataSource::class, 'source_id');
+    }
+
+    public function useCase(): BelongsTo
+    {
+        return $this->belongsTo(UseCase::class, 'useCase_id');
     }
 
     public function rjpps(): BelongsToMany

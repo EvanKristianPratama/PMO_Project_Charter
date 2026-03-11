@@ -21,6 +21,6 @@ class ScStatusImplementation extends Model
      */
     public function scInitiative(): BelongsTo
     {
-        return $this->belongsTo(TrsScInitiative::class, 'sc_initiative_id');
+        return $this->belongsTo(TrsScInitiative::class, 'digital_initiative_id');
     }
 }

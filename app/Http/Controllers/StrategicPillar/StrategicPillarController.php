@@ -10,11 +10,12 @@ use App\Models\Theme;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\Request;
-
 class StrategicPillarController extends Controller
 {
     public function index(Request $request, $goal = null)
     {
+        $orgId = $request->query('org_id');
+
         $strategicPillars = Goal::with(['themes' => function ($query) {
                 $query->orderBy('theme_number', 'asc');
             }])
@@ -34,9 +35,22 @@ class StrategicPillarController extends Controller
                 'initiative:id,name,code,status,business_unit',
                 'initiative.latestStatus',
                 'initiative.organization:id,name',
+                'initiative.mapSc.ScopeCharter',
+                'initiative.mappedProjects:id',
                 'theme:id,name,idGoal',
             ])
+            ->when($orgId, function ($query) use ($orgId) {
+                return $query->whereHas('initiative', function ($q) use ($orgId) {
+                    $q->where('business_unit', $orgId);
+                });
+            })
             ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Get all organizations that have initiatives for the filter dropdown
+        $allOrganizations = \App\Models\TrsOrganization::has('initiatives')
+            ->select('id', 'name')
+            ->orderBy('name', 'asc')
             ->get();
 
         // All initiatives for dropdown
@@ -61,11 +75,13 @@ class StrategicPillarController extends Controller
         return Inertia::render('StrategicPillar/Index', [
             'strategicPillars' => $strategicPillars,
             'allGoals' => $allGoals,
+            'allOrganizations' => $allOrganizations,
             'taggings' => $taggings,
             'allInitiatives' => $allInitiatives,
             'allThemes' => $allThemes,
             'filters' => [
                 'goal_id' => $goal,
+                'org_id' => $orgId,
             ],
         ]);
     }

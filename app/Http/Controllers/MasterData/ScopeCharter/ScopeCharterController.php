@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DataSource;
 use App\Models\InitiativeStatus;
 use App\Models\ScStatusImplementation;
-use App\Models\TrsDigitalInitiative;
+use App\Models\TrsScInitiative;
 use App\Models\UseCase;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -65,7 +65,7 @@ class ScopeCharterController extends Controller
 
     public function index(): Response
     {
-        $initiatives = TrsDigitalInitiative::with([
+        $initiatives = TrsScInitiative::with([
             'useCase:id,name',
             'source:id,name',
             'latestScStatusImplementation',
@@ -80,13 +80,13 @@ class ScopeCharterController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate($this->initiativeRules());
-        $initiative = TrsDigitalInitiative::create($validated);
+        $initiative = TrsScInitiative::create($validated);
 
         $statusData = $request->validate($this->statusRules());
 
         if ($statusData['sc_status'] ?? null) {
             ScStatusImplementation::create([
-                'sc_initiative_id' => $initiative->id,
+                'digital_initiative_id' => $initiative->id,
                 'status'           => $statusData['sc_status'],
                 'review_status'    => $statusData['sc_review_status'] ?? 'Not Started',
                 'date'             => now()->toDateString(),
@@ -99,7 +99,7 @@ class ScopeCharterController extends Controller
             ->with('success', 'Scope Charter berhasil ditambahkan.');
     }
 
-    public function update(Request $request, TrsDigitalInitiative $scopeCharter): RedirectResponse
+    public function update(Request $request, TrsScInitiative $scopeCharter): RedirectResponse
     {
         $validated = $request->validate($this->initiativeRules());
         $scopeCharter->update($validated);
@@ -109,7 +109,7 @@ class ScopeCharterController extends Controller
         if ($statusData['sc_status'] ?? null) {
             ScStatusImplementation::updateOrCreate(
                 [
-                    'sc_initiative_id' => $scopeCharter->id,
+                    'digital_initiative_id' => $scopeCharter->id,
                     'date'             => now()->toDateString(),
                 ],
                 [
@@ -125,7 +125,7 @@ class ScopeCharterController extends Controller
             ->with('success', 'Scope Charter berhasil diperbarui.');
     }
 
-    public function destroy(TrsDigitalInitiative $scopeCharter): RedirectResponse
+    public function destroy(TrsScInitiative $scopeCharter): RedirectResponse
     {
         $scopeCharter->scStatusImplementations()->delete();
         $scopeCharter->delete();

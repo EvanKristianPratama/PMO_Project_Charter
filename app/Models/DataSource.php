@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\TrsDigitalInitiative;
 use Illuminate\Database\Eloquent\Model;
 
 use App\Traits\LogsActivity;
@@ -18,8 +17,8 @@ class DataSource extends Model
         'year',
     ];
 
-    public function DigitalInitiatives()
+    public function scInitiatives()
     {
-        return $this->hasMany(TrsDigitalInitiative::class, 'source_id');
+        return $this->hasMany(TrsScInitiative::class, 'source_id');
     }
 }
