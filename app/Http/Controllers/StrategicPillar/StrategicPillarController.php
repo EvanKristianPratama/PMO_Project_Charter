@@ -23,13 +23,14 @@ class StrategicPillarController extends Controller
                 ->get(),
 
             'taggings' => fn () => InitiativeTagging::with([
-                    'initiative:id,name,code,status,business_unit',
+                    'initiative:id,name,code,status,business_unit,tipe_initiative',
                     'initiative.latestStatus',
                     'initiative.organization:id,name',
                     'initiative.mapSc:id,sc_id,initiative_id',
                     'initiative.mappedProjects:id',
                     'theme:id,name,idGoal',
                 ])
+                ->whereHas('initiative', fn ($q) => $q->where('tipe_initiative', 1))
                 ->orderBy('created_at', 'desc')
                 ->get(),
 
@@ -41,18 +42,27 @@ class StrategicPillarController extends Controller
             // --- Data statis untuk dropdown (tidak dihitung ulang saat partial reload) ---
             'allGoals'         => fn () => Goal::select('id', 'code', 'title')->orderBy('code')->get(),
             'allOrganizations' => fn () => \App\Models\TrsOrganization::has('initiatives')->select('id', 'name')->orderBy('name')->get(),
-            'allInitiatives'   => fn () => MstInitiative::select('id', 'code', 'name', 'business_unit')
+            'allInitiatives'   => fn () => MstInitiative::select('id', 'code', 'name', 'business_unit', 'tipe_initiative')
                 ->with('organization:id,name')
                 ->orderBy('code')
                 ->get()
                 ->map(fn ($i) => [
-                    'id'           => $i->id,
-                    'code'         => $i->code,
-                    'name'         => $i->name,
-                    'organization' => $i->organization ? ['id' => $i->organization->id, 'name' => $i->organization->name] : null,
+                    'id'              => $i->id,
+                    'code'            => $i->code,
+                    'name'            => $i->name,
+                    'tipe_initiative' => $i->tipe_initiative,
+                    'organization'    => $i->organization ? ['id' => $i->organization->id, 'name' => $i->organization->name] : null,
                 ])
                 ->values(),
             'allThemes' => fn () => Theme::with('goal:id,code,title')->select('id', 'name', 'theme_number', 'idGoal')->orderBy('theme_number')->get(),
+
+            // Digital initiatives only (tipe_initiative = 1) for the matrix view
+            'matrixInitiatives' => fn () => MstInitiative::select('id', 'code', 'name')
+                ->where('tipe_initiative', 1)
+                ->orderBy('code')
+                ->get()
+                ->map(fn ($i) => ['id' => $i->id, 'code' => $i->code, 'name' => $i->name])
+                ->values(),
         ]);
     }
 }
