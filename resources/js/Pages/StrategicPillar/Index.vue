@@ -66,7 +66,7 @@
                                 <th class="px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 border-r border-slate-300 dark:border-slate-600 w-1/5">
                                     Strategic Pillar Title
                                 </th>
-                                <th class="px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 border-r border-slate-300 dark:border-slate-600 w-[200px]">
+                                <th class="px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 border-r border-slate-300 dark:border-slate-600 w-[250px]">
                                     Themes
                                 </th>
                                 <th class="px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
@@ -114,17 +114,17 @@
                                             <tbody>
                                                 <tr v-for="theme in pillar.themes" :key="theme.id" class="border-b border-slate-300 dark:border-slate-600 last:border-b-0">
                                                     <!-- Theme Name -->
-                                                    <td class="px-2 py-2 text-[11px] text-slate-700 dark:text-slate-200 border-r border-slate-300 dark:border-slate-600 w-[200px] align-top">
+                                                    <td class="px-2 py-2 text-[11px] text-slate-700 dark:text-slate-200 border-r border-slate-300 dark:border-slate-600 w-[250px] align-top">
                                                         <span class="font-semibold mr-1">{{ theme.theme_number }}.</span>{{ theme.name }}
                                                     </td>
                                                     <!-- Theme-Level Initiatives -->
                                                     <td class="px-2 py-2 align-top">
-                                                        <div v-if="getThemeInitiatives(theme.id).length > 0" class="flex flex-wrap gap-1">
+                                                        <div v-if="getThemeInitiatives(theme.id).length > 0" class="grid grid-cols-2 gap-1">
                                                             <div
                                                                 v-for="tag in getThemeInitiatives(theme.id)"
                                                                 :key="tag.id"
                                                                 @click="navigateToScope(tag)"
-                                                                :class="['inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[9px] font-medium border w-[220px] cursor-pointer hover:brightness-95 transition-all', getStatusColor(tag)]"
+                                                                :class="['inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[9px] font-medium border w-full cursor-pointer hover:brightness-95 transition-all', getStatusColor(tag)]"
                                                             >
                                                                 <div class="flex items-center gap-1 overflow-hidden flex-1 min-w-0" :title="tag.initiative ? `${tag.initiative.code} - ${tag.initiative.name}` : ''">
                                                                     <span class="font-bold flex-shrink-0">{{ tag.initiative ? tag.initiative.code : '?' }}</span>
@@ -142,7 +142,7 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                    <div v-else class="py-3 grid h-full" style="grid-template-columns: 200px 1fr">
+                                    <div v-else class="py-3 grid h-full" style="grid-template-columns: 250px 1fr">
                                         <div class="border-r border-slate-300 dark:border-slate-600 flex items-center h-full px-2">
                                             <span class="text-xs text-slate-400 dark:text-slate-500 italic">No themes</span>
                                         </div>
@@ -272,16 +272,12 @@ const navigateToScope = (tag) => {
         return;
     }
 
-    // 2. Check if it's a Digital Initiative (linked to Scope Charter)
+    // 2. Check if it's a Digital Initiative (linked to Scope Charter / Compendium)
     if (initiative.map_sc && initiative.map_sc.length > 0) {
-        // If there's a specific Scope Charter linked, we might want to go to a filtered view or specific show page
-        // For now, navigating to the general Scope Charter page as requested (or detailed if available)
-        router.get('/master-data/scope-charter');
+        const scId = initiative.map_sc[0].sc_id;
+        router.get(`/program-planning/program-definition/digital-initiatives/compendium/${scId}/edit`);
         return;
     }
-
-    // Fallback or generic message if no target found
-    console.log("No specific navigation target found for this initiative.");
 };
 
 // --- Initiative Computed Groupings ---
