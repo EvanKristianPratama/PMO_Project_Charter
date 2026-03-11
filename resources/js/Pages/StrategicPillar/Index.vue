@@ -75,7 +75,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="pillar in strategicPillars" :key="pillar.id" class="border-b border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                            <tr v-for="pillar in filteredPillars" :key="pillar.id" class="border-b border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                                 <td class="px-2 py-2 border-r border-slate-300 dark:border-slate-600 text-center align-top">
                                     <span class="text-[11px] font-bold text-slate-900 dark:text-white">
                                         {{ pillar.code }}
@@ -158,7 +158,7 @@
             </div>
 
             <!-- Empty State -->
-            <div v-if="!strategicPillars || strategicPillars.length === 0" class="text-center py-16 bg-white dark:bg-[#1a1a1a] rounded-xl border border-slate-200 dark:border-white/5 mt-4">
+            <div v-if="!filteredPillars || filteredPillars.length === 0" class="text-center py-16 bg-white dark:bg-[#1a1a1a] rounded-xl border border-slate-200 dark:border-white/5 mt-4">
                 <svg class="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
@@ -193,7 +193,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, computed } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import InitiativeTaggingModal from '@/Components/StrategicPillar/InitiativeTaggingModal.vue';
@@ -230,34 +230,18 @@ const props = defineProps({
     },
 });
 
-// --- Filters ---
+// --- Filters (client-side only, no server request) ---
 const selectedGoalId = ref(props.filters.goal_id ? Number(props.filters.goal_id) : null);
 const selectedOrgId = ref(props.filters.org_id ? Number(props.filters.org_id) : null);
 
 const applyFilter = () => {
-    let url = '/strategic-pillars';
-    if (selectedGoalId.value) {
-        url += `/${selectedGoalId.value}`;
-    }
-
-    const params = {};
-    if (selectedOrgId.value) {
-        params.org_id = selectedOrgId.value;
-    }
-
-    router.get(url, params, {
-        preserveState: true,
-        preserveScroll: true,
-        replace: true,
-    });
+    // Filtering dilakukan client-side, tidak perlu request ke server
 };
 
-// Sync local state with prop changes
-watch(() => props.filters.goal_id, (newVal) => {
-    selectedGoalId.value = newVal ? Number(newVal) : null;
-});
-watch(() => props.filters.org_id, (newVal) => {
-    selectedOrgId.value = newVal ? Number(newVal) : null;
+// --- Filtered data ---
+const filteredPillars = computed(() => {
+    if (!selectedGoalId.value) return props.strategicPillars;
+    return props.strategicPillars.filter(p => p.id === selectedGoalId.value);
 });
 
 // --- Navigation ---
@@ -289,12 +273,20 @@ const sortByCode = (tags) => [...tags].sort((a, b) => {
 
 const getGoalInitiatives = (pillarCode) => {
     if (!props.taggings) return [];
-    return sortByCode(props.taggings.filter(tag => tag.goal === pillarCode && !tag.themes_id));
+    return sortByCode(props.taggings.filter(tag => {
+        if (tag.goal !== pillarCode || tag.themes_id) return false;
+        if (selectedOrgId.value && tag.initiative?.business_unit != selectedOrgId.value) return false;
+        return true;
+    }));
 };
 
 const getThemeInitiatives = (themeId) => {
     if (!props.taggings) return [];
-    return sortByCode(props.taggings.filter(tag => tag.themes_id === themeId));
+    return sortByCode(props.taggings.filter(tag => {
+        if (tag.themes_id !== themeId) return false;
+        if (selectedOrgId.value && tag.initiative?.business_unit != selectedOrgId.value) return false;
+        return true;
+    }));
 };
 
 // --- Status Styling ---
