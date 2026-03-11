@@ -92,7 +92,7 @@ const valueClass = computed(() => {
         <div class="grid grid-cols-1 border-x border-b border-[#3b82f6] lg:grid-cols-3">
             <!-- Col 1: Use Case Description -->
             <div class="flex flex-col border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
-                <div class="bg-[#2e6ea2] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                <div class="bg-[#1e4f8f] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white">
                     Use Case Description
                 </div>
                 <div class="flex-1 bg-white p-4 text-[12px] text-slate-700 whitespace-pre-line">
@@ -102,7 +102,7 @@ const valueClass = computed(() => {
 
             <!-- Col 2: Current Situation -->
             <div class="flex flex-col border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
-                <div class="bg-[#2e6ea2] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                <div class="bg-[#1e4f8f] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white">
                     Current situation/ frictions addressed
                 </div>
                 <div class="flex-1 bg-white p-4 text-[12px] text-slate-700">
@@ -114,7 +114,7 @@ const valueClass = computed(() => {
 
             <!-- Col 3: Key Functionalities -->
             <div class="flex flex-col">
-                <div class="bg-[#2e6ea2] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                <div class="bg-[#1e4f8f] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white">
                     Key functionalities/scope
                 </div>
                 <div class="flex-1 bg-white p-4 text-[12px] text-slate-700">
@@ -129,54 +129,66 @@ const valueClass = computed(() => {
         <div class="grid grid-cols-1 border-x border-b border-[#3b82f6] lg:grid-cols-3">
             <!-- Value Indication -->
             <div class="flex flex-col border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
-                <div class="bg-[#2e6ea2] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white">
-                    Value Indication
-                </div>
-                <div class="flex flex-1 items-stretch bg-white">
-                    <div class="flex w-20 shrink-0 items-center justify-center text-sm font-bold" :class="valueClass">
+                <div class="flex items-center bg-[#1e4f8f] px-3 py-1.5 text-white">
+                    <div class="text-[10px] font-bold uppercase tracking-wider">
+                        Value Indication
+                    </div>
+                    <div class="ml-2 px-1.5 py-0 text-[8px] font-bold uppercase rounded-full border border-white/20 shadow-sm" :class="valueClass">
                         {{ initiative.value ? initiative.value : '-' }}
                     </div>
-                    <div class="flex-1 border-l border-[#3b82f6] p-3 text-[10px] text-slate-600">
-                        <div class="font-bold uppercase tracking-tight text-slate-800">Rationale:</div>
-                        <p class="mb-2">-</p>
-                        <div class="font-bold uppercase tracking-tight text-slate-800">Metrics Impacted:</div>
-                        <p>-</p>
+                </div>
+                <div class="grid grid-cols-2 divide-x divide-[#3b82f6] bg-white text-[10px] text-slate-600">
+                    <div class="flex flex-col">
+                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold uppercase tracking-tight text-white border-b border-[#3b82f6]">Rationale</div>
+                        <p class="px-2 py-1.5 flex-1">-</p>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold uppercase tracking-tight text-white border-b border-[#3b82f6]">Metrics Impacted</div>
+                        <p class="px-2 py-1.5 flex-1">-</p>
                     </div>
                 </div>
             </div>
 
             <!-- Urgency -->
             <div class="flex flex-col border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
-                <div class="bg-[#2e6ea2] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white">
-                    Urgency
-                </div>
-                <div class="flex flex-1 items-stretch bg-white">
-                    <div class="flex w-20 shrink-0 items-center justify-center text-sm font-bold" :class="urgencyClass">
+                <div class="flex items-center bg-[#1e4f8f] px-3 py-1.5 text-white">
+                    <div class="text-[10px] font-bold uppercase tracking-wider">
+                        Urgency
+                    </div>
+                    <div class="ml-2 px-1.5 py-0 text-[8px] font-bold uppercase rounded-full border border-white/20 shadow-sm" :class="urgencyClass">
                         {{ initiative.urgency ? initiative.urgency : '-' }}
                     </div>
-                    <div class="flex-1 border-l border-[#3b82f6] p-3 text-[10px] text-slate-600">
-                        <div class="font-bold uppercase tracking-tight text-slate-800">Rationale:</div>
-                        <p class="mb-2">-</p>
-                        <div class="font-bold uppercase tracking-tight text-slate-800">Expected Go-Live:</div>
-                        <p>-</p>
+                </div>
+                <div class="grid grid-cols-2 divide-x divide-[#3b82f6] bg-white text-[10px] text-slate-600">
+                    <div class="flex flex-col">
+                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold uppercase tracking-tight text-white border-b border-[#3b82f6]">Rationale</div>
+                        <p class="px-2 py-1.5 flex-1">-</p>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold uppercase tracking-tight text-white border-b border-[#3b82f6]">Expected Go-Live</div>
+                        <p class="px-2 py-1.5 flex-1">-</p>
                     </div>
                 </div>
             </div>
 
             <!-- Ease of Implementation -->
             <div class="flex flex-col border-b border-[#3b82f6] lg:border-b-0">
-                <div class="bg-[#2e6ea2] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white">
-                    Ease of Implementation
-                </div>
-                <div class="flex flex-1 items-stretch bg-white">
-                    <div class="flex w-20 shrink-0 items-center justify-center bg-[#ffc000] text-sm font-bold text-white">
+                <div class="flex items-center bg-[#1e4f8f] px-3 py-1.5 text-white">
+                    <div class="text-[10px] font-bold uppercase tracking-wider">
+                        Ease of Implementation
+                    </div>
+                    <div class="ml-2 px-1.5 py-0 text-[8px] font-bold uppercase rounded-full border border-white/20 shadow-sm bg-[#ffc000] text-white">
                         Medium
                     </div>
-                    <div class="flex-1 border-l border-[#3b82f6] p-3 text-[10px] text-slate-600">
-                        <div class="font-bold uppercase tracking-tight text-slate-800">Rationale:</div>
-                        <p class="mb-2">-</p>
-                        <div class="font-bold uppercase tracking-tight text-slate-800">Notes:</div>
-                        <p>-</p>
+                </div>
+                <div class="grid grid-cols-2 divide-x divide-[#3b82f6] bg-white text-[10px] text-slate-600">
+                    <div class="flex flex-col">
+                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold uppercase tracking-tight text-white border-b border-[#3b82f6]">Rationale</div>
+                        <p class="px-2 py-1.5 flex-1">-</p>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold uppercase tracking-tight text-white border-b border-[#3b82f6]">Notes</div>
+                        <p class="px-2 py-1.5 flex-1">-</p>
                     </div>
                 </div>
             </div>
@@ -185,34 +197,44 @@ const valueClass = computed(() => {
         <div class="grid grid-cols-1 border-x border-b border-[#3b82f6] lg:grid-cols-2">
             <!-- Resource Requirement -->
             <div class="flex flex-col border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
-                <div class="bg-[#2e6ea2] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white">
-                    Resource Requirement
-                </div>
-                <div class="flex flex-1 items-stretch bg-white">
-                    <div class="flex w-20 shrink-0 items-center justify-center bg-[#ffc000] text-sm font-bold text-white">
+                <div class="flex items-center bg-[#1e4f8f] px-3 py-1.5 text-white">
+                    <div class="text-[10px] font-bold uppercase tracking-wider">
+                        Resource Requirement
+                    </div>
+                    <div class="ml-2 px-1.5 py-0 text-[8px] font-bold uppercase rounded-full border border-white/20 shadow-sm bg-[#ffc000] text-white">
                         Medium
                     </div>
-                    <div class="flex-1 border-l border-[#3b82f6] p-3 text-[10px] text-slate-600">
-                        <div class="font-bold uppercase tracking-tight text-slate-800">Rationale:</div>
-                        <p class="mb-2">-</p>
-                        <div class="font-bold uppercase tracking-tight text-slate-800">Notes:</div>
-                        <p>-</p>
+                </div>
+                <div class="grid grid-cols-2 divide-x divide-[#3b82f6] bg-white text-[10px] text-slate-600">
+                    <div class="flex flex-col">
+                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold uppercase tracking-tight text-white border-b border-[#3b82f6]">Rationale</div>
+                        <p class="px-2 py-1.5 flex-1">-</p>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold uppercase tracking-tight text-white border-b border-[#3b82f6]">Notes</div>
+                        <p class="px-2 py-1.5 flex-1">-</p>
                     </div>
                 </div>
             </div>
 
             <!-- Interdependency -->
             <div class="flex flex-col">
-                <div class="bg-[#2e6ea2] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                <div class="bg-[#1e4f8f] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white">
                     Interdependency
                 </div>
-                <div class="flex-1 bg-white p-3 text-[10px] text-slate-600">
-                    <div class="font-bold uppercase tracking-tight text-slate-800">Predecessor:</div>
-                    <p class="mb-1">-</p>
-                    <div class="font-bold uppercase tracking-tight text-slate-800">Successor:</div>
-                    <p class="mb-1">-</p>
-                    <div class="font-bold uppercase tracking-tight text-slate-800">Other BUs implementing the same use cases:</div>
-                    <p>-</p>
+                <div class="grid grid-cols-3 divide-x divide-[#3b82f6] bg-white text-[10px] text-slate-600">
+                    <div class="flex flex-col">
+                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold uppercase tracking-tight text-white border-b border-[#3b82f6]">Predecessor</div>
+                        <p class="px-2 py-1.5 flex-1">-</p>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold uppercase tracking-tight text-white border-b border-[#3b82f6]">Successor</div>
+                        <p class="px-2 py-1.5 flex-1">-</p>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="bg-[#2e6ea2] px-2 py-1 font-bold uppercase tracking-tight text-white border-b border-[#3b82f6]">Other BUs</div>
+                        <p class="px-2 py-1.5 flex-1">-</p>
+                    </div>
                 </div>
             </div>
         </div>
