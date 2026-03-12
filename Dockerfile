@@ -12,14 +12,15 @@ COPY public ./public
 COPY vite.config.js ./
 RUN npm run build
 
-FROM php:8.2-fpm-alpine
-RUN apk add --no-cache nginx supervisor icu-dev libzip-dev oniguruma-dev \
+FROM php:8.4-fpm-alpine
+RUN apk add --no-cache nginx supervisor icu-dev libzip-dev oniguruma-dev sqlite-dev \
     && docker-php-ext-install pdo pdo_mysql pdo_sqlite mbstring intl zip bcmath \
     && rm -rf /var/cache/apk/*
 WORKDIR /var/www/html
 COPY . .
 COPY --from=composer /app/vendor ./vendor
 COPY --from=node /app/public/build ./public/build
+RUN rm -f bootstrap/cache/*.php
 COPY docker/nginx.conf /etc/nginx/nginx.conf
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN mkdir -p storage bootstrap/cache \

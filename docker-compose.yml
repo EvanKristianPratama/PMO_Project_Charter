@@ -6,13 +6,13 @@ services:
     ports:
       - "8080:80"
     env_file:
-      - .env
+      - ${ENV_FILE:-.env}
     depends_on:
       - db
     volumes:
       - ./.env:/var/www/html/.env
       - ./storage:/var/www/html/storage
-      - ./bootstrap/cache:/var/www/html/bootstrap/cache
+      - ./ca.pem:/var/www/html/ca.pem:ro
 
   db:
     image: mysql:8.0
@@ -25,8 +25,6 @@ services:
       MYSQL_ROOT_PASSWORD: change_me_root
     volumes:
       - db_data:/var/lib/mysql
-    ports:
-      - "3306:3306"
 
 volumes:
   db_data:

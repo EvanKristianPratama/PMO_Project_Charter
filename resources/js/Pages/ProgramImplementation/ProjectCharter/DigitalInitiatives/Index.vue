@@ -1,9 +1,13 @@
 <template>
     <UserLayout title="Digital Initiatives">
         <div class="animate-fade-in">
-            <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div
+                class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+            >
                 <div>
-                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white">
+                    <h2
+                        class="text-2xl font-bold text-slate-900 dark:text-white"
+                    >
                         Digital Initiatives
                     </h2>
                 </div>
@@ -21,30 +25,36 @@
                     >
                         <p
                             class="text-xs font-semibold uppercase tracking-[0.08em] text-white"
-                            style="text-shadow: 0 1px 3px rgba(0,0,0,0.3);"
+                            style="text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3)"
                         >
                             Total Digital Inisiatif Disetujui
                         </p>
                         <p
                             class="mt-2 flex items-center justify-between text-3xl font-bold text-white"
-                            style="text-shadow: 0 2px 6px rgba(0,0,0,0.35);"
+                            style="text-shadow: 0 2px 6px rgba(0, 0, 0, 0.35)"
                         >
                             <span>{{ totalDigitalApproved }}</span>
                         </p>
                     </article>
                 </div>
 
-                <article class="flex flex-col justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 shadow-[0_4px_16px_rgba(0,0,0,0.05)] dark:border-white/10 dark:bg-[#171717] lg:col-span-2 space-y-4">
+                <article
+                    class="flex flex-col justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 shadow-[0_4px_16px_rgba(0,0,0,0.05)] dark:border-white/10 dark:bg-[#171717] lg:col-span-2 space-y-4"
+                >
                     <div>
-                        <div class="mb-2 flex items-center justify-between gap-2">
-                            <h2 class="text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">Digital Initiatives Implementation Timelines Status (Project Charter)</h2>
+                        <div
+                            class="mb-2 flex items-center justify-between gap-2"
+                        >
+                            <h2
+                                class="text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400"
+                            >
+                                Digital Initiatives Implementation Timelines
+                                Status (Project Charter)
+                            </h2>
                         </div>
 
                         <div>
-                            <div
-                                class="grid"
-                                :style="gridStyle(digitalSteps)"
-                            >
+                            <div class="grid" :style="gridStyle(digitalSteps)">
                                 <div
                                     v-for="(step, index) in digitalSteps"
                                     :key="`step-${step.key}`"
@@ -55,7 +65,9 @@
                                         class="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold transition-all group-hover:ring-2 group-hover:ring-offset-1 group-hover:ring-slate-300"
                                         :class="[
                                             step.circleClass,
-                                            activeFlowFilter === step.statusId ? 'ring-2 ring-offset-2 ring-blue-500 shadow-md transform scale-110' : ''
+                                            activeFlowFilter === step.statusId
+                                                ? 'ring-2 ring-offset-2 ring-blue-500 shadow-md transform scale-110'
+                                                : '',
                                         ]"
                                     >
                                         {{ step.count }}
@@ -72,8 +84,15 @@
                                 class="mt-2 grid gap-1 text-center"
                                 :style="gridStyle(digitalSteps)"
                             >
-                                <div v-for="step in digitalSteps" :key="`label-${step.key}`">
-                                    <p class="text-[9px] font-semibold text-slate-700 dark:text-slate-200">{{ step.label }}</p>
+                                <div
+                                    v-for="step in digitalSteps"
+                                    :key="`label-${step.key}`"
+                                >
+                                    <p
+                                        class="text-[9px] font-semibold text-slate-700 dark:text-slate-200"
+                                    >
+                                        {{ step.label }}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -93,19 +112,17 @@
                 :items="mstInitiativesList"
                 :initiative-items="allDigitalInitiatives"
             />
-
-
         </div>
     </UserLayout>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
-import UserLayout from '@/Layouts/UserLayout.vue';
-import { statusFlowClassByIndex } from '@/Composables/initiativeStatus';
-import { useFlowFilter } from '@/Composables/useFlowFilter';
-import FlowStatusTable from '@/Components/DigitalInitiative/FlowStatusTable.vue';
-import MasterInitiativeTable from '@/Components/DigitalInitiative/MasterInitiativeTable.vue';
+import { computed, ref } from "vue";
+import UserLayout from "@/Layouts/UserLayout.vue";
+import { statusFlowClassByIndex } from "@/Composables/initiativeStatus";
+import { useFlowFilter } from "@/Composables/useFlowFilter";
+import FlowStatusTable from "@/Components/DigitalInitiative/FlowStatusTable.vue";
+import MasterInitiativeTable from "@/Components/DigitalInitiative/MasterInitiativeTable.vue";
 
 const props = defineProps({
     initiatives: Object,
@@ -113,7 +130,7 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
-    filters: Object,
+
     statusOptions: {
         type: Array,
         default: () => [],
@@ -133,7 +150,7 @@ const props = defineProps({
     statusCounts: {
         type: Object,
         default: () => ({}),
-    }
+    },
 });
 
 const asList = (value) => {
@@ -141,21 +158,16 @@ const asList = (value) => {
         return value;
     }
 
-    if (value && typeof value === 'object') {
+    if (value && typeof value === "object") {
         return Object.values(value);
     }
 
     return [];
 };
 
-// const { activeFlowFilter, filteredItems, toggleFilter } = useFlowFilter(
-//     () => asList(props.itInitiatives),
-//     (item) => item.status
-// );
-
 const TABLE_MODE = {
-    FLOW: 'flow',
-    MASTER: 'master',
+    FLOW: "flow",
+    MASTER: "master",
 };
 
 const tableMode = ref(TABLE_MODE.FLOW);
@@ -175,7 +187,7 @@ const handleFlowFilter = (statusId) => {
 
 const { activeFlowFilter, filteredItems, toggleFilter } = useFlowFilter(
     () => asList(props.initiatives),
-    (item) => item.status
+    (item) => item.status,
 );
 
 const mstInitiativesList = computed(() => {
@@ -192,40 +204,51 @@ const statusOptions = computed(() => {
     }
 
     return [
-        { id: 1, name: 'drafting', label: 'Drafting' },
-        { id: 2, name: 'propose', label: 'Propose' },
-        { id: 3, name: 'review', label: 'Review' },
-        { id: 4, name: 'approved', label: 'Approved' },
-        { id: 5, name: 'baseline', label: 'Baseline' },
+        { id: 1, name: "drafting", label: "Drafting" },
+        { id: 2, name: "propose", label: "Propose" },
+        { id: 3, name: "review", label: "Review" },
+        { id: 4, name: "approved", label: "Approved" },
+        { id: 5, name: "baseline", label: "Baseline" },
     ];
 });
 
-const scopeStatusOrder = ['drafting', 'propose', 'review', 'approved'];
-const normalizeStatusName = (value) => String(value ?? '').trim().toLowerCase();
+const scopeStatusOrder = ["drafting", "propose", "review", "approved"];
+const normalizeStatusName = (value) =>
+    String(value ?? "")
+        .trim()
+        .toLowerCase();
 
 const scopeStatusOptions = computed(() => {
-    const sourceOptions = Array.isArray(statusOptions.value) ? statusOptions.value : [];
+    const sourceOptions = Array.isArray(statusOptions.value)
+        ? statusOptions.value
+        : [];
     const mappedStatusByName = new Map();
 
     sourceOptions.forEach((status) => {
-        const candidateNames = [normalizeStatusName(status?.name), normalizeStatusName(status?.label)];
+        const candidateNames = [
+            normalizeStatusName(status?.name),
+            normalizeStatusName(status?.label),
+        ];
 
-        if (candidateNames.includes('baseline')) {
+        if (candidateNames.includes("baseline")) {
             return;
         }
 
         candidateNames.forEach((candidateName) => {
-            if (scopeStatusOrder.includes(candidateName) && !mappedStatusByName.has(candidateName)) {
+            if (
+                scopeStatusOrder.includes(candidateName) &&
+                !mappedStatusByName.has(candidateName)
+            ) {
                 mappedStatusByName.set(candidateName, status);
             }
         });
     });
 
     const fallbackStatusOptions = [
-        { id: 1, name: 'drafting', label: 'Drafting' },
-        { id: 2, name: 'propose', label: 'Propose' },
-        { id: 3, name: 'review', label: 'Review' },
-        { id: 4, name: 'approved', label: 'Approved' },
+        { id: 1, name: "drafting", label: "Drafting" },
+        { id: 2, name: "propose", label: "Propose" },
+        { id: 3, name: "review", label: "Review" },
+        { id: 4, name: "approved", label: "Approved" },
     ];
 
     return scopeStatusOrder.map((statusName, index) => {
@@ -240,8 +263,13 @@ const scopeStatusOptions = computed(() => {
     });
 });
 
+const countInitiativesByStatus = (statusId) => {
+    return asList(props.initiatives).filter(
+        (item) => Number(item.status) === Number(statusId),
+    ).length;
+};
+
 const digitalSteps = computed(() => {
-    // Project Charter timeline — currently no separate charter status counts
     return scopeStatusOptions.value.map((status, index) => {
         const flowClass = statusFlowClassByIndex(index);
         const key = status.name;
@@ -250,7 +278,7 @@ const digitalSteps = computed(() => {
             key,
             statusId: status.id,
             label: status.label,
-            count: 0,
+            count: countInitiativesByStatus(status.id),
             circleClass: flowClass.circleClass,
             lineClass: flowClass.lineClass,
         };

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\ITInitiative;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ITInitiative\ITInitiativeIndexRequest;
 use App\Http\Requests\ITInitiative\ITInitiativeStoreRequest;
 use App\Http\Requests\ITInitiative\ITInitiativeUpdateRequest;
 use App\Models\InitiativeStatus;
@@ -64,9 +63,8 @@ class ITInitiativeController extends Controller
         ]);
     }
 
-    public function index(ITInitiativeIndexRequest $request): Response
+    public function index(): Response
     {
-        $filters = $request->validated();
         $statusOptions = InitiativeStatus::ordered()
             ->map(fn (InitiativeStatus $status) => [
                 'id' => (int) $status->id,
@@ -77,9 +75,6 @@ class ITInitiativeController extends Controller
 
         $baselineStatus = $statusOptions->firstWhere('name', 'baseline');
         $baselineStatusId = (int) ($baselineStatus['id'] ?? InitiativeStatus::baselineId());
-        $filterStatus = array_key_exists('status', $filters) && $filters['status'] !== null
-            ? (int) $filters['status']
-            : null;
 
         $projects = TrsProject::query()
             ->with([
@@ -165,28 +160,8 @@ class ITInitiativeController extends Controller
                 'projectStatusHistories.projectCharter:id,project_id,version_label,tgl_dokumen',
             ])
             ->where('tipe_inisiative', 2)
-            ->when($filterStatus, fn ($q, $status) => $q->where('status', $status))
-            ->when($filters['search'] ?? null, fn ($q, $search) => $q->where(function ($inner) use ($search): void {
-                $inner->where('name', 'like', "%{$search}%")
-                    ->orWhere('code', 'like', "%{$search}%")
-                    ->orWhereHas('charter', fn ($charter) => $charter->where('owner', 'like', "%{$search}%"));
-            }))
-            ->when($filters['month'] ?? null, fn ($q, $month) => $q->whereMonth('updated_at', $month))
             ->orderBy('id', 'asc')
             ->get()
-            ->filter(function (TrsProject $project) use ($filterStatus): bool {
-                if ($filterStatus === null) {
-                    return true;
-                }
-
-                $resolvedStatusId = $this->resolvedProjectStatusId($project);
-
-                if ($filterStatus === 0) {
-                    return $resolvedStatusId === null || $resolvedStatusId === 0;
-                }
-
-                return $resolvedStatusId === $filterStatus;
-            })
             ->values();
 
         $masterSelectColumns = [
@@ -331,11 +306,6 @@ class ITInitiativeController extends Controller
             'totalItApproved' => $totalItApproved,
             'masterItInitiatives' => $masterItInitiatives,
             'statusCounts' => $statusCounts,
-            'filters'  => [
-                'search' => $filters['search'] ?? null,
-                'status' => $filterStatus,
-                'month' => $filters['month'] ?? null,
-            ],
         ]);
     }
 

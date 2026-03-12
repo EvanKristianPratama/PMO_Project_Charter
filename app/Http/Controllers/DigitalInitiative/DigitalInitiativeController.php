@@ -14,12 +14,8 @@ use Inertia\Response;
 
 class DigitalInitiativeController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(): Response
     {
-        $search = $request->input('search');
-        $type = $request->input('type');
-        $filterStatus = $request->integer('status');
-
         $statusOptions = InitiativeStatus::ordered()
             ->map(fn (InitiativeStatus $status) => [
                 'id' => (int) $status->id,
@@ -33,14 +29,6 @@ class DigitalInitiativeController extends Controller
 
         $initiatives = DigitalInitiative::query()
             ->with(['statusRef:id,name'])
-            ->when($filterStatus, fn ($q, $status) => $q->where('status', $status))
-            ->when($search, fn ($q, $search) => $q->where(function ($inner) use ($search) {
-                $inner->where('no', 'like', "%{$search}%")
-                    ->orWhere('useCase', 'like', "%{$search}%")
-                    ->orWhere('projectOwner', 'like', "%{$search}%")
-                    ->orWhere('desc', 'like', "%{$search}%");
-            }))
-            ->when($type, fn ($q, $type) => $q->where('type', $type))
             ->latest()
             ->get();
 
@@ -96,11 +84,6 @@ class DigitalInitiativeController extends Controller
             'totalDigitalInitiatives' => $totalDigitalInitiatives,
             'totalDigitalApproved' => $totalDigitalApproved,
             'statusCounts' => $statusCounts,
-            'filters' => [
-                'search' => $search,
-                'type' => $type,
-                'status' => $filterStatus ?: null,
-            ],
         ]);
     }
 
@@ -139,7 +122,7 @@ class DigitalInitiativeController extends Controller
         if ($digitalInitiative->status) {
             $statusModel = InitiativeStatus::find($digitalInitiative->status);
             $statusName = $statusModel ? $statusModel->name : (string)$digitalInitiative->status;
-            
+
             \App\Models\UcStatusImplementation::create([
                 'digital_initiative_id' => $digitalInitiative->id,
                 'status' => $statusName,
@@ -201,7 +184,7 @@ class DigitalInitiativeController extends Controller
         if ((string)$digitalInitiative->status !== (string)$oldStatus) {
             $statusModel = InitiativeStatus::find($digitalInitiative->status);
             $statusName = $statusModel ? $statusModel->name : (string)$digitalInitiative->status;
-            
+
             \App\Models\UcStatusImplementation::create([
                 'digital_initiative_id' => $digitalInitiative->id,
                 'status' => $statusName,
