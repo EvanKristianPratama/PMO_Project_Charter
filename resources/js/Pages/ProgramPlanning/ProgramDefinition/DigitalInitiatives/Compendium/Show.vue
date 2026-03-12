@@ -43,7 +43,7 @@
                             @click="startEdit"
                             class="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-xs font-bold text-amber-700 transition-all hover:bg-amber-100"
                         >
-                            Edit Scope Charter
+                            Edit Use Case
                         </button>
 
                         <button
@@ -236,26 +236,54 @@ const selectedThemes = computed(() => {
 });
 
 const appendixData = computed(() => {
+    const a = props.appendix;
     const getLabel = (val) => {
         if (val === 1) return 'High';
         if (val === 2) return 'Medium';
         if (val === 3) return 'Low';
-        return 'TBC';
+        return '-';
     };
 
+    // Resolve sign_by as array
+    let signBy = a?.sign_by ?? [];
+    if (typeof signBy === 'string') {
+        try { signBy = JSON.parse(signBy); } catch { signBy = signBy ? [signBy] : []; }
+    }
+
+    // Resolve rjpp themes from IDs
+    const themeMap = new Map((props.themeOptions ?? []).map(t => [Number(t.id), t]));
+    const rjppThemes = (a?.rjpp_tagging_ids ?? []).map(id => themeMap.get(Number(id))).filter(Boolean);
+
     return {
-        useCase: props.compendium?.usecase,
-        projectOwner: props.compendium?.owner,
-        type: '-', 
-        coe: props.compendium?.coe,
-        rjjp: '-', 
-        desc: props.compendium?.description,
-        value: props.compendium?.value_label || getLabel(props.compendium?.value),
-        urgency: props.compendium?.urgency_label || getLabel(props.compendium?.urgency),
-        ease_label: getLabel(props.appendix?.ease_implementation),
-        resource_label: getLabel(props.appendix?.resource_requirement),
-        themes: props.compendium?.themes || selectedThemes.value,
-        ...props.appendix
+        // TrsScInitiative fields
+        usecase:      a?.usecase ?? '-',
+        description:  a?.description ?? '-',
+        owner:        a?.owner ?? '-',
+        coe:          a?.coe ?? '-',
+        value_label:  getLabel(a?.value),
+        urgency_label: getLabel(a?.urgency),
+        // TrsScDetails fields
+        organization:        a?.organization ?? '-',
+        update_doc:          a?.update_doc ?? '-',
+        situation:           a?.situation ?? '-',
+        key_functionalities: a?.key_functionalities ?? '-',
+        value_rationale:     a?.value_rationale ?? '-',
+        value_matrics:       a?.value_matrics ?? '-',
+        urgency_rationale:   a?.urgency_rationale ?? '-',
+        urgency_expected:    a?.urgency_expected ?? '-',
+        ease_label:          getLabel(a?.ease),
+        ease_rationale:      a?.ease_rationale ?? '-',
+        ease_detail:         a?.ease_detail ?? '-',
+        resource_label:      getLabel(a?.resource),
+        resource_rationale:  a?.resource_rationale ?? '-',
+        resource_detail:     a?.resource_detail ?? '-',
+        predecessor:         a?.predecessor ?? '-',
+        successor:           a?.successor ?? '-',
+        otherBU:             a?.otherBU ?? '-',
+        // Sign
+        sign_by:             signBy,
+        // RJPP
+        rjppThemes,
     };
 });
 

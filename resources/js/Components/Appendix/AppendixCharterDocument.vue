@@ -4,6 +4,13 @@ import { computed } from 'vue';
 const props = defineProps({
     initiative: { type: Object, required: true },
 });
+
+// First signer = index 0, rest go to second slot
+const signFirst  = computed(() => props.initiative.sign_by?.[0] ?? '-');
+const signOthers = computed(() => {
+    const rest = (props.initiative.sign_by ?? []).slice(1);
+    return rest.length ? rest.join(', ') : '-';
+});
 </script>
 
 <template>
@@ -16,7 +23,7 @@ const props = defineProps({
                 <h1 class="text-[18px] font-extrabold leading-tight text-slate-900">
                     <span class="shrink-0 text-[#3b5e96]">Scope Charter Detail</span>
                     <span class="mx-2 shrink-0 text-slate-400">|</span>
-                    <span class="">-</span>
+                    <span>{{ initiative.usecase ?? '-' }}</span>
                 </h1>
             </div>
 
@@ -25,25 +32,25 @@ const props = defineProps({
                 <div class="score-column border-r border-[#1e4f8f]">
                     <div class="bar-sub-mini text-center">Value</div>
                     <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
-                        -
+                        {{ initiative.value_label ?? '-' }}
                     </div>
                 </div>
                 <div class="score-column border-r border-[#1e4f8f]">
                     <div class="bar-sub-mini text-center">Urgency</div>
                     <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
-                        -
+                        {{ initiative.urgency_label ?? '-' }}
                     </div>
                 </div>
                 <div class="score-column border-r border-[#1e4f8f]">
                     <div class="bar-sub-mini text-center">Ease</div>
                     <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
-                        -
+                        {{ initiative.ease_label ?? '-' }}
                     </div>
                 </div>
                 <div class="score-column">
                     <div class="bar-sub-mini text-center">Resource</div>
                     <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
-                        -
+                        {{ initiative.resource_label ?? '-' }}
                     </div>
                 </div>
             </div>
@@ -54,45 +61,41 @@ const props = defineProps({
     <div class="grid grid-cols-1 overflow-hidden border-x border-b border-[#3b82f6] lg:grid-cols-4">
         <!-- Project Owner -->
         <div class="flex border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
-            <div
-                class="flex w-28 shrink-0 items-center justify-center bg-[#1e4f8f] px-2 py-1.5 text-center text-[12px] font-bold text-white">
+            <div class="flex w-28 shrink-0 items-center justify-center bg-[#1e4f8f] px-2 py-1.5 text-center text-[12px] font-bold text-white">
                 Project Owner
             </div>
             <div class="flex flex-1 items-center bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-900">
-                -
+                {{ initiative.owner ?? '-' }}
             </div>
         </div>
 
         <!-- H/SH -->
         <div class="flex border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
-            <div
-                class="flex w-16 shrink-0 items-center justify-center bg-[#2e6ea2] px-2 py-1.5 text-center text-[12px] font-bold text-white">
+            <div class="flex w-16 shrink-0 items-center justify-center bg-[#2e6ea2] px-2 py-1.5 text-center text-[12px] font-bold text-white">
                 H/SH
             </div>
             <div class="flex flex-1 items-center bg-white px-3 py-1.5 text-[12px] text-slate-900">
-                -
+                {{ initiative.organization ?? '-' }}
             </div>
         </div>
 
         <!-- CoE -->
         <div class="flex border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
-            <div
-                class="flex w-16 shrink-0 items-center justify-center bg-[#2e6ea2] px-2 py-1.5 text-center text-[12px] font-bold text-white">
+            <div class="flex w-16 shrink-0 items-center justify-center bg-[#2e6ea2] px-2 py-1.5 text-center text-[12px] font-bold text-white">
                 CoE
             </div>
             <div class="flex flex-1 items-center bg-white px-3 py-1.5 text-[12px] text-slate-900">
-                -
+                {{ initiative.coe ?? '-' }}
             </div>
         </div>
 
-        <!-- updated -->
+        <!-- Updated -->
         <div class="flex">
-            <div
-                class="flex w-16 shrink-0 items-center justify-center bg-[#2e6ea2] px-2 py-1.5 text-center text-[12px] font-bold text-white">
+            <div class="flex w-16 shrink-0 items-center justify-center bg-[#2e6ea2] px-2 py-1.5 text-center text-[12px] font-bold text-white">
                 Updated
             </div>
             <div class="flex flex-1 items-center bg-white px-3 py-1.5 text-[12px] text-slate-900">
-                {{ initiative.updated_at }}
+                {{ initiative.update_doc ?? '-' }}
             </div>
         </div>
     </div>
@@ -104,7 +107,7 @@ const props = defineProps({
                 Use Case Description
             </div>
             <div class="flex-1 bg-white p-4 text-[12px] text-slate-700 whitespace-pre-line">
-                -
+                {{ initiative.description ?? '-' }}
             </div>
         </div>
 
@@ -112,8 +115,8 @@ const props = defineProps({
             <div class="bg-[#1e4f8f] px-3 py-1.5 text-[12px] font-bold text-white">
                 Current situation/ frictions addressed
             </div>
-            <div class="flex-1 bg-white p-4 text-[12px] text-slate-700">
-                -
+            <div class="flex-1 bg-white p-4 text-[12px] text-slate-700 whitespace-pre-line">
+                {{ initiative.situation ?? '-' }}
             </div>
         </div>
 
@@ -121,8 +124,8 @@ const props = defineProps({
             <div class="bg-[#1e4f8f] px-3 py-1.5 text-[12px] font-bold text-white">
                 Key functionalities/scope
             </div>
-            <div class="flex-1 bg-white p-4 text-[12px] text-slate-700">
-                -
+            <div class="flex-1 bg-white p-4 text-[12px] text-slate-700 whitespace-pre-line">
+                {{ initiative.key_functionalities ?? '-' }}
             </div>
         </div>
     </div>
@@ -143,17 +146,14 @@ const props = defineProps({
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-if="!initiative.themes || !initiative.themes.length">
-                            <td class="cell-center h-8"></td>
-                            <td></td>
-                            <td class="cell-center"></td>
-                            <td></td>
+                        <tr v-if="!initiative.rjppThemes || !initiative.rjppThemes.length">
+                            <td class="cell-center h-8 empty-row" colspan="4">Belum ada RJPP tagging.</td>
                         </tr>
-                        <tr>
-                            <td class="cell-center">-</td>
-                            <td>-</td>
-                            <td class="cell-center">-</td>
-                            <td>-</td>
+                        <tr v-for="theme in initiative.rjppThemes" :key="theme.id">
+                            <td class="cell-center">{{ theme.code ?? '-' }}</td>
+                            <td>{{ theme.strategic_pillar ?? '-' }}</td>
+                            <td class="cell-center">{{ theme.theme_code ?? '-' }}</td>
+                            <td>{{ theme.name ?? '-' }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -161,112 +161,99 @@ const props = defineProps({
         </div>
     </div>
 
-    <!-- Bottom Grid -->
+    <!-- Bottom Grid Row 1: Value / Urgency / Ease -->
     <div class="grid grid-cols-1 border-x border-b border-[#3b82f6] lg:grid-cols-3">
         <!-- Value Indication -->
-        <div class="flex flex-col border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
-            <div class="bg-[#1e4f8f] px-3 py-1.5 text-[12px] font-bold text-white">
-                Value Indication
-            </div>
+        <div class="border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
+            <div class="bg-[#1e4f8f] px-3 py-1.5 text-[12px] font-bold text-white">Value Indication</div>
             <div class="grid grid-cols-2 divide-x divide-[#3b82f6] bg-white text-[11px] text-slate-600">
-                <div class="flex flex-col">
+                <div>
                     <div class="bg-[#2e6ea2] px-2 py-1 font-bold text-white border-b border-[#3b82f6]">Rationale</div>
-                    <p class="px-2 py-1.5 flex-1">-</p>
+                    <p class="px-2 py-1.5 whitespace-pre-line break-words">{{ initiative.value_rationale ?? '-' }}</p>
                 </div>
-                <div class="flex flex-col">
-                    <div class="bg-[#2e6ea2] px-2 py-1 font-bold text-white border-b border-[#3b82f6]">Metrics Impacted
-                    </div>
-                    <p class="px-2 py-1.5 flex-1">-</p>
+                <div>
+                    <div class="bg-[#2e6ea2] px-2 py-1 font-bold text-white border-b border-[#3b82f6]">Metrics Impacted</div>
+                    <p class="px-2 py-1.5 whitespace-pre-line break-words">{{ initiative.value_matrics ?? '-' }}</p>
                 </div>
             </div>
         </div>
 
         <!-- Urgency -->
-        <div class="flex flex-col border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
-            <div class="bg-[#1e4f8f] px-3 py-1.5 text-[12px] font-bold text-white">
-                Urgency
-            </div>
+        <div class="border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
+            <div class="bg-[#1e4f8f] px-3 py-1.5 text-[12px] font-bold text-white">Urgency</div>
             <div class="grid grid-cols-2 divide-x divide-[#3b82f6] bg-white text-[11px] text-slate-600">
-                <div class="flex flex-col">
+                <div>
                     <div class="bg-[#2e6ea2] px-2 py-1 font-bold text-white border-b border-[#3b82f6]">Rationale</div>
-                    <p class="px-2 py-1.5 flex-1">-</p>
+                    <p class="px-2 py-1.5 whitespace-pre-line break-words">{{ initiative.urgency_rationale ?? '-' }}</p>
                 </div>
-                <div class="flex flex-col">
-                    <div class="bg-[#2e6ea2] px-2 py-1 font-bold text-white border-b border-[#3b82f6]">Expected Go-Live
-                        Date</div>
-                    <p class="px-2 py-1.5 flex-1">-</p>
+                <div>
+                    <div class="bg-[#2e6ea2] px-2 py-1 font-bold text-white border-b border-[#3b82f6]">Expected Go-Live Date</div>
+                    <p class="px-2 py-1.5 whitespace-pre-line break-words">{{ initiative.urgency_expected ?? '-' }}</p>
                 </div>
             </div>
         </div>
 
         <!-- Ease of Implementation -->
-        <div class="flex flex-col border-b border-[#3b82f6] lg:border-b-0">
-            <div class="bg-[#1e4f8f] px-3 py-1.5 text-[12px] font-bold text-white">
-                Ease of Implementation
-            </div>
+        <div>
+            <div class="bg-[#1e4f8f] px-3 py-1.5 text-[12px] font-bold text-white">Ease of Implementation</div>
             <div class="grid grid-cols-2 divide-x divide-[#3b82f6] bg-white text-[11px] text-slate-600">
-                <div class="flex flex-col">
+                <div>
                     <div class="bg-[#2e6ea2] px-2 py-1 font-bold text-white border-b border-[#3b82f6]">Rationale</div>
-                    <p class="px-2 py-1.5 flex-1">-</p>
+                    <p class="px-2 py-1.5 whitespace-pre-line break-words">{{ initiative.ease_rationale ?? '-' }}</p>
                 </div>
-                <div class="flex flex-col">
+                <div>
                     <div class="bg-[#2e6ea2] px-2 py-1 font-bold text-white border-b border-[#3b82f6]">Detail</div>
-                    <p class="px-2 py-1.5 flex-1">-</p>
+                    <p class="px-2 py-1.5 whitespace-pre-line break-words">{{ initiative.ease_detail ?? '-' }}</p>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Bottom Grid Row 2: Resource / Interdependency / Sign By -->
     <div class="grid grid-cols-1 border-x border-b border-[#3b82f6] lg:grid-cols-3">
         <!-- Resource Requirement -->
-        <div class="flex flex-col border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
-            <div class="bg-[#1e4f8f] px-3 py-1.5 text-[12px] font-bold text-white">
-                Resource Requirement
-            </div>
+        <div class="border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
+            <div class="bg-[#1e4f8f] px-3 py-1.5 text-[12px] font-bold text-white">Resource Requirement</div>
             <div class="grid grid-cols-2 divide-x divide-[#3b82f6] bg-white text-[11px] text-slate-600">
-                <div class="flex flex-col">
+                <div>
                     <div class="bg-[#2e6ea2] px-2 py-1 font-bold text-white border-b border-[#3b82f6]">Rationale</div>
-                    <p class="px-2 py-1.5 flex-1">-</p>
+                    <p class="px-2 py-1.5 whitespace-pre-line break-words">{{ initiative.resource_rationale ?? '-' }}</p>
                 </div>
-                <div class="flex flex-col">
+                <div>
                     <div class="bg-[#2e6ea2] px-2 py-1 font-bold text-white border-b border-[#3b82f6]">Detail</div>
-                    <p class="px-2 py-1.5 flex-1">-</p>
+                    <p class="px-2 py-1.5 whitespace-pre-line break-words">{{ initiative.resource_detail ?? '-' }}</p>
                 </div>
             </div>
         </div>
 
         <!-- Interdependency -->
-        <div class="flex flex-col border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
-            <div class="bg-[#1e4f8f] px-3 py-1.5 text-[12px] font-bold text-white">
-                Interdependency
-            </div>
+        <div class="border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
+            <div class="bg-[#1e4f8f] px-3 py-1.5 text-[12px] font-bold text-white">Interdependency</div>
             <div class="grid grid-cols-3 divide-x divide-[#3b82f6] bg-white text-[11px] text-slate-600">
-                <div class="flex flex-col">
+                <div>
                     <div class="bg-[#2e6ea2] px-2 py-1 font-bold text-white border-b border-[#3b82f6]">Predecessor</div>
-                    <p class="px-2 py-1.5 flex-1">-</p>
+                    <p class="px-2 py-1.5 whitespace-pre-line break-words">{{ initiative.predecessor ?? '-' }}</p>
                 </div>
-                <div class="flex flex-col">
+                <div>
                     <div class="bg-[#2e6ea2] px-2 py-1 font-bold text-white border-b border-[#3b82f6]">Successor</div>
-                    <p class="px-2 py-1.5 flex-1">-</p>
+                    <p class="px-2 py-1.5 whitespace-pre-line break-words">{{ initiative.successor ?? '-' }}</p>
                 </div>
-                <div class="flex flex-col">
+                <div>
                     <div class="bg-[#2e6ea2] px-2 py-1 font-bold text-white border-b border-[#3b82f6]">Other BUs Implement</div>
-                    <p class="px-2 py-1.5 flex-1">-</p>
+                    <p class="px-2 py-1.5 whitespace-pre-line break-words">{{ initiative.otherBU ?? '-' }}</p>
                 </div>
             </div>
         </div>
 
         <!-- Sign By -->
-        <div class="flex flex-col">
-            <div class="bg-[#1e4f8f] px-3 py-1.5 text-[12px] font-bold text-white">
-                Sign By
-            </div>
-            <div class="grid grid-cols-2 divide-x divide-[#3b82f6] bg-white text-[11px] text-slate-600 h-full">
-                <div class="flex items-center justify-center p-2">
-                    <p class="">-</p>
+        <div>
+            <div class="bg-[#1e4f8f] px-3 py-1.5 text-[12px] font-bold text-white">Sign By</div>
+            <div class="grid grid-cols-2 divide-x divide-[#3b82f6] bg-white text-[11px] text-slate-600">
+                <div class="flex items-center justify-center p-3">
+                    <p class="text-center font-semibold">{{ signFirst }}</p>
                 </div>
-                <div class="flex items-center justify-center p-2">
-                    <p class="">-</p>
+                <div class="flex items-center justify-center p-3">
+                    <p class="text-center font-semibold">{{ signOthers }}</p>
                 </div>
             </div>
         </div>
