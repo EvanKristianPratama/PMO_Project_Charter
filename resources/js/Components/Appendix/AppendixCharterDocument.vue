@@ -132,7 +132,7 @@ const currentRjppThemes = computed(() => {
             <div class="flex w-28 shrink-0 items-center justify-center bg-[#1e4f8f] px-2 py-1.5 text-center text-[12px] font-bold text-white">
                 Project Owner
             </div>
-            <div class="flex flex-1 items-center bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-900">
+            <div class="flex flex-1 items-center bg-white px-3 py-1.5 text-[12px] text-slate-900">
                 <input v-if="editable" v-model="form.owner" type="text" class="meta-input" placeholder="...">
                 <template v-else>{{ initiative.owner ?? '-' }}</template>
             </div>
