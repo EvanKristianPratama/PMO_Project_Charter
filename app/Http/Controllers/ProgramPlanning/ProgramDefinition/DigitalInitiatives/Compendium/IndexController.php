@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Compendium;
 
 use App\Http\Controllers\Controller;
+use App\Models\MstCoe;
 use App\Models\MstInitiative;
 use App\Models\MstScSource;
 use App\Models\Theme;
@@ -29,6 +30,7 @@ class IndexController extends Controller
             'mstInitiatives.sourceData:id,name,month,year,created_at',
             'sourceData:id,name,created_at',
         ])
+            ->where('source_id', 1)
             ->orderBy('id')
             ->get([
                 'id',
@@ -105,7 +107,7 @@ class IndexController extends Controller
             ->get(['id', 'code', 'name'])
             ->values();
 
-        $coeOptions = \App\Models\MstCoe::orderBy('name')->get(['id', 'name'])->values();
+        $coeOptions = MstCoe::orderBy('name')->get(['id', 'name'])->values();
 
         $sourceOptions = MstScSource::orderBy('name')
             ->get(['id', 'name', 'month', 'year'])

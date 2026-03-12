@@ -472,6 +472,10 @@ const filters = ref({
     masterInitiative: '',
 });
 
+const sourceOneItems = computed(() => {
+    return props.compendiumItems.filter(item => Number(item.source_id) === 1);
+});
+
 const uniqueOwners = computed(() => {
     const owners = props.compendiumItems
         .map((item) => String(item.project_owner ?? '').trim())
@@ -488,9 +492,6 @@ const uniqueCoes = computed(() => {
 
 const filteredCompendiumItems = computed(() => {
     return props.compendiumItems.filter((item) => {
-        // Only show items with source_id = 1
-        if (Number(item.source_id) !== 1) return false;
-
         const ownerVal = String(item.project_owner ?? '').trim() || '-';
         const coeVal = String(item.coe ?? '').trim() || '-';
 
