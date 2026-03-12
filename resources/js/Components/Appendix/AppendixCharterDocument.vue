@@ -488,9 +488,15 @@ const currentRjppThemes = computed(() => {
 .meta-input {
     width: 100%;
     background: transparent;
-    border: none;
+    border: 1px dashed transparent;
     outline: none;
     font-size: 12px;
+    padding: 2px 4px;
+}
+
+.meta-input:hover, .meta-input:focus {
+    border-color: #cbd5e1;
+    background: rgba(248, 250, 252, 0.5);
 }
 
 .content-textarea {

@@ -204,7 +204,7 @@
                     <AppendixCharterDocument 
                         :initiative="appendixData" 
                         :form="appendixForm"
-                        :editable="isEditingAppendix"
+                        :editable="isEditingAppendix || isEditing"
                         :coe-options="coeOptions"
                         :theme-options="themeOptions"
                     />
@@ -378,6 +378,15 @@ const buildAppendixFormPayload = (appendixDataObj) => {
 
 const appendixForm = useForm(buildAppendixFormPayload(appendixData.value));
 
+// Keep form in sync when appendix data changes (e.g. after refresh or save)
+import { watch } from 'vue';
+watch(() => props.appendix, () => {
+    appendixForm.defaults(buildAppendixFormPayload(appendixData.value));
+    if (!isEditingAppendix.value && !isEditing.value) {
+        appendixForm.reset();
+    }
+}, { deep: true });
+
 const startEditAppendix = () => {
     appendixForm.defaults(buildAppendixFormPayload(appendixData.value));
     appendixForm.reset();
@@ -537,6 +546,10 @@ const onSelectInitiative = (event) => {
 };
 
 const startEdit = () => {
+    if (props.appendix) {
+        appendixForm.defaults(buildAppendixFormPayload(appendixData.value));
+        appendixForm.reset();
+    }
     isEditing.value = true;
 };
 
