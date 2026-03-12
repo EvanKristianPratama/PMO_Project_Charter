@@ -43,7 +43,7 @@
                             @click="startEdit"
                             class="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-xs font-bold text-amber-700 transition-all hover:bg-amber-100"
                         >
-                            Edit Scope Charter
+                            Edit Use Case
                         </button>
 
                         <button
@@ -168,8 +168,17 @@
                 :editable="isEditing"
             />
 
-            <div class="pt-12">
-                <AppendixCharterDocument :initiative="appendixData" />
+            <div class="pt-1">
+                <AppendixCharterDocument v-if="appendix" :initiative="appendixData" />
+                <div v-else class="rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-12 text-center dark:border-white/10 dark:bg-white/5">
+                    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5">
+                        <svg class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">Tidak Ada Data Appendix Terkait</h3>
+                    <p class="mt-2 text-xs text-slate-500">Compendium ini belum dihubungkan dengan Charter Appendix manapun. Klik tombol <strong>"Manage Appendix"</strong> di atas untuk menghubungkannya.</p>
+                </div>
             </div>
         </div>
 
@@ -226,24 +235,64 @@ const closeAppendixModal = () => {
     isAppendixModalOpen.value = false;
 };
 
+const selectedThemes = computed(() => {
+    const ids = Array.isArray(props.compendium?.rjpp_tagging_ids) 
+        ? props.compendium.rjpp_tagging_ids 
+        : [];
+        
+    const map = new Map((props.themeOptions ?? []).map(opt => [toNumber(opt.id, 0), opt]));
+    return ids.map(id => map.get(toNumber(id, 0))).filter(Boolean);
+});
+
 const appendixData = computed(() => {
+    const a = props.appendix;
     const getLabel = (val) => {
         if (val === 1) return 'High';
         if (val === 2) return 'Medium';
         if (val === 3) return 'Low';
-        return 'TBC';
+        return '-';
     };
 
+    // Resolve sign_by as array
+    let signBy = a?.sign_by ?? [];
+    if (typeof signBy === 'string') {
+        try { signBy = JSON.parse(signBy); } catch { signBy = signBy ? [signBy] : []; }
+    }
+
+    // Resolve rjpp themes from IDs
+    const themeMap = new Map((props.themeOptions ?? []).map(t => [Number(t.id), t]));
+    const rjppThemes = (a?.rjpp_tagging_ids ?? []).map(id => themeMap.get(Number(id))).filter(Boolean);
+
     return {
-        useCase: props.compendium?.usecase,
-        projectOwner: props.compendium?.owner,
-        type: '-', 
-        coe: props.compendium?.coe,
-        rjjp: '-', 
-        desc: props.compendium?.description,
-        value: props.compendium?.value_label || getLabel(props.compendium?.value),
-        urgency: props.compendium?.urgency_label || getLabel(props.compendium?.urgency),
-        ...props.appendix
+        // TrsScInitiative fields
+        usecase:      a?.usecase ?? '-',
+        description:  a?.description ?? '-',
+        owner:        a?.owner ?? '-',
+        coe:          a?.coe ?? '-',
+        value_label:  getLabel(a?.value),
+        urgency_label: getLabel(a?.urgency),
+        // TrsScDetails fields
+        organization:        a?.organization ?? '-',
+        update_doc:          a?.update_doc ?? '-',
+        situation:           a?.situation ?? '-',
+        key_functionalities: a?.key_functionalities ?? '-',
+        value_rationale:     a?.value_rationale ?? '-',
+        value_matrics:       a?.value_matrics ?? '-',
+        urgency_rationale:   a?.urgency_rationale ?? '-',
+        urgency_expected:    a?.urgency_expected ?? '-',
+        ease_label:          getLabel(a?.ease),
+        ease_rationale:      a?.ease_rationale ?? '-',
+        ease_detail:         a?.ease_detail ?? '-',
+        resource_label:      getLabel(a?.resource),
+        resource_rationale:  a?.resource_rationale ?? '-',
+        resource_detail:     a?.resource_detail ?? '-',
+        predecessor:         a?.predecessor ?? '-',
+        successor:           a?.successor ?? '-',
+        otherBU:             a?.otherBU ?? '-',
+        // Sign
+        sign_by:             signBy,
+        // RJPP
+        rjppThemes,
     };
 });
 

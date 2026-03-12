@@ -24,35 +24,89 @@ class EditController extends Controller
         $scInitiative->load([
             'mstInitiatives:id,code,name',
             'scDetails' => fn ($query) => $query->latest('id'),
+            // Load appendix initiatives via trs_sc_dependency
+            'appendixes' => fn ($query) => $query->with([
+                'scDetails' => fn ($q) => $q->latest('id')->limit(1),
+            ])->limit(1),
         ]);
 
         $detail = $scInitiative->scDetails->first();
 
+        // Get the first linked appendix initiative
+        $appendixInitiative = $scInitiative->appendixes->first();
+        $appendixDetail     = $appendixInitiative?->scDetails->first();
+
+        // Build appendix RJPP theme IDs
+        $appendixRjppIds = $appendixInitiative
+            ? DB::table('trs_rjpp')
+                ->where('sc_id', $appendixInitiative->id)
+                ->pluck('theme_id')
+                ->map(fn ($id) => (int) $id)
+                ->values()
+                ->all()
+            : [];
+
+        // Decode sign_by JSON stored as string
+        $signBy = $appendixDetail?->sign_by;
+        if (is_string($signBy)) {
+            $signBy = json_decode($signBy, true) ?? [];
+        }
+
         return Inertia::render('ProgramPlanning/ProgramDefinition/DigitalInitiatives/Compendium/Show', [
             'compendium' => [
-                'id' => (int) $scInitiative->id,
+                'id'             => (int) $scInitiative->id,
                 'initiative_ids' => $scInitiative->mstInitiatives->pluck('id')->toArray(),
-                'owner' => $scInitiative->owner,
-                'coe' => $scInitiative->coe,
-                'usecase' => $scInitiative->usecase,
-                'description' => $scInitiative->description,
-                'source_id' => $scInitiative->source_id,
-                'value' => ($scInitiative->value === null || (int) $scInitiative->value === 4) ? null : (int) $scInitiative->value,
-                'urgency' => ($scInitiative->urgency === null || (int) $scInitiative->urgency === 4) ? null : (int) $scInitiative->urgency,
-                'status' => $scInitiative->status,
+                'owner'          => $scInitiative->owner,
+                'coe'            => $scInitiative->coe,
+                'usecase'        => $scInitiative->usecase,
+                'description'    => $scInitiative->description,
+                'source_id'      => $scInitiative->source_id,
+                'value'          => ($scInitiative->value === null || (int) $scInitiative->value === 4) ? null : (int) $scInitiative->value,
+                'urgency'        => ($scInitiative->urgency === null || (int) $scInitiative->urgency === 4) ? null : (int) $scInitiative->urgency,
+                'status'         => $scInitiative->status,
                 'rjpp_tagging_ids' => $this->rjppTaggingIds((int) $scInitiative->id),
                 'detail_useCase_description' => $detail?->useCase_description ?? '',
-                'current_situation' => $detail?->current_situation ?? '',
+                'current_situation'  => $detail?->current_situation ?? '',
                 'key_functionalities' => $detail?->key_functionalities ?? '',
-                'value_detail' => $detail?->value_detail ?? '',
-                'urgency_detail' => $detail?->urgency_detail ?? '',
+                'value_detail'       => $detail?->value_detail ?? '',
+                'urgency_detail'     => $detail?->urgency_detail ?? '',
                 'ease_implementation' => $detail ? (int) $detail->ease_implementation : 4,
-                'ease_detail' => $detail?->ease_detail ?? '',
+                'ease_detail'        => $detail?->ease_detail ?? '',
                 'resource_requirement' => $detail ? (int) $detail->resource_requirement : 4,
-                'resource_detail' => $detail?->resource_detail ?? '',
-                'interpendencies' => $detail?->interpendencies ?? '',
-                'sign_by' => $detail?->sign_by ?? '',
+                'resource_detail'    => $detail?->resource_detail ?? '',
+                'interpendencies'    => $detail?->interpendencies ?? '',
+                'sign_by'            => $detail?->sign_by ?? '',
             ],
+            // Full appendix data from the linked initiative
+            'appendix' => $appendixInitiative ? [
+                'id'                 => (int) $appendixInitiative->id,
+                'usecase'            => $appendixInitiative->usecase,
+                'owner'              => $appendixInitiative->owner,
+                'coe'                => $appendixInitiative->coe,
+                'value'              => $appendixInitiative->value,
+                'urgency'            => $appendixInitiative->urgency,
+                'rjpp_tagging_ids'   => $appendixRjppIds,
+                'organization'       => $appendixDetail?->organization,
+                'situation'          => $appendixDetail?->situation,
+                'key_functionalities'=> $appendixDetail?->key_functionalities,
+                'value_rationale'    => $appendixDetail?->value_rationale,
+                'value_matrics'      => $appendixDetail?->value_matrics,
+                'urgency_rationale'  => $appendixDetail?->urgency_rationale,
+                'urgency_expected'   => $appendixDetail?->urgency_expected,
+                'ease'               => $appendixDetail?->ease,
+                'ease_rationale'     => $appendixDetail?->ease_rationale,
+                'ease_detail'        => $appendixDetail?->ease_detail,
+                'resource'           => $appendixDetail?->resource,
+                'resource_rationale' => $appendixDetail?->resource_rationale,
+                'resource_retionale' => $appendixDetail?->resource_retionale,
+                'resource_detail'    => $appendixDetail?->resource_detail,
+                'predecessor'        => $appendixDetail?->predecessor,
+                'successor'          => $appendixDetail?->successor,
+                'otherBU'            => $appendixDetail?->otherBU,
+                'update_doc'         => $appendixDetail?->updated_at?->format('d M Y'),
+                'sign_by'            => $signBy ?? [],
+                'description'        => $appendixInitiative->description,
+            ] : null,
             'initiativeOptions' => $this->initiativeOptions(),
             'coeOptions' => \App\Models\MstCoe::orderBy('name')->get(['id', 'name'])->values(),
             'sourceOptions' => MstScSource::orderBy('name')->get(['id', 'name', 'month', 'year'])->map(fn ($s) => [
