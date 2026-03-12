@@ -350,6 +350,7 @@ const buildAppendixFormPayload = (appendixDataObj) => {
         rjpp_tagging_ids: Array.isArray(props.appendix?.rjpp_tagging_ids) ? [...props.appendix.rjpp_tagging_ids] : [],
         
         organization: appendixDataObj?.organization !== '-' ? appendixDataObj?.organization : '',
+        update_doc: appendixDataObj?.update_doc !== '-' ? appendixDataObj?.update_doc : '',
         situation: appendixDataObj?.situation !== '-' ? appendixDataObj?.situation : '',
         key_functionalities: appendixDataObj?.key_functionalities !== '-' ? appendixDataObj?.key_functionalities : '',
         value_rationale: appendixDataObj?.value_rationale !== '-' ? appendixDataObj?.value_rationale : '',

@@ -103,7 +103,7 @@ class EditController extends Controller
                 'predecessor'        => $appendixDetail?->predecessor,
                 'successor'          => $appendixDetail?->successor,
                 'otherBU'            => $appendixDetail?->otherBU,
-                'update_doc'         => $appendixDetail?->updated_at?->format('d M Y'),
+                'update_doc'         => $appendixDetail?->update_doc,
                 'sign_by'            => $signBy ?? [],
                 'description'        => $appendixInitiative->description,
             ] : null,

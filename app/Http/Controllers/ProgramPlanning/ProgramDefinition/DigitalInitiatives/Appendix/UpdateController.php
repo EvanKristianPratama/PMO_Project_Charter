@@ -28,6 +28,7 @@ class UpdateController extends Controller
 
             // TrsScDetails Fields
             'organization'       => 'nullable|string|max:255',
+            'update_doc'         => 'nullable|string|max:255',
             'situation'          => 'nullable|string',
             'key_functionalities'=> 'nullable|string',
             'value_rationale'    => 'nullable|string',
@@ -80,6 +81,7 @@ class UpdateController extends Controller
                 ['sc_id' => $scInitiative->id],
                 [
                     'organization'       => $n($validated['organization'] ?? null),
+                    'update_doc'         => $n($validated['update_doc'] ?? null),
                     'situation'          => $n($validated['situation'] ?? null),
                     'key_functionalities'=> $n($validated['key_functionalities'] ?? null),
                     'value_rationale'    => $n($validated['value_rationale'] ?? null),

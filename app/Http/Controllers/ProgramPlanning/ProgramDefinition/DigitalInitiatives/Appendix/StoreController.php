@@ -40,6 +40,7 @@ class StoreController extends Controller
 
             // --- Step 3: TrsScDetails ---
             'organization'       => 'nullable|string|max:255',
+            'update_doc'         => 'nullable|string|max:255',
             'situation'          => 'nullable|string',
             'key_functionalities'=> 'nullable|string',
             'value_rationale'    => 'nullable|string',
@@ -114,6 +115,7 @@ class StoreController extends Controller
             TrsScDetails::create([
                 'sc_id'              => $this->appendixInitiativeId,
                 'organization'       => $n($validated['organization'] ?? null),
+                'update_doc'         => $n($validated['update_doc'] ?? null),
                 'situation'          => $n($validated['situation'] ?? null),
                 'key_functionalities'=> $n($validated['key_functionalities'] ?? null),
                 'value_rationale'    => $n($validated['value_rationale'] ?? null),

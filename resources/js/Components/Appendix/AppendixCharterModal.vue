@@ -41,6 +41,7 @@ const appendixForm = useForm({
 
     // Details Fields
     organization: '',
+    update_doc: '',
     situation: '',
     key_functionalities: '',
     value_rationale: '',
@@ -87,6 +88,7 @@ watch(() => props.show, (isShowing) => {
         appendixForm.initiative_ids = [];
         appendixForm.rjpp_tagging_ids = [];
         appendixForm.organization = '';
+        appendixForm.update_doc = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
         appendixForm.situation = '';
         appendixForm.key_functionalities = '';
         appendixForm.value_rationale = '';
