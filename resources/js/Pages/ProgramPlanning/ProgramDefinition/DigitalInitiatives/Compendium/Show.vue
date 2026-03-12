@@ -43,7 +43,7 @@
                             @click="startEdit"
                             class="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-xs font-bold text-amber-700 transition-all hover:bg-amber-100"
                         >
-                            Edit Scope Charter
+                            Edit Use Case
                         </button>
 
                         <button
@@ -168,8 +168,56 @@
                 :editable="isEditing"
             />
 
-            <div class="pt-12">
-                <AppendixCharterDocument :initiative="appendixData" />
+            <div class="pt-1">
+                <div v-if="appendix">
+                    <div class="mb-4 flex items-center justify-between">
+                        <h2 class="text-lg font-bold text-slate-800">Appendix Details</h2>
+                        <div class="flex gap-2">
+                            <button
+                                v-if="!isEditingAppendix"
+                                type="button"
+                                @click="startEditAppendix"
+                                class="rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50"
+                            >
+                                Edit Appendix
+                            </button>
+                            <template v-else>
+                                <button
+                                    type="button"
+                                    @click="cancelEditAppendix"
+                                    :disabled="appendixForm.processing"
+                                    class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 disabled:opacity-50"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    type="button"
+                                    @click="submitAppendix"
+                                    :disabled="appendixForm.processing"
+                                    class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50"
+                                >
+                                    {{ appendixForm.processing ? 'Menyimpan...' : 'Simpan Appendix' }}
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                    <AppendixCharterDocument 
+                        :initiative="appendixData" 
+                        :form="appendixForm"
+                        :editable="isEditingAppendix"
+                        :coe-options="coeOptions"
+                        :theme-options="themeOptions"
+                    />
+                </div>
+                <div v-else class="rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-12 text-center dark:border-white/10 dark:bg-white/5">
+                    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5">
+                        <svg class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">Tidak Ada Data Appendix Terkait</h3>
+                    <p class="mt-2 text-xs text-slate-500">Compendium ini belum dihubungkan dengan Charter Appendix manapun. Klik tombol <strong>"Manage Appendix"</strong> di atas untuk menghubungkannya.</p>
+                </div>
             </div>
         </div>
 
@@ -226,26 +274,148 @@ const closeAppendixModal = () => {
     isAppendixModalOpen.value = false;
 };
 
+const selectedThemes = computed(() => {
+    const ids = Array.isArray(props.compendium?.rjpp_tagging_ids) 
+        ? props.compendium.rjpp_tagging_ids 
+        : [];
+        
+    const map = new Map((props.themeOptions ?? []).map(opt => [toNumber(opt.id, 0), opt]));
+    return ids.map(id => map.get(toNumber(id, 0))).filter(Boolean);
+});
+
 const appendixData = computed(() => {
+    const a = props.appendix;
     const getLabel = (val) => {
         if (val === 1) return 'High';
         if (val === 2) return 'Medium';
         if (val === 3) return 'Low';
-        return 'TBC';
+        return '-';
     };
 
+    // Resolve sign_by as array
+    let signBy = a?.sign_by ?? [];
+    if (typeof signBy === 'string') {
+        try { signBy = JSON.parse(signBy); } catch { signBy = signBy ? [signBy] : []; }
+    }
+
+    // Resolve rjpp themes from IDs
+    const themeMap = new Map((props.themeOptions ?? []).map(t => [Number(t.id), t]));
+    const rjppThemes = (a?.rjpp_tagging_ids ?? []).map(id => themeMap.get(Number(id))).filter(Boolean);
+
     return {
-        useCase: props.compendium?.usecase,
-        projectOwner: props.compendium?.owner,
-        type: '-', 
-        coe: props.compendium?.coe,
-        rjjp: '-', 
-        desc: props.compendium?.description,
-        value: props.compendium?.value_label || getLabel(props.compendium?.value),
-        urgency: props.compendium?.urgency_label || getLabel(props.compendium?.urgency),
-        ...props.appendix
+        // TrsScInitiative fields
+        usecase:      a?.usecase ?? '-',
+        description:  a?.description ?? '-',
+        owner:        a?.owner ?? '-',
+        coe:          a?.coe ?? '-',
+        value_label:  getLabel(a?.value),
+        urgency_label: getLabel(a?.urgency),
+        // TrsScDetails fields
+        organization:        a?.organization ?? '-',
+        update_doc:          a?.update_doc ?? '-',
+        situation:           a?.situation ?? '-',
+        key_functionalities: a?.key_functionalities ?? '-',
+        value_rationale:     a?.value_rationale ?? '-',
+        value_matrics:       a?.value_matrics ?? '-',
+        urgency_rationale:   a?.urgency_rationale ?? '-',
+        urgency_expected:    a?.urgency_expected ?? '-',
+        ease_label:          getLabel(a?.ease),
+        ease_rationale:      a?.ease_rationale ?? '-',
+        ease_detail:         a?.ease_detail ?? '-',
+        resource_label:      getLabel(a?.resource),
+        resource_rationale:  a?.resource_rationale ?? '-',
+        resource_detail:     a?.resource_detail ?? '-',
+        predecessor:         a?.predecessor ?? '-',
+        successor:           a?.successor ?? '-',
+        otherBU:             a?.otherBU ?? '-',
+        // Sign
+        sign_by:             signBy,
+        // RJPP
+        rjppThemes,
     };
 });
+
+// === APPENDIX EDITING LOGIC ===
+const isEditingAppendix = ref(false);
+
+const buildAppendixFormPayload = (appendixDataObj) => {
+    return {
+        owner: appendixDataObj?.owner !== '-' ? appendixDataObj?.owner : '',
+        coe: appendixDataObj?.coe !== '-' ? appendixDataObj?.coe : '',
+        usecase: appendixDataObj?.usecase !== '-' ? appendixDataObj?.usecase : '',
+        description: appendixDataObj?.description !== '-' ? appendixDataObj?.description : '',
+        value: props.appendix?.value ?? null,
+        urgency: props.appendix?.urgency ?? null,
+        status: props.appendix?.status ?? 1,
+        rjpp_tagging_ids: Array.isArray(props.appendix?.rjpp_tagging_ids) ? [...props.appendix.rjpp_tagging_ids] : [],
+        
+        organization: appendixDataObj?.organization !== '-' ? appendixDataObj?.organization : '',
+        situation: appendixDataObj?.situation !== '-' ? appendixDataObj?.situation : '',
+        key_functionalities: appendixDataObj?.key_functionalities !== '-' ? appendixDataObj?.key_functionalities : '',
+        value_rationale: appendixDataObj?.value_rationale !== '-' ? appendixDataObj?.value_rationale : '',
+        value_matrics: appendixDataObj?.value_matrics !== '-' ? appendixDataObj?.value_matrics : '',
+        urgency_rationale: appendixDataObj?.urgency_rationale !== '-' ? appendixDataObj?.urgency_rationale : '',
+        urgency_expected: appendixDataObj?.urgency_expected !== '-' ? appendixDataObj?.urgency_expected : '',
+        ease: props.appendix?.ease ?? null,
+        ease_rationale: appendixDataObj?.ease_rationale !== '-' ? appendixDataObj?.ease_rationale : '',
+        ease_detail: appendixDataObj?.ease_detail !== '-' ? appendixDataObj?.ease_detail : '',
+        resource: props.appendix?.resource ?? null,
+        resource_rationale: appendixDataObj?.resource_rationale !== '-' ? appendixDataObj?.resource_rationale : '',
+        resource_detail: appendixDataObj?.resource_detail !== '-' ? appendixDataObj?.resource_detail : '',
+        predecessor: appendixDataObj?.predecessor !== '-' ? appendixDataObj?.predecessor : '',
+        successor: appendixDataObj?.successor !== '-' ? appendixDataObj?.successor : '',
+        otherBU: appendixDataObj?.otherBU !== '-' ? appendixDataObj?.otherBU : '',
+        
+        sign_by: Array.isArray(appendixDataObj?.sign_by) && appendixDataObj?.sign_by.length > 0
+            ? [...appendixDataObj.sign_by]
+            : [''],
+        sign_others_raw: Array.isArray(appendixDataObj?.sign_by) && appendixDataObj?.sign_by.length > 1
+            ? appendixDataObj.sign_by.slice(1).join(', ')
+            : '',
+    };
+};
+
+const appendixForm = useForm(buildAppendixFormPayload(appendixData.value));
+
+const startEditAppendix = () => {
+    appendixForm.defaults(buildAppendixFormPayload(appendixData.value));
+    appendixForm.reset();
+    isEditingAppendix.value = true;
+};
+
+const cancelEditAppendix = () => {
+    appendixForm.reset();
+    appendixForm.clearErrors();
+    isEditingAppendix.value = false;
+};
+
+const submitAppendix = () => {
+    if (!props.appendix?.id) return;
+    
+    appendixForm.transform((data) => {
+        // Process sign_by arrays
+        const mainSigner = data.sign_by[0] ? String(data.sign_by[0]).trim() : '';
+        const othersObj = data.sign_others_raw ? String(data.sign_others_raw).split(',').map(s => s.trim()).filter(Boolean) : [];
+        const finalSignBy = [];
+        if (mainSigner) finalSignBy.push(mainSigner);
+        finalSignBy.push(...othersObj);
+
+        return {
+            ...data,
+            value: data.value === null || data.value === '' ? null : toNumber(data.value, null),
+            urgency: data.urgency === null || data.urgency === '' ? null : toNumber(data.urgency, null),
+            ease: data.ease === null || data.ease === '' ? null : toNumber(data.ease, null),
+            resource: data.resource === null || data.resource === '' ? null : toNumber(data.resource, null),
+            sign_by: finalSignBy,
+        };
+    }).put(`/program-planning/program-definition/digital-initiatives/appendix/${props.appendix.id}`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            isEditingAppendix.value = false;
+        },
+    });
+};
+// =============================
 
 const statusOptions = [
     { value: '1', label: 'Drafting' },

@@ -164,7 +164,9 @@ const sourceLabel = computed(() => {
                 <div class="min-w-0 flex-1">
                     <div class="flex flex-wrap items-center gap-2">
                         <h1 class="text-[18px] font-extrabold leading-tight text-slate-900">
-                            Use Case: {{ displayValue(form.usecase) }}
+                            <span class="shrink-0 text-[#3b5e96]">Use Case</span>
+                            <span class="mx-2 shrink-0 text-slate-400">|</span>
+                            <span class="">{{ displayValue(form.usecase) }}</span>
                         </h1>
                     </div>
                     <p class="mt-1 text-[13px] text-slate-600">
@@ -178,7 +180,8 @@ const sourceLabel = computed(() => {
                         <div class="panel-body text-center !py-1.5 !px-2.5">
                             <template v-if="editable">
                                 <select v-model="form.value" class="score-input-simple text-center">
-                                    <option v-for="option in scoreOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
+                                    <option v-for="option in scoreOptions" :key="option.value" :value="option.value">{{
+                                        option.label }}</option>
                                 </select>
                             </template>
                             <div v-else class="text-[13px] text-slate-900">{{ getScoreLabel(form.value) }}</div>
@@ -189,7 +192,8 @@ const sourceLabel = computed(() => {
                         <div class="panel-body text-center !py-1.5 !px-2.5">
                             <template v-if="editable">
                                 <select v-model="form.urgency" class="score-input-simple text-center">
-                                    <option v-for="option in scoreOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
+                                    <option v-for="option in scoreOptions" :key="option.value" :value="option.value">{{
+                                        option.label }}</option>
                                 </select>
                             </template>
                             <div v-else class="text-[13px] text-slate-900">{{ getScoreLabel(form.urgency) }}</div>
@@ -204,13 +208,8 @@ const sourceLabel = computed(() => {
                 <span class="info-label info-label-dark">Project Owner</span>
                 <span class="info-sep"></span>
                 <span class="info-value">
-                    <input
-                        v-if="editable"
-                        v-model="form.owner"
-                        type="text"
-                        class="info-input"
-                        placeholder="Nama project owner"
-                    >
+                    <input v-if="editable" v-model="form.owner" type="text" class="info-input"
+                        placeholder="Nama project owner">
                     <template v-else>{{ displayValue(form.owner) }}</template>
                 </span>
             </div>
@@ -218,13 +217,10 @@ const sourceLabel = computed(() => {
                 <span class="info-label">CoE</span>
                 <span class="info-sep"></span>
                 <span class="info-value">
-                    <select
-                        v-if="editable"
-                        v-model="form.coe"
-                        class="info-input"
-                    >
+                    <select v-if="editable" v-model="form.coe" class="info-input">
                         <option value="">- Pilih CoE -</option>
-                        <option v-for="option in coeOptions" :key="option.id" :value="option.name">{{ option.name }}</option>
+                        <option v-for="option in coeOptions" :key="option.id" :value="option.name">{{ option.name }}
+                        </option>
                     </select>
                     <template v-else>{{ coeCoverageLabel }}</template>
                 </span>
@@ -235,7 +231,9 @@ const sourceLabel = computed(() => {
                 <span class="info-value">
                     <select v-if="editable" v-model="form.source_id" class="info-input">
                         <option value="">- Pilih Source -</option>
-                        <option v-for="option in sourceOptions" :key="option.id" :value="option.id">{{ sourceOptionLabel(option) }}</option>
+                        <option v-for="option in sourceOptions" :key="option.id" :value="option.id">{{
+                            sourceOptionLabel(option)
+                            }}</option>
                     </select>
                     <template v-else>{{ sourceLabel }}</template>
                 </span>
@@ -262,12 +260,11 @@ const sourceLabel = computed(() => {
                             </thead>
                             <tbody>
                                 <tr v-if="!selectedInitiatives.length">
-                                    <td colspan="7" class="empty-row text-center">Belum ada initiative yang dimapping.</td>
+                                    <td colspan="7" class="empty-row text-center">Belum ada initiative yang dimapping.
+                                    </td>
                                 </tr>
-                                <tr
-                                    v-for="(initiative, index) in selectedInitiatives"
-                                    :key="`selected-initiative-${initiative.id}`"
-                                >
+                                <tr v-for="(initiative, index) in selectedInitiatives"
+                                    :key="`selected-initiative-${initiative.id}`">
                                     <td class="cell-center">{{ initiative.code || '-' }}</td>
                                     <td>
                                         <div class="font-semibold text-slate-800">
@@ -284,7 +281,8 @@ const sourceLabel = computed(() => {
                                     <td>{{ initiative.group }}</td>
                                     <td>
                                         <div>{{ initiative.dataSource }}</div>
-                                        <div v-if="initiative.dataSourceCreated !== '-'" class="text-[10px] text-slate-500">
+                                        <div v-if="initiative.dataSourceCreated !== '-'"
+                                            class="text-[10px] text-slate-500">
                                             {{ initiative.dataSourceCreated }}
                                         </div>
                                     </td>
@@ -301,17 +299,10 @@ const sourceLabel = computed(() => {
                 <div class="bar-sub">RJPP Tagging</div>
                 <div class="panel-body space-y-3">
                     <div v-if="editable" class="max-w-xl">
-                        <select
-                            @change="onThemeSelect"
-                            class="field-select"
-                        >
+                        <select @change="onThemeSelect" class="field-select">
                             <option value="">+ Pilih RJPP Tagging...</option>
-                            <option
-                                v-for="option in themeOptions"
-                                :key="option.id"
-                                :value="option.id"
-                                :disabled="normalizedThemeIds.includes(toNumber(option.id))"
-                            >
+                            <option v-for="option in themeOptions" :key="option.id" :value="option.id"
+                                :disabled="normalizedThemeIds.includes(toNumber(option.id))">
                                 {{ option.label }}
                             </option>
                         </select>
@@ -329,22 +320,18 @@ const sourceLabel = computed(() => {
                             </thead>
                             <tbody>
                                 <tr v-if="!selectedThemes.length">
-                                    <td :colspan="editable ? 5 : 4" class="empty-row text-center">Belum ada RJPP tagging yang dimapping.</td>
+                                    <td :colspan="editable ? 5 : 4" class="empty-row text-center">Belum ada RJPP tagging
+                                        yang
+                                        dimapping.</td>
                                 </tr>
-                                <tr
-                                    v-for="theme in selectedThemes"
-                                    :key="`theme-row-${theme.id}`"
-                                >
+                                <tr v-for="theme in selectedThemes" :key="`theme-row-${theme.id}`">
                                     <td class="cell-center">{{ theme.code }}</td>
                                     <td>{{ theme.strategicPillar }}</td>
                                     <td class="cell-center">{{ theme.themeCode }}</td>
                                     <td>{{ theme.name }}</td>
                                     <td v-if="editable" class="cell-center">
-                                        <button
-                                            type="button"
-                                            class="text-red-600 hover:text-red-800 font-bold"
-                                            @click="removeTheme(theme.id)"
-                                        >
+                                        <button type="button" class="text-red-600 hover:text-red-800 font-bold"
+                                            @click="removeTheme(theme.id)">
                                             Remove
                                         </button>
                                     </td>
