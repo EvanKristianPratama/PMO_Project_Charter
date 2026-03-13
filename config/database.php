@@ -2,6 +2,21 @@
 
 use Illuminate\Support\Str;
 
+$mysqlSslCaCandidates = array_filter([
+    env('MYSQL_ATTR_SSL_CA'),
+    base_path('ca.pem'),
+    '/var/www/html/ca.pem',
+]);
+
+$mysqlSslCa = null;
+
+foreach ($mysqlSslCaCandidates as $candidate) {
+    if (is_string($candidate) && file_exists($candidate)) {
+        $mysqlSslCa = $candidate;
+        break;
+    }
+}
+
 return [
 
     /*
@@ -59,7 +74,7 @@ return [
             'strict' => true,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
+                (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA) => $mysqlSslCa,
             ]) : [],
         ],
 
@@ -79,7 +94,7 @@ return [
             'strict' => true,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
+                (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA) => $mysqlSslCa,
             ]) : [],
         ],
 

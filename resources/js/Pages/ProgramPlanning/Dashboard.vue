@@ -34,7 +34,16 @@
                 </article>
             </section>
 
-            <ScopeCharterFlowSection :digital-steps="digitalStatusFlow" :it-steps="itStatusFlow" />
+            <section class="grid grid-cols-1 gap-4 xl:grid-cols-3">
+                <article
+                    class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#171717] xl:col-span-3"
+                >
+                    <div class="space-y-4">
+                        <DigitalFlowStatus :steps="digitalStatusFlow" />
+                        <ITFlowStatus :steps="itStatusFlow" />
+                    </div>
+                </article>
+            </section>
 
             <!-- Initiative Status Summary -->
             <section
@@ -124,7 +133,8 @@
 <script setup>
 import { computed, ref } from 'vue';
 import UserLayout from '@/Layouts/UserLayout.vue';
-import ScopeCharterFlowSection from '@/Components/Dashboard/ScopeCharterFlowSection.vue';
+import DigitalFlowStatus from '@/Components/ProgramPlanning/DigitalFlowStatus.vue';
+import ITFlowStatus from '@/Components/ProgramPlanning/ITFlowStatus.vue';
 import MstInitiativeSwitcher from '@/Components/Dashboard/MstInitiativeSwitcher.vue';
 import { statusFlowClassByIndex } from '@/Composables/initiativeStatus';
 
@@ -298,11 +308,9 @@ const metricCards = computed(() => [
 
 const mapFlowData = (counts = {}) => {
     const flowSteps = [
-        { key: 'not_start', label: 'Not Start' },
         { key: 'drafting',  label: 'Drafting' },
         { key: 'propose',   label: 'Propose' },
         { key: 'review',    label: 'Review' },
-        { key: 'baseline',  label: 'Baseline' },
         { key: 'approved',  label: 'Approved' },
     ];
 
