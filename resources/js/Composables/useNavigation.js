@@ -140,6 +140,12 @@ export function useNavigation() {
                 active: (url) => url.startsWith('/architecture'),
             },
             {
+                label: 'Business Capability',
+                href: '/master-data/business-capabilities',
+                icon: CubeIcon,
+                active: (url) => url.startsWith('/master-data/business-capabilities'),
+            },
+            {
                 label: 'Service Portofolio',
                 href: '/service-portofolio',
                 icon: CubeIcon,

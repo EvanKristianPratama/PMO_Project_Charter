@@ -172,11 +172,9 @@ const resolvePlanningStatusKey = (item) => {
 
 const statusSummaryColumns = computed(() => {
     return [
-        { key: 'not_start', label: 'Not Start' },
         { key: 'drafting', label: 'Drafting' },
         { key: 'propose',  label: 'Propose' },
         { key: 'review',   label: 'Review' },
-        { key: 'baseline', label: 'Baseline' },
         { key: 'approved', label: 'Approved' },
     ];
 });
