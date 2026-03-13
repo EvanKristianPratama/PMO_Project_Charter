@@ -204,7 +204,7 @@
                     <AppendixCharterDocument 
                         :initiative="appendixData" 
                         :form="appendixForm"
-                        :editable="isEditingAppendix || isEditing"
+                        :editable="isEditingAppendix"
                         :coe-options="coeOptions"
                         :theme-options="themeOptions"
                     />

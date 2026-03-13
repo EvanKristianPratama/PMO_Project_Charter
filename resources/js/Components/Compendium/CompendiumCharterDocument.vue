@@ -88,6 +88,29 @@ const selectedInitiatives = computed(() => {
     });
 });
 
+const selectedInitiativeGoals = computed(() => {
+    const selectedThemeIds = normalizedThemeIds.value;
+
+    return normalizedInitiativeIds.value.flatMap((id) => {
+        const option = initiativeMap.value.get(id);
+        // Mengambil data mapping (taggings) dari inisiatif
+        const taggings = Array.isArray(option?.taggings) ? option.taggings : 
+                         Array.isArray(option?.initiative_taggings) ? option.initiative_taggings : [];
+
+        // Hanya tampilkan goal jika theme_id nya ada di daftar RJPP Tagging yang dipilih
+        return taggings
+            .filter((tag) => selectedThemeIds.includes(toNumber(tag.themes_id)))
+            .map((tag) => {
+                const themeOption = themeMap.value.get(toNumber(tag.themes_id));
+                return {
+                    initiativeCode: String(option?.code ?? '').trim().replace(/#/g, ''),
+                    name: tag.goal ?? '-',
+                    theme: themeOption?.name || themeOption?.theme_name || '-',
+                };
+            });
+    });
+});
+
 const coeCoverageLabel = computed(() => {
     return displayValue(props.form.coe);
 });
@@ -286,6 +309,30 @@ const sourceLabel = computed(() => {
                                             {{ initiative.dataSourceCreated }}
                                         </div>
                                     </td>
+                                </tr>
+
+                                <!-- Separator Row -->
+                                <tr>
+                                    <td colspan="7" class="bg-[#2e6ea2] font-bold text-white text-center uppercase tracking-widest py-1 text-[10px] leading-none">
+                                        Master Initiative Goal
+                                    </td>
+                                </tr>
+
+                                <!-- Goal Headers -->
+                                <tr>
+                                    <th class="w-[45px] text-center">Code</th>
+                                    <th colspan="3" class="text-center">Goal</th>
+                                    <th colspan="3" class="text-center">Themes</th>
+                                </tr>
+
+                                <!-- Goal Rows -->
+                                <tr v-if="!selectedInitiativeGoals.length">
+                                    <td colspan="7" class="empty-row text-center">Belum ada goal yang tersedia untuk initiative ini.</td>
+                                </tr>
+                                <tr v-for="(goal, index) in selectedInitiativeGoals" :key="`goal-${index}`">
+                                    <td class="cell-center font-semibold text-slate-700">{{ goal.initiativeCode || '-' }}</td>
+                                    <td colspan="3">{{ goal.name }}</td>
+                                    <td colspan="3">{{ goal.theme }}</td>
                                 </tr>
                             </tbody>
                         </table>

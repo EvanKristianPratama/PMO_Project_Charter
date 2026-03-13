@@ -103,8 +103,39 @@ class IndexController extends Controller
             ->values();
 
         $initiativeOptions = MstInitiative::where('tipe_initiative', 1)
+            ->with([
+                'taggings',
+                'coe:id,name',
+                'organization:id,name,groub_id',
+                'organization.groub:id,name',
+                'sourceData:id,name,month,year,created_at'
+            ])
             ->orderBy('code')
-            ->get(['id', 'code', 'name'])
+            ->get()
+            ->map(function ($mi) {
+                $source = $mi->sourceData;
+                $sourceCreatedAt = '-';
+                if ($source) {
+                    if (!empty($source->month) && !empty($source->year)) {
+                        $sourceCreatedAt = $this->getMonthName($source->month) . ' ' . $source->year;
+                    } elseif (!empty($source->created_at)) {
+                        $sourceCreatedAt = $source->created_at->format('M Y');
+                    }
+                }
+
+                return [
+                    'id' => $mi->id,
+                    'code' => $mi->code,
+                    'name' => $mi->name,
+                    'description' => $mi->description,
+                    'coe' => $mi->coe?->name,
+                    'project_owner' => $mi->organization?->name,
+                    'group' => $mi->organization?->groub?->name,
+                    'data_source' => $mi->sourceData?->name,
+                    'data_source_created' => $sourceCreatedAt,
+                    'taggings' => $mi->taggings,
+                ];
+            })
             ->values();
 
         $coeOptions = MstCoe::orderBy('name')->get(['id', 'name'])->values();
