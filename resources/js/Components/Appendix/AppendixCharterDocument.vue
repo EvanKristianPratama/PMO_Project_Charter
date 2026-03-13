@@ -153,24 +153,24 @@ const getLevelLabel = (type) => {
         <!-- Project Owner -->
         <div class="flex border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
             <div
+                class="flex w-28 shrink-0 items-center justify-center bg-[#2e6ea2] px-2 py-1.5 text-center text-[12px] font-bold text-white">
+                Project Owner
+            </div>
+            <div class="flex flex-1 items-center bg-white px-3 py-1.5 text-[12px] text-slate-900">
+                <input v-if="editable" v-model="form.organization" type="text" class="meta-input" placeholder="...">
+                <template v-else>{{ initiative.organization ?? '-' }}</template>
+            </div>
+        </div>
+
+        <!-- PIC -->
+        <div class="flex border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
+            <div
                 class="flex w-16 shrink-0 items-center justify-center bg-[#2e6ea2] px-2 py-1.5 text-center text-[12px] font-bold text-white">
                 PIC
             </div>
             <div class="flex flex-1 items-center bg-white px-3 py-1.5 text-[12px] text-slate-900">
                 <input v-if="editable" v-model="form.owner" type="text" class="meta-input" placeholder="...">
                 <template v-else>{{ initiative.owner ?? '-' }}</template>
-            </div>
-        </div>
-
-        <!-- H/SH -->
-        <div class="flex border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
-            <div
-                class="flex w-16 shrink-0 items-center justify-center bg-[#2e6ea2] px-2 py-1.5 text-center text-[12px] font-bold text-white">
-                H/SH
-            </div>
-            <div class="flex flex-1 items-center bg-white px-3 py-1.5 text-[12px] text-slate-900">
-                <input v-if="editable" v-model="form.organization" type="text" class="meta-input" placeholder="...">
-                <template v-else>{{ initiative.organization ?? '-' }}</template>
             </div>
         </div>
 
