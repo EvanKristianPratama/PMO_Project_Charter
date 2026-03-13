@@ -12,6 +12,7 @@ use App\Http\Controllers\ITInitiative\CharterController;
 use App\Http\Controllers\ITInitiative\ITInitiativeController;
 use App\Http\Controllers\ITInitiative\MilestoneController;
 use App\Http\Controllers\MasterData\ActivityLogController as MasterDataActivityLogController;
+use App\Http\Controllers\MasterData\BusinessCapability\BusinessCapabilityController;
 use App\Http\Controllers\MasterData\MasterDataController;
 use App\Http\Controllers\MasterData\MstInitiative\MstInitiativeController;
 use App\Http\Controllers\MasterData\ProjectCharter\ProjectCharterController as MasterDataProjectCharterController;
@@ -112,6 +113,14 @@ Route::middleware(['auth', 'approved'])->group(function () {
         Route::post('/{mstInitiative}/status', [MstInitiativeController::class, 'storeStatus'])->name('status.store');
         Route::put('/status/{status}', [MstInitiativeController::class, 'updateStatus'])->name('status.update');
         Route::delete('/status/{status}', [MstInitiativeController::class, 'destroyStatus'])->name('status.destroy');
+    });
+
+    // Master Data → Business Capability CRUD (mst_business_capability)
+    Route::prefix('/master-data/business-capabilities')->name('master-data.business-capabilities.')->group(function () {
+        Route::get('/', [BusinessCapabilityController::class, 'index'])->name('index');
+        Route::post('/', [BusinessCapabilityController::class, 'store'])->name('store');
+        Route::put('/{businessCapability}', [BusinessCapabilityController::class, 'update'])->name('update');
+        Route::delete('/{businessCapability}', [BusinessCapabilityController::class, 'destroy'])->name('destroy');
     });
 
     // Master Data → Scope Charter CRUD (trs_sc_initiative + trs_sc_status_implementation)
