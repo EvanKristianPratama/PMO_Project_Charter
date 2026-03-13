@@ -21,6 +21,7 @@ class CreateController extends Controller
 
         $initiativeOptions = MstInitiative::where('tipe_initiative', 1)
             ->with([
+                'taggings',
                 'coe:id,name',
                 'organization:id,name,groub_id',
                 'organization.groub:id,name',
@@ -51,6 +52,7 @@ class CreateController extends Controller
                     'coe' => $initiative->coe?->name ?? '-',
                     'data_source' => $source?->name ?? '-',
                     'data_source_created' => $sourceCreated,
+                    'taggings' => $initiative->taggings,
                 ];
             })
             ->values();

@@ -89,25 +89,21 @@ const selectedInitiatives = computed(() => {
 });
 
 const selectedInitiativeGoals = computed(() => {
-    const selectedThemeIds = normalizedThemeIds.value;
-
     return normalizedInitiativeIds.value.flatMap((id) => {
         const option = initiativeMap.value.get(id);
-        // Mengambil data mapping (taggings) dari inisiatif
-        const taggings = Array.isArray(option?.taggings) ? option.taggings : 
-                         Array.isArray(option?.initiative_taggings) ? option.initiative_taggings : [];
+        const taggings = Array.isArray(option?.taggings) ? option.taggings :
+            Array.isArray(option?.initiative_taggings) ? option.initiative_taggings : [];
 
-        // Hanya tampilkan goal jika theme_id nya ada di daftar RJPP Tagging yang dipilih
-        return taggings
-            .filter((tag) => selectedThemeIds.includes(toNumber(tag.themes_id)))
-            .map((tag) => {
-                const themeOption = themeMap.value.get(toNumber(tag.themes_id));
-                return {
-                    initiativeCode: String(option?.code ?? '').trim().replace(/#/g, ''),
-                    name: tag.goal ?? '-',
-                    theme: themeOption?.name || themeOption?.theme_name || '-',
-                };
-            });
+        return taggings.map((tag) => {
+            const themeOption = themeMap.value.get(toNumber(tag.themes_id));
+            return {
+                initiativeCode: String(option?.code ?? '').trim().replace(/#/g, ''),
+                goal: tag.goal ?? '-',
+                strategicPillar: themeOption?.strategic_pillar ?? '-',
+                themeCode: String(themeOption?.theme_code ?? themeOption?.code ?? '-').replace(/#/g, ''),
+                themeName: themeOption?.name || themeOption?.theme_name || '-',
+            };
+        });
     });
 });
 
@@ -256,7 +252,7 @@ const sourceLabel = computed(() => {
                         <option value="">- Pilih Source -</option>
                         <option v-for="option in sourceOptions" :key="option.id" :value="option.id">{{
                             sourceOptionLabel(option)
-                            }}</option>
+                        }}</option>
                     </select>
                     <template v-else>{{ sourceLabel }}</template>
                 </span>
@@ -275,7 +271,7 @@ const sourceLabel = computed(() => {
                                     <th class="w-[45px] text-center">Code</th>
                                     <th class="text-center">Master Initiative</th>
                                     <th class="text-center">Description</th>
-                                    <th class="text-center">CoE</th>
+                                    <th class="w-[80px] text-center">CoE</th>
                                     <th class="text-center">Project Owner</th>
                                     <th class="text-center">Group</th>
                                     <th class="text-center">Source</th>
@@ -310,33 +306,40 @@ const sourceLabel = computed(() => {
                                         </div>
                                     </td>
                                 </tr>
-
-                                <!-- Separator Row -->
-                                <tr>
-                                    <td colspan="7" class="bg-[#2e6ea2] font-bold text-white text-center uppercase tracking-widest py-1 text-[10px] leading-none">
-                                        Master Initiative Goal
-                                    </td>
-                                </tr>
-
-                                <!-- Goal Headers -->
-                                <tr>
-                                    <th class="w-[45px] text-center">Code</th>
-                                    <th colspan="3" class="text-center">Goal</th>
-                                    <th colspan="3" class="text-center">Themes</th>
-                                </tr>
-
-                                <!-- Goal Rows -->
-                                <tr v-if="!selectedInitiativeGoals.length">
-                                    <td colspan="7" class="empty-row text-center">Belum ada goal yang tersedia untuk initiative ini.</td>
-                                </tr>
-                                <tr v-for="(goal, index) in selectedInitiativeGoals" :key="`goal-${index}`">
-                                    <td class="cell-center font-semibold text-slate-700">{{ goal.initiativeCode || '-' }}</td>
-                                    <td colspan="3">{{ goal.name }}</td>
-                                    <td colspan="3">{{ goal.theme }}</td>
-                                </tr>
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </article>
+        </div>
+
+        <!-- Separate Master Initiative Goal Section -->
+        <div class="charter-section">
+            <article class="panel border-t-0">
+                <div class="bar-sub">Master Initiative Goal</div>
+                <div class="panel-body space-y-3">
+                    <table class="initiative-table">
+                        <thead>
+                            <tr>
+                                <th class="w-[45px] text-center">Code</th>
+                                <th class="text-center">Strategic Pillar Title</th>
+                                <th colspan="2" class="text-center">Themes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-if="!selectedInitiativeGoals.length">
+                                <td colspan="5" class="empty-row text-center">Belum ada goal yang tersedia untuk
+                                    initiative ini.
+                                </td>
+                            </tr>
+                            <tr v-for="(goal, index) in selectedInitiativeGoals" :key="`goal-${index}`">
+                                <td class="cell-center">{{ goal.goal }}</td>
+                                <td>{{ goal.strategicPillar }}</td>
+                                <td class="cell-center">{{ goal.themeCode }}</td>
+                                <td>{{ goal.themeName }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </article>
         </div>
@@ -489,7 +492,7 @@ const sourceLabel = computed(() => {
 }
 
 .info-label-dark {
-    background: #1e4f8f;
+    background: #2e6ea2;
 }
 
 .info-sep {

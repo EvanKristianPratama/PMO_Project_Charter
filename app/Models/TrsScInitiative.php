@@ -9,7 +9,6 @@ use App\Models\ScStatusImplementation;
 use App\Models\Theme;
 use App\Models\TrsMapSc;
 use App\Models\TrsScDetails;
-use App\Models\TrsScInitiative;
 use App\Models\UseCase;
 use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
