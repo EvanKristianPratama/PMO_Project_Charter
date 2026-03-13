@@ -4,8 +4,8 @@ namespace App\Http\Controllers\ITInitiative;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ITInitiative\CharterStoreRequest;
-use App\Models\TrsProject;
 use App\Models\ProjectCharter;
+use App\Models\TrsProject;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Arr;
 
@@ -22,8 +22,8 @@ class CharterController extends Controller
 
         // 1. Update status dan owner_name di tabel trs_projects (Project utama)
         $projectFields = Arr::only($validated, ['owner_name', 'status']);
-        $projectFields = array_filter($projectFields, fn($v) => $v !== null && $v !== '');
-        if (!empty($projectFields)) {
+        $projectFields = array_filter($projectFields, fn ($v) => $v !== null && $v !== '');
+        if (! empty($projectFields)) {
             $project->update($projectFields);
         }
 
@@ -50,8 +50,8 @@ class CharterController extends Controller
 
         // 1. Update status dan owner_name di tabel trs_projects (Project utama)
         $projectFields = Arr::only($validated, ['owner_name', 'status']);
-        $projectFields = array_filter($projectFields, fn($v) => $v !== null && $v !== '');
-        if (!empty($projectFields)) {
+        $projectFields = array_filter($projectFields, fn ($v) => $v !== null && $v !== '');
+        if (! empty($projectFields)) {
             $project->update($projectFields);
         }
 

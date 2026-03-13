@@ -21,7 +21,7 @@ class DashboardController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        $statusOptions    = $this->statusOptions();
+        $statusOptions = $this->statusOptions();
         $baselineStatusId = $this->baselineStatusId($statusOptions);
         $flowStatusOptions = $this->flowStatusOptions();
 
@@ -34,18 +34,18 @@ class DashboardController extends Controller
 
         return Inertia::render('ProgramImplementation/Dashboard', [
             'overview' => [
-                'total_projects'              => TrsProject::query()->count(),
-                'total_digital_initiatives'   => $digitalProjects->count(),
-                'total_it_initiatives'        => $itProjects->count(),
-                'status_options'              => $flowStatusOptions,
-                'it_status_counts'            => $itStatusCounts,
-                'digital_status_counts'       => $digitalStatusCounts,
-                'total_digital_approved'      => $digitalApprovedFromMst,
-                'total_it_approved'           => $itApprovedFromMst,
+                'total_projects' => TrsProject::query()->count(),
+                'total_digital_initiatives' => $digitalProjects->count(),
+                'total_it_initiatives' => $itProjects->count(),
+                'status_options' => $flowStatusOptions,
+                'it_status_counts' => $itStatusCounts,
+                'digital_status_counts' => $digitalStatusCounts,
+                'total_digital_approved' => $digitalApprovedFromMst,
+                'total_it_approved' => $itApprovedFromMst,
             ],
-            'completedStatusId'      => $baselineStatusId,
+            'completedStatusId' => $baselineStatusId,
             'openDigitalInitiatives' => $digitalProjects,
-            'openItInitiatives'      => $itProjects,
+            'openItInitiatives' => $itProjects,
         ]);
     }
 
@@ -162,6 +162,7 @@ class DashboardController extends Controller
             ->get()
             ->filter(static function (MstInitiative $initiative) use ($approvedAliases): bool {
                 $rawStatus = strtolower(trim((string) ($initiative->latestStatus?->status ?? $initiative->status ?? '')));
+
                 return in_array($rawStatus, $approvedAliases, true);
             })
             ->count();

@@ -25,17 +25,17 @@ class ActivityLogService
             $user = $actor ?? Auth::user();
 
             ActivityLog::create([
-                'user_id'      => $user?->id,
-                'user_name'    => $user?->name,
-                'user_email'   => $user?->email,
-                'event'        => $event,
+                'user_id' => $user?->id,
+                'user_name' => $user?->name,
+                'user_email' => $user?->email,
+                'event' => $event,
                 'subject_type' => $subject ? get_class($subject) : null,
-                'subject_id'   => $subject?->getKey(),
-                'subject_label'=> $subject ? static::resolveSubjectLabel($subject) : null,
-                'description'  => $description,
-                'properties'   => $properties,
-                'ip_address'   => request()->ip(),
-                'user_agent'   => request()->userAgent(),
+                'subject_id' => $subject?->getKey(),
+                'subject_label' => $subject ? static::resolveSubjectLabel($subject) : null,
+                'description' => $description,
+                'properties' => $properties,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
             ]);
         } catch (Throwable) {
             // Jangan biarkan kegagalan logging menghentikan proses utama
@@ -72,6 +72,6 @@ class ActivityLogService
             }
         }
 
-        return class_basename(get_class($subject)) . ' #' . $subject->getKey();
+        return class_basename(get_class($subject)).' #'.$subject->getKey();
     }
 }

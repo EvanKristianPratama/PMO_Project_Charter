@@ -26,22 +26,22 @@ class HandleInertiaRequests extends Middleware
 
                 return [
                     'user' => [
-                        'id'       => $user->id,
-                        'name'     => $user->name,
-                        'email'    => $user->email,
-                        'avatar'   => $user->avatar,
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'avatar' => $user->avatar,
                         'initials' => $user->initials,
-                        'status'   => $user->status,
+                        'status' => $user->status,
                         'app_role' => $appRole,
                         'permission_role' => $user->primaryRoleName(),
-                        'roles'    => $roles,
+                        'roles' => $roles,
                     ],
                 ];
             },
 
             'flash' => [
                 'success' => $request->session()->get('success'),
-                'error'   => $request->session()->get('error'),
+                'error' => $request->session()->get('error'),
                 'check_status' => $request->session()->get('check_status'),
             ],
         ];

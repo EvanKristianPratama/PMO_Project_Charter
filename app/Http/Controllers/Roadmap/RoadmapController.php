@@ -184,6 +184,7 @@ class RoadmapController extends Controller
         $milestones = ($charter->milestones ?? collect())
             ->map(function ($milestone) use ($charterVersion) {
                 $milestone->version = $charterVersion;
+
                 return $milestone;
             })
             ->values();
@@ -215,12 +216,12 @@ class RoadmapController extends Controller
             }
         }
 
-        if (!$fallbackToFirst) {
+        if (! $fallbackToFirst) {
             return [null, null];
         }
 
         $firstProject = $projects->first();
-        if (!$firstProject) {
+        if (! $firstProject) {
             return [null, null];
         }
         $firstCharterId = $firstProject['charters'][0]['id'] ?? null;

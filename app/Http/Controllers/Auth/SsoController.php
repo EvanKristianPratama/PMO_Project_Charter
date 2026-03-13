@@ -40,21 +40,21 @@ class SsoController extends Controller
             if ($user) {
                 $user->update([
                     'google_id' => $googleUser->getId(),
-                    'avatar'    => $googleUser->getAvatar(),
+                    'avatar' => $googleUser->getAvatar(),
                 ]);
             } else {
                 $user = User::create([
-                    'name'      => $googleUser->getName(),
-                    'email'     => $googleUser->getEmail(),
+                    'name' => $googleUser->getName(),
+                    'email' => $googleUser->getEmail(),
                     'google_id' => $googleUser->getId(),
-                    'avatar'    => $googleUser->getAvatar(),
-                    'status'    => 'pending',
-                    'app_role'  => User::APP_ROLE_USER,
+                    'avatar' => $googleUser->getAvatar(),
+                    'status' => 'pending',
+                    'app_role' => User::APP_ROLE_USER,
                 ]);
             }
         } else {
             $user->update([
-                'name'   => $googleUser->getName(),
+                'name' => $googleUser->getName(),
                 'avatar' => $googleUser->getAvatar(),
             ]);
         }
@@ -93,8 +93,8 @@ class SsoController extends Controller
 
             return redirect()->route('login', [
                 'status' => $user->status,
-                'name'   => $user->name,
-                'email'  => $user->email,
+                'name' => $user->name,
+                'email' => $user->email,
             ]);
         }
 

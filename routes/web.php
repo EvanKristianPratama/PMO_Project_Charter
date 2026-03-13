@@ -14,8 +14,8 @@ use App\Http\Controllers\ITInitiative\MilestoneController;
 use App\Http\Controllers\MasterData\ActivityLogController as MasterDataActivityLogController;
 use App\Http\Controllers\MasterData\MasterDataController;
 use App\Http\Controllers\MasterData\MstInitiative\MstInitiativeController;
-use App\Http\Controllers\MasterData\ScopeCharter\ScopeCharterController;
 use App\Http\Controllers\MasterData\ProjectCharter\ProjectCharterController as MasterDataProjectCharterController;
+use App\Http\Controllers\MasterData\ScopeCharter\ScopeCharterController;
 use App\Http\Controllers\ProgramEvaluation\ReviewTimelineController;
 use App\Http\Controllers\ProgramEvaluation\TrsReviewPCController;
 use App\Http\Controllers\ProgramImplementation\DashboardController;
@@ -31,15 +31,15 @@ use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Co
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Compendium\IndexController as ProgramDefinitionDigitalInitiativesCompendiumIndexController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Compendium\StoreController as ProgramDefinitionDigitalInitiativesCompendiumStoreController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Compendium\UpdateController as ProgramDefinitionDigitalInitiativesCompendiumUpdateController;
-use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\IndexController as ProgramDefinitionDigitalInitiativesController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\EditController as ProgramDefinitionDigitalInitiativesEditController;
+use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\IndexController as ProgramDefinitionDigitalInitiativesController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\UpdateController as ProgramDefinitionDigitalInitiativesUpdateController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\IndexController as ProgramDefinitionController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\ITInitiatives\IndexController as ProgramDefinitionITInitiativesController;
 use App\Http\Controllers\ProgramPlanning\ProgramPlanningController;
 use App\Http\Controllers\Roadmap\RoadmapController;
-use App\Http\Controllers\StrategicPillar\StrategicPillarController;
 use App\Http\Controllers\StrategicPillar\InitiativeTaggingController;
+use App\Http\Controllers\StrategicPillar\StrategicPillarController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -129,7 +129,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
         Route::put('/{projectCharter}', [MasterDataProjectCharterController::class, 'update'])->name('update');
         Route::delete('/{projectCharter}', [MasterDataProjectCharterController::class, 'destroy'])->name('destroy');
     });
-    
+
     Route::get('/program-planning/program-definition/it-initiatives', ProgramDefinitionITInitiativesController::class)->name('program-planning.program-definition.it-initiatives');
     Route::get('/program-planning/initiative-relation', [InitiativeRelationController::class, 'index'])->name('program-implementation.initiative-relation');
     Route::redirect('/program-planning/initiative', '/program-planning/initiative-relation');
@@ -173,7 +173,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/roadmap/add', [RoadmapController::class, 'add'])->name('roadmap.add');
     Route::get('/roadmap/edit', [RoadmapController::class, 'edit'])->name('roadmap.edit');
     Route::get('/roadmap/initiative/{initiative}', [RoadmapController::class, 'show'])->name('roadmap.show');
-    
+
     Route::resource('it-initiatives', ITInitiativeController::class)
         ->parameters(['it-initiatives' => 'project']);
     Route::post('/it-initiatives/{project}/charter', [CharterController::class, 'store'])->name('it-initiatives.charter.store');
@@ -183,7 +183,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::put('/it-initiatives/{project}/milestones/{milestone}', [MilestoneController::class, 'update'])->name('it-initiatives.milestones.update');
     Route::delete('/it-initiatives/{project}/milestones/{milestone}', [MilestoneController::class, 'destroy'])->name('it-initiatives.milestones.destroy');
     Route::post('/it-initiatives/{project}/implementation-status', [ITInitiativeController::class, 'storeImplementationStatus'])->name('it-initiatives.implementation-status.store');
-    
+
     Route::put('/implementation-status/{id}', [ITInitiativeController::class, 'updateImplementationStatus'])->name('it-initiatives.implementation-status.update');
     Route::delete('/implementation-status/{id}', [ITInitiativeController::class, 'destroyImplementationStatus'])->name('it-initiatives.implementation-status.destroy');
     Route::put('/it-initiatives/{project}/project-status-history/{history}', [ITInitiativeController::class, 'updateProjectStatusHistory'])->name('it-initiatives.project-status-history.update');

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Milestone extends Model
 {
     use LogsActivity;
+
     protected $table = 'trs_milestones';
 
     protected $fillable = [
@@ -24,9 +25,13 @@ class Milestone extends Model
     ];
 
     public const ROADMAP_TYPE_BLOCK_PRIMARY = 1;
+
     public const ROADMAP_TYPE_DASHED_PRIMARY = 2;
+
     public const ROADMAP_TYPE_BLOCK_SECONDARY = 3;
+
     public const ROADMAP_TYPE_DASHED_SECONDARY = 4;
+
     public const ROADMAP_TYPE_BLOCK_TERTIARY = 5;
 
     public const ROADMAP_TYPE_DEFINITIONS = [
@@ -56,7 +61,7 @@ class Milestone extends Model
     {
         return [
             'start_date' => 'date',
-            'end_date'   => 'date',
+            'end_date' => 'date',
             'milestone_type' => 'integer',
         ];
     }
@@ -91,7 +96,7 @@ class Milestone extends Model
 
         $normalized = (int) $value;
 
-        if (!in_array($normalized, self::roadmapTypeCodes(), true)) {
+        if (! in_array($normalized, self::roadmapTypeCodes(), true)) {
             return self::ROADMAP_TYPE_BLOCK_PRIMARY;
         }
 

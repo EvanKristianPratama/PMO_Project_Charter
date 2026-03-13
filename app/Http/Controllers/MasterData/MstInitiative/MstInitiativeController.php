@@ -4,12 +4,12 @@ namespace App\Http\Controllers\MasterData\MstInitiative;
 
 use App\Http\Controllers\Controller;
 use App\Models\DataSource;
+use App\Models\Goal;
 use App\Models\MstCoe;
 use App\Models\MstInitiative;
-use App\Models\Goal;
-use App\Models\Theme;
 use App\Models\ScInitiative;
 use App\Models\StatusMstInitiative;
+use App\Models\Theme;
 use App\Models\TrsOrganization;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,25 +24,25 @@ class MstInitiativeController extends Controller
     private function rules(): array
     {
         return [
-            'code'             => 'nullable|integer|min:0',
-            'name'             => 'required|string|max:255',
-            'description'      => 'nullable|string',
-            'tipe_initiative'  => 'required|integer|in:1,2',
-            'coe_id'           => 'nullable|integer|exists:mst_coe,id',
-            'business_unit'    => 'nullable|integer|exists:trs_organization,id',
+            'code' => 'nullable|integer|min:0',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'tipe_initiative' => 'required|integer|in:1,2',
+            'coe_id' => 'nullable|integer|exists:mst_coe,id',
+            'business_unit' => 'nullable|integer|exists:trs_organization,id',
             'organization_ids' => 'nullable|array',
             'organization_ids.*' => 'integer|exists:trs_organization,id',
-            'status'           => 'nullable|string|max:255',
-            'source'           => 'nullable|integer|exists:mst_data_source,id',
+            'status' => 'nullable|string|max:255',
+            'source' => 'nullable|integer|exists:mst_data_source,id',
         ];
     }
 
     private function statusRules(): array
     {
         return [
-            'status'  => 'required|string|max:255',
+            'status' => 'required|string|max:255',
             'tanggal' => 'nullable|date',
-            'notes'   => 'nullable|string|max:255',
+            'notes' => 'nullable|string|max:255',
         ];
     }
 
@@ -60,8 +60,8 @@ class MstInitiativeController extends Controller
                 ->orderBy('name')
                 ->get(['id', 'name', 'groub_id'])
                 ->map(fn ($o) => [
-                    'id'    => $o->id,
-                    'name'  => $o->name,
+                    'id' => $o->id,
+                    'name' => $o->name,
                     'groub' => $o->groub?->name,
                 ])
                 ->values(),
@@ -113,18 +113,18 @@ class MstInitiativeController extends Controller
 
         // Auto-create initial status history entry
         $initiative->statusHistory()->create([
-            'status'  => $validated['status'],
+            'status' => $validated['status'],
             'tanggal' => now(),
-            'notes'   => null,
+            'notes' => null,
         ]);
 
         // Save additional statuses if provided (from Create page)
         foreach ($request->input('statuses', []) as $s) {
-            if (!empty($s['status'])) {
+            if (! empty($s['status'])) {
                 $initiative->statusHistory()->create([
-                    'status'  => $s['status'],
+                    'status' => $s['status'],
                     'tanggal' => $s['tanggal'] ?? null,
-                    'notes'   => $s['notes'] ?? null,
+                    'notes' => $s['notes'] ?? null,
                 ]);
             }
         }
@@ -267,7 +267,7 @@ class MstInitiativeController extends Controller
             ->latest('id')
             ->first();
 
-        if (!$scopeInitiative) {
+        if (! $scopeInitiative) {
             $scopeInitiative = ScInitiative::create([
                 'initiative_id' => $initiative->id,
                 'alias' => $this->initiativeAlias($initiative),
@@ -284,6 +284,7 @@ class MstInitiativeController extends Controller
 
         if ($sourceType === 'compendium') {
             $this->upsertScopeDetail($scopeInitiative, $initiative);
+
             return;
         }
 
@@ -293,7 +294,7 @@ class MstInitiativeController extends Controller
 
     private function resolveSourceType(?int $sourceId): ?string
     {
-        if (!$sourceId) {
+        if (! $sourceId) {
             return null;
         }
 

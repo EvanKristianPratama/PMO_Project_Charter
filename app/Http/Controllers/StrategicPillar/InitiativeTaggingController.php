@@ -12,12 +12,12 @@ class InitiativeTaggingController extends Controller
     {
         $validated = $request->validate([
             'initiative_id' => 'required|integer|exists:mst_initiative,id',
-            'themes_id'     => 'nullable|integer|exists:trs_themes,id',
-            'goal'          => 'nullable|string|max:255',
+            'themes_id' => 'nullable|integer|exists:trs_themes,id',
+            'goal' => 'nullable|string|max:255',
         ]);
 
         // Auto-populate goal code from theme's goal if themes_id is provided and goal is empty
-        if (!empty($validated['themes_id']) && empty($validated['goal'])) {
+        if (! empty($validated['themes_id']) && empty($validated['goal'])) {
             $theme = \App\Models\Theme::with('goal')->find($validated['themes_id']);
             $validated['goal'] = $theme?->goal?->code ?? null;
         }
@@ -32,18 +32,19 @@ class InitiativeTaggingController extends Controller
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Mapping ini sudah ada.'], 422);
             }
+
             return back()->with('error', 'Mapping ini sudah ada.');
         }
 
         $tagging = InitiativeTagging::create($validated);
-        
+
         // Eager load relationships for the frontend to use immediately
         $tagging->load(['initiative:id,name,code', 'theme:id,name,idGoal']);
 
         if ($request->expectsJson()) {
             return response()->json([
                 'message' => 'Initiative tagging berhasil ditambahkan.',
-                'data' => $tagging
+                'data' => $tagging,
             ]);
         }
 
@@ -56,7 +57,7 @@ class InitiativeTaggingController extends Controller
 
         if ($request->expectsJson()) {
             return response()->json([
-                'message' => 'Initiative tagging berhasil dihapus.'
+                'message' => 'Initiative tagging berhasil dihapus.',
             ]);
         }
 

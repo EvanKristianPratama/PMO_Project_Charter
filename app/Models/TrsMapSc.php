@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
 use App\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\Model;
 
 class TrsMapSc extends Model
 {
     use LogsActivity;
+
     protected $table = 'trs_map_sc';
 
     protected $guarded = ['id'];

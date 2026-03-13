@@ -8,9 +8,13 @@ use Illuminate\Support\Collection;
 class InitiativeStatus extends Model
 {
     public const DRAFTING = 1;
+
     public const PROPOSE = 2;
+
     public const REVIEW = 3;
+
     public const APPROVE = 4;
+
     public const BASELINE = 5;
 
     protected $table = 'trs_status_initiative';

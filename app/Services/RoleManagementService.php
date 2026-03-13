@@ -3,9 +3,9 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
-use Spatie\Permission\PermissionRegistrar;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RoleManagementService
 {

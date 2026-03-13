@@ -4,9 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
-
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class EnsureUserIsApproved
 {
@@ -15,14 +14,14 @@ class EnsureUserIsApproved
         if (! $request->user()?->isApproved()) {
             $user = $request->user();
             Auth::logout();
-            
+
             request()->session()->invalidate();
             request()->session()->regenerateToken();
 
             return redirect()->route('login', [
                 'status' => $user->status,
-                'name'   => $user->name,
-                'email'  => $user->email,
+                'name' => $user->name,
+                'email' => $user->email,
             ]);
         }
 

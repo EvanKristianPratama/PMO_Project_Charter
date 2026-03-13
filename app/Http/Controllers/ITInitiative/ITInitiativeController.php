@@ -282,14 +282,14 @@ class ITInitiativeController extends Controller
 
         // Build statusCounts from mst_initiative + latestStatus (name-based keys)
         $aliasMap = [
-            'draft'   => 'drafting',
+            'draft' => 'drafting',
             'approve' => 'approved',
             'aproved' => 'approved',
         ];
         $validStatuses = ['drafting', 'propose', 'review', 'approved', 'postpone'];
         $statusCounts = [];
         foreach ($masterItInitiatives as $initiative) {
-            $raw       = strtolower(trim($initiative->latestStatus?->status ?? $initiative->status ?? 'drafting'));
+            $raw = strtolower(trim($initiative->latestStatus?->status ?? $initiative->status ?? 'drafting'));
             $canonical = $aliasMap[$raw] ?? $raw;
             if (! in_array($canonical, $validStatuses)) {
                 $canonical = 'drafting';
@@ -376,7 +376,7 @@ class ITInitiativeController extends Controller
 
     private function syncProjectInitiativeMappings(TrsProject $project, array $initiativeIds): void
     {
-        if (empty($initiativeIds) || !Schema::hasTable('trs_pc_initiative')) {
+        if (empty($initiativeIds) || ! Schema::hasTable('trs_pc_initiative')) {
             return;
         }
 
@@ -420,7 +420,7 @@ class ITInitiativeController extends Controller
             ->values()
             ->all();
 
-        if (!empty($rows)) {
+        if (! empty($rows)) {
             DB::table('trs_pc_initiative')->insert($rows);
         }
 
@@ -699,8 +699,7 @@ class ITInitiativeController extends Controller
         mixed $toStatusId,
         ?string $changedAt = null,
         ?string $notes = null,
-    ): void
-    {
+    ): void {
         if (
             ! Schema::hasTable('trs_project_status_history')
             || ! Schema::hasColumn('trs_project_status_history', 'project_charter_id')

@@ -57,7 +57,7 @@ class IndexController extends Controller
                 ->groupBy('sc_id')
                 ->map(fn ($rows) => $rows
                     ->pluck('theme_number')
-                    ->filter(fn ($num) => !empty($num))
+                    ->filter(fn ($num) => ! empty($num))
                     ->map(fn ($num) => "#$num")
                     ->values()
                     ->implode(', '));
@@ -70,9 +70,9 @@ class IndexController extends Controller
 
                 $sourceCreatedAt = '-';
                 if ($source) {
-                    if (!empty($source->month) && !empty($source->year)) {
-                        $sourceCreatedAt = $this->getMonthName($source->month) . ' ' . $source->year;
-                    } elseif (!empty($source->created_at)) {
+                    if (! empty($source->month) && ! empty($source->year)) {
+                        $sourceCreatedAt = $this->getMonthName($source->month).' '.$source->year;
+                    } elseif (! empty($source->created_at)) {
                         $sourceCreatedAt = $source->created_at->format('M Y');
                     }
                 }
@@ -82,7 +82,10 @@ class IndexController extends Controller
                 $masterInitiatives = $item->mstInitiatives->map(function ($mi) {
                     $code = str_replace('#', '', $mi->code ?? '');
                     $name = $mi->name ?? '';
-                    if ($code && $name) return "{$code} - {$name}";
+                    if ($code && $name) {
+                        return "{$code} - {$name}";
+                    }
+
                     return $code ?: ($name ?: null);
                 })->filter()->implode(', ');
 
@@ -171,8 +174,8 @@ class IndexController extends Controller
             ->values();
 
         $uniqueMasterInitiatives = $compendiumItems->pluck('master_initiatives')
-            ->flatMap(fn($mi) => explode(', ', $mi))
-            ->filter(fn($mi) => $mi !== '-')
+            ->flatMap(fn ($mi) => explode(', ', $mi))
+            ->filter(fn ($mi) => $mi !== '-')
             ->unique()
             ->sort()
             ->values();

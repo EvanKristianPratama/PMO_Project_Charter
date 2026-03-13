@@ -11,6 +11,7 @@ class TrsScDependency extends Model
 
     // Composite primary key – no auto-increment id
     protected $primaryKey = null;
+
     public $incrementing = false;
 
     protected $fillable = [

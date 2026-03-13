@@ -65,7 +65,7 @@ class InitiativeRelationController extends Controller
     {
         $validated = $this->validateRelationPayload($request);
 
-        $initiativeRelation = new MstInitiativeRelation();
+        $initiativeRelation = new MstInitiativeRelation;
         $initiativeRelation->forceFill($this->buildRelationPayload($validated));
         $initiativeRelation->save();
 

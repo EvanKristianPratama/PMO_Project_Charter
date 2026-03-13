@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
 use App\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\Model;
 
 class MstScSource extends Model
 {
     use LogsActivity;
+
     protected $table = 'mst_sc_source';
 
     protected $guarded = ['id'];

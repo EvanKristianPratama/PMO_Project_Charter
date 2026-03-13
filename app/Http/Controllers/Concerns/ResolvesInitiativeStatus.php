@@ -11,8 +11,8 @@ trait ResolvesInitiativeStatus
     {
         return InitiativeStatus::ordered()
             ->map(fn ($status) => [
-                'id'    => (int) $status->id,
-                'name'  => $status->name,
+                'id' => (int) $status->id,
+                'name' => $status->name,
                 'label' => ucfirst($status->name),
             ])
             ->values()

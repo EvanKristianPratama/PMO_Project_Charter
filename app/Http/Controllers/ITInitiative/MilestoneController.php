@@ -96,5 +96,4 @@ class MilestoneController extends Controller
 
         return $raw;
     }
-
 }

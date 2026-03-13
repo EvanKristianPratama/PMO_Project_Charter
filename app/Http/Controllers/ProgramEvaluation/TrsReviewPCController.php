@@ -20,7 +20,7 @@ class TrsReviewPCController extends Controller
 
         // dd($trsReviewPCs->toArray());
         return inertia('ProgramEvaluation/ReviewPC/Index', [
-            'trsReviewPCs' => $trsReviewPCs
+            'trsReviewPCs' => $trsReviewPCs,
         ]);
     }
 

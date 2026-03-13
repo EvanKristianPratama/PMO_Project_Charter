@@ -12,13 +12,13 @@ class MstInitiativeController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'code'           => 'nullable|integer|min:0',
-            'name'           => 'required|string|max:255',
-            'description'    => 'nullable|string',
+            'code' => 'nullable|integer|min:0',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'tipe_initiative' => 'required|integer|in:1,2',
-            'coe_id'         => 'nullable|integer|exists:mst_coe,id',
-            'business_unit'  => 'nullable|integer|exists:trs_organization,id',
-            'status'         => 'nullable|string|max:100',
+            'coe_id' => 'nullable|integer|exists:mst_coe,id',
+            'business_unit' => 'nullable|integer|exists:trs_organization,id',
+            'status' => 'nullable|string|max:100',
         ]);
 
         MstInitiative::create($validated);
@@ -31,13 +31,13 @@ class MstInitiativeController extends Controller
     public function update(Request $request, MstInitiative $mstInitiative): RedirectResponse
     {
         $validated = $request->validate([
-            'code'           => 'nullable|integer|min:0',
-            'name'           => 'required|string|max:255',
-            'description'    => 'nullable|string',
+            'code' => 'nullable|integer|min:0',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'tipe_initiative' => 'required|integer|in:1,2',
-            'coe_id'         => 'nullable|integer|exists:mst_coe,id',
-            'business_unit'  => 'nullable|integer|exists:trs_organization,id',
-            'status'         => 'nullable|string|max:100',
+            'coe_id' => 'nullable|integer|exists:mst_coe,id',
+            'business_unit' => 'nullable|integer|exists:trs_organization,id',
+            'status' => 'nullable|string|max:100',
         ]);
 
         $mstInitiative->update($validated);

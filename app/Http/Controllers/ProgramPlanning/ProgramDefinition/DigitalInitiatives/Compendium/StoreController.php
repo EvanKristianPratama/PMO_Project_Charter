@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Compendium;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstInitiative;
 use App\Models\RjppTagging;
 use App\Models\TrsMapSc;
 use App\Models\TrsScInitiative;
@@ -68,7 +67,7 @@ class StoreController extends Controller
                 })
                 ->all();
 
-            if (!empty($rows)) {
+            if (! empty($rows)) {
                 TrsMapSc::insert($rows);
             }
 
@@ -98,5 +97,3 @@ class StoreController extends Controller
             ->values();
     }
 }
-
-

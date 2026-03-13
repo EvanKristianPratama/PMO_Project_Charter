@@ -35,7 +35,7 @@ class CreateController extends Controller
                 $sourceCreated = '-';
                 if ($source) {
                     if (! empty($source->month) && ! empty($source->year)) {
-                        $sourceCreated = $this->getMonthName($source->month) . ' ' . $source->year;
+                        $sourceCreated = $this->getMonthName($source->month).' '.$source->year;
                     } elseif (! empty($source->created_at)) {
                         $sourceCreated = $source->created_at->format('M Y');
                     }

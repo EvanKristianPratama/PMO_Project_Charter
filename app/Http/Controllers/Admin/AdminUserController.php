@@ -27,14 +27,11 @@ class AdminUserController extends Controller
                 $inner->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%");
             }))
-            ->when(($filters['status'] ?? null) && ($filters['status'] ?? null) !== 'all', fn ($q) =>
-                $q->where('status', $filters['status'])
+            ->when(($filters['status'] ?? null) && ($filters['status'] ?? null) !== 'all', fn ($q) => $q->where('status', $filters['status'])
             )
-            ->when(($filters['app_role'] ?? null) && ($filters['app_role'] ?? null) !== 'all', fn ($q) =>
-                $q->withAppRole($filters['app_role'])
+            ->when(($filters['app_role'] ?? null) && ($filters['app_role'] ?? null) !== 'all', fn ($q) => $q->withAppRole($filters['app_role'])
             )
-            ->when(($filters['permission_role'] ?? null) && ($filters['permission_role'] ?? null) !== 'all', fn ($q) =>
-                $q->role($filters['permission_role'])
+            ->when(($filters['permission_role'] ?? null) && ($filters['permission_role'] ?? null) !== 'all', fn ($q) => $q->role($filters['permission_role'])
             )
             ->with('roles')
             ->latest()
@@ -42,11 +39,11 @@ class AdminUserController extends Controller
             ->withQueryString();
 
         return Inertia::render('Admin/Users/Index', [
-            'users'            => $users,
-            'permissionRoles'  => Role::query()->pluck('name'),
-            'appRoles'         => User::appRoles(),
-            'stats'            => $this->getStats(),
-            'filters'          => [
+            'users' => $users,
+            'permissionRoles' => Role::query()->pluck('name'),
+            'appRoles' => User::appRoles(),
+            'stats' => $this->getStats(),
+            'filters' => [
                 'search' => $filters['search'] ?? null,
                 'status' => $filters['status'] ?? null,
                 'app_role' => $filters['app_role'] ?? null,
@@ -78,10 +75,10 @@ class AdminUserController extends Controller
     private function getStats(): array
     {
         return [
-            'total'   => User::count(),
-            'active'  => User::approved()->count(),
+            'total' => User::count(),
+            'active' => User::approved()->count(),
             'pending' => User::pending()->count(),
-            'admin'   => User::query()->withAppRole(User::APP_ROLE_ADMIN)->count(),
+            'admin' => User::query()->withAppRole(User::APP_ROLE_ADMIN)->count(),
         ];
     }
 }

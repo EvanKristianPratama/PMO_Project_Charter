@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TrsProject extends Model
 {
-    use LogsActivity, SoftDeletes;
+    use HasFactory, LogsActivity, SoftDeletes;
 
     /** Kolom teknis metadata tidak perlu dicatat diff-nya */
     protected array $auditExclude = ['metadata'];
@@ -91,5 +92,4 @@ class TrsProject extends Model
     {
         return $this->belongsToMany(MstInitiative::class, 'trs_pc_initiative', 'pc_id', 'initiative_id');
     }
-
 }

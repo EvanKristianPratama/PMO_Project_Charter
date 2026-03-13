@@ -2,22 +2,20 @@
 
 namespace App\Models;
 
-use App\Models\Organization;
-use App\Models\TrsDigitalInitiative;
-use Illuminate\Database\Eloquent\Model;
-
 use App\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\Model;
 
 class DigitalGroub extends Model
 {
     use LogsActivity;
+
     protected $table = 'trs_digital_groub';
 
     public $incrementing = false;
 
     protected $fillable = [
-        'digital_id', 
-        'organization_id'
+        'digital_id',
+        'organization_id',
     ];
 
     public $timestamps = true;

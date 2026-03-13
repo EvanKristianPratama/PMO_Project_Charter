@@ -5,7 +5,6 @@ namespace App\Http\Controllers\ProgramImplementation;
 use App\Http\Controllers\Concerns\ResolvesInitiativeStatus;
 use App\Http\Controllers\Controller;
 use App\Models\DigitalInitiative;
-use App\Models\MstInitiative;
 use App\Models\TrsProject;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -21,28 +20,28 @@ class ProgramImplementationController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        $statusOptions         = $this->statusOptions();
-        $baselineStatusId      = $this->baselineStatusId($statusOptions);
-        
+        $statusOptions = $this->statusOptions();
+        $baselineStatusId = $this->baselineStatusId($statusOptions);
+
         $digitalStatusCountsRaw = \App\Models\DigitalInitiative::query()
             ->selectRaw('status, COUNT(*) as total')
             ->groupBy('status')
             ->pluck('total', 'status');
 
-        $itStatusCountsRaw     = TrsProject::query()
+        $itStatusCountsRaw = TrsProject::query()
             ->selectRaw('status, COUNT(*) as total')
             ->groupBy('status')
             ->pluck('total', 'status');
 
         return Inertia::render('ProgramImplementation/Dashboard', [
             'overview' => [
-                'status_options'        => $statusOptions,
+                'status_options' => $statusOptions,
                 'digital_status_counts' => $this->mapCountsByStatus($statusOptions, $digitalStatusCountsRaw),
-                'status_counts'      => $this->mapCountsByStatus($statusOptions, $itStatusCountsRaw),
+                'status_counts' => $this->mapCountsByStatus($statusOptions, $itStatusCountsRaw),
             ],
-            'completedStatusId'      => $baselineStatusId,
+            'completedStatusId' => $baselineStatusId,
             'openDigitalInitiatives' => $this->openDigitalInitiatives($baselineStatusId),
-            'openItInitiatives'      => $this->openItInitiatives($baselineStatusId),
+            'openItInitiatives' => $this->openItInitiatives($baselineStatusId),
         ]);
     }
 

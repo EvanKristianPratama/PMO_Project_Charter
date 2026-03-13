@@ -62,9 +62,9 @@ class IndexController extends Controller
         // Build statusCounts from the loaded collection so every initiative
         // is accounted for, even those without a trs_status_mstinitiative row.
         $aliasMap = [
-            'draft'    => 'drafting',
-            'approve'  => 'approved',
-            'aproved'  => 'approved',
+            'draft' => 'drafting',
+            'approve' => 'approved',
+            'aproved' => 'approved',
         ];
         $validStatuses = ['drafting', 'propose', 'review', 'approved', 'postpone'];
         $statusCounts = collect();
@@ -215,4 +215,3 @@ class IndexController extends Controller
         ]);
     }
 }
-

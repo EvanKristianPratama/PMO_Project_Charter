@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class ProjectCharter extends Model
 {
     use LogsActivity;
+
     protected $table = 'trs_project_charters';
 
     protected $fillable = [

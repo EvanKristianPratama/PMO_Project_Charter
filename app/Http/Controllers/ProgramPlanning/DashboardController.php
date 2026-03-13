@@ -5,9 +5,9 @@ namespace App\Http\Controllers\ProgramPlanning;
 use App\Http\Controllers\Concerns\ResolvesInitiativeStatus;
 use App\Http\Controllers\Controller;
 use App\Models\MstInitiative;
-use Illuminate\Support\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -22,13 +22,13 @@ class DashboardController extends Controller
         }
 
         $filters = [
-            'search'          => $request->string('search')->toString(),
-            'category_fase'   => $request->input('category_fase'),
-            'source_id'       => $request->input('source_id'),
-            'groub_id'        => $request->input('groub_id'),
-            'phase_id'        => $request->input('phase_id'),
-            'organization_id'  => $request->input('organization_id'),
-            'coe_id'          => $request->input('coe_id'),
+            'search' => $request->string('search')->toString(),
+            'category_fase' => $request->input('category_fase'),
+            'source_id' => $request->input('source_id'),
+            'groub_id' => $request->input('groub_id'),
+            'phase_id' => $request->input('phase_id'),
+            'organization_id' => $request->input('organization_id'),
+            'coe_id' => $request->input('coe_id'),
         ];
 
         $options = $this->dashboardOptions();
@@ -54,18 +54,18 @@ class DashboardController extends Controller
 
         return Inertia::render('ProgramPlanning/Dashboard', [
             'summary' => [
-                'total_it_initiatives'       => $totalIt,
-                'total_digital_initiatives'  => $totalDigital,
-                'total_all_initiatives'      => $totalDigital + $totalIt,
-                'status_options'             => $statusOptions,
-                'it_status_counts'           => $itStatusCounts,
-                'digital_status_counts'      => $digitalStatusCounts,
+                'total_it_initiatives' => $totalIt,
+                'total_digital_initiatives' => $totalDigital,
+                'total_all_initiatives' => $totalDigital + $totalIt,
+                'status_options' => $statusOptions,
+                'it_status_counts' => $itStatusCounts,
+                'digital_status_counts' => $digitalStatusCounts,
             ],
-            'mstInitiatives'         => $mstInitiatives,
-            'completedStatusId'      => $baselineStatusId,
-            'filters'               => $filters,
-            'options'               => $options,
-            'categoryOptions'       => $this->categoryOptions(),
+            'mstInitiatives' => $mstInitiatives,
+            'completedStatusId' => $baselineStatusId,
+            'filters' => $filters,
+            'options' => $options,
+            'categoryOptions' => $this->categoryOptions(),
         ]);
     }
 
@@ -74,12 +74,12 @@ class DashboardController extends Controller
     private function dashboardOptions(): array
     {
         return [
-            'sources'        => collect(),
-            'groubs'         => collect(),
-            'phases'         => collect(),
-            'organizations'  => collect(),
-            'coes'           => collect(),
-            'rjpps'          => collect(),
+            'sources' => collect(),
+            'groubs' => collect(),
+            'phases' => collect(),
+            'organizations' => collect(),
+            'coes' => collect(),
+            'rjpps' => collect(),
         ];
     }
 

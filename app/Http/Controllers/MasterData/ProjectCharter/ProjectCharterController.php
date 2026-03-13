@@ -9,7 +9,6 @@ use App\Models\PcStatusImplementation;
 use App\Models\TrsProject;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -21,18 +20,18 @@ class ProjectCharterController extends Controller
     private function projectRules(): array
     {
         return [
-            'code'       => 'nullable|string|max:100',
-            'name'       => 'required|string|max:255',
-            'owner'      => 'nullable|string|max:255',
+            'code' => 'nullable|string|max:100',
+            'name' => 'required|string|max:255',
+            'owner' => 'nullable|string|max:255',
             'owner_name' => 'nullable|string|max:255',
-            'status'     => ['required', 'integer', Rule::exists('trs_status_initiative', 'id')],
+            'status' => ['required', 'integer', Rule::exists('trs_status_initiative', 'id')],
         ];
     }
 
     private function statusRules(): array
     {
         return [
-            'pc_status'        => 'nullable|string|max:255',
+            'pc_status' => 'nullable|string|max:255',
             'pc_review_status' => 'nullable|string|in:At Risk,On Track,Not Started,Not Signed',
         ];
     }
@@ -44,8 +43,8 @@ class ProjectCharterController extends Controller
         return [
             'statusOptions' => InitiativeStatus::ordered()
                 ->map(fn (InitiativeStatus $s) => [
-                    'id'    => (int) $s->id,
-                    'name'  => $s->name,
+                    'id' => (int) $s->id,
+                    'name' => $s->name,
                     'label' => ucfirst($s->name),
                 ])
                 ->values(),
@@ -98,11 +97,11 @@ class ProjectCharterController extends Controller
         // Auto-create initial PcStatusImplementation
         $statusModel = InitiativeStatus::find($project->status);
         PcStatusImplementation::create([
-            'project_id'    => $project->id,
+            'project_id' => $project->id,
             'review_status' => $statusData['pc_review_status'] ?? 'Not Started',
-            'status'        => $statusData['pc_status'] ?? ($statusModel?->name ?? ''),
-            'date'          => now()->toDateString(),
-            'time_start'    => now()->toTimeString(),
+            'status' => $statusData['pc_status'] ?? ($statusModel?->name ?? ''),
+            'date' => now()->toDateString(),
+            'time_start' => now()->toTimeString(),
         ]);
 
         return redirect()
@@ -141,12 +140,12 @@ class ProjectCharterController extends Controller
             PcStatusImplementation::updateOrCreate(
                 [
                     'project_id' => $projectCharter->id,
-                    'date'       => now()->toDateString(),
+                    'date' => now()->toDateString(),
                 ],
                 [
                     'review_status' => $statusData['pc_review_status'] ?? 'Not Started',
-                    'status'        => $statusData['pc_status'] ?? ($statusModel?->name ?? ''),
-                    'time_start'    => now()->toTimeString(),
+                    'status' => $statusData['pc_status'] ?? ($statusModel?->name ?? ''),
+                    'time_start' => now()->toTimeString(),
                 ]
             );
         }

@@ -60,14 +60,14 @@ class DigitalInitiativeController extends Controller
 
         // Build statusCounts from mst_initiative + latestStatus (name-based keys)
         $aliasMap = [
-            'draft'   => 'drafting',
+            'draft' => 'drafting',
             'approve' => 'approved',
             'aproved' => 'approved',
         ];
         $validStatuses = ['drafting', 'propose', 'review', 'approved', 'postpone'];
         $statusCounts = [];
         foreach ($masterDigitalInitiatives as $initiative) {
-            $raw       = strtolower(trim($initiative->latestStatus?->status ?? $initiative->status ?? 'drafting'));
+            $raw = strtolower(trim($initiative->latestStatus?->status ?? $initiative->status ?? 'drafting'));
             $canonical = $aliasMap[$raw] ?? $raw;
             if (! in_array($canonical, $validStatuses)) {
                 $canonical = 'drafting';
@@ -121,7 +121,7 @@ class DigitalInitiativeController extends Controller
 
         if ($digitalInitiative->status) {
             $statusModel = InitiativeStatus::find($digitalInitiative->status);
-            $statusName = $statusModel ? $statusModel->name : (string)$digitalInitiative->status;
+            $statusName = $statusModel ? $statusModel->name : (string) $digitalInitiative->status;
 
             \App\Models\UcStatusImplementation::create([
                 'digital_initiative_id' => $digitalInitiative->id,
@@ -181,9 +181,9 @@ class DigitalInitiativeController extends Controller
         $oldStatus = $digitalInitiative->status;
         $digitalInitiative->update($validated);
 
-        if ((string)$digitalInitiative->status !== (string)$oldStatus) {
+        if ((string) $digitalInitiative->status !== (string) $oldStatus) {
             $statusModel = InitiativeStatus::find($digitalInitiative->status);
-            $statusName = $statusModel ? $statusModel->name : (string)$digitalInitiative->status;
+            $statusName = $statusModel ? $statusModel->name : (string) $digitalInitiative->status;
 
             \App\Models\UcStatusImplementation::create([
                 'digital_initiative_id' => $digitalInitiative->id,

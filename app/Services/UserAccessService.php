@@ -70,11 +70,11 @@ class UserAccessService
         }
 
         UserAccessAudit::create([
-            'user_id'        => $targetUser->id,
-            'actor_id'       => $actor?->id,
-            'event'          => 'user_access_updated',
-            'old_values'     => $before,
-            'new_values'     => $after,
+            'user_id' => $targetUser->id,
+            'actor_id' => $actor?->id,
+            'event' => 'user_access_updated',
+            'old_values' => $before,
+            'new_values' => $after,
             'changed_fields' => $changedFields,
         ]);
     }
@@ -82,8 +82,8 @@ class UserAccessService
     private function snapshot(User $user): array
     {
         return [
-            'status'          => $user->status,
-            'app_role'        => $this->normalizeAppRole($user->app_role),
+            'status' => $user->status,
+            'app_role' => $this->normalizeAppRole($user->app_role),
             'permission_role' => $user->getRoleNames()->first(),
         ];
     }

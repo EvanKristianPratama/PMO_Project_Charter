@@ -34,12 +34,12 @@ class ActivityLog extends Model
     public function getEventLabelAttribute(): string
     {
         return match ($this->event) {
-            'login'   => 'Login',
-            'logout'  => 'Logout',
+            'login' => 'Login',
+            'logout' => 'Logout',
             'created' => 'Tambah Data',
             'updated' => 'Ubah Data',
             'deleted' => 'Hapus Data',
-            default   => ucfirst($this->event),
+            default => ucfirst($this->event),
         };
     }
 
@@ -47,12 +47,12 @@ class ActivityLog extends Model
     public function getEventColorAttribute(): string
     {
         return match ($this->event) {
-            'login'   => 'emerald',
-            'logout'  => 'slate',
+            'login' => 'emerald',
+            'logout' => 'slate',
             'created' => 'blue',
             'updated' => 'amber',
             'deleted' => 'rose',
-            default   => 'slate',
+            default => 'slate',
         };
     }
 

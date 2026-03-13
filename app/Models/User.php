@@ -17,6 +17,7 @@ class User extends Authenticatable
     protected array $auditInclude = ['name', 'email', 'status', 'app_role'];
 
     public const APP_ROLE_ADMIN = 'admin';
+
     public const APP_ROLE_USER = 'user';
 
     protected $fillable = [

@@ -20,20 +20,20 @@ class ScopeCharterController extends Controller
     private function initiativeRules(): array
     {
         return [
-            'category_fase'       => 'nullable|string|max:255',
-            'ref_id'              => 'nullable|integer',
-            'useCase_id'          => 'nullable|integer|exists:trs_use_case,id',
+            'category_fase' => 'nullable|string|max:255',
+            'ref_id' => 'nullable|integer',
+            'useCase_id' => 'nullable|integer|exists:trs_use_case,id',
             'useCase_description' => 'nullable|string',
-            'value'               => 'nullable|string|max:255',
-            'urgency'             => 'nullable|string|max:255',
-            'source_id'           => 'nullable|integer|exists:mst_data_source,id',
+            'value' => 'nullable|string|max:255',
+            'urgency' => 'nullable|string|max:255',
+            'source_id' => 'nullable|integer|exists:mst_data_source,id',
         ];
     }
 
     private function statusRules(): array
     {
         return [
-            'sc_status'        => 'nullable|string|max:255',
+            'sc_status' => 'nullable|string|max:255',
             'sc_review_status' => 'nullable|string|in:At Risk,On Track,Not Started,Not Signed',
         ];
     }
@@ -53,8 +53,8 @@ class ScopeCharterController extends Controller
 
             'statusOptions' => InitiativeStatus::ordered()
                 ->map(fn (InitiativeStatus $s) => [
-                    'id'    => (int) $s->id,
-                    'name'  => $s->name,
+                    'id' => (int) $s->id,
+                    'name' => $s->name,
                     'label' => ucfirst($s->name),
                 ])
                 ->values(),
@@ -87,10 +87,10 @@ class ScopeCharterController extends Controller
         if ($statusData['sc_status'] ?? null) {
             ScStatusImplementation::create([
                 'digital_initiative_id' => $initiative->id,
-                'status'           => $statusData['sc_status'],
-                'review_status'    => $statusData['sc_review_status'] ?? 'Not Started',
-                'date'             => now()->toDateString(),
-                'time_start'       => now()->toTimeString(),
+                'status' => $statusData['sc_status'],
+                'review_status' => $statusData['sc_review_status'] ?? 'Not Started',
+                'date' => now()->toDateString(),
+                'time_start' => now()->toTimeString(),
             ]);
         }
 
@@ -110,12 +110,12 @@ class ScopeCharterController extends Controller
             ScStatusImplementation::updateOrCreate(
                 [
                     'digital_initiative_id' => $scopeCharter->id,
-                    'date'             => now()->toDateString(),
+                    'date' => now()->toDateString(),
                 ],
                 [
-                    'status'        => $statusData['sc_status'],
+                    'status' => $statusData['sc_status'],
                     'review_status' => $statusData['sc_review_status'] ?? 'Not Started',
-                    'time_start'    => now()->toTimeString(),
+                    'time_start' => now()->toTimeString(),
                 ]
             );
         }

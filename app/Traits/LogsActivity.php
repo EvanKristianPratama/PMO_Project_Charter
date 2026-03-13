@@ -21,7 +21,7 @@ trait LogsActivity
         static::created(function (self $model): void {
             ActivityLogService::log(
                 event: 'created',
-                description: 'Menambah data ' . class_basename($model) . ': ' . self::resolveLabel($model),
+                description: 'Menambah data '.class_basename($model).': '.self::resolveLabel($model),
                 subject: $model,
                 properties: ['new' => $model->toArray()],
             );
@@ -39,7 +39,7 @@ trait LogsActivity
 
             ActivityLogService::log(
                 event: 'updated',
-                description: 'Mengubah data ' . class_basename($model) . ': ' . self::resolveLabel($model),
+                description: 'Mengubah data '.class_basename($model).': '.self::resolveLabel($model),
                 subject: $model,
                 properties: ['old' => $old, 'new' => $dirty],
             );
@@ -48,7 +48,7 @@ trait LogsActivity
         static::deleted(function (self $model): void {
             ActivityLogService::log(
                 event: 'deleted',
-                description: 'Menghapus data ' . class_basename($model) . ': ' . self::resolveLabel($model),
+                description: 'Menghapus data '.class_basename($model).': '.self::resolveLabel($model),
                 subject: $model,
                 properties: ['old' => $model->toArray()],
             );
@@ -63,15 +63,15 @@ trait LogsActivity
             }
         }
 
-        return class_basename(get_class($model)) . ' #' . $model->getKey();
+        return class_basename(get_class($model)).' #'.$model->getKey();
     }
 
     private static function filterAuditFields(self $model, array $dirty): array
     {
         // Selalu kecualikan kolom teknis
         $defaultExclude = ['updated_at', 'created_at', 'remember_token', 'password'];
-        $exclude        = array_merge($defaultExclude, $model->auditExclude ?? []);
-        $dirty          = Arr::except($dirty, $exclude);
+        $exclude = array_merge($defaultExclude, $model->auditExclude ?? []);
+        $dirty = Arr::except($dirty, $exclude);
 
         // Jika auditInclude didefinisikan, hanya ambil kolom tersebut
         if (! empty($model->auditInclude ?? [])) {

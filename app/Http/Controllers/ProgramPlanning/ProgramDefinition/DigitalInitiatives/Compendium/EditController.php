@@ -34,7 +34,7 @@ class EditController extends Controller
 
         // Get the first linked appendix initiative
         $appendixInitiative = $scInitiative->appendixes->first();
-        $appendixDetail     = $appendixInitiative?->scDetails->first();
+        $appendixDetail = $appendixInitiative?->scDetails->first();
 
         // Build appendix RJPP theme IDs
         $appendixRjppIds = $appendixInitiative
@@ -54,58 +54,58 @@ class EditController extends Controller
 
         return Inertia::render('ProgramPlanning/ProgramDefinition/DigitalInitiatives/Compendium/Show', [
             'compendium' => [
-                'id'             => (int) $scInitiative->id,
+                'id' => (int) $scInitiative->id,
                 'initiative_ids' => $scInitiative->mstInitiatives->pluck('id')->toArray(),
-                'owner'          => $scInitiative->owner,
-                'coe'            => $scInitiative->coe,
-                'usecase'        => $scInitiative->usecase,
-                'description'    => $scInitiative->description,
-                'source_id'      => $scInitiative->source_id,
-                'value'          => ($scInitiative->value === null || (int) $scInitiative->value === 4) ? null : (int) $scInitiative->value,
-                'urgency'        => ($scInitiative->urgency === null || (int) $scInitiative->urgency === 4) ? null : (int) $scInitiative->urgency,
-                'status'         => $scInitiative->status,
+                'owner' => $scInitiative->owner,
+                'coe' => $scInitiative->coe,
+                'usecase' => $scInitiative->usecase,
+                'description' => $scInitiative->description,
+                'source_id' => $scInitiative->source_id,
+                'value' => ($scInitiative->value === null || (int) $scInitiative->value === 4) ? null : (int) $scInitiative->value,
+                'urgency' => ($scInitiative->urgency === null || (int) $scInitiative->urgency === 4) ? null : (int) $scInitiative->urgency,
+                'status' => $scInitiative->status,
                 'rjpp_tagging_ids' => $this->rjppTaggingIds((int) $scInitiative->id),
                 'detail_useCase_description' => $detail?->useCase_description ?? '',
-                'current_situation'  => $detail?->current_situation ?? '',
+                'current_situation' => $detail?->current_situation ?? '',
                 'key_functionalities' => $detail?->key_functionalities ?? '',
-                'value_detail'       => $detail?->value_detail ?? '',
-                'urgency_detail'     => $detail?->urgency_detail ?? '',
+                'value_detail' => $detail?->value_detail ?? '',
+                'urgency_detail' => $detail?->urgency_detail ?? '',
                 'ease_implementation' => $detail ? (int) $detail->ease_implementation : 4,
-                'ease_detail'        => $detail?->ease_detail ?? '',
+                'ease_detail' => $detail?->ease_detail ?? '',
                 'resource_requirement' => $detail ? (int) $detail->resource_requirement : 4,
-                'resource_detail'    => $detail?->resource_detail ?? '',
-                'interpendencies'    => $detail?->interpendencies ?? '',
-                'sign_by'            => $detail?->sign_by ?? '',
+                'resource_detail' => $detail?->resource_detail ?? '',
+                'interpendencies' => $detail?->interpendencies ?? '',
+                'sign_by' => $detail?->sign_by ?? '',
             ],
             // Full appendix data from the linked initiative
             'appendix' => $appendixInitiative ? [
-                'id'                 => (int) $appendixInitiative->id,
-                'usecase'            => $appendixInitiative->usecase,
-                'owner'              => $appendixInitiative->owner,
-                'coe'                => $appendixInitiative->coe,
-                'value'              => $appendixInitiative->value,
-                'urgency'            => $appendixInitiative->urgency,
-                'rjpp_tagging_ids'   => $appendixRjppIds,
-                'organization'       => $appendixDetail?->organization,
-                'situation'          => $appendixDetail?->situation,
-                'key_functionalities'=> $appendixDetail?->key_functionalities,
-                'value_rationale'    => $appendixDetail?->value_rationale,
-                'value_matrics'      => $appendixDetail?->value_matrics,
-                'urgency_rationale'  => $appendixDetail?->urgency_rationale,
-                'urgency_expected'   => $appendixDetail?->urgency_expected,
-                'ease'               => $appendixDetail?->ease,
-                'ease_rationale'     => $appendixDetail?->ease_rationale,
-                'ease_detail'        => $appendixDetail?->ease_detail,
-                'resource'           => $appendixDetail?->resource,
+                'id' => (int) $appendixInitiative->id,
+                'usecase' => $appendixInitiative->usecase,
+                'owner' => $appendixInitiative->owner,
+                'coe' => $appendixInitiative->coe,
+                'value' => $appendixInitiative->value,
+                'urgency' => $appendixInitiative->urgency,
+                'rjpp_tagging_ids' => $appendixRjppIds,
+                'organization' => $appendixDetail?->organization,
+                'situation' => $appendixDetail?->situation,
+                'key_functionalities' => $appendixDetail?->key_functionalities,
+                'value_rationale' => $appendixDetail?->value_rationale,
+                'value_matrics' => $appendixDetail?->value_matrics,
+                'urgency_rationale' => $appendixDetail?->urgency_rationale,
+                'urgency_expected' => $appendixDetail?->urgency_expected,
+                'ease' => $appendixDetail?->ease,
+                'ease_rationale' => $appendixDetail?->ease_rationale,
+                'ease_detail' => $appendixDetail?->ease_detail,
+                'resource' => $appendixDetail?->resource,
                 'resource_rationale' => $appendixDetail?->resource_rationale,
                 'resource_retionale' => $appendixDetail?->resource_retionale,
-                'resource_detail'    => $appendixDetail?->resource_detail,
-                'predecessor'        => $appendixDetail?->predecessor,
-                'successor'          => $appendixDetail?->successor,
-                'otherBU'            => $appendixDetail?->otherBU,
-                'update_doc'         => $appendixDetail?->update_doc,
-                'sign_by'            => $signBy ?? [],
-                'description'        => $appendixInitiative->description,
+                'resource_detail' => $appendixDetail?->resource_detail,
+                'predecessor' => $appendixDetail?->predecessor,
+                'successor' => $appendixDetail?->successor,
+                'otherBU' => $appendixDetail?->otherBU,
+                'update_doc' => $appendixDetail?->update_doc,
+                'sign_by' => $signBy ?? [],
+                'description' => $appendixInitiative->description,
             ] : null,
             'initiativeOptions' => $this->initiativeOptions(),
             'coeOptions' => \App\Models\MstCoe::orderBy('name')->get(['id', 'name'])->values(),
@@ -168,9 +168,9 @@ class EditController extends Controller
 
                 $sourceCreated = '-';
                 if ($source) {
-                    if (!empty($source->month) && !empty($source->year)) {
-                        $sourceCreated = $this->getMonthName($source->month) . ' ' . $source->year;
-                    } elseif (!empty($source->created_at)) {
+                    if (! empty($source->month) && ! empty($source->year)) {
+                        $sourceCreated = $this->getMonthName($source->month).' '.$source->year;
+                    } elseif (! empty($source->created_at)) {
                         $sourceCreated = $source->created_at->format('M Y');
                     }
                 }
@@ -189,28 +189,29 @@ class EditController extends Controller
             })
             ->values();
     }
-private function themeOptions()
-{
-    return Theme::with('goal:id,code,title')
-        ->orderBy('id')
-        ->get()
-        ->map(function (Theme $theme): array {
-            $goal = $theme->goal;
-            $goalTitle = $goal?->title ?? 'No Pillar';
-            $goalCode = $goal?->code ?? '-';
-            $themeNum = $theme->theme_number ?? 'N/A';
 
-            return [
-                'id' => (int) $theme->id,
-                'code' => $goalCode,
-                'strategic_pillar' => $goalTitle,
-                'theme_code' => $themeNum,
-                'name' => $theme->name,
-                'label' => "[$goalCode - $goalTitle] #$themeNum - $theme->name",
-            ];
-        })
-        ->values();
-}
+    private function themeOptions()
+    {
+        return Theme::with('goal:id,code,title')
+            ->orderBy('id')
+            ->get()
+            ->map(function (Theme $theme): array {
+                $goal = $theme->goal;
+                $goalTitle = $goal?->title ?? 'No Pillar';
+                $goalCode = $goal?->code ?? '-';
+                $themeNum = $theme->theme_number ?? 'N/A';
+
+                return [
+                    'id' => (int) $theme->id,
+                    'code' => $goalCode,
+                    'strategic_pillar' => $goalTitle,
+                    'theme_code' => $themeNum,
+                    'name' => $theme->name,
+                    'label' => "[$goalCode - $goalTitle] #$themeNum - $theme->name",
+                ];
+            })
+            ->values();
+    }
 
     private function rjppTaggingIds(int $scInitiativeId): array
     {

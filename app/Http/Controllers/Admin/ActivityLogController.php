@@ -40,8 +40,8 @@ class ActivityLogController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('description', 'like', "%{$search}%")
-                  ->orWhere('user_name', 'like', "%{$search}%")
-                  ->orWhere('user_email', 'like', "%{$search}%");
+                    ->orWhere('user_name', 'like', "%{$search}%")
+                    ->orWhere('user_email', 'like', "%{$search}%");
             });
         }
 
@@ -50,10 +50,10 @@ class ActivityLogController extends Controller
         $users = User::orderBy('name')->get(['id', 'name', 'email']);
 
         return Inertia::render('Admin/ActivityLog', [
-            'logs'    => $logs,
-            'users'   => $users,
+            'logs' => $logs,
+            'users' => $users,
             'filters' => $request->only(['event', 'user_id', 'date_from', 'date_to', 'search']),
-            'events'  => ['login', 'logout', 'created', 'updated', 'deleted'],
+            'events' => ['login', 'logout', 'created', 'updated', 'deleted'],
         ]);
     }
 }

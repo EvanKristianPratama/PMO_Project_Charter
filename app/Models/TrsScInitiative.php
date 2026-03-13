@@ -2,15 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\DataSource;
-use App\Models\MstInitiative;
-use App\Models\MstScSource;
-use App\Models\ScStatusImplementation;
-use App\Models\Theme;
-use App\Models\TrsMapSc;
-use App\Models\TrsScDetails;
-use App\Models\TrsScInitiative;
-use App\Models\UseCase;
 use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class TrsScInitiative extends Model
 {
     use LogsActivity;
+
     protected $table = 'trs_sc_initiative';
 
     protected $guarded = ['id'];

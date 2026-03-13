@@ -2,15 +2,13 @@
 
 namespace App\Models;
 
-use App\Models\Company;
-use App\Models\Organization;
-use Illuminate\Database\Eloquent\Model;
-
 use App\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\Model;
 
 class Groub extends Model
 {
     use LogsActivity;
+
     protected $table = 'trs_groub';
 
     protected $fillable = ['company_id', 'name'];

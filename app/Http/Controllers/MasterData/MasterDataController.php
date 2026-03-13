@@ -34,9 +34,9 @@ class MasterDataController extends Controller
         }
 
         return Inertia::render('MasterData/Index', [
-            'tables'       => $tables,
+            'tables' => $tables,
             'previewLimit' => $previewLimit,
-            'error'        => $error,
+            'error' => $error,
         ]);
     }
 
@@ -51,11 +51,10 @@ class MasterDataController extends Controller
             ->all();
 
         return [
-            'name'       => $table,
-            'columns'    => $columns,
-            'rows'       => $rows,
+            'name' => $table,
+            'columns' => $columns,
+            'rows' => $rows,
             'total_rows' => DB::table($table)->count(),
         ];
     }
 }
-

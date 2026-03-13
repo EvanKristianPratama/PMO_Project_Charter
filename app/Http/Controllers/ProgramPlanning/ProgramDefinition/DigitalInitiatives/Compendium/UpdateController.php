@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Compendium;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstInitiative;
 use App\Models\RjppTagging;
 use App\Models\TrsScInitiative;
 use Illuminate\Http\RedirectResponse;

@@ -108,9 +108,13 @@ class MstInitiative extends Model
 
     public function latestPlanningStatusValue(): ?string
     {
-        $latestStatus = $this->relationLoaded('latestStatus')
-            ? $this->latestStatus
-            : $this->latestStatus()->first();
+        $latestStatus = null;
+
+        if ($this->relationLoaded('latestStatus')) {
+            $latestStatus = $this->latestStatus;
+        } elseif ($this->exists) {
+            $latestStatus = $this->latestStatus()->first();
+        }
 
         $status = trim((string) ($latestStatus?->status ?? ''));
         if ($status !== '') {

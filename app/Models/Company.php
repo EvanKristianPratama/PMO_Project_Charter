@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
 use App\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\Model;
 
 class Company extends Model
 {
     use LogsActivity;
+
     protected $table = 'mst_company';
 
     protected $fillable = ['name'];

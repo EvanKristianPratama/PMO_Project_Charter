@@ -4,7 +4,6 @@ namespace App\Http\Controllers\CompanyProfile;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class CompanyController extends Controller

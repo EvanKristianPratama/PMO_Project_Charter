@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
-use App\Traits\LogsActivity;
 
 class TrsReviewPC extends Model
 {
     use LogsActivity;
+
     protected $table = 'trs_review_pc';
 
     protected $fillable = [
@@ -22,7 +22,7 @@ class TrsReviewPC extends Model
         'how',
         'project_profile',
         'key_milestone',
-        'risk_impact'
+        'risk_impact',
     ];
 
     public function initiative(): BelongsTo
