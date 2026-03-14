@@ -49,7 +49,7 @@ class UpdateController extends Controller
         ]);
 
         DB::transaction(function () use ($validated, $scInitiative): void {
-            // STEP 1: Update TrsScInitiative
+            // 1. Update TrsScInitiative
             $scInitiative->update([
                 'owner' => $validated['owner'] ?? null,
                 'coe' => $validated['coe'] ?? null,
@@ -60,43 +60,35 @@ class UpdateController extends Controller
                 'status' => $validated['status'] ?? $scInitiative->status,
             ]);
 
-            // Sync RJPP taggings
-            RjppTagging::where('sc_id', $scInitiative->id)->delete();
-            if (! empty($validated['rjpp_tagging_ids'])) {
-                foreach (array_filter($validated['rjpp_tagging_ids']) as $themeId) {
-                    RjppTagging::create([
-                        'sc_id' => $scInitiative->id,
-                        'theme_id' => $themeId,
-                    ]);
-                }
-            }
+            // 2. Sync Relationships (Many-to-Many)
+            $scInitiative->rjpps()->sync(array_filter($validated['rjpp_tagging_ids'] ?? []));
 
-            // STEP 2: Update TrsScDetails
-            $n = fn ($v) => ($v === '' || $v === null) ? null : $v;
+            // 3. Update TrsScDetails via Relationship
+            $nullIfEmpty = fn ($value) => ($value === '' || $value === null) ? null : $value;
 
             // Prepare sign_by array
             $signBy = array_filter(array_map('trim', $validated['sign_by'] ?? []), fn ($v) => $v !== '');
 
-            TrsScDetails::updateOrCreate(
+            $scInitiative->scDetails()->updateOrCreate(
                 ['sc_id' => $scInitiative->id],
                 [
-                    'organization' => $n($validated['organization'] ?? null),
-                    'update_doc' => $n($validated['update_doc'] ?? null),
-                    'situation' => $n($validated['situation'] ?? null),
-                    'key_functionalities' => $n($validated['key_functionalities'] ?? null),
-                    'value_rationale' => $n($validated['value_rationale'] ?? null),
-                    'value_matrics' => $n($validated['value_matrics'] ?? null),
-                    'urgency_rationale' => $n($validated['urgency_rationale'] ?? null),
-                    'urgency_expected' => $n($validated['urgency_expected'] ?? null),
+                    'organization' => $nullIfEmpty($validated['organization'] ?? null),
+                    'update_doc' => $nullIfEmpty($validated['update_doc'] ?? null),
+                    'situation' => $nullIfEmpty($validated['situation'] ?? null),
+                    'key_functionalities' => $nullIfEmpty($validated['key_functionalities'] ?? null),
+                    'value_rationale' => $nullIfEmpty($validated['value_rationale'] ?? null),
+                    'value_matrics' => $nullIfEmpty($validated['value_matrics'] ?? null),
+                    'urgency_rationale' => $nullIfEmpty($validated['urgency_rationale'] ?? null),
+                    'urgency_expected' => $nullIfEmpty($validated['urgency_expected'] ?? null),
                     'ease' => $validated['ease'] ?? null,
-                    'ease_rationale' => $n($validated['ease_rationale'] ?? null),
-                    'ease_detail' => $n($validated['ease_detail'] ?? null),
+                    'ease_rationale' => $nullIfEmpty($validated['ease_rationale'] ?? null),
+                    'ease_detail' => $nullIfEmpty($validated['ease_detail'] ?? null),
                     'resource' => $validated['resource'] ?? null,
-                    'resource_rationale' => $n($validated['resource_rationale'] ?? null),
-                    'resource_detail' => $n($validated['resource_detail'] ?? null),
-                    'predecessor' => $n($validated['predecessor'] ?? null),
-                    'successor' => $n($validated['successor'] ?? null),
-                    'otherBU' => $n($validated['otherBU'] ?? null),
+                    'resource_rationale' => $nullIfEmpty($validated['resource_rationale'] ?? null),
+                    'resource_detail' => $nullIfEmpty($validated['resource_detail'] ?? null),
+                    'predecessor' => $nullIfEmpty($validated['predecessor'] ?? null),
+                    'successor' => $nullIfEmpty($validated['successor'] ?? null),
+                    'otherBU' => $nullIfEmpty($validated['otherBU'] ?? null),
                     'sign_by' => ! empty($signBy) ? json_encode(array_values($signBy)) : null,
                 ]
             );

@@ -380,8 +380,8 @@ const getLevelLabel = (type) => {
                         class="bg-[#2e6ea2] w-28 shrink-0 px-2 py-1.5 font-bold text-white border-r border-[#3b82f6] flex items-center text-[10px] leading-tight">
                         Expected Go-Live</div>
                     <div class="px-2 py-1.5 flex-1">
-                        <input v-if="editable" v-model="form.urgency_expected" type="text" class="meta-input"
-                            placeholder="...">
+                        <textarea v-if="editable" v-model="form.urgency_expected" rows="3" class="content-textarea"
+                            placeholder="..."></textarea>
                         <template v-else>
                             <ul v-if="parseList(initiative.urgency_expected).length" class="list-disc pl-4 space-y-1">
                                 <li v-for="(item, idx) in parseList(initiative.urgency_expected)" :key="idx">{{ item }}
@@ -422,7 +422,7 @@ const getLevelLabel = (type) => {
                 </div>
                 <div class="flex flex-1">
                     <div
-                        class="bg-[#2e6ea2] w-28 shrink-0 px-2 py-1.5 font-bold text-white border-r border-[#1e4f8f] flex items-center">
+                        class="bg-[#2e6ea2] w-28 shrink-0 px-2 py-1.5 font-bold text-white border-r border-[#3b82f6] flex items-center">
                         Detail</div>
                     <div class="px-2 py-1.5 flex-1">
                         <textarea v-if="editable" v-model="form.ease_detail" rows="3" class="content-textarea"

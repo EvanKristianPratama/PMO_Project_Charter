@@ -92,7 +92,7 @@ watch(
             appendixForm.initiative_ids = [];
             appendixForm.rjpp_tagging_ids = [];
             appendixForm.organization = "";
-            appendixForm.update_doc = new Date().toISOString().split("T")[0];
+            appendixForm.update_doc = "";
             appendixForm.situation = "";
             appendixForm.key_functionalities = "";
             appendixForm.value_rationale = "";
@@ -334,13 +334,25 @@ const submit = () => {
                         <div>
                             <label
                                 class="mb-1 block text-[11px] font-bold uppercase tracking-wider text-slate-500"
-                                >Business Unit</label
+                                >PIC</label
                             >
                             <input
                                 v-model="appendixForm.organization"
                                 type="text"
                                 class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
-                                placeholder="Business unit name..."
+                                placeholder="PIC name..."
+                            />
+                        </div>
+
+                        <div>
+                            <label
+                                class="mb-1 block text-[11px] font-bold uppercase tracking-wider text-slate-500"
+                                >Update Dokumen</label
+                            >
+                            <input
+                                v-model="appendixForm.update_doc"
+                                type="date"
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
                             />
                         </div>
 
@@ -364,45 +376,7 @@ const submit = () => {
                             </select>
                         </div>
 
-                        <div>
-                            <label
-                                class="mb-1 block text-[11px] font-bold uppercase tracking-wider text-slate-500"
-                                >Update Dokumen</label
-                            >
-                            <input
-                                v-model="appendixForm.update_doc"
-                                type="date"
-                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
-                            />
-                        </div>
-
-                        <div class="md:col-span-3">
-                            <label
-                                class="mb-1 block text-[11px] font-bold uppercase tracking-wider text-slate-500"
-                                >Scope Charter Name</label
-                            >
-                            <input
-                                v-model="appendixForm.usecase"
-                                type="text"
-                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
-                                placeholder="Enter scope charter name..."
-                            />
-                        </div>
-
-                        <div class="md:col-span-3">
-                            <label
-                                class="mb-1 block text-[11px] font-bold uppercase tracking-wider text-slate-500"
-                                >Description</label
-                            >
-                            <textarea
-                                v-model="appendixForm.description"
-                                rows="2"
-                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
-                                placeholder="Scope charter description..."
-                            ></textarea>
-                        </div>
-
-                        <div class="md:col-span-3">
+                        <div class="md:col-span-2">
                             <label
                                 class="mb-1 block text-[11px] font-bold uppercase tracking-wider text-slate-500"
                                 >Source</label
@@ -633,12 +607,12 @@ const submit = () => {
                                     class="mb-1 block text-[10px] font-semibold text-slate-500 uppercase tracking-wider"
                                     >Expected Go-Live</label
                                 >
-                                <input
+                                <textarea
                                     v-model="appendixForm.urgency_expected"
-                                    type="text"
+                                    rows="2"
                                     class="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
                                     placeholder="Expected date or timeframe..."
-                                />
+                                ></textarea>
                             </div>
                         </div>
                     </div>

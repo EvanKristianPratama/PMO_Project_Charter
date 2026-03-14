@@ -136,6 +136,7 @@ class EditController extends Controller
     private function compendiumOptions()
     {
         return TrsScInitiative::query()
+            ->where('source_id', 1)
             ->with(['mstInitiatives:id,code,name'])
             ->orderBy('id')
             ->get(['id', 'owner', 'usecase'])

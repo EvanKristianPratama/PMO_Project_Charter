@@ -61,9 +61,7 @@ class StoreController extends Controller
         ]);
 
         DB::transaction(function () use ($validated): void {
-            // =========================================================
-            // STEP 1: Create TrsScInitiative (the new appendix initiative)
-            // =========================================================
+            // 1. Create TrsScInitiative
             $scInitiative = TrsScInitiative::create([
                 'owner' => $validated['owner'] ?? null,
                 'coe' => $validated['coe'] ?? null,
@@ -75,62 +73,39 @@ class StoreController extends Controller
                 'status' => $validated['status'] ?? 1,
             ]);
 
-            // Store the new initiative ID in the class property for reuse
-            $this->appendixInitiativeId = $scInitiative->id;
-
-            // Sync initiative mappings (trs_map_sc)
+            // 2. Sync Relationships (Many-to-Many)
             if (! empty($validated['initiative_ids'])) {
-                foreach (array_filter($validated['initiative_ids']) as $initId) {
-                    TrsMapSc::create([
-                        'sc_id' => $this->appendixInitiativeId,
-                        'initiative_id' => $initId,
-                    ]);
-                }
+                $scInitiative->mstInitiatives()->sync(array_filter($validated['initiative_ids']));
             }
 
-            // Sync RJPP taggings (trs_rjpp: sc_id + theme_id)
             if (! empty($validated['rjpp_tagging_ids'])) {
-                foreach (array_filter($validated['rjpp_tagging_ids']) as $themeId) {
-                    RjppTagging::create([
-                        'sc_id' => $this->appendixInitiativeId,
-                        'theme_id' => $themeId,
-                    ]);
-                }
+                $scInitiative->rjpps()->sync(array_filter($validated['rjpp_tagging_ids']));
             }
 
-            // =========================================================
-            // STEP 2: Create TrsScDependency mapping
-            //         (links the selected compendium → new appendix initiative)
-            // =========================================================
-            TrsScDependency::create([
-                'compendium_id' => $validated['compendium_id'],
-                'appendix_id' => $this->appendixInitiativeId,
-            ]);
+            // 3. Link to Compendium (Relationship attach)
+            $scInitiative->compendiums()->attach($validated['compendium_id']);
 
-            // =========================================================
-            // STEP 3: Create TrsScDetails for the new appendix initiative
-            // =========================================================
-            $n = fn ($v) => ($v === '' || $v === null) ? null : $v;
+            // 4. Create TrsScDetails via Relationship
+            $nullIfEmpty = fn ($value) => ($value === '' || $value === null) ? null : $value;
 
-            TrsScDetails::create([
-                'sc_id' => $this->appendixInitiativeId,
-                'organization' => $n($validated['organization'] ?? null),
-                'update_doc' => $n($validated['update_doc'] ?? null),
-                'situation' => $n($validated['situation'] ?? null),
-                'key_functionalities' => $n($validated['key_functionalities'] ?? null),
-                'value_rationale' => $n($validated['value_rationale'] ?? null),
-                'value_matrics' => $n($validated['value_matrics'] ?? null),
-                'urgency_rationale' => $n($validated['urgency_rationale'] ?? null),
-                'urgency_expected' => $n($validated['urgency_expected'] ?? null),
+            $scInitiative->scDetails()->create([
+                'organization' => $nullIfEmpty($validated['organization'] ?? null),
+                'update_doc' => $nullIfEmpty($validated['update_doc'] ?? null),
+                'situation' => $nullIfEmpty($validated['situation'] ?? null),
+                'key_functionalities' => $nullIfEmpty($validated['key_functionalities'] ?? null),
+                'value_rationale' => $nullIfEmpty($validated['value_rationale'] ?? null),
+                'value_matrics' => $nullIfEmpty($validated['value_matrics'] ?? null),
+                'urgency_rationale' => $nullIfEmpty($validated['urgency_rationale'] ?? null),
+                'urgency_expected' => $nullIfEmpty($validated['urgency_expected'] ?? null),
                 'ease' => $validated['ease'] ?? null,
-                'ease_rationale' => $n($validated['ease_rationale'] ?? null),
-                'ease_detail' => $n($validated['ease_detail'] ?? null),
+                'ease_rationale' => $nullIfEmpty($validated['ease_rationale'] ?? null),
+                'ease_detail' => $nullIfEmpty($validated['ease_detail'] ?? null),
                 'resource' => $validated['resource'] ?? null,
-                'resource_rationale' => $n($validated['resource_rationale'] ?? null),
-                'resource_detail' => $n($validated['resource_retionale'] ?? null),
-                'predecessor' => $n($validated['predecessor'] ?? null),
-                'successor' => $n($validated['successor'] ?? null),
-                'otherBU' => $n($validated['otherBU'] ?? null),
+                'resource_rationale' => $nullIfEmpty($validated['resource_rationale'] ?? null),
+                'resource_detail' => $nullIfEmpty($validated['resource_retionale'] ?? null),
+                'predecessor' => $nullIfEmpty($validated['predecessor'] ?? null),
+                'successor' => $nullIfEmpty($validated['successor'] ?? null),
+                'otherBU' => $nullIfEmpty($validated['otherBU'] ?? null),
                 'sign_by' => ! empty($validated['sign_by']) ? json_encode($validated['sign_by']) : null,
             ]);
         });
