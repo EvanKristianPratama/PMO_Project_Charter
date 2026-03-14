@@ -50,7 +50,7 @@ class TrsScInitiative extends Model
 
     public function rjpps(): BelongsToMany
     {
-        return $this->belongsToMany(Theme::class, 'trs_rjpp', 'digital_id', 'theme_id')->withTimestamps();
+        return $this->belongsToMany(Theme::class, 'trs_rjpp', 'sc_id', 'theme_id')->withTimestamps();
     }
 
     public function digitalDetail(): HasMany

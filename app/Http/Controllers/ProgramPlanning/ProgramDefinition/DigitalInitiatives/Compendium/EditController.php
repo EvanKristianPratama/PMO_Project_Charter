@@ -117,6 +117,7 @@ class EditController extends Controller
             ])->values(),
             'themeOptions' => $this->themeOptions(),
             'compendiumOptions' => $this->compendiumOptions(),
+            'organizationOptions' => \App\Models\TrsOrganization::orderBy('name')->get(['id', 'name'])->values(),
         ]);
     }
 

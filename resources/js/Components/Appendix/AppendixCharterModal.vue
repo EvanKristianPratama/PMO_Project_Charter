@@ -11,6 +11,7 @@ const props = defineProps({
     coeOptions: { type: Array, default: () => [] },
     sourceOptions: { type: Array, default: () => [] },
     themeOptions: { type: Array, default: () => [] },
+    organizationOptions: { type: Array, default: () => [] },
 });
 
 const emit = defineEmits(["close", "success"]);
@@ -207,6 +208,9 @@ const submit = () => {
                 emit("success");
                 emit("close");
             },
+            onError: () => {
+                alert("Gagal menyimpan data Appendix. Silakan periksa kembali isian Anda.");
+            },
         },
     );
 };
@@ -281,6 +285,7 @@ const submit = () => {
                                         {{ formatCompendiumLabel(option) }}
                                     </option>
                                 </select>
+                                <p v-if="appendixForm.errors.compendium_id" class="mt-1 text-[10px] text-rose-500">{{ appendixForm.errors.compendium_id }}</p>
                                 <div
                                     class="flex min-h-10 flex-wrap gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-2 dark:border-white/10 dark:bg-white/5"
                                 >
@@ -323,12 +328,20 @@ const submit = () => {
                                 class="mb-1 block text-[11px] font-bold uppercase tracking-wider text-slate-500"
                                 >Project Owner</label
                             >
-                            <input
+                            <select
                                 v-model="appendixForm.owner"
-                                type="text"
                                 class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
-                                placeholder="Project owner name..."
-                            />
+                            >
+                                <option value="">Pilih Project Owner...</option>
+                                <option
+                                    v-for="org in organizationOptions"
+                                    :key="`appendix-org-${org.id}`"
+                                    :value="org.name"
+                                >
+                                    {{ org.name }}
+                                </option>
+                            </select>
+                            <p v-if="appendixForm.errors.owner" class="mt-1 text-[10px] text-rose-500">{{ appendixForm.errors.owner }}</p>
                         </div>
 
                         <div>
@@ -342,6 +355,7 @@ const submit = () => {
                                 class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
                                 placeholder="PIC name..."
                             />
+                            <p v-if="appendixForm.errors.organization" class="mt-1 text-[10px] text-rose-500">{{ appendixForm.errors.organization }}</p>
                         </div>
 
                         <div>
@@ -354,6 +368,7 @@ const submit = () => {
                                 type="date"
                                 class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
                             />
+                            <p v-if="appendixForm.errors.update_doc" class="mt-1 text-[10px] text-rose-500">{{ appendixForm.errors.update_doc }}</p>
                         </div>
 
                         <div>
@@ -374,6 +389,7 @@ const submit = () => {
                                     {{ coe.name }}
                                 </option>
                             </select>
+                            <p v-if="appendixForm.errors.coe" class="mt-1 text-[10px] text-rose-500">{{ appendixForm.errors.coe }}</p>
                         </div>
 
                         <div class="md:col-span-2">
@@ -394,6 +410,35 @@ const submit = () => {
                                     {{ sourceDisplayLabel(source) }}
                                 </option>
                             </select>
+                            <p v-if="appendixForm.errors.source_id" class="mt-1 text-[10px] text-rose-500">{{ appendixForm.errors.source_id }}</p>
+                        </div>
+
+                        <div class="md:col-span-3">
+                            <label
+                                class="mb-1 block text-[11px] font-bold uppercase tracking-wider text-slate-500"
+                                >Scope Charter Name</label
+                            >
+                            <input
+                                v-model="appendixForm.usecase"
+                                type="text"
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
+                                placeholder="Enter scope charter name..."
+                            />
+                            <p v-if="appendixForm.errors.usecase" class="mt-1 text-[10px] text-rose-500">{{ appendixForm.errors.usecase }}</p>
+                        </div>
+
+                        <div class="md:col-span-3">
+                            <label
+                                class="mb-1 block text-[11px] font-bold uppercase tracking-wider text-slate-500"
+                                >Description</label
+                            >
+                            <textarea
+                                v-model="appendixForm.description"
+                                rows="2"
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
+                                placeholder="Scope charter description..."
+                            ></textarea>
+                            <p v-if="appendixForm.errors.description" class="mt-1 text-[10px] text-rose-500">{{ appendixForm.errors.description }}</p>
                         </div>
 
                         <div class="md:col-span-3">

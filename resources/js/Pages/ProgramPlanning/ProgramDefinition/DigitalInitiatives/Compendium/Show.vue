@@ -198,6 +198,7 @@
             :coe-options="coeOptions"
             :source-options="sourceOptions"
             :theme-options="themeOptions"
+            :organization-options="organizationOptions"
             @close="closeAppendixModal"
             @success="closeAppendixModal"
         />
@@ -222,6 +223,7 @@ const props = defineProps({
     coeOptions: { type: Array, default: () => [] },
     sourceOptions: { type: Array, default: () => [] },
     themeOptions: { type: Array, default: () => [] },
+    organizationOptions: { type: Array, default: () => [] },
 });
 
 const toNumber = (value, fallback = null) => {
