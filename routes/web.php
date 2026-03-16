@@ -156,9 +156,13 @@ Route::middleware(['auth', 'approved'])->group(function () {
         Route::put('/{initiativeRelation}', [InitiativeRelationController::class, 'update'])->name('update');
         Route::delete('/{initiativeRelation}', [InitiativeRelationController::class, 'destroy'])->name('destroy');
     });
-    Route::get('/architecture', fn () => Inertia::render('Placeholder/Index', [
-        'title' => 'Architecture',
-    ]))->name('architecture.index');
+    Route::get('/architecture', fn () => Inertia::render('Architecture/Index'))->name('architecture.index');
+    Route::get('/architecture/organization-structure', [CompanyController::class, 'index'])->name('architecture.organization-structure');
+    Route::get('/resources-management', fn () => Inertia::render('ResourcesManagement/Index'))->name('resources-management.index');
+    Route::get('/service-portofolio', fn () => Inertia::render('Placeholder/Index', [
+        'title' => 'Service Portofolio',
+    ]))->name('service-portofolio.index');
+    Route::get('/policy', fn () => Inertia::render('Policy/Index'))->name('policy.index');
     Route::get('/program-information', fn () => Inertia::render('Placeholder/Index', [
         'title' => 'Program Information',
     ]))->name('program-information.index');

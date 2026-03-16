@@ -12,7 +12,7 @@ class CompanyController extends Controller
     {
         $companies = Company::with(['groups.organization'])->get();
 
-        return Inertia::render('CompanyProfile/Index', [
+        return Inertia::render('Architecture/OrganizationStructure/Index', [
             'companies' => $companies,
         ]);
     }

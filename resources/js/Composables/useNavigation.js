@@ -137,13 +137,21 @@ export function useNavigation() {
                 label: 'Architecture',
                 href: '/architecture',
                 icon: CubeIcon,
-                active: (url) => url.startsWith('/architecture'),
-            },
-            {
-                label: 'Business Capability',
-                href: '/master-data/business-capabilities',
-                icon: CubeIcon,
-                active: (url) => url.startsWith('/master-data/business-capabilities'),
+                active: (url) => url.startsWith('/architecture') || url.startsWith('/master-data/business-capabilities'),
+                children: [
+                    {
+                        label: 'Business Capability',
+                        href: '/master-data/business-capabilities',
+                        icon: CubeIcon,
+                        active: (url) => url.startsWith('/master-data/business-capabilities'),
+                    },
+                    {
+                        label: 'Organization Structure',
+                        href: '/architecture/organization-structure',
+                        icon: BuildingOffice2Icon,
+                        active: (url) => url.startsWith('/architecture/organization-structure'),
+                    }
+                ]
             },
             {
                 label: 'Service Portofolio',
@@ -168,13 +176,6 @@ export function useNavigation() {
                 href: '/master-data',
                 icon: TableCellsIcon,
                 active: (url) => url.startsWith('/master-data'),
-            },
-
-            {
-                label: 'Company Profile',
-                href: '/companies',
-                icon: BuildingOffice2Icon,
-                active: (url) => url.startsWith('/companies'),
             },
         ];
 

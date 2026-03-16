@@ -27,7 +27,7 @@ class BusinessCapabilityController extends Controller
             ->orderBy('id')
             ->get();
 
-        return Inertia::render('MasterData/BusinessCapability/Index', [
+        return Inertia::render('Architecture/BusinessCapability/Index', [
             'businessCapabilities' => $capabilities,
         ]);
     }
