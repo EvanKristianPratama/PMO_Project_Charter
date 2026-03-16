@@ -355,7 +355,7 @@ const submit = () => {
                         <div class="md:col-span-3">
                             <label
                                 class="mb-1 block text-[11px] font-bold uppercase tracking-wider text-slate-500"
-                                >Initiative</label
+                                >Master Initiative</label
                             >
                             <div class="space-y-2">
                                 <select
