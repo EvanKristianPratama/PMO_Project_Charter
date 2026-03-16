@@ -4,7 +4,6 @@ import { computed } from 'vue';
 const props = defineProps({
     form: { type: Object, required: true },
     editable: { type: Boolean, default: false },
-    initiativeOptions: { type: Array, default: () => [] },
     coeOptions: { type: Array, default: () => [] },
     sourceOptions: { type: Array, default: () => [] },
     themeOptions: { type: Array, default: () => [] },
@@ -40,20 +39,8 @@ const normalizedThemeIds = computed(() => {
         .filter((value) => value > 0);
 });
 
-const normalizedInitiativeIds = computed(() => {
-    if (!Array.isArray(props.form.initiative_ids)) return [];
-
-    return props.form.initiative_ids
-        .map((value) => toNumber(value))
-        .filter((value) => value > 0);
-});
-
 const themeMap = computed(() => {
     return new Map((props.themeOptions ?? []).map((option) => [toNumber(option.id), option]));
-});
-
-const initiativeMap = computed(() => {
-    return new Map((props.initiativeOptions ?? []).map((option) => [toNumber(option.id), option]));
 });
 
 const selectedThemes = computed(() => {
@@ -67,43 +54,6 @@ const selectedThemes = computed(() => {
             themeCode: String(option?.theme_code ?? '-').replace(/#/g, ''),
             name: option?.name ?? `Theme ${id}`,
         };
-    });
-});
-
-const selectedInitiatives = computed(() => {
-    return normalizedInitiativeIds.value.map((id) => {
-        const option = initiativeMap.value.get(id);
-
-        return {
-            id,
-            code: String(option?.code ?? '').trim().replace(/#/g, ''),
-            name: String(option?.name ?? `Initiative ${id}`).trim(),
-            coe: displayValue(option?.coe),
-            projectOwner: displayValue(option?.project_owner),
-            group: displayValue(option?.group),
-            description: displayValue(option?.description),
-            dataSource: displayValue(option?.data_source),
-            dataSourceCreated: displayValue(option?.data_source_created),
-        };
-    });
-});
-
-const selectedInitiativeGoals = computed(() => {
-    return normalizedInitiativeIds.value.flatMap((id) => {
-        const option = initiativeMap.value.get(id);
-        const taggings = Array.isArray(option?.taggings) ? option.taggings :
-            Array.isArray(option?.initiative_taggings) ? option.initiative_taggings : [];
-
-        return taggings.map((tag) => {
-            const themeOption = themeMap.value.get(toNumber(tag.themes_id));
-            return {
-                initiativeCode: String(option?.code ?? '').trim().replace(/#/g, ''),
-                goal: tag.goal ?? '-',
-                strategicPillar: themeOption?.strategic_pillar ?? '-',
-                themeCode: String(themeOption?.theme_code ?? themeOption?.code ?? '-').replace(/#/g, ''),
-                themeName: themeOption?.name || themeOption?.theme_name || '-',
-            };
-        });
     });
 });
 
@@ -257,91 +207,6 @@ const sourceLabel = computed(() => {
                     <template v-else>{{ sourceLabel }}</template>
                 </span>
             </div>
-        </div>
-
-        <div class="charter-section">
-            <div class="bar-main">Detail Information</div>
-            <article class="panel border-t-0">
-                <div class="bar-sub">Master Initiative Dependency</div>
-                <div class="panel-body space-y-4">
-                    <div class="table-wrap">
-                        <table class="initiative-table">
-                            <thead>
-                                <tr>
-                                    <th class="w-[45px] text-center">Code</th>
-                                    <th class="text-center">Master Initiative</th>
-                                    <th class="text-center">Description</th>
-                                    <th class="w-[80px] text-center">CoE</th>
-                                    <th class="text-center">Project Owner</th>
-                                    <th class="text-center">Group</th>
-                                    <th class="text-center">Source</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-if="!selectedInitiatives.length">
-                                    <td colspan="7" class="empty-row text-center">Belum ada initiative yang dimapping.
-                                    </td>
-                                </tr>
-                                <tr v-for="(initiative, index) in selectedInitiatives"
-                                    :key="`selected-initiative-${initiative.id}`">
-                                    <td class="cell-center">{{ initiative.code || '-' }}</td>
-                                    <td>
-                                        <div class="font-semibold text-slate-800">
-                                            {{ initiative.name }}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="text-slate-600">
-                                            {{ initiative.description }}
-                                        </div>
-                                    </td>
-                                    <td>{{ initiative.coe }}</td>
-                                    <td>{{ initiative.projectOwner }}</td>
-                                    <td>{{ initiative.group }}</td>
-                                    <td>
-                                        <div>{{ initiative.dataSource }}</div>
-                                        <div v-if="initiative.dataSourceCreated !== '-'"
-                                            class="text-[10px] text-slate-500">
-                                            {{ initiative.dataSourceCreated }}
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </article>
-        </div>
-
-        <!-- Separate Master Initiative Goal Section -->
-        <div class="charter-section">
-            <article class="panel border-t-0">
-                <div class="bar-sub">Master Initiative Goal</div>
-                <div class="panel-body space-y-3">
-                    <table class="initiative-table">
-                        <thead>
-                            <tr>
-                                <th class="w-[45px] text-center">Code</th>
-                                <th class="text-center">Strategic Pillar Title</th>
-                                <th colspan="2" class="text-center">Themes</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-if="!selectedInitiativeGoals.length">
-                                <td colspan="5" class="empty-row text-center">Belum ada goal yang tersedia untuk
-                                    initiative ini.
-                                </td>
-                            </tr>
-                            <tr v-for="(goal, index) in selectedInitiativeGoals" :key="`goal-${index}`">
-                                <td class="cell-center">{{ goal.goal }}</td>
-                                <td>{{ goal.strategicPillar }}</td>
-                                <td class="cell-center">{{ goal.themeCode }}</td>
-                                <td>{{ goal.themeName }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </article>
         </div>
 
         <div class="charter-section">

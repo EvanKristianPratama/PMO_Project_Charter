@@ -228,6 +228,12 @@ class DigitalInitiativeController extends Controller
             'owner',
             'statusRef:id,name',
             'pcStatusImplementations',
+            'mappedInitiatives.coe:id,name',
+            'mappedInitiatives.organization:id,name,groub_id',
+            'mappedInitiatives.organization.groub:id,name',
+            'mappedInitiatives.sourceData:id,name,month,year,created_at',
+            'mappedInitiatives.taggings.theme:id,idGoal,code,name,strategic_pillar,theme_code,theme_number,theme_name',
+            'mappedInitiatives.taggings.theme.goal:id,code,title',
         ]);
 
         return Inertia::render('ProgramImplementation/ProjectCharter/DigitalInitiatives/Show', [

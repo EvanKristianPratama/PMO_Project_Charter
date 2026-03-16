@@ -159,9 +159,10 @@
                 </div>
             </section>
 
+            <DigitalInitiativeCharterDocument :initiative="masterInitiativeDocument" />
+
             <CompendiumCharterDocument
                 :form="form"
-                :initiative-options="initiativeOptions"
                 :coe-options="coeOptions"
                 :source-options="sourceOptions"
                 :theme-options="themeOptions"
@@ -355,6 +356,7 @@ import { computed, ref, watch } from 'vue';
 import { Link, router, useForm } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import CompendiumCharterDocument from '@/Components/Compendium/CompendiumCharterDocument.vue';
+import DigitalInitiativeCharterDocument from '@/Components/DigitalInitiative/DigitalInitiativeCharterDocument.vue';
 import AppendixCharterDocument from '@/Components/Appendix/AppendixCharterDocument.vue';
 import AppendixCharterModal from '@/Components/Appendix/AppendixCharterModal.vue';
 
@@ -610,6 +612,43 @@ const selectedInitiatives = computed(() => {
             name: option?.name ?? `Initiative ${id}`,
         };
     });
+});
+
+const masterInitiativeDocument = computed(() => {
+    const optionsById = new Map(
+        (props.initiativeOptions ?? []).map((option) => [toNumber(option.id, 0), option])
+    );
+    const themeById = new Map(
+        (props.themeOptions ?? []).map((option) => [toNumber(option.id, 0), option])
+    );
+
+    const mappedInitiatives = normalizeIdList(form.initiative_ids)
+        .map((id) => {
+            const option = optionsById.get(id);
+            if (!option) return null;
+
+            const taggings = Array.isArray(option.taggings) ? option.taggings : [];
+            const enrichedTaggings = taggings.map((tag) => ({
+                ...tag,
+                theme: themeById.get(toNumber(tag.themes_id, 0)) ?? tag.theme ?? null,
+            }));
+
+            return {
+                ...option,
+                taggings: enrichedTaggings,
+            };
+        })
+        .filter(Boolean);
+
+    const compendiumLabel = String(props.compendium?.usecase ?? '').trim();
+    const compendiumDescription = String(props.compendium?.description ?? '').trim();
+    const fallbackTitle = compendiumLabel || (props.compendium?.id ? `Compendium #${props.compendium.id}` : 'Compendium');
+
+    return {
+        code: fallbackTitle,
+        name: compendiumDescription || compendiumLabel,
+        mapped_initiatives: mappedInitiatives,
+    };
 });
 
 const initiativeTagLabel = (item) => {
