@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\DigitalInitiative;
 
 use App\Http\Controllers\Controller;
-use App\Models\DigitalInitiative;
 use App\Models\InitiativeStatus;
 use App\Models\MstInitiative;
+use App\Models\ProjectStatusHistory;
+use App\Models\TrsProject;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -217,18 +219,29 @@ class DigitalInitiativeController extends Controller
         return redirect()->route('digital-initiatives.index')->with('success', 'Digital Initiative created successfully.');
     }
 
-    public function show(DigitalInitiative $digitalInitiative): Response
+    public function show(\App\Models\TrsProject $digitalInitiative): Response
     {
-        $digitalInitiative->load('statusRef:id,name');
+        $digitalInitiative->load([
+            'charter',
+            'charter.milestones',
+            'charters' => static fn ($query) => $query->latest()->with('milestones'),
+            'owner',
+            'statusRef:id,name',
+            'pcStatusImplementations',
+        ]);
 
         return Inertia::render('ProgramImplementation/ProjectCharter/DigitalInitiatives/Show', [
             'initiative' => $digitalInitiative,
         ]);
     }
 
-    public function edit(DigitalInitiative $digitalInitiative): Response
+    public function edit(TrsProject $digitalInitiative): Response
     {
-        $digitalInitiative->load('latestScStatusImplementation');
+        $digitalInitiative->load([
+            'charter',
+            'latestPcStatusImplementation',
+            'projectStatusHistories.projectCharter:id,project_id,version_label,tgl_dokumen'
+        ]);
 
         return Inertia::render('ProgramImplementation/ProjectCharter/DigitalInitiatives/Edit', [
             'initiative' => $digitalInitiative,
@@ -243,60 +256,215 @@ class DigitalInitiativeController extends Controller
         ]);
     }
 
-    public function update(Request $request, DigitalInitiative $digitalInitiative): RedirectResponse
+    public function update(Request $request, TrsProject $digitalInitiative): RedirectResponse
     {
         $validated = $request->validate([
-            'type' => 'required|string|max:255',
-            'tipe_inisiative' => 'nullable|string|max:255',
-            'no' => 'required|string|max:255',
-            'projectOwner' => 'nullable|string|max:255',
-            'useCase' => 'nullable|string|max:255',
-            'desc' => 'nullable|string',
-            'value' => 'nullable|string',
-            'urgency' => 'nullable|string|max:255',
-            'rjjp' => 'nullable|string|max:255',
-            'coe' => 'nullable|string|max:255',
+            'code' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'status' => ['required', 'integer', Rule::exists('trs_status_initiative', 'id')],
-            'sc_status' => 'nullable|string|max:255',
-            'sc_review_status' => ['nullable', Rule::in(['At Risk', 'On Track', 'Not Started', 'Not Signed'])],
+            'project_status_changed_at' => 'nullable|date',
+            'project_status_notes' => 'nullable|string',
+            'charter_category' => 'nullable|string|max:255',
         ]);
 
-        $oldStatus = $digitalInitiative->status;
-        $digitalInitiative->update($validated);
+        $oldStatus = $this->resolvedProjectStatusId($digitalInitiative);
+        $projectStatusChangedAt = $validated['project_status_changed_at'] ?? null;
+        $projectStatusNotes = $validated['project_status_notes'] ?? null;
+        $charterCategory = $validated['charter_category'] ?? null;
 
-        if ((string) $digitalInitiative->status !== (string) $oldStatus) {
-            $statusModel = InitiativeStatus::find($digitalInitiative->status);
-            $statusName = $statusModel ? $statusModel->name : (string) $digitalInitiative->status;
+        $digitalInitiative->update([
+            'code' => $validated['code'],
+            'name' => $validated['name'],
+            'status' => $validated['status'],
+        ]);
 
-            \App\Models\UcStatusImplementation::create([
-                'digital_initiative_id' => $digitalInitiative->id,
-                'status' => $statusName,
-                'date' => now()->toDateString(),
-                'time_start' => now()->toTimeString(),
-            ]);
+        // Update charter category if provided
+        if ($charterCategory !== null) {
+            $charter = $digitalInitiative->charter;
+            if ($charter) {
+                $charter->update(['category' => $charterCategory]);
+            } else {
+                $digitalInitiative->charters()->create(['category' => $charterCategory]);
+            }
         }
 
-        if ($request->filled('sc_status') || $request->filled('sc_review_status')) {
-            \App\Models\ScStatusImplementation::updateOrCreate(
-                [
-                    'digital_initiative_id' => $digitalInitiative->id,
-                    'date' => now()->toDateString(), // Using current date for the status log
-                ],
-                [
-                    'status' => $validated['sc_status'],
-                    'review_status' => $validated['sc_review_status'],
-                    'time_start' => now()->toTimeString(),
-                ]
-            );
-        }
+        $this->recordProjectStatusHistory($digitalInitiative->fresh(), $oldStatus, $digitalInitiative->status, $projectStatusChangedAt, $projectStatusNotes);
 
         return redirect()->route('digital-initiatives.index')->with('success', 'Digital Initiative updated successfully.');
     }
 
-    public function destroy(DigitalInitiative $digitalInitiative): RedirectResponse
+    public function destroy(TrsProject $digitalInitiative): RedirectResponse
     {
         $digitalInitiative->delete();
 
         return redirect()->route('digital-initiatives.index')->with('success', 'Digital Initiative deleted successfully.');
+    }
+
+    public function updateProjectStatusHistory(Request $request, TrsProject $digitalInitiative, ProjectStatusHistory $history): RedirectResponse
+    {
+        $history->loadMissing('projectCharter:id,project_id');
+        abort_unless((int) ($history->projectCharter?->project_id ?? 0) === (int) $digitalInitiative->id, 404);
+
+        $validated = $request->validate([
+            'tanggal' => ['required', 'date'],
+            'notes' => ['nullable', 'string', 'max:5000'],
+        ]);
+
+        $history->update([
+            'tanggal' => \Carbon\Carbon::parse($validated['tanggal'])->toDateString(),
+            'notes' => filled($validated['notes'] ?? null) ? trim((string) $validated['notes']) : null,
+        ]);
+
+        return redirect()->back()->with('success', 'Project status history updated successfully.');
+    }
+
+    public function destroyProjectStatusHistory(TrsProject $digitalInitiative, ProjectStatusHistory $history): RedirectResponse
+    {
+        $history->loadMissing('projectCharter:id,project_id');
+        abort_unless((int) ($history->projectCharter?->project_id ?? 0) === (int) $digitalInitiative->id, 404);
+
+        $history->delete();
+
+        $digitalInitiative->unsetRelation('projectStatusHistories');
+        $this->resequenceProjectStatusHistories($digitalInitiative);
+        $this->syncProjectStatusFromHistory($digitalInitiative);
+
+        return redirect()->back()->with('success', 'Project status history deleted successfully.');
+    }
+
+    private function recordProjectStatusHistory(
+        TrsProject $project,
+        ?int $fromStatusId,
+        ?int $toStatusId,
+        ?string $changedAt = null,
+        ?string $notes = null,
+    ): void {
+        if (
+            ! Schema::hasTable('trs_project_status_history')
+            || ! Schema::hasColumn('trs_project_status_history', 'project_charter_id')
+            || ! Schema::hasColumn('trs_project_status_history', 'status')
+            || ! Schema::hasColumn('trs_project_status_history', 'version')
+            || ! Schema::hasColumn('trs_project_status_history', 'tanggal')
+            || ! Schema::hasColumn('trs_project_status_history', 'notes')
+        ) {
+            return;
+        }
+
+        $normalizedToStatusId = is_numeric($toStatusId) ? (int) $toStatusId : null;
+        $normalizedFromStatusId = is_numeric($fromStatusId) ? (int) $fromStatusId : null;
+
+        if ($normalizedToStatusId === null || $normalizedToStatusId <= 0) {
+            return;
+        }
+
+        if ($normalizedFromStatusId === $normalizedToStatusId) {
+            return;
+        }
+
+        if ($changedAt === null || trim($changedAt) === '') {
+            return;
+        }
+
+        $nextVersion = (int) $project->projectStatusHistories()->max('version') + 1;
+        $projectCharterId = $this->resolveProjectStatusHistoryCharterId($project);
+
+        if ($projectCharterId === null) {
+            return;
+        }
+
+        ProjectStatusHistory::query()->create([
+            'project_charter_id' => $projectCharterId,
+            'status' => $normalizedToStatusId,
+            'version' => $nextVersion,
+            'tanggal' => \Carbon\Carbon::parse($changedAt)->toDateString(),
+            'notes' => $this->buildProjectStatusHistoryNotes($normalizedFromStatusId, $normalizedToStatusId, $notes),
+        ]);
+    }
+
+    private function latestProjectStatusHistoryEntry(TrsProject $project): ?ProjectStatusHistory
+    {
+        if ($project->relationLoaded('projectStatusHistories')) {
+            return $project->projectStatusHistories->first();
+        }
+
+        return $project->projectStatusHistories()->first();
+    }
+
+    private function resolvedProjectStatusId(TrsProject $project): ?int
+    {
+        $historyStatus = $this->latestProjectStatusHistoryEntry($project)?->status;
+        if (is_numeric($historyStatus)) {
+            return (int) $historyStatus;
+        }
+
+        return 0;
+    }
+
+    private function resolveProjectStatusHistoryCharterId(TrsProject $project): ?int
+    {
+        $projectCharterId = $project->charters()->latest('id')->value('id');
+        if ($projectCharterId !== null) {
+            return (int) $projectCharterId;
+        }
+
+        $charter = $project->charters()->create([
+            'version_label' => 'v1',
+        ]);
+
+        return (int) $charter->id;
+    }
+
+    private function resequenceProjectStatusHistories(TrsProject $project): void
+    {
+        $project->projectStatusHistories()
+            ->orderBy('version')
+            ->orderBy('id')
+            ->get()
+            ->values()
+            ->each(static function (ProjectStatusHistory $history, int $index): void {
+                $expectedVersion = $index + 1;
+
+                if ((int) $history->version !== $expectedVersion) {
+                    $history->update(['version' => $expectedVersion]);
+                }
+            });
+    }
+
+    private function syncProjectStatusFromHistory(TrsProject $project): void
+    {
+        $project->refresh();
+        $resolvedStatusId = $this->resolvedProjectStatusId($project);
+
+        if ((int) $project->status !== $resolvedStatusId) {
+            $project->update(['status' => $resolvedStatusId]);
+        }
+    }
+
+    private function buildProjectStatusHistoryNotes(?int $fromStatusId, ?int $toStatusId, ?string $notes = null): string
+    {
+        $manualNotes = trim((string) $notes);
+        if ($manualNotes !== '') {
+            return $manualNotes;
+        }
+
+        $statusNames = InitiativeStatus::query()
+            ->whereIn('id', array_values(array_filter([$fromStatusId, $toStatusId])))
+            ->pluck('name', 'id');
+
+        $formatStatus = static function (?int $statusId) use ($statusNames): string {
+            $name = $statusId !== null ? $statusNames->get($statusId) : null;
+
+            if ($name === null) {
+                return 'Unknown';
+            }
+
+            return ucwords(str_replace('_', ' ', (string) $name));
+        };
+
+        if ($fromStatusId === null) {
+            return 'Status project charter menjadi '.$formatStatus($toStatusId).'.';
+        }
+
+        return 'Status project charter berubah dari '.$formatStatus($fromStatusId).' menjadi '.$formatStatus($toStatusId).'.';
     }
 }

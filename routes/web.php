@@ -183,6 +183,8 @@ Route::middleware(['auth', 'approved'])->group(function () {
 
     // Digital Initiatives
     Route::resource('digital-initiatives', DigitalInitiativeController::class);
+    Route::put('/digital-initiatives/{digital_initiative}/project-status-history/{history}', [DigitalInitiativeController::class, 'updateProjectStatusHistory'])->name('digital-initiatives.project-status-history.update');
+    Route::delete('/digital-initiatives/{digital_initiative}/project-status-history/{history}', [DigitalInitiativeController::class, 'destroyProjectStatusHistory'])->name('digital-initiatives.project-status-history.destroy');
 
     // IT Initiatives & Charters
     // Roadmap — dedicated controller (all programs & per-program views)

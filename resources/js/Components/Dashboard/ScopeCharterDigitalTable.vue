@@ -83,6 +83,7 @@
                                     Edit
                                 </Link>
                                 <Link
+                                    v-if="hasProjectCharter(project)"
                                     :href="`/digital-initiatives/${project.id}?tab=charter`"
                                     :class="actionCellClass(hasProjectCharter(project))"
                                     title="View Project Charter"
@@ -90,6 +91,7 @@
                                     Project Charter
                                 </Link>
                                 <Link
+                                    v-if="hasProjectCharter(project)"
                                     :href="project?.charter?.id ? `/roadmap?pc_id=${project.charter.id}` : '/roadmap'"
                                     class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-sky-100 text-sky-700 transition-colors hover:bg-sky-200 dark:bg-sky-500/20 dark:text-sky-300 dark:hover:bg-sky-500/30"
                                     title="Open Roadmap"
@@ -97,6 +99,7 @@
                                     Roadmap
                                 </Link>
                                 <Link
+                                    v-if="hasProjectCharter(project)"
                                     :href="`/digital-initiatives/${project.id}?tab=detail`"
                                     class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-blue-100 text-blue-700 transition-colors hover:bg-blue-200 dark:bg-blue-500/20 dark:text-blue-300 dark:hover:bg-blue-500/30"
                                     title="View Status Implementation"
