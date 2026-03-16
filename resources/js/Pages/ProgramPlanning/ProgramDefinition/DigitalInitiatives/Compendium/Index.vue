@@ -18,18 +18,24 @@
                     href="/program-planning/program-definition/digital-initiatives"
                     class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
                 >
-                    Digital Initiatives
+                    Digital Initiatives List
                 </Link>
                 <div
                     class="rounded-lg bg-blue-50 px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-blue-600 shadow-sm dark:bg-blue-500/10 dark:text-blue-400"
                 >
-                    Compendium
+                    Compendium List
                 </div>
                 <Link
                     href="/program-planning/program-definition/digital-initiatives/appendix"
                     class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
                 >
-                    Appendix
+                    Appendix List
+                </Link>
+                <Link
+                    href="/program-planning/program-definition/digital-initiatives/mapping"
+                    class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
+                >
+                    Mapping
                 </Link>
             </div>
 

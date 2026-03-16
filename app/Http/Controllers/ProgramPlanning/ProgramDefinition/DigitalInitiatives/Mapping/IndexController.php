@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Appendix;
+namespace App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Mapping;
 
 use App\Http\Controllers\Controller;
 use App\Models\MstCoe;
@@ -27,7 +27,6 @@ class IndexController extends Controller
             'mstInitiatives:id,code,name,description,coe_id,business_unit,source',
             'mstInitiatives.organization:id,name,groub_id',
             'compendiums:id,usecase,description',
-            'scDetails:id,sc_id,organization',
         ])
             ->where('source_id', 2)
             ->orderBy('id')
@@ -42,30 +41,9 @@ class IndexController extends Controller
                 'urgency',
             ]);
 
-        $rjppMap = collect();
-
-        if ($records->isNotEmpty()) {
-            $rjppScKey = Schema::hasColumn('trs_rjpp', 'sc_id') ? 'sc_id' : 'digital_id';
-
-            $rjppMap = DB::table('trs_rjpp as rj')
-                ->join('trs_themes as theme', 'theme.id', '=', 'rj.theme_id')
-                ->whereIn("rj.$rjppScKey", $records->pluck('id')->all())
-                ->selectRaw("rj.$rjppScKey as sc_id, theme.theme_number")
-                ->orderBy('theme.theme_number')
-                ->get()
-                ->groupBy('sc_id')
-                ->map(fn ($rows) => $rows
-                    ->pluck('theme_number')
-                    ->filter(fn ($num) => ! empty($num))
-                    ->map(fn ($num) => "#$num")
-                    ->values()
-                    ->implode(', '));
-        }
-
         $appendixItems = $records
-            ->map(function (TrsScInitiative $item) use ($rjppMap): array {
+            ->map(function (TrsScInitiative $item): array {
                 $firstMst = $item->mstInitiatives->first();
-                $detail = $item->scDetails->first();
 
                 $compendiums = $item->compendiums->map(function ($compendium) {
                     $label = trim((string) ($compendium->usecase ?? ''));
@@ -76,19 +54,13 @@ class IndexController extends Controller
                     return $compendium->description ?: '-';
                 })->filter(fn($d) => $d !== '-')->implode(', ');
 
-                $rjpp = (string) ($rjppMap->get($item->id, '-') ?? '-');
-
                 return [
                     'id' => (int) $item->id,
-                    'project_owner' => $item->owner ?: '-',
-                    'pic' => $detail?->organization ?: '-',
                     'master_initiative' => $firstMst ? ($firstMst->code ? "{$firstMst->code} - {$firstMst->name}" : $firstMst->name) : '-',
                     'use_case_compendium' => $compendiums ?: '-',
                     'use_case_compendium_description' => $compendiumDescriptions ?: '-',
                     'use_case_appendix' => $item->usecase ?: '-',
                     'use_case_appendix_description' => $item->description ?: '-',
-                    'rjpp' => trim($rjpp) !== '' ? $rjpp : '-',
-                    'coe' => $item->coe ?: '-',
                 ];
             })
             ->values();
@@ -100,7 +72,7 @@ class IndexController extends Controller
             ->sort()
             ->values();
 
-        return Inertia::render('ProgramPlanning/ProgramDefinition/DigitalInitiatives/Appendix/Index', [
+        return Inertia::render('ProgramPlanning/ProgramDefinition/DigitalInitiatives/Mapping/Index', [
             'appendixItems' => $appendixItems,
             'totalAppendixItems' => $appendixItems->count(),
             'uniqueCompendiums' => $uniqueCompendiums,

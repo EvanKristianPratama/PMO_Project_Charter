@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <UserLayout title="Program Definition Digital Initiatives â€” Appendix List">
         <div class="animate-fade-in space-y-4">
             <div class="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-white/10 dark:bg-[#171717] w-fit">
@@ -26,23 +26,23 @@
                 >
                     Compendium List
                 </Link>
+                <Link
+                    href="/program-planning/program-definition/digital-initiatives/appendix"
+                    class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
+                >
+                    Appendix List
+                </Link>
                 <div
                     class="rounded-lg bg-blue-50 px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-blue-600 shadow-sm dark:bg-blue-500/10 dark:text-blue-400"
                 >
-                    Appendix List
-                </div>
-                <Link
-                    href="/program-planning/program-definition/digital-initiatives/mapping"
-                    class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
-                >
                     Mapping
-                </Link>
+                </div>
             </div>
 
             <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Appendix List</h1>
+                        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Mapping</h1>
                     </div>
                     <div class="flex items-center gap-2">
                         <span
@@ -114,39 +114,35 @@
                 <div class="overflow-x-auto">
                     <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
                         <colgroup>
-                            <col class="w-[35px]">
-                            <col class="w-[150px]">
-                            <col class="w-[120px]">
-                            <col class="w-[200px]">
-                            <col class="w-[240px]">
-                            <col class="w-[60px]">
-                            <col class="w-[100px]">
-                            <col class="w-[140px]">
-                            <col class="w-[60px]">
+                            <col class="w-[25px]">
+                            <col class="w-[180px]">
+                            <col class="w-[180px]">
+                            <col class="w-[180px]">
+                            <col class="w-[180px]">
+                            <col class="w-[220px]">
+                            <col class="w-[50px]">
                         </colgroup>
                         <thead class="bg-slate-50 dark:bg-white/5">
                             <tr>
                                 <th class="px-3 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">No</th>
-                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Project Owner</th>
-                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">PIC</th>
-                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Scope Charter</th>
-                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Scope Charter Description</th>
-                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">RJPP</th>
-                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">CoE</th>
-                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Compendium</th>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Master Initiative</th>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Use Case Compendium</th>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Use Case Description</th>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Scope Charter Appendix</th>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Scope Charter Appendix Description</th>
                                 <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Action</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
                             <tr v-for="(item, index) in filteredAppendixItems" :key="`appendix-${item.id}`" class="transition-colors hover:bg-slate-50 dark:hover:bg-white/5">
                                 <td class="px-3 py-3 text-center text-slate-400 dark:text-slate-500">{{ index + 1 }}</td>
-                                <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.project_owner ?? '-' }}</td>
-                                <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.pic ?? '-' }}</td>
-                                <td class="px-3 py-3 text-slate-700 dark:text-slate-200 font-medium">{{ item.use_case_appendix ?? '-' }}</td>
-                                <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.use_case_appendix_description ?? '-' }}</td>
-                                <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ (item.rjpp ?? '-').replace(/#/g, '') }}</td>
-                                <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.coe ?? '-' }}</td>
+                                <td class="px-3 py-3 text-slate-700 dark:text-slate-200 font-semibold">{{ item.master_initiative ?? '-' }}</td>
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.use_case_compendium ?? '-' }}</td>
+                                <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.use_case_compendium_description ?? '-' }}</td>
+                                <td class="px-3 py-3 text-slate-700 dark:text-slate-200 font-medium">{{ item.use_case_appendix ?? '-' }}</td>
+                                <td class="px-3 py-3 text-slate-700 dark:text-slate-200">
+                                    {{ item.use_case_appendix_description ?? '-' }}
+                                </td>
                                 <td class="px-3 py-3 text-[10px] font-medium">
                                     <Link
                                         v-if="resolveDetailId(item)"
@@ -164,7 +160,7 @@
                                 </td>
                             </tr>
                             <tr v-if="filteredAppendixItems.length === 0">
-                                <td colspan="9" class="px-6 py-10 text-center text-xs text-slate-500 dark:text-slate-400 italic">
+                                <td colspan="7" class="px-6 py-10 text-center text-xs text-slate-500 dark:text-slate-400 italic">
                                     Data tidak ditemukan berdasarkan filter yang dipilih.
                                 </td>
                             </tr>
@@ -314,26 +310,22 @@ const masterInitiativeRows = computed(() => {
         }
     }
 
-        return labels.map((label) => {
-            const appendixItems = appendixMap.get(label) ?? [];
-            const detailId = appendixItems.length === 1 ? appendixItems[0]?.id : null;
-            const compendiumLabels = compendiumMap.get(label) ?? [];
-            const compendiumDescriptions = compendiumDescMap.get(label) ?? [];
-            return {
-                id: `mi-${label}`,
-                master_initiative: label,
-                project_owner: joinDistinctValues(appendixItems.map((item) => item.project_owner)),
-                pic: joinDistinctValues(appendixItems.map((item) => item.pic)),
-                use_case_compendium: joinDistinctValues(compendiumLabels),
-                use_case_compendium_description: joinDistinctValues(compendiumDescriptions),
-                use_case_appendix: joinListValues(appendixItems.map((item) => item.use_case_appendix)),
-                use_case_appendix_description: joinDistinctValues(appendixItems.map((item) => item.use_case_appendix_description)),
-                rjpp: joinListValues(appendixItems.map((item) => item.rjpp)),
-                coe: joinDistinctValues(appendixItems.map((item) => item.coe)),
-                detail_id: detailId,
-            };
-        });
+    return labels.map((label) => {
+        const appendixItems = appendixMap.get(label) ?? [];
+        const detailId = appendixItems.length === 1 ? appendixItems[0]?.id : null;
+        const compendiumLabels = compendiumMap.get(label) ?? [];
+        const compendiumDescriptions = compendiumDescMap.get(label) ?? [];
+        return {
+            id: `mi-${label}`,
+            master_initiative: label,
+            use_case_compendium: joinDistinctValues(compendiumLabels),
+            use_case_compendium_description: joinDistinctValues(compendiumDescriptions),
+            use_case_appendix: joinListValues(appendixItems.map((item) => item.use_case_appendix)),
+            use_case_appendix_description: joinDistinctValues(appendixItems.map((item) => item.use_case_appendix_description)),
+            detail_id: detailId,
+        };
     });
+});
 
 const compendiumRows = computed(() => {
     const labels = [];
@@ -353,34 +345,30 @@ const compendiumRows = computed(() => {
         compendiumByLabel.get(label).push(opt);
     }
 
-        return labels.map((label) => {
-            const options = compendiumByLabel.get(label) ?? [];
-            const items = (props.appendixItems ?? []).filter((item) => {
-                const list = parseListValue(item.use_case_compendium);
-                return list.includes(label);
-            });
-            const detailId = items.length === 1 ? items[0]?.id : null;
-            return {
-                id: `comp-${label}`,
-                master_initiative: joinDistinctValues([
-                    ...options.map((option) => option.master_initiative),
-                    ...items.map((item) => item.master_initiative),
-                ]),
-                project_owner: joinDistinctValues(items.map((item) => item.project_owner)),
-                pic: joinDistinctValues(items.map((item) => item.pic)),
-                use_case_compendium: label,
-                use_case_compendium_description: joinDistinctValues([
-                    ...options.map((option) => option.description),
-                    ...items.map((item) => item.use_case_compendium_description),
-                ]),
-                use_case_appendix: joinListValues(items.map((item) => item.use_case_appendix)),
-                use_case_appendix_description: joinDistinctValues(items.map((item) => item.use_case_appendix_description)),
-                rjpp: joinListValues(items.map((item) => item.rjpp)),
-                coe: joinDistinctValues(items.map((item) => item.coe)),
-                detail_id: detailId,
-            };
+    return labels.map((label) => {
+        const options = compendiumByLabel.get(label) ?? [];
+        const items = (props.appendixItems ?? []).filter((item) => {
+            const list = parseListValue(item.use_case_compendium);
+            return list.includes(label);
         });
+        const detailId = items.length === 1 ? items[0]?.id : null;
+        return {
+            id: `comp-${label}`,
+            master_initiative: joinDistinctValues([
+                ...options.map((option) => option.master_initiative),
+                ...items.map((item) => item.master_initiative),
+            ]),
+            use_case_compendium: label,
+            use_case_compendium_description: joinDistinctValues([
+                ...options.map((option) => option.description),
+                ...items.map((item) => item.use_case_compendium_description),
+            ]),
+            use_case_appendix: joinListValues(items.map((item) => item.use_case_appendix)),
+            use_case_appendix_description: joinDistinctValues(items.map((item) => item.use_case_appendix_description)),
+            detail_id: detailId,
+        };
     });
+});
 
 const uniqueAppendixUseCases = computed(() => {
     const items = props.appendixItems
@@ -396,14 +384,10 @@ const appendixRows = computed(() => {
         return {
             id: `app-${label}`,
             master_initiative: joinDistinctValues(items.map((item) => item.master_initiative)),
-            project_owner: joinDistinctValues(items.map((item) => item.project_owner)),
-            pic: joinDistinctValues(items.map((item) => item.pic)),
             use_case_compendium: joinListValues(items.map((item) => item.use_case_compendium)),
             use_case_compendium_description: joinDistinctValues(items.map((item) => item.use_case_compendium_description)),
             use_case_appendix: label,
             use_case_appendix_description: joinDistinctValues(items.map((item) => item.use_case_appendix_description)),
-            rjpp: joinListValues(items.map((item) => item.rjpp)),
-            coe: joinDistinctValues(items.map((item) => item.coe)),
             detail_id: detailId,
         };
     });
