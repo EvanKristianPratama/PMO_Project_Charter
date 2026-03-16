@@ -122,20 +122,29 @@ const scoreOptions = [
     { value: null, label: "TBC" },
 ];
 
-const themeDisplayLabel = (theme) => {
+const rjppDisplayLabel = (theme) => {
     if (!theme) return "-";
-    const strategicPillar = String(
-        theme?.strategic_pillar_title ?? theme?.strategic_pillar ?? "",
-    ).trim();
-    const themeNumber = String(theme?.theme_number ?? theme?.code ?? "")
+
+    const code = String(theme?.code ?? theme?.goal_code ?? "")
         .trim()
         .replace(/#/g, "");
-    const themeName = String(theme?.theme_name ?? theme?.name ?? "").trim();
-    if (strategicPillar === "" && themeNumber === "") return themeName || "-";
-    const prefix = strategicPillar !== "" ? `[${strategicPillar}]` : "";
-    const number = themeNumber !== "" ? ` ${themeNumber}` : "";
-    const suffix = themeName !== "" ? ` - ${themeName}` : "";
-    return `${prefix}${number}${suffix}`.trim() || "-";
+    const goal = String(
+        theme?.goal ?? theme?.strategic_pillar ?? theme?.strategic_pillar_title ?? "",
+    ).trim();
+    const themeNumber = String(theme?.theme_number ?? theme?.theme_code ?? "")
+        .trim()
+        .replace(/#/g, "");
+    const themeName = String(theme?.themes ?? theme?.theme_name ?? theme?.name ?? "")
+        .trim();
+
+    const parts = [
+        code !== "" ? code : "-",
+        goal !== "" ? goal : "-",
+        themeNumber !== "" ? themeNumber : "-",
+        themeName !== "" ? themeName : "-",
+    ];
+
+    return parts.join(" - ");
 };
 
 const sourceDisplayLabel = (source) => {
@@ -179,19 +188,39 @@ const removeRjpp = (id) => {
     );
 };
 
+const stripInitiativePrefix = (name, code) => {
+    const rawName = String(name ?? "").trim();
+    const rawCode = String(code ?? "").trim().replace(/#/g, "");
+    if (!rawName || !rawCode) return rawName;
+    const escaped = rawCode.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const pattern = new RegExp(
+        `^\\s*(\\[\\s*)?${escaped}(\\s*\\])?\\s*[-.:)]?\\s*`,
+        "i",
+    );
+    const cleaned = rawName.replace(pattern, "").trim();
+    return cleaned !== "" ? cleaned : rawName;
+};
+
+const initiativeDisplayLabel = (initiative) => {
+    if (!initiative) return "-";
+    const code = String(initiative?.code ?? "").trim().replace(/#/g, "");
+    const name = stripInitiativePrefix(initiative?.name ?? "", code);
+    if (code && name) return `[${code}] - ${name}`;
+    if (code) return `[${code}]`;
+    return name || "-";
+};
+
 const getInitiativeLabel = (id) => {
     const selected = props.initiativeOptions.find(
         (item) => toNumber(item.id) === id,
     );
     if (!selected) return String(id);
-    return selected.code
-        ? `[${String(selected.code).replace(/#/g, "")}] ${selected.name}`
-        : selected.name;
+    return initiativeDisplayLabel(selected) || String(id);
 };
 
 const getThemeLabel = (id) => {
     const theme = props.themeOptions.find((item) => toNumber(item.id) === id);
-    return themeDisplayLabel(theme) || String(id);
+    return rjppDisplayLabel(theme) || String(id);
 };
 
 const formatCompendiumLabel = (option) => {
@@ -321,6 +350,55 @@ const submit = () => {
                                     >
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="md:col-span-3">
+                            <label
+                                class="mb-1 block text-[11px] font-bold uppercase tracking-wider text-slate-500"
+                                >Initiative</label
+                            >
+                            <div class="space-y-2">
+                                <select
+                                    @change="(e) => { addInitiative(Number(e.target.value)); e.target.value = ''; }"
+                                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
+                                >
+                                    <option value="">+ Pilih Initiative...</option>
+                                    <option
+                                        v-for="opt in initiativeOptions"
+                                        :key="`appendix-initiative-opt-${opt.id}`"
+                                        :value="opt.id"
+                                        :disabled="appendixForm.initiative_ids.includes(toNumber(opt.id, 0))"
+                                    >
+                                        {{ initiativeDisplayLabel(opt) }}
+                                    </option>
+                                </select>
+                                <div
+                                    class="flex min-h-10 flex-wrap gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-2 dark:border-white/10 dark:bg-white/5"
+                                >
+                                    <template v-if="appendixForm.initiative_ids.length">
+                                        <span
+                                            v-for="id in appendixForm.initiative_ids"
+                                            :key="`appendix-initiative-tag-${id}`"
+                                            class="inline-flex items-center gap-2 rounded-full bg-blue-100 px-2.5 py-1 text-[10px] font-semibold text-blue-800 dark:bg-blue-500/20 dark:text-blue-300"
+                                        >
+                                            {{ getInitiativeLabel(id) }}
+                                            <button
+                                                type="button"
+                                                class="text-blue-700/70 hover:text-rose-500 dark:text-blue-300/80"
+                                                @click="removeInitiative(id)"
+                                            >
+                                                x
+                                            </button>
+                                        </span>
+                                    </template>
+                                    <span
+                                        v-else
+                                        class="text-[10px] italic text-slate-500 dark:text-slate-400"
+                                        >Belum ada initiative dipilih.</span
+                                    >
+                                </div>
+                            </div>
+                            <p v-if="appendixForm.errors.initiative_ids" class="mt-1 text-[10px] text-rose-500">{{ appendixForm.errors.initiative_ids }}</p>
                         </div>
 
                         <div>
@@ -469,7 +547,7 @@ const submit = () => {
                                             )
                                         "
                                     >
-                                        {{ themeDisplayLabel(opt) }}
+                                        {{ rjppDisplayLabel(opt) }}
                                     </option>
                                 </select>
                                 <div

@@ -1,5 +1,5 @@
-<script setup>
-import { computed } from 'vue';
+﻿<script setup>
+import { computed, watch } from 'vue';
 
 const props = defineProps({
     initiative: { type: Object, required: true },
@@ -8,6 +8,27 @@ const props = defineProps({
     coeOptions: { type: Array, default: () => [] },
     themeOptions: { type: Array, default: () => [] },
 });
+
+const ensureFormArrays = () => {
+    if (!props.form) return;
+    if (!Array.isArray(props.form.rjpp_tagging_ids)) {
+        props.form.rjpp_tagging_ids = [];
+    }
+    if (!Array.isArray(props.form.sign_by)) {
+        props.form.sign_by = [''];
+    }
+    if (props.form.sign_others_raw === undefined || props.form.sign_others_raw === null) {
+        props.form.sign_others_raw = '';
+    }
+};
+
+watch(
+    () => props.form,
+    () => {
+        ensureFormArrays();
+    },
+    { immediate: true },
+);
 
 // Options for score selects
 const scoreOptions = [
@@ -31,9 +52,9 @@ const signOthers = computed(() => {
 const parseList = (text) => {
     if (!text || text === '-') return [];
     const lines = String(text).split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-    const hasBullet = lines.some(l => /^[-•*]/.test(l));
+    const hasBullet = lines.some(l => /^[-â€¢*]/.test(l));
     if (hasBullet) {
-        const result = lines.map(l => l.replace(/^[-•*]\s*/, '').trim()).filter(Boolean);
+        const result = lines.map(l => l.replace(/^[-â€¢*]\s*/, '').trim()).filter(Boolean);
         return result.length > 0 ? result : [];
     }
     return [];
@@ -42,6 +63,7 @@ const parseList = (text) => {
 // RJPP Tagging Helpers for Edit Mode
 const addRjppTagging = (id) => {
     if (!props.form) return;
+    ensureFormArrays();
     const numericId = Number(id);
     if (numericId && !props.form.rjpp_tagging_ids.includes(numericId)) {
         props.form.rjpp_tagging_ids.push(numericId);
@@ -50,19 +72,37 @@ const addRjppTagging = (id) => {
 
 const removeRjppTagging = (id) => {
     if (!props.form) return;
+    ensureFormArrays();
     props.form.rjpp_tagging_ids = props.form.rjpp_tagging_ids.filter(item => item !== id);
+};
+
+const rjppDisplayLabel = (theme) => {
+    if (!theme) return '-';
+
+    const code = String(theme?.code ?? theme?.goal_code ?? '').trim().replace(/#/g, '');
+    const goal = String(theme?.goal ?? theme?.strategic_pillar ?? theme?.strategic_pillar_title ?? '').trim();
+    const themeNumber = String(theme?.theme_number ?? theme?.theme_code ?? '').trim().replace(/#/g, '');
+    const themeName = String(theme?.themes ?? theme?.theme_name ?? theme?.name ?? '').trim();
+
+    const parts = [
+        code !== '' ? code : '-',
+        goal !== '' ? goal : '-',
+        themeNumber !== '' ? themeNumber : '-',
+        themeName !== '' ? themeName : '-',
+    ];
+
+    return parts.join(' - ');
 };
 
 const themeLabel = (id) => {
     const theme = props.themeOptions.find(t => Number(t.id) === id);
-    if (!theme) return String(id);
-    const code = (theme.theme_code ?? theme.code ?? '').replace(/#/g, '');
-    return code ? `[${code}] ${theme.name}` : theme.name;
+    return rjppDisplayLabel(theme) || String(id);
 };
 
 const currentRjppThemes = computed(() => {
     if (props.editable && props.form) {
-        return props.form.rjpp_tagging_ids.map(id => props.themeOptions.find(t => Number(t.id) === id)).filter(Boolean);
+        const ids = Array.isArray(props.form.rjpp_tagging_ids) ? props.form.rjpp_tagging_ids : [];
+        return ids.map(id => props.themeOptions.find(t => Number(t.id) === id)).filter(Boolean);
     }
     return props.initiative.rjppThemes ?? [];
 });
@@ -76,6 +116,17 @@ const getLevelColorClass = (label) => {
     return 'bg-slate-400 text-white';
 };
 
+const formatUpdatedDate = (value) => {
+    if (!value) return '-';
+    const str = String(value).trim();
+    if (!str) return '-';
+    const date = new Date(str);
+    if (Number.isNaN(date.getTime())) {
+        return str;
+    }
+    return new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }).format(date);
+};
+
 const getLevelLabel = (type) => {
     if (props.editable && props.form) {
         const val = props.form[type];
@@ -87,8 +138,10 @@ const getLevelLabel = (type) => {
 </script>
 
 <template>
-    <div class="charter-wrapper w-full border border-slate-200 bg-white text-slate-800 shadow-sm print:shadow-none"
-        style="font-family: 'Segoe UI', sans-serif;">
+    <div
+        class="charter-wrapper w-full border border-slate-200 bg-white text-slate-800 shadow-sm print:shadow-none"
+        style="font-family: 'Segoe UI', sans-serif;"
+    >
         <!-- Header Section -->
         <div class="flex flex-wrap items-center justify-between border-b border-slate-200 px-5 py-2">
             <!-- Title Row -->
@@ -146,10 +199,9 @@ const getLevelLabel = (type) => {
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Metadata Bar -->
-    <div class="grid grid-cols-1 overflow-hidden border-x border-b border-[#3b82f6] lg:grid-cols-4">
+        <!-- Metadata Bar -->
+        <div class="grid grid-cols-1 overflow-hidden border-x border-b border-[#3b82f6] lg:grid-cols-4">
         <!-- Project Owner -->
         <div class="flex border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
             <div
@@ -157,8 +209,8 @@ const getLevelLabel = (type) => {
                 Project Owner
             </div>
             <div class="flex flex-1 items-center bg-white px-3 py-1.5 text-[12px] text-slate-900">
-                <input v-if="editable" v-model="form.organization" type="text" class="meta-input" placeholder="...">
-                <template v-else>{{ initiative.organization ?? '-' }}</template>
+                <input v-if="editable" v-model="form.owner" type="text" class="meta-input" placeholder="...">
+                <template v-else>{{ initiative.owner ?? '-' }}</template>
             </div>
         </div>
 
@@ -169,8 +221,8 @@ const getLevelLabel = (type) => {
                 PIC
             </div>
             <div class="flex flex-1 items-center bg-white px-3 py-1.5 text-[12px] text-slate-900">
-                <input v-if="editable" v-model="form.owner" type="text" class="meta-input" placeholder="...">
-                <template v-else>{{ initiative.owner ?? '-' }}</template>
+                <input v-if="editable" v-model="form.organization" type="text" class="meta-input" placeholder="...">
+                <template v-else>{{ initiative.organization ?? '-' }}</template>
             </div>
         </div>
 
@@ -196,8 +248,8 @@ const getLevelLabel = (type) => {
                 Updated
             </div>
             <div class="flex flex-1 items-center bg-white px-3 py-1.5 text-[12px] text-slate-900">
-                <input v-if="editable" v-model="form.update_doc" type="text" class="meta-input" placeholder="...">
-                <template v-else>{{ initiative.update_doc ?? '-' }}</template>
+                <input v-if="editable" v-model="form.update_doc" type="date" class="meta-input" placeholder="...">
+                <template v-else>{{ formatUpdatedDate(initiative.update_doc) }}</template>
             </div>
         </div>
     </div>
@@ -265,14 +317,14 @@ const getLevelLabel = (type) => {
                     <option value="">+ Pilih RJPP Tagging...</option>
                     <option v-for="opt in themeOptions" :key="opt.id" :value="opt.id"
                         :disabled="form.rjpp_tagging_ids.includes(Number(opt.id))">
-                        {{ opt.theme_code ?? opt.code ?? '-' }} - {{ opt.name }}
+                        {{ rjppDisplayLabel(opt) }}
                     </option>
                 </select>
                 <div class="flex flex-wrap gap-2">
                     <span v-for="id in form.rjpp_tagging_ids" :key="id" class="rjpp-tag">
                         {{ themeLabel(id) }}
                         <button type="button" @click="removeRjppTagging(id)"
-                            class="ml-1 font-bold hover:text-rose-500">×</button>
+                            class="ml-1 font-bold hover:text-rose-500">Ã—</button>
                     </span>
                 </div>
             </div>
@@ -439,8 +491,8 @@ const getLevelLabel = (type) => {
         </div>
     </div>
 
-    <!-- Bottom Grid Row 2: Resource / Interdependency / Sign By -->
-    <div class="grid grid-cols-1 border-x border-b border-[#3b82f6] lg:grid-cols-3">
+        <!-- Bottom Grid Row 2: Resource / Interdependency / Sign By -->
+        <div class="grid grid-cols-1 border-x border-b border-[#3b82f6] lg:grid-cols-3">
         <!-- Resource Requirement -->
         <div class="flex flex-col border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
             <div class="bg-[#1e4f8f] px-3 py-1.5 text-[12px] font-bold text-white flex items-center justify-start gap-2">
@@ -565,6 +617,7 @@ const getLevelLabel = (type) => {
                     </div>
                 </div>
             </div>
+        </div>
         </div>
     </div>
 </template>
@@ -725,3 +778,4 @@ const getLevelLabel = (type) => {
     }
 }
 </style>
+

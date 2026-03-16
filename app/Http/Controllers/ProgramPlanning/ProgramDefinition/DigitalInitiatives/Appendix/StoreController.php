@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Appendix;
 
 use App\Http\Controllers\Controller;
@@ -10,7 +9,9 @@ use App\Models\TrsScDetails;
 use App\Models\TrsScInitiative;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class StoreController extends Controller
 {
@@ -34,13 +35,13 @@ class StoreController extends Controller
             'urgency' => 'nullable|integer|in:1,2,3',
             'status' => 'nullable|integer',
             'initiative_ids' => 'nullable|array',
-            'initiative_ids.*' => 'integer',
+            'initiative_ids.*' => 'integer|exists:mst_initiative,id',
             'rjpp_tagging_ids' => 'nullable|array',
             'rjpp_tagging_ids.*' => 'integer',
 
             // --- Step 3: TrsScDetails ---
             'organization' => 'nullable|string|max:255',
-            'update_doc' => 'nullable|string|max:255',
+            'update_doc' => 'nullable|date',
             'situation' => 'nullable|string',
             'key_functionalities' => 'nullable|string',
             'value_rationale' => 'nullable|string',
@@ -52,6 +53,7 @@ class StoreController extends Controller
             'ease_detail' => 'nullable|string',
             'resource' => 'nullable|integer|in:1,2,3',
             'resource_rationale' => 'nullable|string',
+            'resource_detail' => 'nullable|string',
             'resource_retionale' => 'nullable|string',
             'predecessor' => 'nullable|string',
             'successor' => 'nullable|string',
@@ -74,8 +76,29 @@ class StoreController extends Controller
             ]);
 
             // 2. Sync Relationships (Many-to-Many)
-            if (! empty($validated['initiative_ids'])) {
-                $scInitiative->mstInitiatives()->sync(array_filter($validated['initiative_ids']));
+            $initiativeIds = $this->uniqueIntCollection($validated['initiative_ids'] ?? []);
+            $hasPivotTimestamps =
+                Schema::hasColumn('trs_map_sc', 'created_at')
+                && Schema::hasColumn('trs_map_sc', 'updated_at');
+
+            $rows = $initiativeIds
+                ->map(function (int $initiativeId) use ($scInitiative, $hasPivotTimestamps): array {
+                    $row = [
+                        'sc_id' => $scInitiative->id,
+                        'initiative_id' => $initiativeId,
+                    ];
+
+                    if ($hasPivotTimestamps) {
+                        $row['created_at'] = now();
+                        $row['updated_at'] = now();
+                    }
+
+                    return $row;
+                })
+                ->all();
+
+            if (! empty($rows)) {
+                TrsMapSc::insert($rows);
             }
 
             if (! empty($validated['rjpp_tagging_ids'])) {
@@ -102,7 +125,7 @@ class StoreController extends Controller
                 'ease_detail' => $nullIfEmpty($validated['ease_detail'] ?? null),
                 'resource' => $validated['resource'] ?? null,
                 'resource_rationale' => $nullIfEmpty($validated['resource_rationale'] ?? null),
-                'resource_detail' => $nullIfEmpty($validated['resource_retionale'] ?? null),
+                'resource_detail' => $nullIfEmpty($validated['resource_detail'] ?? $validated['resource_retionale'] ?? null),
                 'predecessor' => $nullIfEmpty($validated['predecessor'] ?? null),
                 'successor' => $nullIfEmpty($validated['successor'] ?? null),
                 'otherBU' => $nullIfEmpty($validated['otherBU'] ?? null),
@@ -111,5 +134,14 @@ class StoreController extends Controller
         });
 
         return back()->with('success', 'Appendix berhasil ditambahkan.');
+    }
+
+    private function uniqueIntCollection(array $items): Collection
+    {
+        return collect($items)
+            ->map(fn ($item) => (int) $item)
+            ->filter(fn (int $item) => $item > 0)
+            ->unique()
+            ->values();
     }
 }

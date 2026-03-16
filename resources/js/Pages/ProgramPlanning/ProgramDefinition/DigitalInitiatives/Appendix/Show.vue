@@ -1,10 +1,10 @@
 <template>
-    <UserLayout title="Program Definition Digital Initiatives — New Appendix">
+    <UserLayout title="Program Definition Digital Initiatives — Edit Appendix">
         <div class="animate-fade-in-up space-y-4">
             <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Create Appendix</h1>
+                        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Edit Appendix</h1>
                         <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Mode tabel (WYSIWYG) untuk data `trs_sc_initiative`.</p>
                     </div>
                     <Link
@@ -29,7 +29,7 @@
                             class="inline-flex items-center gap-1 rounded-lg bg-[#0f63b5] px-4 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-[#0c4e8f] disabled:opacity-50"
                         >
                             <span v-if="form.processing">Menyimpan...</span>
-                            <span v-else>Simpan</span>
+                            <span v-else>Update</span>
                         </button>
                     </div>
 
@@ -95,7 +95,11 @@
 import { Link, useForm } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
-defineProps({
+const props = defineProps({
+    appendix: {
+        type: Object,
+        required: true,
+    },
     initiativeOptions: {
         type: Array,
         default: () => [],
@@ -110,15 +114,15 @@ const scoreOptions = [
 ];
 
 const form = useForm({
-    initiative_id: '',
-    alias: '',
-    useCase_description: '',
-    value: 4,
-    urgency: 4,
+    initiative_id: props.appendix.initiative_id ?? '',
+    alias: props.appendix.alias ?? '',
+    useCase_description: props.appendix.useCase_description ?? '',
+    value: props.appendix.value ?? 4,
+    urgency: props.appendix.urgency ?? 4,
 });
 
 const submit = () => {
-    form.post('/program-planning/program-definition/digital-initiatives/appendix');
+    form.put(`/program-planning/program-definition/digital-initiatives/appendix/${props.appendix.id}`);
 };
 </script>
 

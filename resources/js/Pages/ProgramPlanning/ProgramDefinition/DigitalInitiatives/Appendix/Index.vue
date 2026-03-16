@@ -1,5 +1,5 @@
-<template>
-    <UserLayout title="Program Definition Digital Initiatives — Appendix List">
+﻿<template>
+    <UserLayout title="Program Definition Digital Initiatives â€” Appendix List">
         <div class="animate-fade-in space-y-4">
             <div class="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-white/10 dark:bg-[#171717] w-fit">
                 <Link
@@ -44,12 +44,13 @@
                         >
                             Total: {{ filteredAppendixItems.length }}
                         </span>
-                        <Link
-                            href="/program-planning/program-definition/digital-initiatives/appendix/create"
+                        <button
+                            type="button"
+                            @click="openCreateModal"
                             class="inline-flex items-center rounded-lg bg-[#0f63b5] px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-[#0c4e8f]"
                         >
                             New Appendix
-                        </Link>
+                        </button>
                     </div>
                 </div>
             </section>
@@ -184,7 +185,7 @@
                                         :href="`/program-planning/program-definition/digital-initiatives/appendix/${item.id}/edit`"
                                         class="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-semibold text-amber-800 transition hover:bg-amber-200 dark:bg-amber-500/20 dark:text-amber-300"
                                     >
-                                        Edit
+                                        Show
                                     </Link>
                                 </td>
                             </tr>
@@ -198,13 +199,123 @@
                 </div>
             </section>
         </div>
+
+        <div
+            v-if="isCreateModalOpen"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4 py-4"
+            @click.self="closeCreateModal"
+        >
+            <div class="flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#171717]">
+                <div class="flex items-center justify-between border-b border-slate-200 px-5 py-3 dark:border-white/10">
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-white">
+                        New Appendix
+                    </h2>
+                    <button
+                        type="button"
+                        class="rounded-md px-2 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-200"
+                        @click="closeCreateModal"
+                    >
+                        Close
+                    </button>
+                </div>
+
+                <form class="flex-1 space-y-6 overflow-y-auto px-6 py-5" @submit.prevent="submitCreate">
+                    <div class="space-y-4 rounded-xl border border-slate-200 bg-slate-50/70 p-4 dark:border-white/10 dark:bg-white/5">
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div class="md:col-span-2">
+                                <label class="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-slate-500">Compendium</label>
+                                <select
+                                    v-model="appendixForm.compendium_id"
+                                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
+                                >
+                                    <option value="">+ Pilih Use Case (Compendium)...</option>
+                                    <option
+                                        v-for="option in compendiumOptions"
+                                        :key="`appendix-compendium-${option.id}`"
+                                        :value="String(option.id)"
+                                    >
+                                        {{ formatCompendiumLabel(option) }}
+                                    </option>
+                                </select>
+                                <p v-if="appendixForm.errors.compendium_id" class="mt-1 text-[10px] text-rose-500">{{ appendixForm.errors.compendium_id }}</p>
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label class="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-slate-500">Initiative</label>
+                                <div class="space-y-2">
+                                    <select
+                                        @change="(e) => { addInitiative(Number(e.target.value)); e.target.value = ''; }"
+                                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
+                                    >
+                                        <option value="">+ Pilih Initiative...</option>
+                                        <option
+                                            v-for="opt in initiativeOptions"
+                                            :key="`appendix-initiative-${opt.id}`"
+                                            :value="opt.id"
+                                            :disabled="appendixForm.initiative_ids.includes(Number(opt.id))"
+                                        >
+                                            {{ initiativeDisplayLabel(opt) }}
+                                        </option>
+                                    </select>
+                                    <div class="flex min-h-10 flex-wrap gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-2 dark:border-white/10 dark:bg-white/5">
+                                        <template v-if="appendixForm.initiative_ids.length">
+                                            <span
+                                                v-for="id in appendixForm.initiative_ids"
+                                                :key="`appendix-initiative-tag-${id}`"
+                                                class="inline-flex items-center gap-2 rounded-full bg-blue-100 px-2.5 py-1 text-[10px] font-semibold text-blue-800 dark:bg-blue-500/20 dark:text-blue-300"
+                                            >
+                                                {{ initiativeLabel(id) }}
+                                                <button type="button" class="text-blue-700/70 hover:text-rose-500 dark:text-blue-300/80" @click="removeInitiative(id)">x</button>
+                                            </span>
+                                        </template>
+                                        <span v-else class="text-[10px] italic text-slate-500 dark:text-slate-400">Belum ada initiative dipilih.</span>
+                                    </div>
+                                </div>
+                                <p v-if="appendixForm.errors.initiative_ids" class="mt-1 text-[10px] text-rose-500">{{ appendixForm.errors.initiative_ids }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <AppendixCharterDocument
+                        :initiative="blankAppendix"
+                        :form="appendixForm"
+                        :editable="true"
+                        :coe-options="coeOptions"
+                        :theme-options="themeOptions"
+                    />
+
+                    <div v-if="Object.keys(appendixForm.errors).length" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-[11px] text-rose-600">
+                        <p class="font-semibold">Terdapat error pada input:</p>
+                        <p v-for="(msg, field) in appendixForm.errors" :key="field">{{ field }}: {{ msg }}</p>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-2 border-t border-slate-200 pt-4 dark:border-white/10">
+                        <button
+                            type="button"
+                            class="rounded-lg border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/10"
+                            @click="closeCreateModal"
+                        >
+                            Batal
+                        </button>
+                        <button
+                            type="submit"
+                            :disabled="appendixForm.processing"
+                            class="rounded-lg bg-[#0f63b5] px-6 py-2 text-xs font-bold text-white shadow-md transition-all active:scale-95 hover:bg-[#0c4e8f] disabled:opacity-50"
+                        >
+                            {{ appendixForm.processing ? 'Menyimpan...' : 'Simpan Appendix' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </UserLayout>
 </template>
 
 <script setup>
 import { computed, ref } from 'vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, useForm } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
+import AppendixCharterDocument from '@/Components/Appendix/AppendixCharterDocument.vue';
 
 const props = defineProps({
     appendixItems: {
@@ -219,7 +330,36 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    compendiumOptions: {
+        type: Array,
+        default: () => [],
+    },
+    initiativeOptions: {
+        type: Array,
+        default: () => [],
+    },
+    coeOptions: {
+        type: Array,
+        default: () => [],
+    },
+    themeOptions: {
+        type: Array,
+        default: () => [],
+    },
 });
+
+const APPENDIX_SOURCE_ID = 2;
+
+const isCreateModalOpen = ref(false);
+
+const openCreateModal = () => {
+    isCreateModalOpen.value = true;
+    resetCreateForm();
+};
+
+const closeCreateModal = () => {
+    isCreateModalOpen.value = false;
+};
 
 const filters = ref({
     owner: '',
@@ -228,6 +368,203 @@ const filters = ref({
     coe: '',
     compendium: '',
 });
+
+const blankAppendix = {
+    usecase: '-',
+    description: '-',
+    owner: '-',
+    coe: '-',
+    value_label: '-',
+    urgency_label: '-',
+    organization: '-',
+    update_doc: '-',
+    situation: '-',
+    key_functionalities: '-',
+    value_rationale: '-',
+    value_matrics: '-',
+    urgency_rationale: '-',
+    urgency_expected: '-',
+    ease_label: '-',
+    ease_rationale: '-',
+    ease_detail: '-',
+    resource_label: '-',
+    resource_rationale: '-',
+    resource_detail: '-',
+    predecessor: '-',
+    successor: '-',
+    otherBU: '-',
+    sign_by: [],
+    rjppThemes: [],
+};
+
+const appendixForm = useForm({
+    compendium_id: '',
+    owner: '',
+    coe: '',
+    usecase: '',
+    description: '',
+    source_id: APPENDIX_SOURCE_ID,
+    value: null,
+    urgency: null,
+    status: 1,
+    initiative_ids: [],
+    rjpp_tagging_ids: [],
+    organization: '',
+    update_doc: '',
+    situation: '',
+    key_functionalities: '',
+    value_rationale: '',
+    value_matrics: '',
+    urgency_rationale: '',
+    urgency_expected: '',
+    ease: null,
+    ease_rationale: '',
+    ease_detail: '',
+    resource: null,
+    resource_rationale: '',
+    resource_detail: '',
+    predecessor: '',
+    successor: '',
+    otherBU: '',
+    sign_by: [''],
+    sign_others_raw: '',
+});
+
+const resetCreateForm = () => {
+    appendixForm.reset();
+    appendixForm.clearErrors();
+    appendixForm.compendium_id = '';
+    appendixForm.owner = '';
+    appendixForm.coe = '';
+    appendixForm.usecase = '';
+    appendixForm.description = '';
+    appendixForm.source_id = APPENDIX_SOURCE_ID;
+    appendixForm.value = null;
+    appendixForm.urgency = null;
+    appendixForm.status = 1;
+    appendixForm.initiative_ids = [];
+    appendixForm.rjpp_tagging_ids = [];
+    appendixForm.organization = '';
+    appendixForm.update_doc = '';
+    appendixForm.situation = '';
+    appendixForm.key_functionalities = '';
+    appendixForm.value_rationale = '';
+    appendixForm.value_matrics = '';
+    appendixForm.urgency_rationale = '';
+    appendixForm.urgency_expected = '';
+    appendixForm.ease = null;
+    appendixForm.ease_rationale = '';
+    appendixForm.ease_detail = '';
+    appendixForm.resource = null;
+    appendixForm.resource_rationale = '';
+    appendixForm.resource_detail = '';
+    appendixForm.predecessor = '';
+    appendixForm.successor = '';
+    appendixForm.otherBU = '';
+    appendixForm.sign_by = [''];
+    appendixForm.sign_others_raw = '';
+};
+
+const toNumber = (value, fallback = null) => {
+    const num = Number(value);
+    return Number.isFinite(num) ? num : fallback;
+};
+
+const normalizeIdList = (values) => {
+    if (!Array.isArray(values)) return [];
+    return values.map((value) => toNumber(value, 0)).filter((value) => value > 0);
+};
+
+const stripInitiativePrefix = (name, code) => {
+    const rawName = String(name ?? '').trim();
+    const rawCode = String(code ?? '').trim().replace(/#/g, '');
+    if (!rawName || !rawCode) return rawName;
+    const escaped = rawCode.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const pattern = new RegExp(`^\\s*(\\[\\s*)?${escaped}(\\s*\\])?\\s*[-.:)]?\\s*`, 'i');
+    const cleaned = rawName.replace(pattern, '').trim();
+    return cleaned !== '' ? cleaned : rawName;
+};
+
+const initiativeDisplayLabel = (initiative) => {
+    if (!initiative) return '-';
+    const code = String(initiative?.code ?? '').trim().replace(/#/g, '');
+    const name = stripInitiativePrefix(initiative?.name ?? '', code);
+    if (code && name) return `[${code}] - ${name}`;
+    if (code) return `[${code}]`;
+    return name || '-';
+};
+
+const initiativeLabel = (id) => {
+    const selected = props.initiativeOptions.find((item) => Number(item.id) === Number(id));
+    if (!selected) return String(id);
+    return initiativeDisplayLabel(selected) || String(id);
+};
+
+const addInitiative = (id) => {
+    const numericId = toNumber(id, 0);
+    if (numericId && !appendixForm.initiative_ids.includes(numericId)) {
+        appendixForm.initiative_ids.push(numericId);
+    }
+};
+
+const removeInitiative = (id) => {
+    appendixForm.initiative_ids = appendixForm.initiative_ids.filter((item) => item !== id);
+};
+
+const formatCompendiumLabel = (option) => {
+    const text = String(option?.label ?? '').trim();
+    return text !== '' ? text : `Compendium #${option?.id ?? '-'}`;
+};
+
+const buildSignByPayload = (data) => {
+    const primary = String(data.sign_by?.[0] ?? '').trim();
+    const others = String(data.sign_others_raw ?? '')
+        .split(',')
+        .map((item) => item.trim())
+        .filter((item) => item !== '');
+
+    return [primary, ...others].filter((item) => item !== '');
+};
+
+const submitCreate = () => {
+    appendixForm.transform((data) => ({
+        ...data,
+        compendium_id: data.compendium_id ? toNumber(data.compendium_id, null) : null,
+        initiative_ids: normalizeIdList(data.initiative_ids),
+        rjpp_tagging_ids: normalizeIdList(data.rjpp_tagging_ids),
+        owner: String(data.owner ?? '').trim(),
+        coe: String(data.coe ?? '').trim(),
+        usecase: String(data.usecase ?? '').trim(),
+        description: String(data.description ?? '').trim(),
+        organization: String(data.organization ?? '').trim(),
+        update_doc: data.update_doc ? String(data.update_doc).trim() : null,
+        situation: String(data.situation ?? '').trim(),
+        key_functionalities: String(data.key_functionalities ?? '').trim(),
+        value_rationale: String(data.value_rationale ?? '').trim(),
+        value_matrics: String(data.value_matrics ?? '').trim(),
+        urgency_rationale: String(data.urgency_rationale ?? '').trim(),
+        urgency_expected: String(data.urgency_expected ?? '').trim(),
+        ease_rationale: String(data.ease_rationale ?? '').trim(),
+        ease_detail: String(data.ease_detail ?? '').trim(),
+        resource_rationale: String(data.resource_rationale ?? '').trim(),
+        resource_detail: String(data.resource_detail ?? '').trim(),
+        predecessor: String(data.predecessor ?? '').trim(),
+        successor: String(data.successor ?? '').trim(),
+        otherBU: String(data.otherBU ?? '').trim(),
+        value: data.value === null || data.value === '' ? null : toNumber(data.value, null),
+        urgency: data.urgency === null || data.urgency === '' ? null : toNumber(data.urgency, null),
+        ease: data.ease === null || data.ease === '' ? null : toNumber(data.ease, null),
+        resource: data.resource === null || data.resource === '' ? null : toNumber(data.resource, null),
+        sign_by: buildSignByPayload(data),
+        source_id: APPENDIX_SOURCE_ID,
+    })).post('/program-planning/program-definition/digital-initiatives/appendix', {
+        preserveScroll: true,
+        onSuccess: () => {
+            closeCreateModal();
+            resetCreateForm();
+        },
+    });
+};
 
 const uniqueOwners = computed(() => {
     const owners = props.appendixItems

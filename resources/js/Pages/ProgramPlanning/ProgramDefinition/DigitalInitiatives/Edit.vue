@@ -1,4 +1,4 @@
-<template>
+  <template>
     <UserLayout title="Edit Digital Initiative">
         <div class="mx-auto max-w-5xl animate-fade-in">
             <div class="mb-6">

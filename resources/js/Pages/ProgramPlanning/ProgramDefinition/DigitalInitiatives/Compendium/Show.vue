@@ -169,9 +169,44 @@
             />
 
             <div class="pt-1">
-                <div v-if="appendix">
+                <div v-if="appendix" class="space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900 dark:text-white">Appendix Detail</h3>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button
+                                v-if="!isAppendixEditing"
+                                type="button"
+                                @click="startAppendixEdit"
+                                class="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-xs font-bold text-amber-700 transition-all hover:bg-amber-100"
+                            >
+                                Edit Appendix
+                            </button>
+                            <button
+                                v-if="isAppendixEditing"
+                                type="button"
+                                @click="cancelAppendixEdit"
+                                class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition-all hover:bg-slate-50 dark:border-white/10 dark:bg-transparent dark:text-slate-300 dark:hover:bg-white/5"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                v-if="isAppendixEditing"
+                                type="button"
+                                @click="submitAppendix"
+                                :disabled="appendixForm.processing"
+                                class="inline-flex items-center gap-2 rounded-lg bg-[#0f63b5] px-6 py-2 text-xs font-bold text-white shadow-md transition-all active:scale-95 hover:bg-[#0c4e8f] disabled:opacity-50"
+                            >
+                                {{ appendixForm.processing ? 'Menyimpan...' : 'Simpan Appendix' }}
+                            </button>
+                        </div>
+                    </div>
+
                     <AppendixCharterDocument 
                         :initiative="appendixData" 
+                        :form="appendixForm"
+                        :editable="appendixEditable"
                         :coe-options="coeOptions"
                         :theme-options="themeOptions"
                     />
@@ -232,8 +267,11 @@ const toNumber = (value, fallback = null) => {
 };
 
 const compendiumId = computed(() => toNumber(props.compendium?.id, 0));
+const appendixId = computed(() => toNumber(props.appendix?.id, 0));
+const hasAppendix = computed(() => appendixId.value > 0);
 
 const isAppendixModalOpen = ref(false);
+const isAppendixEditing = ref(false);
 
 const openAppendixModal = () => {
     isAppendixModalOpen.value = true;
@@ -337,10 +375,67 @@ const buildFormPayload = (compendium = {}) => ({
     status: String(compendium.status ?? '1'),
 });
 
+const parseSignBy = (value) => {
+    if (Array.isArray(value)) {
+        return value.map((item) => String(item ?? '').trim()).filter((item) => item !== '');
+    }
+    if (typeof value === 'string') {
+        try {
+            const parsed = JSON.parse(value);
+            if (Array.isArray(parsed)) {
+                return parsed.map((item) => String(item ?? '').trim()).filter((item) => item !== '');
+            }
+        } catch {
+            // fall through
+        }
+        const trimmed = value.trim();
+        return trimmed ? [trimmed] : [];
+    }
+    return [];
+};
+
+const buildAppendixFormPayload = (appendix = {}) => {
+    const signBy = parseSignBy(appendix.sign_by ?? []);
+    const primary = signBy[0] ?? '';
+    const others = signBy.slice(1).join(', ');
+
+    return {
+        owner: String(appendix.owner ?? ''),
+        coe: String(appendix.coe ?? ''),
+        usecase: String(appendix.usecase ?? ''),
+        description: String(appendix.description ?? ''),
+        value: appendix.value === null || appendix.value === undefined ? null : toNumber(appendix.value, null),
+        urgency: appendix.urgency === null || appendix.urgency === undefined ? null : toNumber(appendix.urgency, null),
+        status: appendix.status ?? null,
+        rjpp_tagging_ids: normalizeIdList(appendix.rjpp_tagging_ids),
+        organization: String(appendix.organization ?? ''),
+        update_doc: String(appendix.update_doc ?? ''),
+        situation: String(appendix.situation ?? ''),
+        key_functionalities: String(appendix.key_functionalities ?? ''),
+        value_rationale: String(appendix.value_rationale ?? ''),
+        value_matrics: String(appendix.value_matrics ?? ''),
+        urgency_rationale: String(appendix.urgency_rationale ?? ''),
+        urgency_expected: String(appendix.urgency_expected ?? ''),
+        ease: appendix.ease === null || appendix.ease === undefined ? null : toNumber(appendix.ease, null),
+        ease_rationale: String(appendix.ease_rationale ?? ''),
+        ease_detail: String(appendix.ease_detail ?? ''),
+        resource: appendix.resource === null || appendix.resource === undefined ? null : toNumber(appendix.resource, null),
+        resource_rationale: String(appendix.resource_rationale ?? ''),
+        resource_detail: String(appendix.resource_detail ?? appendix.resource_retionale ?? ''),
+        predecessor: String(appendix.predecessor ?? ''),
+        successor: String(appendix.successor ?? ''),
+        otherBU: String(appendix.otherBU ?? ''),
+        sign_by: [primary, ...signBy.slice(1)],
+        sign_others_raw: others,
+    };
+};
+
 const isExisting = computed(() => compendiumId.value > 0);
 const isEditing = ref(!isExisting.value);
+const appendixEditable = computed(() => isAppendixEditing.value || isEditing.value);
 
 const form = useForm(buildFormPayload(props.compendium ?? {}));
+const appendixForm = useForm(buildAppendixFormPayload(props.appendix ?? {}));
 
 const selectedCompendiumId = computed({
     get: () => (isExisting.value ? String(compendiumId.value) : ''),
@@ -435,6 +530,32 @@ const cancelEdit = () => {
     isEditing.value = false;
 };
 
+const syncAppendixForm = () => {
+    appendixForm.defaults(buildAppendixFormPayload(props.appendix ?? {}));
+    appendixForm.reset();
+    appendixForm.clearErrors();
+};
+
+const startAppendixEdit = () => {
+    syncAppendixForm();
+    isAppendixEditing.value = true;
+};
+
+const cancelAppendixEdit = () => {
+    syncAppendixForm();
+    isAppendixEditing.value = false;
+};
+
+const buildSignByPayload = (data) => {
+    const primary = String(data.sign_by?.[0] ?? '').trim();
+    const others = String(data.sign_others_raw ?? '')
+        .split(',')
+        .map((item) => item.trim())
+        .filter((item) => item !== '');
+
+    return [primary, ...others].filter((item) => item !== '');
+};
+
 const submit = () => {
     const endpointBase = '/program-planning/program-definition/digital-initiatives/compendium';
     form.transform((data) => ({
@@ -460,4 +581,53 @@ const submit = () => {
         preserveScroll: true,
     });
 };
+
+const submitAppendix = () => {
+    if (!hasAppendix.value) return;
+    appendixForm.transform((data) => ({
+        ...data,
+        rjpp_tagging_ids: normalizeIdList(data.rjpp_tagging_ids),
+        owner: String(data.owner ?? '').trim(),
+        coe: String(data.coe ?? '').trim(),
+        usecase: String(data.usecase ?? '').trim(),
+        description: String(data.description ?? '').trim(),
+        organization: String(data.organization ?? '').trim(),
+        update_doc: String(data.update_doc ?? '').trim(),
+        situation: String(data.situation ?? '').trim(),
+        key_functionalities: String(data.key_functionalities ?? '').trim(),
+        value_rationale: String(data.value_rationale ?? '').trim(),
+        value_matrics: String(data.value_matrics ?? '').trim(),
+        urgency_rationale: String(data.urgency_rationale ?? '').trim(),
+        urgency_expected: String(data.urgency_expected ?? '').trim(),
+        ease_rationale: String(data.ease_rationale ?? '').trim(),
+        ease_detail: String(data.ease_detail ?? '').trim(),
+        resource_rationale: String(data.resource_rationale ?? '').trim(),
+        resource_detail: String(data.resource_detail ?? '').trim(),
+        predecessor: String(data.predecessor ?? '').trim(),
+        successor: String(data.successor ?? '').trim(),
+        otherBU: String(data.otherBU ?? '').trim(),
+        value: data.value === null || data.value === '' ? null : toNumber(data.value, null),
+        urgency: data.urgency === null || data.urgency === '' ? null : toNumber(data.urgency, null),
+        ease: data.ease === null || data.ease === '' ? null : toNumber(data.ease, null),
+        resource: data.resource === null || data.resource === '' ? null : toNumber(data.resource, null),
+        sign_by: buildSignByPayload(data),
+    }));
+
+    appendixForm.put(`/program-planning/program-definition/digital-initiatives/appendix/${appendixId.value}`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            isAppendixEditing.value = false;
+        },
+    });
+};
+
+watch(
+    () => props.appendix,
+    () => {
+        if (!isAppendixEditing.value) {
+            syncAppendixForm();
+        }
+    },
+    { deep: true },
+);
 </script>

@@ -13,6 +13,8 @@ class TrsScDetails extends Model
 
     protected $guarded = ['id'];
 
+    protected $casts = ['update_doc' => 'date:Y-m-d'];
+
     public function ScInitiative()
     {
         return $this->belongsTo(TrsScInitiative::class, 'sc_id');

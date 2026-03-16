@@ -224,7 +224,7 @@
                 </div>
 
                 <form class="flex-1 space-y-4 overflow-y-auto px-5 py-4" @submit.prevent="submitCreate">
-                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div class="space-y-4">
                         <div>
                             <label class="mb-1 block text-[11px] font-semibold text-slate-600 dark:text-slate-300">Initiative</label>
                             <div class="space-y-2">
@@ -239,7 +239,7 @@
                                         :value="opt.id"
                                         :disabled="form.initiative_ids.includes(opt.id)"
                                     >
-                                        {{ opt.code ? `[${String(opt.code).replace(/#/g, '')}] ` : '' }}{{ themeDisplayLabel(opt) }}
+                                        {{ initiativeDisplayLabel(opt) }}
                                     </option>
                                 </select>
                                 <div class="flex min-h-10 flex-wrap gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-2 dark:border-white/10 dark:bg-white/5">
@@ -259,7 +259,7 @@
                             <p v-if="form.errors.initiative_ids" class="mt-1 text-[10px] text-rose-500">{{ form.errors.initiative_ids }}</p>
                         </div>
 
-                        <div class="space-y-3">
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
                             <div>
                                 <label class="mb-1 block text-[11px] font-semibold text-slate-600 dark:text-slate-300">Project Owner</label>
                                 <input
@@ -365,7 +365,7 @@
                                     :value="opt.id"
                                     :disabled="form.rjpp_tagging_ids.includes(opt.id)"
                                 >
-                                    {{ themeDisplayLabel(opt) }}
+                                    {{ rjppDisplayLabel(opt) }}
                                 </option>
                             </select>
                             <div class="flex min-h-10 flex-wrap gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-2 dark:border-white/10 dark:bg-white/5">
@@ -564,10 +564,29 @@ const removeInitiative = (id) => {
     form.initiative_ids = form.initiative_ids.filter((item) => item !== id);
 };
 
+const stripInitiativePrefix = (name, code) => {
+    const rawName = String(name ?? '').trim();
+    const rawCode = String(code ?? '').trim().replace(/#/g, '');
+    if (!rawName || !rawCode) return rawName;
+    const escaped = rawCode.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const pattern = new RegExp(`^\\s*(\\[\\s*)?${escaped}(\\s*\\])?\\s*[-.:)]?\\s*`, 'i');
+    const cleaned = rawName.replace(pattern, '').trim();
+    return cleaned !== '' ? cleaned : rawName;
+};
+
+const initiativeDisplayLabel = (initiative) => {
+    if (!initiative) return '-';
+    const code = String(initiative?.code ?? '').trim().replace(/#/g, '');
+    const name = stripInitiativePrefix(initiative?.name ?? '', code);
+    if (code && name) return `[${code}] - ${name}`;
+    if (code) return `[${code}]`;
+    return name || '-';
+};
+
 const initiativeLabel = (id) => {
     const selected = props.initiativeOptions.find((item) => item.id === id);
     if (!selected) return String(id);
-    return selected.code ? `[${selected.code}] ${selected.name}` : selected.name;
+    return initiativeDisplayLabel(selected) || String(id);
 };
 
 const addRjppTagging = (id) => {
@@ -580,27 +599,27 @@ const removeRjppTagging = (id) => {
     form.rjpp_tagging_ids = form.rjpp_tagging_ids.filter((item) => item !== id);
 };
 
-const themeDisplayLabel = (theme) => {
+const rjppDisplayLabel = (theme) => {
     if (!theme) return '-';
 
-    const strategicPillar = String(theme?.strategic_pillar_title ?? theme?.strategic_pillar ?? '').trim();
-    const themeNumber = String(theme?.theme_number ?? theme?.code ?? '').trim().replace(/#/g, '');
-    const themeName = String(theme?.theme_name ?? theme?.name ?? '').trim();
+    const code = String(theme?.code ?? theme?.goal_code ?? '').trim().replace(/#/g, '');
+    const goal = String(theme?.goal ?? theme?.strategic_pillar ?? theme?.strategic_pillar_title ?? '').trim();
+    const themeNumber = String(theme?.theme_number ?? theme?.theme_code ?? '').trim().replace(/#/g, '');
+    const themeName = String(theme?.themes ?? theme?.theme_name ?? theme?.name ?? '').trim();
 
-    if (strategicPillar === '' && themeNumber === '') {
-        return themeName || '-';
-    }
+    const parts = [
+        code !== '' ? code : '-',
+        goal !== '' ? goal : '-',
+        themeNumber !== '' ? themeNumber : '-',
+        themeName !== '' ? themeName : '-',
+    ];
 
-    const prefix = strategicPillar !== '' ? `[${strategicPillar}]` : '';
-    const number = themeNumber !== '' ? ` ${themeNumber}` : '';
-    const suffix = themeName !== '' ? ` - ${themeName}` : '';
-
-    return `${prefix}${number}${suffix}`.trim() || '-';
+    return parts.join(' - ');
 };
 
 const themeLabel = (id) => {
     const theme = props.themeOptions.find((item) => item.id === id);
-    return themeDisplayLabel(theme) || String(id);
+    return rjppDisplayLabel(theme) || String(id);
 };
 
 const sourceDisplayLabel = (source) => {
@@ -648,11 +667,5 @@ const scoreClass = (label) => {
 
 <style scoped>
 </style>
-
-
-
-
-
-
 
 

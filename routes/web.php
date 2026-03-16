@@ -81,6 +81,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/program-planning/program-definition/digital-initiatives', ProgramDefinitionDigitalInitiativesController::class)->name('program-planning.program-definition.digital-initiatives');
     Route::get('/program-planning/program-definition/digital-initiatives/{digitalInitiative}/edit', ProgramDefinitionDigitalInitiativesEditController::class)->name('program-planning.program-definition.digital-initiatives.edit');
     Route::put('/program-planning/program-definition/digital-initiatives/{digitalInitiative}', ProgramDefinitionDigitalInitiativesUpdateController::class)->name('program-planning.program-definition.digital-initiatives.update');
+    
     Route::prefix('/program-planning/program-definition/digital-initiatives/appendix')->name('program-planning.program-definition.digital-initiatives.appendix.')->group(function () {
         Route::get('/', ProgramDefinitionDigitalInitiativesAppendixIndexController::class)->name('index');
         Route::get('/create', ProgramDefinitionDigitalInitiativesAppendixCreateController::class)->name('create');

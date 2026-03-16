@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Appendix;
 
 use App\Http\Controllers\Controller;
@@ -28,7 +27,7 @@ class UpdateController extends Controller
 
             // TrsScDetails Fields
             'organization' => 'nullable|string|max:255',
-            'update_doc' => 'nullable|string|max:255',
+            'update_doc' => 'nullable|date',
             'situation' => 'nullable|string',
             'key_functionalities' => 'nullable|string',
             'value_rationale' => 'nullable|string',

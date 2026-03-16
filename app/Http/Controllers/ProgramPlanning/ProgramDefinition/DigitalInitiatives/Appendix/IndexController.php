@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Appendix;
 
 use App\Http\Controllers\Controller;
+use App\Models\MstCoe;
+use App\Models\MstInitiative;
+use App\Models\Theme;
 use App\Models\TrsScInitiative;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -93,6 +96,10 @@ class IndexController extends Controller
             'appendixItems' => $appendixItems,
             'totalAppendixItems' => $appendixItems->count(),
             'uniqueCompendiums' => $uniqueCompendiums,
+            'compendiumOptions' => $this->compendiumOptions(),
+            'initiativeOptions' => $this->initiativeOptions(),
+            'coeOptions' => MstCoe::orderBy('name')->get(['id', 'name'])->values(),
+            'themeOptions' => $this->themeOptions(),
         ]);
     }
 
@@ -104,5 +111,64 @@ class IndexController extends Controller
             3 => 'Low',
             default => 'TBC',
         };
+    }
+
+    private function compendiumOptions()
+    {
+        return TrsScInitiative::query()
+            ->where('source_id', 1)
+            ->with(['mstInitiatives:id,code,name'])
+            ->orderBy('id')
+            ->get(['id', 'owner', 'usecase'])
+            ->map(function (TrsScInitiative $item): array {
+                $firstInitiative = $item->mstInitiatives->first();
+                $label = trim((string) ($item->usecase ?: ($firstInitiative?->name ?? '-')));
+
+                return [
+                    'id' => (int) $item->id,
+                    'label' => $label !== '' ? $label : '-',
+                ];
+            })
+            ->values();
+    }
+
+    private function initiativeOptions()
+    {
+        return MstInitiative::where('tipe_initiative', 1)
+            ->orderBy('code')
+            ->orderBy('name')
+            ->get(['id', 'code', 'name'])
+            ->map(fn (MstInitiative $initiative) => [
+                'id' => (int) $initiative->id,
+                'code' => $initiative->code,
+                'name' => $initiative->name,
+            ])
+            ->values();
+    }
+
+    private function themeOptions()
+    {
+        return Theme::with('goal:id,code,title')
+            ->orderBy('id')
+            ->get()
+            ->map(function (Theme $theme): array {
+                $goal = $theme->goal;
+                $goalTitle = $goal?->title ?? 'No Pillar';
+                $goalCode = $goal?->code ?? '-';
+                $themeNum = $theme->theme_number ?? 'N/A';
+
+                return [
+                    'id' => (int) $theme->id,
+                    'code' => $goalCode,
+                    'goal' => $goalTitle,
+                    'strategic_pillar' => $goalTitle,
+                    'theme_number' => $themeNum,
+                    'theme_code' => $themeNum,
+                    'themes' => $theme->name,
+                    'name' => $theme->name,
+                    'label' => "[$goalCode - $goalTitle] #$themeNum - $theme->name",
+                ];
+            })
+            ->values();
     }
 }
