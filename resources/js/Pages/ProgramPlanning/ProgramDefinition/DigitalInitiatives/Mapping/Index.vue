@@ -159,6 +159,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    noMasterCompendiumItems: {
+        type: Array,
+        default: () => [],
+    },
     totalAppendixItems: {
         type: Number,
         default: 0,
@@ -208,8 +212,10 @@ const filters = ref({
     compendium: '',
 });
 
+const DEFAULT_MASTER_LIMIT = 90;
+
 const normalizeFilterValue = (value) => {
-    if (value === '__none__' || value === null || value === undefined) {
+    if (value === null || value === undefined) {
         return '';
     }
     return String(value);
@@ -217,7 +223,7 @@ const normalizeFilterValue = (value) => {
 
 const isAllFilter = (value) => value === '';
 const isNoneFilter = (value) => value === '__none__';
-const isSpecificFilter = (value) => value !== '' && value !== '__none__';
+const isSpecificFilter = (value) => value !== '';
 
 const parseListValue = (value) => String(value ?? '')
     .split(',')
@@ -249,10 +255,11 @@ const masterInitiativeRows = computed(() => {
 
     const appendixMap = new Map();
     for (const item of props.appendixItems ?? []) {
-        const key = String(item.master_initiative ?? '').trim();
-        if (!key) continue;
-        if (!appendixMap.has(key)) appendixMap.set(key, []);
-        appendixMap.get(key).push(item);
+        const keys = parseListValue(item.master_initiative);
+        for (const key of keys) {
+            if (!appendixMap.has(key)) appendixMap.set(key, []);
+            appendixMap.get(key).push(item);
+        }
     }
 
     const compendiumMap = new Map();
@@ -331,27 +338,44 @@ const compendiumRows = computed(() => {
     });
 });
 
+const noMasterAppendixItems = computed(() => {
+    return (props.appendixItems ?? []).filter((item) => {
+        const masterValue = String(item.master_initiative ?? '').trim();
+        const hasNoMaster = masterValue === '' || masterValue === '-';
+        const hasNoCompendium = parseListValue(item.use_case_compendium).length === 0;
+        return hasNoMaster && hasNoCompendium;
+    });
+});
+
 const filteredAppendixItems = computed(() => {
     const masterRaw = filters.value.masterInitiative;
     const compendiumRaw = filters.value.compendium;
 
-    if (isAllFilter(masterRaw) && isNoneFilter(compendiumRaw)) {
-        return masterInitiativeRows.value;
-    }
-
-    if (isNoneFilter(masterRaw) && isAllFilter(compendiumRaw)) {
-        return compendiumRows.value;
+    if (isAllFilter(masterRaw) && isAllFilter(compendiumRaw)) {
+        return masterInitiativeRows.value.slice(0, DEFAULT_MASTER_LIMIT);
     }
 
     const masterFilter = normalizeFilterValue(masterRaw);
     const compendiumFilter = normalizeFilterValue(compendiumRaw);
 
-    return (props.appendixItems ?? []).filter((item) => {
-        const matchMaster = !masterFilter || item.master_initiative === masterFilter;
+    const baseItems = isNoneFilter(masterRaw)
+        ? [
+            ...(props.noMasterCompendiumItems ?? []),
+            ...(noMasterAppendixItems.value ?? []),
+        ]
+        : (props.appendixItems ?? []);
+
+    return baseItems.filter((item) => {
+        const masterValues = parseListValue(item.master_initiative);
+        const matchMaster = isNoneFilter(masterRaw)
+            ? masterValues.length === 0
+            : (!masterFilter || masterValues.includes(masterFilter));
 
         let matchCompendium = true;
-        if (compendiumFilter) {
-            matchCompendium = (item.use_case_compendium ?? '').includes(compendiumFilter);
+        if (isNoneFilter(compendiumRaw)) {
+            matchCompendium = parseListValue(item.use_case_compendium).length === 0;
+        } else if (compendiumFilter) {
+            matchCompendium = parseListValue(item.use_case_compendium).includes(compendiumFilter);
         }
 
         return matchMaster && matchCompendium;

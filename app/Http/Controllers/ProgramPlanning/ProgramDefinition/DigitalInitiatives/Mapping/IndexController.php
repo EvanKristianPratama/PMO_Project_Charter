@@ -41,9 +41,42 @@ class IndexController extends Controller
                 'urgency',
             ]);
 
-        $appendixItems = $records
+        $noMasterCompendiumItems = TrsScInitiative::with([
+            'mstInitiatives:id,code,name',
+        ])
+            ->where('source_id', 1)
+            ->orderBy('id')
+            ->get(['id', 'usecase', 'description'])
+            ->filter(fn (TrsScInitiative $item) => $item->mstInitiatives->isEmpty())
             ->map(function (TrsScInitiative $item): array {
                 $firstMst = $item->mstInitiatives->first();
+
+                return [
+                    'id' => "comp-only-{$item->id}",
+                    'master_initiative' => $firstMst ? ($firstMst->code ? "{$firstMst->code} - {$firstMst->name}" : $firstMst->name) : '-',
+                    'use_case_compendium' => $item->usecase ?: '-',
+                    'use_case_compendium_description' => $item->description ?: '-',
+                    'use_case_appendix' => '-',
+                    'use_case_appendix_description' => '-',
+                ];
+            })
+            ->values();
+
+        $appendixItems = $records
+            ->map(function (TrsScInitiative $item): array {
+                $masterInitiatives = $item->mstInitiatives
+                    ->map(function ($mi) {
+                        $code = $mi->code ?? '';
+                        $name = $mi->name ?? '';
+                        if ($code && $name) {
+                            return "{$code} - {$name}";
+                        }
+
+                        return $code ?: ($name ?: null);
+                    })
+                    ->filter()
+                    ->values();
+                $masterLabel = $masterInitiatives->implode(', ');
 
                 $compendiums = $item->compendiums->map(function ($compendium) {
                     $label = trim((string) ($compendium->usecase ?? ''));
@@ -56,7 +89,7 @@ class IndexController extends Controller
 
                 return [
                     'id' => (int) $item->id,
-                    'master_initiative' => $firstMst ? ($firstMst->code ? "{$firstMst->code} - {$firstMst->name}" : $firstMst->name) : '-',
+                    'master_initiative' => $masterLabel !== '' ? $masterLabel : '-',
                     'use_case_compendium' => $compendiums ?: '-',
                     'use_case_compendium_description' => $compendiumDescriptions ?: '-',
                     'use_case_appendix' => $item->usecase ?: '-',
@@ -74,6 +107,7 @@ class IndexController extends Controller
 
         return Inertia::render('ProgramPlanning/ProgramDefinition/DigitalInitiatives/Mapping/Index', [
             'appendixItems' => $appendixItems,
+            'noMasterCompendiumItems' => $noMasterCompendiumItems,
             'totalAppendixItems' => $appendixItems->count(),
             'uniqueCompendiums' => $uniqueCompendiums,
             'compendiumOptions' => $this->compendiumOptions(),
