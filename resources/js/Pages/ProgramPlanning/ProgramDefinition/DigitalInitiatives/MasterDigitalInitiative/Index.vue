@@ -1,39 +1,35 @@
 <template>
     <UserLayout title="Program Definition Digital Initiatives">
         <div class="animate-fade-in space-y-4">
-            <section class="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
-                <SummaryCard :total="totalDigitalInitiatives" @create="showCreateModal = true"
-                    @show-all="toggleShowAll" />
-
-                <div class="lg:col-span-2">
-                    <TimelineFlow :status-counts="statusCounts" :postpone-from-counts="postponeFromCounts"
-                        :active-status="activeStatusFilter" @select="toggleStatusFilter" />
-                </div>
-            </section>
-
-            <div v-if="!showTable"
-                class="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-white/10 dark:bg-[#171717] w-fit">
-
+            <div class="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-white/10 dark:bg-[#171717] w-fit">
+                
                 <div
-                    class="rounded-lg bg-blue-50 px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-blue-600 shadow-sm dark:bg-blue-500/10 dark:text-blue-400">
+                    class="rounded-lg bg-blue-50 px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-blue-600 shadow-sm dark:bg-blue-500/10 dark:text-blue-400"
+                >
                     Digital Initiatives List
                 </div>
-                <Link href="/program-planning/program-definition/digital-initiatives/compendium"
-                    class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5">
+                <Link
+                    href="/program-planning/program-definition/digital-initiatives/compendium"
+                    class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
+                >
                     Compendium List
                 </Link>
-                <Link href="/program-planning/program-definition/digital-initiatives/appendix"
-                    class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5">
+                <Link
+                    href="/program-planning/program-definition/digital-initiatives/appendix/"
+                    class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
+                >
                     Appendix List
                 </Link>
-                <Link href="/program-planning/program-definition/digital-initiatives/appendix"
-                    class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5">
+                <Link
+                    href="/program-planning/program-definition/digital-initiatives/mapping"
+                    class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
+                >
                     Mapping
                 </Link>
             </div>
 
             <!-- Hint when table is hidden -->
-            <p v-if="showTable" class="py-4 text-center text-xs text-slate-400 dark:text-slate-500">
+            <p v-if="!showTable" class="py-4 text-center text-xs text-slate-400 dark:text-slate-500">
                 Klik card atau status timeline untuk menampilkan data
             </p>
 

@@ -20,7 +20,7 @@
             
             <div class="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-white/10 dark:bg-[#171717] w-fit">
                 <Link
-                    href="/program-planning/program-definition/digital-initiatives"
+                    href="/program-planning/program-definition/digital-initiatives/master"
                     class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
                 >
                     Digital Initiatives List

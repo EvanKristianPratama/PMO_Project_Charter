@@ -3,19 +3,7 @@
         <div class="animate-fade-in space-y-4">
             <div class="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-white/10 dark:bg-[#171717] w-fit">
                 <Link
-                    href="/program-planning/program-definition/digital-initiatives"
-                    class="group flex h-8 items-center gap-2 rounded-lg px-3 text-xs font-bold text-slate-500 transition-all hover:bg-slate-50 hover:text-[#0f63b5] dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-blue-400"
-                >
-                    <svg class="h-4 w-4 transition-transform group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
-                    </svg>
-                    Kembali
-                </Link>
-
-                <div class="h-4 w-px bg-slate-200 dark:bg-white/10" />
-
-                <Link
-                    href="/program-planning/program-definition/digital-initiatives"
+                    href="/program-planning/program-definition/digital-initiatives/master"
                     class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
                 >
                     Digital Initiatives List
@@ -27,7 +15,7 @@
                     Compendium List
                 </Link>
                 <Link
-                    href="/program-planning/program-definition/digital-initiatives/appendix"
+                    href="/program-planning/program-definition/digital-initiatives/appendix/"
                     class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
                 >
                     Appendix List
@@ -43,20 +31,6 @@
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Mapping</h1>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span
-                            class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300"
-                        >
-                            Total: {{ filteredAppendixItems.length }}
-                        </span>
-                        <button
-                            type="button"
-                            @click="openCreateModal"
-                            class="inline-flex items-center rounded-lg bg-[#0f63b5] px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-[#0c4e8f]"
-                        >
-                            New Appendix
-                        </button>
                     </div>
                 </div>
             </section>
