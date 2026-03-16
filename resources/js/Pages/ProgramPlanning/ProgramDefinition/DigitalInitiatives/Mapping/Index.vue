@@ -44,7 +44,7 @@
                             class="w-[125px] rounded-lg border border-slate-200 bg-white py-1 pl-2 pr-7 text-[11px] text-slate-700 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
                         >
                             <option value="">All</option>
-                            <option value="__none__">None</option>
+                            <option value="__none__">No Master Initiative</option>
                             <option v-for="opt in initiativeOptions" :key="opt.id" :value="opt.code ? `${opt.code} - ${opt.name}` : opt.name">
                                 {{ opt.code ? `${opt.code} - ` : '' }}{{ opt.name }}
                             </option>
@@ -58,20 +58,8 @@
                             class="w-[125px] rounded-lg border border-slate-200 bg-white py-1 pl-2 pr-7 text-[11px] text-slate-700 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
                         >
                             <option value="">All</option>
-                            <option value="__none__">None</option>
+                            <option value="__none__">No Compendium</option>
                             <option v-for="opt in compendiumOptions" :key="opt.id" :value="opt.label">{{ opt.label }}</option>
-                        </select>
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        <label class="shrink-0 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Appendix:</label>
-                        <select
-                            v-model="filters.appendix"
-                            class="w-[125px] rounded-lg border border-slate-200 bg-white py-1 pl-2 pr-7 text-[11px] text-slate-700 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
-                        >
-                            <option value="">All</option>
-                            <option value="__none__">None</option>
-                            <option v-for="val in uniqueAppendixUseCases" :key="val" :value="val">{{ val }}</option>
                         </select>
                     </div>
 
@@ -218,7 +206,6 @@ const closeCreateModal = () => {
 const filters = ref({
     masterInitiative: '',
     compendium: '',
-    appendix: '',
 });
 
 const normalizeFilterValue = (value) => {
@@ -344,67 +331,36 @@ const compendiumRows = computed(() => {
     });
 });
 
-const uniqueAppendixUseCases = computed(() => {
-    const items = props.appendixItems
-        .map((item) => String(item.use_case_appendix ?? '').trim())
-        .filter((val) => val !== '' && val !== '-');
-    return [...new Set(items)].sort();
-});
-
-const appendixRows = computed(() => {
-    return uniqueAppendixUseCases.value.map((label) => {
-        const items = (props.appendixItems ?? []).filter((item) => item.use_case_appendix === label);
-        const detailId = items.length === 1 ? items[0]?.id : null;
-        return {
-            id: `app-${label}`,
-            master_initiative: joinDistinctValues(items.map((item) => item.master_initiative)),
-            use_case_compendium: joinListValues(items.map((item) => item.use_case_compendium)),
-            use_case_compendium_description: joinDistinctValues(items.map((item) => item.use_case_compendium_description)),
-            use_case_appendix: label,
-            use_case_appendix_description: joinDistinctValues(items.map((item) => item.use_case_appendix_description)),
-            detail_id: detailId,
-        };
-    });
-});
-
 const filteredAppendixItems = computed(() => {
     const masterRaw = filters.value.masterInitiative;
     const compendiumRaw = filters.value.compendium;
-    const appendixRaw = filters.value.appendix;
 
-    if (isAllFilter(masterRaw) && isNoneFilter(compendiumRaw) && isNoneFilter(appendixRaw)) {
+    if (isAllFilter(masterRaw) && isNoneFilter(compendiumRaw)) {
         return masterInitiativeRows.value;
     }
 
-    if (isNoneFilter(masterRaw) && isAllFilter(compendiumRaw) && isNoneFilter(appendixRaw)) {
+    if (isNoneFilter(masterRaw) && isAllFilter(compendiumRaw)) {
         return compendiumRows.value;
-    }
-
-    if (isNoneFilter(masterRaw) && isNoneFilter(compendiumRaw) && isAllFilter(appendixRaw)) {
-        return appendixRows.value;
     }
 
     const masterFilter = normalizeFilterValue(masterRaw);
     const compendiumFilter = normalizeFilterValue(compendiumRaw);
-    const appendixFilter = normalizeFilterValue(appendixRaw);
 
     return (props.appendixItems ?? []).filter((item) => {
         const matchMaster = !masterFilter || item.master_initiative === masterFilter;
-        const matchAppendix = !appendixFilter || item.use_case_appendix === appendixFilter;
 
         let matchCompendium = true;
         if (compendiumFilter) {
             matchCompendium = (item.use_case_compendium ?? '').includes(compendiumFilter);
         }
 
-        return matchMaster && matchCompendium && matchAppendix;
+        return matchMaster && matchCompendium;
     });
 });
 
 const hasActiveFilters = computed(() => {
     return isSpecificFilter(filters.value.masterInitiative)
-        || isSpecificFilter(filters.value.compendium)
-        || isSpecificFilter(filters.value.appendix);
+        || isSpecificFilter(filters.value.compendium);
 });
 
 const resolveDetailId = (item) => {
@@ -416,6 +372,5 @@ const resolveDetailId = (item) => {
 const resetFilters = () => {
     filters.value.masterInitiative = '';
     filters.value.compendium = '';
-    filters.value.appendix = '';
 };
 </script>
