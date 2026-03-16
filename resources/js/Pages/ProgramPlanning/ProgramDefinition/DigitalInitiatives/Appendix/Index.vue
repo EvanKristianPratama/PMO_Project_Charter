@@ -1,19 +1,24 @@
 ﻿<template>
     <UserLayout title="Program Definition Digital Initiatives â€” Appendix List">
         <div class="animate-fade-in space-y-4">
+            <section class="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+                <SummaryCard
+                    :total="totalDigitalInitiatives"
+                    @create="showCreateModal = true"
+                    @show-all="toggleShowAll"
+                />
+
+                <div class="lg:col-span-2">
+                    <TimelineFlow
+                        :status-counts="statusCounts"
+                        :postpone-from-counts="postponeFromCounts"
+                        :active-status="activeStatusFilter"
+                        @select="toggleStatusFilter"
+                    />
+                </div>
+            </section>
+            
             <div class="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-white/10 dark:bg-[#171717] w-fit">
-                <Link
-                    href="/program-planning/program-definition/digital-initiatives"
-                    class="group flex h-8 items-center gap-2 rounded-lg px-3 text-xs font-bold text-slate-500 transition-all hover:bg-slate-50 hover:text-[#0f63b5] dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-blue-400"
-                >
-                    <svg class="h-4 w-4 transition-transform group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
-                    </svg>
-                    Kembali
-                </Link>
-
-                <div class="h-4 w-px bg-slate-200 dark:bg-white/10" />
-
                 <Link
                     href="/program-planning/program-definition/digital-initiatives"
                     class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
@@ -70,7 +75,7 @@
                             class="w-[125px] rounded-lg border border-slate-200 bg-white py-1 pl-2 pr-7 text-[11px] text-slate-700 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
                         >
                             <option value="">All</option>
-                            <option value="__none__">None</option>
+                            <option value="__none__">No Master Initiative</option>
                             <option v-for="opt in initiativeOptions" :key="opt.id" :value="opt.code ? `${opt.code} - ${opt.name}` : opt.name">
                                 {{ opt.code ? `${opt.code} - ` : '' }}{{ opt.name }}
                             </option>
@@ -84,7 +89,7 @@
                             class="w-[125px] rounded-lg border border-slate-200 bg-white py-1 pl-2 pr-7 text-[11px] text-slate-700 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
                         >
                             <option value="">All</option>
-                            <option value="__none__">None</option>
+                            <option value="__none__">No Compendium</option>
                             <option v-for="opt in compendiumOptions" :key="opt.id" :value="opt.label">{{ opt.label }}</option>
                         </select>
                     </div>
@@ -252,7 +257,7 @@ const filters = ref({
 });
 
 const normalizeFilterValue = (value) => {
-    if (value === '__none__' || value === null || value === undefined) {
+    if (value === null || value === undefined) {
         return '';
     }
     return String(value);
@@ -260,7 +265,7 @@ const normalizeFilterValue = (value) => {
 
 const isAllFilter = (value) => value === '';
 const isNoneFilter = (value) => value === '__none__';
-const isSpecificFilter = (value) => value !== '' && value !== '__none__';
+const isSpecificFilter = (value) => value !== '';
 
 const parseListValue = (value) => String(value ?? '')
     .split(',')
@@ -414,29 +419,25 @@ const filteredAppendixItems = computed(() => {
     const compendiumRaw = filters.value.compendium;
     const appendixRaw = filters.value.appendix;
 
-    if (isAllFilter(masterRaw) && isNoneFilter(compendiumRaw) && isNoneFilter(appendixRaw)) {
-        return masterInitiativeRows.value;
-    }
-
-    if (isNoneFilter(masterRaw) && isAllFilter(compendiumRaw) && isNoneFilter(appendixRaw)) {
-        return compendiumRows.value;
-    }
-
-    if (isNoneFilter(masterRaw) && isNoneFilter(compendiumRaw) && isAllFilter(appendixRaw)) {
-        return appendixRows.value;
-    }
-
     const masterFilter = normalizeFilterValue(masterRaw);
     const compendiumFilter = normalizeFilterValue(compendiumRaw);
     const appendixFilter = normalizeFilterValue(appendixRaw);
 
     return (props.appendixItems ?? []).filter((item) => {
-        const matchMaster = !masterFilter || item.master_initiative === masterFilter;
-        const matchAppendix = !appendixFilter || item.use_case_appendix === appendixFilter;
+        const masterValue = String(item.master_initiative ?? '').trim();
+        const matchMaster = isNoneFilter(masterRaw)
+            ? masterValue === '' || masterValue === '-'
+            : (!masterFilter || masterValue === masterFilter);
+        const appendixValue = String(item.use_case_appendix ?? '').trim();
+        const matchAppendix = isNoneFilter(appendixRaw)
+            ? appendixValue === '' || appendixValue === '-'
+            : (!appendixFilter || appendixValue === appendixFilter);
 
         let matchCompendium = true;
-        if (compendiumFilter) {
-            matchCompendium = (item.use_case_compendium ?? '').includes(compendiumFilter);
+        if (isNoneFilter(compendiumRaw)) {
+            matchCompendium = parseListValue(item.use_case_compendium).length === 0;
+        } else if (compendiumFilter) {
+            matchCompendium = parseListValue(item.use_case_compendium).includes(compendiumFilter);
         }
 
         return matchMaster && matchCompendium && matchAppendix;

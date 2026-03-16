@@ -294,36 +294,40 @@ const formatCompendiumLabel = (option) => {
 };
 
 const submit = () => {
-    form.transform((data) => ({
-        ...data,
-        initiative_ids: normalizeIdList(data.initiative_ids),
-        compendium_ids: normalizeIdList(data.compendium_ids),
-        rjpp_tagging_ids: normalizeIdList(data.rjpp_tagging_ids),
-        owner: String(data.owner ?? '').trim(),
-        coe: String(data.coe ?? '').trim(),
-        usecase: String(data.usecase ?? '').trim(),
-        description: String(data.description ?? '').trim(),
-        organization: String(data.organization ?? '').trim(),
-        update_doc: data.update_doc ? String(data.update_doc).trim() : null,
-        situation: String(data.situation ?? '').trim(),
-        key_functionalities: String(data.key_functionalities ?? '').trim(),
-        value_rationale: String(data.value_rationale ?? '').trim(),
-        value_matrics: String(data.value_matrics ?? '').trim(),
-        urgency_rationale: String(data.urgency_rationale ?? '').trim(),
-        urgency_expected: String(data.urgency_expected ?? '').trim(),
-        ease_rationale: String(data.ease_rationale ?? '').trim(),
-        ease_detail: String(data.ease_detail ?? '').trim(),
-        resource_rationale: String(data.resource_rationale ?? '').trim(),
-        resource_detail: String(data.resource_detail ?? '').trim(),
-        predecessor: String(data.predecessor ?? '').trim(),
-        successor: String(data.successor ?? '').trim(),
-        otherBU: String(data.otherBU ?? '').trim(),
-        value: data.value === null || data.value === '' ? null : toNumber(data.value, null),
-        urgency: data.urgency === null || data.urgency === '' ? null : toNumber(data.urgency, null),
-        ease: data.ease === null || data.ease === '' ? null : toNumber(data.ease, null),
-        resource: data.resource === null || data.resource === '' ? null : toNumber(data.resource, null),
-        sign_by: buildSignByPayload(data),
-    }));
+    form.transform((data) => {
+        const initiativeIds = normalizeIdList(data.initiative_ids);
+        const compendiumIds = normalizeIdList(data.compendium_ids);
+        return {
+            ...data,
+            initiative_ids: initiativeIds.length ? initiativeIds : null,
+            compendium_ids: compendiumIds,
+            rjpp_tagging_ids: normalizeIdList(data.rjpp_tagging_ids),
+            owner: String(data.owner ?? '').trim(),
+            coe: String(data.coe ?? '').trim(),
+            usecase: String(data.usecase ?? '').trim(),
+            description: String(data.description ?? '').trim(),
+            organization: String(data.organization ?? '').trim(),
+            update_doc: data.update_doc ? String(data.update_doc).trim() : null,
+            situation: String(data.situation ?? '').trim(),
+            key_functionalities: String(data.key_functionalities ?? '').trim(),
+            value_rationale: String(data.value_rationale ?? '').trim(),
+            value_matrics: String(data.value_matrics ?? '').trim(),
+            urgency_rationale: String(data.urgency_rationale ?? '').trim(),
+            urgency_expected: String(data.urgency_expected ?? '').trim(),
+            ease_rationale: String(data.ease_rationale ?? '').trim(),
+            ease_detail: String(data.ease_detail ?? '').trim(),
+            resource_rationale: String(data.resource_rationale ?? '').trim(),
+            resource_detail: String(data.resource_detail ?? '').trim(),
+            predecessor: String(data.predecessor ?? '').trim(),
+            successor: String(data.successor ?? '').trim(),
+            otherBU: String(data.otherBU ?? '').trim(),
+            value: data.value === null || data.value === '' ? null : toNumber(data.value, null),
+            urgency: data.urgency === null || data.urgency === '' ? null : toNumber(data.urgency, null),
+            ease: data.ease === null || data.ease === '' ? null : toNumber(data.ease, null),
+            resource: data.resource === null || data.resource === '' ? null : toNumber(data.resource, null),
+            sign_by: buildSignByPayload(data),
+        };
+    });
 
     form.put(`/program-planning/program-definition/digital-initiatives/appendix/${props.appendix.id}`, {
         preserveScroll: true,

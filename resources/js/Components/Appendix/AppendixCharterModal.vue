@@ -229,19 +229,26 @@ const formatCompendiumLabel = (option) => {
 };
 
 const submit = () => {
-    appendixForm.post(
-        `/program-planning/program-definition/digital-initiatives/appendix`,
-        {
-            preserveScroll: true,
-            onSuccess: () => {
-                emit("success");
-                emit("close");
+    appendixForm
+        .transform((data) => ({
+            ...data,
+            initiative_ids: Array.isArray(data.initiative_ids) && data.initiative_ids.length
+                ? data.initiative_ids
+                : null,
+        }))
+        .post(
+            `/program-planning/program-definition/digital-initiatives/appendix`,
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    emit("success");
+                    emit("close");
+                },
+                onError: () => {
+                    alert("Gagal menyimpan data Appendix. Silakan periksa kembali isian Anda.");
+                },
             },
-            onError: () => {
-                alert("Gagal menyimpan data Appendix. Silakan periksa kembali isian Anda.");
-            },
-        },
-    );
+        );
 };
 </script>
 

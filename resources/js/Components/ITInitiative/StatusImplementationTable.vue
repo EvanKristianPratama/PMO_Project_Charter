@@ -1,5 +1,17 @@
 <template>
     <div class="space-y-3">
+<<<<<<< Updated upstream
+=======
+        <div class="flex items-center justify-between mb-2">
+            <div></div>
+            
+            <button v-if="projectList.length === 1 && projectList[0]?.id" @click="openAddModal(projectList[0])" class="inline-flex h-[26px] items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-3 text-[10px] font-semibold text-indigo-700 shadow-none transition hover:bg-indigo-100 dark:border-indigo-900/50 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-900/50">
+                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Add Status
+            </button>
+        </div>
+
+>>>>>>> Stashed changes
         <!-- Tabel 1: Code & Status Implementasi -->
         <div class="overflow-x-auto rounded-lg border border-slate-200 dark:border-white/10">
             <table class="w-full table-fixed divide-y divide-x divide-slate-200 text-[11px] dark:divide-white/10">
