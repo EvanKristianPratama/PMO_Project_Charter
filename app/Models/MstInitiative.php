@@ -140,15 +140,11 @@ class MstInitiative extends Model
         }
 
         $project = $this->findAutoSyncedProject();
-        $metadata = is_array($project?->metadata) ? $project->metadata : [];
-        $metadata['mst_initiative_id'] = (int) $this->id;
-        $metadata['auto_synced_from_mst_initiative'] = true;
 
         if ($project) {
             $payload = [
                 'name' => $this->name,
                 'tipe_inisiative' => (string) $this->tipe_initiative,
-                'metadata' => $metadata,
             ];
 
             if ($this->isAutoSyncedProject($project)) {
@@ -165,7 +161,6 @@ class MstInitiative extends Model
             'name' => $this->name,
             'status' => 0,
             'tipe_inisiative' => (string) $this->tipe_initiative,
-            'metadata' => $metadata,
         ]);
     }
 
@@ -173,7 +168,6 @@ class MstInitiative extends Model
     {
         $project = TrsProject::query()
             ->where('code', $this->autoSyncedProjectCode())
-            ->orWhere('metadata->mst_initiative_id', $this->id)
             ->first();
 
         if ($project) {
@@ -193,10 +187,6 @@ class MstInitiative extends Model
 
     private function isAutoSyncedProject(TrsProject $project): bool
     {
-        $metadata = is_array($project->metadata) ? $project->metadata : [];
-
-        return $project->code === $this->autoSyncedProjectCode()
-            || (bool) ($metadata['auto_synced_from_mst_initiative'] ?? false)
-            || (int) ($metadata['mst_initiative_id'] ?? 0) === (int) $this->id;
+        return $project->code === $this->autoSyncedProjectCode();
     }
 }

@@ -148,14 +148,14 @@
                                     <td class="px-6 py-4 text-slate-600 dark:text-slate-300 font-medium">{{ formatDate(entry.tanggal) }}</td>
                                     <td class="px-6 py-4 text-slate-600 dark:text-slate-300 italic">{{ entry.notes ?? '-' }}</td>
                                     <td class="px-6 py-4">
-                                        <div class="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div class="flex justify-center gap-2 transition-opacity">
                                             <button type="button" @click="startEdit(entry)"
                                                 class="inline-flex items-center rounded-lg bg-amber-50 px-2.5 py-1.5 text-[10px] font-bold text-amber-700 ring-1 ring-amber-200 hover:bg-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:ring-amber-700/40 transition-colors">
-                                                ✏️ Edit
+                                                Edit
                                             </button>
                                             <button type="button" @click="deleteStatus(entry.id)" :disabled="deletingId === entry.id"
                                                 class="inline-flex items-center rounded-lg bg-rose-50 px-2.5 py-1.5 text-[10px] font-bold text-rose-700 ring-1 ring-rose-200 hover:bg-rose-100 disabled:opacity-50 dark:bg-rose-900/20 dark:text-rose-400 dark:ring-rose-700/40 transition-colors">
-                                                🗑️ Hapus
+                                                Hapus
                                             </button>
                                         </div>
                                     </td>
@@ -237,60 +237,86 @@
 
             <!-- ═══ STRATEGIC MAPPING — TAGGING ═══ -->
             <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/5 dark:bg-[#1a1a1a]">
-                <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-white/10">
+                <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-white/10 bg-slate-50/30 dark:bg-white/[0.02]">
                     <div>
                         <h2 class="text-sm font-bold text-slate-800 dark:text-slate-200">Strategic Mapping</h2>
-                        <p class="text-[10px] text-slate-500 uppercase tracking-wider mt-0.5">Hubungan ke Strategic Pillar & Theme ({{ initiative.taggings?.length ?? 0 }})</p>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-wider mt-0.5">Hubungan ke Strategic Pillar & Theme</p>
                     </div>
                 </div>
                 
-                <div class="p-6 space-y-6">
-                    <!-- Current Mappings -->
-                    <div class="space-y-3">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mapping Saat Ini</label>
-                        <div class="flex flex-wrap gap-2.5">
-                            <div v-for="tag in initiative.taggings" :key="tag.id" 
-                                class="inline-flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/50 pl-3 pr-2 py-2 text-[11px] font-bold text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 shadow-sm transition-all hover:bg-white dark:hover:bg-white/10 hover:shadow-md group"
-                            >
-                                <div class="flex flex-col">
-                                    <span class="text-[#0f63b5] dark:text-blue-400 uppercase">{{ tag.goal }}</span>
-                                    <span v-if="tag.theme" class="text-[10px] font-medium text-slate-400 max-w-[200px] truncate leading-tight">{{ tag.theme.name }}</span>
-                                    <span v-else class="text-[9px] font-medium text-slate-300 uppercase italic">Langsung ke Pillar</span>
-                                </div>
-                                <button @click="removeTagging(tag.id)" class="rounded-lg p-1.5 text-slate-300 hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-900/20 transition-all group-hover:text-slate-400">
-                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
-                                </button>
+                <div class="p-6">
+                    <div class="flex flex-col gap-8">
+                        <!-- Current Mappings (Atas) -->
+                        <div class="w-full">
+                            <div class="mb-4 flex items-center justify-between px-1">
+                                <h3 class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Mapping Saat Ini ({{ initiative.taggings?.length ?? 0 }})</h3>
                             </div>
-                            <div v-if="!initiative.taggings?.length" class="flex flex-col items-center justify-center py-6 w-full border-2 border-dashed border-slate-100 dark:border-white/5 rounded-2xl">
-                                <p class="text-[11px] font-medium text-slate-400 uppercase tracking-widest italic">Belum ada mapping yang dilakukan.</p>
+                            
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                <div
+                                    v-for="tag in initiative.taggings"
+                                    :key="tag.id"
+                                    class="group flex items-start justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 transition-all hover:border-[#0f63b5]/30 hover:shadow-md dark:border-white/10 dark:bg-[#1a1a1a]"
+                                >
+                                    <div class="flex flex-col gap-1 min-w-0">
+                                        <div class="flex items-center gap-2">
+                                            <span class="inline-flex rounded-lg bg-blue-50 px-2 py-0.5 text-[10px] font-black text-[#0f63b5] dark:bg-blue-900/30 dark:text-blue-400">
+                                                {{ tag.goal }}
+                                            </span>
+                                            <span v-if="tag.theme" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Theme Connection</span>
+                                            <span v-else class="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">Direct Pillar</span>
+                                        </div>
+                                        <p class="text-[11px] font-bold text-slate-700 dark:text-slate-200 truncate leading-tight mt-1" :title="tag.theme?.name || 'Strategic Pillar Connection'">
+                                            {{ tag.theme?.name || 'Connected directly to Strategic Pillar' }}
+                                        </p>
+                                    </div>
+                                    <button @click="removeTagging(tag.id)" class="shrink-0 rounded-lg p-1.5 text-slate-300 hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-900/20 transition-all opacity-0 group-hover:opacity-100">
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div
+                                    v-if="!initiative.taggings?.length"
+                                    class="col-span-full flex flex-col items-center justify-center py-12 rounded-2xl border-2 border-dashed border-slate-100 dark:border-white/5"
+                                >
+                                    <svg class="h-8 w-8 text-slate-200 dark:text-white/5 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest italic text-center">Belum ada strategic mapping.</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Add New Mapping Form -->
-                    <div class="rounded-2xl bg-slate-50/50 p-6 border border-slate-100 dark:bg-white/2 dark:border-white/5">
-                        <h3 class="mb-4 text-[10px] font-bold uppercase tracking-widest text-[#0f63b5]">Tambah Hubungan Baru</h3>
-                        <div class="flex flex-col md:flex-row items-end gap-4">
-                            <div class="flex-1 space-y-1.5 w-full">
-                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-1">Strategic Pillar (Goal)</label>
-                                <select v-model="mappingForm.goalId" @change="onGoalChange" class="form-input-premium">
-                                    <option value="">— Pilih Strategic Pillar —</option>
-                                    <option v-for="g in allGoals" :key="g.id" :value="g.id">[{{ g.code }}] {{ g.title }}</option>
-                                </select>
+                        <!-- Add New Mapping Form (Bawah) -->
+                        <div class="border-t border-slate-100 dark:border-white/5 pt-8">
+                            <div class="max-w-2xl mx-auto rounded-2xl border border-slate-100 bg-slate-50/50 p-6 dark:border-white/5 dark:bg-white/[0.03]">
+                                <h3 class="mb-4 text-[10px] font-bold uppercase tracking-widest text-[#0f63b5]">Tambah Hubungan Baru</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                                    <div class="space-y-1.5">
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-1">Strategic Pillar (Goal)</label>
+                                        <select v-model="mappingForm.goalId" @change="onGoalChange" class="form-input-premium">
+                                            <option value="">— Pilih Pillar —</option>
+                                            <option v-for="g in allGoals" :key="g.id" :value="g.id">[{{ g.code }}] {{ g.title }}</option>
+                                        </select>
+                                    </div>
+                                    <div class="space-y-1.5">
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-1">Theme (Opsional)</label>
+                                        <select v-model="mappingForm.themes_id" :disabled="!mappingForm.goalId" class="form-input-premium disabled:opacity-50">
+                                            <option value="">— Hubungkan ke Pillar Langsung —</option>
+                                            <option v-for="t in filteredThemes" :key="t.id" :value="t.id">{{ t.theme_number }}. {{ t.name }}</option>
+                                        </select>
+                                    </div>
+                                    <div class="md:col-span-2 mt-2">
+                                        <button
+                                            @click="addTagging"
+                                            :disabled="!mappingForm.goalId || mappingProcessing"
+                                            class="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#0f63b5] px-6 text-xs font-bold text-white shadow-lg hover:bg-[#0c4e8f] active:scale-95 transition-all disabled:opacity-50"
+                                        >
+                                            <svg v-if="mappingProcessing" class="animate-spin h-3.5 w-3.5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                            {{ mappingProcessing ? 'Memproses...' : 'Tambah Mapping Baru' }}
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="flex-1 space-y-1.5 w-full text-nowrap">
-                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-1">Theme (Opsional)</label>
-                                <select v-model="mappingForm.themes_id" :disabled="!mappingForm.goalId" class="form-input-premium disabled:bg-slate-100/50 dark:disabled:bg-white/5">
-                                    <option value="">— Hubungkan ke Pillar Langsung —</option>
-                                    <option v-for="t in filteredThemes" :key="t.id" :value="t.id">{{ t.theme_number }}. {{ t.name }}</option>
-                                </select>
-                            </div>
-                            <button @click="addTagging" :disabled="!mappingForm.goalId || mappingProcessing"
-                                class="inline-flex h-11 min-w-[160px] items-center justify-center gap-2 rounded-xl bg-[#0f63b5] px-6 text-xs font-bold text-white shadow-lg hover:bg-[#0c4e8f] active:scale-95 transition-all disabled:opacity-50 disabled:scale-100"
-                            >
-                                <svg v-if="mappingProcessing" class="animate-spin h-3.5 w-3.5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                {{ mappingProcessing ? 'Memproses...' : 'Tambah Mapping' }}
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -456,7 +482,7 @@ const addTagging = () => {
     if (!goalObj) return;
 
     mappingProcessing.value = true;
-    router.post('/initiative-tagging', {
+    router.post('/strategic-pillars/tagging', {
         initiative_id: props.initiative.id,
         goal: goalObj.code,
         themes_id: mappingForm.themes_id || null
@@ -475,7 +501,7 @@ const addTagging = () => {
 const removeTagging = (tagId) => {
     if (!window.confirm('Hapus mapping ini?')) return;
     
-    router.delete(`/initiative-tagging/${tagId}`, {
+    router.delete(`/strategic-pillars/tagging/${tagId}`, {
         preserveScroll: true
     });
 };

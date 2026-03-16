@@ -51,6 +51,113 @@
                 </div>
             </section>
 
+            <section
+                v-if="isEditing"
+                class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717]"
+            >
+                <div class="mb-4">
+                    <h4 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-white">Master Initiative Mapping</h4>
+                    <p class="mt-1 text-xs text-slate-500">Pilih atau sesuaikan inisiatif yang terhubung ke Appendix.</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="max-w-xl">
+                        <select
+                            @change="onSelectInitiative"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
+                        >
+                            <option value="">+ Pilih Initiative untuk dimapping...</option>
+                            <option
+                                v-for="opt in initiativeOptions"
+                                :key="`appendix-initiative-opt-${opt.id}`"
+                                :value="opt.id"
+                                :disabled="form.initiative_ids.includes(Number(opt.id))"
+                            >
+                                {{ opt.code ? `[${String(opt.code).replace(/#/g, '')}] ` : '' }}{{ opt.name }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="min-h-[40px] rounded-xl border border-dashed border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-white/5">
+                        <div class="flex flex-wrap gap-2">
+                            <div
+                                v-for="item in selectedInitiatives"
+                                :key="`appendix-tag-${item.id}`"
+                                class="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-xs font-bold text-blue-700 shadow-sm dark:border-blue-500/30 dark:bg-[#1a1a1a] dark:text-blue-400"
+                            >
+                                <span class="max-w-[280px] truncate">{{ initiativeTagLabel(item).replace(/#/g, '') }}</span>
+                                <button
+                                    type="button"
+                                    @click="removeInitiative(item.id)"
+                                    class="text-slate-400 transition-colors hover:text-rose-500"
+                                >
+                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <p v-if="selectedInitiatives.length === 0" class="flex items-center text-xs italic text-slate-400">
+                            Belum ada inisiatif yang dipilih.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-8 border-t border-slate-100 pt-6 dark:border-white/5">
+                    <div class="mb-4">
+                        <h4 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-white">Compendium Mapping</h4>
+                        <p class="mt-1 text-xs text-slate-500">Pilih compendium yang terhubung ke Appendix.</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="max-w-xl">
+                            <select
+                                @change="onSelectCompendium"
+                                class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
+                            >
+                                <option value="">+ Pilih Compendium untuk dimapping...</option>
+                                <option
+                                    v-for="opt in compendiumOptions"
+                                    :key="`appendix-compendium-opt-${opt.id}`"
+                                    :value="opt.id"
+                                    :disabled="form.compendium_ids.includes(Number(opt.id))"
+                                >
+                                    {{ formatCompendiumLabel(opt) }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="min-h-[40px] rounded-xl border border-dashed border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-white/5">
+                            <div class="flex flex-wrap gap-2">
+                                <div
+                                    v-for="item in selectedCompendiums"
+                                    :key="`appendix-compendium-tag-${item.id}`"
+                                    class="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-xs font-bold text-blue-700 shadow-sm dark:border-blue-500/30 dark:bg-[#1a1a1a] dark:text-blue-400"
+                                >
+                                    <span class="max-w-[280px] truncate">{{ item.label }}</span>
+                                    <button
+                                        type="button"
+                                        @click="removeCompendium(item.id)"
+                                        class="text-slate-400 transition-colors hover:text-rose-500"
+                                    >
+                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <p v-if="selectedCompendiums.length === 0" class="flex items-center text-xs italic text-slate-400">
+                                Belum ada compendium yang dipilih.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div v-if="form.errors.compendium_ids" class="mt-2 text-xs italic text-rose-500">* {{ form.errors.compendium_ids }}</div>
+                </div>
+            </section>
+
             <AppendixCharterDocument
                 :initiative="appendixData"
                 :form="form"
@@ -70,6 +177,8 @@ import AppendixCharterDocument from '@/Components/Appendix/AppendixCharterDocume
 
 const props = defineProps({
     appendix: { type: Object, required: true },
+    initiativeOptions: { type: Array, default: () => [] },
+    compendiumOptions: { type: Array, default: () => [] },
     coeOptions: { type: Array, default: () => [] },
     themeOptions: { type: Array, default: () => [] },
 });
@@ -107,8 +216,16 @@ const buildAppendixFormPayload = (appendix = {}) => {
     const signBy = parseSignBy(appendix.sign_by ?? []);
     const primary = signBy[0] ?? '';
     const others = signBy.slice(1).join(', ');
+    const initiativeIds = Array.isArray(appendix.initiative_ids)
+        ? appendix.initiative_ids
+        : (appendix.initiative_id ? [appendix.initiative_id] : []);
+    const compendiumIds = Array.isArray(appendix.compendium_ids)
+        ? appendix.compendium_ids
+        : (appendix.compendium_id ? [appendix.compendium_id] : []);
 
     return {
+        initiative_ids: normalizeIdList(initiativeIds),
+        compendium_ids: normalizeIdList(compendiumIds),
         owner: String(appendix.owner ?? ''),
         coe: String(appendix.coe ?? ''),
         usecase: String(appendix.usecase ?? ''),
@@ -171,9 +288,16 @@ const buildSignByPayload = (data) => {
     return [primary, ...others].filter((item) => item !== '');
 };
 
+const formatCompendiumLabel = (option) => {
+    const text = String(option?.label ?? '').trim();
+    return text !== '' ? text : `Compendium #${option?.id ?? '-'}`;
+};
+
 const submit = () => {
     form.transform((data) => ({
         ...data,
+        initiative_ids: normalizeIdList(data.initiative_ids),
+        compendium_ids: normalizeIdList(data.compendium_ids),
         rjpp_tagging_ids: normalizeIdList(data.rjpp_tagging_ids),
         owner: String(data.owner ?? '').trim(),
         coe: String(data.coe ?? '').trim(),
@@ -207,6 +331,77 @@ const submit = () => {
             isEditing.value = false;
         },
     });
+};
+
+const selectedInitiatives = computed(() => {
+    const optionsById = new Map(
+        (props.initiativeOptions ?? []).map((option) => [toNumber(option.id, 0), option])
+    );
+    return normalizeIdList(form.initiative_ids).map((id) => {
+        const option = optionsById.get(id);
+        return {
+            id,
+            code: option?.code ?? '',
+            name: option?.name ?? `Initiative ${id}`,
+        };
+    });
+});
+
+const initiativeTagLabel = (item) => {
+    if (!item) return '-';
+    if (item.code) return `[${item.code}] ${item.name}`;
+    return item.name;
+};
+
+const selectedCompendiums = computed(() => {
+    const optionsById = new Map(
+        (props.compendiumOptions ?? []).map((option) => [toNumber(option.id, 0), option])
+    );
+    return normalizeIdList(form.compendium_ids).map((id) => {
+        const option = optionsById.get(id);
+        return {
+            id,
+            label: option ? formatCompendiumLabel(option) : `Compendium #${id}`,
+        };
+    });
+});
+
+const addInitiative = (id) => {
+    const numericId = toNumber(id, 0);
+    if (!numericId) return;
+    if (!form.initiative_ids.includes(numericId)) {
+        form.initiative_ids.push(numericId);
+    }
+};
+
+const removeInitiative = (id) => {
+    const numericId = toNumber(id, 0);
+    form.initiative_ids = normalizeIdList(form.initiative_ids).filter((item) => item !== numericId);
+};
+
+const onSelectInitiative = (event) => {
+    const selectedId = toNumber(event.target.value, 0);
+    addInitiative(selectedId);
+    event.target.value = '';
+};
+
+const addCompendium = (id) => {
+    const numericId = toNumber(id, 0);
+    if (!numericId) return;
+    if (!form.compendium_ids.includes(numericId)) {
+        form.compendium_ids.push(numericId);
+    }
+};
+
+const removeCompendium = (id) => {
+    const numericId = toNumber(id, 0);
+    form.compendium_ids = normalizeIdList(form.compendium_ids).filter((item) => item !== numericId);
+};
+
+const onSelectCompendium = (event) => {
+    const selectedId = toNumber(event.target.value, 0);
+    addCompendium(selectedId);
+    event.target.value = '';
 };
 
 const appendixData = computed(() => {

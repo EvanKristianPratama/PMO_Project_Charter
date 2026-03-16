@@ -7,6 +7,7 @@ use App\Models\TrsScDetails;
 use App\Models\TrsScInitiative;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class UpdateController extends Controller
@@ -22,6 +23,10 @@ class UpdateController extends Controller
             'value' => 'nullable|integer|in:1,2,3',
             'urgency' => 'nullable|integer|in:1,2,3',
             'status' => 'nullable|integer',
+            'initiative_ids' => 'nullable|array',
+            'initiative_ids.*' => 'integer|exists:mst_initiative,id',
+            'compendium_ids' => 'nullable|array',
+            'compendium_ids.*' => 'integer|exists:trs_sc_initiative,id',
             'rjpp_tagging_ids' => 'nullable|array',
             'rjpp_tagging_ids.*' => 'integer',
 
@@ -48,6 +53,9 @@ class UpdateController extends Controller
         ]);
 
         DB::transaction(function () use ($validated, $scInitiative): void {
+            $initiativeIds = $this->uniqueIntCollection($validated['initiative_ids'] ?? []);
+            $compendiumIds = $this->uniqueIntCollection($validated['compendium_ids'] ?? []);
+
             // 1. Update TrsScInitiative
             $scInitiative->update([
                 'owner' => $validated['owner'] ?? null,
@@ -60,6 +68,8 @@ class UpdateController extends Controller
             ]);
 
             // 2. Sync Relationships (Many-to-Many)
+            $scInitiative->mstInitiatives()->sync($initiativeIds->all());
+            $scInitiative->compendiums()->sync($compendiumIds->all());
             $scInitiative->rjpps()->sync(array_filter($validated['rjpp_tagging_ids'] ?? []));
 
             // 3. Update TrsScDetails via Relationship
@@ -94,5 +104,14 @@ class UpdateController extends Controller
         });
 
         return back()->with('success', 'Appendix berhasil diperbarui.');
+    }
+
+    private function uniqueIntCollection(array $items): Collection
+    {
+        return collect($items)
+            ->map(fn ($item) => (int) $item)
+            ->filter(fn (int $item) => $item > 0)
+            ->unique()
+            ->values();
     }
 }

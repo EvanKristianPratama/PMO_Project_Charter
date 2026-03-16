@@ -4,6 +4,7 @@ namespace App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiati
 
 use App\Http\Controllers\Controller;
 use App\Models\MstCoe;
+use App\Models\MstInitiative;
 use App\Models\Theme;
 use App\Models\TrsScInitiative;
 use Illuminate\Http\RedirectResponse;
@@ -21,6 +22,8 @@ class EditController extends Controller
         }
 
         $scInitiative->load([
+            'mstInitiatives:id,code,name',
+            'compendiums:id,usecase',
             'scDetails' => fn ($query) => $query->latest('id'),
         ]);
 
@@ -43,6 +46,8 @@ class EditController extends Controller
         return Inertia::render('ProgramPlanning/ProgramDefinition/DigitalInitiatives/Appendix/Edit', [
             'appendix' => [
                 'id' => (int) $scInitiative->id,
+                'initiative_ids' => $scInitiative->mstInitiatives->pluck('id')->map(fn ($id) => (int) $id)->values()->all(),
+                'compendium_ids' => $scInitiative->compendiums->pluck('id')->map(fn ($id) => (int) $id)->values()->all(),
                 'owner' => $scInitiative->owner,
                 'coe' => $scInitiative->coe,
                 'usecase' => $scInitiative->usecase,
@@ -71,6 +76,8 @@ class EditController extends Controller
                 'otherBU' => $detail?->otherBU,
                 'sign_by' => $signBy ?? [],
             ],
+            'initiativeOptions' => $this->initiativeOptions(),
+            'compendiumOptions' => $this->compendiumOptions(),
             'coeOptions' => MstCoe::orderBy('name')->get(['id', 'name'])->values(),
             'themeOptions' => $this->themeOptions(),
         ]);
@@ -97,6 +104,39 @@ class EditController extends Controller
                     'themes' => $theme->name,
                     'name' => $theme->name,
                     'label' => "[$goalCode - $goalTitle] #$themeNum - $theme->name",
+                ];
+            })
+            ->values();
+    }
+
+    private function initiativeOptions()
+    {
+        return MstInitiative::where('tipe_initiative', 1)
+            ->orderBy('code')
+            ->orderBy('name')
+            ->get(['id', 'code', 'name'])
+            ->map(fn (MstInitiative $initiative) => [
+                'id' => (int) $initiative->id,
+                'code' => $initiative->code,
+                'name' => $initiative->name,
+            ])
+            ->values();
+    }
+
+    private function compendiumOptions()
+    {
+        return TrsScInitiative::query()
+            ->where('source_id', 1)
+            ->with(['mstInitiatives:id,code,name'])
+            ->orderBy('id')
+            ->get(['id', 'owner', 'usecase'])
+            ->map(function (TrsScInitiative $item): array {
+                $firstInitiative = $item->mstInitiatives->first();
+                $label = trim((string) ($item->usecase ?: ($firstInitiative?->name ?? '-')));
+
+                return [
+                    'id' => (int) $item->id,
+                    'label' => $label !== '' ? $label : '-',
                 ];
             })
             ->values();

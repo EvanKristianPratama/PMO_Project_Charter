@@ -26,6 +26,8 @@ class EditController extends Controller
             'scDetails' => fn ($query) => $query->latest('id'),
             // Load appendix initiatives via trs_sc_dependency
             'appendixes' => fn ($query) => $query->with([
+                'mstInitiatives:id,code,name',
+                'compendiums:id,usecase',
                 'scDetails' => fn ($q) => $q->latest('id')->limit(1),
             ])->limit(1),
         ]);
@@ -80,6 +82,8 @@ class EditController extends Controller
             // Full appendix data from the linked initiative
             'appendix' => $appendixInitiative ? [
                 'id' => (int) $appendixInitiative->id,
+                'initiative_ids' => $appendixInitiative->mstInitiatives->pluck('id')->map(fn ($id) => (int) $id)->values()->all(),
+                'compendium_ids' => $appendixInitiative->compendiums->pluck('id')->map(fn ($id) => (int) $id)->values()->all(),
                 'usecase' => $appendixInitiative->usecase,
                 'owner' => $appendixInitiative->owner,
                 'coe' => $appendixInitiative->coe,
