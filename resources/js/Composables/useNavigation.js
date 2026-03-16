@@ -150,6 +150,12 @@ export function useNavigation() {
                         href: '/architecture/organization-structure',
                         icon: BuildingOffice2Icon,
                         active: (url) => url.startsWith('/architecture/organization-structure'),
+                    },
+                    {
+                        label: 'Informatic System',
+                        href: '/architecture/informatic-system',
+                        icon: BuildingOffice2Icon,
+                        active: (url) => url.startsWith('/architecture/informatic-system'),
                     }
                 ]
             },

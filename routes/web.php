@@ -158,6 +158,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     });
     Route::get('/architecture', fn () => Inertia::render('Architecture/Index'))->name('architecture.index');
     Route::get('/architecture/organization-structure', [CompanyController::class, 'index'])->name('architecture.organization-structure');
+    Route::get('/architecture/informatic-system', fn () => Inertia::render('Architecture/InformaticSystem/Index'))->name('architecture.informatic-system');
     Route::get('/resources-management', fn () => Inertia::render('ResourcesManagement/Index'))->name('resources-management.index');
     Route::get('/service-portofolio', fn () => Inertia::render('Placeholder/Index', [
         'title' => 'Service Portofolio',

@@ -16,7 +16,7 @@ class StrategicPillarController extends Controller
     {
         $orgId = $request->query('org_id');
 
-        return Inertia::render('StrategicPillar/Index', [
+        return Inertia::render('ProgramPlanning/StrategicPillar/Index', [
             // --- Filter-dependent (selalu dihitung ulang) ---
             'strategicPillars' => fn () => Goal::with(['themes' => fn ($q) => $q->orderBy('theme_number', 'asc')])
                 ->orderBy('code', 'asc')
