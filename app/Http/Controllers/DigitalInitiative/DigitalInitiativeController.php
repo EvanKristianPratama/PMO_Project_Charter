@@ -27,10 +27,93 @@ class DigitalInitiativeController extends Controller
         $baselineStatus = $statusOptions->firstWhere('name', 'baseline');
         $baselineStatusId = (int) ($baselineStatus['id'] ?? InitiativeStatus::baselineId());
 
-        $initiatives = DigitalInitiative::query()
-            ->with(['statusRef:id,name'])
-            ->latest()
-            ->get();
+        $initiatives = \App\Models\TrsProject::query()
+            ->with([
+                'owner',
+                'charter' => static fn ($charterQuery) => $charterQuery
+                    ->select([
+                        'trs_project_charters.id',
+                        'trs_project_charters.project_id',
+                        'trs_project_charters.version_label',
+                        'trs_project_charters.status',
+                        'trs_project_charters.category',
+                        'trs_project_charters.owner',
+                        'trs_project_charters.tgl_dokumen',
+                        'trs_project_charters.duration',
+                        'trs_project_charters.objectives',
+                        'trs_project_charters.background',
+                        'trs_project_charters.scope',
+                        'trs_project_charters.impact_value',
+                        'trs_project_charters.key_personnel',
+                        'trs_project_charters.key_items',
+                        'trs_project_charters.budget',
+                        'trs_project_charters.risks_identified',
+                        'trs_project_charters.risk_mitigation',
+                    ])
+                    ->with([
+                        'milestones' => static fn ($milestoneQuery) => $milestoneQuery
+                            ->select([
+                                'trs_milestones.id',
+                                'trs_milestones.pc_id',
+                                'trs_milestones.version',
+                                'trs_milestones.title',
+                                'trs_milestones.output',
+                                'trs_milestones.start_date',
+                                'trs_milestones.end_date',
+                                'trs_milestones.type',
+                                'trs_milestones.milestone_type',
+                                'trs_milestones.order',
+                            ])
+                            ->orderBy('trs_milestones.order')
+                            ->orderBy('trs_milestones.id'),
+                    ]),
+                'charter.milestones',
+                'charters' => static fn ($query) => $query
+                    ->select([
+                        'trs_project_charters.id',
+                        'trs_project_charters.project_id',
+                        'trs_project_charters.version_label',
+                        'trs_project_charters.status',
+                        'trs_project_charters.category',
+                        'trs_project_charters.owner',
+                        'trs_project_charters.tgl_dokumen',
+                        'trs_project_charters.duration',
+                        'trs_project_charters.objectives',
+                        'trs_project_charters.background',
+                        'trs_project_charters.scope',
+                        'trs_project_charters.impact_value',
+                        'trs_project_charters.key_personnel',
+                        'trs_project_charters.key_items',
+                        'trs_project_charters.budget',
+                        'trs_project_charters.risks_identified',
+                        'trs_project_charters.risk_mitigation',
+                    ])
+                    ->with([
+                        'milestones' => static fn ($milestoneQuery) => $milestoneQuery
+                            ->select([
+                                'trs_milestones.id',
+                                'trs_milestones.pc_id',
+                                'trs_milestones.version',
+                                'trs_milestones.title',
+                                'trs_milestones.output',
+                                'trs_milestones.start_date',
+                                'trs_milestones.end_date',
+                                'trs_milestones.type',
+                                'trs_milestones.milestone_type',
+                                'trs_milestones.order',
+                            ])
+                            ->orderBy('trs_milestones.order')
+                            ->orderBy('trs_milestones.id'),
+                    ])
+                    ->latest('id'),
+                'statusRef:id,name',
+                'pcStatusImplementations' => static fn ($q) => $q->orderBy('date', 'desc')->orderBy('id', 'desc'),
+                'projectStatusHistories.projectCharter:id,project_id,version_label,tgl_dokumen',
+            ])
+            ->where('tipe_inisiative', 1)
+            ->orderBy('id', 'asc')
+            ->get()
+            ->values();
 
         $totalDigitalInitiatives = MstInitiative::query()
             ->where('tipe_initiative', 1)

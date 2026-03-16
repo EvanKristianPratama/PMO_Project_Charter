@@ -185,9 +185,45 @@ const handleFlowFilter = (statusId) => {
     toggleFilter(statusId);
 };
 
+const FLOW_NOT_YET_ID = 0;
+const FLOW_STATUS_STEPS = [
+    { id: FLOW_NOT_YET_ID, name: "not_start", label: "Not Start" },
+    { id: 1, name: "drafting", label: "Drafting" },
+    { id: 2, name: "propose", label: "Propose" },
+    { id: 3, name: "review", label: "Review" },
+    { id: 5, name: "baseline", label: "Baseline" },
+    { id: 4, name: "approved", label: "Approved" },
+];
+
+const normalizeProjectStatusId = (value) => {
+    const parsed = Number(value);
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : FLOW_NOT_YET_ID;
+};
+
+const latestProjectStatusHistory = (item) => {
+    const histories =
+        item?.project_status_histories ?? item?.projectStatusHistories ?? [];
+    return Array.isArray(histories) && histories.length > 0
+        ? histories[0]
+        : null;
+};
+
+const resolvedInitiativeStatusId = (item) => {
+    const historyStatus = latestProjectStatusHistory(item)?.status;
+    if (
+        historyStatus !== null &&
+        historyStatus !== undefined &&
+        historyStatus !== ""
+    ) {
+        return normalizeProjectStatusId(historyStatus);
+    }
+
+    return FLOW_NOT_YET_ID;
+};
+
 const { activeFlowFilter, filteredItems, toggleFilter } = useFlowFilter(
     () => asList(props.initiatives),
-    (item) => item.status,
+    (item) => resolvedInitiativeStatusId(item),
 );
 
 const mstInitiativesList = computed(() => {
@@ -199,78 +235,35 @@ const allDigitalInitiatives = computed(() => {
 });
 
 const statusOptions = computed(() => {
-    if (props.statusOptions.length > 0) {
-        return props.statusOptions;
-    }
-
-    return [
-        { id: 1, name: "drafting", label: "Drafting" },
-        { id: 2, name: "propose", label: "Propose" },
-        { id: 3, name: "review", label: "Review" },
-        { id: 4, name: "approved", label: "Approved" },
-        { id: 5, name: "baseline", label: "Baseline" },
-    ];
-});
-
-const scopeStatusOrder = ["drafting", "propose", "review", "approved"];
-const normalizeStatusName = (value) =>
-    String(value ?? "")
-        .trim()
-        .toLowerCase();
-
-const scopeStatusOptions = computed(() => {
-    const sourceOptions = Array.isArray(statusOptions.value)
-        ? statusOptions.value
+    const sourceOptions = Array.isArray(props.statusOptions)
+        ? props.statusOptions
         : [];
-    const mappedStatusByName = new Map();
+    const sourceById = new Map(
+        sourceOptions
+            .map((status) => [Number(status?.id), status])
+            .filter(([id]) => Number.isInteger(id))
+    );
 
-    sourceOptions.forEach((status) => {
-        const candidateNames = [
-            normalizeStatusName(status?.name),
-            normalizeStatusName(status?.label),
-        ];
-
-        if (candidateNames.includes("baseline")) {
-            return;
-        }
-
-        candidateNames.forEach((candidateName) => {
-            if (
-                scopeStatusOrder.includes(candidateName) &&
-                !mappedStatusByName.has(candidateName)
-            ) {
-                mappedStatusByName.set(candidateName, status);
-            }
-        });
-    });
-
-    const fallbackStatusOptions = [
-        { id: 1, name: "drafting", label: "Drafting" },
-        { id: 2, name: "propose", label: "Propose" },
-        { id: 3, name: "review", label: "Review" },
-        { id: 4, name: "approved", label: "Approved" },
-    ];
-
-    return scopeStatusOrder.map((statusName, index) => {
-        const matchedStatus = mappedStatusByName.get(statusName);
-        const fallbackStatus = fallbackStatusOptions[index];
+    return FLOW_STATUS_STEPS.map((step) => {
+        const matched = sourceById.get(step.id);
 
         return {
-            id: Number(matchedStatus?.id ?? fallbackStatus.id),
-            name: statusName,
-            label: fallbackStatus.label,
+            id: step.id,
+            name: step.name,
+            label: step.label,
+            rawName: matched?.name ?? step.name,
         };
     });
 });
 
 const countInitiativesByStatus = (statusId) => {
     return asList(props.initiatives).filter(
-        (item) => Number(item.status) === Number(statusId),
+        (item) => resolvedInitiativeStatusId(item) === Number(statusId),
     ).length;
 };
 
 const digitalSteps = computed(() => {
-    return scopeStatusOptions.value.map((status, index) => {
+    return statusOptions.value.map((status, index) => {
         const flowClass = statusFlowClassByIndex(index);
         const key = status.name;
 

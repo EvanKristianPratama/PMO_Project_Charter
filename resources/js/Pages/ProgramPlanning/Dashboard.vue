@@ -1,18 +1,17 @@
 <template>
     <UserLayout title="Dashboard">
         <div class="space-y-6 animate-fade-in-up">
-            <section class="rounded-2xl border border-[#E42313] bg-[#E42313] p-6 shadow-sm">
+            <section class="rounded-xl bg-gradient-to-r from-red-600 to-rose-700 p-6 shadow-md dark:from-[#8C1D13] dark:to-[#A42518] dark:border dark:border-white/10">
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div>
-                        <h1 class="text-2xl font-bold text-white">Program <span class="text-yellow-400">Planning</span>
-                            Summary</h1>
+                        <h1 class="text-2xl font-black text-white tracking-tight">Program <span class="font-bold">Planning</span> Summary</h1>
                     </div>
                 </div>
             </section>
 
             <section class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <article v-for="item in metricCards" :key="item.key"
-                    class="relative flex flex-col rounded-2xl border p-5 shadow-sm"
+                    class="relative flex flex-col rounded-xl border p-5 shadow-sm transition-shadow hover:shadow-md"
                     :class="item.cardClass || 'bg-white border-slate-200 dark:border-white/10 dark:bg-[#171717]'">
                     <p class="text-xs font-semibold uppercase tracking-[0.08em]"
                         :class="item.labelClass || 'text-slate-500 dark:text-slate-400'"
@@ -36,7 +35,7 @@
 
             <section class="grid grid-cols-1 gap-4 xl:grid-cols-3">
                 <article
-                    class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#171717] xl:col-span-3"
+                    class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#171717] xl:col-span-3 transition-shadow hover:shadow-md"
                 >
                     <div class="space-y-4">
                         <DigitalFlowStatus :steps="digitalStatusFlow" />
@@ -47,7 +46,7 @@
 
             <!-- Initiative Status Summary -->
             <section
-                class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-white/10 dark:bg-[#171717]">
                 <div class="border-b border-slate-200 px-5 py-4 dark:border-white/10">
                     <h2 class="text-base font-semibold text-slate-900 dark:text-white">Initiative Status Summary</h2>
                 </div>
@@ -112,7 +111,7 @@
             <!-- Initiative View -->
             <section class="grid grid-cols-1 gap-5">
                 <article v-if="selectedInitiative === null"
-                    class="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-center shadow-sm dark:border-white/15 dark:bg-[#171717]">
+                    class="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center shadow-inner dark:border-white/15 dark:bg-[#171717]/50">
                     <p class="text-sm font-medium text-slate-700 dark:text-slate-200">
                         Klik baris <span class="font-semibold">Digital Initiative</span> atau <span
                             class="font-semibold">IT Initiative</span> untuk menampilkan tabel detail.
