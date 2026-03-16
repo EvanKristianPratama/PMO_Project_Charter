@@ -32,34 +32,37 @@
                         <!-- Create row (WYSIWYG) -->
                         <tr class="bg-slate-50/60 dark:bg-white/5">
                             <td class="px-3 py-2 align-top">
-                                <input
+                                <select
                                     v-model="createForm.group_business"
-                                    type="text"
-                                    placeholder="Group Business Function"
                                     class="w-full min-w-[180px] rounded border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
-                                />
+                                >
+                                    <option value="" disabled>Group Business Function</option>
+                                    <option v-for="opt in groupBusinessOptions" :key="opt" :value="opt">{{ opt }}</option>
+                                </select>
                                 <p v-if="createForm.errors.group_business" class="mt-1 text-[10px] text-rose-500">
                                     {{ createForm.errors.group_business }}
                                 </p>
                             </td>
                             <td class="px-3 py-2 align-top">
-                                <input
+                                <select
                                     v-model="createForm.group_function"
-                                    type="text"
-                                    placeholder="Group Function"
                                     class="w-full min-w-[160px] rounded border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
-                                />
+                                >
+                                    <option value="" disabled>Group Function</option>
+                                    <option v-for="opt in groupFunctionOptions" :key="opt" :value="opt">{{ opt }}</option>
+                                </select>
                                 <p v-if="createForm.errors.group_function" class="mt-1 text-[10px] text-rose-500">
                                     {{ createForm.errors.group_function }}
                                 </p>
                             </td>
                             <td class="px-3 py-2 align-top">
-                                <input
+                                <select
                                     v-model="createForm.subGroup_function"
-                                    type="text"
-                                    placeholder="SubGroup Function"
                                     class="w-full min-w-[180px] rounded border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
-                                />
+                                >
+                                    <option value="" disabled>SubGroup Function</option>
+                                    <option v-for="opt in subGroupFunctionOptions" :key="opt" :value="opt">{{ opt }}</option>
+                                </select>
                                 <p v-if="createForm.errors.subGroup_function" class="mt-1 text-[10px] text-rose-500">
                                     {{ createForm.errors.subGroup_function }}
                                 </p>
@@ -99,11 +102,13 @@
                         <tr v-for="item in rows" :key="item.id" class="transition-colors hover:bg-slate-50 dark:hover:bg-white/5">
                             <td class="px-3 py-2.5 align-top text-slate-700 dark:text-slate-200">
                                 <template v-if="isEditing(item)">
-                                    <input
+                                    <select
                                         v-model="editForm.group_business"
-                                        type="text"
                                         class="w-full min-w-[180px] rounded border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
-                                    />
+                                    >
+                                        <option value="" disabled>Group Business Function</option>
+                                        <option v-for="opt in groupBusinessOptions" :key="opt" :value="opt">{{ opt }}</option>
+                                    </select>
                                     <p v-if="editForm.errors.group_business" class="mt-1 text-[10px] text-rose-500">
                                         {{ editForm.errors.group_business }}
                                     </p>
@@ -112,11 +117,13 @@
                             </td>
                             <td class="px-3 py-2.5 align-top text-slate-700 dark:text-slate-200">
                                 <template v-if="isEditing(item)">
-                                    <input
+                                    <select
                                         v-model="editForm.group_function"
-                                        type="text"
                                         class="w-full min-w-[160px] rounded border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
-                                    />
+                                    >
+                                        <option value="" disabled>Group Function</option>
+                                        <option v-for="opt in groupFunctionOptions" :key="opt" :value="opt">{{ opt }}</option>
+                                    </select>
                                     <p v-if="editForm.errors.group_function" class="mt-1 text-[10px] text-rose-500">
                                         {{ editForm.errors.group_function }}
                                     </p>
@@ -125,11 +132,13 @@
                             </td>
                             <td class="px-3 py-2.5 align-top text-slate-600 dark:text-slate-300">
                                 <template v-if="isEditing(item)">
-                                    <input
+                                    <select
                                         v-model="editForm.subGroup_function"
-                                        type="text"
                                         class="w-full min-w-[180px] rounded border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
-                                    />
+                                    >
+                                        <option value="" disabled>SubGroup Function</option>
+                                        <option v-for="opt in subGroupFunctionOptions" :key="opt" :value="opt">{{ opt }}</option>
+                                    </select>
                                     <p v-if="editForm.errors.subGroup_function" class="mt-1 text-[10px] text-rose-500">
                                         {{ editForm.errors.subGroup_function }}
                                     </p>
@@ -213,6 +222,46 @@ import { computed, ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+
+const groupBusinessOptions = [
+    'Exploration & Production',
+    'Gas & Pipeline Management',
+    'Refining & Petrochemical',
+    'Renewable Energy',
+];
+
+const groupFunctionOptions = [
+    'Core Capability',
+    'Enterprise Capability',
+];
+
+const subGroupFunctionOptions = [
+    'Administrative Support & Services Management',
+    'Development & Production Management',
+    'Distribution & Storage',
+    'Energy Analysis and Consulting',
+    'Energy Efficiency Management',
+    'Energy Regulations and Policies',
+    'Enterprise Effectiveness Management & Business Intelligent*',
+    'Environmental and Regulatory Compliance',
+    'Exploration & Appraisal Management',
+    'Exploration & Production',
+    'Finance & Accounting Management',
+    'Fix Asset Management',
+    'Governance, Risk & Compliance Management',
+    'HSSE Management',
+    'Human Resource Management',
+    'ICT Management',
+    'Operation Management',
+    'Processing and Treatment',
+    'Renewable Energy Project Development',
+    'Renewable Energy Technicians and Engineers',
+    'Research & Knowledge Management',
+    'Supply Chain Management',
+    'Sustainability and Environment',
+    'Technology Research and Innovation Dev.',
+    'Transportation',
+];
 
 const props = defineProps({
     businessCapabilities: { type: Array, default: () => [] },
