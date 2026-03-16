@@ -17,7 +17,7 @@
                         <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 align-top dark:text-slate-400">No</th>
                         <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 align-top dark:text-slate-400">Code</th>
                         <th class="px-3 py-2 text-left align-top">
-                            <span class="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">IT Arsitektur</span>
+                            <span class="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">IT Building Block</span>
                             <select v-model="filterCategory" class="mt-1.5 w-full rounded border border-slate-300 bg-white px-1.5 py-1 text-[10px] font-normal text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200">
                                 <option value="">Semua</option>
                                 <option v-for="cat in availableCategories" :key="cat" :value="cat">{{ cat }}</option>
@@ -137,6 +137,8 @@ import { computed, ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { statusBadgeClassById, statusLabelFromOptions } from '@/Composables/initiativeStatus';
 
+const FLOW_NOT_YET_ID = 0;
+
 const props = defineProps({
     items: {
         type: Array,
@@ -160,13 +162,24 @@ const latestProjectStatusHistory = (project) => {
 };
 
 const resolvedProjectStatusId = (project) => {
+    // 1. Check history first
     const historyStatus = latestProjectStatusHistory(project)?.status;
-    const parsedHistoryStatus = Number(historyStatus);
-    if (Number.isInteger(parsedHistoryStatus) && parsedHistoryStatus > 0) {
-        return parsedHistoryStatus;
+    if (historyStatus !== null && historyStatus !== undefined && historyStatus !== "") {
+        const parsedHistoryStatus = Number(historyStatus);
+        if (Number.isInteger(parsedHistoryStatus) && parsedHistoryStatus >= 0) {
+            return parsedHistoryStatus;
+        }
     }
 
-    return 0;
+    // 2. Fallback to project status
+    if (project?.status !== null && project?.status !== undefined) {
+        const parsedStatus = Number(project.status);
+        if (Number.isInteger(parsedStatus) && parsedStatus >= 0) {
+            return parsedStatus;
+        }
+    }
+
+    return FLOW_NOT_YET_ID;
 };
 
 const resolvedProjectStatusDate = (project) => {

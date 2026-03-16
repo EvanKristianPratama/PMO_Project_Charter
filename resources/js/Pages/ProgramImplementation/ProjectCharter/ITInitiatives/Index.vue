@@ -620,8 +620,11 @@ const FLOW_STATUS_STEPS = [
 ];
 
 const normalizeProjectStatusId = (value) => {
+    if (value === null || value === "" || value === undefined) {
+        return FLOW_NOT_YET_ID;
+    }
     const parsed = Number(value);
-    return Number.isInteger(parsed) && parsed > 0 ? parsed : FLOW_NOT_YET_ID;
+    return Number.isInteger(parsed) && parsed >= 0 ? parsed : FLOW_NOT_YET_ID;
 };
 
 const latestProjectStatusHistory = (item) => {
@@ -633,6 +636,7 @@ const latestProjectStatusHistory = (item) => {
 };
 
 const resolvedProjectStatusId = (item) => {
+    // 1. Check history first (most accurate for transitioned projects)
     const historyStatus = latestProjectStatusHistory(item)?.status;
     if (
         historyStatus !== null &&
@@ -640,6 +644,11 @@ const resolvedProjectStatusId = (item) => {
         historyStatus !== ""
     ) {
         return normalizeProjectStatusId(historyStatus);
+    }
+
+    // 2. Fallback to project status (for newly synced projects without history)
+    if (item?.status !== null && item?.status !== undefined) {
+        return normalizeProjectStatusId(item.status);
     }
 
     return FLOW_NOT_YET_ID;

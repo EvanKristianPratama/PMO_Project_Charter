@@ -10,10 +10,52 @@
                     >
                         Digital Initiatives
                     </h2>
+                    <div class="mt-2 flex flex-wrap items-center gap-2">
+                        <button
+                            type="button"
+                            class="inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition"
+                            :class="
+                                tableMode === TABLE_MODE.FLOW || tableMode === TABLE_MODE.MASTER
+                                    ? 'border-[#1C75BC] bg-[#1C75BC] text-white hover:bg-[#0b5c9d]'
+                                    : 'border-[#1C75BC]/45 bg-[#1C75BC]/10 text-[#1C75BC] hover:bg-[#1C75BC]/20 dark:text-[#7FC0F2]'
+                            "
+                            @click="showAllProjectCharter"
+                        >
+                            Project Charter
+                        </button>
+                        <button
+                            type="button"
+                            class="inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition"
+                            :class="
+                                tableMode === TABLE_MODE.ROADMAP
+                                    ? 'border-[#1C75BC] bg-[#1C75BC] text-white hover:bg-[#0b5c9d]'
+                                    : 'border-[#1C75BC]/45 bg-[#1C75BC]/10 text-[#1C75BC] hover:bg-[#1C75BC]/20 dark:text-[#7FC0F2]'
+                            "
+                            @click="showRoadmapView"
+                        >
+                            Roadmap Project Charter
+                        </button>
+                        <button
+                            type="button"
+                            class="inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition"
+                            :class="
+                                tableMode === TABLE_MODE.IMPLEMENTATION
+                                    ? 'border-[#1C75BC] bg-[#1C75BC] text-white hover:bg-[#0b5c9d]'
+                                    : 'border-[#1C75BC]/45 bg-[#1C75BC]/10 text-[#1C75BC] hover:bg-[#1C75BC]/20 dark:text-[#7FC0F2]'
+                            "
+                            @click="showImplementationView"
+                        >
+                            Status Implementation
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <section class="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+
+            <section
+                v-if="tableMode !== TABLE_MODE.ROADMAP && tableMode !== TABLE_MODE.IMPLEMENTATION"
+                class="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-3"
+            >
                 <div class="flex h-full flex-col gap-3">
                     <article
                         class="relative flex min-h-[140px] flex-1 cursor-pointer flex-col justify-center rounded-2xl border bg-[#1C75BC] border-[#1C75BC] p-4 shadow-[0_4px_16px_rgba(28,117,188,0.3)]"
@@ -102,16 +144,34 @@
 
             <FlowStatusTable
                 v-if="hasTableSelection && tableMode === TABLE_MODE.FLOW"
-                :items="filteredItems"
+                :items="filteredItemsList"
                 :status-options="statusOptions"
                 :active-flow-filter="activeFlowFilter"
             />
 
             <MasterInitiativeTable
-                v-if="hasTableSelection && tableMode === TABLE_MODE.MASTER"
+                v-else-if="hasTableSelection && tableMode === TABLE_MODE.MASTER"
                 :items="mstInitiativesList"
                 :initiative-items="allDigitalInitiatives"
             />
+
+            <section
+                v-else-if="hasTableSelection && tableMode === TABLE_MODE.ROADMAP"
+                class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-white/15 dark:bg-[#171717]"
+            >
+                <p class="text-sm font-medium text-slate-600 dark:text-slate-300">
+                    Feature Roadmap for Digital Initiatives coming soon.
+                </p>
+            </section>
+
+            <section
+                v-else-if="hasTableSelection && tableMode === TABLE_MODE.IMPLEMENTATION"
+                class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-white/15 dark:bg-[#171717]"
+            >
+                <p class="text-sm font-medium text-slate-600 dark:text-slate-300">
+                    Feature Status Implementation for Digital Initiatives coming soon.
+                </p>
+            </section>
         </div>
     </UserLayout>
 </template>
@@ -168,10 +228,20 @@ const asList = (value) => {
 const TABLE_MODE = {
     FLOW: "flow",
     MASTER: "master",
+    ROADMAP: "roadmap",
+    IMPLEMENTATION: "implementation",
 };
 
 const tableMode = ref(TABLE_MODE.FLOW);
 const hasTableSelection = ref(false);
+const showAllCharter = ref(false);
+
+const showAllProjectCharter = () => {
+    hasTableSelection.value = true;
+    tableMode.value = TABLE_MODE.FLOW;
+    activeFlowFilter.value = null;
+    showAllCharter.value = true;
+};
 
 const showMasterDigitalInitiatives = () => {
     hasTableSelection.value = true;
@@ -179,9 +249,22 @@ const showMasterDigitalInitiatives = () => {
     activeFlowFilter.value = null;
 };
 
+const showRoadmapView = () => {
+    hasTableSelection.value = true;
+    tableMode.value = TABLE_MODE.ROADMAP;
+    activeFlowFilter.value = null;
+};
+
+const showImplementationView = () => {
+    hasTableSelection.value = true;
+    tableMode.value = TABLE_MODE.IMPLEMENTATION;
+    activeFlowFilter.value = null;
+};
+
 const handleFlowFilter = (statusId) => {
     hasTableSelection.value = true;
     tableMode.value = TABLE_MODE.FLOW;
+    showAllCharter.value = false;
     toggleFilter(statusId);
 };
 
@@ -196,8 +279,11 @@ const FLOW_STATUS_STEPS = [
 ];
 
 const normalizeProjectStatusId = (value) => {
+    if (value === null || value === "" || value === undefined) {
+        return FLOW_NOT_YET_ID;
+    }
     const parsed = Number(value);
-    return Number.isInteger(parsed) && parsed > 0 ? parsed : FLOW_NOT_YET_ID;
+    return Number.isInteger(parsed) && parsed >= 0 ? parsed : FLOW_NOT_YET_ID;
 };
 
 const latestProjectStatusHistory = (item) => {
@@ -209,6 +295,7 @@ const latestProjectStatusHistory = (item) => {
 };
 
 const resolvedInitiativeStatusId = (item) => {
+    // 1. Check history first (most accurate for transitioned projects)
     const historyStatus = latestProjectStatusHistory(item)?.status;
     if (
         historyStatus !== null &&
@@ -218,6 +305,11 @@ const resolvedInitiativeStatusId = (item) => {
         return normalizeProjectStatusId(historyStatus);
     }
 
+    // 2. Fallback to project status (for newly synced projects without history)
+    if (item?.status !== null && item?.status !== undefined) {
+        return normalizeProjectStatusId(item.status);
+    }
+
     return FLOW_NOT_YET_ID;
 };
 
@@ -225,6 +317,13 @@ const { activeFlowFilter, filteredItems, toggleFilter } = useFlowFilter(
     () => asList(props.initiatives),
     (item) => resolvedInitiativeStatusId(item),
 );
+
+const filteredItemsList = computed(() => {
+    if (showAllCharter.value && activeFlowFilter.value === null) {
+        return asList(props.initiatives);
+    }
+    return filteredItems.value;
+});
 
 const mstInitiativesList = computed(() => {
     return asList(props.mstDigitalInitiatives);
