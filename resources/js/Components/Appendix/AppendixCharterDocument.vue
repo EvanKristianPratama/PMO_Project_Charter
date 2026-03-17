@@ -49,17 +49,6 @@ const signOthers = computed(() => {
     return rest.length ? rest.join(', ') : '-';
 });
 
-const parseList = (text) => {
-    if (!text || text === '-') return [];
-    const lines = String(text).split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-    const hasBullet = lines.some(l => /^[-â€¢*]/.test(l));
-    if (hasBullet) {
-        const result = lines.map(l => l.replace(/^[-â€¢*]\s*/, '').trim()).filter(Boolean);
-        return result.length > 0 ? result : [];
-    }
-    return [];
-};
-
 // RJPP Tagging Helpers for Edit Mode
 const addRjppTagging = (id) => {
     if (!props.form) return;
@@ -264,10 +253,7 @@ const getLevelLabel = (type) => {
                 <textarea v-if="editable" v-model="form.description" rows="5" class="content-textarea"
                     placeholder="Input description..."></textarea>
                 <template v-else>
-                    <ul v-if="parseList(initiative.description).length" class="list-disc pl-5 space-y-1">
-                        <li v-for="(item, idx) in parseList(initiative.description)" :key="idx">{{ item }}</li>
-                    </ul>
-                    <p v-else class="whitespace-pre-line">{{ initiative.description ?? '-' }}</p>
+                    <p class="whitespace-pre-line break-words">{{ initiative.description ?? '-' }}</p>
                 </template>
             </div>
         </div>
@@ -280,10 +266,7 @@ const getLevelLabel = (type) => {
                 <textarea v-if="editable" v-model="form.situation" rows="5" class="content-textarea"
                     placeholder="Input situation..."></textarea>
                 <template v-else>
-                    <ul v-if="parseList(initiative.situation).length" class="list-disc pl-5 space-y-1">
-                        <li v-for="(item, idx) in parseList(initiative.situation)" :key="idx">{{ item }}</li>
-                    </ul>
-                    <p v-else class="whitespace-pre-line">{{ initiative.situation ?? '-' }}</p>
+                    <p class="whitespace-pre-line break-words">{{ initiative.situation ?? '-' }}</p>
                 </template>
             </div>
         </div>
@@ -296,10 +279,7 @@ const getLevelLabel = (type) => {
                 <textarea v-if="editable" v-model="form.key_functionalities" rows="5" class="content-textarea"
                     placeholder="Input functionalities..."></textarea>
                 <template v-else>
-                    <ul v-if="parseList(initiative.key_functionalities).length" class="list-disc pl-5 space-y-1">
-                        <li v-for="(item, idx) in parseList(initiative.key_functionalities)" :key="idx">{{ item }}</li>
-                    </ul>
-                    <p v-else class="whitespace-pre-line">{{ initiative.key_functionalities ?? '-' }}</p>
+                    <p class="whitespace-pre-line break-words">{{ initiative.key_functionalities ?? '-' }}</p>
                 </template>
             </div>
         </div>
@@ -373,12 +353,7 @@ const getLevelLabel = (type) => {
                         <textarea v-if="editable" v-model="form.value_rationale" rows="3" class="content-textarea"
                             placeholder="..."></textarea>
                         <template v-else>
-                            <ul v-if="parseList(initiative.value_rationale).length" class="list-disc pl-4 space-y-1">
-                                <li v-for="(item, idx) in parseList(initiative.value_rationale)" :key="idx">{{ item }}
-                                </li>
-                            </ul>
-                            <p v-else class="whitespace-pre-line break-words">{{ initiative.value_rationale ?? '-' }}
-                            </p>
+                            <p class="whitespace-pre-line break-words">{{ initiative.value_rationale ?? '-' }}</p>
                         </template>
                     </div>
                 </div>
@@ -390,11 +365,7 @@ const getLevelLabel = (type) => {
                         <textarea v-if="editable" v-model="form.value_matrics" rows="3" class="content-textarea"
                             placeholder="..."></textarea>
                         <template v-else>
-                            <ul v-if="parseList(initiative.value_matrics).length" class="list-disc pl-4 space-y-1">
-                                <li v-for="(item, idx) in parseList(initiative.value_matrics)" :key="idx">{{ item }}
-                                </li>
-                            </ul>
-                            <p v-else class="whitespace-pre-line break-words">{{ initiative.value_matrics ?? '-' }}</p>
+                            <p class="whitespace-pre-line break-words">{{ initiative.value_matrics ?? '-' }}</p>
                         </template>
                     </div>
                 </div>
@@ -418,12 +389,7 @@ const getLevelLabel = (type) => {
                         <textarea v-if="editable" v-model="form.urgency_rationale" rows="3" class="content-textarea"
                             placeholder="..."></textarea>
                         <template v-else>
-                            <ul v-if="parseList(initiative.urgency_rationale).length" class="list-disc pl-4 space-y-1">
-                                <li v-for="(item, idx) in parseList(initiative.urgency_rationale)" :key="idx">{{ item }}
-                                </li>
-                            </ul>
-                            <p v-else class="whitespace-pre-line break-words">{{ initiative.urgency_rationale ?? '-' }}
-                            </p>
+                            <p class="whitespace-pre-line break-words">{{ initiative.urgency_rationale ?? '-' }}</p>
                         </template>
                     </div>
                 </div>
@@ -435,12 +401,7 @@ const getLevelLabel = (type) => {
                         <textarea v-if="editable" v-model="form.urgency_expected" rows="3" class="content-textarea"
                             placeholder="..."></textarea>
                         <template v-else>
-                            <ul v-if="parseList(initiative.urgency_expected).length" class="list-disc pl-4 space-y-1">
-                                <li v-for="(item, idx) in parseList(initiative.urgency_expected)" :key="idx">{{ item }}
-                                </li>
-                            </ul>
-                            <p v-else class="whitespace-pre-line break-words">{{ initiative.urgency_expected ?? '-' }}
-                            </p>
+                            <p class="whitespace-pre-line break-words">{{ initiative.urgency_expected ?? '-' }}</p>
                         </template>
                     </div>
                 </div>
@@ -464,11 +425,7 @@ const getLevelLabel = (type) => {
                         <textarea v-if="editable" v-model="form.ease_rationale" rows="3" class="content-textarea"
                             placeholder="..."></textarea>
                         <template v-else>
-                            <ul v-if="parseList(initiative.ease_rationale).length" class="list-disc pl-4 space-y-1">
-                                <li v-for="(item, idx) in parseList(initiative.ease_rationale)" :key="idx">{{ item }}
-                                </li>
-                            </ul>
-                            <p v-else class="whitespace-pre-line break-words">{{ initiative.ease_rationale ?? '-' }}</p>
+                            <p class="whitespace-pre-line break-words">{{ initiative.ease_rationale ?? '-' }}</p>
                         </template>
                     </div>
                 </div>
@@ -480,10 +437,7 @@ const getLevelLabel = (type) => {
                         <textarea v-if="editable" v-model="form.ease_detail" rows="3" class="content-textarea"
                             placeholder="..."></textarea>
                         <template v-else>
-                            <ul v-if="parseList(initiative.ease_detail).length" class="list-disc pl-4 space-y-1">
-                                <li v-for="(item, idx) in parseList(initiative.ease_detail)" :key="idx">{{ item }}</li>
-                            </ul>
-                            <p v-else class="whitespace-pre-line break-words">{{ initiative.ease_detail ?? '-' }}</p>
+                            <p class="whitespace-pre-line break-words">{{ initiative.ease_detail ?? '-' }}</p>
                         </template>
                     </div>
                 </div>
@@ -510,12 +464,7 @@ const getLevelLabel = (type) => {
                         <textarea v-if="editable" v-model="form.resource_rationale" rows="3" class="content-textarea"
                             placeholder="..."></textarea>
                         <template v-else>
-                            <ul v-if="parseList(initiative.resource_rationale).length" class="list-disc pl-4 space-y-1">
-                                <li v-for="(item, idx) in parseList(initiative.resource_rationale)" :key="idx">{{ item
-                                    }}</li>
-                            </ul>
-                            <p v-else class="whitespace-pre-line break-words">{{ initiative.resource_rationale ?? '-' }}
-                            </p>
+                            <p class="whitespace-pre-line break-words">{{ initiative.resource_rationale ?? '-' }}</p>
                         </template>
                     </div>
                 </div>
@@ -527,12 +476,7 @@ const getLevelLabel = (type) => {
                         <textarea v-if="editable" v-model="form.resource_detail" rows="3" class="content-textarea"
                             placeholder="..."></textarea>
                         <template v-else>
-                            <ul v-if="parseList(initiative.resource_detail).length" class="list-disc pl-4 space-y-1">
-                                <li v-for="(item, idx) in parseList(initiative.resource_detail)" :key="idx">{{ item }}
-                                </li>
-                            </ul>
-                            <p v-else class="whitespace-pre-line break-words">{{ initiative.resource_detail ?? '-' }}
-                            </p>
+                            <p class="whitespace-pre-line break-words">{{ initiative.resource_detail ?? '-' }}</p>
                         </template>
                     </div>
                 </div>
@@ -551,10 +495,7 @@ const getLevelLabel = (type) => {
                         <textarea v-if="editable" v-model="form.predecessor" rows="2" class="content-textarea"
                             placeholder="..."></textarea>
                         <template v-else>
-                            <ul v-if="parseList(initiative.predecessor).length" class="list-disc pl-4 space-y-1">
-                                <li v-for="(item, idx) in parseList(initiative.predecessor)" :key="idx">{{ item }}</li>
-                            </ul>
-                            <p v-else class="whitespace-pre-line break-words">{{ initiative.predecessor ?? '-' }}</p>
+                            <p class="whitespace-pre-line break-words">{{ initiative.predecessor ?? '-' }}</p>
                         </template>
                     </div>
                 </div>
@@ -566,10 +507,7 @@ const getLevelLabel = (type) => {
                         <textarea v-if="editable" v-model="form.successor" rows="2" class="content-textarea"
                             placeholder="..."></textarea>
                         <template v-else>
-                            <ul v-if="parseList(initiative.successor).length" class="list-disc pl-4 space-y-1">
-                                <li v-for="(item, idx) in parseList(initiative.successor)" :key="idx">{{ item }}</li>
-                            </ul>
-                            <p v-else class="whitespace-pre-line break-words">{{ initiative.successor ?? '-' }}</p>
+                            <p class="whitespace-pre-line break-words">{{ initiative.successor ?? '-' }}</p>
                         </template>
                     </div>
                 </div>
@@ -581,10 +519,7 @@ const getLevelLabel = (type) => {
                         <textarea v-if="editable" v-model="form.otherBU" rows="2" class="content-textarea"
                             placeholder="..."></textarea>
                         <template v-else>
-                            <ul v-if="parseList(initiative.otherBU).length" class="list-disc pl-4 space-y-1">
-                                <li v-for="(item, idx) in parseList(initiative.otherBU)" :key="idx">{{ item }}</li>
-                            </ul>
-                            <p v-else class="whitespace-pre-line break-words">{{ initiative.otherBU ?? '-' }}</p>
+                            <p class="whitespace-pre-line break-words">{{ initiative.otherBU ?? '-' }}</p>
                         </template>
                     </div>
                 </div>
@@ -778,4 +713,3 @@ const getLevelLabel = (type) => {
     }
 }
 </style>
-
