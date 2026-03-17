@@ -10,11 +10,6 @@ const displayValue = (value) => {
     return trimmed === '' ? '-' : trimmed;
 };
 
-const statusLabel = computed(() => {
-    const statusRef = props.initiative?.statusRef?.name;
-    return displayValue(statusRef ?? props.initiative?.status);
-});
-
 const mapSourceCreated = (source) => {
     if (!source) return '-';
 
@@ -132,9 +127,6 @@ const mappedInitiativeGoals = computed(() => {
                             <span class="mx-2 shrink-0 text-slate-400">|</span>
                             <span class="">{{ displayValue(initiative.no || initiative.code) }}</span>
                         </h1>
-                        <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600">
-                            {{ statusLabel }}
-                        </span>
                     </div>
                     <p class="mt-1 text-[13px] text-slate-600">
                         {{ displayValue(initiative.useCase || initiative.name) }}

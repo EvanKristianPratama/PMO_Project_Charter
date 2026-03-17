@@ -159,7 +159,10 @@
                 </div>
             </section>
 
-            <DigitalInitiativeCharterDocument :initiative="masterInitiativeDocument" />
+            <DigitalInitiativeCharterDocument
+                v-if="hasMasterInitiatives"
+                :initiative="masterInitiativeDocument"
+            />
 
             <CompendiumCharterDocument
                 :form="form"
@@ -168,6 +171,22 @@
                 :theme-options="themeOptions"
                 :editable="isEditing"
             />
+
+            <div
+                v-if="!hasMasterInitiatives"
+                class="rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-12 text-center dark:border-white/10 dark:bg-white/5"
+            >
+                <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5">
+                    <svg class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 4h.01M6 20h12a2 2 0 0 0 2-2V8l-6-6H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2z" />
+                    </svg>
+                </div>
+                <h3 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">Tidak Ada Master Initiative Terkait</h3>
+                <p class="mt-2 text-xs text-slate-500">
+                    Compendium ini belum dihubungkan dengan Master Initiative. Klik tombol <strong>"Edit Use Case"</strong> lalu pilih inisiatif pada bagian
+                    <strong>Master Initiative Mapping</strong>.
+                </p>
+            </div>
 
             <div class="pt-1">
                 <div v-if="appendix" class="space-y-3">
@@ -650,6 +669,10 @@ const masterInitiativeDocument = computed(() => {
         mapped_initiatives: mappedInitiatives,
     };
 });
+
+const hasMasterInitiatives = computed(() => (
+    (masterInitiativeDocument.value?.mapped_initiatives?.length ?? 0) > 0
+));
 
 const initiativeTagLabel = (item) => {
     if (!item) return '-';
