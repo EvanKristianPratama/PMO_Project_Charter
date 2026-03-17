@@ -146,7 +146,7 @@ const mappedInitiativeGoals = computed(() => {
         <!-- Info Bar -->
         <div class="info-bar">
             <div class="info-cell info-cell-compact">
-                <span class="info-label info-label-dark">Project Owner</span>
+                <span class="info-label info-label">Project Owner</span>
                 <span class="info-sep"></span>
                 <span class="info-value">{{ headerMeta.owners }}</span>
             </div>
@@ -156,7 +156,7 @@ const mappedInitiativeGoals = computed(() => {
                 <span class="info-value">{{ headerMeta.coes }}</span>
             </div>
             <div class="info-cell info-cell-last">
-                <span class="info-label">Source</span>
+                <span class="info-label">Data Source</span>
                 <span class="info-sep"></span>
                 <span class="info-value">{{ headerMeta.sources }}</span>
             </div>

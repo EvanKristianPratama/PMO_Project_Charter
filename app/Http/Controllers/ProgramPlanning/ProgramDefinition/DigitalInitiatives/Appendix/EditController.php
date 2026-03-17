@@ -43,7 +43,7 @@ class EditController extends Controller
             $signBy = json_decode($signBy, true) ?? [];
         }
 
-        return Inertia::render('ProgramPlanning/ProgramDefinition/DigitalInitiatives/Appendix/Edit', [
+        return Inertia::render('ProgramPlanning/ProgramDefinition/DigitalInitiatives/Appendix/Show', [
             'appendix' => [
                 'id' => (int) $scInitiative->id,
                 'initiative_ids' => $scInitiative->mstInitiatives->pluck('id')->map(fn ($id) => (int) $id)->values()->all(),
@@ -76,6 +76,7 @@ class EditController extends Controller
                 'otherBU' => $detail?->otherBU,
                 'sign_by' => $signBy ?? [],
             ],
+            'appendixOptions' => $this->appendixOptions(),
             'initiativeOptions' => $this->initiativeOptions(),
             'compendiumOptions' => $this->compendiumOptions(),
             'coeOptions' => MstCoe::orderBy('name')->get(['id', 'name'])->values(),
@@ -130,6 +131,25 @@ class EditController extends Controller
             ->with(['mstInitiatives:id,code,name'])
             ->orderBy('id')
             ->get(['id', 'owner', 'usecase'])
+            ->map(function (TrsScInitiative $item): array {
+                $firstInitiative = $item->mstInitiatives->first();
+                $label = trim((string) ($item->usecase ?: ($firstInitiative?->name ?? '-')));
+
+                return [
+                    'id' => (int) $item->id,
+                    'label' => $label !== '' ? $label : '-',
+                ];
+            })
+            ->values();
+    }
+
+    private function appendixOptions()
+    {
+        return TrsScInitiative::query()
+            ->where('source_id', 2)
+            ->with(['mstInitiatives:id,code,name'])
+            ->orderBy('id')
+            ->get(['id', 'owner', 'usecase', 'description'])
             ->map(function (TrsScInitiative $item): array {
                 $firstInitiative = $item->mstInitiatives->first();
                 $label = trim((string) ($item->usecase ?: ($firstInitiative?->name ?? '-')));

@@ -174,7 +174,7 @@ const sourceLabel = computed(() => {
 
         <div class="info-bar">
             <div class="info-cell info-cell-compact">
-                <span class="info-label info-label-dark">Project Owner</span>
+                <span class="info-label info-label">Project Owner</span>
                 <span class="info-sep"></span>
                 <span class="info-value">
                     <input v-if="editable" v-model="form.owner" type="text" class="info-input"
