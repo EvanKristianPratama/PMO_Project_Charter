@@ -73,16 +73,15 @@
                     </button>
                 </div>
 
-                <div class="overflow-x-auto">
+                <div class="overflow-x-hidden">
                     <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
                         <colgroup>
-                            <col class="w-[25px]">
-                            <col class="w-[180px]">
-                            <col class="w-[180px]">
-                            <col class="w-[180px]">
-                            <col class="w-[180px]">
-                            <col class="w-[220px]">
-                            <col class="w-[50px]">
+                            <col class="w-[4%]">
+                            <col class="w-[18%]">
+                            <col class="w-[16%]">
+                            <col class="w-[24%]">
+                            <col class="w-[16%]">
+                            <col class="w-[22%]">
                         </colgroup>
                         <thead class="bg-slate-50 dark:bg-white/5">
                             <tr>
@@ -100,9 +99,11 @@
                                 <td class="px-3 py-3 text-center text-slate-400 dark:text-slate-500">{{ index + 1 }}</td>
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200 font-semibold">{{ item.master_initiative ?? '-' }}</td>
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.use_case_compendium ?? '-' }}</td>
-                                <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.use_case_compendium_description ?? '-' }}</td>
+                                <td class="px-3 py-3 text-slate-700 dark:text-slate-200 whitespace-pre-line text-xs leading-snug break-words">
+                                    {{ item.use_case_compendium_description ?? '-' }}
+                                </td>
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200 font-medium">{{ item.use_case_appendix ?? '-' }}</td>
-                                <td class="px-3 py-3 text-slate-700 dark:text-slate-200">
+                                <td class="px-3 py-3 text-slate-700 dark:text-slate-200 whitespace-pre-line text-xs leading-snug break-words">
                                     {{ item.use_case_appendix_description ?? '-' }}
                                 </td>
                                 <!-- <td class="px-3 py-3 text-[10px] font-medium">
@@ -122,7 +123,7 @@
                                 </td> -->
                             </tr>
                             <tr v-if="filteredAppendixItems.length === 0">
-                                <td colspan="7" class="px-6 py-10 text-center text-xs text-slate-500 dark:text-slate-400 italic">
+                                <td colspan="6" class="px-6 py-10 text-center text-xs text-slate-500 dark:text-slate-400 italic">
                                     Data tidak ditemukan berdasarkan filter yang dipilih.
                                 </td>
                             </tr>

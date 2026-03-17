@@ -119,15 +119,15 @@
                 <div class="overflow-x-auto">
                     <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
                         <colgroup>
-                            <col class="w-[35px]">
-                            <col class="w-[150px]">
+                            <col class="w-[40px]">
                             <col class="w-[120px]">
+                            <col class="w-[150px]">
                             <col class="w-[200px]">
-                            <col class="w-[240px]">
-                            <col class="w-[60px]">
+                            <col class="w-[200px]">
+                            <col class="w-[80px]">
+                            <col class="w-[80px]">
                             <col class="w-[100px]">
-                            <col class="w-[140px]">
-                            <col class="w-[60px]">
+                            <col class="w-[80px]">
                         </colgroup>
                         <thead class="bg-slate-50 dark:bg-white/5">
                             <tr>
@@ -148,7 +148,9 @@
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.project_owner ?? '-' }}</td>
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.pic ?? '-' }}</td>
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200 font-medium">{{ item.use_case_appendix ?? '-' }}</td>
-                                <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.use_case_appendix_description ?? '-' }}</td>
+                                <td class="px-3 py-3 text-slate-700 dark:text-slate-200 whitespace-pre-line text-xs leading-snug">
+                                    {{ item.use_case_appendix_description ?? '-' }}
+                                </td>
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ (item.rjpp ?? '-').replace(/#/g, '') }}</td>
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.coe ?? '-' }}</td>
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.use_case_compendium ?? '-' }}</td>
