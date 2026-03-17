@@ -175,7 +175,9 @@
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200">{{ item.project_owner ?? '-' }}</td>
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200 font-medium">{{ item.use_case ?? '-' }}</td>
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-200">
-                                    {{ item.desc ?? '-' }}
+                                    <p class="whitespace-pre-line text-xs leading-snug text-slate-700 dark:text-slate-200">
+                                        {{ item.desc ?? '-' }}
+                                    </p>
                                 </td>
                                 <td class="px-3 py-3">
                                     <span :class="scoreClass(item.value)" class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-bold uppercase">
@@ -678,5 +680,3 @@ const scoreClass = (label) => {
 
 <style scoped>
 </style>
-
-
