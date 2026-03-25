@@ -12,7 +12,10 @@ class PcInitiative extends Model
 
     protected $table = 'trs_pc_initiative';
 
-    protected $guarded = [];
+    protected $fillable = [
+        'pc_id',
+        'initiative_id',
+    ];
 
     public function project(): BelongsTo
     {

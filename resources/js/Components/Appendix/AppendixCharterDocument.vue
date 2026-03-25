@@ -7,6 +7,7 @@ const props = defineProps({
     editable: { type: Boolean, default: false },
     coeOptions: { type: Array, default: () => [] },
     themeOptions: { type: Array, default: () => [] },
+    organizationOptions: { type: Array, default: () => [] },
 });
 
 const ensureFormArrays = () => {
@@ -94,6 +95,37 @@ const currentRjppThemes = computed(() => {
         return ids.map(id => props.themeOptions.find(t => Number(t.id) === id)).filter(Boolean);
     }
     return props.initiative.rjppThemes ?? [];
+});
+
+const projectOwnerOptions = computed(() => {
+    const options = [];
+    const seenNames = new Set();
+
+    const appendOption = (option) => {
+        const name = String(option?.name ?? '').trim();
+        if (!name || seenNames.has(name)) return;
+
+        seenNames.add(name);
+        options.push({
+            id: option?.id ?? `org-${name}`,
+            name,
+        });
+    };
+
+    props.organizationOptions.forEach(appendOption);
+
+    const currentOwner = String(
+        (props.editable && props.form ? props.form.owner : props.initiative.owner) ?? '',
+    ).trim();
+
+    if (currentOwner && !seenNames.has(currentOwner)) {
+        options.unshift({
+            id: `current-owner-${currentOwner}`,
+            name: currentOwner,
+        });
+    }
+
+    return options;
 });
 
 const getLevelColorClass = (label) => {
@@ -198,7 +230,16 @@ const getLevelLabel = (type) => {
                 Project Owner
             </div>
             <div class="flex flex-1 items-center bg-white px-3 py-1.5 text-[12px] text-slate-900">
-                <input v-if="editable" v-model="form.owner" type="text" class="meta-input" placeholder="...">
+                <select v-if="editable" v-model="form.owner" class="meta-input">
+                    <option value="">Pilih Project Owner...</option>
+                    <option
+                        v-for="org in projectOwnerOptions"
+                        :key="`appendix-doc-org-${org.id}`"
+                        :value="org.name"
+                    >
+                        {{ org.name }}
+                    </option>
+                </select>
                 <template v-else>{{ initiative.owner ?? '-' }}</template>
             </div>
         </div>
@@ -304,7 +345,7 @@ const getLevelLabel = (type) => {
                     <span v-for="id in form.rjpp_tagging_ids" :key="id" class="rjpp-tag">
                         {{ themeLabel(id) }}
                         <button type="button" @click="removeRjppTagging(id)"
-                            class="ml-1 font-bold hover:text-rose-500">Ã—</button>
+                            class="ml-1 font-bold hover:text-rose-500">X</button>
                     </span>
                 </div>
             </div>

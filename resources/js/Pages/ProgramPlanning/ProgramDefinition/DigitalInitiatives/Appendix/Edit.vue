@@ -107,11 +107,11 @@
                 <div class="mt-8 border-t border-slate-100 pt-6 dark:border-white/5">
                     <div class="mb-4">
                         <h4 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-white">Compendium Mapping</h4>
-                        <p class="mt-1 text-xs text-slate-500">Pilih compendium yang terhubung ke Appendix.</p>
+                        <p class="mt-1 text-xs text-slate-500">Pilih compendium yang terhubung ke Appendix. Boleh kosong jika Appendix berdiri sendiri.</p>
                     </div>
 
                     <div class="space-y-4">
-                        <div class="max-w-xl">
+                        <div class="max-w-xl space-y-2">
                             <select
                                 @change="onSelectCompendium"
                                 class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
@@ -126,6 +126,14 @@
                                     {{ formatCompendiumLabel(opt) }}
                                 </option>
                             </select>
+                            <button
+                                v-if="form.compendium_ids.length"
+                                type="button"
+                                @click="form.compendium_ids = []"
+                                class="text-xs font-semibold text-rose-500 transition-colors hover:text-rose-600 dark:text-rose-400"
+                            >
+                                Kosongkan Compendium Mapping
+                            </button>
                         </div>
 
                         <div class="min-h-[40px] rounded-xl border border-dashed border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-white/5">
@@ -164,6 +172,7 @@
                 :editable="isEditing"
                 :coe-options="coeOptions"
                 :theme-options="themeOptions"
+                :organization-options="organizationOptions"
             />
         </div>
     </UserLayout>
@@ -181,6 +190,7 @@ const props = defineProps({
     compendiumOptions: { type: Array, default: () => [] },
     coeOptions: { type: Array, default: () => [] },
     themeOptions: { type: Array, default: () => [] },
+    organizationOptions: { type: Array, default: () => [] },
 });
 
 const toNumber = (value, fallback = null) => {

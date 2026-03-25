@@ -28,6 +28,22 @@ const normalizeIdList = (values) => {
         .filter((value) => value > 0);
 };
 
+const resolveCompendiumInitiativeIds = (compendiumId) => {
+    const numericCompendiumId = toNumber(compendiumId, 0);
+    if (!numericCompendiumId) return [];
+
+    const directCompendiumId = toNumber(props.compendium?.id, 0);
+    if (directCompendiumId === numericCompendiumId) {
+        return normalizeIdList(props.compendium?.initiative_ids ?? []);
+    }
+
+    const selectedCompendium = props.compendiumOptions.find(
+        (option) => toNumber(option?.id, 0) === numericCompendiumId,
+    );
+
+    return normalizeIdList(selectedCompendium?.initiative_ids ?? []);
+};
+
 const appendixForm = useForm({
     // Initiative Fields
     compendium_id: null,
@@ -81,7 +97,8 @@ watch(
     (isShowing) => {
         if (isShowing) {
             // Always reset all fields — we always create a new initiative
-            appendixForm.compendium_id = props.compendium?.id ?? null;
+            const defaultCompendiumId = toNumber(props.compendium?.id, null);
+            appendixForm.compendium_id = defaultCompendiumId;
             appendixForm.owner = "";
             appendixForm.coe = "";
             appendixForm.usecase = "";
@@ -90,7 +107,7 @@ watch(
             appendixForm.value = null;
             appendixForm.urgency = null;
             appendixForm.status = 1;
-            appendixForm.initiative_ids = [];
+            appendixForm.initiative_ids = resolveCompendiumInitiativeIds(defaultCompendiumId);
             appendixForm.rjpp_tagging_ids = [];
             appendixForm.organization = "";
             appendixForm.update_doc = "";
@@ -112,6 +129,14 @@ watch(
             appendixForm.sign_by = [];
             signByInput.value = "";
         }
+    },
+);
+
+watch(
+    () => appendixForm.compendium_id,
+    (compendiumId) => {
+        if (!props.show) return;
+        appendixForm.initiative_ids = resolveCompendiumInitiativeIds(compendiumId);
     },
 );
 
@@ -232,6 +257,10 @@ const submit = () => {
     appendixForm
         .transform((data) => ({
             ...data,
+            compendium_id:
+                data.compendium_id === "" || data.compendium_id === null
+                    ? null
+                    : toNumber(data.compendium_id, null),
             initiative_ids: Array.isArray(data.initiative_ids) && data.initiative_ids.length
                 ? data.initiative_ids
                 : null,

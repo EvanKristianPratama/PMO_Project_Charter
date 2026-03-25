@@ -342,10 +342,58 @@ const compendiumRows = computed(() => {
 const noMasterAppendixItems = computed(() => {
     return (props.appendixItems ?? []).filter((item) => {
         const masterValue = String(item.master_initiative ?? '').trim();
-        const hasNoMaster = masterValue === '' || masterValue === '-';
-        const hasNoCompendium = parseListValue(item.use_case_compendium).length === 0;
-        return hasNoMaster && hasNoCompendium;
+        return masterValue === '' || masterValue === '-';
     });
+});
+
+const noMasterRows = computed(() => {
+    const compendiumRows = (props.noMasterCompendiumItems ?? []).map((item) => ({
+        ...item,
+        linked_appendix_items: [],
+    }));
+
+    const compendiumRowByLabel = new Map();
+    for (const row of compendiumRows) {
+        const labels = parseListValue(row.use_case_compendium);
+        for (const label of labels) {
+            if (!compendiumRowByLabel.has(label)) {
+                compendiumRowByLabel.set(label, row);
+            }
+        }
+    }
+
+    const standaloneAppendixRows = [];
+    for (const appendixItem of noMasterAppendixItems.value) {
+        const matchedRow = parseListValue(appendixItem.use_case_compendium)
+            .map((label) => compendiumRowByLabel.get(label))
+            .find(Boolean);
+
+        if (!matchedRow) {
+            standaloneAppendixRows.push(appendixItem);
+            continue;
+        }
+
+        matchedRow.linked_appendix_items.push(appendixItem);
+    }
+
+    const mergedCompendiumRows = compendiumRows.map((row) => {
+        const linkedItems = row.linked_appendix_items ?? [];
+
+        return {
+            ...row,
+            use_case_compendium_description: joinDistinctValues([
+                row.use_case_compendium_description,
+                ...linkedItems.map((item) => item.use_case_compendium_description),
+            ]),
+            use_case_appendix: joinListValues(linkedItems.map((item) => item.use_case_appendix)),
+            use_case_appendix_description: joinDistinctValues(
+                linkedItems.map((item) => item.use_case_appendix_description),
+            ),
+            detail_id: linkedItems.length === 1 ? linkedItems[0]?.id : null,
+        };
+    });
+
+    return [...mergedCompendiumRows, ...standaloneAppendixRows];
 });
 
 const filteredAppendixItems = computed(() => {
@@ -360,10 +408,7 @@ const filteredAppendixItems = computed(() => {
     const compendiumFilter = normalizeFilterValue(compendiumRaw);
 
     const baseItems = isNoneFilter(masterRaw)
-        ? [
-            ...(props.noMasterCompendiumItems ?? []),
-            ...(noMasterAppendixItems.value ?? []),
-        ]
+        ? (noMasterRows.value ?? [])
         : (props.appendixItems ?? []);
 
     return baseItems.filter((item) => {

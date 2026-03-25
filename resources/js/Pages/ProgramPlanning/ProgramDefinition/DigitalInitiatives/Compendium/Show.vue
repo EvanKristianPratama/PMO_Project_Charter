@@ -339,6 +339,7 @@
                         :editable="appendixEditable"
                         :coe-options="coeOptions"
                         :theme-options="themeOptions"
+                        :organization-options="organizationOptions"
                     />
                 </div>
                 <div v-else class="rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-12 text-center dark:border-white/10 dark:bg-white/5">

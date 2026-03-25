@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MstCoe;
 use App\Models\MstInitiative;
 use App\Models\Theme;
+use App\Models\TrsOrganization;
 use App\Models\TrsScInitiative;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -81,6 +82,7 @@ class EditController extends Controller
             'compendiumOptions' => $this->compendiumOptions(),
             'coeOptions' => MstCoe::orderBy('name')->get(['id', 'name'])->values(),
             'themeOptions' => $this->themeOptions(),
+            'organizationOptions' => TrsOrganization::orderBy('name')->get(['id', 'name'])->values(),
         ]);
     }
 
@@ -138,6 +140,7 @@ class EditController extends Controller
                 return [
                     'id' => (int) $item->id,
                     'label' => $label !== '' ? $label : '-',
+                    'initiative_ids' => $item->mstInitiatives->pluck('id')->map(fn ($id) => (int) $id)->values()->all(),
                 ];
             })
             ->values();

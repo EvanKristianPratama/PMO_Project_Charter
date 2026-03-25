@@ -68,36 +68,36 @@
 
             <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/5 dark:bg-[#1a1a1a]">
                 <!-- Filters Section (Compact Toolbar Style) -->
-                <div class="flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-slate-100 bg-slate-50/30 px-4 py-2.5 dark:border-white/5 dark:bg-white/5">
-                    <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-slate-100 bg-slate-50/30 px-3.5 py-2 dark:border-white/5 dark:bg-white/5">
+                    <div class="flex items-center gap-1.5">
                         <label class="shrink-0 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Owner:</label>
                         <select
                             v-model="filters.owner"
-                            class="min-w-[140px] rounded-lg border border-slate-200 bg-white py-1 pl-2 pr-8 text-[11px] text-slate-700 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                            class="w-[230px] rounded-lg border border-slate-200 bg-white py-1 pl-2 pr-7 text-[10px] text-slate-700 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
                         >
                             <option value="">All Project Owners</option>
                             <option v-for="owner in uniqueOwners" :key="owner" :value="owner">{{ owner }}</option>
                         </select>
                     </div>
 
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-1.5">
                         <label class="shrink-0 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">CoE:</label>
                         <select
                             v-model="filters.coe"
-                            class="min-w-[120px] rounded-lg border border-slate-200 bg-white py-1 pl-2 pr-8 text-[11px] text-slate-700 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                            class="w-[88px] rounded-lg border border-slate-200 bg-white py-1 pl-2 pr-7 text-[10px] text-slate-700 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
                         >
                             <option value="">All CoE</option>
                             <option v-for="coe in uniqueCoes" :key="coe" :value="coe">{{ coe }}</option>
                         </select>
                     </div>
 
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-1.5">
                         <label class="shrink-0 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Value:</label>
                         <select
                             v-model="filters.value"
-                            class="min-w-[90px] rounded-lg border border-slate-200 bg-white py-1 pl-2 pr-8 text-[11px] text-slate-700 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                            class="w-[100px] rounded-lg border border-slate-200 bg-white py-1 pl-2 pr-7 text-[10px] text-slate-700 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
                         >
-                            <option value="">All Value</option>
+                            <option value="">All</option>
                             <option value="High">High</option>
                             <option value="Medium">Medium</option>
                             <option value="Low">Low</option>
@@ -105,13 +105,13 @@
                         </select>
                     </div>
 
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-1.5">
                         <label class="shrink-0 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Urgency:</label>
                         <select
                             v-model="filters.urgency"
-                            class="min-w-[90px] rounded-lg border border-slate-200 bg-white py-1 pl-2 pr-8 text-[11px] text-slate-700 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                            class="w-[100px] rounded-lg border border-slate-200 bg-white py-1 pl-2 pr-7 text-[10px] text-slate-700 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
                         >
-                            <option value="">All Urgency</option>
+                            <option value="">All</option>
                             <option value="High">High</option>
                             <option value="Medium">Medium</option>
                             <option value="Low">Low</option>
@@ -119,23 +119,36 @@
                         </select>
                     </div>
 
-                    <div class="flex items-center gap-2">
-                        <label class="shrink-0 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Master Initiative:</label>
-                        <select
-                            v-model="filters.masterInitiative"
-                            class="min-w-[140px] rounded-lg border border-slate-200 bg-white py-1 pl-2 pr-8 text-[11px] text-slate-700 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
-                        >
-                            <option value="">All Master Initiative</option>
-                            <option value="none">(No Master Initiative)</option>
-                            <option v-for="mi in uniqueMasterInitiatives" :key="mi" :value="mi">{{ mi }}</option>
-                        </select>
+                    <div class="order-2 flex basis-full flex-wrap items-center gap-x-4 gap-y-2 border-t border-slate-100 pt-2 dark:border-white/5">
+                        <div class="flex items-center gap-2">
+                            <label class="shrink-0 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Master Initiative:</label>
+                            <select
+                                v-model="filters.masterInitiative"
+                                class="w-[400px] max-w-full rounded-lg border border-slate-200 bg-white py-1 pl-2 pr-7 text-[10px] text-slate-700 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                            >
+                                <option value="">All</option>
+                                <option value="none">No Master Initiative</option>
+                                <option v-for="mi in sortedMasterInitiatives" :key="mi" :value="mi">{{ mi }}</option>
+                            </select>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <label class="shrink-0 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Compendium:</label>
+                            <select
+                                v-model="filters.compendium"
+                                class="w-[400px] max-w-full rounded-lg border border-slate-200 bg-white py-1 pl-2 pr-7 text-[10px] text-slate-700 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                            >
+                                <option value="">All</option>
+                                <option v-for="comp in uniqueCompendiums" :key="comp" :value="comp">{{ comp }}</option>
+                            </select>
+                        </div>
                     </div>
 
                     <button
                         v-if="hasActiveFilters"
                         type="button"
                         @click="resetFilters"
-                        class="ml-auto text-[10px] font-bold uppercase tracking-tighter text-rose-500 hover:text-rose-600 dark:text-rose-400"
+                        class="order-1 ml-auto text-[10px] font-bold uppercase tracking-tighter text-rose-500 hover:text-rose-600 dark:text-rose-400"
                     >
                         Reset Filters
                     </button>
@@ -483,6 +496,7 @@ const filters = ref({
     urgency: '',
     coe: '',
     masterInitiative: '',
+    compendium: '',
 });
 
 const sourceOneItems = computed(() => {
@@ -503,15 +517,36 @@ const uniqueCoes = computed(() => {
     return [...new Set(coes)].sort();
 });
 
+const uniqueCompendiums = computed(() => {
+    const compendiums = props.compendiumItems
+        .map((item) => String(item.use_case ?? '').trim())
+        .filter((comp) => comp !== '' && comp !== '-');
+    return [...new Set(compendiums)].sort();
+});
+
+const sortedMasterInitiatives = computed(() => {
+    return [...props.uniqueMasterInitiatives].sort((a, b) => {
+        const aMatch = String(a).match(/\d+/);
+        const bMatch = String(b).match(/\d+/);
+        const aNum = aMatch ? parseInt(aMatch[0]) : 0;
+        const bNum = bMatch ? parseInt(bMatch[0]) : 0;
+        
+        if (aNum !== bNum) return aNum - bNum;
+        return String(a).localeCompare(String(b));
+    });
+});
+
 const filteredCompendiumItems = computed(() => {
     return props.compendiumItems.filter((item) => {
         const ownerVal = String(item.project_owner ?? '').trim() || '-';
         const coeVal = String(item.coe ?? '').trim() || '-';
+        const compVal = String(item.use_case ?? '').trim() || '-';
 
         const matchOwner = !filters.value.owner || ownerVal === filters.value.owner;
         const matchValue = !filters.value.value || item.value === filters.value.value;
         const matchUrgency = !filters.value.urgency || item.urgency === filters.value.urgency;
         const matchCoe = !filters.value.coe || coeVal === filters.value.coe;
+        const matchCompendium = !filters.value.compendium || compVal === filters.value.compendium;
         
         let matchMasterInitiative = true;
         if (filters.value.masterInitiative === 'none') {
@@ -520,12 +555,12 @@ const filteredCompendiumItems = computed(() => {
             matchMasterInitiative = (item.master_initiatives ?? '').includes(filters.value.masterInitiative);
         }
 
-        return matchOwner && matchValue && matchUrgency && matchCoe && matchMasterInitiative;
+        return matchOwner && matchValue && matchUrgency && matchCoe && matchMasterInitiative && matchCompendium;
     });
 });
 
 const hasActiveFilters = computed(() => {
-    return !!(filters.value.owner || filters.value.value || filters.value.urgency || filters.value.coe || filters.value.masterInitiative);
+    return !!(filters.value.owner || filters.value.value || filters.value.urgency || filters.value.coe || filters.value.masterInitiative || filters.value.compendium);
 });
 
 const resetFilters = () => {
@@ -534,6 +569,7 @@ const resetFilters = () => {
     filters.value.urgency = '';
     filters.value.coe = '';
     filters.value.masterInitiative = '';
+    filters.value.compendium = '';
 };
 
 const form = useForm({
