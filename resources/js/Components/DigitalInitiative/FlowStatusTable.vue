@@ -81,7 +81,7 @@
                         <td class="px-3 py-3 text-[10px] font-medium">
                             <div class="flex flex-col items-start gap-1">
                                 <Link
-                                    :href="`/digital-initiatives/${project.id}/edit`"
+                                    :href="route('digital-initiatives.edit', project.id)"
                                     class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-amber-100 text-amber-700 transition-colors hover:bg-amber-200 dark:bg-amber-500/20 dark:text-amber-300 dark:hover:bg-amber-500/30"
                                     title="Edit Project Charter"
                                 >
@@ -89,7 +89,7 @@
                                 </Link>
                                 <Link
                                     v-if="hasProjectCharter(project)"
-                                    :href="`/digital-initiatives/${project.id}?tab=charter`"
+                                    :href="route('digital-initiatives.show', { digital_initiative: project.id, tab: 'charter' })"
                                     :class="actionCellClass(hasProjectCharter(project))"
                                     title="View Project Charter"
                                 >
@@ -97,7 +97,7 @@
                                 </Link>
                                 <Link
                                     v-if="hasProjectCharter(project)"
-                                    :href="project?.charter?.id ? `/roadmap?pc_id=${project.charter.id}` : '/roadmap'"
+                                    :href="project?.charter?.id ? route('roadmap.index', { pc_id: project.charter.id }) : route('roadmap.index')"
                                     class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-sky-100 text-sky-700 transition-colors hover:bg-sky-200 dark:bg-sky-500/20 dark:text-sky-300 dark:hover:bg-sky-500/30"
                                     title="Open Roadmap"
                                 >
@@ -105,7 +105,7 @@
                                 </Link>
                                 <Link
                                     v-if="hasProjectCharter(project)"
-                                    :href="`/digital-initiatives/${project.id}?tab=detail`"
+                                    :href="route('digital-initiatives.show', { digital_initiative: project.id, tab: 'detail' })"
                                     class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-blue-100 text-blue-700 transition-colors hover:bg-blue-200 dark:bg-blue-500/20 dark:text-blue-300 dark:hover:bg-blue-500/30"
                                     title="View Status Implementation"
                                 >
@@ -304,4 +304,3 @@ const formatDate = (rawDate) => {
     return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 </script>
-

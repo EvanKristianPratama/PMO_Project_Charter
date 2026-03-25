@@ -142,6 +142,7 @@
 <script setup>
 import { computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import { statusFlowClassByIndex, statusLabelFromOptions } from '@/Composables/initiativeStatus';
 
@@ -155,6 +156,8 @@ const props = defineProps({
         }),
     },
 });
+
+const route = useRouteHelper();
 
 const fallbackStatusOptions = [
     { id: 1, name: 'drafting', label: 'Drafting' },
@@ -231,13 +234,13 @@ const projectCharterActions = [
         key: 'digital',
         label: 'Digital Initiative',
         buttonLabel: 'New Project Charter',
-        href: '/digital-initiatives/create',
+        href: route('digital-initiatives.create'),
     },
     {
         key: 'it',
         label: 'IT Initiative',
         buttonLabel: 'New Project Charter',
-        href: '/it-initiatives/create',
+        href: route('it-initiatives.create'),
     },
 ];
 </script>

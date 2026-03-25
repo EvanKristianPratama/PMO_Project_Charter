@@ -4,15 +4,10 @@ use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Architecture\BusinessCapability\BusinessCapabilityController;
+use App\Http\Controllers\Architecture\OrganizationStructure\IndexController as ArchitectureOrganizationStructureIndexController;
 use App\Http\Controllers\Auth\SsoController;
-use App\Http\Controllers\CompanyProfile\CompanyController;
-use App\Http\Controllers\DigitalInitiative\DigitalInitiativeController;
-use App\Http\Controllers\InitiativeRelation\InitiativeRelationController;
-use App\Http\Controllers\ITInitiative\CharterController;
-use App\Http\Controllers\ITInitiative\ITInitiativeController;
-use App\Http\Controllers\ITInitiative\MilestoneController;
 use App\Http\Controllers\MasterData\ActivityLogController as MasterDataActivityLogController;
-use App\Http\Controllers\MasterData\BusinessCapability\BusinessCapabilityController;
 use App\Http\Controllers\MasterData\MasterDataController;
 use App\Http\Controllers\MasterData\MstInitiative\MstInitiativeController;
 use App\Http\Controllers\MasterData\ProjectCharter\ProjectCharterController as MasterDataProjectCharterController;
@@ -21,7 +16,12 @@ use App\Http\Controllers\ProgramEvaluation\ReviewTimelineController;
 use App\Http\Controllers\ProgramEvaluation\TrsReviewPCController;
 use App\Http\Controllers\ProgramImplementation\DashboardController;
 use App\Http\Controllers\ProgramImplementation\ProgramImplementationController;
+use App\Http\Controllers\ProgramImplementation\ProjectCharter\DigitalInitiatives\DigitalInitiativeController;
+use App\Http\Controllers\ProgramImplementation\ProjectCharter\ITInitiatives\CharterController;
+use App\Http\Controllers\ProgramImplementation\ProjectCharter\ITInitiatives\ITInitiativeController;
+use App\Http\Controllers\ProgramImplementation\ProjectCharter\ITInitiatives\MilestoneController;
 use App\Http\Controllers\ProgramPlanning\DashboardController as PlanningDashboardController;
+use App\Http\Controllers\ProgramPlanning\InitiativeRelation\InitiativeRelationController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Appendix\CreateController as ProgramDefinitionDigitalInitiativesAppendixCreateController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Appendix\EditController as ProgramDefinitionDigitalInitiativesAppendixEditController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Appendix\IndexController as ProgramDefinitionDigitalInitiativesAppendixIndexController;
@@ -40,9 +40,9 @@ use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Up
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\IndexController as ProgramDefinitionController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\ITInitiatives\IndexController as ProgramDefinitionITInitiativesController;
 use App\Http\Controllers\ProgramPlanning\ProgramPlanningController;
+use App\Http\Controllers\ProgramPlanning\StrategicPillars\IndexController as ProgramPlanningStrategicPillarsIndexController;
+use App\Http\Controllers\ProgramPlanning\StrategicPillars\InitiativeTaggingController;
 use App\Http\Controllers\Roadmap\RoadmapController;
-use App\Http\Controllers\StrategicPillar\InitiativeTaggingController;
-use App\Http\Controllers\StrategicPillar\StrategicPillarController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -145,14 +145,8 @@ Route::middleware(['auth', 'approved'])->group(function () {
     });
 
     Route::get('/program-planning/program-definition/it-initiatives', ProgramDefinitionITInitiativesController::class)->name('program-planning.program-definition.it-initiatives');
-    Route::get('/program-planning/initiative-relation', [InitiativeRelationController::class, 'index'])->name('program-implementation.initiative-relation');
     Route::redirect('/program-planning/initiative', '/program-planning/initiative-relation');
-    Route::get('/program-implementation', ProgramImplementationController::class)->name('program-implementation.index');
-
-    Route::get('/program-implementation/budgeting', fn () => Inertia::render('Placeholder/Index', [
-        'title' => 'Budgeting',
-    ]))->name('program-implementation.budgeting');
-    Route::prefix('/program-implementation/initiative-relation')->name('initiative-relations.')->group(function () {
+    Route::prefix('/program-planning/initiative-relation')->name('initiative-relations.')->group(function () {
         Route::get('/', [InitiativeRelationController::class, 'index'])->name('index');
         Route::get('/create', [InitiativeRelationController::class, 'create'])->name('create');
         Route::post('/', [InitiativeRelationController::class, 'store'])->name('store');
@@ -160,8 +154,18 @@ Route::middleware(['auth', 'approved'])->group(function () {
         Route::put('/{initiativeRelation}', [InitiativeRelationController::class, 'update'])->name('update');
         Route::delete('/{initiativeRelation}', [InitiativeRelationController::class, 'destroy'])->name('destroy');
     });
+    Route::redirect('/program-implementation/initiative-relation', '/program-planning/initiative-relation');
+    Route::redirect('/program-implementation/initiative-relation/create', '/program-planning/initiative-relation/create');
+    Route::get('/program-implementation/initiative-relation/{initiativeRelation}/edit', static function (string $initiativeRelation) {
+        return redirect("/program-planning/initiative-relation/{$initiativeRelation}/edit");
+    });
+    Route::get('/program-implementation', ProgramImplementationController::class)->name('program-implementation.index');
+
+    Route::get('/program-implementation/budgeting', fn () => Inertia::render('Placeholder/Index', [
+        'title' => 'Budgeting',
+    ]))->name('program-implementation.budgeting');
     Route::get('/architecture', fn () => Inertia::render('Architecture/Index'))->name('architecture.index');
-    Route::get('/architecture/organization-structure', [CompanyController::class, 'index'])->name('architecture.organization-structure');
+    Route::get('/architecture/organization-structure', ArchitectureOrganizationStructureIndexController::class)->name('architecture.organization-structure');
     Route::get('/architecture/informatic-system', fn () => Inertia::render('Architecture/InformaticSystem/Index'))->name('architecture.informatic-system');
     Route::get('/resources-management', fn () => Inertia::render('ResourcesManagement/Index'))->name('resources-management.index');
     Route::get('/service-portofolio', fn () => Inertia::render('Placeholder/Index', [
@@ -179,7 +183,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/program-evalution/review-timeline', [ReviewTimelineController::class, 'index'])->name('program-evaluation.review-timeline');
 
     // Strategic Pillars
-    Route::get('/strategic-pillars/{goal?}', [StrategicPillarController::class, 'index'])->name('strategic-pillars.index');
+    Route::get('/strategic-pillars/{goal?}', ProgramPlanningStrategicPillarsIndexController::class)->name('strategic-pillars.index');
     Route::post('/strategic-pillars/tagging', [InitiativeTaggingController::class, 'store'])->name('strategic-pillars.tagging.store');
     Route::delete('/strategic-pillars/tagging/{tagging}', [InitiativeTaggingController::class, 'destroy'])->name('strategic-pillars.tagging.destroy');
 
@@ -210,9 +214,6 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::put('/it-initiatives/{project}/project-status-history/{history}', [ITInitiativeController::class, 'updateProjectStatusHistory'])->name('it-initiatives.project-status-history.update');
     Route::delete('/it-initiatives/{project}/project-status-history/{history}', [ITInitiativeController::class, 'destroyProjectStatusHistory'])->name('it-initiatives.project-status-history.destroy');
     Route::put('/it-initiatives/{project}/mapping', [ITInitiativeController::class, 'updateMapping'])->name('it-initiatives.mapping.update');
-
-    // Company Profile
-    Route::resource('companies', CompanyController::class)->only(['index']);
 });
 
 /*

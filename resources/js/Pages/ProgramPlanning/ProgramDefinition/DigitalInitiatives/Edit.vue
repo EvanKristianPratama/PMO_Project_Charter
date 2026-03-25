@@ -2,7 +2,7 @@
     <UserLayout title="Edit Digital Initiative">
         <div class="mx-auto max-w-5xl animate-fade-in">
             <div class="mb-6">
-                <Link href="/program-planning/program-definition/digital-initiatives" class="mb-2 flex items-center gap-1 text-sm text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400">
+                <Link :href="route('program-planning.program-definition.digital-initiatives')" class="mb-2 flex items-center gap-1 text-sm text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                     </svg>
@@ -208,7 +208,7 @@
                     <!-- Actions -->
                     <div class="flex items-center justify-end gap-3 rounded-b-xl border-t border-slate-100 pt-6 dark:border-white/5">
                         <Link
-                            href="/program-planning/program-definition/digital-initiatives"
+                            :href="route('program-planning.program-definition.digital-initiatives')"
                             class="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-white/5"
                         >
                             Cancel
@@ -229,6 +229,7 @@
 
 <script setup>
 import { Link, useForm } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
 const props = defineProps({
@@ -245,6 +246,8 @@ const props = defineProps({
         default: 1,
     },
 });
+
+const route = useRouteHelper();
 
 const statusOptions = props.statusOptions.length > 0
     ? props.statusOptions
@@ -270,6 +273,6 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.put(`/program-planning/program-definition/digital-initiatives/${props.initiative.id}`);
+    form.put(route('program-planning.program-definition.digital-initiatives.update', props.initiative.id));
 };
 </script>

@@ -11,11 +11,11 @@
                         </p>
                     </div>
                     <div class="flex items-center gap-2">
-                        <a href="/master-data"
+                        <a :href="route('master-data.index')"
                            class="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5">
                             ← Master Data
                         </a>
-                        <a href="/master-data/master-initiatives/create"
+                        <a :href="route('master-data.mst-initiatives.create')"
                            class="inline-flex items-center gap-1 rounded-lg bg-[#0f63b5] px-4 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-[#0c4e8f]">
                             + Tambah
                         </a>
@@ -106,7 +106,7 @@
                                 <td class="px-3 py-2.5 text-slate-600 dark:text-slate-300"><p class="line-clamp-2 break-words">{{ item.description ?? '-' }}</p></td>
                                 <td class="px-3 py-2.5">
                                     <div class="flex items-center gap-1">
-                                        <a :href="`/master-data/master-initiatives/${item.id}/edit`"
+                                        <a :href="route('master-data.mst-initiatives.edit', item.id)"
                                             class="inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-semibold text-amber-800 hover:bg-amber-200 dark:bg-amber-500/20 dark:text-amber-300">Edit</a>
                                         <button type="button" @click="confirmDelete(item)"
                                             class="inline-flex rounded-full bg-rose-100 px-2 py-0.5 text-[9px] font-semibold text-rose-700 hover:bg-rose-200 dark:bg-rose-500/20 dark:text-rose-300">Hapus</button>
@@ -129,12 +129,15 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { router } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import ConfirmDeleteModal from '@/Components/MasterData/ConfirmDeleteModal.vue';
 
 const props = defineProps({
     mstInitiatives: { type: Array, default: () => [] },
 });
+
+const route = useRouteHelper();
 
 const headers = ['No', 'Code', 'Tipe', 'CoE', 'Nama', 'Holding', 'Organisasi', 'Status', 'Sumber Data', 'Deskripsi', 'Action'];
 
@@ -167,7 +170,7 @@ const deleteTarget = ref(null);
 const confirmDelete = (item) => { deleteTarget.value = item; };
 const doDelete = () => {
     if (!deleteTarget.value) return;
-    router.delete(`/master-data/master-initiatives/${deleteTarget.value.id}`, {
+    router.delete(route('master-data.mst-initiatives.destroy', deleteTarget.value.id), {
         onFinish: () => { deleteTarget.value = null; },
     });
 };

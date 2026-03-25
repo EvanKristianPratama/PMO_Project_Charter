@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Groub extends Model
 {
@@ -13,13 +15,18 @@ class Groub extends Model
 
     protected $fillable = ['company_id', 'name'];
 
-    public function company()
+    public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class, 'company_id');
     }
 
-    public function organization()
+    public function organizations(): HasMany
     {
-        return $this->hasMany(Organization::class, 'groub_id');
+        return $this->hasMany(TrsOrganization::class, 'groub_id');
+    }
+
+    public function organization(): HasMany
+    {
+        return $this->organizations();
     }
 }

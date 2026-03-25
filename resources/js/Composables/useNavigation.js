@@ -1,5 +1,6 @@
 import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
+import { routeHelper } from '@/Composables/useRouteHelper';
 import {
     FlagIcon,
     FolderIcon,
@@ -20,31 +21,16 @@ export function useNavigation() {
     const isAdmin = computed(() => appRole.value === 'admin');
 
     const navItems = computed(() => {
-        const items = [
-            {
-                label: 'Program Planning',
-                href: '/dashboard-monitoring',
-                icon: Squares2X2Icon,
-                active: (url) =>
-                    url.startsWith('/dashboard-monitoring')
-                    || url.startsWith('/program-planning')
-                    || url.startsWith('/strategic-pillars'),
-            },
-            // {
-            //     label: 'RSTI Sub Holding',
-            //     href: '/program-planning/rsti-sub-holding',
-            //     icon: BuildingOffice2Icon,
-            //     active: (url) => url.startsWith('/program-planning/rsti-sub-holding'),
-            // },
+        const programPlanningChildren = [
             {
                 label: 'Strategic Pillars',
-                href: '/strategic-pillars',
+                href: routeHelper('strategic-pillars.index'),
                 icon: FlagIcon,
                 active: (url) => url.startsWith('/strategic-pillars'),
             },
             {
                 label: 'Digital Initiative Definition',
-                href: '/program-planning/program-definition/digital-initiatives',
+                href: routeHelper('program-planning.program-definition.digital-initiatives'),
                 icon: DocumentTextIcon,
                 active: (url) =>
                     url.startsWith('/program-planning/program-definition/digital-initiatives')
@@ -52,41 +38,112 @@ export function useNavigation() {
             },
             {
                 label: 'IT Initiative Definition',
-                href: '/program-planning/program-definition/it-initiatives',
+                href: routeHelper('program-planning.program-definition.it-initiatives'),
                 icon: DocumentTextIcon,
                 active: (url) => url.startsWith('/program-planning/program-definition/it-initiatives'),
             },
             {
                 label: 'Initiative Relation',
-                href: '/program-planning/initiative-relation',
+                href: routeHelper('initiative-relations.index'),
                 icon: TableCellsIcon,
                 active: (url) => url.startsWith('/program-planning/initiative-relation'),
             },
+        ];
+
+        const programEvaluationChildren = [
             {
-                label: 'Program Evaluation',
-                href: '/program-evalution/review',
-                icon: DocumentTextIcon,
-                active: (url) => url.startsWith('/program-evalution'),
+                label: 'Review PC',
+                href: routeHelper('program-evaluation.index'),
+                icon: ClipboardDocumentCheckIcon,
+                active: (url) =>
+                    url.startsWith('/program-evalution/review')
+                    && !url.startsWith('/program-evalution/review-timeline'),
+            },
+            {
+                label: 'Review Timeline',
+                href: routeHelper('program-evaluation.review-timeline'),
+                icon: ClipboardDocumentCheckIcon,
+                active: (url) => url.startsWith('/program-evalution/review-timeline'),
+            },
+        ];
+
+        const programImplementationChildren = [
+            {
+                label: 'Digital Initiatives',
+                href: routeHelper('digital-initiatives.index'),
+                icon: FolderIcon,
+                active: (url) => url.startsWith('/digital-initiatives'),
+            },
+            {
+                label: 'IT Initiatives',
+                href: routeHelper('it-initiatives.index'),
+                icon: FolderIcon,
+                active: (url) => url.startsWith('/it-initiatives') || url.startsWith('/roadmap'),
                 children: [
                     {
-                        label: 'Review PC',
-                        href: '/program-evalution/review',
+                        label: 'Roadmap Project Charter',
+                        href: routeHelper('it-initiatives.index', { tableMode: 'roadmap' }),
                         icon: ClipboardDocumentCheckIcon,
-                        active: (url) =>
-                            url.startsWith('/program-evalution/review')
-                            && !url.startsWith('/program-evalution/review-timeline'),
+                        active: (url) => url.startsWith('/roadmap') && !url.startsWith('/roadmap/status-implementation'),
                     },
                     {
-                        label: 'Review Timeline',
-                        href: '/program-evalution/review-timeline',
+                        label: 'Status Implementation',
+                        href: routeHelper('it-initiatives.index', { tableMode: 'implementation' }),
                         icon: ClipboardDocumentCheckIcon,
-                        active: (url) => url.startsWith('/program-evalution/review-timeline'),
+                        active: (url) => url.includes('tableMode=implementation'),
                     },
                 ],
             },
             {
+                label: 'RKAP',
+                href: routeHelper('program-implementation.budgeting'),
+                icon: DocumentTextIcon,
+                active: (url) => url.startsWith('/program-implementation/budgeting'),
+            },
+        ];
+
+        const architectureChildren = [
+            {
+                label: 'Business Capability',
+                href: routeHelper('master-data.business-capabilities.index'),
+                icon: CubeIcon,
+                active: (url) => url.startsWith('/master-data/business-capabilities'),
+            },
+            {
+                label: 'Organization Structure',
+                href: routeHelper('architecture.organization-structure'),
+                icon: BuildingOffice2Icon,
+                active: (url) => url.startsWith('/architecture/organization-structure'),
+            },
+            {
+                label: 'Informatic System',
+                href: routeHelper('architecture.informatic-system'),
+                icon: BuildingOffice2Icon,
+                active: (url) => url.startsWith('/architecture/informatic-system'),
+            },
+        ];
+
+        const items = [
+            {
+                label: 'Program Planning',
+                href: routeHelper('dashboard-monitoring'),
+                icon: Squares2X2Icon,
+                active: (url) =>
+                    url.startsWith('/dashboard-monitoring')
+                    || url.startsWith('/program-planning')
+                    || url.startsWith('/strategic-pillars'),
+                children: programPlanningChildren,
+            },
+            {
+                label: 'Program Evaluation',
+                href: routeHelper('program-evaluation.index'),
+                icon: DocumentTextIcon,
+                active: (url) => url.startsWith('/program-evalution'),
+                children: programEvaluationChildren,
+            },
+            {
                 label: 'Program Implementation',
-                href: '/dashboard',
+                href: routeHelper('dashboard'),
                 icon: ChartBarIcon,
                 active: (url) =>
                     url.startsWith('/program-implementation')
@@ -94,92 +151,36 @@ export function useNavigation() {
                     || url.startsWith('/digital-initiatives')
                     || url.startsWith('/it-initiatives')
                     || url.startsWith('/roadmap'),
-            },
-            {
-                label: 'Digital Initiatives',
-                href: '/digital-initiatives',
-                icon: FolderIcon,
-                active: (url) => url.startsWith('/digital-initiatives'),
-            },
-            {
-                label: 'IT Initiatives',
-                href: '/it-initiatives',
-                icon: FolderIcon,
-                active: (url) => url.startsWith('/it-initiatives') || url.startsWith('/roadmap'),
-                children: [
-                    {
-                        label: 'Roadmap Project Charter',
-                        href: '/it-initiatives?tableMode=roadmap',
-                        icon: ClipboardDocumentCheckIcon,
-                        active: (url) => url.startsWith('/roadmap') && !url.startsWith('/roadmap/status-implementation'),
-                    },
-                    {
-                        label: 'Status Implementation',
-                        href: '/it-initiatives?tableMode=implementation',
-                        icon: ClipboardDocumentCheckIcon,
-                        active: (url) => url.includes('tableMode=implementation'),
-                    },
-                ],
-            },
-            {
-                label: 'Initiatives Relations',
-                href: '/program-implementation/initiative-relation',
-                icon: TableCellsIcon,
-                active: (url) => url.startsWith('/program-implementation/initiative-relation'),
-            },
-            {
-                label: 'RKAP',
-                href: '/program-implementation/budgeting',
-                icon: DocumentTextIcon,
-                active: (url) => url.startsWith('/program-implementation/budgeting'),
+                children: programImplementationChildren,
             },
             {
                 label: 'Architecture',
-                href: '/architecture',
+                href: routeHelper('architecture.index'),
                 icon: CubeIcon,
                 active: (url) => url.startsWith('/architecture') || url.startsWith('/master-data/business-capabilities'),
-                children: [
-                    {
-                        label: 'Business Capability',
-                        href: '/master-data/business-capabilities',
-                        icon: CubeIcon,
-                        active: (url) => url.startsWith('/master-data/business-capabilities'),
-                    },
-                    {
-                        label: 'Organization Structure',
-                        href: '/architecture/organization-structure',
-                        icon: BuildingOffice2Icon,
-                        active: (url) => url.startsWith('/architecture/organization-structure'),
-                    },
-                    {
-                        label: 'Informatic System',
-                        href: '/architecture/informatic-system',
-                        icon: BuildingOffice2Icon,
-                        active: (url) => url.startsWith('/architecture/informatic-system'),
-                    }
-                ]
+                children: architectureChildren,
             },
             {
                 label: 'Service Portofolio',
-                href: '/service-portofolio',
+                href: routeHelper('service-portofolio.index'),
                 icon: CubeIcon,
                 active: (url) => url.startsWith('/service-portofolio'),
             },
             {
                 label: 'Resources Management',
-                href: '/resources-management',
+                href: routeHelper('resources-management.index'),
                 icon: CubeIcon,
                 active: (url) => url.startsWith('/resources-management'),
             },
             {
                 label: 'Policy',
-                href: '/policy',
+                href: routeHelper('policy.index'),
                 icon: DocumentTextIcon,
                 active: (url) => url.startsWith('/policy'),
             },
             {
                 label: 'Master Data',
-                href: '/master-data',
+                href: routeHelper('master-data.index'),
                 icon: TableCellsIcon,
                 active: (url) => url.startsWith('/master-data'),
             },
@@ -188,7 +189,7 @@ export function useNavigation() {
         if (isAdmin.value) {
             items.push({
                 label: 'Admin',
-                href: '/admin/dashboard',
+                href: routeHelper('admin.dashboard'),
                 icon: ShieldCheckIcon,
                 active: (url) => url.startsWith('/admin'),
             });

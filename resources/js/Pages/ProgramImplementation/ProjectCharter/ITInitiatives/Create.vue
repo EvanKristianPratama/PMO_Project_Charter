@@ -3,7 +3,7 @@
         <div class="mx-auto max-w-[1860px] animate-fade-in space-y-6">
             <div>
                 <Link
-                    href="/it-initiatives"
+                    :href="route('it-initiatives.index')"
                     class="mb-2 flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400"
                 >
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -104,6 +104,7 @@
 
 <script setup>
 import { useForm, Link } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
 const props = defineProps({
@@ -122,10 +123,12 @@ const statusOptions = props.statusOptions.length > 0
     : [{ id: 1, label: 'Drafting' }];
 const currentDate = () => new Date().toISOString().slice(0, 10);
 
+const route = useRouteHelper();
+
 const form = useForm({
     code: '',
     name: '',
-    owner: '',
+    owner_name: '',
     charter_category: '',
     status: statusOptions.some((statusOption) => statusOption.id === props.defaultStatusId)
         ? props.defaultStatusId
@@ -135,7 +138,7 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post('/it-initiatives');
+    form.post(route('it-initiatives.store'));
 };
 </script>
 

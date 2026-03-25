@@ -1,10 +1,10 @@
 <template>
-    <UserLayout :title="`Digital Initiative - ${initiative.code || initiative.no}`">
+    <UserLayout :title="`Digital Initiative - ${initiative.code}`">
         <div class="space-y-4 print:space-y-0">
             <section class="print:hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="flex flex-wrap items-center gap-2 px-3 py-2.5">
                     <Link
-                        href="/digital-initiatives"
+                        :href="route('digital-initiatives.index')"
                         class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-slate-500 dark:text-slate-400"
                     >
                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -16,7 +16,7 @@
                     <span class="text-slate-300 dark:text-slate-600">|</span>
 
                     <h1 class="text-xs font-bold text-slate-900 dark:text-white">
-                        {{ initiative.code || initiative.no }}
+                        {{ initiative.code }}
                     </h1>
 
                     <div class="ml-auto flex items-center gap-1.5">
@@ -47,7 +47,7 @@
 
                         <div class="flex flex-wrap items-center gap-2">
                             <Link
-                                :href="`/digital-initiatives/${initiative.id}/edit`"
+                                :href="route('digital-initiatives.edit', initiative.id)"
                                 class="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-indigo-700"
                             >
                                 Edit Charter
@@ -84,11 +84,14 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import DigitalCharterDocument from './Partials/DigitalCharterDocument.vue';
 import StatusImplementationTable from '@/Components/ITInitiative/StatusImplementationTable.vue';
+
+const route = useRouteHelper();
 
 const props = defineProps({
     initiative: Object,
@@ -120,8 +123,8 @@ const toggleTab = (key) => {
 };
 
 const confirmDelete = () => {
-    if (confirm(`Are you sure you want to delete initiative "${props.initiative.code || props.initiative.no}"?`)) {
-        router.delete(`/digital-initiatives/${props.initiative.id}`);
+    if (confirm(`Are you sure you want to delete initiative "${props.initiative.code}"?`)) {
+        router.delete(route('digital-initiatives.destroy', props.initiative.id));
     }
 };
 
@@ -129,4 +132,3 @@ const printCharter = () => {
     window.print();
 };
 </script>
-

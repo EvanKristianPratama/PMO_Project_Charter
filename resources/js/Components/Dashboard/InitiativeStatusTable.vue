@@ -159,6 +159,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 
 const props = defineProps({
     items: {
@@ -175,6 +176,8 @@ const props = defineProps({
         default: '',
     },
 });
+
+const route = useRouteHelper();
 
 const normalizeText = (value) => {
     const text = String(value ?? '').trim();
@@ -237,7 +240,7 @@ const statusBadgeClass = (status) => {
     return map[key] ?? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300';
 };
 
-const editHref = (item) => `/master-data/master-initiatives/${item.id}/edit`;
+const editHref = (item) => route('master-data.mst-initiatives.edit', item.id);
 
 // ── Filters ──
 const filterTipe = ref(props.initialTipeFilter);

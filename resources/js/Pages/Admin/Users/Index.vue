@@ -250,6 +250,7 @@
 <script setup>
 import { computed, reactive } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import StatusBadge from '@/Components/StatusBadge.vue';
 import UserAvatar from '@/Components/UserAvatar.vue';
@@ -261,6 +262,8 @@ const props = defineProps({
     stats: { type: Object, required: true },
     filters: { type: Object, default: () => ({}) },
 });
+
+const route = useRouteHelper();
 
 const localFilters = reactive({
     search: props.filters.search || '',
@@ -320,7 +323,7 @@ function debouncedSearch() {
 }
 
 function applyFilters() {
-    router.get('/admin/users', {
+    router.get(route('admin.users.index'), {
         search: localFilters.search || undefined,
         status: localFilters.status !== 'all' ? localFilters.status : undefined,
         app_role: localFilters.app_role !== 'all' ? localFilters.app_role : undefined,
@@ -333,16 +336,16 @@ function resetFilters() {
     localFilters.status = 'all';
     localFilters.app_role = 'all';
     localFilters.permission_role = 'all';
-    router.get('/admin/users', {}, { preserveState: true, replace: true });
+    router.get(route('admin.users.index'), {}, { preserveState: true, replace: true });
 }
 
 function updateUser(user, data) {
-    router.put(`/admin/users/${user.id}`, data, { preserveScroll: true });
+    router.put(route('admin.users.update', user.id), data, { preserveScroll: true });
 }
 
 function deleteUser(user) {
     if (confirm(`Hapus user ${user.name}?`)) {
-        router.delete(`/admin/users/${user.id}`, { preserveScroll: true });
+        router.delete(route('admin.users.destroy', user.id), { preserveScroll: true });
     }
 }
 </script>

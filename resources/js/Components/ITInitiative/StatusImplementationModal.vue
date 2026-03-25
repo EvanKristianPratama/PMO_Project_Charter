@@ -112,6 +112,7 @@
 import { useForm } from '@inertiajs/vue3';
 import { watch, computed } from 'vue';
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 
 const props = defineProps({
     show: Boolean,
@@ -126,6 +127,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close']);
+const route = useRouteHelper();
 
 const form = useForm({
     month_year: '',
@@ -155,12 +157,12 @@ const closeModal = () => {
 
 const submit = () => {
     if (isEditing.value) {
-        form.put(`/implementation-status/${props.statusData.id}`, {
+        form.put(route('it-initiatives.implementation-status.update', props.statusData.id), {
             preserveScroll: true,
             onSuccess: () => closeModal(),
         });
     } else {
-        form.post(`/it-initiatives/${props.projectId}/implementation-status`, {
+        form.post(route('it-initiatives.implementation-status.store', props.projectId), {
             preserveScroll: true,
             onSuccess: () => closeModal(),
         });

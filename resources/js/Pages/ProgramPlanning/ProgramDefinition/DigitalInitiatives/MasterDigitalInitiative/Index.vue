@@ -9,19 +9,19 @@
                     Digital Initiatives List
                 </div>
                 <Link
-                    href="/program-planning/program-definition/digital-initiatives/compendium"
+                    :href="route('program-planning.program-definition.digital-initiatives.compendium.index')"
                     class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
                 >
                     Compendium List
                 </Link>
                 <Link
-                    href="/program-planning/program-definition/digital-initiatives/appendix/"
+                    :href="route('program-planning.program-definition.digital-initiatives.appendix.index')"
                     class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
                 >
                     Appendix List
                 </Link>
                 <Link
-                    href="/program-planning/program-definition/digital-initiatives/mapping"
+                    :href="route('program-planning.program-definition.digital-initiatives.mapping.index')"
                     class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
                 >
                     Mapping

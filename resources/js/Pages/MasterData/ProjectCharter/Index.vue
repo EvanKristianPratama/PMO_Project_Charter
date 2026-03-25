@@ -10,7 +10,7 @@
                             Kelola data Project Charter &amp; PC Status Implementation.
                         </p>
                     </div>
-                    <a href="/master-data"
+                    <a :href="route('master-data.index')"
                        class="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5">
                         ← Kembali ke Master Data
                     </a>
@@ -156,6 +156,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import FormField from '@/Components/MasterData/FormField.vue';
 import ConfirmDeleteModal from '@/Components/MasterData/ConfirmDeleteModal.vue';
@@ -166,6 +167,8 @@ const props = defineProps({
     statusOptions:        { type: Array, default: () => [] },
     masterItInitiatives:  { type: Array, default: () => [] },
 });
+
+const route = useRouteHelper();
 
 const headers = ['No', 'Code', 'Nama', 'Owner', 'Status', 'Charter', 'PC Status', 'Review', 'Action'];
 const reviewOptions = ['At Risk', 'On Track', 'Not Started', 'Not Signed'];
@@ -214,9 +217,9 @@ const closeFormModal = () => { showFormModal.value = false; editingItem.value = 
 const submitForm = () => {
     const opts = { onSuccess: () => closeFormModal() };
     if (editingItem.value) {
-        form.put(`/master-data/project-charter/${editingItem.value.id}`, opts);
+        form.put(route('master-data.project-charter.update', editingItem.value.id), opts);
     } else {
-        form.post('/master-data/project-charter', opts);
+        form.post(route('master-data.project-charter.store'), opts);
     }
 };
 
@@ -225,7 +228,7 @@ const deleteTarget = ref(null);
 const confirmDelete = (item) => { deleteTarget.value = item; };
 const doDelete = () => {
     if (!deleteTarget.value) return;
-    router.delete(`/master-data/project-charter/${deleteTarget.value.id}`, {
+    router.delete(route('master-data.project-charter.destroy', deleteTarget.value.id), {
         onFinish: () => { deleteTarget.value = null; },
     });
 };

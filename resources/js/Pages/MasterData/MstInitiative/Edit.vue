@@ -10,7 +10,7 @@
                             {{ initiative.code ?? '' }} — {{ initiative.name }}
                         </p>
                     </div>
-                    <a href="/master-data/master-initiatives"
+                    <a :href="route('master-data.mst-initiatives.index')"
                        class="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5">
                         ← Kembali
                     </a>
@@ -328,7 +328,10 @@
 <script setup>
 import { ref, reactive, computed } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
+
+const route = useRouteHelper();
 
 const props = defineProps({
     initiative:          { type: Object, required: true },
@@ -375,13 +378,13 @@ const submitMaster = () => {
         .transform((data) => {
             const organizationIds = normalizeOrganizationIds(data.organization_ids);
 
-            return {
-                ...data,
-                organization_ids: organizationIds,
-                business_unit: organizationIds[0] ?? null,
-            };
-        })
-        .put(`/master-data/master-initiatives/${props.initiative.id}`);
+        return {
+            ...data,
+            organization_ids: organizationIds,
+            business_unit: organizationIds[0] ?? null,
+        };
+    })
+        .put(route('master-data.mst-initiatives.update', props.initiative.id));
 };
 
 // ── Add new status ──
@@ -402,7 +405,7 @@ const saveNewRow = () => {
     newRowErrors.status = '';
     if (!newRow.status.trim()) { newRowErrors.status = 'Status wajib diisi.'; return; }
     newRowProcessing.value = true;
-    router.post(`/master-data/master-initiatives/${props.initiative.id}/status`, {
+    router.post(route('master-data.mst-initiatives.status.store', props.initiative.id), {
         status: newRow.status,
         tanggal: newRow.tanggal || null,
         notes: newRow.notes || null,
@@ -434,7 +437,7 @@ const saveEdit = (statusId) => {
     editErrors.status = '';
     if (!editRow.status.trim()) { editErrors.status = 'Status wajib diisi.'; return; }
     editProcessing.value = true;
-    router.put(`/master-data/master-initiatives/status/${statusId}`, {
+    router.put(route('master-data.mst-initiatives.status.update', statusId), {
         status: editRow.status,
         tanggal: editRow.tanggal || null,
         notes: editRow.notes || null,
@@ -450,7 +453,7 @@ const deletingId = ref(null);
 const deleteStatus = (statusId) => {
     if (!window.confirm('Hapus riwayat status ini?')) return;
     deletingId.value = statusId;
-    router.delete(`/master-data/master-initiatives/status/${statusId}`, {
+    router.delete(route('master-data.mst-initiatives.status.destroy', statusId), {
         preserveScroll: true,
         onFinish: () => { deletingId.value = null; },
     });
@@ -482,7 +485,7 @@ const addTagging = () => {
     if (!goalObj) return;
 
     mappingProcessing.value = true;
-    router.post('/strategic-pillars/tagging', {
+    router.post(route('strategic-pillars.tagging.store'), {
         initiative_id: props.initiative.id,
         goal: goalObj.code,
         themes_id: mappingForm.themes_id || null
@@ -501,7 +504,7 @@ const addTagging = () => {
 const removeTagging = (tagId) => {
     if (!window.confirm('Hapus mapping ini?')) return;
     
-    router.delete(`/strategic-pillars/tagging/${tagId}`, {
+    router.delete(route('strategic-pillars.tagging.destroy', tagId), {
         preserveScroll: true
     });
 };

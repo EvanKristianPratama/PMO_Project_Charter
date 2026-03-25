@@ -165,7 +165,7 @@
 
 
                 <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-6 dark:border-white/5">
-                    <Link href="/program-implementation/initiative-relation"
+                    <Link :href="initiativeRelationIndexPath"
                         class="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-white/5">
                         Cancel
                     </Link>
@@ -183,6 +183,8 @@
 import { computed, ref, toRef, watch } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import InitiativeDetailsWithRelations from './InitiativeDetailsWithRelations.vue';
+
+const initiativeRelationIndexPath = '/program-planning/initiative-relation';
 
 const props = defineProps({
     form: {
@@ -344,7 +346,7 @@ const buildRelations = (initiativeId) => {
             const columnInitiative = relation.initiative_column;
             const rowFallback = relation.initiative_code_row;
             const columnFallback = relation.initiative_code_column;
-            const justifikasi = relation.justifikasi ?? relation.description ?? '-';
+            const justifikasi = relation.justifikasi ?? '-';
 
             return {
                 id: relation.id ?? `${relation.initiative_code_row}-${relation.initiative_code_column}-${relation.type_relation}-${relation.model_relasi}`,

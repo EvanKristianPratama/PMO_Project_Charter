@@ -20,7 +20,7 @@
 
             <div class="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-white/10 dark:bg-[#171717] w-fit">
                 <Link
-                    href="/program-planning/program-definition/digital-initiatives/master"
+                    :href="route('program-planning.program-definition.digital-initiatives.master.index')"
                     class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
                 >
                     Digital Initiatives List
@@ -31,13 +31,13 @@
                     Compendium List
                 </div>
                 <Link
-                    href="/program-planning/program-definition/digital-initiatives/appendix"
+                    :href="route('program-planning.program-definition.digital-initiatives.appendix.index')"
                     class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
                 >
                     Appendix List
                 </Link>
                 <Link
-                    href="/program-planning/program-definition/digital-initiatives/mapping"
+                    :href="route('program-planning.program-definition.digital-initiatives.mapping.index')"
                     class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
                 >
                     Mapping
@@ -197,7 +197,7 @@
                                 <td class="px-3 py-3 text-[10px] font-medium">
                                     <div class="flex items-center gap-2">
                                         <Link
-                                            :href="`/program-planning/program-definition/digital-initiatives/compendium/${item.id}/edit`"
+                                            :href="route('program-planning.program-definition.digital-initiatives.compendium.edit', item.id)"
                                             class="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-semibold text-amber-800 transition hover:bg-amber-200 dark:bg-amber-500/20 dark:text-amber-300"
                                             title="Edit Compendium"
                                         >
@@ -423,6 +423,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
 const props = defineProps({
@@ -455,6 +456,8 @@ const props = defineProps({
         default: () => [],
     },
 });
+
+const route = useRouteHelper();
 
 const isCreateModalOpen = ref(false);
 
@@ -660,7 +663,7 @@ const submitCreate = () => {
         initiative_ids: Array.isArray(data.initiative_ids) ? data.initiative_ids : [],
         value: data.value === '' ? null : data.value,
         urgency: data.urgency === '' ? null : data.urgency,
-    })).post('/program-planning/program-definition/digital-initiatives/compendium', {
+    })).post(route('program-planning.program-definition.digital-initiatives.compendium.store'), {
         preserveScroll: true,
         onSuccess: () => {
             isCreateModalOpen.value = false;

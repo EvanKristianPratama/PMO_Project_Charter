@@ -133,7 +133,7 @@
                                     Edit
                                 </Link>
                                 <Link
-                                    :href="item.mappedProjects?.[0]?.id ? `/it-initiatives/${item.mappedProjects[0].id}?tab=detail` : `/it-initiatives?tableMode=implementation`"
+                                    :href="item.mappedProjects?.[0]?.id ? route('it-initiatives.show', { project: item.mappedProjects[0].id, tab: 'detail' }) : route('it-initiatives.index', { tableMode: 'implementation' })"
                                     class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-500/20 dark:text-blue-300 dark:hover:bg-blue-500/30 transition-colors cursor-pointer"
                                     title="Status Implementation"
                                 >
@@ -173,6 +173,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 
 const props = defineProps({
@@ -185,6 +186,8 @@ const props = defineProps({
         default: () => [],
     },
 });
+
+const route = useRouteHelper();
 
 const showNoDataModal = ref(false);
 
@@ -273,11 +276,11 @@ const hasLinkedInitiative = (item) => Boolean(resolveLinkedInitiative(item)?.id)
 
 const initiativeHref = (item) => {
     const matchedInitiative = resolveLinkedInitiative(item);
-    return matchedInitiative?.id ? `/digital-initiatives/${matchedInitiative.id}` : '/digital-initiatives';
+    return matchedInitiative?.id ? route('digital-initiatives.show', matchedInitiative.id) : route('digital-initiatives.index');
 };
 
 const editHref = (item) => {
-    return `/master-data/master-initiatives/${item.id}/edit`;
+    return route('master-data.mst-initiatives.edit', item.id);
 };
 
 const actionCellClass = (isReady) => {

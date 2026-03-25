@@ -165,6 +165,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 
 const props = defineProps({
@@ -177,6 +178,8 @@ const props = defineProps({
         default: () => [],
     },
 });
+
+const route = useRouteHelper();
 
 const showNoDataModal = ref(false);
 
@@ -266,12 +269,12 @@ const hasLinkedInitiative = (item) => Boolean(resolveLinkedInitiative(item)?.id)
 const initiativeHref = (item) => {
     const matchedInitiative = resolveLinkedInitiative(item);
     return matchedInitiative?.id
-        ? `/program-planning/program-definition/digital-initiatives/compendium/${matchedInitiative.id}/edit`
-        : '/program-planning/program-definition/digital-initiatives/compendium';
+        ? route('program-planning.program-definition.digital-initiatives.compendium.edit', matchedInitiative.id)
+        : route('program-planning.program-definition.digital-initiatives.compendium.index');
 };
 
 const editHref = (item) => {
-    return `/master-data/master-initiatives/${item.id}/edit`;
+    return route('master-data.mst-initiatives.edit', item.id);
 };
 
 const actionCellClass = (isReady) => {

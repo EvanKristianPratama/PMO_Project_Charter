@@ -649,7 +649,7 @@ const extractRelations = (initiative) => {
         ?? initiative?.initiative_relations_column
         ?? [];
 
-    const justifikasiValue = (relation) => relation.justifikasi ?? relation.description ?? '-';
+    const justifikasiValue = (relation) => relation.justifikasi ?? '-';
     const shouldIncludeRelation = (relation) => {
         if (selectedModelRelasi.value === 'all') {
             return true;

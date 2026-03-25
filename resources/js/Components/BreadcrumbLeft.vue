@@ -7,35 +7,40 @@ const { navItems } = useNavigation();
 const page = usePage();
 const currentUrl = computed(() => page.url);
 
-const planningChildHrefs = [
-    // '/program-planning/rsti-sub-holding',
-    '/strategic-pillars',
-    '/program-planning/program-definition/digital-initiatives',
-    '/program-planning/program-definition/it-initiatives',
-    '/program-planning/initiative-relation',
-];
-const implementationChildHrefs = [
-    '/digital-initiatives',
-    '/it-initiatives',
-    '/roadmap',
-    '/program-implementation/budgeting',
-    '/program-implementation/initiative-relation',
-];
-
 const programPlanningItem = computed(() => {
     return navItems.value.find((item) => item.label === 'Program Planning') ?? null;
 });
 
 const programPlanningChildren = computed(() => {
-    return navItems.value.filter((item) => planningChildHrefs.includes(item.href));
+    return programPlanningItem.value?.children || [];
 });
 
 const programImplementationItem = computed(() => {
     return navItems.value.find((item) => item.label === 'Program Implementation') ?? null;
 });
 
+const programImplementationInitiativeRelationShortcut = computed(() => {
+    const initiativeRelationItem = programPlanningChildren.value.find((item) => item.label === 'Initiative Relation');
+
+    if (!initiativeRelationItem) {
+        return null;
+    }
+
+    return {
+        ...initiativeRelationItem,
+        active: () => false,
+    };
+});
+
 const programImplementationChildren = computed(() => {
-    return navItems.value.filter((item) => implementationChildHrefs.includes(item.href));
+    const implementationChildren = programImplementationItem.value?.children || [];
+    const hasInitiativeRelation = implementationChildren.some((item) => item.label === 'Initiative Relation');
+
+    if (hasInitiativeRelation || !programImplementationInitiativeRelationShortcut.value) {
+        return implementationChildren;
+    }
+
+    return [...implementationChildren, programImplementationInitiativeRelationShortcut.value];
 });
 
 const programInformationItem = computed(() => {

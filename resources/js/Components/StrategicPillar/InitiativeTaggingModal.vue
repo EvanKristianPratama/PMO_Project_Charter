@@ -125,7 +125,10 @@
 <script setup>
 import { computed, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue';
+
+const route = useRouteHelper();
 
 const props = defineProps({
     show: Boolean,
@@ -181,7 +184,7 @@ const submit = () => {
         ...data,
         goal: data.goal === '__TBC__' ? null : data.goal,
         themes_id: data.goal === '__TBC__' ? null : data.themes_id,
-    })).post('/strategic-pillars/tagging', {
+    })).post(route('strategic-pillars.tagging.store'), {
         preserveScroll: true,
         onSuccess: () => closeModal(),
     });

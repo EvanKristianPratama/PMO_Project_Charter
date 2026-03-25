@@ -4,7 +4,7 @@
             <section
                 class="mx-auto mb-3 w-full max-w-[1200px] rounded-2xl border border-slate-200 bg-white shadow-sm print:hidden dark:border-white/10 dark:bg-[#171717]">
                 <div class="flex flex-wrap items-center gap-2 px-3 py-2.5">
-                    <Link href="/program-evalution"
+                    <Link :href="route('program-evaluation.index')"
                         class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-slate-500 dark:text-slate-400">
                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 19-7-7 7-7" />
@@ -43,7 +43,7 @@
                             Review
                         </button>
                     </div>
-                    <Link v-if="activeNav === 'review'" :href="`/program-evalution/review?edit=${trsReviewPC.id}`"
+                    <Link v-if="activeNav === 'review'" :href="route('program-evaluation.index', { edit: trsReviewPC.id })"
                         class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5">
                         Edit
                     </Link>
@@ -228,6 +228,7 @@
 <script setup>
 import { computed, onMounted, ref, reactive } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import ItCharterDocument from '@/Components/ProjectCharter/ItCharterDocument.vue';
 import ProjectRoadmap from '@/Components/Roadmap/ProjectRoadmap.vue';
@@ -258,6 +259,8 @@ const props = defineProps({
         default: () => [],
     },
 });
+
+const route = useRouteHelper();
 
 const review = computed(() => ({
     ...props.trsReviewPC,
@@ -342,7 +345,7 @@ const selectedReviewId = computed({
     get: () => String(props.trsReviewPC?.id ?? ''),
     set: (value) => {
         if (!value || String(value) === String(props.trsReviewPC?.id)) return;
-        router.visit(`/program-evalution/review/${value}`);
+        router.visit(route('program-evaluation.show', value));
     },
 });
 
@@ -556,7 +559,7 @@ const buildInitiativeRelations = () => {
         const columnInitiative = relation.initiative_column;
         const rowFallback = relation.initiative_code_row;
         const columnFallback = relation.initiative_code_column;
-        const justifikasi = relation.justifikasi ?? relation.description ?? '-';
+        const justifikasi = relation.justifikasi ?? '-';
 
         rows.push({
             id: relation.id ?? `${relation.initiative_code_row}-${relation.initiative_code_column}`,

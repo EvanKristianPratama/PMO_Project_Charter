@@ -185,7 +185,10 @@ import FlowStatusTable from "@/Components/DigitalInitiative/FlowStatusTable.vue"
 import MasterInitiativeTable from "@/Components/DigitalInitiative/MasterInitiativeTable.vue";
 
 const props = defineProps({
-    initiatives: Object,
+    initiatives: {
+        type: Array,
+        default: () => [],
+    },
     mstDigitalInitiatives: {
         type: Array,
         default: () => [],

@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import {
     ArrowTopRightOnSquareIcon,
@@ -28,6 +29,8 @@ const props = defineProps({
         default: () => [],
     },
 });
+
+const route = useRouteHelper();
 
 const cards = computed(() => [
     {
@@ -60,37 +63,37 @@ const quickActions = [
     {
         label: 'Kelola User',
         description: 'Atur app role dan internal role.',
-        href: '/admin/users',
+        href: route('admin.users.index'),
         icon: UsersIcon,
     },
     {
         label: 'User Pending',
         description: 'Lihat akun yang menunggu approval.',
-        href: '/admin/users?status=pending',
+        href: route('admin.users.index', { status: 'pending' }),
         icon: ClockIcon,
     },
     {
         label: 'Akun Admin',
         description: 'Filter akun dengan app_role admin.',
-        href: '/admin/users?app_role=admin',
+        href: route('admin.users.index', { app_role: 'admin' }),
         icon: ShieldCheckIcon,
     },
     {
         label: 'Role Management',
         description: 'Buat role dan atur permission.',
-        href: '/admin/roles',
+        href: route('admin.roles.index'),
         icon: KeyIcon,
     },
     {
         label: 'Log Aktivitas',
         description: 'Audit trail semua aktivitas user.',
-        href: '/admin/activity-log',
+        href: route('admin.activity-log.index'),
         icon: ClipboardDocumentListIcon,
     },
     {
         label: 'Portal User',
         description: 'Masuk ke dashboard aplikasi utama.',
-        href: '/dashboard',
+        href: route('dashboard'),
         icon: ArrowTopRightOnSquareIcon,
     },
 ];
@@ -145,7 +148,7 @@ const getInitials = (name) => {
                         <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Ringkasan akses akun aplikasi PMO dalam satu panel.</p>
                     </div>
                     <Link
-                        href="/admin/users"
+                        :href="route('admin.users.index')"
                         class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
                     >
                         <UserPlusIcon class="h-4 w-4" />
@@ -199,7 +202,7 @@ const getInitials = (name) => {
                 <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#111827] xl:col-span-3">
                     <div class="flex items-center justify-between">
                         <h2 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Recent Users</h2>
-                        <Link href="/admin/users" class="text-xs font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-300 dark:hover:text-indigo-200">
+                        <Link :href="route('admin.users.index')" class="text-xs font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-300 dark:hover:text-indigo-200">
                             Lihat semua
                         </Link>
                     </div>

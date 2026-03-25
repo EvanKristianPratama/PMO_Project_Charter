@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import {
     AdjustmentsHorizontalIcon,
@@ -37,6 +38,8 @@ const props = defineProps({
     },
 });
 
+const route = useRouteHelper();
+
 const search   = ref(props.filters.search    ?? '');
 const event    = ref(props.filters.event     ?? '');
 const userId   = ref(props.filters.user_id   ?? '');
@@ -46,7 +49,7 @@ const showFilters = ref(false);
 
 const applyFilters = () => {
     router.get(
-        '/master-data/log-aktivitas',
+        route('master-data.activity-log.index'),
         {
             search:    search.value   || undefined,
             event:     event.value    || undefined,

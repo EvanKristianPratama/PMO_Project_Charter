@@ -4,7 +4,7 @@
             <section class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="flex flex-wrap items-center gap-3 px-4 py-3">
                     <Link
-                        href="/program-planning/program-definition/digital-initiatives/appendix"
+                        :href="route('program-planning.program-definition.digital-initiatives.appendix.index')"
                         class="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-50 dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/5"
                     >
                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -172,6 +172,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import AppendixCharterDocument from '@/Components/Appendix/AppendixCharterDocument.vue';
 
@@ -182,6 +183,8 @@ const props = defineProps({
     coeOptions: { type: Array, default: () => [] },
     themeOptions: { type: Array, default: () => [] },
 });
+
+const route = useRouteHelper();
 
 const toNumber = (value, fallback = null) => {
     const num = Number(value);
@@ -329,7 +332,7 @@ const submit = () => {
         };
     });
 
-    form.put(`/program-planning/program-definition/digital-initiatives/appendix/${props.appendix.id}`, {
+    form.put(route('program-planning.program-definition.digital-initiatives.appendix.update', props.appendix.id), {
         preserveScroll: true,
         onSuccess: () => {
             isEditing.value = false;

@@ -78,7 +78,7 @@
                         </td>
                         <td class="border border-slate-300 px-4 py-3 text-slate-600 dark:border-white/20 dark:text-slate-400">
                             <Link
-                                :href="`/program-evalution/review/${review.id}`"
+                                :href="route('program-evaluation.show', review.id)"
                                 class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700 dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-200 dark:hover:border-sky-500/60 dark:hover:bg-sky-900/30 dark:hover:text-sky-200"
                                 @click.stop
                             >

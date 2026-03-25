@@ -4,7 +4,7 @@
             <section class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="flex flex-wrap items-center gap-3 px-4 py-3">
                     <Link
-                        href="/program-planning/program-definition/digital-initiatives/compendium"
+                        :href="route('program-planning.program-definition.digital-initiatives.compendium.index')"
                         class="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-50 dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/5"
                     >
                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -373,6 +373,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { Link, router, useForm } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import CompendiumCharterDocument from '@/Components/Compendium/CompendiumCharterDocument.vue';
 import DigitalInitiativeCharterDocument from '@/Components/DigitalInitiative/DigitalInitiativeCharterDocument.vue';
@@ -391,6 +392,8 @@ const props = defineProps({
     themeOptions: { type: Array, default: () => [] },
     organizationOptions: { type: Array, default: () => [] },
 });
+
+const route = useRouteHelper();
 
 const toNumber = (value, fallback = null) => {
     const num = Number(value);
@@ -583,11 +586,11 @@ const selectedCompendiumId = computed({
         if (!selectedValue) return;
         if (selectedValue === COMPENDIUM_CREATE_VALUE) {
             if (!isExisting.value) return;
-            router.visit('/program-planning/program-definition/digital-initiatives/compendium/create');
+            router.visit(route('program-planning.program-definition.digital-initiatives.compendium.create'));
             return;
         }
         if (isExisting.value && selectedValue === String(compendiumId.value)) return;
-        router.visit(`/program-planning/program-definition/digital-initiatives/compendium/${selectedValue}/edit`);
+        router.visit(route('program-planning.program-definition.digital-initiatives.compendium.edit', selectedValue));
     },
 });
 
@@ -808,7 +811,6 @@ const buildSignByPayload = (data) => {
 };
 
 const submit = () => {
-    const endpointBase = '/program-planning/program-definition/digital-initiatives/compendium';
     form.transform((data) => ({
         ...data,
         initiative_ids: normalizeIdList(data.initiative_ids),
@@ -823,12 +825,12 @@ const submit = () => {
         status: String(data.status ?? '1'),
     }));
     if (isExisting.value) {
-        form.put(`${endpointBase}/${compendiumId.value}`, {
+        form.put(route('program-planning.program-definition.digital-initiatives.compendium.update', compendiumId.value), {
             preserveScroll: true,
         });
         return;
     }
-    form.post(endpointBase, {
+    form.post(route('program-planning.program-definition.digital-initiatives.compendium.store'), {
         preserveScroll: true,
     });
 };
@@ -866,7 +868,7 @@ const submitAppendix = () => {
         sign_by: buildSignByPayload(data),
     }));
 
-    appendixForm.put(`/program-planning/program-definition/digital-initiatives/appendix/${appendixId.value}`, {
+    appendixForm.put(route('program-planning.program-definition.digital-initiatives.appendix.update', appendixId.value), {
         preserveScroll: true,
         onSuccess: () => {
             isAppendixEditing.value = false;

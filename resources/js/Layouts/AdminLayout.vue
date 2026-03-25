@@ -2,6 +2,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import {
     ArrowRightOnRectangleIcon,
     Bars3Icon,
@@ -24,6 +25,7 @@ const props = defineProps({
 });
 
 const { isDark, toggleDarkMode } = useDarkMode();
+const route = useRouteHelper();
 const page = usePage();
 const sidebarOpen = ref(false);
 const authUser = computed(() => page.props.auth?.user || {});
@@ -34,25 +36,25 @@ const userEmail = computed(() => authUser.value?.email || '-');
 const navItems = [
     {
         label: 'Dashboard',
-        href: '/admin/dashboard',
+        href: route('admin.dashboard'),
         icon: HomeIcon,
         active: (url) => url.startsWith('/admin/dashboard'),
     },
     {
         label: 'User Management',
-        href: '/admin/users',
+        href: route('admin.users.index'),
         icon: UsersIcon,
         active: (url) => url.startsWith('/admin/users'),
     },
     {
         label: 'Role Management',
-        href: '/admin/roles',
+        href: route('admin.roles.index'),
         icon: KeyIcon,
         active: (url) => url.startsWith('/admin/roles'),
     },
     {
         label: 'Log Aktivitas',
-        href: '/admin/activity-log',
+        href: route('admin.activity-log.index'),
         icon: ClipboardDocumentListIcon,
         active: (url) => url.startsWith('/admin/activity-log'),
     },
@@ -76,7 +78,7 @@ const closeSidebar = () => {
 };
 
 const logout = () => {
-    router.post('/logout');
+    router.post(route('logout'));
 };
 </script>
 
@@ -95,7 +97,7 @@ const logout = () => {
                         <Bars3Icon class="h-6 w-6" />
                     </button>
 
-                    <Link href="/admin/dashboard" class="inline-flex items-center gap-2">
+                    <Link :href="route('admin.dashboard')" class="inline-flex items-center gap-2">
                         <img
                             src="/logo.png"
                             alt="Logo"

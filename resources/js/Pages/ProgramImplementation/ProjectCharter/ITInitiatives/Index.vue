@@ -551,6 +551,7 @@
 <script setup>
 import { computed, ref, reactive, onMounted } from "vue";
 import { Link, usePage } from "@inertiajs/vue3";
+import { useRouteHelper } from "@/Composables/useRouteHelper";
 import UserLayout from "@/Layouts/UserLayout.vue";
 import { statusFlowClassByIndex } from "@/Composables/initiativeStatus";
 import { useFlowFilter } from "@/Composables/useFlowFilter";
@@ -587,6 +588,8 @@ const props = defineProps({
         default: () => ({}),
     },
 });
+
+const route = useRouteHelper();
 
 const asList = (value) => {
     if (Array.isArray(value)) {
@@ -962,7 +965,7 @@ const roadmapItems = computed(() => {
 
 const addRoadmapHref = computed(() => {
     if (selectedRoadmapProjectId.value === "all") {
-        return "/roadmap/add";
+        return route("roadmap.add");
     }
 
     const selectedProject = roadmapSourceItems.value.find(
@@ -972,8 +975,8 @@ const addRoadmapHref = computed(() => {
     const selectedPcId = Number(selectedProject?.charter?.id ?? 0);
 
     return selectedPcId > 0
-        ? `/roadmap/add?pc_id=${selectedPcId}`
-        : "/roadmap/add";
+        ? route("roadmap.add", { pc_id: selectedPcId })
+        : route("roadmap.add");
 });
 
 const statusOptions = computed(() => {

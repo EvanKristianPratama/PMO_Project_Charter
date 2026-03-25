@@ -34,7 +34,7 @@ class TrsOrganization extends Model
         return $this->belongsToMany(
             MstInitiative::class,
             'trs_bu_collaboration',
-            'ogranitiation_id',
+            'organization_id',
             'initiative_id',
         )->withTimestamps();
     }

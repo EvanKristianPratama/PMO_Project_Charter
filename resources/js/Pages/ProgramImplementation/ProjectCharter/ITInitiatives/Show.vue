@@ -5,7 +5,7 @@
             <section
                 class="print:hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="flex flex-wrap items-center gap-2 px-3 py-2.5">
-                    <Link href="/it-initiatives"
+                    <Link :href="route('it-initiatives.index')"
                         class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-slate-500 dark:text-slate-400">
                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 19-7-7 7-7" />
@@ -177,10 +177,13 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { Link, router, useForm, usePage } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import CharterDocument from '@/Components/ProjectCharter/ItCharterDocument.vue';
 import ProjectRoadmap from '@/Components/Roadmap/ProjectRoadmap.vue';
 import StatusImplementationTable from '@/Components/ITInitiative/StatusImplementationTable.vue';
+
+const route = useRouteHelper();
 
 const props = defineProps({
     itInitiative: Object,
@@ -192,30 +195,31 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    statusOptions: {
+        type: Array,
+        default: () => [],
+    },
 });
 const page = usePage();
 
-// --- Status styling helper ---
-const currentStatus = computed(() => {
-    const val = Number(props.itInitiative?.status);
-    switch (val) {
-        case 1: return { label: 'Draft', class: 'bg-slate-100 text-slate-600 ring-1 ring-slate-300' };
-        case 2: return { label: 'Propose', class: 'bg-blue-100 text-blue-700 ring-1 ring-blue-300' };
-        case 3: return { label: 'Review', class: 'bg-amber-100 text-amber-700 ring-1 ring-amber-300' };
-        case 4: return { label: 'Approved', class: 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-300' };
-        case 5: return { label: 'Baseline', class: 'bg-purple-100 text-purple-700 ring-1 ring-purple-300' };
-        default: return null;
-    }
-});
+const statusOptions = computed(() => {
+    const sourceStatusOptions = Array.isArray(props.statusOptions) ? props.statusOptions : [];
 
-// --- Status options for the charter status dropdown ---
-const statusOptions = [
-    { value: 1, label: 'Draft' },
-    { value: 2, label: 'Propose' },
-    { value: 3, label: 'Review' },
-    { value: 4, label: 'Approved' },
-    { value: 5, label: 'Baseline' },
-];
+    if (sourceStatusOptions.length > 0) {
+        return sourceStatusOptions.map((statusOption) => ({
+            value: Number(statusOption.id),
+            label: statusOption.label,
+        }));
+    }
+
+    return [
+        { value: 1, label: 'Drafting' },
+        { value: 2, label: 'Propose' },
+        { value: 3, label: 'Review' },
+        { value: 4, label: 'Approved' },
+        { value: 5, label: 'Baseline' },
+    ];
+});
 
 // --- Tabs ---
 const tabs = [
@@ -269,9 +273,13 @@ watch(selectedProjectId, (nextValue, previousValue) => {
     const selectedId = Number(nextValue);
     if (!Number.isFinite(selectedId) || selectedId <= 0 || selectedId === Number(props.itInitiative?.id)) return;
 
-    const payload = activeTab.value ? { tab: activeTab.value } : {};
+    const routeParams = { project: selectedId };
 
-    router.get(`/it-initiatives/${selectedId}`, payload, { preserveScroll: true });
+    if (activeTab.value) {
+        routeParams.tab = activeTab.value;
+    }
+
+    router.get(route('it-initiatives.show', routeParams), {}, { preserveScroll: true });
 });
 
 watch(
@@ -320,7 +328,7 @@ const charterVersions = computed(() => {
     items.forEach((charter) => {
         const statusId = Number(charter.status);
         if (!uniqueStatusMap.has(statusId)) {
-            const statusObj = statusOptions.find(s => s.value === statusId);
+            const statusObj = statusOptions.value.find((statusOption) => statusOption.value === statusId);
             uniqueStatusMap.set(statusId, {
                 ...charter,
                 resolved_status_label: statusObj ? statusObj.label : `Status ${statusId}`,
@@ -408,9 +416,9 @@ const toggleRoadmapView = () => {
 
 const addRoadmap = () => {
     if (!resolvedRoadmapPcId.value) return;
-    router.get('/roadmap/edit', {
+    router.get(route('roadmap.edit', {
         pc_id: resolvedRoadmapPcId.value,
-    }, {
+    }), {}, {
         preserveScroll: true,
     });
 };
@@ -475,7 +483,7 @@ const startNewVersion = () => {
 const saveCharter = () => {
     if (isNewVersion.value) {
         // POST: create new charter version
-        form.post(`/it-initiatives/${props.itInitiative.id}/charter`, {
+        form.post(route('it-initiatives.charter.store', props.itInitiative.id), {
             preserveScroll: true,
             onSuccess: () => {
                 isEditing.value = false;
@@ -485,7 +493,7 @@ const saveCharter = () => {
     } else {
         // PUT: update the existing selected charter in-place
         const charterId = selectedCharterId.value;
-        form.put(`/it-initiatives/${props.itInitiative.id}/charter/${charterId}`, {
+        form.put(route('it-initiatives.charter.update', [props.itInitiative.id, charterId]), {
             preserveScroll: true,
             onSuccess: () => {
                 isEditing.value = false;

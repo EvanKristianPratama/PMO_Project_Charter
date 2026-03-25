@@ -8,7 +8,7 @@
                         <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Tambah Master Initiative</h1>
                         <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Isi data initiative baru.</p>
                     </div>
-                    <a href="/master-data/master-initiatives"
+                    <a :href="route('master-data.mst-initiatives.index')"
                        class="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5">
                         ← Kembali
                     </a>
@@ -177,6 +177,7 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import { useForm } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
 defineProps({
@@ -185,6 +186,8 @@ defineProps({
     tipeOptions:         { type: Array, default: () => [] },
     sourceOptions:       { type: Array, default: () => [] },
 });
+
+const route = useRouteHelper();
 
 const masterHeaders = ['Code', 'Tipe', 'CoE', 'Organisasi', 'Sumber Data', 'Nama', 'Deskripsi'];
 const statusHeaders = ['No', 'Status', 'Tanggal', 'Notes', 'Action'];
@@ -244,7 +247,7 @@ const submitForm = () => {
             business_unit: organizationIds[0] ?? null,
             statuses: localStatuses.value.map((s) => ({ status: s.status, tanggal: s.tanggal || null, notes: s.notes || null })),
         };
-    }).post('/master-data/master-initiatives');
+    }).post(route('master-data.mst-initiatives.store'));
 };
 </script>
 

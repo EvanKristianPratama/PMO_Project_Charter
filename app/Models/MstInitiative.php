@@ -51,7 +51,7 @@ class MstInitiative extends Model
             TrsOrganization::class,
             'trs_bu_collaboration',
             'initiative_id',
-            'ogranitiation_id',
+            'organization_id',
         )->withTimestamps();
     }
 

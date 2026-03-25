@@ -20,13 +20,13 @@
             
             <div class="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-white/10 dark:bg-[#171717] w-fit">
                 <Link
-                    href="/program-planning/program-definition/digital-initiatives/master"
+                    :href="route('program-planning.program-definition.digital-initiatives.master.index')"
                     class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
                 >
                     Digital Initiatives List
                 </Link>
                 <Link
-                    href="/program-planning/program-definition/digital-initiatives/compendium"
+                    :href="route('program-planning.program-definition.digital-initiatives.compendium.index')"
                     class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
                 >
                     Compendium List
@@ -37,7 +37,7 @@
                     Appendix List
                 </div>
                 <Link
-                    href="/program-planning/program-definition/digital-initiatives/mapping"
+                    :href="route('program-planning.program-definition.digital-initiatives.mapping.index')"
                     class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
                 >
                     Mapping
@@ -157,7 +157,7 @@
                                 <td class="px-3 py-3 text-[10px] font-medium">
                                     <Link
                                         v-if="resolveDetailId(item)"
-                                        :href="`/program-planning/program-definition/digital-initiatives/appendix/${resolveDetailId(item)}/edit`"
+                                        :href="route('program-planning.program-definition.digital-initiatives.appendix.edit', resolveDetailId(item))"
                                         class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-[9px] font-bold text-amber-800 transition hover:bg-amber-200 dark:bg-amber-500/20 dark:text-amber-300"
                                     >
                                         Show

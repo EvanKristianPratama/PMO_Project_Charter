@@ -204,6 +204,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 
 const props = defineProps({
     project: {
@@ -219,6 +220,8 @@ const props = defineProps({
         default: () => [],
     },
 });
+
+const route = useRouteHelper();
 
 const quarterOptions = [1, 2, 3, 4];
 const currentYear = new Date().getFullYear();
@@ -513,13 +516,13 @@ const submitForm = () => {
     }
 
     if (editingMilestoneId.value) {
-        milestoneForm.put(`/it-initiatives/${charterId}/milestones/${editingMilestoneId.value}`, {
+        milestoneForm.put(route('it-initiatives.milestones.update', [charterId, editingMilestoneId.value]), {
             preserveScroll: true,
             preserveState: true,
             onSuccess: () => resetForm(),
         });
     } else {
-        milestoneForm.post(`/it-initiatives/${charterId}/milestones`, {
+        milestoneForm.post(route('it-initiatives.milestones.store', charterId), {
             preserveScroll: true,
             preserveState: true,
             onSuccess: () => resetForm(),
@@ -541,7 +544,7 @@ const removeMilestone = (milestoneId) => {
         resetForm();
     }
 
-    router.delete(`/it-initiatives/${charterId}/milestones/${milestoneId}`, {
+    router.delete(route('it-initiatives.milestones.destroy', [charterId, milestoneId]), {
         preserveScroll: true,
         preserveState: true,
     });

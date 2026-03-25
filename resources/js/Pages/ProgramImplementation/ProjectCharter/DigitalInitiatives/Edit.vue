@@ -3,7 +3,7 @@
         <div class="mx-auto max-w-[1860px] animate-fade-in space-y-6">
             <div>
                 <Link
-                    href="/digital-initiatives"
+                    :href="route('digital-initiatives.index')"
                     class="mb-2 flex items-center gap-1 text-sm text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400"
                 >
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -179,14 +179,14 @@
                                 <td class="px-3 py-3 text-[11px] text-slate-500 dark:text-slate-400">{{ formatDateTime(entry.updated_at ?? entry.updatedAt ?? entry.created_at ?? entry.createdAt) }}</td>
                                 <td class="px-3 py-3 text-[10px] font-medium align-top">
                                     <div class="flex flex-col items-start gap-1">
-                                         <Link
+                                        <Link
                                             v-if="historyCharterId(entry)"
-                                            :href="`/digital-initiatives/${props.initiative.id}?tab=charter`"
+                                            :href="route('digital-initiatives.show', { digital_initiative: props.initiative.id, tab: 'charter' })"
                                             class="inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-[9px] font-semibold text-indigo-700 transition-colors hover:bg-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:hover:bg-indigo-500/30"
                                         >
                                             Project Charter
                                         </Link>
-                                         <template v-if="getProjectStatusHistoryDraft(entry).editing">
+                                        <template v-if="getProjectStatusHistoryDraft(entry).editing">
                                             <button
                                                 type="button"
                                                 :disabled="getProjectStatusHistoryDraft(entry).processing"
@@ -233,8 +233,11 @@
 <script setup>
 import { computed, reactive, ref } from 'vue';
 import { Link, router, useForm } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import { statusBadgeClassById, statusLabelFromOptions } from '@/Composables/initiativeStatus';
+
+const route = useRouteHelper();
 
 const props = defineProps({
     initiative: {
@@ -260,8 +263,8 @@ const resolvedDefaultStatusId = statusOptions.some((statusOption) => statusOptio
     : statusOptions[0].id;
 
 const form = useForm({
-    code: props.initiative.code ?? props.initiative.no ?? '',
-    name: props.initiative.name ?? props.initiative.useCase ?? '',
+    code: props.initiative.code ?? '',
+    name: props.initiative.name ?? '',
     status: props.initiative.status ?? resolvedDefaultStatusId,
     charter_category: props.initiative.charter?.category ?? '',
     project_status_changed_at: '',
@@ -347,7 +350,7 @@ const cancelEditing = (entry) => {
 };
 
 const submitProject = () => {
-    form.put(`/digital-initiatives/${props.initiative.id}`, {
+    form.put(route('digital-initiatives.update', props.initiative.id), {
         preserveScroll: true,
     });
 };
@@ -355,7 +358,7 @@ const submitProject = () => {
 const updateProjectStatusHistory = (id) => {
     const draft = projectStatusHistoryDrafts[id];
     draft.processing = true;
-    router.put(`/digital-initiatives/${props.initiative.id}/project-status-history/${id}`, {
+    router.put(route('digital-initiatives.project-status-history.update', [props.initiative.id, id]), {
         tanggal: draft.tanggal,
         notes: draft.notes,
     }, {
@@ -367,7 +370,7 @@ const updateProjectStatusHistory = (id) => {
 
 const confirmDeleteHistory = (id) => {
     if (confirm('Are you sure you want to delete this status history?')) {
-        router.delete(`/digital-initiatives/${props.initiative.id}/project-status-history/${id}`, {
+        router.delete(route('digital-initiatives.project-status-history.destroy', [props.initiative.id, id]), {
             preserveScroll: true,
         });
     }
@@ -403,4 +406,3 @@ const confirmDeleteHistory = (id) => {
     color: rgb(226 232 240);
 }
 </style>
-

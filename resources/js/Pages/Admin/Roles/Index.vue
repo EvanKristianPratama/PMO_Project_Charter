@@ -1,6 +1,7 @@
 <script setup>
 import { computed, reactive, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import {
     CheckCircleIcon,
@@ -25,6 +26,8 @@ const props = defineProps({
         default: () => [],
     },
 });
+
+const route = useRouteHelper();
 
 const createRoleForm = reactive({
     name: '',
@@ -74,7 +77,7 @@ const toggleNewRolePermission = (permission) => {
 };
 
 const submitCreateRole = () => {
-    router.post('/admin/roles', {
+    router.post(route('admin.roles.store'), {
         name: createRoleForm.name,
         permissions: createRoleForm.permissions,
     }, {
@@ -87,7 +90,7 @@ const submitCreateRole = () => {
 };
 
 const submitCreatePermission = () => {
-    router.post('/admin/roles/permissions', {
+    router.post(route('admin.roles.permissions.store'), {
         name: createPermissionForm.name,
     }, {
         preserveScroll: true,
@@ -98,7 +101,7 @@ const submitCreatePermission = () => {
 };
 
 const saveRolePermissions = (role) => {
-    router.put(`/admin/roles/${role.id}/permissions`, {
+    router.put(route('admin.roles.permissions.update', role.id), {
         permissions: rolePermissionState[role.id] || [],
     }, {
         preserveScroll: true,
@@ -111,7 +114,7 @@ const deleteRole = (role) => {
     }
 
     if (confirm(`Hapus role ${role.name}?`)) {
-        router.delete(`/admin/roles/${role.id}`, {
+        router.delete(route('admin.roles.destroy', role.id), {
             preserveScroll: true,
         });
     }

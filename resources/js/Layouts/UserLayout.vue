@@ -3,6 +3,7 @@ import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import BreadcrumbLeft from '@/Components/BreadcrumbLeft.vue';
 import BreadcrumbRight from '@/Components/BreadcrumbRight.vue';
 import { useNavigation } from '@/Composables/useNavigation';
@@ -24,6 +25,7 @@ const props = defineProps({
 });
 
 const { isDark, toggleDarkMode } = useDarkMode();
+const route = useRouteHelper();
 const page = usePage();
 const mobileMenuOpen = ref(false);
 const authUser = computed(() => page.props.auth?.user || {});
@@ -44,7 +46,7 @@ const getInitials = (name) => {
 };
 
 const logout = () => {
-    router.post('/logout');
+    router.post(route('logout'));
 };
 </script>
 
@@ -55,7 +57,7 @@ const logout = () => {
         <nav class="sticky top-0 z-50 border-b border-slate-200 bg-white dark:border-white/10 dark:bg-[#141414] print:hidden">
             <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center gap-3">
-                    <Link href="/dashboard" class="group inline-flex items-center gap-3">
+                    <Link :href="route('dashboard')" class="group inline-flex items-center gap-3">
                         <img
                             src="/logo.png"
                             alt="Logo"
@@ -109,7 +111,7 @@ const logout = () => {
                                 <div class="p-1">
                                     <MenuItem v-slot="{ active }">
                                         <Link
-                                            href="/master-data"
+                                            :href="route('master-data.index')"
                                             class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-indigo-600 transition-colors dark:text-indigo-300"
                                             :class="active ? 'bg-indigo-50 dark:bg-indigo-500/10' : ''"
                                         >
@@ -151,12 +153,17 @@ const logout = () => {
                 <div class="space-y-1 px-4 py-4">
                     <template v-for="item in navItems" :key="`mobile-${item.href}`">
                         <div v-if="item.children && item.children.length > 0">
-                            <!-- Parent menu with children -->
-                            <div class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400">
+                            <Link
+                                :href="item.href"
+                                class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+                                :class="item.active(currentUrl)
+                                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
+                                    : 'text-slate-600 hover:bg-blue-50 hover:text-blue-600 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-blue-300'"
+                                @click="mobileMenuOpen = false"
+                            >
                                 <component :is="item.icon" class="h-5 w-5" />
                                 {{ item.label }}
-                            </div>
-                            <!-- Submenu items -->
+                            </Link>
                             <div class="ml-4 space-y-1">
                                 <Link
                                     v-for="child in item.children"

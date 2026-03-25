@@ -4,14 +4,14 @@
             <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                     <div>
-                        <Link href="/roadmap" class="mb-2 inline-flex text-sm font-medium text-[#0B2A8A] hover:underline dark:text-[#53BDE6]">
+                        <Link :href="route('roadmap.index')" class="mb-2 inline-flex text-sm font-medium text-[#0B2A8A] hover:underline dark:text-[#53BDE6]">
                             Kembali
                         </Link>
                         <h1 class="text-xl font-bold text-slate-900 dark:text-white">Roadmap Input & Edit</h1>
                     </div>
 
                     <Link
-                        href="/roadmap"
+                        :href="route('roadmap.index')"
                         class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:bg-transparent dark:text-slate-200 dark:hover:bg-white/5"
                     >
                         Lihat Roadmap
@@ -91,6 +91,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import ActivityQuarterManager from '@/Components/Roadmap/ActivityQuarterManager.vue';
 import ProjectRoadmap from '@/Components/Roadmap/ProjectRoadmap.vue';
@@ -100,6 +101,8 @@ const props = defineProps({
     selectedProjectId: { type: Number, default: null },
     selectedCharterId: { type: Number, default: null },
 });
+
+const route = useRouteHelper();
 
 const selectedProjectIdLocal = ref(props.selectedProjectId ?? null);
 const selectedCharterIdLocal = ref(props.selectedCharterId ?? null);
@@ -123,7 +126,7 @@ const handleProjectChange = () => {
     const firstCharterId = project?.charters?.[0]?.id ?? null;
     selectedCharterIdLocal.value = firstCharterId;
 
-    router.get('/roadmap/edit', {
+    router.get(route('roadmap.edit'), {
         pc_id: Number.isFinite(Number(firstCharterId)) && Number(firstCharterId) > 0 ? firstCharterId : undefined,
     }, {
         preserveState: true,
@@ -134,7 +137,7 @@ const handleProjectChange = () => {
 
 const handleCharterChange = () => {
     const selectedId = Number(selectedCharterIdLocal.value);
-    router.get('/roadmap/edit', {
+    router.get(route('roadmap.edit'), {
         pc_id: Number.isFinite(selectedId) && selectedId > 0 ? selectedId : undefined,
     }, {
         preserveState: true,

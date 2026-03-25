@@ -3,7 +3,7 @@
         <div class="mx-auto max-w-[1860px] animate-fade-in space-y-6">
             <div>
                 <Link
-                    href="/it-initiatives"
+                    :href="route('it-initiatives.index')"
                     class="mb-2 flex items-center gap-1 text-sm text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400"
                 >
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -180,7 +180,7 @@
                                     <div class="flex flex-col items-start gap-1">
                                         <Link
                                             v-if="historyCharterId(entry)"
-                                            :href="`/it-initiatives/${props.itInitiative.id}?tab=detail`"
+                                            :href="route('it-initiatives.show', { project: props.itInitiative.id, tab: 'detail' })"
                                             class="inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-[9px] font-semibold text-indigo-700 transition-colors hover:bg-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:hover:bg-indigo-500/30"
                                         >
                                             Project Charter
@@ -251,9 +251,12 @@
 <script setup>
 import { computed, reactive, ref } from 'vue';
 import { Link, router, useForm } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import { statusBadgeClassById, statusLabelFromOptions } from '@/Composables/initiativeStatus';
+
+const route = useRouteHelper();
 
 const props = defineProps({
     itInitiative: {
@@ -424,7 +427,7 @@ const cancelEditing = (entry) => {
 };
 
 const submitProject = () => {
-    form.put(`/it-initiatives/${props.itInitiative.id}`, {
+    form.put(route('it-initiatives.update', props.itInitiative.id), {
         preserveScroll: true,
     });
 };
@@ -436,7 +439,7 @@ const updateProjectStatusHistory = (id) => {
     draft.processing = true;
     draft.error = '';
 
-    router.put(`/it-initiatives/${props.itInitiative.id}/project-status-history/${id}`, {
+    router.put(route('it-initiatives.project-status-history.update', [props.itInitiative.id, id]), {
         tanggal: draft.tanggal,
         notes: draft.notes,
     }, {
@@ -488,7 +491,7 @@ const confirmDeleteHistory = () => {
 
     deleteProcessing.value = true;
 
-    router.delete(`/it-initiatives/${props.itInitiative.id}/project-status-history/${pendingDeleteId.value}`, {
+    router.delete(route('it-initiatives.project-status-history.destroy', [props.itInitiative.id, pendingDeleteId.value]), {
         preserveScroll: true,
         onFinish: () => {
             closeDeleteModal();

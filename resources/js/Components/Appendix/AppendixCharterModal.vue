@@ -1,5 +1,6 @@
 <script setup>
 import { useForm } from "@inertiajs/vue3";
+import { useRouteHelper } from "@/Composables/useRouteHelper";
 import { computed, watch, ref } from "vue";
 
 const props = defineProps({
@@ -15,6 +16,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["close", "success"]);
+const route = useRouteHelper();
 
 const toNumber = (value, fallback = null) => {
     const num = Number(value);
@@ -237,7 +239,7 @@ const submit = () => {
                 : null,
         }))
         .post(
-            `/program-planning/program-definition/digital-initiatives/appendix`,
+            route("program-planning.program-definition.digital-initiatives.appendix.store"),
             {
                 preserveScroll: true,
                 onSuccess: () => {

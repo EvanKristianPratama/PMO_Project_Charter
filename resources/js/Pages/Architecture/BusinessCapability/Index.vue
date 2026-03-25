@@ -7,28 +7,100 @@
                 </div>
             </section>
 
-            <div class="overflow-x-auto rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-[#171717]">
-                <table class="w-full divide-y divide-slate-200 text-[11px] dark:divide-white/10">
-                    <thead class="bg-slate-50 dark:bg-white/5">
-                        <tr>
-                            <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                                Group Business Function
-                            </th>
-                            <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+            <section class="rounded-lg border border-slate-200 bg-white px-4 py-3 dark:border-white/10 dark:bg-[#171717]">
+                <div class="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
+                    <div class="grid flex-1 grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+                        <label class="space-y-1">
+                            <span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                                Search
+                            </span>
+                            <input
+                                v-model="search"
+                                type="text"
+                                placeholder="Cari capability..."
+                                class="w-full rounded border border-slate-200 bg-white px-2.5 py-2 text-[11px] text-slate-700 shadow-sm outline-none transition focus:border-[#1C75BC] focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                            />
+                        </label>
+
+                        <label class="space-y-1">
+                            <span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                                Group Business
+                            </span>
+                            <select
+                                v-model="selectedGroupBusiness"
+                                class="w-full rounded border border-slate-200 bg-white px-2.5 py-2 text-[11px] text-slate-700 shadow-sm outline-none transition focus:border-[#1C75BC] focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                            >
+                                <option value="">Semua Group Business</option>
+                                <option v-for="option in groupBusinessFilterOptions" :key="option" :value="option">
+                                    {{ option }}
+                                </option>
+                            </select>
+                        </label>
+
+                        <label class="space-y-1">
+                            <span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                                 Group Function
-                            </th>
-                            <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                            </span>
+                            <select
+                                v-model="selectedGroupFunction"
+                                class="w-full rounded border border-slate-200 bg-white px-2.5 py-2 text-[11px] text-slate-700 shadow-sm outline-none transition focus:border-[#1C75BC] focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                            >
+                                <option value="">Semua Group Function</option>
+                                <option v-for="option in groupFunctionFilterOptions" :key="option" :value="option">
+                                    {{ option }}
+                                </option>
+                            </select>
+                        </label>
+
+                        <label class="space-y-1">
+                            <span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                                 SubGroup Function
-                            </th>
-                            <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                                SubSubGroup Function
-                            </th>
-                            <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                                Action
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#171717]">
+                            </span>
+                            <select
+                                v-model="selectedSubGroupFunction"
+                                class="w-full rounded border border-slate-200 bg-white px-2.5 py-2 text-[11px] text-slate-700 shadow-sm outline-none transition focus:border-[#1C75BC] focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                            >
+                                <option value="">Semua SubGroup Function</option>
+                                <option v-for="option in subGroupFunctionFilterOptions" :key="option" :value="option">
+                                    {{ option }}
+                                </option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="inline-flex rounded border border-slate-300 px-3 py-2 text-[11px] font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/10"
+                        @click="resetFilters"
+                    >
+                        Reset Filter
+                    </button>
+                </div>
+            </section>
+
+            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-[#171717]">
+                <div class="overflow-x-auto">
+                    <table class="w-full divide-y divide-slate-200 text-[11px] dark:divide-white/10">
+                        <thead class="bg-slate-50 dark:bg-white/5">
+                            <tr>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                                    Group Business Function
+                                </th>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                                    Group Function
+                                </th>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                                    SubGroup Function
+                                </th>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                                    SubSubGroup Function
+                                </th>
+                                <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                                    Action
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#171717]">
                         <!-- Create row (WYSIWYG) -->
                         <tr class="bg-slate-50/60 dark:bg-white/5">
                             <td class="px-3 py-2 align-top">
@@ -99,7 +171,7 @@
                             </td>
                         </tr>
 
-                        <tr v-for="item in rows" :key="item.id" class="transition-colors hover:bg-slate-50 dark:hover:bg-white/5">
+                        <tr v-for="item in filteredRows" :key="item.id" class="transition-colors hover:bg-slate-50 dark:hover:bg-white/5">
                             <td class="px-3 py-2.5 align-top text-slate-700 dark:text-slate-200">
                                 <template v-if="isEditing(item)">
                                     <select
@@ -195,11 +267,12 @@
                             </td>
                         </tr>
 
-                        <tr v-if="rows.length === 0">
+                        <tr v-if="filteredRows.length === 0">
                             <td colspan="5" class="px-6 py-8 text-center text-xs text-slate-500">Belum ada data.</td>
                         </tr>
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -220,6 +293,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 
@@ -269,11 +343,17 @@ const subGroupFunctionOptions = [
     'Transportation',
 ];
 
+const route = useRouteHelper();
+
 const props = defineProps({
     businessCapabilities: { type: Array, default: () => [] },
 });
 
-const rows = computed(() => props.businessCapabilities);
+const businessCapabilityRows = computed(() => props.businessCapabilities);
+const search = ref('');
+const selectedGroupBusiness = ref('');
+const selectedGroupFunction = ref('');
+const selectedSubGroupFunction = ref('');
 
 const createForm = useForm({
     group_business: '',
@@ -294,13 +374,80 @@ const showDeleteModal = ref(false);
 const deleteTarget = ref(null);
 const deleteForm = useForm({});
 
+const buildFilterOptions = (...optionGroups) => {
+    return [...new Set(
+        optionGroups
+            .flat()
+            .filter((option) => option !== null && option !== undefined && String(option).trim() !== ''),
+    )].sort((left, right) => String(left).localeCompare(String(right)));
+};
+
+const groupBusinessFilterOptions = computed(() => {
+    return buildFilterOptions(
+        groupBusinessOptions,
+        businessCapabilityRows.value.map((item) => item.group_business),
+    );
+});
+
+const groupFunctionFilterOptions = computed(() => {
+    return buildFilterOptions(
+        groupFunctionOptions,
+        businessCapabilityRows.value.map((item) => item.group_function),
+    );
+});
+
+const subGroupFunctionFilterOptions = computed(() => {
+    return buildFilterOptions(
+        subGroupFunctionOptions,
+        businessCapabilityRows.value.map((item) => item.subGroup_function),
+    );
+});
+
+const normalizeText = (value) => String(value ?? '').trim().toLowerCase();
+
+const filteredRows = computed(() => {
+    const searchKeyword = normalizeText(search.value);
+
+    return businessCapabilityRows.value.filter((item) => {
+        if (selectedGroupBusiness.value && item.group_business !== selectedGroupBusiness.value) {
+            return false;
+        }
+
+        if (selectedGroupFunction.value && item.group_function !== selectedGroupFunction.value) {
+            return false;
+        }
+
+        if (selectedSubGroupFunction.value && item.subGroup_function !== selectedSubGroupFunction.value) {
+            return false;
+        }
+
+        if (!searchKeyword) {
+            return true;
+        }
+
+        return [
+            item.group_business,
+            item.group_function,
+            item.subGroup_function,
+            item.subSubGroup_function,
+        ].some((value) => normalizeText(value).includes(searchKeyword));
+    });
+});
+
 const resetCreate = () => {
     createForm.reset();
     createForm.clearErrors();
 };
 
+const resetFilters = () => {
+    search.value = '';
+    selectedGroupBusiness.value = '';
+    selectedGroupFunction.value = '';
+    selectedSubGroupFunction.value = '';
+};
+
 const createRow = () => {
-    createForm.post('/master-data/business-capabilities', {
+    createForm.post(route('master-data.business-capabilities.store'), {
         preserveScroll: true,
         onSuccess: () => resetCreate(),
     });
@@ -324,7 +471,7 @@ const cancelEdit = () => {
 const saveEdit = () => {
     if (!editingId.value) return;
 
-    editForm.put(`/master-data/business-capabilities/${editingId.value}`, {
+    editForm.put(route('master-data.business-capabilities.update', editingId.value), {
         preserveScroll: true,
         onSuccess: () => cancelEdit(),
     });
@@ -338,7 +485,7 @@ const confirmDelete = (item) => {
 const executeDelete = () => {
     if (!deleteTarget.value) return;
 
-    deleteForm.delete(`/master-data/business-capabilities/${deleteTarget.value.id}`, {
+    deleteForm.delete(route('master-data.business-capabilities.destroy', deleteTarget.value.id), {
         preserveScroll: true,
         onSuccess: () => {
             showDeleteModal.value = false;

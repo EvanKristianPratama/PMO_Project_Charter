@@ -278,9 +278,12 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import InitiativeTaggingModal from '@/Components/StrategicPillar/InitiativeTaggingModal.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+
+const route = useRouteHelper();
 
 const props = defineProps({
     strategicPillars: { type: Array, default: () => [] },
@@ -308,11 +311,11 @@ const navigateToScope = (tag) => {
     const initiative = tag.initiative;
     if (!initiative) return;
     if (initiative.mapped_projects?.length > 0) {
-        router.get(`/it-initiatives/${initiative.mapped_projects[0].id}`);
+        router.get(route('it-initiatives.show', initiative.mapped_projects[0].id));
         return;
     }
     if (initiative.map_sc?.length > 0) {
-        router.get(`/program-planning/program-definition/digital-initiatives/compendium/${initiative.map_sc[0].sc_id}/edit`);
+        router.get(route('program-planning.program-definition.digital-initiatives.compendium.edit', initiative.map_sc[0].sc_id));
     }
 };
 
@@ -424,7 +427,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown));
 const confirmDelete = (tag) => { pendingDeleteTag.value = tag; showDeleteModal.value = true; };
 const executeDelete = () => {
     if (!pendingDeleteTag.value) return;
-    deleteForm.delete(`/strategic-pillars/tagging/${pendingDeleteTag.value.id}`, {
+    deleteForm.delete(route('strategic-pillars.tagging.destroy', pendingDeleteTag.value.id), {
         preserveScroll: true,
         onSuccess: () => { showDeleteModal.value = false; pendingDeleteTag.value = null; },
     });
