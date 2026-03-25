@@ -1,65 +1,83 @@
 <?php
 
-namespace App\Http\Controllers\Roadmap;
+namespace App\Services\ProgramImplementation\Roadmap;
 
-use App\Http\Controllers\Controller;
 use App\Models\Milestone;
 use App\Models\MstInitiative;
 use App\Models\ProjectCharter;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Inertia\Inertia;
-use Inertia\Response;
 
-class RoadmapController extends Controller
+class RoadmapPageService
 {
-    /**
-     * View-only roadmap page with all project charters.
-     */
-    public function index(Request $request): Response
+    public function getOverviewPageProps(?int $projectCharterId, ?int $legacyProjectId): array
     {
-        return Inertia::render('ProgramImplementation/RoadMap/Index', $this->buildRoadmapOverviewPayload($request));
+        $roadmapSources = $this->roadmapSourceQuery()
+            ->orderByDesc('trs_project_charters.id')
+            ->get();
+
+        $projects = $this->groupRoadmapSources($roadmapSources);
+        $requestedProjectCharterId = $this->resolveRequestedProjectCharterId($projectCharterId, $legacyProjectId);
+        [$selectedProjectId, $selectedCharterId] = $this->resolveSelectedIds(
+            $roadmapSources,
+            $projects,
+            $requestedProjectCharterId,
+            false,
+        );
+
+        return [
+            'projects' => $projects,
+            'selectedProjectId' => $selectedProjectId,
+            'selectedCharterId' => $selectedCharterId,
+            'milestoneTypeOptions' => Milestone::roadmapTypeOptions(),
+            ...$this->roadmapYearRange(),
+        ];
     }
 
-    public function add(Request $request): Response
+    public function getEditorPageProps(?int $projectCharterId, ?int $legacyProjectId): array
     {
-        return Inertia::render('ProgramImplementation/RoadMap/Create', $this->buildRoadmapEditorPayload($request));
+        $roadmapSources = $this->roadmapSourceQuery()
+            ->orderByDesc('trs_project_charters.id')
+            ->get();
+
+        $projects = $this->groupRoadmapSources($roadmapSources);
+        $requestedProjectCharterId = $this->resolveRequestedProjectCharterId($projectCharterId, $legacyProjectId);
+        [$selectedProjectId, $selectedCharterId] = $this->resolveSelectedIds(
+            $roadmapSources,
+            $projects,
+            $requestedProjectCharterId,
+            true,
+        );
+
+        return [
+            'projects' => $projects,
+            'selectedProjectId' => $selectedProjectId,
+            'selectedCharterId' => $selectedCharterId,
+            'milestoneTypeOptions' => Milestone::roadmapTypeOptions(),
+            ...$this->roadmapYearRange(),
+        ];
     }
 
-    /**
-     * Input/edit roadmap process page.
-     */
-    public function edit(Request $request): Response
-    {
-        return Inertia::render('ProgramImplementation/RoadMap/Edit', $this->buildRoadmapEditorPayload($request));
-    }
-
-    /**
-     * Display roadmap by initiative (all mapped project charters).
-     */
-    public function show(MstInitiative $initiative): Response
+    public function getProgramPageProps(MstInitiative $initiative): array
     {
         $projectIds = $initiative->mappedProjects()->pluck('trs_projects.id')->values();
 
-        $sources = $projectIds->isEmpty()
+        $roadmapSources = $projectIds->isEmpty()
             ? collect()
             : $this->roadmapSourceQuery()
                 ->whereIn('trs_project_charters.project_id', $projectIds)
                 ->orderByDesc('trs_project_charters.id')
                 ->get();
 
-        $projects = $this->flattenRoadmapCharters($sources);
-
-        return Inertia::render('ProgramImplementation/RoadMap/Show', [
+        return [
             'program' => [
                 'id' => (int) $initiative->id,
                 'name' => $initiative->name,
-                'projects' => $projects,
+                'projects' => $this->flattenRoadmapCharters($roadmapSources),
             ],
             'milestoneTypeOptions' => Milestone::roadmapTypeOptions(),
             ...$this->roadmapYearRange(),
-        ]);
+        ];
     }
 
     private function roadmapSourceQuery(): Builder
@@ -89,9 +107,6 @@ class RoadmapController extends Controller
             ]);
     }
 
-    /**
-     * Shared roadmap year range.
-     */
     private function roadmapYearRange(): array
     {
         return [
@@ -100,55 +115,9 @@ class RoadmapController extends Controller
         ];
     }
 
-    /**
-     * Payload for roadmap view-only page from project charter source table.
-     */
-    private function buildRoadmapOverviewPayload(Request $request): array
+    private function groupRoadmapSources(Collection $roadmapSources): Collection
     {
-        $sources = $this->roadmapSourceQuery()
-            ->orderByDesc('trs_project_charters.id')
-            ->get();
-        $projects = $this->groupRoadmapSources($sources);
-        $requestedPcId = $this->requestedPcId($request);
-        [$resolvedProjectId, $resolvedCharterId] = $this->resolveSelectedIds($sources, $projects, $requestedPcId, false);
-
-        return [
-            'projects' => $projects,
-            'selectedProjectId' => $resolvedProjectId,
-            'selectedCharterId' => $resolvedCharterId,
-            'milestoneTypeOptions' => Milestone::roadmapTypeOptions(),
-            ...$this->roadmapYearRange(),
-        ];
-    }
-
-    /**
-     * Payload for roadmap input/edit page.
-     */
-    private function buildRoadmapEditorPayload(Request $request): array
-    {
-        $selectedPcId = $this->requestedPcId($request);
-
-        $sources = $this->roadmapSourceQuery()
-            ->orderByDesc('trs_project_charters.id')
-            ->get();
-        $projects = $this->groupRoadmapSources($sources);
-        [$resolvedProjectId, $resolvedCharterId] = $this->resolveSelectedIds($sources, $projects, $selectedPcId, true);
-
-        return [
-            'projects' => $projects,
-            'selectedProjectId' => $resolvedProjectId,
-            'selectedCharterId' => $resolvedCharterId,
-            'milestoneTypeOptions' => Milestone::roadmapTypeOptions(),
-            ...$this->roadmapYearRange(),
-        ];
-    }
-
-    /**
-     * Group roadmap sources by project.
-     */
-    private function groupRoadmapSources(Collection $sources): Collection
-    {
-        return $sources
+        return $roadmapSources
             ->groupBy('project_id')
             ->map(function (Collection $charters): array {
                 $project = $charters->first()?->project;
@@ -167,9 +136,9 @@ class RoadmapController extends Controller
             ->values();
     }
 
-    private function flattenRoadmapCharters(Collection $sources): Collection
+    private function flattenRoadmapCharters(Collection $roadmapSources): Collection
     {
-        return $sources->map(function (ProjectCharter $charter): array {
+        return $roadmapSources->map(function (ProjectCharter $charter): array {
             $payload = $this->mapCharterForRoadmap($charter);
             $payload['code'] = $charter->project?->code;
             $payload['name'] = $charter->project?->name;
@@ -206,13 +175,17 @@ class RoadmapController extends Controller
         ];
     }
 
-    private function resolveSelectedIds(Collection $sources, Collection $projects, ?int $requestedPcId, bool $fallbackToFirst): array
-    {
-        if ($requestedPcId !== null) {
-            $matched = $sources->firstWhere('id', $requestedPcId);
+    private function resolveSelectedIds(
+        Collection $roadmapSources,
+        Collection $projects,
+        ?int $requestedProjectCharterId,
+        bool $fallbackToFirst,
+    ): array {
+        if ($requestedProjectCharterId !== null) {
+            $matchedCharter = $roadmapSources->firstWhere('id', $requestedProjectCharterId);
 
-            if ($matched) {
-                return [(int) $matched->project_id, (int) $matched->id];
+            if ($matchedCharter) {
+                return [(int) $matchedCharter->project_id, (int) $matchedCharter->id];
             }
         }
 
@@ -221,34 +194,31 @@ class RoadmapController extends Controller
         }
 
         $firstProject = $projects->first();
+
         if (! $firstProject) {
             return [null, null];
         }
+
         $firstCharterId = $firstProject['charters'][0]['id'] ?? null;
 
         return [$firstProject['id'] ?? null, $firstCharterId ? (int) $firstCharterId : null];
     }
 
-    private function requestedPcId(Request $request): ?int
+    private function resolveRequestedProjectCharterId(?int $projectCharterId, ?int $legacyProjectId): ?int
     {
-        $pcId = $request->integer('pc_id');
-
-        if ($pcId > 0) {
-            return $pcId;
+        if ($projectCharterId !== null) {
+            return $projectCharterId;
         }
 
-        // Backward compatibility for old links that still send project_id.
-        $legacyProjectId = $request->integer('project_id');
-
-        if ($legacyProjectId <= 0) {
+        if ($legacyProjectId === null) {
             return null;
         }
 
-        $resolvedPcId = ProjectCharter::query()
+        $resolvedProjectCharterId = ProjectCharter::query()
             ->where('project_id', $legacyProjectId)
             ->max('id');
 
-        return $resolvedPcId ? (int) $resolvedPcId : null;
+        return $resolvedProjectCharterId ? (int) $resolvedProjectCharterId : null;
     }
 
     private function normalizeVersionLabel(mixed $value): string

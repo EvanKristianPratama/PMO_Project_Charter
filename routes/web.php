@@ -20,6 +20,7 @@ use App\Http\Controllers\ProgramImplementation\ProjectCharter\DigitalInitiatives
 use App\Http\Controllers\ProgramImplementation\ProjectCharter\ITInitiatives\CharterController;
 use App\Http\Controllers\ProgramImplementation\ProjectCharter\ITInitiatives\ITInitiativeController;
 use App\Http\Controllers\ProgramImplementation\ProjectCharter\ITInitiatives\MilestoneController;
+use App\Http\Controllers\ProgramImplementation\Roadmap\RoadmapController;
 use App\Http\Controllers\ProgramPlanning\DashboardController as PlanningDashboardController;
 use App\Http\Controllers\ProgramPlanning\InitiativeRelation\InitiativeRelationController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Appendix\CreateController as ProgramDefinitionDigitalInitiativesAppendixCreateController;
@@ -42,7 +43,6 @@ use App\Http\Controllers\ProgramPlanning\ProgramDefinition\ITInitiatives\IndexCo
 use App\Http\Controllers\ProgramPlanning\ProgramPlanningController;
 use App\Http\Controllers\ProgramPlanning\StrategicPillars\IndexController as ProgramPlanningStrategicPillarsIndexController;
 use App\Http\Controllers\ProgramPlanning\StrategicPillars\InitiativeTaggingController;
-use App\Http\Controllers\Roadmap\RoadmapController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
