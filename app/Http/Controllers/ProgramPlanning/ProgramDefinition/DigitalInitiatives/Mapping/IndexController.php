@@ -158,6 +158,7 @@ class IndexController extends Controller
                     'label' => $label !== '' ? $label : '-',
                     'description' => $item->description ?: '-',
                     'master_initiative' => $firstInitiative ? ($firstInitiative->code ? "{$firstInitiative->code} - {$firstInitiative->name}" : $firstInitiative->name) : '-',
+                    'initiative_ids' => $item->mstInitiatives->pluck('id')->map(fn ($id) => (int) $id)->values()->all(),
                 ];
             })
             ->values();

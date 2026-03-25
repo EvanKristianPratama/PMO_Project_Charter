@@ -152,6 +152,7 @@ class EditController extends Controller
                 return [
                     'id' => (int) $item->id,
                     'label' => $label !== '' ? $label : '-',
+                    'initiative_ids' => $item->mstInitiatives->pluck('id')->map(fn ($id) => (int) $id)->values()->all(),
                 ];
             })
             ->values();

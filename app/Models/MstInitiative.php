@@ -52,7 +52,8 @@ class MstInitiative extends Model
             'trs_bu_collaboration',
             'initiative_id',
             'organization_id',
-        )->withTimestamps();
+        )->using(TrsBuCollaboration::class)
+            ->withTimestamps();
     }
 
     public function initiativeRelationsRow(): HasMany

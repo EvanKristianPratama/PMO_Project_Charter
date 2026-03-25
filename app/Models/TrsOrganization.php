@@ -36,6 +36,7 @@ class TrsOrganization extends Model
             'trs_bu_collaboration',
             'organization_id',
             'initiative_id',
-        )->withTimestamps();
+        )->using(TrsBuCollaboration::class)
+            ->withTimestamps();
     }
 }

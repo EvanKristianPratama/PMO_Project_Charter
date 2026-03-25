@@ -25,7 +25,7 @@ class StoreController extends Controller
     {
         $validated = $request->validate([
             // --- Step 1: TrsScInitiative ---
-            'compendium_id' => 'required|integer|exists:trs_sc_initiative,id',
+            'compendium_id' => 'nullable|integer|exists:trs_sc_initiative,id',
             'owner' => 'nullable|string|max:255',
             'coe' => 'nullable|string|max:255',
             'usecase' => 'required|string|max:255',
@@ -105,8 +105,10 @@ class StoreController extends Controller
                 $scInitiative->rjpps()->sync(array_filter($validated['rjpp_tagging_ids']));
             }
 
-            // 3. Link to Compendium (Relationship attach)
-            $scInitiative->compendiums()->attach($validated['compendium_id']);
+            // 3. Link to Compendium only when the appendix depends on one
+            if (! empty($validated['compendium_id'])) {
+                $scInitiative->compendiums()->attach($validated['compendium_id']);
+            }
 
             // 4. Create TrsScDetails via Relationship
             $nullIfEmpty = fn ($value) => ($value === '' || $value === null) ? null : $value;
