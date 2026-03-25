@@ -7,6 +7,7 @@ FROM node:20-alpine AS node
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
+COPY --from=composer /app/vendor ./vendor
 COPY resources ./resources
 COPY public ./public
 COPY vite.config.js ./
