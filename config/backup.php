@@ -1,5 +1,6 @@
 <?php
 
+use App\Backup\Cleanup\RetentionDaysStrategy;
 use Spatie\Backup\Notifications\Notifiable;
 use Spatie\Backup\Notifications\Notifications\BackupHasFailedNotification;
 use Spatie\Backup\Notifications\Notifications\BackupWasSuccessfulNotification;
@@ -78,15 +79,14 @@ return [
              * also supply the useSingleTransaction option to avoid table locking.
              *
              * E.g.
-             * 'mysql' => [
-             *       ...
-             *      'dump' => [
-             *           'useSingleTransaction' => true,
-             *       ],
-             * ],
-             *
-             * For a complete list of available customization options, see https://github.com/spatie/db-dumper
-             */
+            *
+            * For a complete list of available customization options, see https://github.com/spatie/db-dumper
+            */
+            'mysql' => [
+                'options' => extension_loaded('pdo_mysql') ? array_filter([
+                    PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
+                ]) : [],
+            ],
             'databases' => [
                 env('DB_CONNECTION', 'mysql'),
             ],
@@ -103,7 +103,7 @@ return [
          *
          * If you do not want any compressor at all, set it to null.
          */
-        'database_dump_compressor' => null,
+        'database_dump_compressor' => '',
 
         /*
          * If specified, the database dumped file name will contain a timestamp (e.g.: 'Y-m-d-H-i-s').
@@ -125,6 +125,12 @@ return [
          * The file extension should be specified without a leading .
          */
         'database_dump_file_extension' => '',
+        'database_dump_command_timeout' => 300,
+
+        'database_dump' => [
+            'dump_binary_path' => '/usr/bin',
+            'add_extra_option' => '--ssl-mode=DISABLED',
+        ],
 
         'destination' => [
             'compression_method' => ZipArchive::CM_DEFAULT,
@@ -296,7 +302,7 @@ return [
          * No matter how you configure it the default strategy will never
          * delete the newest backup.
          */
-        'strategy' => \App\Backup\Cleanup\RetentionDaysStrategy::class,
+        'strategy' => RetentionDaysStrategy::class,
 
         'default_strategy' => [
             /*
