@@ -12,9 +12,21 @@ COPY resources ./resources
 COPY public ./public
 COPY vite.config.js ./
 RUN npm run build
+RUN apk add --no-cache bash
 
 FROM php:8.4-fpm-alpine
-RUN apk add --no-cache nginx supervisor icu-dev libzip-dev oniguruma-dev sqlite-dev \
+RUN apk add --no-cache \
+    nginx \
+    supervisor \
+    icu-dev \
+    libzip-dev \
+    oniguruma-dev \
+    sqlite-dev \
+    bash \
+    curl \
+    git \
+    nano \
+    mysql-client \
     && docker-php-ext-install pdo pdo_mysql pdo_sqlite mbstring intl zip bcmath \
     && rm -rf /var/cache/apk/*
 WORKDIR /var/www/html
