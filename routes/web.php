@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminUserController;
@@ -232,6 +233,11 @@ Route::middleware(['auth', 'approved', 'admin'])->prefix('admin')->name('admin.'
     Route::post('/roles/permissions', [AdminRoleController::class, 'storePermission'])->name('roles.permissions.store');
     Route::put('/roles/{role}/permissions', [AdminRoleController::class, 'updatePermissions'])->name('roles.permissions.update');
     Route::delete('/roles/{role}', [AdminRoleController::class, 'destroy'])->name('roles.destroy');
+    Route::get('/backup', [BackupController::class, 'index'])->name('backup.index');
+    Route::get('/backup/download/{file}', [BackupController::class, 'download'])
+        ->where('file', '[A-Za-z0-9._-]+')
+        ->name('backup.download');
+    Route::put('/backup/settings', [BackupController::class, 'updateRetention'])->name('backup.settings.update');
     Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
 });
 

@@ -22,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $appUrl = rtrim((string) config('app.url'), '/');
 
-        if ($appUrl === '') {
+        if ($appUrl === '' || $this->app->environment(['local', 'testing'])) {
             return;
         }
 

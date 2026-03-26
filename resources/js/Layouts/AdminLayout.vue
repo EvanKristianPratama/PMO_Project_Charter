@@ -4,6 +4,7 @@ import { computed, ref } from 'vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
 import {
+    ArchiveBoxIcon,
     ArrowRightOnRectangleIcon,
     Bars3Icon,
     ChevronDownIcon,
@@ -51,6 +52,12 @@ const navItems = [
         href: route('admin.roles.index'),
         icon: KeyIcon,
         active: (url) => url.startsWith('/admin/roles'),
+    },
+    {
+        label: 'Backup Database',
+        href: route('admin.backup.index'),
+        icon: ArchiveBoxIcon,
+        active: (url) => url.startsWith('/admin/backup'),
     },
     {
         label: 'Log Aktivitas',
