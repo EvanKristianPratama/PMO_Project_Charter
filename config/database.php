@@ -17,6 +17,15 @@ foreach ($mysqlSslCaCandidates as $candidate) {
     }
 }
 
+$mysqlDumpSkipSsl = filter_var(env('DB_DUMP_SKIP_SSL', false), FILTER_VALIDATE_BOOL);
+$mysqlDumpExtraOption = env('DB_DUMP_EXTRA_OPTION');
+
+if (! is_string($mysqlDumpExtraOption) || trim($mysqlDumpExtraOption) === '') {
+    $mysqlDumpExtraOption = $mysqlDumpSkipSsl || $mysqlSslCa === null
+        ? null
+        : '--ssl-ca="' . addcslashes($mysqlSslCa, '\\"') . '"';
+}
+
 return [
 
     /*
@@ -77,6 +86,12 @@ return [
             //     (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA) => $mysqlSslCa,
             // ]) : [],
             'options' => [],
+            'dump' => array_filter([
+                'dump_binary_path' => env('DB_DUMP_BINARY_PATH', PHP_OS_FAMILY === 'Windows' ? '' : '/usr/bin'),
+                'timeout' => (int) env('DB_DUMP_TIMEOUT', 300),
+                'skip_ssl' => $mysqlDumpSkipSsl,
+                'add_extra_option' => $mysqlDumpExtraOption,
+            ], static fn ($value) => $value !== null && $value !== ''),
         ],
 
         'mariadb' => [

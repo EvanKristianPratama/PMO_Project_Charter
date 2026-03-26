@@ -95,6 +95,12 @@ export function useNavigation() {
                 ],
             },
             {
+                label: 'Master Initiative Roadmap',
+                href: routeHelper('roadmap.index'),
+                icon: TableCellsIcon,
+                active: (url) => url.startsWith('/roadmap'),
+            },
+            {
                 label: 'RKAP',
                 href: routeHelper('program-implementation.budgeting'),
                 icon: DocumentTextIcon,
