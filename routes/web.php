@@ -237,6 +237,7 @@ Route::middleware(['auth', 'approved', 'admin'])->prefix('admin')->name('admin.'
     Route::get('/backup/download/{file}', [BackupController::class, 'download'])
         ->where('file', '[A-Za-z0-9._-]+')
         ->name('backup.download');
+    Route::post('/backup/run', [BackupController::class, 'run'])->name('backup.run');
     Route::put('/backup/settings', [BackupController::class, 'updateRetention'])->name('backup.settings.update');
     Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
 });

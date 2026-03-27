@@ -5,8 +5,11 @@ namespace App\Services;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Spatie\Backup\BackupDestination\Backup;
@@ -75,6 +78,31 @@ class BackupService
         }
 
         return $retentionDays;
+    }
+
+    public function runDatabaseBackup(): void
+    {
+        $lock = Cache::lock('backup:database:run', 900);
+
+        if (! $lock->get()) {
+            throw new RuntimeException('Backup database sedang berjalan. Silakan coba lagi beberapa saat.');
+        }
+
+        try {
+            $exitCode = Artisan::call('backup:database-run');
+
+            if ($exitCode !== 0) {
+                $output = trim(Artisan::output());
+
+                Log::error('Manual database backup failed.', [
+                    'output' => $output,
+                ]);
+
+                throw new RuntimeException($this->formatBackupFailureMessage($output));
+            }
+        } finally {
+            $lock->release();
+        }
     }
 
     public function downloadBackup(string $fileName): StreamedResponse
@@ -174,5 +202,33 @@ class BackupService
         $value = $bytes / (1024 ** $power);
 
         return number_format($value, $power === 0 ? 0 : 2).' '.$units[$power];
+    }
+
+    private function formatBackupFailureMessage(string $output): string
+    {
+        $normalizedOutput = trim((string) preg_replace('/\s+/', ' ', $output));
+
+        if ($normalizedOutput === '') {
+            return 'Gagal menjalankan backup database.';
+        }
+
+        if (
+            str_contains($normalizedOutput, 'mysqldump')
+            && str_contains($normalizedOutput, 'not recognized as an internal or external command')
+        ) {
+            return 'Backup database gagal karena mysqldump tidak ditemukan di server. Atur DB_DUMP_BINARY_PATH atau pastikan MySQL client terpasang.';
+        }
+
+        if (str_contains($normalizedOutput, 'Unknown MySQL server host')) {
+            return 'Backup database gagal karena host database tidak bisa di-resolve oleh proses dump. Pastikan DB_HOST benar atau isi DB_DUMP_HOST dengan IP server database.';
+        }
+
+        if (str_contains($normalizedOutput, 'exceeded the timeout of')) {
+            return 'Backup database gagal karena proses dump melebihi batas waktu. Naikkan DB_DUMP_TIMEOUT atau kurangi beban query saat backup berjalan.';
+        }
+
+        $summary = preg_split('/\s+#0\s+/', $normalizedOutput)[0] ?? $normalizedOutput;
+
+        return $summary !== '' ? $summary : 'Gagal menjalankan backup database.';
     }
 }

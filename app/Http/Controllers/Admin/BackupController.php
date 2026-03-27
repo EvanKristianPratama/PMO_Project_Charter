@@ -37,6 +37,17 @@ class BackupController extends Controller
         }
     }
 
+    public function run(): RedirectResponse
+    {
+        try {
+            $this->backupService->runDatabaseBackup();
+
+            return back()->with('success', 'Backup database berhasil dijalankan.');
+        } catch (RuntimeException $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
+    }
+
     public function updateRetention(BackupRetentionUpdateRequest $request): RedirectResponse
     {
         try {

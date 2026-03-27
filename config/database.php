@@ -18,7 +18,55 @@ foreach ($mysqlSslCaCandidates as $candidate) {
 }
 
 $mysqlDumpSkipSsl = filter_var(env('DB_DUMP_SKIP_SSL', false), FILTER_VALIDATE_BOOL);
+$mysqlDumpTimeout = (int) env('DB_DUMP_TIMEOUT', 1800);
+$mysqlDumpUseSingleTransaction = filter_var(env('DB_DUMP_USE_SINGLE_TRANSACTION', true), FILTER_VALIDATE_BOOL);
+$mysqlDumpSkipLockTables = filter_var(env('DB_DUMP_SKIP_LOCK_TABLES', true), FILTER_VALIDATE_BOOL);
+$mysqlDumpMysqlGtidPurged = env('DB_DUMP_MYSQL_GTID_PURGED', 'OFF');
 $mysqlDumpExtraOption = env('DB_DUMP_EXTRA_OPTION');
+$resolveDumpBinaryPath = static function (?string $path): ?string {
+    if (! is_string($path) || trim($path) === '') {
+        return null;
+    }
+
+    $normalizedPath = str_replace('\\', '/', trim($path, " \t\n\r\0\x0B\"'"));
+
+    if (is_file($normalizedPath)) {
+        return str_replace('\\', '/', dirname($normalizedPath));
+    }
+
+    if (is_dir($normalizedPath)) {
+        return rtrim($normalizedPath, '/');
+    }
+
+    return null;
+};
+
+$mysqlDumpBinaryPath = $resolveDumpBinaryPath(env('DB_DUMP_BINARY_PATH'));
+
+if ($mysqlDumpBinaryPath === null && PHP_OS_FAMILY === 'Windows') {
+    $windowsDumpDirectories = array_merge(
+        glob('C:/laragon/bin/mysql/*/bin', GLOB_ONLYDIR) ?: [],
+        glob('C:/xampp/mysql/bin', GLOB_ONLYDIR) ?: [],
+        glob('C:/wamp64/bin/mysql/*/bin', GLOB_ONLYDIR) ?: [],
+        glob('C:/Program Files/MySQL/*/bin', GLOB_ONLYDIR) ?: [],
+        glob('C:/Program Files/MariaDB */bin', GLOB_ONLYDIR) ?: [],
+    );
+
+    rsort($windowsDumpDirectories);
+
+    foreach ($windowsDumpDirectories as $directory) {
+        $resolvedDirectory = $resolveDumpBinaryPath($directory);
+
+        if ($resolvedDirectory !== null && is_file($resolvedDirectory.'/mysqldump.exe')) {
+            $mysqlDumpBinaryPath = $resolvedDirectory;
+            break;
+        }
+    }
+}
+
+if ($mysqlDumpBinaryPath === null && PHP_OS_FAMILY !== 'Windows') {
+    $mysqlDumpBinaryPath = $resolveDumpBinaryPath('/usr/bin');
+}
 
 if (! is_string($mysqlDumpExtraOption) || trim($mysqlDumpExtraOption) === '') {
     $mysqlDumpExtraOption = $mysqlDumpSkipSsl || $mysqlSslCa === null
@@ -87,8 +135,11 @@ return [
             // ]) : [],
             'options' => [],
             'dump' => array_filter([
-                'dump_binary_path' => env('DB_DUMP_BINARY_PATH', PHP_OS_FAMILY === 'Windows' ? '' : '/usr/bin'),
-                'timeout' => (int) env('DB_DUMP_TIMEOUT', 300),
+                'dump_binary_path' => $mysqlDumpBinaryPath,
+                'timeout' => $mysqlDumpTimeout,
+                'use_single_transaction' => $mysqlDumpUseSingleTransaction,
+                'skip_lock_tables' => $mysqlDumpSkipLockTables,
+                'mysql_gtid_purged' => $mysqlDumpMysqlGtidPurged,
                 'skip_ssl' => $mysqlDumpSkipSsl,
                 'add_extra_option' => $mysqlDumpExtraOption,
             ], static fn ($value) => $value !== null && $value !== ''),
@@ -112,6 +163,15 @@ return [
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA) => $mysqlSslCa,
             ]) : [],
+            'dump' => array_filter([
+                'dump_binary_path' => $mysqlDumpBinaryPath,
+                'timeout' => $mysqlDumpTimeout,
+                'use_single_transaction' => $mysqlDumpUseSingleTransaction,
+                'skip_lock_tables' => $mysqlDumpSkipLockTables,
+                'mysql_gtid_purged' => $mysqlDumpMysqlGtidPurged,
+                'skip_ssl' => $mysqlDumpSkipSsl,
+                'add_extra_option' => $mysqlDumpExtraOption,
+            ], static fn ($value) => $value !== null && $value !== ''),
         ],
 
         'pgsql' => [

@@ -5,6 +5,7 @@ import { useRouteHelper } from '@/Composables/useRouteHelper';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import {
     ArchiveBoxIcon,
+    ArrowPathIcon,
     ArrowDownTrayIcon,
     CalendarDaysIcon,
     CircleStackIcon,
@@ -31,6 +32,8 @@ const page = usePage();
 const route = useRouteHelper();
 
 const flash = computed(() => page.props.flash ?? {});
+
+const backupForm = useForm({});
 
 const retentionForm = useForm({
     retention_days: props.settings.retention_days ?? 14,
@@ -84,6 +87,12 @@ function formatTime(value) {
     });
 }
 
+function submitBackup() {
+    backupForm.post(route('admin.backup.run'), {
+        preserveScroll: true,
+    });
+}
+
 function submitRetention() {
     retentionForm.put(route('admin.backup.settings.update'), {
         preserveScroll: true,
@@ -107,9 +116,22 @@ function submitRetention() {
                         </p>
                     </div>
 
-                    <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-white/10 dark:bg-[#111827]">
-                        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Storage Path</p>
-                        <p class="mt-1 text-sm font-medium text-slate-800 dark:text-slate-200">{{ stats.storage_path }}</p>
+                    <div class="flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-white/10 dark:bg-[#111827]">
+                            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Storage Path</p>
+                            <p class="mt-1 text-sm font-medium text-slate-800 dark:text-slate-200">{{ stats.storage_path }}</p>
+                        </div>
+
+                        <form @submit.prevent="submitBackup">
+                            <button
+                                type="submit"
+                                class="inline-flex h-full items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+                                :disabled="backupForm.processing"
+                            >
+                                <ArrowPathIcon class="h-5 w-5" :class="{ 'animate-spin': backupForm.processing }" />
+                                {{ backupForm.processing ? 'Memproses backup...' : 'Backup Sekarang' }}
+                            </button>
+                        </form>
                     </div>
                 </div>
             </section>
@@ -165,6 +187,10 @@ function submitRetention() {
                             <p class="mt-1 text-sm font-semibold text-slate-900 dark:text-white">Otomatis</p>
                             <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">File lebih tua dari retensi akan dibersihkan setiap hari.</p>
                         </div>
+                    </div>
+
+                    <div class="mt-4 rounded-xl border border-dashed border-slate-300 px-4 py-3 text-xs text-slate-500 dark:border-white/15 dark:text-slate-400">
+                        Tombol <span class="font-semibold text-slate-700 dark:text-slate-200">Backup Sekarang</span> akan menjalankan backup database saat ini tanpa menunggu jadwal otomatis server.
                     </div>
                 </div>
 
