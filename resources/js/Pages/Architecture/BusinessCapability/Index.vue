@@ -3,78 +3,7 @@
         <div class="animate-fade-in-up space-y-3">
             <section class="flex flex-wrap items-end justify-between gap-3">
                 <div>
-                    <h1 class="text-xl font-semibold text-slate-900 dark:text-white">Business Capability</h1>
-                </div>
-            </section>
-
-            <section class="rounded-lg border border-slate-200 bg-white px-4 py-3 dark:border-white/10 dark:bg-[#171717]">
-                <div class="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
-                    <div class="grid flex-1 grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-                        <label class="space-y-1">
-                            <span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                Search
-                            </span>
-                            <input
-                                v-model="search"
-                                type="text"
-                                placeholder="Cari capability..."
-                                class="w-full rounded border border-slate-200 bg-white px-2.5 py-2 text-[11px] text-slate-700 shadow-sm outline-none transition focus:border-[#1C75BC] focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
-                            />
-                        </label>
-
-                        <label class="space-y-1">
-                            <span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                Group Business
-                            </span>
-                            <select
-                                v-model="selectedGroupBusiness"
-                                class="w-full rounded border border-slate-200 bg-white px-2.5 py-2 text-[11px] text-slate-700 shadow-sm outline-none transition focus:border-[#1C75BC] focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
-                            >
-                                <option value="">Semua Group Business</option>
-                                <option v-for="option in groupBusinessFilterOptions" :key="option" :value="option">
-                                    {{ option }}
-                                </option>
-                            </select>
-                        </label>
-
-                        <label class="space-y-1">
-                            <span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                Group Function
-                            </span>
-                            <select
-                                v-model="selectedGroupFunction"
-                                class="w-full rounded border border-slate-200 bg-white px-2.5 py-2 text-[11px] text-slate-700 shadow-sm outline-none transition focus:border-[#1C75BC] focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
-                            >
-                                <option value="">Semua Group Function</option>
-                                <option v-for="option in groupFunctionFilterOptions" :key="option" :value="option">
-                                    {{ option }}
-                                </option>
-                            </select>
-                        </label>
-
-                        <label class="space-y-1">
-                            <span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                SubGroup Function
-                            </span>
-                            <select
-                                v-model="selectedSubGroupFunction"
-                                class="w-full rounded border border-slate-200 bg-white px-2.5 py-2 text-[11px] text-slate-700 shadow-sm outline-none transition focus:border-[#1C75BC] focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
-                            >
-                                <option value="">Semua SubGroup Function</option>
-                                <option v-for="option in subGroupFunctionFilterOptions" :key="option" :value="option">
-                                    {{ option }}
-                                </option>
-                            </select>
-                        </label>
-                    </div>
-
-                    <button
-                        type="button"
-                        class="inline-flex rounded border border-slate-300 px-3 py-2 text-[11px] font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/10"
-                        @click="resetFilters"
-                    >
-                        Reset Filter
-                    </button>
+                    <h1 class="text-xl font-semibold text-slate-900 dark:text-white">Business Capability Maps</h1>
                 </div>
             </section>
 
@@ -84,43 +13,92 @@
                         <thead class="bg-slate-50 dark:bg-white/5">
                             <tr>
                                 <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                                    Group Business Function
+                                    Group Function (Level 1)
                                 </th>
                                 <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                                    Group Function
+                                    SubGroup Function (Level 2)
                                 </th>
                                 <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                                    SubGroup Function
+                                    SubSubGroup Function (Level 3)
                                 </th>
                                 <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                                    SubSubGroup Function
+                                    Group Business 
                                 </th>
                                 <th class="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                                     Action
                                 </th>
                             </tr>
+                            <tr class="border-t border-slate-200/80 dark:border-white/10">
+                                <th class="px-3 py-1.5 align-top">
+                                    <select
+                                        v-model="selectedGroupFunction"
+                                        class="w-full min-w-[150px] rounded border border-slate-200 bg-white px-2 py-1 text-[11px] font-normal text-slate-700 outline-none focus:border-[#1C75BC] focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                                    >
+                                        <option value="">All</option>
+                                        <option v-for="option in groupFunctionFilterOptions" :key="option" :value="option">
+                                            {{ option }}
+                                        </option>
+                                    </select>
+                                </th>
+                                <th class="px-3 py-1.5 align-top">
+                                    <select
+                                        v-model="selectedSubGroupFunction"
+                                        class="w-full min-w-[170px] rounded border border-slate-200 bg-white px-2 py-1 text-[11px] font-normal text-slate-700 outline-none focus:border-[#1C75BC] focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                                    >
+                                        <option value="">All</option>
+                                        <option v-for="option in subGroupFunctionFilterOptions" :key="option" :value="option">
+                                            {{ option }}
+                                        </option>
+                                    </select>
+                                </th>
+                                <th class="px-3 py-1.5 align-top">
+                                    <input
+                                        v-model="subSubGroupSearch"
+                                        type="text"
+                                        placeholder="Search SubSubGroup..."
+                                        class="w-full min-w-[180px] rounded border border-slate-200 bg-white px-2 py-1 text-[11px] font-normal text-slate-700 outline-none focus:border-[#1C75BC] focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                                    />
+                                </th>
+                                <th class="px-3 py-1.5 align-top">
+                                    <select
+                                        v-model="selectedGroupBusiness"
+                                        class="w-full min-w-[170px] rounded border border-slate-200 bg-white px-2 py-1 text-[11px] font-normal text-slate-700 outline-none focus:border-[#1C75BC] focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                                    >
+                                        <option value="">All</option>
+                                        <option v-for="option in groupBusinessFilterOptions" :key="option" :value="option">
+                                            {{ option }}
+                                        </option>
+                                    </select>
+                                </th>
+                                <th class="px-3 py-1.5 align-top">
+                                    <div class="flex flex-nowrap items-center justify-end gap-1 whitespace-nowrap">
+                                        <button
+                                            type="button"
+                                            class="inline-flex rounded border border-[#1C75BC] bg-[#1C75BC] px-2 py-1 text-[10px] font-semibold text-white transition hover:bg-[#165f98]"
+                                            @click="toggleCreateRow"
+                                        >
+                                            {{ showCreateRow ? 'Tutup' : 'Tambah' }}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            class="inline-flex rounded border border-slate-300 px-2 py-1 text-[10px] font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/10"
+                                            @click="resetFilters"
+                                        >
+                                            Reset
+                                        </button>
+                                    </div>
+                                </th>
+                            </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#171717]">
                         <!-- Create row (WYSIWYG) -->
-                        <tr class="bg-slate-50/60 dark:bg-white/5">
-                            <td class="px-3 py-2 align-top">
-                                <select
-                                    v-model="createForm.group_business"
-                                    class="w-full min-w-[180px] rounded border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
-                                >
-                                    <option value="" disabled>Group Business Function</option>
-                                    <option v-for="opt in groupBusinessOptions" :key="opt" :value="opt">{{ opt }}</option>
-                                </select>
-                                <p v-if="createForm.errors.group_business" class="mt-1 text-[10px] text-rose-500">
-                                    {{ createForm.errors.group_business }}
-                                </p>
-                            </td>
+                        <tr v-if="showCreateRow" class="bg-slate-50/60 dark:bg-white/5">
                             <td class="px-3 py-2 align-top">
                                 <select
                                     v-model="createForm.group_function"
                                     class="w-full min-w-[160px] rounded border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
                                 >
-                                    <option value="" disabled>Group Function</option>
+                                    <option value="" disabled>Group Function (Level 1)</option>
                                     <option v-for="opt in groupFunctionOptions" :key="opt" :value="opt">{{ opt }}</option>
                                 </select>
                                 <p v-if="createForm.errors.group_function" class="mt-1 text-[10px] text-rose-500">
@@ -151,6 +129,18 @@
                                 </p>
                             </td>
                             <td class="px-3 py-2 align-top">
+                                <select
+                                    v-model="createForm.group_business"
+                                    class="w-full min-w-[180px] rounded border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                                >
+                                    <option value="" disabled>Group Business Function</option>
+                                    <option v-for="opt in groupBusinessOptions" :key="opt" :value="opt">{{ opt }}</option>
+                                </select>
+                                <p v-if="createForm.errors.group_business" class="mt-1 text-[10px] text-rose-500">
+                                    {{ createForm.errors.group_business }}
+                                </p>
+                            </td>
+                            <td class="px-3 py-2 align-top">
                                 <div class="flex items-center gap-1">
                                     <button
                                         type="button"
@@ -175,21 +165,6 @@
                             <td class="px-3 py-2.5 align-top text-slate-700 dark:text-slate-200">
                                 <template v-if="isEditing(item)">
                                     <select
-                                        v-model="editForm.group_business"
-                                        class="w-full min-w-[180px] rounded border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
-                                    >
-                                        <option value="" disabled>Group Business Function</option>
-                                        <option v-for="opt in groupBusinessOptions" :key="opt" :value="opt">{{ opt }}</option>
-                                    </select>
-                                    <p v-if="editForm.errors.group_business" class="mt-1 text-[10px] text-rose-500">
-                                        {{ editForm.errors.group_business }}
-                                    </p>
-                                </template>
-                                <template v-else>{{ displayVal(item.group_business) }}</template>
-                            </td>
-                            <td class="px-3 py-2.5 align-top text-slate-700 dark:text-slate-200">
-                                <template v-if="isEditing(item)">
-                                    <select
                                         v-model="editForm.group_function"
                                         class="w-full min-w-[160px] rounded border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
                                     >
@@ -202,7 +177,7 @@
                                 </template>
                                 <template v-else>{{ displayVal(item.group_function) }}</template>
                             </td>
-                            <td class="px-3 py-2.5 align-top text-slate-600 dark:text-slate-300">
+                            <td class="px-3 py-2.5 align-top text-slate-700 dark:text-slate-200">
                                 <template v-if="isEditing(item)">
                                     <select
                                         v-model="editForm.subGroup_function"
@@ -229,6 +204,21 @@
                                     </p>
                                 </template>
                                 <template v-else>{{ displayVal(item.subSubGroup_function) }}</template>
+                            </td>
+                            <td class="px-3 py-2.5 align-top text-slate-600 dark:text-slate-300">
+                                <template v-if="isEditing(item)">
+                                    <select
+                                        v-model="editForm.group_business"
+                                        class="w-full min-w-[180px] rounded border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-1 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                                    >
+                                        <option value="" disabled>Group Business Function</option>
+                                        <option v-for="opt in groupBusinessOptions" :key="opt" :value="opt">{{ opt }}</option>
+                                    </select>
+                                    <p v-if="editForm.errors.group_business" class="mt-1 text-[10px] text-rose-500">
+                                        {{ editForm.errors.group_business }}
+                                    </p>
+                                </template>
+                                <template v-else>{{ displayVal(item.group_business) }}</template>
                             </td>
                             <td class="px-3 py-2.5 align-top">
                                 <div v-if="isEditing(item)" class="flex items-center gap-1">
@@ -350,10 +340,11 @@ const props = defineProps({
 });
 
 const businessCapabilityRows = computed(() => props.businessCapabilities);
-const search = ref('');
+const subSubGroupSearch = ref('');
 const selectedGroupBusiness = ref('');
 const selectedGroupFunction = ref('');
 const selectedSubGroupFunction = ref('');
+const showCreateRow = ref(false);
 
 const createForm = useForm({
     group_business: '',
@@ -406,7 +397,7 @@ const subGroupFunctionFilterOptions = computed(() => {
 const normalizeText = (value) => String(value ?? '').trim().toLowerCase();
 
 const filteredRows = computed(() => {
-    const searchKeyword = normalizeText(search.value);
+    const subSubGroupKeyword = normalizeText(subSubGroupSearch.value);
 
     return businessCapabilityRows.value.filter((item) => {
         if (selectedGroupBusiness.value && item.group_business !== selectedGroupBusiness.value) {
@@ -421,16 +412,11 @@ const filteredRows = computed(() => {
             return false;
         }
 
-        if (!searchKeyword) {
+        if (!subSubGroupKeyword) {
             return true;
         }
 
-        return [
-            item.group_business,
-            item.group_function,
-            item.subGroup_function,
-            item.subSubGroup_function,
-        ].some((value) => normalizeText(value).includes(searchKeyword));
+        return normalizeText(item.subSubGroup_function).includes(subSubGroupKeyword);
     });
 });
 
@@ -439,8 +425,16 @@ const resetCreate = () => {
     createForm.clearErrors();
 };
 
+const toggleCreateRow = () => {
+    showCreateRow.value = !showCreateRow.value;
+
+    if (!showCreateRow.value) {
+        resetCreate();
+    }
+};
+
 const resetFilters = () => {
-    search.value = '';
+    subSubGroupSearch.value = '';
     selectedGroupBusiness.value = '';
     selectedGroupFunction.value = '';
     selectedSubGroupFunction.value = '';
@@ -449,7 +443,10 @@ const resetFilters = () => {
 const createRow = () => {
     createForm.post(route('master-data.business-capabilities.store'), {
         preserveScroll: true,
-        onSuccess: () => resetCreate(),
+        onSuccess: () => {
+            resetCreate();
+            showCreateRow.value = false;
+        },
     });
 };
 
