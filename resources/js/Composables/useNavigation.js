@@ -95,10 +95,10 @@ export function useNavigation() {
                 ],
             },
             {
-                label: 'Master Initiative Roadmap',
-                href: routeHelper('roadmap.index'),
-                icon: TableCellsIcon,
-                active: (url) => url.startsWith('/roadmap'),
+                label: 'IT Building Blocks',
+                href: routeHelper('program-implementation.it-building-blocks.index'),
+                icon: DocumentTextIcon,
+                active: (url) => url.startsWith('/program-implementation/it-building-blocks'),
             },
             {
                 label: 'RKAP',

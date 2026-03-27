@@ -16,6 +16,7 @@ use App\Http\Controllers\MasterData\ScopeCharter\ScopeCharterController;
 use App\Http\Controllers\ProgramEvaluation\ReviewTimelineController;
 use App\Http\Controllers\ProgramEvaluation\TrsReviewPCController;
 use App\Http\Controllers\ProgramImplementation\DashboardController;
+use App\Http\Controllers\ProgramImplementation\ItBuildingBlockController;
 use App\Http\Controllers\ProgramImplementation\ProgramImplementationController;
 use App\Http\Controllers\ProgramImplementation\ProjectCharter\DigitalInitiatives\DigitalInitiativeController;
 use App\Http\Controllers\ProgramImplementation\ProjectCharter\ITInitiatives\CharterController;
@@ -38,6 +39,7 @@ use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Ed
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\IndexController as ProgramDefinitionDigitalInitiativesController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Mapping\IndexController as ProgramDefinitionDigitalInitiativesMappingIndexController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\MasterDigitalInitiative\IndexController as ProgramDefinitionDigitalInitiativesMasterIndexController;
+use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Roadmap\IndexController as ProgramDefinitionDigitalInitiativesRoadmapIndexController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\UpdateController as ProgramDefinitionDigitalInitiativesUpdateController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\IndexController as ProgramDefinitionController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\ITInitiatives\IndexController as ProgramDefinitionITInitiativesController;
@@ -101,6 +103,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     });
     Route::get('/program-planning/program-definition/digital-initiatives/mapping', ProgramDefinitionDigitalInitiativesMappingIndexController::class)->name('program-planning.program-definition.digital-initiatives.mapping.index');
     Route::get('/program-planning/program-definition/digital-initiatives/master', ProgramDefinitionDigitalInitiativesMasterIndexController::class)->name('program-planning.program-definition.digital-initiatives.master.index');
+    Route::get('/program-planning/program-definition/digital-initiatives/roadmap', ProgramDefinitionDigitalInitiativesRoadmapIndexController::class)->name('program-planning.program-definition.digital-initiatives.roadmap.index');
 
     // ═══ Master Data ═══════════════════════════════════════════════
     Route::get('/master-data', MasterDataController::class)->name('master-data.index');
@@ -161,6 +164,12 @@ Route::middleware(['auth', 'approved'])->group(function () {
         return redirect("/program-planning/initiative-relation/{$initiativeRelation}/edit");
     });
     Route::get('/program-implementation', ProgramImplementationController::class)->name('program-implementation.index');
+    Route::get('/program-implementation/it-building-blocks', ItBuildingBlockController::class)->name('program-implementation.it-building-blocks.index');
+    Route::post('/program-implementation/it-building-blocks', [ItBuildingBlockController::class, 'store'])->name('program-implementation.it-building-blocks.store');
+    Route::delete('/program-implementation/it-building-blocks/primary/{primary}', [ItBuildingBlockController::class, 'destroyPrimary'])->name('program-implementation.it-building-blocks.primary.destroy');
+    Route::delete('/program-implementation/it-building-blocks/primary/{primary}/secondary/{secondary}', [ItBuildingBlockController::class, 'destroySecondary'])->name('program-implementation.it-building-blocks.secondary.destroy');
+    Route::delete('/program-implementation/it-building-blocks/primary/{primary}/secondary/{secondary}/initiative/{initiative}', [ItBuildingBlockController::class, 'destroyInitiative'])->name('program-implementation.it-building-blocks.initiative.destroy');
+    Route::post('/program-implementation/it-building-blocks/initiatives/bulk-delete', [ItBuildingBlockController::class, 'destroyInitiatives'])->name('program-implementation.it-building-blocks.initiative.bulk-destroy');
 
     Route::get('/program-implementation/budgeting', fn () => Inertia::render('Placeholder/Index', [
         'title' => 'Budgeting',

@@ -9,6 +9,12 @@
                     Digital Initiatives List
                 </div>
                 <Link
+                    :href="route('program-planning.program-definition.digital-initiatives.roadmap.index')"
+                    class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
+                >
+                    Roadmap
+                </Link>
+                <Link
                     :href="route('program-planning.program-definition.digital-initiatives.compendium.index')"
                     class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
                 >

@@ -27,10 +27,15 @@ const props = defineProps({
     loading: {
         type: Boolean,
         default: false
+    },
+    maxWidth: {
+        type: String,
+        default: 'md',
+        validator: (value) => ['sm', 'md', 'lg', 'xl', '2xl'].includes(value)
     }
 });
 
-const emit = defineEmits(['close', 'confirm']);
+const emit = defineEmits(['close', 'confirm', 'after-leave']);
 
 const colors = {
     danger: {
@@ -54,10 +59,18 @@ const colors = {
         button: 'bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500'
     }
 };
+
+const widths = {
+    sm: 'max-w-sm',
+    md: 'max-w-md',
+    lg: 'max-w-lg',
+    xl: 'max-w-xl',
+    '2xl': 'max-w-2xl',
+};
 </script>
 
 <template>
-    <TransitionRoot appear :show="show" as="template">
+    <TransitionRoot appear :show="show" as="template" @after-leave="emit('after-leave')">
         <Dialog as="div" @close="emit('close')" class="relative z-50">
             <TransitionChild
                 as="template"
@@ -82,7 +95,10 @@ const colors = {
                         leave-from="opacity-100 scale-100"
                         leave-to="opacity-0 scale-95"
                     >
-                        <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-[#1a1a1a] p-6 text-left align-middle shadow-xl transition-all border border-gray-200/80 dark:border-white/5">
+                        <DialogPanel
+                            class="w-full transform overflow-hidden rounded-2xl bg-white dark:bg-[#1a1a1a] p-6 text-left align-middle shadow-xl transition-all border border-gray-200/80 dark:border-white/5"
+                            :class="widths[maxWidth]"
+                        >
                             <div class="flex items-start space-x-4">
                                 <div 
                                     class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center"
@@ -112,6 +128,10 @@ const colors = {
                                         </p>
                                     </div>
                                 </div>
+                            </div>
+
+                            <div v-if="$slots.default" class="mt-5">
+                                <slot />
                             </div>
 
                             <div class="mt-6 flex justify-end gap-3">
