@@ -20,7 +20,13 @@
             </div>
 
             <div class="mt-4 flex flex-wrap items-center gap-2">
-                <span class="text-xs font-semibold text-white/90" style="text-shadow: 0 1px 2px rgba(0,0,0,0.2);">Digital Initiative :</span>
+                <Link
+                    :href="route('program-planning.program-definition.digital-initiatives.roadmap.index')"
+                    class="inline-flex items-center rounded-full border border-white/30 bg-white/15 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/25"
+                    @click.stop
+                >
+                    Roadmap
+                </Link>
                 <Link
                     :href="route('program-planning.program-definition.digital-initiatives.compendium.index')"
                     class="inline-flex items-center rounded-full border border-white/30 bg-white/15 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/25"
