@@ -4,6 +4,7 @@ namespace App\Services\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Road
 
 use App\Models\MstInitiative;
 use App\Models\TrsMasterMilestone;
+use App\Models\TrsOrganization;
 use Illuminate\Support\Collection;
 
 class MasterMilestonePageService
@@ -106,12 +107,23 @@ class MasterMilestonePageService
             })
             ->values();
 
+        $organizationOptions = TrsOrganization::query()
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn (TrsOrganization $organization): array => [
+                'id' => (int) $organization->id,
+                'name' => trim((string) ($organization->name ?? '')),
+            ])
+            ->filter(fn (array $organization): bool => $organization['name'] !== '')
+            ->values();
+
         [$startYearRange, $endYearRange] = $this->resolveYearRange($milestones);
 
         return [
             'milestones' => $milestones,
             'roadmapItems' => $milestones,
             'initiativeOptions' => $initiativeOptions,
+            'organizationOptions' => $organizationOptions,
             'availableVersions' => $milestones
                 ->pluck('version')
                 ->filter(fn (mixed $version): bool => trim((string) $version) !== '')

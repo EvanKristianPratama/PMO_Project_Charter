@@ -59,19 +59,19 @@
 
                         <div class="w-full sm:w-56">
                             <label class="mb-1 block text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
-                                Version
+                                Filter Organization
                             </label>
                             <select
-                                v-model="selectedVersion"
+                                v-model="selectedOrganization"
                                 class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-2 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#101826] dark:text-slate-100"
                             >
-                                <option value="all">Semua Version</option>
+                                <option value="all">Semua Organization</option>
                                 <option
-                                    v-for="version in versionOptions"
-                                    :key="`filter-version-${version}`"
-                                    :value="version"
+                                    v-for="organization in organizationOptions"
+                                    :key="`filter-organization-${organization}`"
+                                    :value="organization"
                                 >
-                                    {{ version }}
+                                    {{ organization }}
                                 </option>
                             </select>
                         </div>
@@ -143,7 +143,7 @@ import UserLayout from '@/Layouts/UserLayout.vue';
 const props = defineProps({
     milestones: { type: Array, default: () => [] },
     initiativeOptions: { type: Array, default: () => [] },
-    availableVersions: { type: Array, default: () => [] },
+    organizationOptions: { type: Array, default: () => [] },
     startYearRange: { type: Number, default: 2024 },
     endYearRange: { type: Number, default: 2029 },
     usingDummyData: { type: Boolean, default: false },
@@ -187,31 +187,37 @@ const milestoneItems = computed(() =>
         startQ: normalizeQuarter(item?.startQ),
         endYear: toNumber(item?.endYear, 0),
         endQ: normalizeQuarter(item?.endQ),
-        version: normalizeText(item?.version),
     })),
 );
 
-const versionOptions = computed(() => {
-    const explicit = (Array.isArray(props.availableVersions) ? props.availableVersions : [])
-        .map((value) => normalizeText(value))
-        .filter(Boolean);
+const organizationOptions = computed(() =>
+    (() => {
+        const masterOrganizations = (Array.isArray(props.organizationOptions) ? props.organizationOptions : [])
+            .map((item) => normalizeText(item?.name))
+            .filter(Boolean);
 
-    if (explicit.length > 0) {
-        return explicit;
-    }
+        if (masterOrganizations.length > 0) {
+            return [...new Set(masterOrganizations)]
+                .sort((left, right) => left.localeCompare(right, undefined, { numeric: true, sensitivity: 'base' }));
+        }
 
-    return [...new Set(milestoneItems.value.map((item) => item.version).filter(Boolean))];
-});
+        return [...new Set(
+            milestoneItems.value
+                .map((item) => normalizeText(item.organization_name))
+                .filter(Boolean),
+        )].sort((left, right) => left.localeCompare(right, undefined, { numeric: true, sensitivity: 'base' }));
+    })(),
+);
 
 const selectedInitiativeId = ref('all');
-const selectedVersion = ref('all');
+const selectedOrganization = ref('all');
 
 const filteredMilestones = computed(() => milestoneItems.value.filter((item) => {
     if (selectedInitiativeId.value !== 'all' && String(item.initiative_id) !== selectedInitiativeId.value) {
         return false;
     }
 
-    if (selectedVersion.value !== 'all' && item.version !== selectedVersion.value) {
+    if (selectedOrganization.value !== 'all' && item.organization_name !== selectedOrganization.value) {
         return false;
     }
 
