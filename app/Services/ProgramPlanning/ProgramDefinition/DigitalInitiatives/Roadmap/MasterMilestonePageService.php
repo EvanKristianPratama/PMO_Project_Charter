@@ -74,13 +74,9 @@ class MasterMilestonePageService
                 'initiative:id,code,name,business_unit',
                 'initiative.organization:id,name',
             ])
-            ->orderBy('initiative_id')
-            ->orderByRaw('CAST(startYear AS UNSIGNED)')
-            ->orderByRaw("CAST(REPLACE(startQ, 'Q', '') AS UNSIGNED)")
-            ->orderByRaw('COALESCE(version, \'\')')
-            ->orderBy('id')
             ->get()
             ->map(fn (TrsMasterMilestone $milestone): array => $this->mapMilestone($milestone))
+            ->sort(fn (array $left, array $right): int => $this->compareMilestones($left, $right))
             ->values();
 
         $initiativeOptions = MstInitiative::query()
@@ -170,6 +166,96 @@ class MasterMilestonePageService
         }
 
         return 'Q1';
+    }
+
+    private function compareMilestones(array $left, array $right): int
+    {
+        $initiativeCodeComparison = $this->compareNaturalText(
+            (string) ($left['initiative_code'] ?? ''),
+            (string) ($right['initiative_code'] ?? ''),
+        );
+
+        if ($initiativeCodeComparison !== 0) {
+            return $initiativeCodeComparison;
+        }
+
+        $initiativeNameComparison = $this->compareNaturalText(
+            (string) ($left['initiative_name'] ?? ''),
+            (string) ($right['initiative_name'] ?? ''),
+        );
+
+        if ($initiativeNameComparison !== 0) {
+            return $initiativeNameComparison;
+        }
+
+        $organizationNameComparison = $this->compareNaturalText(
+            (string) ($left['organization_name'] ?? ''),
+            (string) ($right['organization_name'] ?? ''),
+        );
+
+        if ($organizationNameComparison !== 0) {
+            return $organizationNameComparison;
+        }
+
+        $startYearComparison = ((int) ($left['startYear'] ?? 0)) <=> ((int) ($right['startYear'] ?? 0));
+
+        if ($startYearComparison !== 0) {
+            return $startYearComparison;
+        }
+
+        $startQuarterComparison = $this->quarterOrder($left['startQ'] ?? null) <=> $this->quarterOrder($right['startQ'] ?? null);
+
+        if ($startQuarterComparison !== 0) {
+            return $startQuarterComparison;
+        }
+
+        $endYearComparison = ((int) ($left['endYear'] ?? 0)) <=> ((int) ($right['endYear'] ?? 0));
+
+        if ($endYearComparison !== 0) {
+            return $endYearComparison;
+        }
+
+        $endQuarterComparison = $this->quarterOrder($left['endQ'] ?? null) <=> $this->quarterOrder($right['endQ'] ?? null);
+
+        if ($endQuarterComparison !== 0) {
+            return $endQuarterComparison;
+        }
+
+        $activityComparison = $this->compareNaturalText(
+            (string) ($left['activity'] ?? ''),
+            (string) ($right['activity'] ?? ''),
+        );
+
+        if ($activityComparison !== 0) {
+            return $activityComparison;
+        }
+
+        return ((int) ($left['id'] ?? 0)) <=> ((int) ($right['id'] ?? 0));
+    }
+
+    private function compareNaturalText(string $left, string $right): int
+    {
+        $normalizedLeft = trim($left);
+        $normalizedRight = trim($right);
+
+        if ($normalizedLeft !== '' && $normalizedRight !== '') {
+            return strnatcasecmp($normalizedLeft, $normalizedRight);
+        }
+
+        if ($normalizedLeft === $normalizedRight) {
+            return 0;
+        }
+
+        return $normalizedLeft === '' ? 1 : -1;
+    }
+
+    private function quarterOrder(mixed $value): int
+    {
+        if (preg_match('/Q?([1-4])/', strtoupper(trim((string) $value)), $matches) === 1) {
+            return (int) $matches[1];
+        }
+
+        return 0;
     }
 
     private function versionSortKey(string $version): string

@@ -76,6 +76,7 @@ const resolveOrganizationName = (item) => {
 const normalizedItems = computed(() => {
     const items = Array.isArray(props.data) ? props.data : [];
     const maxQuarterIndex = totalCells.value - 1;
+    const initiativeOrder = new Map();
 
     return items
         .map((item, index) => {
@@ -97,31 +98,48 @@ const normalizedItems = computed(() => {
                 return null;
             }
 
+            const initiativeKey = String(item?.initiative_id ?? item?.initiativeId ?? resolveInitiativeName(item));
+
+            if (!initiativeOrder.has(initiativeKey)) {
+                initiativeOrder.set(initiativeKey, initiativeOrder.size);
+            }
+
             return {
                 key: String(item?.id ?? `roadmap-item-${index}`),
-                initiativeKey: String(item?.initiative_id ?? item?.initiativeId ?? resolveInitiativeName(item)),
+                initiativeKey,
+                initiativeOrder: initiativeOrder.get(initiativeKey) ?? index,
                 organizationName: resolveOrganizationName(item),
                 initiativeName: resolveInitiativeName(item),
                 activity: String(item?.activity ?? item?.title ?? '-').trim() || '-',
                 startIndex: Math.max(0, startIndex),
                 endIndex: Math.min(maxQuarterIndex, endIndex),
+                sourceIndex: index,
             };
         })
         .filter(Boolean)
         .sort((left, right) => {
-            if (left.organizationName !== right.organizationName) {
-                return left.organizationName.localeCompare(right.organizationName);
-            }
-
-            if (left.initiativeName !== right.initiativeName) {
-                return left.initiativeName.localeCompare(right.initiativeName);
+            if (left.initiativeOrder !== right.initiativeOrder) {
+                return left.initiativeOrder - right.initiativeOrder;
             }
 
             if (left.startIndex !== right.startIndex) {
                 return left.startIndex - right.startIndex;
             }
 
-            return left.activity.localeCompare(right.activity);
+            if (left.endIndex !== right.endIndex) {
+                return left.endIndex - right.endIndex;
+            }
+
+            const activityComparison = left.activity.localeCompare(right.activity, undefined, {
+                numeric: true,
+                sensitivity: 'base',
+            });
+
+            if (activityComparison !== 0) {
+                return activityComparison;
+            }
+
+            return left.sourceIndex - right.sourceIndex;
         });
 });
 
