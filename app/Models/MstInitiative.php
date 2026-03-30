@@ -71,6 +71,11 @@ class MstInitiative extends Model
         return $this->hasMany(PcInitiative::class, 'initiative_id');
     }
 
+    public function masterMilestones(): HasMany
+    {
+        return $this->hasMany(TrsMasterMilestone::class, 'initiative_id');
+    }
+
     /**
      * Status history entries (trs_status_mstinitiative).
      */

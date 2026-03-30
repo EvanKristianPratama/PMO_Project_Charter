@@ -88,7 +88,7 @@ return [
                 ]) : [],
             ],
             'databases' => [
-                env('DB_CONNECTION', 'mysql'),
+                env('DB_BACKUP_CONNECTION', env('DB_CONNECTION', 'mysql')),
             ],
         ],
 

@@ -8,7 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class IndexController extends Controller
+class CreateController extends Controller
 {
     public function __construct(
         private readonly MasterMilestonePageService $pageService,
@@ -20,6 +20,13 @@ class IndexController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        return Inertia::render('ProgramPlanning/ProgramDefinition/DigitalInitiatives/Roadmap/Index', $this->pageService->getIndexPageProps());
+        $selectedInitiativeId = request()->filled('initiative_id')
+            ? (int) request()->input('initiative_id')
+            : null;
+
+        return Inertia::render(
+            'ProgramPlanning/ProgramDefinition/DigitalInitiatives/Roadmap/Create',
+            $this->pageService->getCreatePageProps($selectedInitiativeId),
+        );
     }
 }

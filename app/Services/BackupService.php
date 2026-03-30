@@ -219,6 +219,20 @@ class BackupService
             return 'Backup database gagal karena mysqldump tidak ditemukan di server. Atur DB_DUMP_BINARY_PATH atau pastikan MySQL client terpasang.';
         }
 
+        if (
+            str_contains($normalizedOutput, 'mariadb-dump')
+            || (
+                str_contains($normalizedOutput, 'mysqldump')
+                && str_contains($normalizedOutput, 'set-gtid-purged')
+            )
+        ) {
+            return 'Backup database gagal karena proses dump di container berjalan dengan client MariaDB tetapi masih membawa opsi MySQL `set-gtid-purged`. Untuk environment Docker, arahkan backup ke connection MariaDB dengan `DB_BACKUP_CONNECTION=mariadb`, lalu jalankan `php artisan config:clear`. Jika tetap harus memakai connection `mysql`, kosongkan `DB_DUMP_MYSQL_GTID_PURGED`.';
+        }
+
+        if ($this->isWindowsDumpSocketError($normalizedOutput)) {
+            return 'Backup database gagal karena `mysqldump.exe` di Windows tidak bisa membuka koneksi TCP ke server database. Jika database berada di server remote, izinkan `mysqldump.exe` lewat firewall/antivirus, pastikan host dan port database dapat diakses dari mesin aplikasi, lalu coba isi `DB_DUMP_HOST` dengan hostname database, set `DB_DUMP_RESOLVE_HOST=false`, dan jalankan `php artisan optimize:clear`. Jika koneksi database memakai SSL, pastikan file CA pada `MYSQL_ATTR_SSL_CA` atau `DB_DUMP_EXTRA_OPTION` masih ada dan bisa dibaca proses backup.';
+        }
+
         if (str_contains($normalizedOutput, 'Unknown MySQL server host')) {
             return 'Backup database gagal karena host database tidak bisa di-resolve oleh proses dump. Pastikan DB_HOST benar atau isi DB_DUMP_HOST dengan IP server database.';
         }
@@ -230,5 +244,31 @@ class BackupService
         $summary = preg_split('/\s+#0\s+/', $normalizedOutput)[0] ?? $normalizedOutput;
 
         return $summary !== '' ? $summary : 'Gagal menjalankan backup database.';
+    }
+
+    private function isWindowsDumpSocketError(string $normalizedOutput): bool
+    {
+        if (! str_contains($normalizedOutput, 'mysqldump')) {
+            return false;
+        }
+
+        $indicators = [
+            'Got error: 2003',
+            'Got error: 2004',
+            "Can't connect to MySQL server",
+            "Can't create TCP/IP socket",
+            '(10013)',
+            '(10106)',
+            'An attempt was made to access a socket in a way forbidden by its access permissions',
+            'Service provider failed to initialize',
+        ];
+
+        foreach ($indicators as $indicator) {
+            if (str_contains($normalizedOutput, $indicator)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

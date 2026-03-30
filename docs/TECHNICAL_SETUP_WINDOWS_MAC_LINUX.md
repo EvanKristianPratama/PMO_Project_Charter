@@ -140,6 +140,14 @@ Optional SSL CA (if required by your environment):
 MYSQL_ATTR_SSL_CA=/absolute/path/to/ca.pem
 ```
 
+If you use a remote MySQL service on Windows and want to use the admin backup feature, these dump-specific settings are often useful:
+
+```env
+DB_DUMP_HOST=your-db-hostname
+DB_DUMP_RESOLVE_HOST=false
+# DB_DUMP_BINARY_PATH=C:/path/to/mysql/bin
+```
+
 Then run:
 
 ```bash
@@ -233,6 +241,12 @@ php artisan migrate:fresh --seed
   - run `php artisan migrate --seed`
 - Login always pending/rejected:
   - user status must be approved in admin flow/database
+- `Backup failed ... Can't create TCP/IP socket (10106)` or `Can't connect to MySQL server ... (10013)` on Windows:
+  - allow `mysqldump.exe` through Windows Firewall / antivirus
+  - confirm the database host and port are reachable from the app machine
+  - for remote MySQL, set `DB_DUMP_HOST` to the database hostname and `DB_DUMP_RESOLVE_HOST=false`
+  - verify `MYSQL_ATTR_SSL_CA` or the CA file used by `DB_DUMP_EXTRA_OPTION`
+  - run `php artisan optimize:clear` after changing env values
 - Permission issue (macOS/Linux):
   - run `chmod -R ug+rwx storage bootstrap/cache`
 - Config not updated after env change:

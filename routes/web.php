@@ -39,7 +39,10 @@ use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Ed
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\IndexController as ProgramDefinitionDigitalInitiativesController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Mapping\IndexController as ProgramDefinitionDigitalInitiativesMappingIndexController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\MasterDigitalInitiative\IndexController as ProgramDefinitionDigitalInitiativesMasterIndexController;
+use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Roadmap\CreateController as ProgramDefinitionDigitalInitiativesRoadmapCreateController;
+use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Roadmap\EditController as ProgramDefinitionDigitalInitiativesRoadmapEditController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Roadmap\IndexController as ProgramDefinitionDigitalInitiativesRoadmapIndexController;
+use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Roadmap\MilestoneController as ProgramDefinitionDigitalInitiativesRoadmapMilestoneController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\UpdateController as ProgramDefinitionDigitalInitiativesUpdateController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\IndexController as ProgramDefinitionController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\ITInitiatives\IndexController as ProgramDefinitionITInitiativesController;
@@ -84,8 +87,12 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/program-planning/rsti-sub-holding', [ProgramPlanningController::class, 'rstiSubHolding'])->name('program-planning.rsti-sub-holding');
     Route::get('/program-planning/program-definition', ProgramDefinitionController::class)->name('program-planning.program-definition');
     Route::get('/program-planning/program-definition/digital-initiatives', ProgramDefinitionDigitalInitiativesController::class)->name('program-planning.program-definition.digital-initiatives');
-    Route::get('/program-planning/program-definition/digital-initiatives/{digitalInitiative}/edit', ProgramDefinitionDigitalInitiativesEditController::class)->name('program-planning.program-definition.digital-initiatives.edit');
-    Route::put('/program-planning/program-definition/digital-initiatives/{digitalInitiative}', ProgramDefinitionDigitalInitiativesUpdateController::class)->name('program-planning.program-definition.digital-initiatives.update');
+    Route::get('/program-planning/program-definition/digital-initiatives/{digitalInitiative}/edit', ProgramDefinitionDigitalInitiativesEditController::class)
+        ->whereNumber('digitalInitiative')
+        ->name('program-planning.program-definition.digital-initiatives.edit');
+    Route::put('/program-planning/program-definition/digital-initiatives/{digitalInitiative}', ProgramDefinitionDigitalInitiativesUpdateController::class)
+        ->whereNumber('digitalInitiative')
+        ->name('program-planning.program-definition.digital-initiatives.update');
 
     Route::prefix('/program-planning/program-definition/digital-initiatives/appendix')->name('program-planning.program-definition.digital-initiatives.appendix.')->group(function () {
         Route::get('/', ProgramDefinitionDigitalInitiativesAppendixIndexController::class)->name('index');
@@ -103,7 +110,14 @@ Route::middleware(['auth', 'approved'])->group(function () {
     });
     Route::get('/program-planning/program-definition/digital-initiatives/mapping', ProgramDefinitionDigitalInitiativesMappingIndexController::class)->name('program-planning.program-definition.digital-initiatives.mapping.index');
     Route::get('/program-planning/program-definition/digital-initiatives/master', ProgramDefinitionDigitalInitiativesMasterIndexController::class)->name('program-planning.program-definition.digital-initiatives.master.index');
-    Route::get('/program-planning/program-definition/digital-initiatives/roadmap', ProgramDefinitionDigitalInitiativesRoadmapIndexController::class)->name('program-planning.program-definition.digital-initiatives.roadmap.index');
+    Route::prefix('/program-planning/program-definition/digital-initiatives/roadmap')->name('program-planning.program-definition.digital-initiatives.roadmap.')->group(function () {
+        Route::get('/', ProgramDefinitionDigitalInitiativesRoadmapIndexController::class)->name('index');
+        Route::get('/create', ProgramDefinitionDigitalInitiativesRoadmapCreateController::class)->name('create');
+        Route::get('/edit', ProgramDefinitionDigitalInitiativesRoadmapEditController::class)->name('edit');
+        Route::post('/', [ProgramDefinitionDigitalInitiativesRoadmapMilestoneController::class, 'store'])->name('store');
+        Route::put('/{masterMilestone}', [ProgramDefinitionDigitalInitiativesRoadmapMilestoneController::class, 'update'])->name('update');
+        Route::delete('/{masterMilestone}', [ProgramDefinitionDigitalInitiativesRoadmapMilestoneController::class, 'destroy'])->name('destroy');
+    });
 
     // ═══ Master Data ═══════════════════════════════════════════════
     Route::get('/master-data', MasterDataController::class)->name('master-data.index');

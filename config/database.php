@@ -21,7 +21,10 @@ $mysqlDumpSkipSsl = filter_var(env('DB_DUMP_SKIP_SSL', false), FILTER_VALIDATE_B
 $mysqlDumpTimeout = (int) env('DB_DUMP_TIMEOUT', 1800);
 $mysqlDumpUseSingleTransaction = filter_var(env('DB_DUMP_USE_SINGLE_TRANSACTION', true), FILTER_VALIDATE_BOOL);
 $mysqlDumpSkipLockTables = filter_var(env('DB_DUMP_SKIP_LOCK_TABLES', true), FILTER_VALIDATE_BOOL);
-$mysqlDumpMysqlGtidPurged = env('DB_DUMP_MYSQL_GTID_PURGED', 'OFF');
+$mysqlDumpMysqlGtidPurged = env('DB_DUMP_MYSQL_GTID_PURGED');
+$mysqlDumpMysqlGtidPurgedForMysql = is_string($mysqlDumpMysqlGtidPurged) && trim($mysqlDumpMysqlGtidPurged) !== ''
+    ? trim($mysqlDumpMysqlGtidPurged)
+    : 'OFF';
 $mysqlDumpExtraOption = env('DB_DUMP_EXTRA_OPTION');
 $resolveDumpBinaryPath = static function (?string $path): ?string {
     if (! is_string($path) || trim($path) === '') {
@@ -130,16 +133,15 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-            // 'options' => extension_loaded('pdo_mysql') ? array_filter([
-            //     (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA) => $mysqlSslCa,
-            // ]) : [],
-            'options' => [],
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA) => $mysqlSslCa,
+            ]) : [],
             'dump' => array_filter([
                 'dump_binary_path' => $mysqlDumpBinaryPath,
                 'timeout' => $mysqlDumpTimeout,
                 'use_single_transaction' => $mysqlDumpUseSingleTransaction,
                 'skip_lock_tables' => $mysqlDumpSkipLockTables,
-                'mysql_gtid_purged' => $mysqlDumpMysqlGtidPurged,
+                'mysql_gtid_purged' => $mysqlDumpMysqlGtidPurgedForMysql,
                 'skip_ssl' => $mysqlDumpSkipSsl,
                 'add_extra_option' => $mysqlDumpExtraOption,
             ], static fn ($value) => $value !== null && $value !== ''),
@@ -168,7 +170,6 @@ return [
                 'timeout' => $mysqlDumpTimeout,
                 'use_single_transaction' => $mysqlDumpUseSingleTransaction,
                 'skip_lock_tables' => $mysqlDumpSkipLockTables,
-                'mysql_gtid_purged' => $mysqlDumpMysqlGtidPurged,
                 'skip_ssl' => $mysqlDumpSkipSsl,
                 'add_extra_option' => $mysqlDumpExtraOption,
             ], static fn ($value) => $value !== null && $value !== ''),
