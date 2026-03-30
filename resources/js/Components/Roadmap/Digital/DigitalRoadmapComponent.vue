@@ -179,13 +179,38 @@ const groupedRoadmapRows = computed(() => {
         grouped.get(item.initiativeKey).items.push(item);
     });
 
-    return Array.from(grouped.values()).map((group) => ({
+    const groups = Array.from(grouped.values()).map((group) => ({
         ...group,
         lanes: allocateLanes(group.items).map((laneItems, laneIndex) => ({
             key: `${group.initiativeKey}-lane-${laneIndex}`,
             cells: buildLaneCells(group.initiativeKey, laneIndex, laneItems),
         })),
     }));
+
+    let groupIndex = 0;
+
+    while (groupIndex < groups.length) {
+        const organizationName = groups[groupIndex].organizationName;
+        let organizationRowSpan = 0;
+        let endIndex = groupIndex;
+
+        while (endIndex < groups.length && groups[endIndex].organizationName === organizationName) {
+            organizationRowSpan += groups[endIndex].lanes.length;
+            endIndex += 1;
+        }
+
+        groups[groupIndex].showOrganizationCell = true;
+        groups[groupIndex].organizationRowSpan = organizationRowSpan;
+
+        for (let hiddenIndex = groupIndex + 1; hiddenIndex < endIndex; hiddenIndex += 1) {
+            groups[hiddenIndex].showOrganizationCell = false;
+            groups[hiddenIndex].organizationRowSpan = 0;
+        }
+
+        groupIndex = endIndex;
+    }
+
+    return groups;
 });
 
 const isYearEndIndex = (index) => quarterCells.value[index]?.quarter === 4;
@@ -280,8 +305,8 @@ const buildLaneCells = (initiativeKey, laneIndex, items) => {
                         class="row-data"
                     >
                         <td
-                            v-if="laneIndex === 0"
-                            :rowspan="group.lanes.length"
+                            v-if="laneIndex === 0 && group.showOrganizationCell"
+                            :rowspan="group.organizationRowSpan"
                             class="cell-organization"
                         >
                             {{ group.organizationName }}
@@ -344,11 +369,11 @@ const buildLaneCells = (initiativeKey, laneIndex, items) => {
 }
 
 .col-organization {
-    width: 12%;
+    width: 9%;
 }
 
 .col-initiative {
-    width: 20%;
+    width: 23%;
 }
 
 .col-quarter {
@@ -394,13 +419,14 @@ const buildLaneCells = (initiativeKey, laneIndex, items) => {
     color: #334155;
     padding: 6px 8px;
     line-height: 1.3;
-    vertical-align: top;
+    text-align: center;
+    vertical-align: middle;
     background: #f8fafc;
 }
 
 .cell-project-name {
     font-size: 12px;
-    font-weight: 800;
+    font-weight: 500;
     color: var(--text);
     padding: 6px 8px;
     line-height: 1.3;
@@ -450,11 +476,11 @@ const buildLaneCells = (initiativeKey, laneIndex, items) => {
 
 @media (max-width: 1024px) {
     .col-organization {
-        width: 16%;
+        width: 12%;
     }
 
     .col-initiative {
-        width: 26%;
+        width: 30%;
     }
 
     .col-quarter {
