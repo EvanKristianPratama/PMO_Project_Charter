@@ -38,7 +38,7 @@ class MilestoneController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'initiative_id' => ['required', 'integer', Rule::exists('mst_initiative', 'id')],
-            'activity' => ['required', 'string'],
+            'activity' => ['nullable', 'string'],
             'startYear' => ['required', 'integer', 'between:2000,2100'],
             'startQ' => ['required', 'string'],
             'endYear' => ['required', 'integer', 'between:2000,2100'],
@@ -47,7 +47,6 @@ class MilestoneController extends Controller
         ], [
             'initiative_id.required' => 'Initiative wajib dipilih.',
             'initiative_id.exists' => 'Initiative yang dipilih tidak valid.',
-            'activity.required' => 'Activity wajib diisi.',
             'startYear.required' => 'Start year wajib diisi.',
             'endYear.required' => 'End year wajib diisi.',
         ]);
@@ -80,10 +79,11 @@ class MilestoneController extends Controller
         });
 
         $validated = $validator->validate();
+        $activity = trim((string) ($validated['activity'] ?? ''));
 
         $payload = [
             'initiative_id' => (int) $validated['initiative_id'],
-            'activity' => trim((string) $validated['activity']),
+            'activity' => $activity,
             'startYear' => (int) $validated['startYear'],
             'startQ' => $this->normalizeQuarter($validated['startQ']),
             'endYear' => (int) $validated['endYear'],
