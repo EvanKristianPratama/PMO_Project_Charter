@@ -440,27 +440,30 @@ const buildLaneCells = (initiativeKey, laneIndex, items) => {
     background: var(--bg-row);
 }
 
-.cell-tl-bar {
-    height: 26px;
-    padding: 0 10px;
+.roadmap-table td.cell-tl-bar {
+    height: auto;
+    padding: 6px 10px;
     background: #b7cd26;
     color: #2f3d0a;
     font-size: 10px;
     font-weight: 700;
-    line-height: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.3;
+    vertical-align: middle;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
     border-top: 1px solid rgba(111, 130, 20, 0.45);
     border-bottom: 1px solid rgba(111, 130, 20, 0.45);
 }
 
 .cell-tl-bar__text {
-    display: inline-block;
+    display: block;
     max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .roadmap-empty {
@@ -492,8 +495,8 @@ const buildLaneCells = (initiativeKey, laneIndex, items) => {
         font-size: 11px;
     }
 
-    .cell-tl-bar {
-        padding: 0 6px;
+    .roadmap-table td.cell-tl-bar {
+        padding: 6px;
         font-size: 9px;
     }
 }
