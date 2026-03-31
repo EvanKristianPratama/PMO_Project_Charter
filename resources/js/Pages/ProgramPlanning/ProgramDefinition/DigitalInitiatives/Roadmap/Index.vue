@@ -38,25 +38,6 @@
                     </div>
 
                     <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end">
-                        <div class="w-full sm:w-72">
-                            <label class="mb-1 block text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
-                                Filter Initiative
-                            </label>
-                            <select
-                                v-model="selectedInitiativeId"
-                                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-2 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#101826] dark:text-slate-100"
-                            >
-                                <option value="all">Semua Initiative</option>
-                                <option
-                                    v-for="option in normalizedInitiativeOptions"
-                                    :key="`filter-initiative-${option.id}`"
-                                    :value="String(option.id)"
-                                >
-                                    {{ initiativeLabel(option) }}
-                                </option>
-                            </select>
-                        </div>
-
                         <div class="w-full sm:w-56">
                             <label class="mb-1 block text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
                                 Filter Organization
@@ -72,6 +53,25 @@
                                     :value="organization"
                                 >
                                     {{ organization }}
+                                </option>
+                            </select>
+                        </div>
+                        
+                        <div class="w-full sm:w-72">
+                            <label class="mb-1 block text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
+                                Filter Initiative
+                            </label>
+                            <select
+                                v-model="selectedInitiativeId"
+                                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-2 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#101826] dark:text-slate-100"
+                            >
+                                <option value="all">Semua Initiative</option>
+                                <option
+                                    v-for="option in normalizedInitiativeOptions"
+                                    :key="`filter-initiative-${option.id}`"
+                                    :value="String(option.id)"
+                                >
+                                    {{ initiativeLabel(option) }}
                                 </option>
                             </select>
                         </div>
@@ -113,12 +113,18 @@
                 Data roadmap saat ini masih menggunakan dummy data.
             </div>
 
-            <section v-if="filteredMilestones.length > 0" >
-                <DigitalRoadmapComponent
-                    :data="filteredMilestones"
-                    :start-year-range="timelineStartYear"
-                    :end-year-range="timelineEndYear"
-                />
+            <section v-if="organizationRoadmapGroups.length > 0" class="space-y-2">
+                <div
+                    v-for="group in organizationRoadmapGroups"
+                    :key="`roadmap-organization-${group.organizationName}`"
+                    class="space-y-3"
+                >
+                    <DigitalRoadmapComponent
+                        :data="group.items"
+                        :start-year-range="group.startYear"
+                        :end-year-range="group.endYear"
+                    />
+                </div>
             </section>
 
             <section
@@ -224,15 +230,40 @@ const filteredMilestones = computed(() => milestoneItems.value.filter((item) => 
     return true;
 }));
 
-const timelineStartYear = computed(() => {
-    const years = filteredMilestones.value.map((item) => item.startYear).filter((year) => year > 0);
+const resolveTimelineStartYear = (items = []) => {
+    const years = items.map((item) => item.startYear).filter((year) => year > 0);
     return years.length > 0 ? Math.min(toNumber(props.startYearRange, 2024), ...years) : toNumber(props.startYearRange, 2024);
+};
+
+const resolveTimelineEndYear = (items = []) => {
+    const years = items.map((item) => item.endYear).filter((year) => year > 0);
+    return years.length > 0 ? Math.max(toNumber(props.endYearRange, 2029), ...years) : toNumber(props.endYearRange, 2029);
+};
+
+const organizationRoadmapGroups = computed(() => {
+    const groupedItems = new Map();
+
+    filteredMilestones.value.forEach((item) => {
+        const organizationName = normalizeText(item.organization_name) || '-';
+
+        if (!groupedItems.has(organizationName)) {
+            groupedItems.set(organizationName, []);
+        }
+
+        groupedItems.get(organizationName).push(item);
+    });
+
+    return Array.from(groupedItems.entries()).map(([organizationName, items]) => ({
+            organizationName,
+            items,
+            startYear: resolveTimelineStartYear(items),
+            endYear: resolveTimelineEndYear(items),
+        }));
 });
 
-const timelineEndYear = computed(() => {
-    const years = filteredMilestones.value.map((item) => item.endYear).filter((year) => year > 0);
-    return years.length > 0 ? Math.max(toNumber(props.endYearRange, 2029), ...years) : toNumber(props.endYearRange, 2029);
-});
+const timelineStartYear = computed(() => resolveTimelineStartYear(filteredMilestones.value));
+
+const timelineEndYear = computed(() => resolveTimelineEndYear(filteredMilestones.value));
 
 const initiativeLabel = (item) => {
     const code = normalizeText(item?.code ?? item?.initiative_code);

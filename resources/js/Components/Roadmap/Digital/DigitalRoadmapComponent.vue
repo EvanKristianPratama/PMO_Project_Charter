@@ -181,10 +181,13 @@ const groupedRoadmapRows = computed(() => {
 
     const groups = Array.from(grouped.values()).map((group) => ({
         ...group,
-        lanes: allocateLanes(group.items).map((laneItems, laneIndex) => ({
-            key: `${group.initiativeKey}-lane-${laneIndex}`,
-            cells: buildLaneCells(group.initiativeKey, laneIndex, laneItems),
-        })),
+        lanes: allocateLanes(group.items)
+            .map((laneItems, laneIndex) => ({
+                key: `${group.initiativeKey}-lane-${laneIndex}`,
+                sourceIndex: Math.min(...laneItems.map((laneItem) => laneItem.sourceIndex)),
+                cells: buildLaneCells(group.initiativeKey, laneIndex, laneItems),
+            }))
+            .sort((left, right) => left.sourceIndex - right.sourceIndex),
     }));
 
     let groupIndex = 0;
