@@ -21,7 +21,7 @@
                             Initiative
                 </label>
                 <select v-model="selectedInitiative"
-                    class="rounded border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700 shadow-sm transition focus:border-slate-300 focus:outline-none dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200">
+                    class="w-[170px] rounded border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700 shadow-sm transition focus:border-slate-300 focus:outline-none dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200">
                     <option value="all">Semua Initiative</option>
                     <option v-for="initiative in availableInitiatives" :key="`initiative-${initiative.value}`"
                         :value="initiative.value">
@@ -39,6 +39,19 @@
                     <option value="all">Semua Bulan</option>
                     <option v-for="month in availableMonths" :key="`month-${month.value}`" :value="month.value">
                         {{ month.label }}
+                    </option>
+                </select>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+                <label class="text-[10px]">
+                            Status
+                </label>
+                <select v-model="selectedStatus"
+                    class="w-[120px] rounded border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700 shadow-sm transition focus:border-slate-300 focus:outline-none dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200">
+                    <option value="all">Semua Status</option>
+                    <option v-for="status in availableStatuses" :key="`status-${status.value}`" :value="status.value">
+                        {{ status.label }}
                     </option>
                 </select>
             </div>
@@ -161,6 +174,7 @@ const props = defineProps({
 const selectedOrganization = ref('all');
 const selectedInitiative = ref('all');
 const selectedMonth = ref('all');
+const selectedStatus = ref('all');
 const selectedYear = ref('all');
 const isModalOpen = ref(false);
 const editingItem = ref(null);
@@ -273,6 +287,23 @@ const availableInitiatives = computed(() => {
 });
 
 const availableMonths = computed(() => monthOptions);
+const availableStatuses = computed(() => {
+    const statuses = new Set(
+        normalizedItems.value
+            .map((item) => String(item?.review_status ?? '').trim())
+            .filter(Boolean),
+    );
+
+    return Array.from(statuses)
+        .sort((left, right) => left.localeCompare(right, undefined, {
+            numeric: true,
+            sensitivity: 'base',
+        }))
+        .map((status) => ({
+            value: status,
+            label: status,
+        }));
+});
 
 const availableYears = computed(() => {
     const years = new Set(
@@ -310,6 +341,10 @@ const filteredItems = computed(() => {
             return false;
         }
 
+        if (selectedStatus.value !== 'all' && normalizeText(item.review_status) !== normalizeText(selectedStatus.value)) {
+            return false;
+        }
+
         if (selectedYear.value !== 'all' && item.period_year !== selectedYear.value) {
             return false;
         }
@@ -337,6 +372,24 @@ const compareText = (left, right) => {
     return normalizedLeft.localeCompare(normalizedRight);
 };
 
+const compareCode = (left, right) => {
+    const normalizedLeft = String(left ?? '').trim();
+    const normalizedRight = String(right ?? '').trim();
+
+    if (normalizedLeft === '' && normalizedRight !== '') {
+        return 1;
+    }
+
+    if (normalizedLeft !== '' && normalizedRight === '') {
+        return -1;
+    }
+
+    return normalizedLeft.localeCompare(normalizedRight, undefined, {
+        numeric: true,
+        sensitivity: 'base',
+    });
+};
+
 const compareDate = (left, right) => {
     const leftTime = Date.parse(left ?? '');
     const rightTime = Date.parse(right ?? '');
@@ -346,13 +399,67 @@ const compareDate = (left, right) => {
     return normalizedLeft - normalizedRight;
 };
 
+const businessUnitGroupKey = (item) => {
+    const normalizedBusinessUnit = normalizeText(item?.business_unit);
+
+    if (normalizedBusinessUnit !== '') {
+        return `business-unit:${normalizedBusinessUnit}`;
+    }
+
+    if (item?.organization_id) {
+        return `organization:${item.organization_id}`;
+    }
+
+    return `status:${item?.id ?? 'unknown'}`;
+};
+
+const creationTimestamp = (item) => {
+    const createdTime = Date.parse(item?.created_at ?? '');
+
+    if (!Number.isNaN(createdTime)) {
+        return createdTime;
+    }
+
+    const updatedTime = Date.parse(item?.updated_at ?? '');
+
+    if (!Number.isNaN(updatedTime)) {
+        return updatedTime;
+    }
+
+    const numericId = Number(item?.id ?? 0);
+
+    return Number.isFinite(numericId) && numericId > 0 ? numericId : Number.MAX_SAFE_INTEGER;
+};
+
+const organizationDisplayOrder = computed(() => {
+    const displayOrderMap = new Map();
+
+    normalizedItems.value.forEach((item) => {
+        const groupKey = businessUnitGroupKey(item);
+        const currentTimestamp = creationTimestamp(item);
+        const savedTimestamp = displayOrderMap.get(groupKey);
+
+        if (savedTimestamp === undefined || currentTimestamp < savedTimestamp) {
+            displayOrderMap.set(groupKey, currentTimestamp);
+        }
+    });
+
+    return displayOrderMap;
+});
+
 const sortedItems = computed(() => {
     return [...filteredItems.value].sort((left, right) => {
+        const leftGroupKey = businessUnitGroupKey(left);
+        const rightGroupKey = businessUnitGroupKey(right);
+
         return (
+            (organizationDisplayOrder.value.get(leftGroupKey) ?? Number.MAX_SAFE_INTEGER) -
+                (organizationDisplayOrder.value.get(rightGroupKey) ?? Number.MAX_SAFE_INTEGER) ||
             compareText(left.business_unit, right.business_unit) ||
-            compareText(left.code, right.code) ||
+            compareCode(left.code, right.code) ||
             compareText(left.initiative, right.initiative) ||
             compareDate(left.created_at, right.created_at) ||
+            compareDate(left.updated_at, right.updated_at) ||
             Number(left.id || 0) - Number(right.id || 0)
         );
     });
