@@ -1,67 +1,56 @@
 <template>
     <section class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/5 dark:bg-[#1a1a1a]">
-        <div class="border-b border-slate-200 bg-slate-50/70 px-4 py-3 dark:border-white/10 dark:bg-white/[0.03]">
-            <div class="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-                <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
-                    <div class="flex min-w-0 items-center gap-2">
-                        <label
-                            class="shrink-0 text-[10px] font-semibold uppercase tracking-[0.06em] text-slate-500 dark:text-slate-400">
+        <div
+            class="flex flex-wrap items-center gap-2 border-b border-slate-200 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:border-white/10 dark:text-slate-400">
+            <div class="flex items-center gap-1.5">
+                <label class="text-[10px]">
                             Organization
-                        </label>
-                        <select v-model="selectedOrganization"
-                            class="h-8 w-[250px] rounded-lg border border-slate-300 bg-white px-3 text-[10px] text-slate-700 shadow-sm focus:border-[#1C75BC] focus:outline-none focus:ring-2 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#101826] dark:text-slate-100">
-                            <option value="all">Semua Organization</option>
-                            <option v-for="organization in availableOrganizations"
-                                :key="`organization-${organization.value}`" :value="organization.value">
-                                {{ organization.label }}
-                            </option>
-                        </select>
-                    </div>
-
-                    <div class="flex min-w-0 items-center gap-2">
-                        <label
-                            class="shrink-0 text-[10px] font-semibold uppercase tracking-[0.06em] text-slate-500 dark:text-slate-400">
-                            Initiative
-                        </label>
-                        <select v-model="selectedInitiative"
-                            class="h-8 w-[340px] rounded-lg border border-slate-300 bg-white px-3 text-[10px] text-slate-700 shadow-sm focus:border-[#1C75BC] focus:outline-none focus:ring-2 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#101826] dark:text-slate-100">
-                            <option value="all">Semua Initiative</option>
-                            <option v-for="initiative in availableInitiatives" :key="`initiative-${initiative.value}`"
-                                :value="initiative.value">
-                                {{ initiative.label }}
-                            </option>
-                        </select>
-                    </div>
-
-                    <div class="flex min-w-0 items-center gap-2">
-                        <label
-                            class="shrink-0 text-[10px] font-semibold uppercase tracking-[0.06em] text-slate-500 dark:text-slate-400">
-                            Bulan
-                        </label>
-                        <select v-model="selectedMonth"
-                            class="h-8 w-[170px] rounded-lg border border-slate-300 bg-white px-3 text-[10px] text-slate-700 shadow-sm focus:border-[#1C75BC] focus:outline-none focus:ring-2 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#101826] dark:text-slate-100">
-                            <option value="all">Semua Bulan</option>
-                            <option v-for="month in availableMonths" :key="`month-${month.value}`" :value="month.value">
-                                {{ month.label }}
-                            </option>
-                        </select>
-                    </div>
-
-                    <div class="flex min-w-0 items-center gap-2">
-                        <button type="button"
-                            class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg bg-[#1C75BC] px-3 text-[10px] font-semibold text-white shadow-sm transition hover:bg-[#0f63b5] focus:outline-none focus:ring-2 focus:ring-[#1C75BC]/20"
-                            @click="openAddModal">
-                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4v16m8-8H4" />
-                            </svg>
-                            Add Status
-                        </button>
-                    </div>
-                </div>
-
-
+                </label>
+                <select v-model="selectedOrganization"
+                    class="rounded border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700 shadow-sm transition focus:border-slate-300 focus:outline-none dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200">
+                    <option value="all">Semua Organization</option>
+                    <option v-for="organization in availableOrganizations" :key="`organization-${organization.value}`"
+                        :value="organization.value">
+                        {{ organization.label }}
+                    </option>
+                </select>
             </div>
+
+            <div class="flex items-center gap-1.5">
+                <label class="text-[10px]">
+                            Initiative
+                </label>
+                <select v-model="selectedInitiative"
+                    class="rounded border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700 shadow-sm transition focus:border-slate-300 focus:outline-none dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200">
+                    <option value="all">Semua Initiative</option>
+                    <option v-for="initiative in availableInitiatives" :key="`initiative-${initiative.value}`"
+                        :value="initiative.value">
+                        {{ initiative.label }}
+                    </option>
+                </select>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+                <label class="text-[10px]">
+                            Bulan
+                </label>
+                <select v-model="selectedMonth"
+                    class="rounded border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700 shadow-sm transition focus:border-slate-300 focus:outline-none dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200">
+                    <option value="all">Semua Bulan</option>
+                    <option v-for="month in availableMonths" :key="`month-${month.value}`" :value="month.value">
+                        {{ month.label }}
+                    </option>
+                </select>
+            </div>
+
+            <button type="button"
+                class="ml-auto inline-flex items-center justify-center gap-1 rounded-md bg-[#1C75BC] px-2 py-1 text-[10px] font-semibold normal-case tracking-normal text-white shadow-sm transition hover:bg-[#0f63b5] focus:outline-none focus:ring-2 focus:ring-[#1C75BC]/20"
+                @click="openAddModal">
+                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Add Status
+            </button>
         </div>
 
         <div class="overflow-x-auto">

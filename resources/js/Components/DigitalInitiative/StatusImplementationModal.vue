@@ -38,7 +38,7 @@
                 </p>
             </div>
 
-            <div class="grid gap-4 md:grid-cols-[minmax(0,0.8fr)_150px_150px_110px]">
+            <div class="grid gap-4 md:grid-cols-[120px_150px_150px_100px]">
                 <div class="space-y-1.5">
                     <label class="block text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
                         Review Status
