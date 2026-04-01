@@ -4,6 +4,9 @@ namespace App\Models;
 
 use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Theme extends Model
 {
@@ -13,22 +16,22 @@ class Theme extends Model
 
     protected $fillable = ['idGoal', 'theme_number', 'name'];
 
-    public function goal()
+    public function goal(): BelongsTo
     {
         return $this->belongsTo(Goal::class, 'idGoal');
     }
 
-    public function rjppTaggings()
+    public function rjppTaggings(): HasMany
     {
         return $this->hasMany(RjppTagging::class, 'theme_id');
     }
 
-    public function digitalInitiatives()
+    public function digitalInitiatives(): BelongsToMany
     {
-        return $this->belongsToMany(TrsDigitalInitiative::class, 'trs_rjpp', 'theme_id', 'digital_id')->withTimestamps();
+        return $this->belongsToMany(TrsScInitiative::class, 'trs_rjpp', 'theme_id', 'sc_id')->withTimestamps();
     }
 
-    public function initiativeTaggings()
+    public function initiativeTaggings(): HasMany
     {
         return $this->hasMany(InitiativeTagging::class, 'themes_id');
     }

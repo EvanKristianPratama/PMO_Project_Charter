@@ -4,6 +4,7 @@ namespace App\Http\Controllers\ProgramImplementation\ProjectCharter\DigitalIniti
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProgramImplementation\ProjectCharter\DigitalInitiatives\StoreDigitalInitiativeRequest;
+use App\Http\Requests\ProgramImplementation\ProjectCharter\DigitalInitiatives\UpsertImplementationStatusRequest;
 use App\Http\Requests\ProgramImplementation\ProjectCharter\DigitalInitiatives\UpdateDigitalInitiativeRequest;
 use App\Http\Requests\ProgramImplementation\ProjectCharter\UpdateProjectStatusHistoryRequest;
 use App\Models\ProjectStatusHistory;
@@ -78,6 +79,23 @@ class DigitalInitiativeController extends Controller
         return redirect()
             ->route('digital-initiatives.index')
             ->with('success', 'Digital initiative berhasil dihapus.');
+    }
+
+    public function storeImplementationStatus(
+        UpsertImplementationStatusRequest $request
+    ): RedirectResponse {
+        $this->digitalInitiativeService->storeImplementationStatus($request->validated());
+
+        return back()->with('success', 'Status implementation berhasil ditambahkan.');
+    }
+
+    public function updateImplementationStatus(
+        UpsertImplementationStatusRequest $request,
+        int $statusId
+    ): RedirectResponse {
+        $this->digitalInitiativeService->updateImplementationStatus($statusId, $request->validated());
+
+        return back()->with('success', 'Status implementation berhasil diperbarui.');
     }
 
     public function updateProjectStatusHistory(

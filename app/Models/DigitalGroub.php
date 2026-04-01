@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DigitalGroub extends Model
 {
@@ -20,9 +21,9 @@ class DigitalGroub extends Model
 
     public $timestamps = true;
 
-    public function digitalInitiative()
+    public function digitalInitiative(): BelongsTo
     {
-        return $this->belongsTo(TrsDigitalInitiative::class, 'digital_id');
+        return $this->belongsTo(TrsScInitiative::class, 'digital_id');
     }
 
     public function organizations()

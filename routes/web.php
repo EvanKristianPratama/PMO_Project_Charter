@@ -212,6 +212,10 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::delete('/strategic-pillars/tagging/{tagging}', [InitiativeTaggingController::class, 'destroy'])->name('strategic-pillars.tagging.destroy');
 
     // Digital Initiatives
+    Route::post('/digital-initiatives/implementation-status', [DigitalInitiativeController::class, 'storeImplementationStatus'])
+        ->name('digital-initiatives.implementation-status.store');
+    Route::put('/digital-initiatives/implementation-status/{statusId}', [DigitalInitiativeController::class, 'updateImplementationStatus'])
+        ->name('digital-initiatives.implementation-status.update');
     Route::resource('digital-initiatives', DigitalInitiativeController::class);
     Route::put('/digital-initiatives/{digital_initiative}/project-status-history/{history}', [DigitalInitiativeController::class, 'updateProjectStatusHistory'])->name('digital-initiatives.project-status-history.update');
     Route::delete('/digital-initiatives/{digital_initiative}/project-status-history/{history}', [DigitalInitiativeController::class, 'destroyProjectStatusHistory'])->name('digital-initiatives.project-status-history.destroy');

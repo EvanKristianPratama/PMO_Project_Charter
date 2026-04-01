@@ -166,23 +166,26 @@
 
             <section
                 v-else-if="hasTableSelection && tableMode === TABLE_MODE.IMPLEMENTATION"
-                class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-white/15 dark:bg-[#171717]"
+                class="space-y-4"
             >
-                <p class="text-sm font-medium text-slate-600 dark:text-slate-300">
-                    Feature Status Implementation for Digital Initiatives coming soon.
-                </p>
+                <StatusImplementationTable
+                    :items="implementationStatusItems"
+                    :organization-options="implementationOrganizationOptions"
+                    :initiative-options="implementationInitiativeOptions"
+                />
             </section>
         </div>
     </UserLayout>
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import UserLayout from "@/Layouts/UserLayout.vue";
 import { statusFlowClassByIndex } from "@/Composables/initiativeStatus";
 import { useFlowFilter } from "@/Composables/useFlowFilter";
 import FlowStatusTable from "@/Components/DigitalInitiative/FlowStatusTable.vue";
 import MasterInitiativeTable from "@/Components/DigitalInitiative/MasterInitiativeTable.vue";
+import StatusImplementationTable from "@/Components/DigitalInitiative/StatusImplementationTable.vue";
 
 const props = defineProps({
     initiatives: {
@@ -190,6 +193,18 @@ const props = defineProps({
         default: () => [],
     },
     mstDigitalInitiatives: {
+        type: Array,
+        default: () => [],
+    },
+    implementationStatuses: {
+        type: Array,
+        default: () => [],
+    },
+    implementationOrganizations: {
+        type: Array,
+        default: () => [],
+    },
+    implementationInitiatives: {
         type: Array,
         default: () => [],
     },
@@ -336,6 +351,18 @@ const allDigitalInitiatives = computed(() => {
     return asList(props.initiatives);
 });
 
+const implementationStatusItems = computed(() => {
+    return asList(props.implementationStatuses);
+});
+
+const implementationOrganizationOptions = computed(() => {
+    return asList(props.implementationOrganizations);
+});
+
+const implementationInitiativeOptions = computed(() => {
+    return asList(props.implementationInitiatives);
+});
+
 const statusOptions = computed(() => {
     const sourceOptions = Array.isArray(props.statusOptions)
         ? props.statusOptions
@@ -382,5 +409,16 @@ const digitalSteps = computed(() => {
 
 const gridStyle = (steps = []) => ({
     gridTemplateColumns: `repeat(${Math.max(steps.length, 1)}, minmax(0, 1fr))`,
+});
+
+onMounted(() => {
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get("tableMode");
+
+    if (mode && Object.values(TABLE_MODE).includes(mode)) {
+        tableMode.value = mode;
+        hasTableSelection.value = true;
+        showAllCharter.value = mode === TABLE_MODE.FLOW;
+    }
 });
 </script>

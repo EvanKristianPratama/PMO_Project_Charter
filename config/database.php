@@ -2,10 +2,14 @@
 
 use Illuminate\Support\Str;
 
+$mysqlHost = (string) env('DB_HOST', '127.0.0.1');
+$mysqlHostNormalized = strtolower(trim($mysqlHost));
+$mysqlUsesLocalHost = in_array($mysqlHostNormalized, ['127.0.0.1', 'localhost', '::1'], true);
+
 $mysqlSslCaCandidates = array_filter([
     env('MYSQL_ATTR_SSL_CA'),
-    base_path('ca.pem'),
-    '/var/www/html/ca.pem',
+    $mysqlUsesLocalHost ? null : base_path('ca.pem'),
+    $mysqlUsesLocalHost ? null : '/var/www/html/ca.pem',
 ]);
 
 $mysqlSslCa = null;

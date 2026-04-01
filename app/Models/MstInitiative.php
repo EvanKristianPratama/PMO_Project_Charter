@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class MstInitiative extends Model
 {
@@ -87,7 +88,7 @@ class MstInitiative extends Model
     /**
      * The latest status entry.
      */
-    public function latestStatus(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function latestStatus(): HasOne
     {
         return $this->hasOne(StatusMstInitiative::class, 'initiative_id')->latestOfMany();
     }
@@ -194,5 +195,10 @@ class MstInitiative extends Model
     private function isAutoSyncedProject(TrsProject $project): bool
     {
         return $project->code === $this->autoSyncedProjectCode();
+    }
+
+    public function statusImplementations(): HasMany
+    {
+        return $this->hasMany(TrsStatusImplementation::class, 'initiative_id');
     }
 }

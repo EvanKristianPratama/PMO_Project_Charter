@@ -73,6 +73,16 @@ export function useNavigation() {
                 href: routeHelper('digital-initiatives.index'),
                 icon: FolderIcon,
                 active: (url) => url.startsWith('/digital-initiatives'),
+                children: [
+                    {
+                        label: 'Status Implementation',
+                        href: routeHelper('digital-initiatives.index', { tableMode: 'implementation' }),
+                        icon: ClipboardDocumentCheckIcon,
+                        active: (url) =>
+                            url.startsWith('/digital-initiatives')
+                            && url.includes('tableMode=implementation'),
+                    },
+                ],
             },
             {
                 label: 'IT Initiatives',

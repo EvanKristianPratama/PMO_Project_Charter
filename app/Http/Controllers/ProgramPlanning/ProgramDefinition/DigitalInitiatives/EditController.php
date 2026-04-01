@@ -3,27 +3,15 @@
 namespace App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives;
 
 use App\Http\Controllers\Controller;
-use App\Models\DigitalInitiative;
-use App\Models\InitiativeStatus;
-use Inertia\Inertia;
-use Inertia\Response;
+use App\Models\MstInitiative;
+use Illuminate\Http\RedirectResponse;
 
 class EditController extends Controller
 {
-    public function __invoke(DigitalInitiative $digitalInitiative): Response
+    public function __invoke(MstInitiative $digitalInitiative): RedirectResponse
     {
-        $digitalInitiative->load('latestScStatusImplementation');
-
-        return Inertia::render('ProgramPlanning/ProgramDefinition/DigitalInitiatives/Edit', [
-            'initiative' => $digitalInitiative,
-            'statusOptions' => InitiativeStatus::ordered()
-                ->map(fn (InitiativeStatus $status) => [
-                    'id' => (int) $status->id,
-                    'name' => $status->name,
-                    'label' => ucfirst($status->name),
-                ])
-                ->values(),
-            'defaultStatusId' => InitiativeStatus::DRAFTING,
-        ]);
+        return redirect()
+            ->route('master-data.mst-initiatives.edit', $digitalInitiative)
+            ->with('info', 'Halaman edit Digital Initiative lama sudah dipindahkan ke Master Initiative.');
     }
 }
