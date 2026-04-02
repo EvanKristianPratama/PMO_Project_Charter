@@ -191,15 +191,41 @@ const modalLoading = computed(() => {
     return isAddModal.value ? mappingProcessing.value : deleteProcessing.value;
 });
 
-const initiativeOptionLabel = (initiative) => {
-    const code = String(initiative?.code ?? '').trim();
-    const name = String(initiative?.name ?? '').trim();
+const stripInitiativePrefix = (name, code) => {
+    const rawName = String(name ?? '').trim();
+    const rawCode = String(code ?? '').trim().replace(/#/g, '');
 
-    if (code !== '' && name !== '') {
+    if (rawName === '' || rawCode === '') {
+        return rawName;
+    }
+
+    const escapedCode = rawCode.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const pattern = new RegExp(`^\\s*(\\[\\s*)?${escapedCode}(\\s*\\])?\\s*[-|.:)]?\\s*`, 'i');
+    const cleanedName = rawName.replace(pattern, '').trim();
+
+    return cleanedName !== '' ? cleanedName : rawName;
+};
+
+const initiativeDisplayCode = (initiative) => {
+    return String(initiative?.code ?? '').trim().replace(/#/g, '');
+};
+
+const initiativeDisplayName = (initiative) => {
+    const code = initiativeDisplayCode(initiative);
+    const name = stripInitiativePrefix(initiative?.name ?? '', code);
+
+    return name || '-';
+};
+
+const initiativeOptionLabel = (initiative) => {
+    const code = initiativeDisplayCode(initiative);
+    const name = initiativeDisplayName(initiative);
+
+    if (code !== '' && name !== '-') {
         return `[${code}] ${name}`;
     }
 
-    return name || code || '-';
+    return name !== '-' ? name : code || '-';
 };
 
 const isValidId = (value) => {
@@ -709,8 +735,18 @@ defineExpose({
                                             class="initiative-box"
                                             :title="initiativeOptionLabel(initiative)"
                                         >
-                                            <span class="initiative-box__label">
-                                                {{ initiative.name }}
+                                            <span
+                                                v-if="initiativeDisplayCode(initiative)"
+                                                class="initiative-box__code"
+                                            >
+                                                {{ initiativeDisplayCode(initiative) }}
+                                            </span>
+
+                                            <span
+                                                class="initiative-box__name"
+                                                :class="{ 'initiative-box__name--full': !initiativeDisplayCode(initiative) }"
+                                            >
+                                                {{ initiativeDisplayName(initiative) }}
                                             </span>
 
                                             <button
@@ -1006,33 +1042,55 @@ defineExpose({
 .initiatives-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    align-items: flex-start;
+    gap: 8px;
 }
 
 .initiative-box {
     position: relative;
-    display: inline-flex;
-    min-height: 28px;
-    max-width: 210px;
-    align-items: center;
-    border: 1px solid #4b5563;
+    display: inline-grid;
+    flex: 0 1 auto;
+    grid-template-columns: auto minmax(0, 1fr);
+    min-height: 38px;
+    max-width: 100%;
+    align-items: stretch;
+    border: 1px solid #374151;
     background: #ffffff;
-    padding: 4px 8px;
     font-size: 11px;
     font-weight: 500;
     line-height: 1.25;
     color: #1f2937;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+    overflow: hidden;
 }
 
-.initiative-box__label {
-    padding-right: 18px;
+.initiative-box__code {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid #374151;
+    padding: 6px 10px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+}
+
+.initiative-box__name {
+    display: flex;
+    align-items: center;
+    max-width: 220px;
+    padding: 6px 28px 6px 12px;
+    word-break: break-word;
+}
+
+.initiative-box__name--full {
+    grid-column: 1 / -1;
+    padding-left: 12px;
 }
 
 .initiative-box__remove {
     position: absolute;
-    top: 3px;
-    right: 4px;
+    top: 4px;
+    right: 6px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1090,8 +1148,16 @@ defineExpose({
     }
 
     .initiative-box {
-        max-width: 160px;
         font-size: 10px;
+    }
+
+    .initiative-box__code {
+        padding: 6px 9px;
+    }
+
+    .initiative-box__name {
+        max-width: 180px;
+        padding: 6px 24px 6px 10px;
     }
 }
 </style>
