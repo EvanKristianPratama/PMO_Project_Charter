@@ -151,6 +151,12 @@ export function useNavigation() {
                 children: programPlanningChildren,
             },
             {
+                label: 'Strategic House',
+                href: routeHelper('strategic-house.index'),
+                icon: DocumentTextIcon,
+                active: (url) => url.startsWith('/strategic-house'),
+            },
+            {
                 label: 'Program Evaluation',
                 href: routeHelper('program-evaluation.index'),
                 icon: DocumentTextIcon,

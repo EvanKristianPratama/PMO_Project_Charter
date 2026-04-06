@@ -37,6 +37,14 @@
                                         Add Initiative Tagging
                                     </DialogTitle>
 
+                                    <div class="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300">
+                                        Pilar aktif:
+                                        <span class="ml-1 font-semibold text-slate-900 dark:text-white">{{ pilarLabel }}</span>
+                                        <span class="ml-2 rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:bg-slate-700 dark:text-slate-200">
+                                            Pilar {{ pilar }}
+                                        </span>
+                                    </div>
+
                                     <form @submit.prevent="submit" class="mt-4 space-y-4">
                                         <!-- 1. Initiative -->
                                         <div>
@@ -140,6 +148,14 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    pilar: {
+        type: [String, Number],
+        default: 1,
+    },
+    pilarLabel: {
+        type: String,
+        default: 'Strategic Pillars',
+    },
 });
 
 const emit = defineEmits(['close']);
@@ -148,6 +164,7 @@ const form = useForm({
     initiative_id: '',
     goal: '',
     themes_id: '',
+    pilar: String(props.pilar ?? 1),
 });
 
 // Sort initiatives by code numerically
@@ -173,15 +190,21 @@ watch(() => form.goal, (newGoal, oldGoal) => {
     }
 });
 
+watch(() => props.pilar, (newPilar) => {
+    form.pilar = String(newPilar ?? 1);
+});
+
 const closeModal = () => {
     emit('close');
     form.reset();
+    form.pilar = String(props.pilar ?? 1);
     form.clearErrors();
 };
 
 const submit = () => {
     form.transform(data => ({
         ...data,
+        pilar: String(props.pilar ?? data.pilar ?? 1),
         goal: data.goal === '__TBC__' ? null : data.goal,
         themes_id: data.goal === '__TBC__' ? null : data.themes_id,
     })).post(route('strategic-pillars.tagging.store'), {

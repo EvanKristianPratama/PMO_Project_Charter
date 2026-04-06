@@ -17,6 +17,7 @@ class StoreInitiativeTaggingRequest extends FormRequest
             'initiative_id' => ['required', 'integer', 'exists:mst_initiative,id'],
             'themes_id' => ['nullable', 'integer', 'exists:trs_themes,id'],
             'goal' => ['nullable', 'string', 'max:255'],
+            'pilar' => ['required', 'string', 'in:1,2'],
         ];
     }
 }

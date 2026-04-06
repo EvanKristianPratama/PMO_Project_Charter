@@ -1,10 +1,28 @@
 <template>
-    <UserLayout title="Strategic Pillars">
+    <UserLayout :title="pageTitle">
         <div class="animate-fade-in">
             <div class="mb-4">
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h2 class="text-base font-bold text-slate-900 dark:text-white">Strategic Pillars & Themes</h2>
+                        <h2 class="text-base font-bold text-slate-900 dark:text-white">{{ pageTitle }}</h2>
+                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                            Pindah konteks pilar untuk membuka mapping initiative yang berbeda.
+                        </p>
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <button
+                                v-for="option in pilarOptions"
+                                :key="`pilar-nav-${option.id}`"
+                                type="button"
+                                @click="switchPilar(option.id)"
+                                :class="String(option.id) === currentPilar
+                                    ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm dark:border-blue-400 dark:bg-blue-500/10 dark:text-blue-200'
+                                    : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900/30 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/60'"
+                                class="inline-flex min-w-[140px] flex-col rounded-xl border px-3 py-2 text-left transition-colors"
+                            >
+                                <span class="text-[10px] font-semibold uppercase tracking-wider opacity-70">{{ option.label }}</span>
+                                <span class="text-sm font-semibold">{{ option.name }}</span>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="flex items-center gap-2">
@@ -256,6 +274,8 @@
                 :show="showTaggingModal"
                 :initiatives="allInitiatives"
                 :goals="strategicPillars"
+                :pilar="currentPilar"
+                :pilar-label="currentPilarOption.name"
                 @close="showTaggingModal = false"
             />
 
@@ -294,17 +314,47 @@ const props = defineProps({
     matrixInitiatives:{ type: Array, default: () => [] },
     allOrganizations: { type: Array, default: () => [] },
     filters:          { type: Object, default: () => ({}) },
+    pilarOptions:     { type: Array, default: () => [] },
 });
 
 // --- Filters (client-side only) ---
-const selectedGoalId = ref(props.filters.goal_id ? Number(props.filters.goal_id) : null);
+const initialGoalId = props.filters.goal_id ? Number(props.filters.goal_id) : null;
+const selectedGoalId = ref(
+    props.allGoals.some(goal => Number(goal.id) === initialGoalId)
+        ? initialGoalId
+        : null
+);
 const selectedOrgId  = ref(props.filters.org_id  ? Number(props.filters.org_id)  : null);
 const applyFilter = () => {};
+const currentPilar = computed(() => String(props.filters.pilar ?? 1));
+const currentPilarOption = computed(() =>
+    props.pilarOptions.find(option => String(option.id) === currentPilar.value)
+    ?? {
+        id: Number(currentPilar.value),
+        label: `Pilar ${currentPilar.value}`,
+        name: `Pilar ${currentPilar.value}`,
+    }
+);
+const pageTitle = computed(() => currentPilarOption.value.name);
 
 const filteredPillars = computed(() => {
     if (!selectedGoalId.value) return props.strategicPillars;
     return props.strategicPillars.filter(p => p.id === selectedGoalId.value);
 });
+
+const switchPilar = (pilarId) => {
+    if (String(pilarId) === currentPilar.value) return;
+
+    const payload = { pilar: pilarId };
+
+    if (selectedOrgId.value) {
+        payload.org_id = selectedOrgId.value;
+    }
+
+    router.get(route('strategic-pillars.index'), payload, {
+        preserveScroll: true,
+    });
+};
 
 // --- Navigation ---
 const navigateToScope = (tag) => {

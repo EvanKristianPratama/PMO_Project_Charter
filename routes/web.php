@@ -47,6 +47,7 @@ use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Up
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\IndexController as ProgramDefinitionController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\ITInitiatives\IndexController as ProgramDefinitionITInitiativesController;
 use App\Http\Controllers\ProgramPlanning\ProgramPlanningController;
+use App\Http\Controllers\ProgramPlanning\StrategicHouse\IndexController as ProgramPlanningStrategicHouseIndexController;
 use App\Http\Controllers\ProgramPlanning\StrategicPillars\IndexController as ProgramPlanningStrategicPillarsIndexController;
 use App\Http\Controllers\ProgramPlanning\StrategicPillars\InitiativeTaggingController;
 use Illuminate\Support\Facades\Route;
@@ -207,6 +208,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/program-evalution/review-timeline', [ReviewTimelineController::class, 'index'])->name('program-evaluation.review-timeline');
 
     // Strategic Pillars
+    Route::get('/strategic-house', ProgramPlanningStrategicHouseIndexController::class)->name('strategic-house.index');
     Route::get('/strategic-pillars/{goal?}', ProgramPlanningStrategicPillarsIndexController::class)->name('strategic-pillars.index');
     Route::post('/strategic-pillars/tagging', [InitiativeTaggingController::class, 'store'])->name('strategic-pillars.tagging.store');
     Route::delete('/strategic-pillars/tagging/{tagging}', [InitiativeTaggingController::class, 'destroy'])->name('strategic-pillars.tagging.destroy');
