@@ -69,7 +69,7 @@
                             <!-- Action -->
                             <td class="px-1 py-1 text-center align-middle">
                                 <div class="flex items-center justify-center gap-1.5 w-max mx-auto">
-                                    <button v-if="logIndex === (getStatusRowCount(proj) - 1) && proj?.id" @click="openAddModal(proj)" class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-indigo-100 text-indigo-800 hover:bg-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:hover:bg-indigo-500/30 transition-colors cursor-pointer" title="Add Status">
+                                    <button v-if="logIndex === 0 && proj?.id" @click="openAddModal(proj)" class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-indigo-100 text-indigo-800 hover:bg-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:hover:bg-indigo-500/30 transition-colors cursor-pointer" title="Add Status">
                                         <svg class="mr-0.5 h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                         Add
                                     </button>
@@ -318,7 +318,7 @@ const getLogPeriodeLabel = (log) => {
 
 const getLatestImplementationLog = (project) => {
     const history = getImplementationHistory(project);
-    return history.length > 0 ? history[history.length - 1] : null;
+    return history.length > 0 ? history[0] : null;
 };
 
 const getLatestReviewStatus = (project) => {

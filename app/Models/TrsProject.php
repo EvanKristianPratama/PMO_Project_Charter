@@ -62,7 +62,7 @@ class TrsProject extends Model
     public function pcStatusImplementations(): HasMany
     {
         return $this->hasMany(PcStatusImplementation::class, 'project_id')
-            ->orderBy('id', 'asc');
+            ->orderBy('id', 'desc');
     }
 
     public function projectStatusHistories(): HasManyThrough
