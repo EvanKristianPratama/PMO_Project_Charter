@@ -19,10 +19,6 @@ const programImplementationItem = computed(() => {
     return navItems.value.find((item) => item.label === 'Program Implementation') ?? null;
 });
 
-const strategicHouseItem = computed(() => {
-    return navItems.value.find((item) => item.label === 'Strategic House') ?? null;
-});
-
 const programImplementationInitiativeRelationShortcut = computed(() => {
     const initiativeRelationItem = programPlanningChildren.value.find((item) => item.label === 'Initiative Relation');
 
@@ -95,28 +91,7 @@ const showImplementationChildren = computed(() => {
             </Link>
 
             <span
-                v-if="programPlanningItem && (strategicHouseItem || programImplementationItem || programInformationItem)"
-                class="select-none px-0.5 text-slate-300 dark:text-slate-600"
-            >
-                ·
-            </span>
-
-            <Link
-                v-if="strategicHouseItem"
-                :href="strategicHouseItem.href"
-                class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
-                :class="[
-                    strategicHouseItem.active(currentUrl)
-                        ? 'bg-blue-500 text-white shadow-sm'
-                        : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200'
-                ]"
-            >
-                <component :is="strategicHouseItem.icon" v-if="strategicHouseItem.icon" class="h-3.5 w-3.5 shrink-0" />
-                <span>{{ strategicHouseItem.label }}</span>
-            </Link>
-
-            <span
-                v-if="strategicHouseItem && (programImplementationItem || programInformationItem)"
+                v-if="programPlanningItem && (programImplementationItem || programInformationItem)"
                 class="select-none px-0.5 text-slate-300 dark:text-slate-600"
             >
                 ·
