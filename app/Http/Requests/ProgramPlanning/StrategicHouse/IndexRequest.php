@@ -18,6 +18,7 @@ class IndexRequest extends FormRequest
             'show_empty' => ['nullable', 'boolean'],
         ];
     }
+    
 
     public function filters(): array
     {

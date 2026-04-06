@@ -23,6 +23,12 @@ export function useNavigation() {
     const navItems = computed(() => {
         const programPlanningChildren = [
             {
+                label: 'Strategic House',
+                href: routeHelper('strategic-house.index'),
+                icon: DocumentTextIcon,
+                active: (url) => url.startsWith('/strategic-house'),
+            },
+            {
                 label: 'Strategic Pillars',
                 href: routeHelper('strategic-pillars.index'),
                 icon: FlagIcon,
@@ -147,14 +153,9 @@ export function useNavigation() {
                 active: (url) =>
                     url.startsWith('/dashboard-monitoring')
                     || url.startsWith('/program-planning')
+                    || url.startsWith('/strategic-house')
                     || url.startsWith('/strategic-pillars'),
                 children: programPlanningChildren,
-            },
-            {
-                label: 'Strategic House',
-                href: routeHelper('strategic-house.index'),
-                icon: DocumentTextIcon,
-                active: (url) => url.startsWith('/strategic-house'),
             },
             {
                 label: 'Program Evaluation',
