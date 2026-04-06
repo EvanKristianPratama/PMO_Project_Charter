@@ -28,7 +28,9 @@ export function useNavigation() {
                 icon: DocumentTextIcon,
                 active: (url) => url.startsWith('/strategic-house'),
             },
+            
             {
+        
                 label: 'Strategic Pillars',
                 href: routeHelper('strategic-pillars.index'),
                 icon: FlagIcon,
