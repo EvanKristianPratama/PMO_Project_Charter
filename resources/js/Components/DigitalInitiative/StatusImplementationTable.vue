@@ -56,14 +56,21 @@
                 </select>
             </div>
 
-            <button type="button"
-                class="ml-auto inline-flex items-center justify-center gap-1 rounded-md bg-[#1C75BC] px-2 py-1 text-[10px] font-semibold normal-case tracking-normal text-white shadow-sm transition hover:bg-[#0f63b5] focus:outline-none focus:ring-2 focus:ring-[#1C75BC]/20"
-                @click="openAddModal">
-                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Add Status
-            </button>
+            <div class="ml-auto flex items-center gap-2">
+                <div
+                    class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs font-semibold text-slate-600 shadow-sm dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-200">
+                    Total: {{ filteredItemsCount }}
+                </div>
+
+                <button type="button"
+                    class="inline-flex items-center justify-center gap-1 rounded-md bg-[#1C75BC] px-2 py-1 text-[10px] font-semibold normal-case tracking-normal text-white shadow-sm transition hover:bg-[#0f63b5] focus:outline-none focus:ring-2 focus:ring-[#1C75BC]/20"
+                    @click="openAddModal">
+                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add Status
+                </button>
+            </div>
         </div>
 
         <div class="overflow-x-auto">
@@ -356,6 +363,8 @@ const filteredItems = computed(() => {
         return true;
     });
 });
+
+const filteredItemsCount = computed(() => filteredItems.value.length);
 
 const compareText = (left, right) => {
     const normalizedLeft = normalizeText(left);

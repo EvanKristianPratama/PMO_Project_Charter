@@ -85,7 +85,7 @@ class ITInitiativeService
             ->with([
                 'charter',
                 'charter.milestones',
-                'charters' => static fn ($query) => $query->latest()->with('milestones'),
+                'charters' => static fn ($query) => $query->latest('id')->with('milestones'),
                 'owner',
                 'statusRef:id,name',
                 'pcStatusImplementations',
@@ -118,9 +118,9 @@ class ITInitiativeService
                         'trs_project_charters.tgl_dokumen',
                         'trs_project_charters.duration',
                     ])
-                    ->latest(),
+                    ->latest('id'),
                 'statusRef:id,name',
-                'pcStatusImplementations' => static fn ($query) => $query->orderBy('date', 'desc')->orderBy('time_start', 'desc')->limit(1),
+                'pcStatusImplementations' => static fn ($query) => $query->orderBy('year', 'asc')->orderBy('id', 'asc'),
             ])
             ->orderBy('code')
             ->get();
@@ -223,8 +223,9 @@ class ITInitiativeService
             'project_id' => $project->id,
             'review_status' => $payload['review_status'],
             'status' => $payload['status'],
-            'date' => \Carbon\Carbon::createFromFormat('Y-m', $payload['month_year'])->startOfMonth()->toDateString(),
-            'time_start' => now()->toTimeString(),
+            'start' => $payload['start'] ?? null,
+            'end' => $payload['end'] ?? null,
+            'year' => $payload['year'] ?? null,
         ]);
     }
 
@@ -235,7 +236,9 @@ class ITInitiativeService
         $implementationStatus->update([
             'status' => $payload['status'],
             'review_status' => $payload['review_status'],
-            'date' => \Carbon\Carbon::createFromFormat('Y-m', $payload['month_year'])->startOfMonth()->toDateString(),
+            'start' => $payload['start'] ?? null,
+            'end' => $payload['end'] ?? null,
+            'year' => $payload['year'] ?? null,
         ]);
     }
 
@@ -288,7 +291,7 @@ class ITInitiativeService
                     ])
                     ->latest('id'),
                 'statusRef:id,name',
-                'pcStatusImplementations' => fn ($query) => $query->orderBy('date', 'desc')->orderBy('id', 'desc'),
+                'pcStatusImplementations' => fn ($query) => $query->orderBy('year', 'asc')->orderBy('id', 'asc'),
                 'projectStatusHistories.projectCharter:id,project_id,version_label,tgl_dokumen',
             ])
             ->where('tipe_inisiative', 2)
@@ -330,7 +333,7 @@ class ITInitiativeService
                     ->with([
                         'owner:id,name',
                         'statusRef:id,name',
-                        'pcStatusImplementations' => fn ($implementationQuery) => $implementationQuery->orderBy('date', 'desc')->orderBy('id', 'desc'),
+                        'pcStatusImplementations' => fn ($implementationQuery) => $implementationQuery->orderBy('year', 'asc')->orderBy('id', 'asc'),
                         'charter' => fn ($charterQuery) => $charterQuery->select($projectCharterColumns),
                         'charters' => fn ($chartersQuery) => $chartersQuery
                             ->select($projectCharterColumns)

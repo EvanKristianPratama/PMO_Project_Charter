@@ -29,7 +29,7 @@ class TrsScInitiative extends Model
     {
         return tap(
             $this->hasMany(ScStatusImplementation::class, 'digital_initiative_id'),
-            fn ($q) => $q->orderBy('date', 'desc')->orderBy('time_start', 'desc')
+            fn ($q) => $q->orderBy('date', 'desc')->orderBy('id', 'desc')
         );
     }
 

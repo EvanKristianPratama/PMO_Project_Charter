@@ -4,12 +4,12 @@
         <div class="overflow-x-auto rounded-lg border border-slate-200 dark:border-white/10">
             <table class="w-full table-fixed divide-y divide-x divide-slate-200 text-[11px] dark:divide-white/10">
                 <colgroup>
-                    <col :class="codeLabel !== 'Code' ? 'w-[15%]' : 'w-[10%]'">
-                    <col class="w-[20%]">
-                    <col :class="codeLabel !== 'Code' ? 'w-[15%]' : 'w-[15%]'">
-                    <col :class="codeLabel !== 'Code' ? 'w-[10%]' : 'w-[15%]'">
-                    <col :class="codeLabel !== 'Code' ? 'w-[30%]' : 'w-[40%]'">
+                    <col :class="codeLabel !== 'Code' ? 'w-[12%]' : 'w-[8%]'">
+                    <col class="w-[18%]">
                     <col class="w-[10%]">
+                    <col :class="codeLabel !== 'Code' ? 'w-[12%]' : 'w-[14%]'">
+                    <col :class="codeLabel !== 'Code' ? 'w-[35%]' : 'w-[37%]'">
+                    <col class="w-[13%]">
                 </colgroup>
                 <thead v-if="showHeader" class="bg-slate-50 dark:bg-white/[0.03]">
                     <tr class="divide-x divide-slate-200 dark:divide-white/10">
@@ -24,51 +24,64 @@
                             Progres Status</th>
                         <th
                             class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-                            Month/Year</th>
+                            Periode Status</th>
                         <th
                             class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
                             Notes</th>
                         <th
-                            class="w-16 px-1 py-1.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                            class="px-1 py-1.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-400">
                             Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/10 dark:bg-[#1a1a1a]">
-                    <tr v-for="(proj, projIndex) in projectList" :key="`t1-status-${proj?.id ?? projIndex}`" class="divide-x divide-slate-200 hover:bg-slate-50 dark:divide-white/10 dark:hover:bg-white/5 transition-colors">
-                        <td class="px-2 py-3 text-[11px] font-semibold text-slate-700 dark:text-slate-200">
-                            {{ proj.code || '-' }}
-                        </td>
-                        <td class="px-2 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-200 truncate" :title="proj.name">
-                            {{ proj.name || '-' }}
-                        </td>
-                        <td class="px-1 py-2">
-                            <span v-if="getLatestReviewStatus(proj)"
-                                class="inline-flex rounded-md px-1.5 py-0.5 text-[9px] font-medium"
-                                :class="reviewStatusBadgeClass(getLatestReviewStatus(proj))">
-                                {{ getLatestReviewStatus(proj) }}
-                            </span>
-                            <span v-else class="text-[10px] italic text-slate-400">-</span>
-                        </td>
-                        <td class="px-2 py-3 text-[10px] font-medium text-slate-600 dark:text-slate-300">
-                            {{ getLatestImplementationMonthYear(proj) || '-' }}
-                        </td>
-                        <td class="px-2 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-300">
-                            {{ getLatestImplementationStatus(proj) || '-' }}
-                        </td>
-                        <td class="px-1 py-1 text-center align-middle">
-                            <div class="flex items-center justify-center gap-1.5 w-max mx-auto">
-                                <button v-if="proj?.id" @click="openAddModal(proj)" class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-indigo-100 text-indigo-800 hover:bg-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:hover:bg-indigo-500/30 transition-colors cursor-pointer" title="Add Status">
-                                    <svg class="mr-0.5 h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                    Add
-                                </button>
-                                <button v-if="getLatestImplementationLog(proj)" @click="openEditModal(getLatestImplementationLog(proj))" class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-500/20 dark:text-amber-300 dark:hover:bg-amber-500/30 transition-colors cursor-pointer" title="Edit Status">
-                                    Edit
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+                    <template v-for="(proj, projIndex) in projectList" :key="`proj-${proj?.id ?? projIndex}`">
+                        <tr v-for="(log, logIndex) in getStatusRows(proj)" :key="`t1-${proj?.id ?? projIndex}-${log?.id ?? logIndex}`" class="divide-x divide-slate-200 hover:bg-slate-50 dark:divide-white/10 dark:hover:bg-white/5 transition-colors">
+                            <!-- Code: rowspan on first row -->
+                            <td v-if="logIndex === 0"
+                                :rowspan="getStatusRowCount(proj)"
+                                class="px-2 py-3 text-[11px] font-semibold text-slate-700 dark:text-slate-200 align-middle text-center border-b border-slate-200 dark:border-white/10">
+                                {{ proj.code || '-' }}
+                            </td>
+                            <!-- Name: rowspan on first row -->
+                            <td v-if="logIndex === 0"
+                                :rowspan="getStatusRowCount(proj)"
+                                class="px-2 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-200 truncate align-middle text-center border-b border-slate-200 dark:border-white/10"
+                                :title="proj.name">
+                                {{ proj.name || '-' }}
+                            </td>
+                            <!-- Progres Status -->
+                            <td class="px-1 py-2 align-middle text-center">
+                                <span v-if="log?.review_status"
+                                    class="inline-flex rounded-md px-1.5 py-0.5 text-[9px] font-medium"
+                                    :class="reviewStatusBadgeClass(log.review_status)">
+                                    {{ log.review_status }}
+                                </span>
+                                <span v-else class="text-[10px] italic text-slate-400">-</span>
+                            </td>
+                            <!-- Periode Status -->
+                            <td class="px-2 py-3 text-[10px] font-medium text-slate-600 dark:text-slate-300">
+                                {{ getLogPeriodeLabel(log) || '-' }}
+                            </td>
+                            <!-- Notes -->
+                            <td class="px-2 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                                {{ log?.status || '-' }}
+                            </td>
+                            <!-- Action -->
+                            <td class="px-1 py-1 text-center align-middle">
+                                <div class="flex items-center justify-center gap-1.5 w-max mx-auto">
+                                    <button v-if="logIndex === (getStatusRowCount(proj) - 1) && proj?.id" @click="openAddModal(proj)" class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-indigo-100 text-indigo-800 hover:bg-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:hover:bg-indigo-500/30 transition-colors cursor-pointer" title="Add Status">
+                                        <svg class="mr-0.5 h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                        Add
+                                    </button>
+                                    <button v-if="log?.id" @click="openEditModal(log)" class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-500/20 dark:text-amber-300 dark:hover:bg-amber-500/30 transition-colors cursor-pointer" title="Edit Status">
+                                        Edit
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </template>
                     <tr v-if="projectList.length === 0">
-                        <td colspan="4" class="px-4 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
+                        <td colspan="6" class="px-4 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
                             Data status implementasi belum tersedia.
                         </td>
                     </tr>
@@ -278,9 +291,34 @@ const getImplementationHistory = (project) => {
     return Array.isArray(source) ? source : [];
 };
 
+// Returns all status rows for a project; at least 1 empty placeholder row if none
+const getStatusRows = (project) => {
+    const history = getImplementationHistory(project);
+    return history.length > 0 ? history : [null];
+};
+
+const getStatusRowCount = (project) => {
+    return getStatusRows(project).length;
+};
+
+const getLogPeriodeLabel = (log) => {
+    if (!log) return null;
+
+    // Use backend-computed periode_label
+    const label = log?.periode_label ?? null;
+    if (label) return label;
+
+    // Fallback: old date column
+    const rawDate = log?.date ?? null;
+    if (!rawDate) return null;
+    const date = new Date(rawDate);
+    if (Number.isNaN(date.getTime())) return null;
+    return date.toLocaleDateString('id-ID', { year: 'numeric', month: 'long' });
+};
+
 const getLatestImplementationLog = (project) => {
     const history = getImplementationHistory(project);
-    return history.length > 0 ? history[0] : null;
+    return history.length > 0 ? history[history.length - 1] : null;
 };
 
 const getLatestReviewStatus = (project) => {
@@ -297,11 +335,18 @@ const getLatestImplementationStatus = (project) => {
 
 const getLatestImplementationMonthYear = (project) => {
     const log = getLatestImplementationLog(project);
+    if (!log) return null;
+
+    // Use the computed periode_label from the backend
+    const label = log?.periode_label ?? null;
+    if (label) return label;
+
+    // Fallback: old date column for backward compatibility
     const rawDate = log?.date ?? null;
     if (!rawDate) return null;
     const date = new Date(rawDate);
     if (Number.isNaN(date.getTime())) return null;
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+    return date.toLocaleDateString('id-ID', { year: 'numeric', month: 'long' });
 };
 
 const formatDateLong = (value) => {

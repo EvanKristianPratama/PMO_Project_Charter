@@ -37,15 +37,42 @@
                                     </DialogTitle>
                                     
                                     <form @submit.prevent="submit" class="mt-4 space-y-4">
-                                        <div>
-                                            <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">Month / Year</label>
-                                            <input
-                                                v-model="form.month_year"
-                                                type="month"
-                                                class="mt-1 block w-full rounded-lg border-gray-300 dark:border-white/10 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white"
-                                                required
-                                            />
-                                            <div v-if="form.errors.month_year" class="mt-1 text-sm text-red-600">{{ form.errors.month_year }}</div>
+                                        <!-- Periode: Start, End, Year -->
+                                        <div class="grid grid-cols-3 gap-3">
+                                            <div>
+                                                <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">Start <span class="text-red-500">*</span></label>
+                                                <select
+                                                    v-model="form.start"
+                                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-white/10 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white"
+                                                    required
+                                                >
+                                                    <option value="" disabled>Pilih</option>
+                                                    <option v-for="m in monthOptions" :key="m" :value="m">{{ m }}</option>
+                                                </select>
+                                                <div v-if="form.errors.start" class="mt-1 text-sm text-red-600">{{ form.errors.start }}</div>
+                                            </div>
+                                            <div>
+                                                <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">End</label>
+                                                <select
+                                                    v-model="form.end"
+                                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-white/10 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white"
+                                                >
+                                                    <option value="">Pilih</option>
+                                                    <option v-for="m in monthOptions" :key="m" :value="m">{{ m }}</option>
+                                                </select>
+                                                <div v-if="form.errors.end" class="mt-1 text-sm text-red-600">{{ form.errors.end }}</div>
+                                            </div>
+                                            <div>
+                                                <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">Year</label>
+                                                <input
+                                                    v-model="form.year"
+                                                    type="text"
+                                                    maxlength="4"
+                                                    placeholder="2026"
+                                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-white/10 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white"
+                                                />
+                                                <div v-if="form.errors.year" class="mt-1 text-sm text-red-600">{{ form.errors.year }}</div>
+                                            </div>
                                         </div>
 
                                         <div>
@@ -129,8 +156,15 @@ const props = defineProps({
 const emit = defineEmits(['close']);
 const route = useRouteHelper();
 
+const monthOptions = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+];
+
 const form = useForm({
-    month_year: '',
+    start: '',
+    end: '',
+    year: '',
     review_status: 'On Track',
     status: '',
 });
@@ -140,7 +174,9 @@ const isEditing = computed(() => !!props.statusData);
 watch(() => props.show, (show) => {
     if (show) {
         if (props.statusData) {
-            form.month_year = props.statusData.date ? props.statusData.date.substring(0, 7) : '';
+            form.start = props.statusData.start || '';
+            form.end = props.statusData.end || '';
+            form.year = props.statusData.year || '';
             form.review_status = props.statusData.review_status || 'On Track';
             form.status = props.statusData.status || '';
         } else {
