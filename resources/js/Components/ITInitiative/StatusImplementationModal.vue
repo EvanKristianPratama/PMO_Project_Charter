@@ -83,6 +83,7 @@
                                                 required
                                             >
                                                 <option value="On Track">On Track</option>
+                                                <option value="Done">Done</option>
                                                 <option value="At Risk">At Risk</option>
                                                 <option value="Not Started">Not Started</option>
                                                 <option value="Not Signed">Not Signed</option>
