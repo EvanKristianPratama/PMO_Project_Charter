@@ -11,39 +11,59 @@ use Illuminate\Support\Collection;
 
 class StrategicPillarPageService
 {
-    public function getPageProps(?string $goalId, ?string $organizationId): array
+    private const DEFAULT_PILAR = '1';
+
+    private const PILAR_OPTIONS = [
+        '1' => [
+            'label' => 'Pilar 1',
+            'name' => 'Strategic Pillars',
+        ],
+        '2' => [
+            'label' => 'Pilar 2',
+            'name' => 'Dual Growth',
+        ],
+    ];
+
+    public function getPageProps(?string $goalId, ?string $organizationId, ?string $pilarId): array
     {
+        $selectedPilar = $this->normalizePilar($pilarId);
+
         return [
-            'strategicPillars' => fn () => $this->getStrategicPillars(),
-            'taggings' => fn () => $this->getTaggings(),
-            'filters' => $this->getFilters($goalId, $organizationId),
-            'allGoals' => fn () => $this->getAllGoals(),
+            'strategicPillars' => fn () => $this->getStrategicPillars($selectedPilar),
+            'taggings' => fn () => $this->getTaggings($selectedPilar),
+            'filters' => $this->getFilters($goalId, $organizationId, $selectedPilar),
+            'allGoals' => fn () => $this->getAllGoals($selectedPilar),
             'allOrganizations' => fn () => $this->getAllOrganizations(),
             'allInitiatives' => fn () => $this->getAllInitiatives(),
-            'allThemes' => fn () => $this->getAllThemes(),
-            'matrixInitiatives' => fn () => $this->getMatrixInitiatives(),
+            'allThemes' => fn () => $this->getAllThemes($selectedPilar),
+            'matrixInitiatives' => fn () => $this->getMatrixInitiatives($selectedPilar),
+            'pilarOptions' => $this->getPilarOptions(),
         ];
     }
 
-    public function getFilters(?string $goalId, ?string $organizationId): array
+    public function getFilters(?string $goalId, ?string $organizationId, string $pilarId): array
     {
         return [
             'goal_id' => filled($goalId) ? (int) $goalId : null,
             'org_id' => filled($organizationId) ? (int) $organizationId : null,
+            'pilar' => (int) $pilarId,
         ];
     }
 
-    public function getStrategicPillars(): Collection
+    public function getStrategicPillars(string $pilarId): Collection
     {
-        return Goal::query()
+        $query = Goal::query()
             ->with(['themes' => fn ($query) => $query->orderBy('theme_number', 'asc')])
-            ->orderBy('code', 'asc')
-            ->get();
+            ->orderBy('code', 'asc');
+
+        $this->applyGoalPilarFilter($query, $pilarId);
+
+        return $query->get();
     }
 
-    public function getTaggings(): Collection
+    public function getTaggings(string $pilarId): Collection
     {
-        return InitiativeTagging::query()
+        $query = InitiativeTagging::query()
             ->with([
                 'initiative:id,name,code,status,business_unit,tipe_initiative',
                 'initiative.latestStatus',
@@ -53,16 +73,22 @@ class StrategicPillarPageService
                 'theme:id,name,idGoal',
             ])
             ->whereHas('initiative', fn ($query) => $query->where('tipe_initiative', 1))
-            ->orderByDesc('created_at')
-            ->get();
+            ->orderByDesc('created_at');
+
+        $this->applyTaggingPilarFilter($query, $pilarId);
+
+        return $query->get();
     }
 
-    public function getAllGoals(): Collection
+    public function getAllGoals(string $pilarId): Collection
     {
-        return Goal::query()
-            ->select('id', 'code', 'title')
-            ->orderBy('code')
-            ->get();
+        $query = Goal::query()
+            ->select('id', 'code', 'title', 'pilar')
+            ->orderBy('code');
+
+        $this->applyGoalPilarFilter($query, $pilarId);
+
+        return $query->get();
     }
 
     public function getAllOrganizations(): Collection
@@ -93,20 +119,26 @@ class StrategicPillarPageService
             ->values();
     }
 
-    public function getAllThemes(): Collection
+    public function getAllThemes(string $pilarId): Collection
     {
         return Theme::query()
-            ->with('goal:id,code,title')
+            ->with('goal:id,code,title,pilar')
             ->select('id', 'name', 'theme_number', 'idGoal')
+            ->whereHas('goal', function ($query) use ($pilarId): void {
+                $this->applyGoalPilarFilter($query, $pilarId);
+            })
             ->orderBy('theme_number')
             ->get();
     }
 
-    public function getMatrixInitiatives(): Collection
+    public function getMatrixInitiatives(string $pilarId): Collection
     {
         return MstInitiative::query()
             ->select('id', 'code', 'name')
             ->where('tipe_initiative', 1)
+            ->whereHas('taggings', function ($query) use ($pilarId): void {
+                $this->applyTaggingPilarFilter($query, $pilarId);
+            })
             ->orderBy('code')
             ->get()
             ->map(fn (MstInitiative $initiative): array => [
@@ -115,5 +147,52 @@ class StrategicPillarPageService
                 'name' => $initiative->name,
             ])
             ->values();
+    }
+
+    public function getPilarOptions(): array
+    {
+        return collect(self::PILAR_OPTIONS)
+            ->map(fn (array $option, string $id): array => [
+                'id' => (int) $id,
+                'label' => $option['label'],
+                'name' => $option['name'],
+            ])
+            ->values()
+            ->all();
+    }
+
+    private function normalizePilar(?string $pilarId): string
+    {
+        return array_key_exists((string) $pilarId, self::PILAR_OPTIONS)
+            ? (string) $pilarId
+            : self::DEFAULT_PILAR;
+    }
+
+    private function applyGoalPilarFilter($query, string $pilarId): void
+    {
+        if ($pilarId === self::DEFAULT_PILAR) {
+            $query->where(function ($subQuery): void {
+                $subQuery->where('pilar', self::DEFAULT_PILAR)
+                    ->orWhereNull('pilar');
+            });
+
+            return;
+        }
+
+        $query->where('pilar', $pilarId);
+    }
+
+    private function applyTaggingPilarFilter($query, string $pilarId): void
+    {
+        if ($pilarId === self::DEFAULT_PILAR) {
+            $query->where(function ($subQuery): void {
+                $subQuery->where('pilar', self::DEFAULT_PILAR)
+                    ->orWhereNull('pilar');
+            });
+
+            return;
+        }
+
+        $query->where('pilar', $pilarId);
     }
 }

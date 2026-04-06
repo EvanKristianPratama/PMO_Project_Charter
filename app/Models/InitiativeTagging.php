@@ -15,6 +15,7 @@ class InitiativeTagging extends Model
     protected $fillable = [
         'initiative_id',
         'goal',
+        'pilar',
         'themes_id',
     ];
 

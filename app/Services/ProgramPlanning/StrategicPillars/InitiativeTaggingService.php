@@ -2,6 +2,7 @@
 
 namespace App\Services\ProgramPlanning\StrategicPillars;
 
+use App\Models\Goal;
 use App\Models\InitiativeTagging;
 use App\Models\Theme;
 use Illuminate\Validation\ValidationException;
@@ -28,19 +29,33 @@ class InitiativeTaggingService
     {
         $themesId = $payload['themes_id'] ?? null;
         $goal = $payload['goal'] ?? null;
+        $pilar = $payload['pilar'] ?? null;
 
         if ($themesId) {
             $theme = Theme::query()
-                ->with('goal:id,code')
+                ->with('goal:id,code,pilar')
                 ->find($themesId);
 
             $goal = $theme?->goal?->code ?? $goal;
+            $pilar = $theme?->goal?->pilar ?? $pilar;
+        } elseif (filled($goal)) {
+            $matchedGoal = Goal::query()
+                ->select('id', 'code', 'pilar')
+                ->where('code', $goal)
+                ->when(
+                    filled($pilar),
+                    fn ($query) => $query->where('pilar', (string) $pilar)
+                )
+                ->first();
+
+            $pilar = $matchedGoal?->pilar ?? $pilar;
         }
 
         return [
             'initiative_id' => (int) $payload['initiative_id'],
             'themes_id' => $themesId ?: null,
             'goal' => blank($goal) ? null : $goal,
+            'pilar' => blank($pilar) ? null : (string) $pilar,
         ];
     }
 
@@ -50,6 +65,7 @@ class InitiativeTaggingService
             ->where('initiative_id', $payload['initiative_id'])
             ->where('themes_id', $payload['themes_id'])
             ->where('goal', $payload['goal'])
+            ->where('pilar', $payload['pilar'])
             ->exists();
 
         if ($initiativeTaggingExists) {

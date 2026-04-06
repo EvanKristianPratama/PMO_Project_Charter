@@ -18,7 +18,11 @@ class IndexController extends Controller
     {
         return Inertia::render(
             'ProgramPlanning/StrategicPillar/Index',
-            $this->strategicPillarPageService->getPageProps($goal, $request->query('org_id'))
+            $this->strategicPillarPageService->getPageProps(
+                $goal,
+                $request->query('org_id'),
+                $request->query('pilar')
+            )
         );
     }
 }
