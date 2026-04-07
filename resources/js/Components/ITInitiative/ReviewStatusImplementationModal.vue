@@ -152,6 +152,14 @@ const props = defineProps({
         type: Number,
         required: true,
     },
+    storeRouteName: {
+        type: String,
+        default: 'it-initiatives.implementation-status.store',
+    },
+    updateRouteName: {
+        type: String,
+        default: 'it-initiatives.implementation-status.update',
+    },
 });
 
 const emit = defineEmits(['close']);
@@ -194,12 +202,12 @@ const closeModal = () => {
 
 const submit = () => {
     if (isEditing.value) {
-        form.put(route('it-initiatives.implementation-status.update', props.statusData.id), {
+        form.put(route(props.updateRouteName, props.statusData.id), {
             preserveScroll: true,
             onSuccess: () => closeModal(),
         });
     } else {
-        form.post(route('it-initiatives.implementation-status.store', props.projectId), {
+        form.post(route(props.storeRouteName, props.projectId), {
             preserveScroll: true,
             onSuccess: () => closeModal(),
         });

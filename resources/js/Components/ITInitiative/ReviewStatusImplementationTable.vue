@@ -153,6 +153,8 @@
             :show="isModalOpen"
             :status-data="editingStatus"
             :project-id="selectedProjectIdForModal"
+            :store-route-name="storeRouteName"
+            :update-route-name="updateRouteName"
             @close="closeModal"
         />
     </div>
@@ -172,9 +174,21 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    historySource: {
+        type: String,
+        default: 'auto',
+    },
     codeLabel: {
         type: String,
         default: 'Code',
+    },
+    storeRouteName: {
+        type: String,
+        default: 'it-initiatives.implementation-status.store',
+    },
+    updateRouteName: {
+        type: String,
+        default: 'it-initiatives.implementation-status.update',
     },
     showTimelineHistory: {
         type: Boolean,
@@ -286,9 +300,110 @@ const getCharterVersionLabel = (charter, index, total) => {
     return '-';
 };
 
+const monthOrderMap = new Map([
+    ['Januari', 1],
+    ['Februari', 2],
+    ['Maret', 3],
+    ['April', 4],
+    ['Mei', 5],
+    ['Juni', 6],
+    ['Juli', 7],
+    ['Agustus', 8],
+    ['September', 9],
+    ['Oktober', 10],
+    ['November', 11],
+    ['Desember', 12],
+]);
+
+const asArray = (value) => {
+    if (Array.isArray(value)) {
+        return value;
+    }
+
+    if (value && typeof value === 'object') {
+        return Object.values(value);
+    }
+
+    return [];
+};
+
+const resolveHistorySource = (project) => {
+    if (props.historySource === 'review') {
+        return project?.review_pc_status_implementations ?? project?.reviewPcStatusImplementations ?? [];
+    }
+
+    if (props.historySource === 'implementation') {
+        return project?.pc_status_implementations ?? project?.pcStatusImplementations ?? [];
+    }
+
+    return project?.review_pc_status_implementations
+        ?? project?.reviewPcStatusImplementations
+        ?? project?.pc_status_implementations
+        ?? project?.pcStatusImplementations
+        ?? [];
+};
+
+const parseHistoryYear = (value) => {
+    const parsed = Number.parseInt(String(value ?? '').trim(), 10);
+    return Number.isFinite(parsed) ? parsed : null;
+};
+
+const parseHistoryTimestamp = (value) => {
+    const parsed = Date.parse(String(value ?? '').trim());
+    return Number.isNaN(parsed) ? null : parsed;
+};
+
+const primaryHistoryMonth = (log) => {
+    const endMonth = monthOrderMap.get(String(log?.end ?? '').trim());
+    const startMonth = monthOrderMap.get(String(log?.start ?? '').trim());
+
+    return endMonth ?? startMonth ?? 0;
+};
+
+const secondaryHistoryMonth = (log) => {
+    return monthOrderMap.get(String(log?.start ?? '').trim()) ?? 0;
+};
+
+const sortHistoryDescending = (left, right) => {
+    const leftYear = parseHistoryYear(left?.year);
+    const rightYear = parseHistoryYear(right?.year);
+
+    if (leftYear !== rightYear) {
+        return (rightYear ?? Number.MIN_SAFE_INTEGER) - (leftYear ?? Number.MIN_SAFE_INTEGER);
+    }
+
+    const leftPrimaryMonth = primaryHistoryMonth(left);
+    const rightPrimaryMonth = primaryHistoryMonth(right);
+
+    if (leftPrimaryMonth !== rightPrimaryMonth) {
+        return rightPrimaryMonth - leftPrimaryMonth;
+    }
+
+    const leftSecondaryMonth = secondaryHistoryMonth(left);
+    const rightSecondaryMonth = secondaryHistoryMonth(right);
+
+    if (leftSecondaryMonth !== rightSecondaryMonth) {
+        return rightSecondaryMonth - leftSecondaryMonth;
+    }
+
+    const leftTimestamp =
+        parseHistoryTimestamp(left?.date) ??
+        parseHistoryTimestamp(left?.created_at) ??
+        parseHistoryTimestamp(left?.updated_at);
+    const rightTimestamp =
+        parseHistoryTimestamp(right?.date) ??
+        parseHistoryTimestamp(right?.created_at) ??
+        parseHistoryTimestamp(right?.updated_at);
+
+    if (leftTimestamp !== rightTimestamp) {
+        return (rightTimestamp ?? Number.MIN_SAFE_INTEGER) - (leftTimestamp ?? Number.MIN_SAFE_INTEGER);
+    }
+
+    return Number(right?.id || 0) - Number(left?.id || 0);
+};
+
 const getImplementationHistory = (project) => {
-    const source = project?.review_pc_status_implementations ?? project?.reviewPcStatusImplementations ?? project?.pc_status_implementations ?? project?.pcStatusImplementations ?? [];
-    return Array.isArray(source) ? source : [];
+    return asArray(resolveHistorySource(project)).sort(sortHistoryDescending);
 };
 
 // Returns all status rows for a project; at least 1 empty placeholder row if none

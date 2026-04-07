@@ -58,7 +58,12 @@
                         </span>
                     </div>
 
-                    <StatusImplementationTable :projects="initiative.projects" />
+                    <StatusImplementationTable
+                        :projects="initiative.projects"
+                        history-source="review"
+                        store-route-name="program-evaluation.review-timeline.review-status.store"
+                        update-route-name="program-evaluation.review-timeline.review-status.update"
+                    />
 
                     <div v-if="showRoadmap && roadmapProjectsFor(initiative).length > 0" 
                          class="mt-5 flex flex-col overflow-hidden rounded-xl border border-[#d0dce8] shadow-sm dark:border-white/10"

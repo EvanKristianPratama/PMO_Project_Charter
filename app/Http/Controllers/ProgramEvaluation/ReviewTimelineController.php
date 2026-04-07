@@ -4,7 +4,10 @@ namespace App\Http\Controllers\ProgramEvaluation;
 
 use App\Http\Controllers\Controller;
 use App\Models\MstInitiative;
+use App\Models\TrsReviewPCStatusImplementation;
 use App\Models\TrsProject;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Response;
 
 class ReviewTimelineController extends Controller
@@ -20,7 +23,9 @@ class ReviewTimelineController extends Controller
                     ->with([
                         'owner:id,name',
                         'statusRef:id,name',
-                        'pcStatusImplementations',
+                        'reviewPcStatusImplementations' => static fn ($reviewQuery) => $reviewQuery
+                            ->orderByDesc('year')
+                            ->orderByDesc('id'),
                         'charter' => static fn ($charterQuery) => $charterQuery
                             ->select([
                                 'trs_project_charters.id',
@@ -116,6 +121,51 @@ class ReviewTimelineController extends Controller
 
         return inertia('ProgramEvaluation/ReviewTimeline/Index', [
             'initiatives' => $initiatives,
+        ]);
+    }
+
+    public function storeReviewStatusImplementation(Request $request, TrsProject $project): RedirectResponse
+    {
+        $payload = $this->validateReviewStatusPayload($request);
+
+        TrsReviewPCStatusImplementation::query()->create([
+            'project_id' => $project->id,
+            'start' => $payload['start'],
+            'end' => $payload['end'] ?? null,
+            'year' => $payload['year'] ?? null,
+            'review_status' => $payload['review_status'],
+            'status' => $payload['status'],
+        ]);
+
+        return back()->with('success', 'Review status implementation berhasil ditambahkan.');
+    }
+
+    public function updateReviewStatusImplementation(Request $request, int $statusId): RedirectResponse
+    {
+        $payload = $this->validateReviewStatusPayload($request);
+
+        $statusImplementation = TrsReviewPCStatusImplementation::query()->findOrFail($statusId);
+        $statusImplementation->update([
+            'start' => $payload['start'],
+            'end' => $payload['end'] ?? null,
+            'year' => $payload['year'] ?? null,
+            'review_status' => $payload['review_status'],
+            'status' => $payload['status'],
+        ]);
+
+        return back()->with('success', 'Review status implementation berhasil diperbarui.');
+    }
+
+    private function validateReviewStatusPayload(Request $request): array
+    {
+        $months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+        return $request->validate([
+            'start' => ['required', 'in:' . implode(',', $months)],
+            'end' => ['nullable', 'in:' . implode(',', $months)],
+            'year' => ['nullable', 'string', 'max:4'],
+            'review_status' => ['required', 'in:On Track,Done,At Risk,Not Started,Not Signed'],
+            'status' => ['required', 'string'],
         ]);
     }
 }
