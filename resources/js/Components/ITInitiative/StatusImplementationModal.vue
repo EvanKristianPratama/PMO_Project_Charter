@@ -40,7 +40,7 @@
                                         <!-- Target & Progress -->
                                         <div class="grid grid-cols-2 gap-3">
                                             <div>
-                                                <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">Target (%) <span class="text-red-500">*</span></label>
+                                                <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">Target (%)</label>
                                                 <input
                                                     v-model.number="form.target"
                                                     type="number"
@@ -48,12 +48,11 @@
                                                     max="100"
                                                     placeholder="0"
                                                     class="mt-1 block w-full rounded-lg border-gray-300 dark:border-white/10 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white"
-                                                    required
                                                 />
                                                 <div v-if="form.errors.target" class="mt-1 text-sm text-red-600">{{ form.errors.target }}</div>
                                             </div>
                                             <div>
-                                                <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">Progres (%) <span class="text-red-500">*</span></label>
+                                                <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">Progres (%)</label>
                                                 <input
                                                     v-model.number="form.progress"
                                                     type="number"
@@ -61,7 +60,6 @@
                                                     max="100"
                                                     placeholder="0"
                                                     class="mt-1 block w-full rounded-lg border-gray-300 dark:border-white/10 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white"
-                                                    required
                                                 />
                                                 <div v-if="form.errors.progress" class="mt-1 text-sm text-red-600">{{ form.errors.progress }}</div>
                                             </div>
@@ -81,7 +79,7 @@
                                                 <div v-if="form.errors.month" class="mt-1 text-sm text-red-600">{{ form.errors.month }}</div>
                                             </div>
                                             <div>
-                                                <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">Tahun <span class="text-red-500">*</span></label>
+                                                <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">Tahun</label>
                                                 <input
                                                     v-model.number="form.year"
                                                     type="number"
@@ -89,7 +87,6 @@
                                                     max="2040"
                                                     :placeholder="currentYear"
                                                     class="mt-1 block w-full rounded-lg border-gray-300 dark:border-white/10 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white"
-                                                    required
                                                 />
                                                 <div v-if="form.errors.year" class="mt-1 text-sm text-red-600">{{ form.errors.year }}</div>
                                             </div>
@@ -97,13 +94,12 @@
 
                                         <!-- Status -->
                                         <div>
-                                            <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">Status <span class="text-red-500">*</span></label>
+                                            <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">Status</label>
                                             <select
                                                 v-model="form.status"
                                                 class="mt-1 block w-full rounded-lg border-gray-300 dark:border-white/10 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white"
-                                                required
                                             >
-                                                <option value="" disabled>Pilih Status</option>
+                                                <option value="">Pilih Status</option>
                                                 <option value="On Track">On Track</option>
                                                 <option value="Done">Done</option>
                                                 <option value="At Risk">At Risk</option>
@@ -188,10 +184,10 @@ const monthOptions = [
 ];
 
 const form = useForm({
-    target: 0,
-    progress: 0,
+    target: '',
+    progress: '',
     month: '',
-    year: currentYear,
+    year: '',
     status: '',
     description: '',
 });
@@ -201,15 +197,14 @@ const isEditing = computed(() => !!props.statusData);
 watch(() => props.show, (show) => {
     if (show) {
         if (props.statusData) {
-            form.target = props.statusData.target ?? 0;
-            form.progress = props.statusData.progress ?? 0;
+            form.target = props.statusData.target ?? '';
+            form.progress = props.statusData.progress ?? '';
             form.month = props.statusData.month || '';
-            form.year = props.statusData.year || currentYear;
+            form.year = props.statusData.year ?? '';
             form.status = props.statusData.status || '';
             form.description = props.statusData.description || '';
         } else {
             form.reset();
-            form.year = currentYear;
         }
     }
 });

@@ -18,11 +18,11 @@ class UpsertImplementationStatusRequest extends FormRequest
         $statuses = ['On Track', 'Done', 'At Risk', 'Delayed', 'Not Started'];
 
         return [
-            'target' => ['required', 'integer', 'between:0,100'],
-            'progress' => ['required', 'integer', 'between:0,100'],
+            'target' => ['nullable', 'integer', 'between:0,100'],
+            'progress' => ['nullable', 'integer', 'between:0,100'],
             'month' => ['nullable', Rule::in($months)],
-            'year' => ['required', 'integer', 'between:0,9999'],
-            'status' => ['required', Rule::in($statuses)],
+            'year' => ['nullable', 'integer', 'between:0,9999'],
+            'status' => ['nullable', Rule::in($statuses)],
             'description' => ['nullable', 'string'],
         ];
     }

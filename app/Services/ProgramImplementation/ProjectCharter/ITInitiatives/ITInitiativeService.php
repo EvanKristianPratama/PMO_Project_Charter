@@ -219,32 +219,17 @@ class ITInitiativeService
 
     public function storeImplementationStatus(TrsProject $project, array $payload): void
     {
-        $description = trim((string) ($payload['description'] ?? ''));
-
         TrsPcStatusImplementation::query()->create([
             'project_id' => $project->id,
-            'target' => $payload['target'],
-            'progress' => $payload['progress'],
-            'month' => $payload['month'] ?? null,
-            'year' => $payload['year'],
-            'status' => $payload['status'],
-            'description' => $description !== '' ? $description : null,
+            ...$this->normalizeImplementationStatusPayload($payload),
         ]);
     }
 
     public function updateImplementationStatus(int $statusId, array $payload): void
     {
         $implementationStatus = TrsPcStatusImplementation::query()->findOrFail($statusId);
-        $description = trim((string) ($payload['description'] ?? ''));
 
-        $implementationStatus->update([
-            'target' => $payload['target'],
-            'progress' => $payload['progress'],
-            'month' => $payload['month'] ?? null,
-            'year' => $payload['year'],
-            'status' => $payload['status'],
-            'description' => $description !== '' ? $description : null,
-        ]);
+        $implementationStatus->update($this->normalizeImplementationStatusPayload($payload));
     }
 
     public function deleteImplementationStatus(int $statusId): void
@@ -545,6 +530,25 @@ class ITInitiativeService
             'trs_project_charters.budget',
             'trs_project_charters.risks_identified',
             'trs_project_charters.risk_mitigation',
+        ];
+    }
+
+    private function normalizeImplementationStatusPayload(array $payload): array
+    {
+        $target = $payload['target'] ?? '';
+        $progress = $payload['progress'] ?? '';
+        $year = $payload['year'] ?? '';
+        $month = trim((string) ($payload['month'] ?? ''));
+        $status = trim((string) ($payload['status'] ?? ''));
+        $description = trim((string) ($payload['description'] ?? ''));
+
+        return [
+            'target' => $target !== '' ? $target : null,
+            'progress' => $progress !== '' ? $progress : null,
+            'month' => $month !== '' ? $month : null,
+            'year' => $year !== '' ? $year : null,
+            'status' => $status !== '' ? $status : null,
+            'description' => $description !== '' ? $description : null,
         ];
     }
 
