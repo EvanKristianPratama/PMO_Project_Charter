@@ -53,7 +53,7 @@
                             <!-- Name: rowspan on first row -->
                             <td v-if="logIndex === 0"
                                 :rowspan="getStatusRowCount(proj)"
-                                class="px-2 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-200 truncate align-middle text-center border-b border-slate-200 dark:border-white/10"
+                                class="whitespace-normal break-words px-2 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-200 align-middle text-center border-b border-slate-200 dark:border-white/10"
                                 :title="proj.name">
                                 {{ proj.name || '-' }}
                             </td>
@@ -86,7 +86,7 @@
                                 {{ getPeriodeLabel(log) }}
                             </td>
                             <!-- Description -->
-                            <td class="px-2 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                            <td class="whitespace-pre-line break-words px-2 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-300">
                                 {{ log?.description || '-' }}
                             </td>
                             <!-- Action -->
