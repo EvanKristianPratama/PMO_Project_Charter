@@ -89,8 +89,9 @@
                             <option value="all">Semua Status</option>
                             <option value="Not Started">Not Started</option>
                             <option value="On Track">On Track</option>
-                            <option value="Not Signed">Not Signed</option>
+                            <option value="Done">Done</option>
                             <option value="At Risk">At Risk</option>
+                            <option value="Delayed">Delayed</option>
                         </select>
                     </div>
 
@@ -457,7 +458,6 @@
                     >
                         <StatusImplementationTable
                             :project="project"
-                            codeLabel="Progres status history"
                             :showTimelineHistory="showTimelineHistory"
                             :showHeader="
                                 initiativeIndex === 0 && projectIndex === 0
@@ -683,6 +683,70 @@ const showImplementationRoadmap = ref(true);
 const showTimelineHistory = ref(true);
 const showInitiativeLabel = ref(true);
 const expandedImplementationRoadmapItems = reactive(new Set());
+const monthOrderMap = new Map([
+    ["Januari", 1],
+    ["Februari", 2],
+    ["Maret", 3],
+    ["April", 4],
+    ["Mei", 5],
+    ["Juni", 6],
+    ["Juli", 7],
+    ["Agustus", 8],
+    ["September", 9],
+    ["Oktober", 10],
+    ["November", 11],
+    ["Desember", 12],
+]);
+
+const parseImplementationLogDate = (value) => {
+    const parsed = Date.parse(String(value ?? "").trim());
+    return Number.isNaN(parsed) ? null : parsed;
+};
+
+const parseImplementationLogYear = (value) => {
+    const parsed = Number.parseInt(String(value ?? "").trim(), 10);
+    return Number.isFinite(parsed) ? parsed : null;
+};
+
+const sortImplementationLogs = (left, right) => {
+    const leftYear = parseImplementationLogYear(left?.year);
+    const rightYear = parseImplementationLogYear(right?.year);
+
+    if (leftYear !== rightYear) {
+        return (leftYear ?? Number.MIN_SAFE_INTEGER) - (rightYear ?? Number.MIN_SAFE_INTEGER);
+    }
+
+    const leftMonth = monthOrderMap.get(String(left?.month ?? "").trim()) ?? 0;
+    const rightMonth = monthOrderMap.get(String(right?.month ?? "").trim()) ?? 0;
+
+    if (leftMonth !== rightMonth) {
+        return leftMonth - rightMonth;
+    }
+
+    const leftTimestamp =
+        parseImplementationLogDate(left?.created_at) ??
+        parseImplementationLogDate(left?.updated_at);
+    const rightTimestamp =
+        parseImplementationLogDate(right?.created_at) ??
+        parseImplementationLogDate(right?.updated_at);
+
+    if (leftTimestamp !== rightTimestamp) {
+        return (leftTimestamp ?? Number.MIN_SAFE_INTEGER) - (rightTimestamp ?? Number.MIN_SAFE_INTEGER);
+    }
+
+    return Number(left?.id || 0) - Number(right?.id || 0);
+};
+
+const implementationLogsFor = (project) => {
+    return asList(
+        project?.pc_status_implementations ?? project?.pcStatusImplementations,
+    ).sort(sortImplementationLogs);
+};
+
+const latestImplementationLogFor = (project) => {
+    const logs = implementationLogsFor(project);
+    return logs.length > 0 ? logs[logs.length - 1] : null;
+};
 
 const filteredImplementationInitiativeItems = computed(() => {
     let items = asList(props.masterItInitiatives);
@@ -700,14 +764,11 @@ const filteredImplementationInitiativeItems = computed(() => {
         items = items
             .map((init) => {
                 const projects = (init.projects || []).filter((proj) => {
-                    const logs =
-                        proj.pcStatusImplementations ||
-                        proj.pc_status_implementations ||
-                        [];
                     const latestStatus =
-                        logs.length > 0
-                            ? String(logs[0].review_status || "").trim()
-                            : "Not Started";
+                        String(
+                            latestImplementationLogFor(proj)?.status ?? "",
+                        ).trim() || "Not Started";
+
                     return latestStatus === selectedProgresStatus.value;
                 });
                 return { ...init, projects };

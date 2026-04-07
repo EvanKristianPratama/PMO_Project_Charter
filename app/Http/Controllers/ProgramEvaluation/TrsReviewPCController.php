@@ -85,7 +85,7 @@ class TrsReviewPCController extends Controller
                                 ->with('milestones'),
                             'owner',
                             'statusRef:id,name',
-                            'pcStatusImplementations',
+                            'reviewPcStatusImplementations',
                         ])
                         ->whereIn('id', $mappedProjectIds)
                         ->get()

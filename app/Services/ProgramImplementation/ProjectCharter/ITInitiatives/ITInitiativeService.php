@@ -3,7 +3,7 @@
 namespace App\Services\ProgramImplementation\ProjectCharter\ITInitiatives;
 
 use App\Models\MstInitiative;
-use App\Models\PcStatusImplementation;
+use App\Models\TrsPcStatusImplementation;
 use App\Models\ProjectStatusHistory;
 use App\Models\TrsProject;
 use App\Services\ProgramImplementation\ProjectCharter\ProjectCharterStatusService;
@@ -219,32 +219,34 @@ class ITInitiativeService
 
     public function storeImplementationStatus(TrsProject $project, array $payload): void
     {
-        PcStatusImplementation::query()->create([
+        TrsPcStatusImplementation::query()->create([
             'project_id' => $project->id,
-            'review_status' => $payload['review_status'],
+            'target' => $payload['target'],
+            'progress' => $payload['progress'],
+            'month' => $payload['month'] ?? null,
+            'year' => $payload['year'],
             'status' => $payload['status'],
-            'start' => $payload['start'] ?? null,
-            'end' => $payload['end'] ?? null,
-            'year' => $payload['year'] ?? null,
+            'description' => $payload['description'],
         ]);
     }
 
     public function updateImplementationStatus(int $statusId, array $payload): void
     {
-        $implementationStatus = PcStatusImplementation::query()->findOrFail($statusId);
+        $implementationStatus = TrsPcStatusImplementation::query()->findOrFail($statusId);
 
         $implementationStatus->update([
+            'target' => $payload['target'],
+            'progress' => $payload['progress'],
+            'month' => $payload['month'] ?? null,
+            'year' => $payload['year'],
             'status' => $payload['status'],
-            'review_status' => $payload['review_status'],
-            'start' => $payload['start'] ?? null,
-            'end' => $payload['end'] ?? null,
-            'year' => $payload['year'] ?? null,
+            'description' => $payload['description'],
         ]);
     }
 
     public function deleteImplementationStatus(int $statusId): void
     {
-        PcStatusImplementation::query()->findOrFail($statusId)->delete();
+        TrsPcStatusImplementation::query()->findOrFail($statusId)->delete();
     }
 
     public function updateProjectStatusHistory(TrsProject $project, ProjectStatusHistory $history, array $payload): void
@@ -333,7 +335,7 @@ class ITInitiativeService
                     ->with([
                         'owner:id,name',
                         'statusRef:id,name',
-                        'pcStatusImplementations' => fn ($implementationQuery) => $implementationQuery->orderBy('year', 'asc')->orderBy('id', 'asc'),
+                        'pcStatusImplementations' => fn ($query) => $query->orderBy('year', 'asc')->orderBy('id', 'asc'),
                         'charter' => fn ($charterQuery) => $charterQuery->select($projectCharterColumns),
                         'charters' => fn ($chartersQuery) => $chartersQuery
                             ->select($projectCharterColumns)

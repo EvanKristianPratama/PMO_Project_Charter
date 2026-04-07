@@ -37,92 +37,69 @@
                                     </DialogTitle>
                                     
                                     <form @submit.prevent="submit" class="mt-4 space-y-4">
-                                        <!-- Target & Progress -->
-                                        <div class="grid grid-cols-2 gap-3">
+                                        <!-- Periode: Start, End, Year -->
+                                        <div class="grid grid-cols-3 gap-3">
                                             <div>
-                                                <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">Target (%) <span class="text-red-500">*</span></label>
-                                                <input
-                                                    v-model.number="form.target"
-                                                    type="number"
-                                                    min="0"
-                                                    max="100"
-                                                    placeholder="0"
-                                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-white/10 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white"
-                                                    required
-                                                />
-                                                <div v-if="form.errors.target" class="mt-1 text-sm text-red-600">{{ form.errors.target }}</div>
-                                            </div>
-                                            <div>
-                                                <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">Progres (%) <span class="text-red-500">*</span></label>
-                                                <input
-                                                    v-model.number="form.progress"
-                                                    type="number"
-                                                    min="0"
-                                                    max="100"
-                                                    placeholder="0"
-                                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-white/10 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white"
-                                                    required
-                                                />
-                                                <div v-if="form.errors.progress" class="mt-1 text-sm text-red-600">{{ form.errors.progress }}</div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Month & Year -->
-                                        <div class="grid grid-cols-2 gap-3">
-                                            <div>
-                                                <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">Bulan</label>
+                                                <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">Start <span class="text-red-500">*</span></label>
                                                 <select
-                                                    v-model="form.month"
+                                                    v-model="form.start"
                                                     class="mt-1 block w-full rounded-lg border-gray-300 dark:border-white/10 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white"
+                                                    required
                                                 >
-                                                    <option value="">Pilih Bulan</option>
+                                                    <option value="" disabled>Pilih</option>
                                                     <option v-for="m in monthOptions" :key="m" :value="m">{{ m }}</option>
                                                 </select>
-                                                <div v-if="form.errors.month" class="mt-1 text-sm text-red-600">{{ form.errors.month }}</div>
+                                                <div v-if="form.errors.start" class="mt-1 text-sm text-red-600">{{ form.errors.start }}</div>
                                             </div>
                                             <div>
-                                                <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">Tahun <span class="text-red-500">*</span></label>
-                                                <input
-                                                    v-model.number="form.year"
-                                                    type="number"
-                                                    min="2020"
-                                                    max="2040"
-                                                    :placeholder="currentYear"
+                                                <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">End</label>
+                                                <select
+                                                    v-model="form.end"
                                                     class="mt-1 block w-full rounded-lg border-gray-300 dark:border-white/10 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white"
-                                                    required
+                                                >
+                                                    <option value="">Pilih</option>
+                                                    <option v-for="m in monthOptions" :key="m" :value="m">{{ m }}</option>
+                                                </select>
+                                                <div v-if="form.errors.end" class="mt-1 text-sm text-red-600">{{ form.errors.end }}</div>
+                                            </div>
+                                            <div>
+                                                <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">Year</label>
+                                                <input
+                                                    v-model="form.year"
+                                                    type="text"
+                                                    maxlength="4"
+                                                    placeholder="2026"
+                                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-white/10 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white"
                                                 />
                                                 <div v-if="form.errors.year" class="mt-1 text-sm text-red-600">{{ form.errors.year }}</div>
                                             </div>
                                         </div>
 
-                                        <!-- Status -->
                                         <div>
-                                            <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">Status <span class="text-red-500">*</span></label>
+                                            <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">Review Status</label>
                                             <select
-                                                v-model="form.status"
+                                                v-model="form.review_status"
                                                 class="mt-1 block w-full rounded-lg border-gray-300 dark:border-white/10 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white"
                                                 required
                                             >
-                                                <option value="" disabled>Pilih Status</option>
                                                 <option value="On Track">On Track</option>
                                                 <option value="Done">Done</option>
                                                 <option value="At Risk">At Risk</option>
-                                                <option value="Delayed">Delayed</option>
                                                 <option value="Not Started">Not Started</option>
+                                                <option value="Not Signed">Not Signed</option>
                                             </select>
-                                            <div v-if="form.errors.status" class="mt-1 text-sm text-red-600">{{ form.errors.status }}</div>
+                                            <div v-if="form.errors.review_status" class="mt-1 text-sm text-red-600">{{ form.errors.review_status }}</div>
                                         </div>
 
-                                        <!-- Description -->
                                         <div>
-                                            <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">Description <span class="text-red-500">*</span></label>
+                                            <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">Status / Notes</label>
                                             <textarea
-                                                v-model="form.description"
+                                                v-model="form.status"
                                                 rows="3"
                                                 class="mt-1 block w-full rounded-lg border-gray-300 dark:border-white/10 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white"
                                                 required
                                             ></textarea>
-                                            <div v-if="form.errors.description" class="mt-1 text-sm text-red-600">{{ form.errors.description }}</div>
+                                            <div v-if="form.errors.status" class="mt-1 text-sm text-red-600">{{ form.errors.status }}</div>
                                         </div>
 
                                         <div class="mt-6 flex justify-end gap-3 pt-2">
@@ -143,7 +120,7 @@
                                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                     </svg>
-                                                    Menyimpan...
+                                                    Membaca...
                                                 </span>
                                                 <span v-else>Save</span>
                                             </button>
@@ -180,20 +157,17 @@ const props = defineProps({
 const emit = defineEmits(['close']);
 const route = useRouteHelper();
 
-const currentYear = new Date().getFullYear();
-
 const monthOptions = [
     'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
 ];
 
 const form = useForm({
-    target: 0,
-    progress: 0,
-    month: '',
-    year: currentYear,
+    start: '',
+    end: '',
+    year: '',
+    review_status: 'On Track',
     status: '',
-    description: '',
 });
 
 const isEditing = computed(() => !!props.statusData);
@@ -201,15 +175,13 @@ const isEditing = computed(() => !!props.statusData);
 watch(() => props.show, (show) => {
     if (show) {
         if (props.statusData) {
-            form.target = props.statusData.target ?? 0;
-            form.progress = props.statusData.progress ?? 0;
-            form.month = props.statusData.month || '';
-            form.year = props.statusData.year || currentYear;
+            form.start = props.statusData.start || '';
+            form.end = props.statusData.end || '';
+            form.year = props.statusData.year || '';
+            form.review_status = props.statusData.review_status || 'On Track';
             form.status = props.statusData.status || '';
-            form.description = props.statusData.description || '';
         } else {
             form.reset();
-            form.year = currentYear;
         }
     }
 });

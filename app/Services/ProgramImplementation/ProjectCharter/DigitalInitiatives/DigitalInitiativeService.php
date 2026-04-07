@@ -214,7 +214,7 @@ class DigitalInitiativeService
                     ])
                     ->latest('id'),
                 'statusRef:id,name',
-                'pcStatusImplementations' => static fn ($query) => $query->orderBy('date', 'desc')->orderBy('id', 'desc'),
+                'pcStatusImplementations' => static fn ($query) => $query->orderBy('year', 'asc')->orderBy('id', 'asc'),
                 'projectStatusHistories.projectCharter:id,project_id,version_label,tgl_dokumen',
             ])
             ->where('tipe_inisiative', 1)

@@ -181,7 +181,7 @@ import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import CharterDocument from '@/Components/ProjectCharter/ItCharterDocument.vue';
 import ProjectRoadmap from '@/Components/Roadmap/ProjectRoadmap.vue';
-import StatusImplementationTable from '@/Components/ITInitiative/StatusImplementationTable.vue';
+import StatusImplementationTable from '@/Components/ITInitiative/ReviewStatusImplementationTable.vue';
 
 const route = useRouteHelper();
 

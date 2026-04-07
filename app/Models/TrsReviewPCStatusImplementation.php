@@ -5,11 +5,11 @@ namespace App\Models;
 use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
 
-class PcStatusImplementation extends Model
+class TrsReviewPCStatusImplementation extends Model
 {
     use LogsActivity;
 
-    protected $table = 'trs_pc_status_implementation';
+    protected $table = 'trs_review_pc_status_implementation';
 
     protected $guarded = ['id'];
 

@@ -59,9 +59,15 @@ class TrsProject extends Model
         return $this->belongsTo(InitiativeStatus::class, 'status');
     }
 
+    public function reviewPcStatusImplementations(): HasMany
+    {
+        return $this->hasMany(TrsReviewPCStatusImplementation::class, 'project_id')
+            ->orderBy('id', 'desc');
+    }
+
     public function pcStatusImplementations(): HasMany
     {
-        return $this->hasMany(PcStatusImplementation::class, 'project_id')
+        return $this->hasMany(TrsPcStatusImplementation::class, 'project_id')
             ->orderBy('id', 'desc');
     }
 
@@ -83,7 +89,7 @@ class TrsProject extends Model
 
     public function latestPcStatusImplementation(): HasOne
     {
-        return $this->hasOne(PcStatusImplementation::class, 'project_id')->latestOfMany('id');
+        return $this->hasOne(TrsReviewPCStatusImplementation::class, 'project_id')->latestOfMany('id');
     }
 
     public function mappedInitiatives(): BelongsToMany

@@ -14,14 +14,16 @@ class UpsertImplementationStatusRequest extends FormRequest
 
     public function rules(): array
     {
-        $months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+        $months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        $statuses = ['On Track', 'Done', 'At Risk', 'Delayed', 'Not Started'];
 
         return [
-            'status' => ['required', 'string', 'max:255'],
-            'review_status' => ['required', Rule::in(['At Risk', 'On Track', 'Not Started', 'Not Signed'])],
-            'start' => ['required', Rule::in($months)],
-            'end' => ['nullable', Rule::in($months)],
-            'year' => ['nullable', 'string', 'size:4'],
+            'target' => ['required', 'integer', 'between:0,100'],
+            'progress' => ['required', 'integer', 'between:0,100'],
+            'month' => ['nullable', Rule::in($months)],
+            'year' => ['required', 'integer', 'between:0,9999'],
+            'status' => ['required', Rule::in($statuses)],
+            'description' => ['required', 'string'],
         ];
     }
 }

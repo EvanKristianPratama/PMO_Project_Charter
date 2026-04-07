@@ -4,38 +4,30 @@
         <div class="overflow-x-auto rounded-lg border border-slate-200 dark:border-white/10">
             <table class="w-full table-fixed divide-y divide-x divide-slate-200 text-[11px] dark:divide-white/10">
                 <colgroup>
-                    <col class="w-[7%]">
-                    <col class="w-[16%]">
-                    <col class="w-[7%]">
-                    <col class="w-[7%]">
-                    <col class="w-[9%]">
-                    <col class="w-[12%]">
-                    <col class="w-[30%]">
-                    <col class="w-[12%]">
+                    <col :class="codeLabel !== 'Code' ? 'w-[12%]' : 'w-[8%]'">
+                    <col class="w-[18%]">
+                    <col class="w-[10%]">
+                    <col :class="codeLabel !== 'Code' ? 'w-[12%]' : 'w-[14%]'">
+                    <col :class="codeLabel !== 'Code' ? 'w-[35%]' : 'w-[37%]'">
+                    <col class="w-[13%]">
                 </colgroup>
                 <thead v-if="showHeader" class="bg-slate-50 dark:bg-white/[0.03]">
                     <tr class="divide-x divide-slate-200 dark:divide-white/10">
                         <th
-                            class="px-1 py-1.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-                            Code</th>
+                            class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                            {{ codeLabel }}</th>
                         <th
-                            class="px-1 py-1.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                            class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
                             Project Name</th>
                         <th
-                            class="px-1 py-1.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-                            Target</th>
-                        <th
-                            class="px-1 py-1.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-                            Progres</th>
-                        <th
-                            class="px-1 py-1.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-                            Status</th>
+                            class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                            Progres Status</th>
                         <th
                             class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-                            Periode</th>
+                            Periode Status</th>
                         <th
                             class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-                            Description</th>
+                            Notes</th>
                         <th
                             class="px-1 py-1.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-400">
                             Action</th>
@@ -57,37 +49,22 @@
                                 :title="proj.name">
                                 {{ proj.name || '-' }}
                             </td>
-                            <!-- Target -->
+                            <!-- Progres Status -->
                             <td class="px-1 py-2 align-middle text-center">
-                                <span v-if="log?.target != null" class="text-[11px] font-semibold text-slate-700 dark:text-slate-200">
-                                    {{ log.target }}%
-                                </span>
-                                <span v-else class="text-[10px] italic text-slate-400">-</span>
-                            </td>
-                            <!-- Progres -->
-                            <td class="px-1 py-2 align-middle text-center">
-                                <span v-if="log?.progress != null"
-                                    class="text-[11px] font-semibold text-slate-700 dark:text-slate-200">
-                                    {{ log.progress }}%
-                                </span>
-                                <span v-else class="text-[10px] italic text-slate-400">-</span>
-                            </td>
-                            <!-- Status -->
-                            <td class="px-2 py-3 text-center text-[10px] font-medium text-slate-600 dark:text-slate-300">
-                                <span v-if="log?.status"
+                                <span v-if="log?.review_status"
                                     class="inline-flex rounded-md px-1.5 py-0.5 text-[9px] font-medium"
-                                    :class="statusBadgeClass(log.status)">
-                                    {{ log.status }}
+                                    :class="reviewStatusBadgeClass(log.review_status)">
+                                    {{ log.review_status }}
                                 </span>
                                 <span v-else class="text-[10px] italic text-slate-400">-</span>
                             </td>
-                            <!-- Periode -->
+                            <!-- Periode Status -->
                             <td class="px-2 py-3 text-[10px] font-medium text-slate-600 dark:text-slate-300">
-                                {{ getPeriodeLabel(log) }}
+                                {{ getLogPeriodeLabel(log) || '-' }}
                             </td>
-                            <!-- Description -->
+                            <!-- Notes -->
                             <td class="px-2 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-300">
-                                {{ log?.description || '-' }}
+                                {{ log?.status || '-' }}
                             </td>
                             <!-- Action -->
                             <td class="px-1 py-1 text-center align-middle">
@@ -104,7 +81,7 @@
                         </tr>
                     </template>
                     <tr v-if="projectList.length === 0">
-                        <td colspan="8" class="px-4 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
+                        <td colspan="6" class="px-4 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
                             Data status implementasi belum tersedia.
                         </td>
                     </tr>
@@ -184,7 +161,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { statusLabelFromOptions } from '@/Composables/initiativeStatus';
-import StatusImplementationModal from './StatusImplementationModal.vue';
+import StatusImplementationModal from './ReviewStatusImplementationModal.vue';
 
 const props = defineProps({
     project: {
@@ -194,6 +171,10 @@ const props = defineProps({
     projects: {
         type: Array,
         default: () => [],
+    },
+    codeLabel: {
+        type: String,
+        default: 'Code',
     },
     showTimelineHistory: {
         type: Boolean,
@@ -305,76 +286,9 @@ const getCharterVersionLabel = (charter, index, total) => {
     return '-';
 };
 
-const monthOrderMap = new Map([
-    ['Januari', 1],
-    ['Februari', 2],
-    ['Maret', 3],
-    ['April', 4],
-    ['Mei', 5],
-    ['Juni', 6],
-    ['Juli', 7],
-    ['Agustus', 8],
-    ['September', 9],
-    ['Oktober', 10],
-    ['November', 11],
-    ['Desember', 12],
-]);
-
-const asArray = (value) => {
-    if (Array.isArray(value)) {
-        return value;
-    }
-
-    if (value && typeof value === 'object') {
-        return Object.values(value);
-    }
-
-    return [];
-};
-
-const parseImplementationYear = (value) => {
-    const parsed = Number.parseInt(String(value ?? '').trim(), 10);
-    return Number.isFinite(parsed) ? parsed : null;
-};
-
-const parseImplementationTimestamp = (value) => {
-    const parsed = Date.parse(String(value ?? '').trim());
-    return Number.isNaN(parsed) ? null : parsed;
-};
-
-const sortImplementationHistory = (left, right) => {
-    const leftYear = parseImplementationYear(left?.year);
-    const rightYear = parseImplementationYear(right?.year);
-
-    if (leftYear !== rightYear) {
-        return (rightYear ?? Number.MIN_SAFE_INTEGER) - (leftYear ?? Number.MIN_SAFE_INTEGER);
-    }
-
-    const leftMonth = monthOrderMap.get(String(left?.month ?? '').trim()) ?? 0;
-    const rightMonth = monthOrderMap.get(String(right?.month ?? '').trim()) ?? 0;
-
-    if (leftMonth !== rightMonth) {
-        return rightMonth - leftMonth;
-    }
-
-    const leftTimestamp =
-        parseImplementationTimestamp(left?.created_at) ??
-        parseImplementationTimestamp(left?.updated_at);
-    const rightTimestamp =
-        parseImplementationTimestamp(right?.created_at) ??
-        parseImplementationTimestamp(right?.updated_at);
-
-    if (leftTimestamp !== rightTimestamp) {
-        return (rightTimestamp ?? Number.MIN_SAFE_INTEGER) - (leftTimestamp ?? Number.MIN_SAFE_INTEGER);
-    }
-
-    return Number(right?.id || 0) - Number(left?.id || 0);
-};
-
 const getImplementationHistory = (project) => {
-    return asArray(
-        project?.pc_status_implementations ?? project?.pcStatusImplementations,
-    ).sort(sortImplementationHistory);
+    const source = project?.review_pc_status_implementations ?? project?.reviewPcStatusImplementations ?? project?.pc_status_implementations ?? project?.pcStatusImplementations ?? [];
+    return Array.isArray(source) ? source : [];
 };
 
 // Returns all status rows for a project; at least 1 empty placeholder row if none
@@ -387,14 +301,52 @@ const getStatusRowCount = (project) => {
     return getStatusRows(project).length;
 };
 
-const getPeriodeLabel = (log) => {
-    if (!log) return '-';
-    const month = String(log?.month ?? '').trim();
-    const year = log?.year;
-    if (month && year) return `${month} ${year}`;
-    if (month) return month;
-    if (year) return String(year);
-    return '-';
+const getLogPeriodeLabel = (log) => {
+    if (!log) return null;
+
+    // Use backend-computed periode_label
+    const label = log?.periode_label ?? null;
+    if (label) return label;
+
+    // Fallback: old date column
+    const rawDate = log?.date ?? null;
+    if (!rawDate) return null;
+    const date = new Date(rawDate);
+    if (Number.isNaN(date.getTime())) return null;
+    return date.toLocaleDateString('id-ID', { year: 'numeric', month: 'long' });
+};
+
+const getLatestImplementationLog = (project) => {
+    const history = getImplementationHistory(project);
+    return history.length > 0 ? history[0] : null;
+};
+
+const getLatestReviewStatus = (project) => {
+    const log = getLatestImplementationLog(project);
+    const raw = String(log?.review_status ?? '').trim();
+    return raw.length > 0 ? raw : null;
+};
+
+const getLatestImplementationStatus = (project) => {
+    const log = getLatestImplementationLog(project);
+    const raw = String(log?.status ?? '').trim();
+    return raw.length > 0 ? raw : null;
+};
+
+const getLatestImplementationMonthYear = (project) => {
+    const log = getLatestImplementationLog(project);
+    if (!log) return null;
+
+    // Use the computed periode_label from the backend
+    const label = log?.periode_label ?? null;
+    if (label) return label;
+
+    // Fallback: old date column for backward compatibility
+    const rawDate = log?.date ?? null;
+    if (!rawDate) return null;
+    const date = new Date(rawDate);
+    if (Number.isNaN(date.getTime())) return null;
+    return date.toLocaleDateString('id-ID', { year: 'numeric', month: 'long' });
 };
 
 const formatDateLong = (value) => {
@@ -484,13 +436,12 @@ const statusBadgeClassById = (statusId) => {
     }
 };
 
-const statusBadgeClass = (status) => {
-    const normalized = String(status ?? '').trim().toLowerCase();
+const reviewStatusBadgeClass = (reviewStatus) => {
+    const normalized = String(reviewStatus ?? '').trim().toLowerCase();
     if (normalized === 'on track') return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300';
-    if (normalized === 'done' || normalized === 'completed') return 'bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300';
     if (normalized === 'at risk') return 'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300';
-    if (normalized === 'delayed') return 'bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-300';
     if (normalized === 'not started') return 'bg-slate-100 text-slate-700 dark:bg-white/10 dark:text-slate-300';
+    if (normalized === 'not signed') return 'bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-300';
     return 'bg-slate-100 text-slate-700 dark:bg-white/10 dark:text-slate-300';
 };
 </script>

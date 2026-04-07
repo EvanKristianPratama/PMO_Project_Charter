@@ -114,7 +114,7 @@
 <script setup>
 import { computed, reactive, ref } from 'vue';
 import UserLayout from '@/Layouts/UserLayout.vue';
-import StatusImplementationTable from '@/Components/ITInitiative/StatusImplementationTable.vue';
+import StatusImplementationTable from '@/Components/ITInitiative/ReviewStatusImplementationTable.vue';
 import ProjectRoadmapSummary from '@/Components/Roadmap/ProjectRoadmapSummary.vue';
 import ProjectRoadmap from '@/Components/Roadmap/ProjectRoadmap.vue';
 

@@ -89,7 +89,7 @@ import { Link, router, usePage } from '@inertiajs/vue3';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import DigitalCharterDocument from './Partials/DigitalCharterDocument.vue';
-import StatusImplementationTable from '@/Components/ITInitiative/StatusImplementationTable.vue';
+import StatusImplementationTable from '@/Components/ITInitiative/ReviewStatusImplementationTable.vue';
 
 const route = useRouteHelper();
 

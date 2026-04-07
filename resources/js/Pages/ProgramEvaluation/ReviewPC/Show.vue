@@ -233,7 +233,7 @@ import UserLayout from '@/Layouts/UserLayout.vue';
 import ItCharterDocument from '@/Components/ProjectCharter/ItCharterDocument.vue';
 import ProjectRoadmap from '@/Components/Roadmap/ProjectRoadmap.vue';
 import ProjectRoadmapSummary from '@/Components/Roadmap/ProjectRoadmapSummary.vue';
-import StatusImplementationTable from '@/Components/ITInitiative/StatusImplementationTable.vue';
+import StatusImplementationTable from '@/Components/ITInitiative/ReviewStatusImplementationTable.vue';
 import ReviewContent from '@/Components/ReviewPC/ReviewContent.vue';
 import InitiativeDetailsWithRelations from '@/Components/InitiativeRelation/InitiativeDetailsWithRelations.vue';
 
