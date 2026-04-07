@@ -219,6 +219,8 @@ class ITInitiativeService
 
     public function storeImplementationStatus(TrsProject $project, array $payload): void
     {
+        $description = trim((string) ($payload['description'] ?? ''));
+
         TrsPcStatusImplementation::query()->create([
             'project_id' => $project->id,
             'target' => $payload['target'],
@@ -226,13 +228,14 @@ class ITInitiativeService
             'month' => $payload['month'] ?? null,
             'year' => $payload['year'],
             'status' => $payload['status'],
-            'description' => $payload['description'],
+            'description' => $description !== '' ? $description : null,
         ]);
     }
 
     public function updateImplementationStatus(int $statusId, array $payload): void
     {
         $implementationStatus = TrsPcStatusImplementation::query()->findOrFail($statusId);
+        $description = trim((string) ($payload['description'] ?? ''));
 
         $implementationStatus->update([
             'target' => $payload['target'],
@@ -240,7 +243,7 @@ class ITInitiativeService
             'month' => $payload['month'] ?? null,
             'year' => $payload['year'],
             'status' => $payload['status'],
-            'description' => $payload['description'],
+            'description' => $description !== '' ? $description : null,
         ]);
     }
 

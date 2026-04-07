@@ -115,12 +115,12 @@
 
                                         <!-- Description -->
                                         <div>
-                                            <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">Description <span class="text-red-500">*</span></label>
+                                            <label class="block text-[13px] font-medium text-gray-700 dark:text-gray-300">Description</label>
                                             <textarea
                                                 v-model="form.description"
                                                 rows="3"
                                                 class="mt-1 block w-full rounded-lg border-gray-300 dark:border-white/10 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white"
-                                                required
+                                                placeholder="Opsional"
                                             ></textarea>
                                             <div v-if="form.errors.description" class="mt-1 text-sm text-red-600">{{ form.errors.description }}</div>
                                         </div>

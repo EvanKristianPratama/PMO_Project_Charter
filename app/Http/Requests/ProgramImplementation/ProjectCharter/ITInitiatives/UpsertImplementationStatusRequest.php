@@ -23,7 +23,7 @@ class UpsertImplementationStatusRequest extends FormRequest
             'month' => ['nullable', Rule::in($months)],
             'year' => ['required', 'integer', 'between:0,9999'],
             'status' => ['required', Rule::in($statuses)],
-            'description' => ['required', 'string'],
+            'description' => ['nullable', 'string'],
         ];
     }
 }
