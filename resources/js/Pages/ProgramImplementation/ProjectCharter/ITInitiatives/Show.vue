@@ -156,8 +156,13 @@
                 </section>
 
                 <main v-if="!showRoadmapPanel" class="print:m-0 print:p-0">
-                    <CharterDocument :it-initiative="editableItInitiative" :form="form" :status-timeline="form.status"
-                        :editable="isEditing" />
+                    <component
+                        :is="resolvedCharterComponent"
+                        :it-initiative="editableItInitiative"
+                        :form="form"
+                        :status-timeline="form.status"
+                        :editable="isEditing"
+                    />
                 </main>
                 <section v-if="showRoadmapPanel"
                     class="print:hidden rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-white/10 dark:bg-[#171717]">
@@ -179,7 +184,8 @@ import { computed, ref, watch } from 'vue';
 import { Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
-import CharterDocument from '@/Components/ProjectCharter/ItCharterDocument.vue';
+import ItCharterDocument from '@/Components/ProjectCharter/ItCharterDocument.vue';
+import AprovedCharterDocument from '@/Components/ProjectCharter/AprovedCharterDocument.vue';
 import ProjectRoadmap from '@/Components/Roadmap/ProjectRoadmap.vue';
 import StatusImplementationTable from '@/Components/ITInitiative/ReviewStatusImplementationTable.vue';
 
@@ -289,9 +295,9 @@ watch(
 
 // --- Charter ---
 const CHARTER_FIELDS = [
-    'category', 'duration', 'background', 'objectives', 'scope',
-    'impact_value', 'key_personnel', 'key_items', 'budget',
-    'risks_identified', 'risk_mitigation',
+    'sponsor', 'leader', 'category', 'duration', 'start_year', 'end_year',
+    'background', 'objectives', 'impact_value', 'key_personnel', 'key_items',
+    'budget', 'key_milestone', 'risks_identified', 'risk_mitigation', 'notes',
 ];
 
 const mapCharterToForm = (charter = null, project = null) => {
@@ -300,6 +306,14 @@ const mapCharterToForm = (charter = null, project = null) => {
         owner: charter?.owner ?? '',
         status: charter?.status ?? '',
         tgl_dokumen: charter?.tgl_dokumen ?? '',
+        metadata: charter?.metadata ?? {},
+        target_kpi:
+            charter?.target_kpi
+            ?? charter?.metadata?.target_kpi
+            ?? charter?.metadata?.targetKpi
+            ?? charter?.metadata?.kpi_target
+            ?? charter?.metadata?.kpi
+            ?? '',
     };
     for (const field of CHARTER_FIELDS) {
         payload[field] = charter?.[field] ?? '';
@@ -430,6 +444,31 @@ const editableItInitiative = computed(() => {
         ...props.itInitiative,
         owner: form.owner ?? props.itInitiative?.charter?.owner ?? '',
     };
+});
+
+const isApprovedStatus = (value) => {
+    const numericValue = Number(value);
+
+    if (numericValue === 4) {
+        return true;
+    }
+
+    return String(value ?? '').trim().toLowerCase() === 'approved';
+};
+
+const resolvedCharterComponent = computed(() => {
+    if (isEditing.value) {
+        return ItCharterDocument;
+    }
+
+    const activeStatus =
+        selectedCharter.value?.status ??
+        defaultCharter.value?.status ??
+        form.status;
+
+    return isApprovedStatus(activeStatus)
+        ? AprovedCharterDocument
+        : ItCharterDocument;
 });
 
 const setFormValues = (charter, project = null) => {

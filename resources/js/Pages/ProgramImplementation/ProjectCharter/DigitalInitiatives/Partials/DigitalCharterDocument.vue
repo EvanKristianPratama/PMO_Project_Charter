@@ -51,7 +51,6 @@ const narrativeSections = computed(() => {
     return [
         { key: 'objectives', label: 'Objectives', value: charterField('objectives') },
         { key: 'background', label: 'Background', value: charterField('background') },
-        { key: 'scope', label: 'Scope', value: charterField('scope') },
         { key: 'impact_value', label: 'Impact Value', value: charterField('impact_value') },
         { key: 'key_personnel', label: 'Key Personnel', value: charterField('key_personnel') },
         { key: 'key_items', label: 'Key Items', value: charterField('key_items') },

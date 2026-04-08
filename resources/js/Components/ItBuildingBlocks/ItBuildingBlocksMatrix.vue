@@ -419,7 +419,7 @@ const submitMapping = () => {
     modalError.value = '';
     mappingProcessing.value = true;
 
-    router.post(route('program-implementation.it-building-blocks.store'), {
+    router.post(route('program-planning.it-building-blocks.store'), {
         primary: Number(mappingForm.primary),
         secondary: Number(mappingForm.secondary),
         initiative_ids: mappingForm.initiative_ids.map((value) => Number(value)),
@@ -484,7 +484,7 @@ const openDeleteInitiativeModal = (group, secondaryGroup, initiative) => {
 const confirmDeletePrimary = () => {
     deleteProcessing.value = true;
 
-    router.delete(route('program-implementation.it-building-blocks.primary.destroy', {
+    router.delete(route('program-planning.it-building-blocks.primary.destroy', {
         primary: deleteTarget.group.primary_id,
     }), {
         preserveScroll: true,
@@ -501,7 +501,7 @@ const confirmDeletePrimary = () => {
 const confirmDeleteSecondary = () => {
     deleteProcessing.value = true;
 
-    router.delete(route('program-implementation.it-building-blocks.secondary.destroy', {
+    router.delete(route('program-planning.it-building-blocks.secondary.destroy', {
         primary: deleteTarget.group.primary_id,
         secondary: deleteTarget.secondaryGroup.secondary_id,
     }), {
@@ -550,7 +550,7 @@ const savePendingInitiativeRemovals = () => {
 
     saveRemovalsProcessing.value = true;
 
-    router.post(route('program-implementation.it-building-blocks.initiative.bulk-destroy'), {
+    router.post(route('program-planning.it-building-blocks.initiative.bulk-destroy'), {
         removals: pendingInitiativeRemovals.value.map((item) => ({
             primary: item.primary_id,
             secondary: item.secondary_id,

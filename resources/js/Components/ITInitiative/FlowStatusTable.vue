@@ -272,8 +272,6 @@ const displayedItems = computed(() => {
 
 const hasFilled = (value) => value !== null && value !== undefined && String(value).trim() !== '';
 
-const hasScopeCharter = (project) => hasFilled(project?.code) && hasFilled(project?.name);
-
 const hasProjectCharter = (project) => {
     const charter = project?.charter;
     if (!charter || typeof charter !== 'object') {
@@ -285,7 +283,6 @@ const hasProjectCharter = (project) => {
         charter.duration,
         charter.background,
         charter.objectives,
-        charter.scope,
         charter.impact_value,
     ].some(hasFilled);
 };

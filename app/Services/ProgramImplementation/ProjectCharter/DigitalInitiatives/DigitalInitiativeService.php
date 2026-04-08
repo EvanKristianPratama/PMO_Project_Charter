@@ -364,7 +364,6 @@ class DigitalInitiativeService
             'trs_project_charters.duration',
             'trs_project_charters.objectives',
             'trs_project_charters.background',
-            'trs_project_charters.scope',
             'trs_project_charters.impact_value',
             'trs_project_charters.key_personnel',
             'trs_project_charters.key_items',

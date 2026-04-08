@@ -14,11 +14,12 @@ class ProjectCharterService
             trim((string) ($payload['version_label'] ?? '')),
             sprintf('v%d', $project->charters()->count() + 1)
         );
+        $charterPayload = $this->charterPayload($payload);
 
         $this->syncProjectSummaryFields($project, $payload);
 
         $project->charters()->create([
-            ...Arr::except($payload, ['version_label', 'owner_name']),
+            ...$charterPayload,
             'version_label' => $versionLabel,
         ]);
 
@@ -33,11 +34,12 @@ class ProjectCharterService
             trim((string) ($payload['version_label'] ?? '')),
             $charter->version_label ?? sprintf('v%d', $project->charters()->count())
         );
+        $charterPayload = $this->charterPayload($payload);
 
         $this->syncProjectSummaryFields($project, $payload);
 
         $charter->update([
-            ...Arr::except($payload, ['owner_name']),
+            ...$charterPayload,
             'version_label' => $versionLabel,
         ]);
 
@@ -57,5 +59,24 @@ class ProjectCharterService
     private function resolveVersionLabel(string $versionLabel, string $fallbackVersionLabel): string
     {
         return $versionLabel !== '' ? $versionLabel : $fallbackVersionLabel;
+    }
+
+    private function charterPayload(array $payload): array
+    {
+        return Arr::only($payload, [
+            'owner',
+            'status',
+            'tgl_dokumen',
+            'category',
+            'duration',
+            'background',
+            'objectives',
+            'impact_value',
+            'key_personnel',
+            'key_items',
+            'budget',
+            'risks_identified',
+            'risk_mitigation',
+        ]);
     }
 }

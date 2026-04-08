@@ -19,26 +19,38 @@ export function useNavigation() {
     const authUser = computed(() => page.props.auth?.user || {});
     const appRole = computed(() => String(authUser.value?.app_role || 'user').toLowerCase());
     const isAdmin = computed(() => appRole.value === 'admin');
+    const safeRoute = (...args) => {
+        try {
+            return routeHelper(...args);
+        } catch (error) {
+            console.warn(`[useNavigation] Failed to resolve route "${args[0]}".`, error);
+            return page.url || '#';
+        }
+    };
 
     const navItems = computed(() => {
         const programPlanningChildren = [
             {
                 label: 'Strategic House',
-                href: routeHelper('strategic-house.index'),
+                href: safeRoute('strategic-house.index'),
                 icon: DocumentTextIcon,
                 active: (url) => url.startsWith('/strategic-house'),
             },
-            
             {
-        
                 label: 'Strategic Pillars',
-                href: routeHelper('strategic-pillars.index'),
+                href: safeRoute('strategic-pillars.index'),
                 icon: FlagIcon,
                 active: (url) => url.startsWith('/strategic-pillars'),
             },
             {
+                label: 'IT Building Blocks',
+                href: safeRoute('program-planning.it-building-blocks.index'),
+                icon: DocumentTextIcon,
+                active: (url) => url.startsWith('/program-planning/it-building-blocks'),
+            },
+            {
                 label: 'Digital Initiative Definition',
-                href: routeHelper('program-planning.program-definition.digital-initiatives'),
+                href: safeRoute('program-planning.program-definition.digital-initiatives'),
                 icon: DocumentTextIcon,
                 active: (url) =>
                     url.startsWith('/program-planning/program-definition/digital-initiatives')
@@ -46,13 +58,13 @@ export function useNavigation() {
             },
             {
                 label: 'IT Initiative Definition',
-                href: routeHelper('program-planning.program-definition.it-initiatives'),
+                href: safeRoute('program-planning.program-definition.it-initiatives'),
                 icon: DocumentTextIcon,
                 active: (url) => url.startsWith('/program-planning/program-definition/it-initiatives'),
             },
             {
                 label: 'Initiative Relation',
-                href: routeHelper('initiative-relations.index'),
+                href: safeRoute('initiative-relations.index'),
                 icon: TableCellsIcon,
                 active: (url) => url.startsWith('/program-planning/initiative-relation'),
             },
@@ -61,7 +73,7 @@ export function useNavigation() {
         const programEvaluationChildren = [
             {
                 label: 'Review PC',
-                href: routeHelper('program-evaluation.index'),
+                href: safeRoute('program-evaluation.index'),
                 icon: ClipboardDocumentCheckIcon,
                 active: (url) =>
                     url.startsWith('/program-evalution/review')
@@ -69,7 +81,7 @@ export function useNavigation() {
             },
             {
                 label: 'Review Timeline',
-                href: routeHelper('program-evaluation.review-timeline'),
+                href: safeRoute('program-evaluation.review-timeline'),
                 icon: ClipboardDocumentCheckIcon,
                 active: (url) => url.startsWith('/program-evalution/review-timeline'),
             },
@@ -78,13 +90,13 @@ export function useNavigation() {
         const programImplementationChildren = [
             {
                 label: 'Digital Initiatives',
-                href: routeHelper('digital-initiatives.index'),
+                href: safeRoute('digital-initiatives.index'),
                 icon: FolderIcon,
                 active: (url) => url.startsWith('/digital-initiatives'),
                 children: [
                     {
                         label: 'Status Implementation',
-                        href: routeHelper('digital-initiatives.index', { tableMode: 'implementation' }),
+                        href: safeRoute('digital-initiatives.index', { tableMode: 'implementation' }),
                         icon: ClipboardDocumentCheckIcon,
                         active: (url) =>
                             url.startsWith('/digital-initiatives')
@@ -94,33 +106,28 @@ export function useNavigation() {
             },
             {
                 label: 'IT Initiatives',
-                href: routeHelper('it-initiatives.index'),
+                href: safeRoute('it-initiatives.index'),
                 icon: FolderIcon,
                 active: (url) => url.startsWith('/it-initiatives') || url.startsWith('/roadmap'),
                 children: [
                     {
                         label: 'Roadmap Project Charter',
-                        href: routeHelper('it-initiatives.index', { tableMode: 'roadmap' }),
+                        href: safeRoute('it-initiatives.index', { tableMode: 'roadmap' }),
                         icon: ClipboardDocumentCheckIcon,
                         active: (url) => url.startsWith('/roadmap') && !url.startsWith('/roadmap/status-implementation'),
                     },
                     {
                         label: 'Status Implementation',
-                        href: routeHelper('it-initiatives.index', { tableMode: 'implementation' }),
+                        href: safeRoute('it-initiatives.index', { tableMode: 'implementation' }),
                         icon: ClipboardDocumentCheckIcon,
                         active: (url) => url.includes('tableMode=implementation'),
                     },
                 ],
             },
-            {
-                label: 'IT Building Blocks',
-                href: routeHelper('program-implementation.it-building-blocks.index'),
-                icon: DocumentTextIcon,
-                active: (url) => url.startsWith('/program-implementation/it-building-blocks'),
-            },
+
             {
                 label: 'RKAP',
-                href: routeHelper('program-implementation.budgeting'),
+                href: safeRoute('program-implementation.budgeting'),
                 icon: DocumentTextIcon,
                 active: (url) => url.startsWith('/program-implementation/budgeting'),
             },
@@ -129,19 +136,19 @@ export function useNavigation() {
         const architectureChildren = [
             {
                 label: 'Business Capability',
-                href: routeHelper('master-data.business-capabilities.index'),
+                href: safeRoute('master-data.business-capabilities.index'),
                 icon: CubeIcon,
                 active: (url) => url.startsWith('/master-data/business-capabilities'),
             },
             {
                 label: 'Organization Structure',
-                href: routeHelper('architecture.organization-structure'),
+                href: safeRoute('architecture.organization-structure'),
                 icon: BuildingOffice2Icon,
                 active: (url) => url.startsWith('/architecture/organization-structure'),
             },
             {
                 label: 'Informatic System',
-                href: routeHelper('architecture.informatic-system'),
+                href: safeRoute('architecture.informatic-system'),
                 icon: BuildingOffice2Icon,
                 active: (url) => url.startsWith('/architecture/informatic-system'),
             },
@@ -150,7 +157,7 @@ export function useNavigation() {
         const items = [
             {
                 label: 'Program Planning',
-                href: routeHelper('dashboard-monitoring'),
+                href: safeRoute('dashboard-monitoring'),
                 icon: Squares2X2Icon,
                 active: (url) =>
                     url.startsWith('/dashboard-monitoring')
@@ -161,14 +168,14 @@ export function useNavigation() {
             },
             {
                 label: 'Program Evaluation',
-                href: routeHelper('program-evaluation.index'),
+                href: safeRoute('program-evaluation.index'),
                 icon: DocumentTextIcon,
                 active: (url) => url.startsWith('/program-evalution'),
                 children: programEvaluationChildren,
             },
             {
                 label: 'Program Implementation',
-                href: routeHelper('dashboard'),
+                href: safeRoute('dashboard'),
                 icon: ChartBarIcon,
                 active: (url) =>
                     url.startsWith('/program-implementation')
@@ -180,32 +187,32 @@ export function useNavigation() {
             },
             {
                 label: 'Architecture',
-                href: routeHelper('architecture.index'),
+                href: safeRoute('architecture.index'),
                 icon: CubeIcon,
                 active: (url) => url.startsWith('/architecture') || url.startsWith('/master-data/business-capabilities'),
                 children: architectureChildren,
             },
             {
                 label: 'Service Portofolio',
-                href: routeHelper('service-portofolio.index'),
+                href: safeRoute('service-portofolio.index'),
                 icon: CubeIcon,
                 active: (url) => url.startsWith('/service-portofolio'),
             },
             {
                 label: 'Resources Management',
-                href: routeHelper('resources-management.index'),
+                href: safeRoute('resources-management.index'),
                 icon: CubeIcon,
                 active: (url) => url.startsWith('/resources-management'),
             },
             {
                 label: 'Policy',
-                href: routeHelper('policy.index'),
+                href: safeRoute('policy.index'),
                 icon: DocumentTextIcon,
                 active: (url) => url.startsWith('/policy'),
             },
             {
                 label: 'Master Data',
-                href: routeHelper('master-data.index'),
+                href: safeRoute('master-data.index'),
                 icon: TableCellsIcon,
                 active: (url) => url.startsWith('/master-data'),
             },
@@ -214,7 +221,7 @@ export function useNavigation() {
         if (isAdmin.value) {
             items.push({
                 label: 'Admin',
-                href: routeHelper('admin.dashboard'),
+                href: safeRoute('admin.dashboard'),
                 icon: ShieldCheckIcon,
                 active: (url) => url.startsWith('/admin'),
             });

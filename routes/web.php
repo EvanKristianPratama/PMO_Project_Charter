@@ -179,12 +179,20 @@ Route::middleware(['auth', 'approved'])->group(function () {
         return redirect("/program-planning/initiative-relation/{$initiativeRelation}/edit");
     });
     Route::get('/program-implementation', ProgramImplementationController::class)->name('program-implementation.index');
-    Route::get('/program-implementation/it-building-blocks', ItBuildingBlockController::class)->name('program-implementation.it-building-blocks.index');
-    Route::post('/program-implementation/it-building-blocks', [ItBuildingBlockController::class, 'store'])->name('program-implementation.it-building-blocks.store');
-    Route::delete('/program-implementation/it-building-blocks/primary/{primary}', [ItBuildingBlockController::class, 'destroyPrimary'])->name('program-implementation.it-building-blocks.primary.destroy');
-    Route::delete('/program-implementation/it-building-blocks/primary/{primary}/secondary/{secondary}', [ItBuildingBlockController::class, 'destroySecondary'])->name('program-implementation.it-building-blocks.secondary.destroy');
-    Route::delete('/program-implementation/it-building-blocks/primary/{primary}/secondary/{secondary}/initiative/{initiative}', [ItBuildingBlockController::class, 'destroyInitiative'])->name('program-implementation.it-building-blocks.initiative.destroy');
-    Route::post('/program-implementation/it-building-blocks/initiatives/bulk-delete', [ItBuildingBlockController::class, 'destroyInitiatives'])->name('program-implementation.it-building-blocks.initiative.bulk-destroy');
+
+    // IT Building Blocks (moved to Program Planning)
+    Route::get('/program-planning/it-building-blocks', ItBuildingBlockController::class)->name('program-planning.it-building-blocks.index');
+    Route::post('/program-planning/it-building-blocks', [ItBuildingBlockController::class, 'store'])->name('program-planning.it-building-blocks.store');
+    Route::delete('/program-planning/it-building-blocks/primary/{primary}', [ItBuildingBlockController::class, 'destroyPrimary'])->name('program-planning.it-building-blocks.primary.destroy');
+    Route::delete('/program-planning/it-building-blocks/primary/{primary}/secondary/{secondary}', [ItBuildingBlockController::class, 'destroySecondary'])->name('program-planning.it-building-blocks.secondary.destroy');
+    Route::delete('/program-planning/it-building-blocks/primary/{primary}/secondary/{secondary}/initiative/{initiative}', [ItBuildingBlockController::class, 'destroyInitiative'])->name('program-planning.it-building-blocks.initiative.destroy');
+    Route::post('/program-planning/it-building-blocks/initiatives/bulk-delete', [ItBuildingBlockController::class, 'destroyInitiatives'])->name('program-planning.it-building-blocks.initiative.bulk-destroy');
+
+    // Redirects untuk backward-compatibility: URL lama → URL baru
+    Route::redirect('/program-implementation/it-building-blocks', '/program-planning/it-building-blocks');
+    Route::post('/program-implementation/it-building-blocks', [ItBuildingBlockController::class, 'store']);
+    Route::redirect('/program-implementation/it-building-blocks/primary/{primary}', '/program-planning/it-building-blocks');
+    Route::redirect('/program-implementation/it-building-blocks/primary/{primary}/secondary/{secondary}', '/program-planning/it-building-blocks');
 
     Route::get('/program-implementation/budgeting', fn () => Inertia::render('Placeholder/Index', [
         'title' => 'Budgeting',

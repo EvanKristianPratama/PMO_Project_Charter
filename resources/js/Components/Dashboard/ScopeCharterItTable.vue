@@ -168,7 +168,6 @@ const hasProjectCharter = (project) => {
         charter.duration,
         charter.background,
         charter.objectives,
-        charter.scope,
         charter.impact_value,
     ].some(hasFilled);
 };

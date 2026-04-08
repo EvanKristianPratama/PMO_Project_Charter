@@ -11,8 +11,6 @@ const lineItems = (value) => String(value || '')
     .map((line) => line.trim())
     .filter(Boolean);
 
-const showScope = () => !props.editable && Boolean(String(props.form.scope || '').trim());
-
 const stripBulletPrefix = (value) => String(value || '')
     .replace(/^[\u2022\u2023\u25E6\u2043\u2219â€¢\-\*\u00B7\u2013\u2014]+\s*/u, '')
     .trim();
@@ -150,18 +148,6 @@ const displayOwner = (value) => {
                 </article>
             </div>
 
-            <!-- Scope (optional) -->
-            <article v-if="showScope()" class="panel mt-0 border-t-0">
-                <div class="bar-sub">Scope</div>
-                <div class="panel-body">
-                    <textarea v-if="editable" v-model="form.scope" class="field-area"
-                        placeholder="Satu poin per baris..."></textarea>
-                    <ul v-else-if="lineItems(form.scope).length" class="bullet-list">
-                        <li v-for="(line, idx) in lineItems(form.scope)" :key="`scope-${idx}`">{{ line }}</li>
-                    </ul>
-                    <p v-else class="empty">-</p>
-                </div>
-            </article>
         </div>
 
         <!-- Dampak & Kebutuhan Sumber Daya -->

@@ -22,7 +22,6 @@ class ProjectCharter extends Model
         'duration',
         'background',
         'objectives',
-        'scope',
         'impact_value',
         'key_personnel',
         'key_items',

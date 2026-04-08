@@ -23,7 +23,6 @@ class StoreProjectCharterRequest extends FormRequest
             'duration' => ['nullable', 'string', 'max:255'],
             'background' => ['nullable', 'string'],
             'objectives' => ['nullable', 'string'],
-            'scope' => ['nullable', 'string'],
             'impact_value' => ['nullable', 'string'],
             'key_personnel' => ['nullable', 'string'],
             'key_items' => ['nullable', 'string'],

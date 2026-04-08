@@ -441,7 +441,6 @@ const charterFormFor = (proj, charterOverride = null) => {
         tgl_dokumen: charter?.tgl_dokumen ?? '',
         background: charter?.background ?? '',
         objectives: charter?.objectives ?? '',
-        scope: charter?.scope ?? '',
         impact_value: charter?.impact_value ?? '',
         key_personnel: charter?.key_personnel ?? '',
         key_items: charter?.key_items ?? '',
