@@ -112,7 +112,7 @@ const headlineSummary = () => {
         <div class="px-5 pt-5 pb-3 border-b border-slate-200">
             <div class="flex flex-wrap items-center gap-2">
                 <h1 class="text-[18px] font-extrabold leading-tight text-slate-900">
-                    Approved Project Charter:
+                    Project Charter:
                     {{ itInitiative.name || '-' }}
                 </h1>
                 <span

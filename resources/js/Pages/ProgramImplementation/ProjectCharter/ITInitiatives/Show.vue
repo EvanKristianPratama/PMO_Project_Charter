@@ -46,34 +46,42 @@
                 <section
                     class="print:hidden rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-white/10 dark:bg-[#171717]">
                     <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-                        <div class="w-full lg:max-w-sm">
+                        <div class="w-full lg:flex-1 lg:max-w-4xl">
                             <label
                                 class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 Charter Status Timeline
                             </label>
-                            <div class="flex items-center gap-2">
+                            <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
                                 <select v-model="selectedCharterId"
                                     :disabled="charterVersions.length === 0 || isEditing"
-                                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-white/10 dark:bg-[#131313] dark:text-slate-100 dark:disabled:bg-white/5">
+                                    class="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-white/10 dark:bg-[#131313] dark:text-slate-100 dark:disabled:bg-white/5">
                                     <option v-if="charterVersions.length === 0" value="">No saved version yet</option>
                                     <option v-for="charter in charterVersions" :key="charter.id"
                                         :value="String(charter.id)">
                                         {{ charterOptionLabel(charter) }}
                                     </option>
                                 </select>
-                                <button type="button"
-                                    class="shrink-0 rounded-lg px-3 py-2 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60"
-                                    :class="showRoadmapPanel
-                                        ? 'border border-red-300 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400 dark:hover:bg-red-950/40'
-                                        : 'border border-slate-200 bg-blue-50 text-blue-700 hover:bg-blue-100 dark:border-slate-600 dark:bg-blue-950/20 dark:text-blue-400 dark:hover:bg-blue-950/40'"
-                                    :disabled="!resolvedRoadmapPcId" @click="toggleRoadmapView">
-                                    {{ showRoadmapPanel ? 'Close Roadmap' : 'View Roadmap' }}
-                                </button>
-                                <button type="button"
-                                    class="shrink-0 rounded-lg border border-slate-200 bg-green-50 px-3 py-2 text-xs font-medium text-green-700 hover:bg-green-100 transition disabled:cursor-not-allowed disabled:opacity-60 dark:border-green-900/30 dark:bg-green-950/20 dark:text-green-400 dark:hover:bg-green-950/40"
-                                    :disabled="!resolvedRoadmapPcId" @click="addRoadmap">
-                                    {{ hasRoadmap ? 'Edit Roadmap' : 'Add Roadmap' }}
-                                </button>
+                                <div class="flex flex-wrap items-center gap-2 sm:flex-none">
+                                    <button type="button"
+                                        class="shrink-0 rounded-lg px-3 py-2 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60"
+                                        :class="showRoadmapPanel
+                                            ? 'border border-red-300 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400 dark:hover:bg-red-950/40'
+                                            : 'border border-slate-200 bg-blue-50 text-blue-700 hover:bg-blue-100 dark:border-slate-600 dark:bg-blue-950/20 dark:text-blue-400 dark:hover:bg-blue-950/40'"
+                                        :disabled="!resolvedRoadmapPcId" @click="toggleRoadmapView">
+                                        {{ showRoadmapPanel ? 'Close Roadmap' : 'View Roadmap' }}
+                                    </button>
+                                    <button type="button"
+                                        class="shrink-0 rounded-lg border border-slate-200 bg-green-50 px-3 py-2 text-xs font-medium text-green-700 hover:bg-green-100 transition disabled:cursor-not-allowed disabled:opacity-60 dark:border-green-900/30 dark:bg-green-950/20 dark:text-green-400 dark:hover:bg-green-950/40"
+                                        :disabled="!resolvedRoadmapPcId" @click="addRoadmap">
+                                        {{ hasRoadmap ? 'Edit Roadmap' : 'Add Roadmap' }}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#171717] dark:text-slate-300 dark:hover:bg-white/5"
+                                    >
+                                        Change Visibility
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -187,7 +195,7 @@ import UserLayout from '@/Layouts/UserLayout.vue';
 import ItCharterDocument from '@/Components/ProjectCharter/ItCharterDocument.vue';
 import AprovedCharterDocument from '@/Components/ProjectCharter/AprovedCharterDocument.vue';
 import ProjectRoadmap from '@/Components/Roadmap/ProjectRoadmap.vue';
-import StatusImplementationTable from '@/Components/ITInitiative/ReviewStatusImplementationTable.vue';
+import StatusImplementationTable from '@/Components/ITInitiative/StatusImplementationTable.vue';
 
 const route = useRouteHelper();
 
