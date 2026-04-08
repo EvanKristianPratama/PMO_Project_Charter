@@ -1,4 +1,4 @@
-  <template>
+<template>
     <UserLayout title="Edit Digital Initiative">
         <div class="mx-auto max-w-5xl animate-fade-in">
             <div class="mb-6">
@@ -168,43 +168,6 @@
                         </div>
                     </div>
 
-                    <!-- SC Implementation Status -->
-                    <div class="space-y-4 rounded-xl border border-blue-100 bg-blue-50/30 p-6 dark:border-white/5 dark:bg-white/5">
-                        <h3 class="flex items-center text-sm font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400">
-                            <span class="mr-2 h-px w-8 bg-blue-300 dark:bg-blue-600"></span>
-                            SC Implementation Status
-                            <span class="ml-2 h-px flex-1 bg-blue-300 dark:bg-blue-600"></span>
-                        </h3>
-
-                        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                            <div>
-                                <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Status SC</label>
-                                <input
-                                    v-model="form.sc_status"
-                                    type="text"
-                                    class="w-full rounded-md border-slate-300 bg-white shadow-sm focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-100 sm:text-sm"
-                                    placeholder="e.g., In Progress, Completed"
-                                />
-                                <p v-if="form.errors.sc_status" class="mt-1 text-xs text-red-500">{{ form.errors.sc_status }}</p>
-                            </div>
-
-                            <div>
-                                <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Review SC</label>
-                                <select
-                                    v-model="form.sc_review_status"
-                                    class="w-full rounded-md border-slate-300 bg-white shadow-sm focus:border-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10 dark:bg-[#131313] dark:text-slate-200 sm:text-sm"
-                                >
-                                    <option value="">Select Review Status</option>
-                                    <option value="On Track">On Track</option>
-                                    <option value="At Risk">At Risk</option>
-                                    <option value="Not Started">Not Started</option>
-                                    <option value="Not Signed">Not Signed</option>
-                                </select>
-                                <p v-if="form.errors.sc_review_status" class="mt-1 text-xs text-red-500">{{ form.errors.sc_review_status }}</p>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Actions -->
                     <div class="flex items-center justify-end gap-3 rounded-b-xl border-t border-slate-100 pt-6 dark:border-white/5">
                         <Link
@@ -268,8 +231,6 @@ const form = useForm({
     rjjp:             props.initiative.rjjp ?? '',
     coe:              props.initiative.coe ?? '',
     status:           props.initiative.status ?? resolvedDefaultStatusId,
-    sc_status:        props.initiative.latest_sc_status_implementation?.status ?? '',
-    sc_review_status: props.initiative.latest_sc_status_implementation?.review_status ?? '',
 });
 
 const submit = () => {

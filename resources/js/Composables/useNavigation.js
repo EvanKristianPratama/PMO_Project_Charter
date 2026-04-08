@@ -12,6 +12,7 @@ import {
     DocumentTextIcon,
     TableCellsIcon,
     ClipboardDocumentCheckIcon,
+    CircleStackIcon,
 } from '@heroicons/vue/24/outline';
 
 export function useNavigation() {
@@ -128,7 +129,7 @@ export function useNavigation() {
             {
                 label: 'Resource Management',
                 href: safeRoute('program-implementation.resources-management.index'),
-                icon: TableCellsIcon,
+                icon: CircleStackIcon,
                 active: (url) => url.startsWith('/program-implementation/resources-management'),
             },
         ];

@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Models\DataSource;
 use App\Models\MstInitiative;
 use App\Models\MstScSource;
-use App\Models\ScStatusImplementation;
 use App\Models\Theme;
 use App\Models\TrsMapSc;
 use App\Models\TrsScDetails;
@@ -15,7 +14,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class TrsScInitiative extends Model
 {
@@ -24,19 +22,6 @@ class TrsScInitiative extends Model
     protected $table = 'trs_sc_initiative';
 
     protected $guarded = ['id'];
-
-    public function scStatusImplementations(): HasMany
-    {
-        return tap(
-            $this->hasMany(ScStatusImplementation::class, 'digital_initiative_id'),
-            fn ($q) => $q->orderBy('date', 'desc')->orderBy('id', 'desc')
-        );
-    }
-
-    public function latestScStatusImplementation(): HasOne
-    {
-        return $this->hasOne(ScStatusImplementation::class, 'digital_initiative_id')->latestOfMany('id');
-    }
 
     public function source(): BelongsTo
     {
@@ -73,9 +58,6 @@ class TrsScInitiative extends Model
         return $this->hasMany(TrsScDetails::class, 'sc_id');
     }
 
-    /**
-     * Appendix initiatives linked to this compendium via trs_sc_dependency.
-     */
     public function appendixes(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -86,9 +68,6 @@ class TrsScInitiative extends Model
         );
     }
 
-    /**
-     * Compendium initiatives this initiative is an appendix of.
-     */
     public function compendiums(): BelongsToMany
     {
         return $this->belongsToMany(

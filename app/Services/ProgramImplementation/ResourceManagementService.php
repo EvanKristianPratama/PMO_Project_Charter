@@ -4,7 +4,6 @@ namespace App\Services\ProgramImplementation;
 
 use App\Models\InitiativeStatus;
 use App\Models\TrsProject;
-use Illuminate\Database\Eloquent\Builder;
 
 class ResourceManagementService
 {
@@ -12,11 +11,8 @@ class ResourceManagementService
 
     private const TYPE_IT_INITIATIVE = 2;
 
-    public function getIndexProps(array $filters = []): array
+    public function getIndexProps(): array
     {
-        $resolvedTypeFilter = $this->resolveTypeFilter($filters['type'] ?? null);
-        $resolvedStatusFilter = $this->resolveStatusFilter($filters['status'] ?? null);
-
         $resourceRows = TrsProject::select([
                 'trs_projects.id',
                 'trs_projects.code',
@@ -24,32 +20,19 @@ class ResourceManagementService
                 'trs_projects.tipe_inisiative',
             ])
             ->with([
-                'projectCharters' => function ($query) use ($resolvedStatusFilter) {
+                'projectCharters' => function ($query) {
                     $query->select([
-                    'trs_project_charters.id',
-                    'trs_project_charters.project_id',
-                    'trs_project_charters.status',
-                    'trs_project_charters.budget',
-                    'trs_project_charters.key_personnel',
-                ]);
-
-                    if ($resolvedStatusFilter !== null) {
-                        $query->where('trs_project_charters.status', $resolvedStatusFilter);
-                    }
+                        'trs_project_charters.id',
+                        'trs_project_charters.project_id',
+                        'trs_project_charters.status',
+                        'trs_project_charters.budget',
+                        'trs_project_charters.key_personnel',
+                    ]);
 
                     $query->oldest('trs_project_charters.id');
                 },
                 'projectCharters.statusRef:id,name',
             ])
-            ->when(
-                $resolvedTypeFilter !== null,
-                fn ($query) => $query->where('trs_projects.tipe_inisiative', $resolvedTypeFilter)
-            )
-            ->whereHas('projectCharters', function (Builder $query) use ($resolvedStatusFilter) {
-                if ($resolvedStatusFilter !== null) {
-                    $query->where('trs_project_charters.status', $resolvedStatusFilter);
-                }
-            })
             ->oldest('trs_projects.id')
             ->get()
             ->flatMap(fn (TrsProject $project): array => $this->mapProjectResources($project))
@@ -60,8 +43,8 @@ class ResourceManagementService
             'resourceProjects' => $resourceRows,
             'resourceSummary' => $this->buildResourceSummary($resourceRows),
             'filters' => [
-                'type' => $resolvedTypeFilter !== null ? (string) $resolvedTypeFilter : 'all',
-                'status' => $resolvedStatusFilter !== null ? (string) $resolvedStatusFilter : 'all',
+                'type' => 'all',
+                'status' => 'all',
             ],
             'filterOptions' => [
                 'types' => $this->typeOptions(),
@@ -72,15 +55,35 @@ class ResourceManagementService
 
     private function mapProjectResources(TrsProject $project): array
     {
+        if ($project->projectCharters->isEmpty()) {
+            return [[
+                'id' => null,
+                'row_key' => sprintf('project-%d', $project->id),
+                'project_id' => (int) $project->id,
+                'project_code' => $this->normalizeText($project->getAttribute('code')),
+                'project_name' => $this->normalizeProjectName($project),
+                'project_type' => (int) ($project->tipe_inisiative ?? 0),
+                'project_type_label' => $this->typeLabel($project->tipe_inisiative),
+                'status_id' => null,
+                'status' => '-',
+                'budget' => null,
+                'key_personnel' => null,
+            ]];
+        }
+
         return $project->projectCharters
             ->map(function ($charter) use ($project): array {
                 return [
                     'id' => (int) $charter->id,
+                    'row_key' => sprintf('charter-%d', $charter->id),
                     'project_id' => (int) $project->id,
                     'project_code' => $this->normalizeText($project->getAttribute('code')),
                     'project_name' => $this->normalizeProjectName($project),
                     'project_type' => (int) ($project->tipe_inisiative ?? 0),
                     'project_type_label' => $this->typeLabel($project->tipe_inisiative),
+                    'status_id' => $charter->status !== null && $charter->status !== ''
+                        ? (int) $charter->status
+                        : null,
                     'status' => $this->normalizeStatusLabel(
                         $charter->statusRef?->name,
                         $charter->status,
@@ -132,34 +135,6 @@ class ResourceManagementService
         return $statusId !== null && $statusId !== ''
             ? sprintf('Status %s', $statusId)
             : '-';
-    }
-
-    private function resolveTypeFilter(mixed $value): ?int
-    {
-        if ($value === null || $value === '') {
-            return self::TYPE_IT_INITIATIVE;
-        }
-
-        if ($value === 'all') {
-            return null;
-        }
-
-        $normalized = (int) $value;
-
-        return in_array($normalized, [self::TYPE_DIGITAL_INITIATIVE, self::TYPE_IT_INITIATIVE], true)
-            ? $normalized
-            : self::TYPE_IT_INITIATIVE;
-    }
-
-    private function resolveStatusFilter(mixed $value): ?int
-    {
-        if ($value === null || $value === '' || $value === 'all') {
-            return null;
-        }
-
-        $normalized = (int) $value;
-
-        return $normalized > 0 ? $normalized : null;
     }
 
     private function typeOptions(): array

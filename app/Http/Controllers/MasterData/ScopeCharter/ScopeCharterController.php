@@ -4,8 +4,6 @@ namespace App\Http\Controllers\MasterData\ScopeCharter;
 
 use App\Http\Controllers\Controller;
 use App\Models\DataSource;
-use App\Models\InitiativeStatus;
-use App\Models\ScStatusImplementation;
 use App\Models\TrsScInitiative;
 use App\Models\UseCase;
 use Illuminate\Http\RedirectResponse;
@@ -15,8 +13,6 @@ use Inertia\Response;
 
 class ScopeCharterController extends Controller
 {
-    /* ── Validation rules (DRY) ────────────────────── */
-
     private function initiativeRules(): array
     {
         return [
@@ -30,16 +26,6 @@ class ScopeCharterController extends Controller
         ];
     }
 
-    private function statusRules(): array
-    {
-        return [
-            'sc_status' => 'nullable|string|max:255',
-            'sc_review_status' => 'nullable|string|in:At Risk,On Track,Not Started,Not Signed',
-        ];
-    }
-
-    /* ── Shared dropdown options (DRY) ─────────────── */
-
     private function dropdownOptions(): array
     {
         return [
@@ -50,25 +36,14 @@ class ScopeCharterController extends Controller
             'sourceOptions' => DataSource::orderBy('name')
                 ->get(['id', 'name'])
                 ->values(),
-
-            'statusOptions' => InitiativeStatus::ordered()
-                ->map(fn (InitiativeStatus $s) => [
-                    'id' => (int) $s->id,
-                    'name' => $s->name,
-                    'label' => ucfirst($s->name),
-                ])
-                ->values(),
         ];
     }
-
-    /* ── CRUD ──────────────────────────────────────── */
 
     public function index(): Response
     {
         $initiatives = TrsScInitiative::with([
             'useCase:id,name',
             'source:id,name',
-            'latestScStatusImplementation',
         ])->latest()->get();
 
         return Inertia::render('MasterData/ScopeCharter/Index', [
@@ -80,19 +55,8 @@ class ScopeCharterController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate($this->initiativeRules());
-        $initiative = TrsScInitiative::create($validated);
 
-        $statusData = $request->validate($this->statusRules());
-
-        if ($statusData['sc_status'] ?? null) {
-            ScStatusImplementation::create([
-                'digital_initiative_id' => $initiative->id,
-                'status' => $statusData['sc_status'],
-                'review_status' => $statusData['sc_review_status'] ?? 'Not Started',
-                'date' => now()->toDateString(),
-                'time_start' => now()->toTimeString(),
-            ]);
-        }
+        TrsScInitiative::create($validated);
 
         return redirect()
             ->route('master-data.scope-charter.index')
@@ -104,22 +68,6 @@ class ScopeCharterController extends Controller
         $validated = $request->validate($this->initiativeRules());
         $scopeCharter->update($validated);
 
-        $statusData = $request->validate($this->statusRules());
-
-        if ($statusData['sc_status'] ?? null) {
-            ScStatusImplementation::updateOrCreate(
-                [
-                    'digital_initiative_id' => $scopeCharter->id,
-                    'date' => now()->toDateString(),
-                ],
-                [
-                    'status' => $statusData['sc_status'],
-                    'review_status' => $statusData['sc_review_status'] ?? 'Not Started',
-                    'time_start' => now()->toTimeString(),
-                ]
-            );
-        }
-
         return redirect()
             ->route('master-data.scope-charter.index')
             ->with('success', 'Scope Charter berhasil diperbarui.');
@@ -127,7 +75,6 @@ class ScopeCharterController extends Controller
 
     public function destroy(TrsScInitiative $scopeCharter): RedirectResponse
     {
-        $scopeCharter->scStatusImplementations()->delete();
         $scopeCharter->delete();
 
         return redirect()
