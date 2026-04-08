@@ -1,147 +1,116 @@
 <template>
     <UserLayout :title="page.title">
-        <div class="space-y-6 animate-fade-in">
+        <div class="strategic-house animate-fade-in">
             <section class="overflow-hidden rounded-[28px] border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#171717] sm:p-6">
-                <div class="text-center">
-                    <p class="text-xs font-semibold uppercase tracking-[0.22em] text-sky-600 dark:text-sky-300">Strategic House</p>
-                    <h1 class="mt-3 text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl">{{ page.headline }}</h1>
 
-                    <div class="mt-5 flex flex-wrap justify-center gap-2">
-                        <span
-                            v-for="band in focusBands"
-                            :key="band.id"
-                            class="inline-flex items-center rounded-full bg-sky-100 px-4 py-2 text-xs font-semibold text-sky-700 shadow-sm dark:bg-sky-500/15 dark:text-sky-200"
-                        >
-                            {{ band.label }}
-                        </span>
-                    </div>
-                </div>
-
-                <div class="mt-6 overflow-hidden rounded-[30px] bg-gradient-to-b from-[#2a6fc2] to-[#17478d] px-5 py-8 text-center text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] [clip-path:polygon(8%_0%,92%_0%,100%_100%,0%_100%)] sm:px-8">
-                    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-sky-100/90">{{ page.visionTitle }}</p>
-                    <p class="mx-auto mt-4 max-w-5xl text-sm leading-7 text-white/90 sm:text-base">
-                        {{ page.visionText }}
-                    </p>
-                </div>
-
-                <div class="mt-5 rounded-[28px] bg-[#184f96] px-4 py-5 text-white shadow-sm sm:px-5">
-                    <div class="text-center">
-                        <p class="text-3xl font-bold">{{ summary.total_initiatives }}</p>
-                        <p class="mt-1 text-sm font-medium text-white/85">{{ page.initiativeLabel }}</p>
-                    </div>
-
-                    <div class="mt-5 grid gap-3 md:grid-cols-5">
-                        <article
-                            v-for="card in technologyCards"
-                            :key="card.name"
-                            :class="technologyToneClass(card.tone)"
-                            class="rounded-2xl border px-4 py-4 shadow-sm transition-transform hover:-translate-y-0.5"
-                        >
-                            <div class="flex items-start justify-between gap-3">
-                                <h2 class="text-sm font-semibold">{{ card.display_name }}</h2>
-                                <span class="rounded-full bg-white/80 px-2.5 py-1 text-[11px] font-bold text-slate-900">
-                                    {{ card.initiatives_count }}
-                                </span>
-                            </div>
-
-                            <div class="mt-3 space-y-1.5">
-                                <p
-                                    v-for="initiative in card.initiatives_preview"
-                                    :key="initiative.id"
-                                    class="rounded-xl bg-white/70 px-3 py-2 text-[11px] font-medium text-slate-700"
+                <!-- ═══ ROOF: Focus Bands (Maximize Legacy Business + Build Low Carbon) ═══ -->
+                <div class="roof-section">
+                    <!-- Main roof bar -->
+                    <div class="roof-top">
+                        <div class="roof-main">
+                            <div class="roof-main-label">{{ page.headline }}</div>
+                            <div class="roof-sub-items">
+                                <div
+                                    v-for="(band, idx) in focusBands.slice(0, 2)"
+                                    :key="band.id"
+                                    class="roof-sub-item"
                                 >
-                                    {{ initiative.label }}
-                                </p>
-
-                                <p v-if="card.is_empty" class="rounded-xl bg-white/10 px-3 py-3 text-[11px] text-white/80">
-                                    Belum ada initiative yang terhubung ke CoE ini.
-                                </p>
+                                    {{ band.label }}
+                                </div>
                             </div>
-                        </article>
-                    </div>
-                </div>
-
-                <div class="mt-5 rounded-[30px] bg-[#ddebff] p-4 shadow-inner dark:bg-[#12253f] sm:p-5">
-                    <div class="rounded-3xl bg-white/75 px-5 py-4 text-center shadow-sm dark:bg-white/5">
-                        <p class="text-sm font-semibold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">
-                            {{ page.grandStrategyTitle }}
-                        </p>
-                        <p class="mx-auto mt-2 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-300">
-                            {{ page.grandStrategyText }}
-                        </p>
-
-                        <div v-if="architectureCard" class="mt-4 inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white dark:bg-sky-500/20 dark:text-sky-100">
-                            <span>{{ architectureCard.display_name }}</span>
-                            <span class="rounded-full bg-white/20 px-2 py-0.5">{{ architectureCard.initiatives_count }} linked initiatives</span>
+                        </div>
+                        <div v-if="focusBands.length > 2" class="roof-side">
+                            <span>{{ focusBands[2].label }}</span>
                         </div>
                     </div>
+                </div>
 
-                    <div class="mt-5 grid gap-4 xl:grid-cols-6">
+                <!-- ═══ CONNECTOR: small decorative chain ═══ -->
+                <div class="connector-chain">
+                    <svg width="20" height="28" viewBox="0 0 20 28">
+                        <circle cx="10" cy="6" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5"/>
+                        <line x1="10" y1="11" x2="10" y2="17" stroke="#9cb8d8" stroke-width="1.5"/>
+                        <circle cx="10" cy="22" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5"/>
+                    </svg>
+                </div>
+
+                <!-- ═══ VISION TRAPEZOID ═══ -->
+                <div class="vision-trapezoid">
+                    <p class="vision-title">{{ page.visionTitle }}:</p>
+                    <p class="vision-text">{{ page.visionText }}</p>
+                </div>
+
+                <!-- ═══ CONNECTOR ═══ -->
+                <div class="connector-chain">
+                    <svg width="20" height="28" viewBox="0 0 20 28">
+                        <circle cx="10" cy="6" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5"/>
+                        <line x1="10" y1="11" x2="10" y2="17" stroke="#9cb8d8" stroke-width="1.5"/>
+                        <circle cx="10" cy="22" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5"/>
+                    </svg>
+                </div>
+
+                <!-- ═══ DIGITAL TRANSFORMATION INITIATIVES SECTION ═══ -->
+                <div class="dti-section">
+                    <div class="dti-header">
+                        <p class="dti-count">{{ summary.total_initiatives }}</p>
+                        <p class="dti-label">{{ page.initiativeLabel }}</p>
+                    </div>
+
+                    <div class="dti-cards">
+                        <div
+                            v-for="card in technologyCards"
+                            :key="card.name"
+                            class="dti-card"
+                        >
+                            {{ card.display_name }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ CONNECTOR ═══ -->
+                <div class="connector-chain">
+                    <svg width="20" height="28" viewBox="0 0 20 28">
+                        <circle cx="10" cy="6" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5"/>
+                        <line x1="10" y1="11" x2="10" y2="17" stroke="#9cb8d8" stroke-width="1.5"/>
+                        <circle cx="10" cy="22" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5"/>
+                    </svg>
+                </div>
+
+                <!-- ═══ GRAND IT STRATEGY SECTION ═══ -->
+                <div class="gits-section">
+                    <div class="gits-header">
+                        <h2 class="gits-title">{{ page.grandStrategyTitle }}</h2>
+                        <p class="gits-subtitle">{{ page.grandStrategyText }}</p>
+                    </div>
+
+                    <div class="gits-pillars">
                         <article
                             v-for="card in strategyCards"
                             :key="card.name"
-                            :class="strategyToneClass(card.tone)"
-                            class="rounded-[26px] border px-4 py-5 text-white shadow-sm"
+                            class="gits-pillar"
                         >
-                            <div class="flex items-start justify-between gap-3">
-                                <h2 class="text-lg font-semibold leading-6">{{ card.display_name }}</h2>
-                                <span class="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-bold text-white">
-                                    {{ card.initiatives_count }}
-                                </span>
-                            </div>
-
-                            <div class="mt-4 space-y-2">
+                            <h3 class="gits-pillar-title">{{ card.display_name }}</h3>
+                            <div class="gits-pillar-desc">
                                 <p
                                     v-for="initiative in card.initiatives_preview"
                                     :key="initiative.id"
-                                    class="rounded-2xl bg-white/10 px-3 py-2 text-[11px] leading-5 text-white/90"
                                 >
                                     {{ initiative.label }}
                                 </p>
-                                <p v-if="card.is_empty" class="rounded-2xl bg-white/10 px-3 py-3 text-[11px] leading-5 text-white/75">
-                                    Capability CoE sudah tersedia, tetapi belum ada initiative digital yang dimapping ke area ini.
+                                <p v-if="card.is_empty" class="gits-pillar-empty">
+                                    Belum ada initiative yang terhubung ke area ini.
                                 </p>
-                            </div>
-
-                            <div v-if="card.status_breakdown.length > 0" class="mt-4 flex flex-wrap gap-1.5">
-                                <span
-                                    v-for="status in card.status_breakdown"
-                                    :key="`${card.name}-${status.key}`"
-                                    class="rounded-full bg-white/15 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-white/85"
-                                >
-                                    {{ status.label }} {{ status.count }}
-                                </span>
                             </div>
                         </article>
                     </div>
 
-                    <div
-                        v-if="foundationCard"
-                        class="mt-5 rounded-[24px] bg-gradient-to-r from-[#1b4f93] via-[#215da8] to-[#1b4f93] px-5 py-4 text-white shadow-sm"
-                    >
-                        <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                            <div>
-                                <p class="text-lg font-semibold">{{ foundationCard.display_name }}</p>
-                                <p class="mt-1 text-sm text-white/80">
-                                    Memungkinkan pelaksanaan efektif dari seluruh digital dan IT initiative sebagai lapisan fondasi.
-                                </p>
-                            </div>
-
-                            <div class="flex flex-wrap gap-2">
-                                <span class="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
-                                    {{ foundationCard.initiatives_count }} mapped initiatives
-                                </span>
-                                <span
-                                    v-for="status in foundationCard.status_breakdown"
-                                    :key="`foundation-${status.key}`"
-                                    class="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold"
-                                >
-                                    {{ status.label }} {{ status.count }}
-                                </span>
-                            </div>
-                        </div>
+                    <!-- ═══ FOUNDATION BAR ═══ -->
+                    <div v-if="foundationCard" class="foundation-bar">
+                        <span class="foundation-title">{{ foundationCard.display_name }}:</span>
+                        <span class="foundation-desc">Memungkinkan pelaksanaan efektif dari semua digital dan IT initiative</span>
                     </div>
                 </div>
+
             </section>
         </div>
     </UserLayout>
@@ -188,29 +157,307 @@ defineProps({
         default: () => [],
     },
 });
-
-const technologyToneClass = (tone) => {
-    const classes = {
-        sky: 'border-sky-200 bg-gradient-to-b from-[#eff7ff] to-[#dbeeff] text-slate-900',
-        indigo: 'border-indigo-200 bg-gradient-to-b from-[#eef2ff] to-[#dde7ff] text-slate-900',
-        cyan: 'border-cyan-200 bg-gradient-to-b from-[#ecfeff] to-[#d7f7fb] text-slate-900',
-        slate: 'border-slate-200 bg-gradient-to-b from-[#f8fafc] to-[#e9eef5] text-slate-900',
-        amber: 'border-amber-200 bg-gradient-to-b from-[#fff8e8] to-[#ffedbf] text-slate-900',
-    };
-
-    return classes[tone] ?? 'border-slate-200 bg-white text-slate-900';
-};
-
-const strategyToneClass = (tone) => {
-    const classes = {
-        sky: 'border-sky-300 bg-gradient-to-b from-[#2d72bd] to-[#1e5aa0]',
-        blue: 'border-blue-300 bg-gradient-to-b from-[#2964ad] to-[#184d8d]',
-        indigo: 'border-indigo-300 bg-gradient-to-b from-[#3158a7] to-[#243f88]',
-        cyan: 'border-cyan-300 bg-gradient-to-b from-[#2b6f98] to-[#1a5579]',
-        emerald: 'border-emerald-300 bg-gradient-to-b from-[#2b7288] to-[#1d5c72]',
-        slate: 'border-slate-300 bg-gradient-to-b from-[#36506f] to-[#24384f]',
-    };
-
-    return classes[tone] ?? 'border-slate-300 bg-gradient-to-b from-[#31527f] to-[#22395a]';
-};
 </script>
+
+<style scoped>
+/* ─── ROOF SECTION ─── */
+.roof-section {
+    margin-bottom: 0;
+}
+
+.roof-top {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+}
+
+.roof-main {
+    flex: 1;
+    text-align: center;
+}
+
+.roof-main-label {
+    background: #e8eff8;
+    border: 1px solid #c5d6e8;
+    padding: 12px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a2a3a;
+    border-radius: 4px;
+}
+
+.roof-sub-items {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.roof-sub-item {
+    flex: 1;
+    background: #e8eff8;
+    border: 1px solid #c5d6e8;
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #2a4a6a;
+    text-align: center;
+    border-radius: 4px;
+}
+
+.roof-side {
+    width: 160px;
+    background: #184f96;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.4;
+}
+
+/* ─── CONNECTORS ─── */
+.connector-chain {
+    display: flex;
+    justify-content: center;
+    padding: 4px 0;
+}
+
+/* ─── VISION TRAPEZOID ─── */
+.vision-trapezoid {
+    background: linear-gradient(180deg, #1e6dc0 0%, #184f96 100%);
+    color: #fff;
+    text-align: center;
+    padding: 24px 40px;
+    clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%);
+    border-radius: 6px;
+}
+
+.vision-title {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.vision-text {
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.92);
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ─── DIGITAL TRANSFORMATION INITIATIVES ─── */
+.dti-section {
+    background: #b8d4f0;
+    border-radius: 6px;
+    padding: 20px 20px 24px;
+}
+
+.dti-header {
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.dti-count {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0d2a4a;
+    display: inline;
+}
+
+.dti-label {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0d2a4a;
+    display: inline;
+}
+
+.dti-header p {
+    display: inline;
+}
+
+.dti-cards {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+}
+
+.dti-card {
+    background: #fff;
+    border: 1.5px solid #3b82c8;
+    border-radius: 4px;
+    padding: 14px 12px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: #184f96;
+}
+
+/* ─── GRAND IT STRATEGY SECTION ─── */
+.gits-section {
+    background: #dde8f4;
+    border-radius: 6px;
+    padding: 24px 20px;
+}
+
+.gits-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.gits-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0d2a4a;
+}
+
+.gits-subtitle {
+    font-size: 12px;
+    color: #3a5a7a;
+    margin-top: 4px;
+}
+
+.gits-pillars {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.gits-pillar {
+    background: linear-gradient(180deg, #2567a8 0%, #184f96 100%);
+    border-radius: 10px;
+    padding: 16px 14px;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+}
+
+.gits-pillar-title {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 8px;
+}
+
+.gits-pillar-desc {
+    font-size: 10px;
+    line-height: 1.5;
+    color: rgba(255,255,255,0.85);
+    flex: 1;
+}
+
+.gits-pillar-desc p {
+    margin-bottom: 4px;
+}
+
+.gits-pillar-empty {
+    color: rgba(255,255,255,0.6);
+    font-style: italic;
+}
+
+/* ─── FOUNDATION BAR ─── */
+.foundation-bar {
+    background: linear-gradient(90deg, #1b4f93 0%, #215da8 50%, #1b4f93 100%);
+    border-radius: 8px;
+    padding: 14px 24px;
+    color: #fff;
+    text-align: center;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.foundation-title {
+    font-weight: 700;
+    margin-right: 4px;
+}
+
+.foundation-desc {
+    color: rgba(255,255,255,0.85);
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 1024px) {
+    .gits-pillars {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .roof-top {
+        flex-direction: column;
+    }
+
+    .roof-side {
+        width: 100%;
+    }
+
+    .dti-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .gits-pillars {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .vision-trapezoid {
+        clip-path: polygon(5% 0%, 95% 0%, 100% 100%, 0% 100%);
+        padding: 20px 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dti-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .gits-pillars {
+        grid-template-columns: 1fr;
+    }
+
+    .roof-sub-items {
+        flex-direction: column;
+    }
+}
+
+/* ─── DARK MODE ─── */
+:deep(.dark) .roof-main-label,
+:deep(.dark) .roof-sub-item {
+    background: #1e293b;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+:deep(.dark) .dti-section {
+    background: #12253f;
+}
+
+:deep(.dark) .dti-count,
+:deep(.dark) .dti-label {
+    color: #e2e8f0;
+}
+
+:deep(.dark) .dti-card {
+    background: #1e293b;
+    border-color: #3b82c8;
+    color: #93c5fd;
+}
+
+:deep(.dark) .gits-section {
+    background: #0f1d2f;
+}
+
+:deep(.dark) .gits-title {
+    color: #e2e8f0;
+}
+
+:deep(.dark) .gits-subtitle {
+    color: #94a3b8;
+}
+</style>
