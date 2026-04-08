@@ -68,7 +68,7 @@ class Milestone extends Model
 
     public function charter(): BelongsTo
     {
-        return $this->belongsTo(ProjectCharter::class, 'pc_id');
+        return $this->belongsTo(TrsProjectCharter::class, 'pc_id');
     }
 
     public static function roadmapTypeCodes(): array

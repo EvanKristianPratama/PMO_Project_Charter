@@ -18,6 +18,7 @@ use App\Http\Controllers\ProgramEvaluation\TrsReviewPCController;
 use App\Http\Controllers\ProgramImplementation\DashboardController;
 use App\Http\Controllers\ProgramImplementation\ItBuildingBlockController;
 use App\Http\Controllers\ProgramImplementation\ProgramImplementationController;
+use App\Http\Controllers\ProgramImplementation\ResourceManagementController;
 use App\Http\Controllers\ProgramImplementation\ProjectCharter\DigitalInitiatives\DigitalInitiativeController;
 use App\Http\Controllers\ProgramImplementation\ProjectCharter\ITInitiatives\CharterController;
 use App\Http\Controllers\ProgramImplementation\ProjectCharter\ITInitiatives\ITInitiativeController;
@@ -194,13 +195,15 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::redirect('/program-implementation/it-building-blocks/primary/{primary}', '/program-planning/it-building-blocks');
     Route::redirect('/program-implementation/it-building-blocks/primary/{primary}/secondary/{secondary}', '/program-planning/it-building-blocks');
 
-    Route::get('/program-implementation/budgeting', fn () => Inertia::render('Placeholder/Index', [
-        'title' => 'Budgeting',
-    ]))->name('program-implementation.budgeting');
+    Route::get('/program-implementation/resources-management', ResourceManagementController::class)
+        ->name('program-implementation.resources-management.index');
+    Route::get('/program-implementation/budgeting', fn () => redirect()->route('program-implementation.resources-management.index'))
+        ->name('program-implementation.budgeting');
     Route::get('/architecture', fn () => Inertia::render('Architecture/Index'))->name('architecture.index');
     Route::get('/architecture/organization-structure', ArchitectureOrganizationStructureIndexController::class)->name('architecture.organization-structure');
     Route::get('/architecture/informatic-system', fn () => Inertia::render('Architecture/InformaticSystem/Index'))->name('architecture.informatic-system');
-    Route::get('/resources-management', fn () => Inertia::render('ResourcesManagement/Index'))->name('resources-management.index');
+    Route::get('/resources-management', fn () => redirect()->route('program-implementation.resources-management.index'))
+        ->name('resources-management.index');
     Route::get('/service-portofolio', fn () => Inertia::render('Placeholder/Index', [
         'title' => 'Service Portofolio',
     ]))->name('service-portofolio.index');

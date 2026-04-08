@@ -3,11 +3,11 @@
 namespace App\Services\ProgramImplementation\ProjectCharter\ITInitiatives;
 
 use App\Models\Milestone;
-use App\Models\ProjectCharter;
+use App\Models\TrsProjectCharter;
 
 class MilestoneService
 {
-    public function storeMilestone(ProjectCharter $charter, array $payload): void
+    public function storeMilestone(TrsProjectCharter $charter, array $payload): void
     {
         $nextOrder = (int) (Milestone::query()
             ->where('pc_id', $charter->id)
@@ -26,7 +26,7 @@ class MilestoneService
         ]);
     }
 
-    public function updateMilestone(ProjectCharter $charter, Milestone $milestone, array $payload): void
+    public function updateMilestone(TrsProjectCharter $charter, Milestone $milestone, array $payload): void
     {
         abort_if((int) ($milestone->pc_id ?? 0) !== (int) $charter->id, 404);
 
@@ -42,7 +42,7 @@ class MilestoneService
         ]);
     }
 
-    public function deleteMilestone(ProjectCharter $charter, Milestone $milestone): void
+    public function deleteMilestone(TrsProjectCharter $charter, Milestone $milestone): void
     {
         abort_if((int) ($milestone->pc_id ?? 0) !== (int) $charter->id, 404);
 

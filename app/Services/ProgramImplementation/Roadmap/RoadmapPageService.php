@@ -4,7 +4,7 @@ namespace App\Services\ProgramImplementation\Roadmap;
 
 use App\Models\Milestone;
 use App\Models\MstInitiative;
-use App\Models\ProjectCharter;
+use App\Models\TrsProjectCharter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
@@ -82,7 +82,7 @@ class RoadmapPageService
 
     private function roadmapSourceQuery(): Builder
     {
-        return ProjectCharter::query()
+        return TrsProjectCharter::query()
             ->select([
                 'trs_project_charters.id',
                 'trs_project_charters.project_id',
@@ -127,7 +127,7 @@ class RoadmapPageService
                     'code' => $project?->code,
                     'name' => $project?->name,
                     'charters' => $charters
-                        ->map(fn (ProjectCharter $charter): array => $this->mapCharterForRoadmap($charter))
+                        ->map(fn (TrsProjectCharter $charter): array => $this->mapCharterForRoadmap($charter))
                         ->values()
                         ->all(),
                 ];
@@ -138,7 +138,7 @@ class RoadmapPageService
 
     private function flattenRoadmapCharters(Collection $roadmapSources): Collection
     {
-        return $roadmapSources->map(function (ProjectCharter $charter): array {
+        return $roadmapSources->map(function (TrsProjectCharter $charter): array {
             $payload = $this->mapCharterForRoadmap($charter);
             $payload['code'] = $charter->project?->code;
             $payload['name'] = $charter->project?->name;
@@ -147,7 +147,7 @@ class RoadmapPageService
         });
     }
 
-    private function mapCharterForRoadmap(ProjectCharter $charter): array
+    private function mapCharterForRoadmap(TrsProjectCharter $charter): array
     {
         $charterVersion = $this->normalizeVersionLabel($charter->version_label);
         $milestones = ($charter->milestones ?? collect())
@@ -214,7 +214,7 @@ class RoadmapPageService
             return null;
         }
 
-        $resolvedProjectCharterId = ProjectCharter::query()
+        $resolvedProjectCharterId = TrsProjectCharter::query()
             ->where('project_id', $legacyProjectId)
             ->max('id');
 

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\ProgramImplementation\ProjectCharter\ITInitiative
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProgramImplementation\ProjectCharter\ITInitiatives\StoreProjectCharterRequest;
-use App\Models\ProjectCharter;
+use App\Models\TrsProjectCharter;
 use App\Models\TrsProject;
 use App\Services\ProgramImplementation\ProjectCharter\ITInitiatives\ProjectCharterService;
 use Illuminate\Http\RedirectResponse;
@@ -25,7 +25,7 @@ class CharterController extends Controller
     public function update(
         StoreProjectCharterRequest $request,
         TrsProject $project,
-        ProjectCharter $charter
+        TrsProjectCharter $charter
     ): RedirectResponse {
         $versionLabel = $this->projectCharterService->updateProjectCharter($project, $charter, $request->validated());
 

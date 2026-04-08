@@ -126,10 +126,10 @@ export function useNavigation() {
             },
 
             {
-                label: 'RKAP',
-                href: safeRoute('program-implementation.budgeting'),
-                icon: DocumentTextIcon,
-                active: (url) => url.startsWith('/program-implementation/budgeting'),
+                label: 'Resource Management',
+                href: safeRoute('program-implementation.resources-management.index'),
+                icon: TableCellsIcon,
+                active: (url) => url.startsWith('/program-implementation/resources-management'),
             },
         ];
 
@@ -197,12 +197,6 @@ export function useNavigation() {
                 href: safeRoute('service-portofolio.index'),
                 icon: CubeIcon,
                 active: (url) => url.startsWith('/service-portofolio'),
-            },
-            {
-                label: 'Resources Management',
-                href: safeRoute('resources-management.index'),
-                icon: CubeIcon,
-                active: (url) => url.startsWith('/resources-management'),
             },
             {
                 label: 'Policy',

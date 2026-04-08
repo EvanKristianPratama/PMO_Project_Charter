@@ -2,8 +2,8 @@
 
 namespace App\Services\ProgramImplementation\ProjectCharter\ITInitiatives;
 
-use App\Models\ProjectCharter;
 use App\Models\TrsProject;
+use App\Models\TrsProjectCharter;
 use Illuminate\Support\Arr;
 
 class ProjectCharterService
@@ -26,7 +26,7 @@ class ProjectCharterService
         return $versionLabel;
     }
 
-    public function updateProjectCharter(TrsProject $project, ProjectCharter $charter, array $payload): string
+    public function updateProjectCharter(TrsProject $project, TrsProjectCharter $charter, array $payload): string
     {
         abort_if((int) $charter->project_id !== (int) $project->id, 403, 'Charter does not belong to this project.');
 

@@ -32,7 +32,7 @@ class ProjectStatusHistory extends Model
 
     public function projectCharter(): BelongsTo
     {
-        return $this->belongsTo(ProjectCharter::class, 'project_charter_id');
+        return $this->belongsTo(TrsProjectCharter::class, 'project_charter_id');
     }
 
     public function statusRef(): BelongsTo

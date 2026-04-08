@@ -46,12 +46,22 @@ class TrsProject extends Model
 
     public function charter(): HasOne
     {
-        return $this->hasOne(ProjectCharter::class, 'project_id')->latestOfMany('id');
+        return $this->projectCharter();
+    }
+
+    public function projectCharter(): HasOne
+    {
+        return $this->hasOne(TrsProjectCharter::class, 'project_id')->latestOfMany('id');
     }
 
     public function charters(): HasMany
     {
-        return $this->hasMany(ProjectCharter::class, 'project_id');
+        return $this->projectCharters();
+    }
+
+    public function projectCharters(): HasMany
+    {
+        return $this->hasMany(TrsProjectCharter::class, 'project_id');
     }
 
     public function statusRef(): BelongsTo
@@ -75,7 +85,7 @@ class TrsProject extends Model
     {
         return $this->hasManyThrough(
             ProjectStatusHistory::class,
-            ProjectCharter::class,
+            TrsProjectCharter::class,
             'project_id',
             'project_charter_id',
             'id',

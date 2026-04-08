@@ -19,11 +19,8 @@ const showArchitectureChildren = computed(() => {
     if (architectureItem.value?.active(currentUrl.value)) {
         return true;
     }
-    return architectureChildren.value.some((item) => item.active(currentUrl.value));
-});
 
-const resourceManagementItem = computed(() => {
-    return navItems.value.find((item) => item.label === 'Resources Management') ?? null;
+    return architectureChildren.value.some((item) => item.active(currentUrl.value));
 });
 
 const policyItem = computed(() => {
@@ -33,7 +30,6 @@ const policyItem = computed(() => {
 const adminItem = computed(() => {
     return navItems.value.find((item) => item.label === 'Admin') ?? null;
 });
-
 </script>
 
 <template>
@@ -46,7 +42,7 @@ const adminItem = computed(() => {
                 :class="[
                     showArchitectureChildren
                         ? 'bg-indigo-500 text-white shadow-sm'
-                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200'
+                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
             >
                 <component :is="architectureItem.icon" v-if="architectureItem.icon" class="h-3.5 w-3.5 shrink-0" />
@@ -54,39 +50,10 @@ const adminItem = computed(() => {
             </Link>
 
             <span
-                v-if="architectureItem && resourceManagementItem"
-                class="select-none px-0.5 text-indigo-200 dark:text-indigo-900"
-            >
-                ·
-            </span>
-
-            <template v-if="resourceManagementItem">
-                <Link
-                    :href="resourceManagementItem.href"
-                    class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
-                    :class="[
-                        resourceManagementItem.active(currentUrl)
-                            ? 'bg-indigo-500 text-white shadow-sm'
-                            : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200'
-                    ]"
-                >
-                    <component :is="resourceManagementItem.icon" v-if="resourceManagementItem.icon" class="h-3.5 w-3.5 shrink-0" />
-                    <span>{{ resourceManagementItem.label }}</span>
-                </Link>
-            </template>
-            <template v-else>
-                <span
-                    class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium text-indigo-500 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-900/10"
-                >
-                    <span>Resources Management</span>
-                </span>
-            </template>
-
-            <span
                 v-if="policyItem"
                 class="select-none px-0.5 text-indigo-200 dark:text-indigo-900"
             >
-                ·
+                &middot;
             </span>
 
             <Link
@@ -96,7 +63,7 @@ const adminItem = computed(() => {
                 :class="[
                     policyItem.active(currentUrl)
                         ? 'bg-indigo-500 text-white shadow-sm'
-                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200'
+                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
             >
                 <component :is="policyItem.icon" v-if="policyItem.icon" class="h-3.5 w-3.5 shrink-0" />
@@ -107,7 +74,7 @@ const adminItem = computed(() => {
                 v-if="adminItem"
                 class="select-none px-0.5 text-indigo-200 dark:text-indigo-900"
             >
-                ·
+                &middot;
             </span>
 
             <Link
@@ -117,7 +84,7 @@ const adminItem = computed(() => {
                 :class="[
                     adminItem.active(currentUrl)
                         ? 'bg-indigo-500 text-white shadow-sm'
-                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200'
+                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
             >
                 <component :is="adminItem.icon" v-if="adminItem.icon" class="h-3.5 w-3.5 shrink-0" />
@@ -134,7 +101,7 @@ const adminItem = computed(() => {
                 :class="[
                     item.active(currentUrl)
                         ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300'
-                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200'
+                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
             >
                 <component :is="item.icon" v-if="item.icon" class="h-3 w-3 shrink-0" />

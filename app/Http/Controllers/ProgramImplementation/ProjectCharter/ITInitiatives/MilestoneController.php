@@ -5,7 +5,7 @@ namespace App\Http\Controllers\ProgramImplementation\ProjectCharter\ITInitiative
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProgramImplementation\ProjectCharter\ITInitiatives\StoreMilestoneRequest;
 use App\Models\Milestone;
-use App\Models\ProjectCharter;
+use App\Models\TrsProjectCharter;
 use App\Services\ProgramImplementation\ProjectCharter\ITInitiatives\MilestoneService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,7 +16,7 @@ class MilestoneController extends Controller
         private readonly MilestoneService $milestoneService
     ) {}
 
-    public function store(StoreMilestoneRequest $request, ProjectCharter $project): RedirectResponse
+    public function store(StoreMilestoneRequest $request, TrsProjectCharter $project): RedirectResponse
     {
         $this->milestoneService->storeMilestone($project, $request->validated());
 
@@ -25,7 +25,7 @@ class MilestoneController extends Controller
 
     public function update(
         StoreMilestoneRequest $request,
-        ProjectCharter $project,
+        TrsProjectCharter $project,
         Milestone $milestone
     ): RedirectResponse {
         $this->milestoneService->updateMilestone($project, $milestone, $request->validated());
@@ -33,14 +33,14 @@ class MilestoneController extends Controller
         return back()->with('success', 'Roadmap activity berhasil diperbarui.');
     }
 
-    public function destroy(ProjectCharter $project, Milestone $milestone): RedirectResponse
+    public function destroy(TrsProjectCharter $project, Milestone $milestone): RedirectResponse
     {
         $this->milestoneService->deleteMilestone($project, $milestone);
 
         return back()->with('success', 'Roadmap activity berhasil dihapus.');
     }
 
-    public function createVersion(Request $request, ProjectCharter $project): RedirectResponse
+    public function createVersion(Request $request, TrsProjectCharter $project): RedirectResponse
     {
         return back()->with('warning', 'Versi roadmap mengikuti versi project charter. Buat versi charter baru untuk roadmap baru.');
     }
