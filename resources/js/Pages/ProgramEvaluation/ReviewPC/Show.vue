@@ -142,7 +142,9 @@
                             <div class="space-y-3 pb-3">
                                 <template v-for="(charter, charterIndex) in group.charters"
                                     :key="charter?.id ?? `charter-${group.project.id}-${charterIndex}`">
-                                    <ItCharterDocument :it-initiative="group.project"
+                                    <component
+                                        :is="resolveReviewCharterComponent(charter)"
+                                        :it-initiative="group.project"
                                         :form="charterFormFor(group.project, charter)"
                                         :status-timeline="getProjectReviewStatus(group.project, charter)"
                                         :editable="false" />
@@ -231,6 +233,7 @@ import { Link, router } from '@inertiajs/vue3';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import ItCharterDocument from '@/Components/ProjectCharter/ItCharterDocument.vue';
+import AprovedCharterDocument from '@/Components/ProjectCharter/AprovedCharterDocument.vue';
 import ProjectRoadmap from '@/Components/Roadmap/ProjectRoadmap.vue';
 import ProjectRoadmapSummary from '@/Components/Roadmap/ProjectRoadmapSummary.vue';
 import StatusImplementationTable from '@/Components/ITInitiative/ReviewStatusImplementationTable.vue';
@@ -431,23 +434,34 @@ const roadmapProjectFrom = (project) => {
 const mappedRoadmapProject = computed(() => roadmapProjectFrom(props.mappedProject));
 
 // ---- Per-project charter form helper ----
+const CHARTER_FIELDS = [
+    'sponsor', 'leader', 'category', 'duration', 'start_year', 'end_year',
+    'background', 'objectives', 'impact_value', 'key_personnel', 'key_items',
+    'budget', 'key_milestone', 'risks_identified', 'risk_mitigation', 'notes',
+];
+
 const charterFormFor = (proj, charterOverride = null) => {
     const charter = charterOverride ?? proj?.charter ?? {};
-    return {
+    const payload = {
         version_label: charter?.version_label ?? '',
-        category: charter?.category ?? '',
-        duration: charter?.duration ?? '',
         owner: charter?.owner ?? '',
+        status: charter?.status ?? proj?.status ?? '',
         tgl_dokumen: charter?.tgl_dokumen ?? '',
-        background: charter?.background ?? '',
-        objectives: charter?.objectives ?? '',
-        impact_value: charter?.impact_value ?? '',
-        key_personnel: charter?.key_personnel ?? '',
-        key_items: charter?.key_items ?? '',
-        budget: charter?.budget ?? '',
-        risks_identified: charter?.risks_identified ?? '',
-        risk_mitigation: charter?.risk_mitigation ?? '',
+        metadata: charter?.metadata ?? {},
+        target_kpi:
+            charter?.target_kpi
+            ?? charter?.metadata?.target_kpi
+            ?? charter?.metadata?.targetKpi
+            ?? charter?.metadata?.kpi_target
+            ?? charter?.metadata?.kpi
+            ?? '',
     };
+
+    for (const field of CHARTER_FIELDS) {
+        payload[field] = charter?.[field] ?? '';
+    }
+
+    return payload;
 };
 
 // Keep backward-compatible charterForm for other tabs
@@ -480,6 +494,21 @@ const getProjectReviewStatus = (proj, charter = null) => {
     const raw = charter?.status ?? proj?.status;
     if (raw === null || raw === undefined || raw === '') return null;
     return Number(raw);
+};
+
+const isApprovedStatus = (value) => {
+    const numericValue = Number(value);
+
+    if (numericValue === 4) {
+        return true;
+    }
+
+    return String(value ?? '').trim().toLowerCase() === 'approved';
+};
+
+const resolveReviewCharterComponent = (charter = null) => {
+    const activeStatus = charter?.status;
+    return isApprovedStatus(activeStatus) ? AprovedCharterDocument : ItCharterDocument;
 };
 
 const filteredProjectCharterGroups = computed(() => {

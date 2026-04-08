@@ -63,20 +63,41 @@ class ProjectCharterService
 
     private function charterPayload(array $payload): array
     {
-        return Arr::only($payload, [
+        $charterPayload = Arr::only($payload, [
+            'sponsor',
             'owner',
+            'leader',
             'status',
             'tgl_dokumen',
             'category',
             'duration',
+            'start_year',
+            'end_year',
             'background',
             'objectives',
             'impact_value',
             'key_personnel',
             'key_items',
             'budget',
+            'key_milestone',
             'risks_identified',
             'risk_mitigation',
+            'notes',
         ]);
+
+        $metadata = is_array($payload['metadata'] ?? null) ? $payload['metadata'] : [];
+        $targetKpi = trim((string) ($payload['target_kpi'] ?? ''));
+
+        unset($metadata['targetKpi'], $metadata['kpi_target'], $metadata['kpi']);
+
+        if ($targetKpi !== '') {
+            $metadata['target_kpi'] = $targetKpi;
+        } else {
+            unset($metadata['target_kpi']);
+        }
+
+        $charterPayload['metadata'] = $metadata !== [] ? $metadata : null;
+
+        return $charterPayload;
     }
 }

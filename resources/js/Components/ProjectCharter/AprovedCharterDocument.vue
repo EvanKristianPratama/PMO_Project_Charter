@@ -133,18 +133,44 @@ const headlineSummary = () => {
                 <div class="info-paired-cell">
                     <span class="info-label">Project Sponsor</span>
                     <span class="info-sep"></span>
-                    <span class="info-value">{{ displayValue(form.sponsor) }}</span>
+                    <span class="info-value">
+                        <input
+                            v-if="editable"
+                            v-model="form.sponsor"
+                            type="text"
+                            class="info-input"
+                            placeholder="Project sponsor"
+                        >
+                        <template v-else>{{ displayValue(form.sponsor) }}</template>
+                    </span>
                 </div>
                 <div class="info-paired-cell info-paired-cell-subgroup">
                     <div class="info-subcell">
                         <span class="info-label">Project Duration</span>
                         <span class="info-sep"></span>
-                        <span class="info-value">{{ displayValue(form.duration) }}</span>
+                        <span class="info-value">
+                            <input
+                                v-if="editable"
+                                v-model="form.duration"
+                                type="text"
+                                class="info-input"
+                                placeholder="Project duration"
+                            >
+                            <template v-else>{{ displayValue(form.duration) }}</template>
+                        </span>
                     </div>
                     <div class="info-subcell info-subcell-compact">
                         <span class="info-label info-label-dark">Document Date</span>
                         <span class="info-sep"></span>
-                        <span class="info-value">{{ formatDateLong(form.tgl_dokumen) }}</span>
+                        <span class="info-value">
+                            <input
+                                v-if="editable"
+                                v-model="form.tgl_dokumen"
+                                type="date"
+                                class="info-input"
+                            >
+                            <template v-else>{{ formatDateLong(form.tgl_dokumen) }}</template>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -153,12 +179,29 @@ const headlineSummary = () => {
                 <div class="info-paired-cell">
                     <span class="info-label">Project Owner</span>
                     <span class="info-sep"></span>
-                    <span class="info-value">{{ displayValue(form.owner) }}</span>
+                    <span class="info-value">
+                        <input
+                            v-if="editable"
+                            v-model="form.owner"
+                            type="text"
+                            class="info-input"
+                            placeholder="Project owner"
+                        >
+                        <template v-else>{{ displayValue(form.owner) }}</template>
+                    </span>
                 </div>
                 <div class="info-paired-cell">
                     <span class="info-label">Required Resources</span>
                     <span class="info-sep"></span>
-                    <span class="info-value info-value-multiline">{{ displayMultilineValue(form.key_items) }}</span>
+                    <span class="info-value info-value-multiline">
+                        <textarea
+                            v-if="editable"
+                            v-model="form.key_items"
+                            class="info-textarea"
+                            placeholder="Satu poin per baris..."
+                        ></textarea>
+                        <template v-else>{{ displayMultilineValue(form.key_items) }}</template>
+                    </span>
                 </div>
             </div>
 
@@ -166,12 +209,30 @@ const headlineSummary = () => {
                 <div class="info-paired-cell">
                     <span class="info-label">Project Leader</span>
                     <span class="info-sep"></span>
-                    <span class="info-value">{{ displayValue(form.leader) }}</span>
+                    <span class="info-value">
+                        <input
+                            v-if="editable"
+                            v-model="form.leader"
+                            type="text"
+                            class="info-input"
+                            placeholder="Project leader"
+                        >
+                        <template v-else>{{ displayValue(form.leader) }}</template>
+                    </span>
                 </div>
                 <div class="info-paired-cell">
                     <span class="info-label">Cost</span>
                     <span class="info-sep"></span>
-                    <span class="info-value">{{ displayValue(form.budget) }}</span>
+                    <span class="info-value">
+                        <input
+                            v-if="editable"
+                            v-model="form.budget"
+                            type="text"
+                            class="info-input"
+                            placeholder="Cost"
+                        >
+                        <template v-else>{{ displayValue(form.budget) }}</template>
+                    </span>
                 </div>
             </div>
 
@@ -179,18 +240,42 @@ const headlineSummary = () => {
                 <div class="info-paired-cell">
                     <span class="info-label info-label-dark">Cross Function Involvement</span>
                     <span class="info-sep"></span>
-                    <span class="info-value info-value-multiline">{{ displayMultilineValue(form.key_personnel) }}</span>
+                    <span class="info-value info-value-multiline">
+                        <textarea
+                            v-if="editable"
+                            v-model="form.key_personnel"
+                            class="info-textarea"
+                            placeholder="Satu poin per baris..."
+                        ></textarea>
+                        <template v-else>{{ displayMultilineValue(form.key_personnel) }}</template>
+                    </span>
                 </div>
                 <div class="info-paired-cell info-paired-cell-vertical">
                     <div class="info-subcell info-subcell-static">
                         <span class="info-label">Business Objectives</span>
                         <span class="info-sep"></span>
-                        <span class="info-value info-value-multiline">{{ displayMultilineValue(form.objectives) }}</span>
+                        <span class="info-value info-value-multiline">
+                            <textarea
+                                v-if="editable"
+                                v-model="form.objectives"
+                                class="info-textarea"
+                                placeholder="Satu poin per baris..."
+                            ></textarea>
+                            <template v-else>{{ displayMultilineValue(form.objectives) }}</template>
+                        </span>
                     </div>
                     <div class="info-subcell info-subcell-fill">
                         <span class="info-label">Target KPI</span>
                         <span class="info-sep"></span>
-                        <span class="info-value info-value-multiline">{{ resolveTargetKpi() }}</span>
+                        <span class="info-value info-value-multiline">
+                            <textarea
+                                v-if="editable"
+                                v-model="form.target_kpi"
+                                class="info-textarea"
+                                placeholder="Satu poin per baris..."
+                            ></textarea>
+                            <template v-else>{{ resolveTargetKpi() }}</template>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -200,7 +285,13 @@ const headlineSummary = () => {
             <article class="panel">
                 <div class="bar-sub">Project Background</div>
                 <div class="panel-body">
-                    <ul v-if="normalizedLineItems(form.background).length" class="bullet-list">
+                    <textarea
+                        v-if="editable"
+                        v-model="form.background"
+                        class="field-area"
+                        placeholder="Satu poin per baris..."
+                    ></textarea>
+                    <ul v-else-if="normalizedLineItems(form.background).length" class="bullet-list">
                         <li v-for="(line, idx) in normalizedLineItems(form.background)" :key="`bg-${idx}`">
                             {{ line }}
                         </li>
@@ -215,7 +306,13 @@ const headlineSummary = () => {
                 <article class="panel stretch-panel">
                     <div class="bar-sub">Key Milestone & Due Date</div>
                     <div class="panel-body">
-                        <ul v-if="normalizedLineItems(form.key_milestone).length" class="bullet-list">
+                        <textarea
+                            v-if="editable"
+                            v-model="form.key_milestone"
+                            class="field-area"
+                            placeholder="Satu poin per baris..."
+                        ></textarea>
+                        <ul v-else-if="normalizedLineItems(form.key_milestone).length" class="bullet-list">
                             <li v-for="(line, idx) in normalizedLineItems(form.key_milestone)" :key="`km-${idx}`">
                                 {{ line }}
                             </li>
@@ -233,7 +330,13 @@ const headlineSummary = () => {
                         <article class="panel stretch-panel">
                             <div class="bar-sub">Risk</div>
                             <div class="panel-body">
-                                <ul v-if="normalizedLineItems(form.risks_identified).length" class="bullet-list">
+                                <textarea
+                                    v-if="editable"
+                                    v-model="form.risks_identified"
+                                    class="field-area"
+                                    placeholder="Satu poin per baris..."
+                                ></textarea>
+                                <ul v-else-if="normalizedLineItems(form.risks_identified).length" class="bullet-list">
                                     <li v-for="(line, idx) in normalizedLineItems(form.risks_identified)" :key="`risk-${idx}`">
                                         {{ line }}
                                     </li>
@@ -245,7 +348,13 @@ const headlineSummary = () => {
                         <article class="panel stretch-panel">
                             <div class="bar-sub">Mitigation</div>
                             <div class="panel-body">
-                                <ul v-if="normalizedLineItems(form.risk_mitigation).length" class="bullet-list">
+                                <textarea
+                                    v-if="editable"
+                                    v-model="form.risk_mitigation"
+                                    class="field-area"
+                                    placeholder="Satu poin per baris..."
+                                ></textarea>
+                                <ul v-else-if="normalizedLineItems(form.risk_mitigation).length" class="bullet-list">
                                     <li v-for="(line, idx) in normalizedLineItems(form.risk_mitigation)" :key="`mit-${idx}`">
                                         {{ line }}
                                     </li>
@@ -261,7 +370,13 @@ const headlineSummary = () => {
                 <article class="panel stretch-panel">
                     <div class="bar-sub">Notes</div>
                     <div class="panel-body">
-                        <p v-if="displayValue(form.notes) !== '-'" class="whitespace-pre-line text-[12px] leading-[1.55] text-slate-900">
+                        <textarea
+                            v-if="editable"
+                            v-model="form.notes"
+                            class="field-area"
+                            placeholder="Notes..."
+                        ></textarea>
+                        <p v-else-if="displayValue(form.notes) !== '-'" class="whitespace-pre-line text-[12px] leading-[1.55] text-slate-900">
                             {{ form.notes }}
                         </p>
                         <p v-else class="empty">-</p>
@@ -273,7 +388,13 @@ const headlineSummary = () => {
                 <article class="panel stretch-panel">
                     <div class="bar-sub">Impact and Value for Pertamina</div>
                     <div class="panel-body">
-                        <ul v-if="normalizedLineItems(form.impact_value).length" class="bullet-list">
+                        <textarea
+                            v-if="editable"
+                            v-model="form.impact_value"
+                            class="field-area"
+                            placeholder="Satu poin per baris..."
+                        ></textarea>
+                        <ul v-else-if="normalizedLineItems(form.impact_value).length" class="bullet-list">
                             <li v-for="(line, idx) in normalizedLineItems(form.impact_value)" :key="`impact-${idx}`">
                                 {{ line }}
                             </li>
@@ -407,6 +528,30 @@ const headlineSummary = () => {
     align-items: flex-start;
 }
 
+.info-input {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 13px;
+    background: transparent;
+    color: inherit;
+}
+
+.info-textarea {
+    width: 100%;
+    min-height: 72px;
+    border: 1px solid #2e6ea2;
+    border-radius: 0;
+    padding: 8px;
+    resize: vertical;
+    background: #fff;
+    font-size: 12px;
+    line-height: 1.45;
+    outline: none;
+    font-family: inherit;
+    color: inherit;
+}
+
 .charter-section {
     padding: 0;
     border-top: 1px solid #ddd;
@@ -487,6 +632,21 @@ const headlineSummary = () => {
     padding: 10px;
     background: #fff;
     font-size: 12px;
+}
+
+.field-area {
+    width: 100%;
+    min-height: 110px;
+    border: 1px solid #2e6ea2;
+    border-radius: 0;
+    padding: 8px;
+    resize: vertical;
+    background: #fff;
+    font-size: 12px;
+    line-height: 1.45;
+    outline: none;
+    font-family: inherit;
+    color: inherit;
 }
 
 .panel-body-sm {

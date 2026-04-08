@@ -457,14 +457,13 @@ const isApprovedStatus = (value) => {
 };
 
 const resolvedCharterComponent = computed(() => {
-    if (isEditing.value) {
-        return ItCharterDocument;
-    }
-
-    const activeStatus =
-        selectedCharter.value?.status ??
-        defaultCharter.value?.status ??
-        form.status;
+    const activeStatus = isEditing.value
+        ? form.status
+        : (
+            selectedCharter.value?.status ??
+            defaultCharter.value?.status ??
+            form.status
+        );
 
     return isApprovedStatus(activeStatus)
         ? AprovedCharterDocument
@@ -511,6 +510,8 @@ const startNewVersion = () => {
     values.owner = '';
     values.status = '';
     values.tgl_dokumen = '';
+    values.target_kpi = '';
+    values.metadata = {};
 
     Object.keys(values).forEach(key => form[key] = values[key]);
     form.defaults(values);
