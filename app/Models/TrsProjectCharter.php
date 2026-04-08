@@ -52,6 +52,11 @@ class TrsProjectCharter extends Model
         return $this->belongsTo(TrsProject::class);
     }
 
+    public function statusRef(): BelongsTo
+    {
+        return $this->belongsTo(InitiativeStatus::class, 'status');
+    }
+
     public function milestones(): HasMany
     {
         return $this->hasMany(Milestone::class, 'pc_id');
