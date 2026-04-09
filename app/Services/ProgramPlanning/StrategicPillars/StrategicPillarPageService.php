@@ -16,11 +16,11 @@ class StrategicPillarPageService
     private const PILAR_OPTIONS = [
         '1' => [
             'label' => 'Pilar 1',
-            'name' => 'Strategic Pillars',
+            'name' => 'Dual Growth Strategy Compendium',
         ],
         '2' => [
             'label' => 'Pilar 2',
-            'name' => 'Dual Growth',
+            'name' => 'Dual Growth Strategy RSTI 2025-2029',
         ],
     ];
 
@@ -127,6 +127,7 @@ class StrategicPillarPageService
             ->whereHas('goal', function ($query) use ($pilarId): void {
                 $this->applyGoalPilarFilter($query, $pilarId);
             })
+            ->orderBy('idGoal')
             ->orderBy('theme_number')
             ->get();
     }

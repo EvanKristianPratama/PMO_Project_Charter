@@ -1,6 +1,13 @@
 <template>
     <UserLayout :title="pageTitle">
         <div class="animate-fade-in">
+            <div v-if="flash.success" class="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
+                {{ flash.success }}
+            </div>
+            <div v-if="flash.error" class="mb-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300">
+                {{ flash.error }}
+            </div>
+
             <div class="mb-4">
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
@@ -29,9 +36,9 @@
                         <!-- Filter Dropdown (hidden in matrix mode) -->
                         <template v-if="!matrixMode">
                             <div class="flex w-full flex-col items-start gap-1.5 sm:w-auto sm:flex-row sm:items-center sm:gap-2">
-                                <label class="text-[10px] font-medium text-slate-700 dark:text-slate-300 sm:whitespace-nowrap">Pillar:</label>
+                                <label class="text-[10px] font-medium text-slate-700 dark:text-slate-300 sm:whitespace-nowrap">Blok:</label>
                                 <select v-model="selectedGoalId" @change="applyFilter" class="w-full rounded border border-slate-300 bg-white px-2 py-1 text-[10px] text-slate-900 focus:border-transparent focus:ring-1 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800 dark:text-white sm:min-w-[150px] sm:w-auto">
-                                    <option :value="null">All Pillars</option>
+                                    <option :value="null">Semua Blok</option>
                                     <option v-for="goal in allGoals" :key="goal.id" :value="goal.id">{{ goal.code }} - {{ goal.title }}</option>
                                 </select>
                             </div>
@@ -71,6 +78,113 @@
                 </div>
             </div>
 
+            <div v-if="canManageStructure" class="mb-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-[#1a1a1a]">
+                <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 dark:text-white">Kelola Struktur Pilar 2</h3>
+                        <p class="mt-1 max-w-2xl text-xs text-slate-500 dark:text-slate-400">
+                            Data pada area ini disimpan ke <code>mst_goals</code> untuk blok dan <code>trs_themes</code> untuk theme.
+                        </p>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+                        <button
+                            type="button"
+                            class="inline-flex items-center rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-blue-700"
+                            @click="openCreateGoalModal"
+                        >
+                            Tambah Blok
+                        </button>
+                        <button
+                            type="button"
+                            class="inline-flex items-center rounded-lg bg-amber-500 px-3 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-60"
+                            :disabled="!hasStructureGoals"
+                            @click="openCreateThemeModal"
+                        >
+                            Tambah Theme
+                        </button>
+                    </div>
+                </div>
+
+                <div v-if="strategicPillars.length === 0" class="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center dark:border-slate-700 dark:bg-slate-900/30">
+                    <p class="text-sm font-medium text-slate-700 dark:text-slate-200">Belum ada blok untuk Pilar 2.</p>
+                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Mulai dengan menambahkan blok, lalu isi theme di bawah blok tersebut.</p>
+                </div>
+
+                <div v-else class="mt-4 grid gap-3 xl:grid-cols-2">
+                    <div
+                        v-for="goal in strategicPillars"
+                        :key="`structure-goal-${goal.id}`"
+                        class="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-900/30"
+                    >
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <div class="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-blue-700 dark:bg-blue-500/15 dark:text-blue-200">
+                                    {{ goal.code }}
+                                </div>
+                                <h4 class="mt-2 text-sm font-semibold text-slate-900 dark:text-white">{{ goal.title }}</h4>
+                                <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">{{ goal.themes?.length ?? 0 }} theme</p>
+                            </div>
+
+                            <div class="flex items-center gap-1">
+                                <button
+                                    type="button"
+                                    class="rounded-md border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-600 transition-colors hover:border-slate-300 hover:bg-white dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                                    @click="openEditGoalModal(goal)"
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    type="button"
+                                    class="rounded-md border border-rose-200 px-2 py-1 text-[11px] font-medium text-rose-600 transition-colors hover:bg-rose-50 dark:border-rose-500/30 dark:text-rose-300 dark:hover:bg-rose-500/10"
+                                    @click="confirmStructureDelete('goal', goal)"
+                                >
+                                    Hapus
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 space-y-2">
+                            <div
+                                v-for="theme in goal.themes ?? []"
+                                :key="`structure-theme-${theme.id}`"
+                                class="flex items-start justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-[#1a1a1a]"
+                            >
+                                <div class="min-w-0">
+                                    <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Theme {{ theme.theme_number }}</div>
+                                    <div class="mt-1 text-sm text-slate-800 dark:text-slate-200">{{ theme.name }}</div>
+                                </div>
+
+                                <div class="flex shrink-0 items-center gap-1">
+                                    <button
+                                        type="button"
+                                        class="rounded-md border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-600 transition-colors hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                                        @click="openEditThemeModal(theme)"
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="rounded-md border border-rose-200 px-2 py-1 text-[11px] font-medium text-rose-600 transition-colors hover:bg-rose-50 dark:border-rose-500/30 dark:text-rose-300 dark:hover:bg-rose-500/10"
+                                        @click="confirmStructureDelete('theme', theme)"
+                                    >
+                                        Hapus
+                                    </button>
+                                </div>
+                            </div>
+
+                            <button
+                                type="button"
+                                class="inline-flex items-center rounded-lg border border-dashed border-slate-300 px-3 py-2 text-xs font-medium text-slate-600 transition-colors hover:border-slate-400 hover:bg-white dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+                                @click="openCreateThemeModal(goal)"
+                            >
+                                + Tambah theme di blok ini
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Legend (hidden in matrix mode) -->
             <div v-if="!matrixMode" class="flex flex-wrap items-center gap-3 mb-3 px-1">
                 <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Legend:</span>
@@ -100,7 +214,7 @@
                             <thead>
                                 <tr class="bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-300 dark:border-slate-600">
                                     <th class="px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 border-r border-slate-300 dark:border-slate-600 w-12">Code</th>
-                                    <th class="px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 border-r border-slate-300 dark:border-slate-600 w-1/5">Strategic Pillar Title</th>
+                                    <th class="px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 border-r border-slate-300 dark:border-slate-600 w-1/5">Blok / Goal</th>
                                     <th class="px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 border-r border-slate-300 dark:border-slate-600 w-[250px]">Themes</th>
                                     <th class="px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">Digital Initiatives</th>
                                 </tr>
@@ -239,7 +353,7 @@
                                 </tr>
                                 <!-- Theme number row -->
                                 <tr class="bg-slate-100 dark:bg-slate-800 sticky top-[29px] z-10">
-                                    <th v-for="theme in allThemes" :key="theme.id" class="border border-slate-300 dark:border-slate-600 px-1 py-1 text-center font-semibold text-slate-600 dark:text-slate-400 whitespace-nowrap w-[44px] min-w-[44px]" :title="`${theme.theme_number}. ${theme.name}`">
+                                    <th v-for="theme in sortedMatrixThemes" :key="theme.id" class="border border-slate-300 dark:border-slate-600 px-1 py-1 text-center font-semibold text-slate-600 dark:text-slate-400 whitespace-nowrap w-[44px] min-w-[44px]" :title="`${theme.goal?.code ?? '-'} · ${theme.theme_number}. ${theme.name}`">
                                         <div class="text-[8px] font-bold">T{{ theme.theme_number }}</div>
                                     </th>
                                 </tr>
@@ -255,7 +369,7 @@
                                         <span class="text-[9px]">{{ initiative.name }}</span>
                                     </td>
                                     <!-- Theme columns -->
-                                    <td v-for="theme in allThemes" :key="theme.id" class="border border-slate-300 dark:border-slate-600 text-center py-1 w-[44px]">
+                                    <td v-for="theme in sortedMatrixThemes" :key="theme.id" class="border border-slate-300 dark:border-slate-600 text-center py-1 w-[44px]">
                                         <span v-if="isTagged(initiative.id, theme.id)" class="inline-block w-3.5 h-3.5 rounded-sm bg-indigo-500 dark:bg-indigo-400" :title="`${initiative.code} → T${theme.theme_number}`"></span>
                                     </td>
                                     <!-- TBC column -->
@@ -279,6 +393,23 @@
                 @close="showTaggingModal = false"
             />
 
+            <GoalFormModal
+                :show="showGoalFormModal"
+                :goal="editingGoal"
+                :pilar="currentPilar"
+                :pilar-label="currentPilarOption.name"
+                @close="closeGoalModal"
+            />
+
+            <ThemeFormModal
+                :show="showThemeFormModal"
+                :theme="editingTheme"
+                :goals="allGoals"
+                :pilar="currentPilar"
+                :pilar-label="currentPilarOption.name"
+                @close="closeThemeModal"
+            />
+
             <!-- Delete Confirmation -->
             <ConfirmationModal
                 :show="showDeleteModal"
@@ -291,19 +422,34 @@
                 @close="showDeleteModal = false"
                 @confirm="executeDelete"
             />
+
+            <ConfirmationModal
+                :show="showStructureDeleteModal"
+                :title="structureDeleteTitle"
+                :message="structureDeleteMessage"
+                confirm-text="Ya, Hapus"
+                cancel-text="Batal"
+                type="danger"
+                :loading="structureDeleteForm.processing"
+                @close="showStructureDeleteModal = false"
+                @confirm="executeStructureDelete"
+            />
         </div>
     </UserLayout>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import { router, useForm } from '@inertiajs/vue3';
+import { router, useForm, usePage } from '@inertiajs/vue3';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
+import GoalFormModal from '@/Components/StrategicPillar/GoalFormModal.vue';
 import InitiativeTaggingModal from '@/Components/StrategicPillar/InitiativeTaggingModal.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import ThemeFormModal from '@/Components/StrategicPillar/ThemeFormModal.vue';
 
 const route = useRouteHelper();
+const page = usePage();
 
 const props = defineProps({
     strategicPillars: { type: Array, default: () => [] },
@@ -327,6 +473,7 @@ const selectedGoalId = ref(
 const selectedOrgId  = ref(props.filters.org_id  ? Number(props.filters.org_id)  : null);
 const applyFilter = () => {};
 const currentPilar = computed(() => String(props.filters.pilar ?? 1));
+const flash = computed(() => page.props.flash ?? {});
 const currentPilarOption = computed(() =>
     props.pilarOptions.find(option => String(option.id) === currentPilar.value)
     ?? {
@@ -336,6 +483,8 @@ const currentPilarOption = computed(() =>
     }
 );
 const pageTitle = computed(() => currentPilarOption.value.name);
+const canManageStructure = computed(() => currentPilar.value === '2');
+const hasStructureGoals = computed(() => props.strategicPillars.length > 0);
 
 const filteredPillars = computed(() => {
     if (!selectedGoalId.value) return props.strategicPillars;
@@ -430,20 +579,32 @@ const showDeleteModal  = ref(false);
 const matrixMode       = ref(false);
 const pendingDeleteTag = ref(null);
 const deleteForm       = useForm({});
+const showGoalFormModal = ref(false);
+const showThemeFormModal = ref(false);
+const editingGoal = ref(null);
+const editingTheme = ref(null);
+const showStructureDeleteModal = ref(false);
+const pendingStructureDelete = ref(null);
+const structureDeleteForm = useForm({
+    pilar: String(currentPilar.value),
+});
 
 // --- Matrix helpers ---
-const THEME_GROUPS = [
-    { label: 'A – Maximizing Legacy Business',         from: 1,  to: 4  },
-    { label: 'B – Building Low Carbon Business',       from: 5,  to: 8  },
-    { label: 'C – Holding Inputs / Enablers Required', from: 9,  to: 12 },
-    { label: 'D – Sustainability',                     from: 13, to: 16 },
-];
+const sortedMatrixThemes = computed(() =>
+    [...props.allThemes].sort((left, right) => {
+        const goalCompare = String(left.goal?.code ?? '').localeCompare(String(right.goal?.code ?? ''));
+        if (goalCompare !== 0) return goalCompare;
+        return Number(left.theme_number ?? 0) - Number(right.theme_number ?? 0);
+    })
+);
 
 const themeGroupsWithCount = computed(() =>
-    THEME_GROUPS.map(g => ({
-        ...g,
-        count: props.allThemes.filter(t => t.theme_number >= g.from && t.theme_number <= g.to).length,
-    })).filter(g => g.count > 0)
+    props.strategicPillars
+        .map(goal => ({
+            label: `${goal.code} - ${goal.title}`,
+            count: (goal.themes ?? []).length,
+        }))
+        .filter(group => group.count > 0)
 );
 
 // initiative_id-theme_id pairs that are tagged
@@ -480,6 +641,91 @@ const executeDelete = () => {
     deleteForm.delete(route('strategic-pillars.tagging.destroy', pendingDeleteTag.value.id), {
         preserveScroll: true,
         onSuccess: () => { showDeleteModal.value = false; pendingDeleteTag.value = null; },
+    });
+};
+
+const closeGoalModal = () => {
+    showGoalFormModal.value = false;
+    editingGoal.value = null;
+};
+
+const closeThemeModal = () => {
+    showThemeFormModal.value = false;
+    editingTheme.value = null;
+};
+
+const openCreateGoalModal = () => {
+    editingGoal.value = null;
+    showGoalFormModal.value = true;
+};
+
+const openEditGoalModal = (goal) => {
+    editingGoal.value = goal;
+    showGoalFormModal.value = true;
+};
+
+const openCreateThemeModal = (goal = null) => {
+    editingTheme.value = goal
+        ? { idGoal: goal.id }
+        : null;
+    showThemeFormModal.value = true;
+};
+
+const openEditThemeModal = (theme) => {
+    editingTheme.value = theme;
+    showThemeFormModal.value = true;
+};
+
+const confirmStructureDelete = (type, item) => {
+    pendingStructureDelete.value = { type, item };
+    showStructureDeleteModal.value = true;
+};
+
+const structureDeleteTitle = computed(() => {
+    if (pendingStructureDelete.value?.type === 'goal') {
+        return 'Hapus Blok Pilar';
+    }
+
+    return 'Hapus Theme';
+});
+
+const structureDeleteMessage = computed(() => {
+    if (pendingStructureDelete.value?.type === 'goal') {
+        return 'Blok akan dihapus dari mst_goals. Pastikan theme dan tagging yang terkait sudah dibersihkan.';
+    }
+
+    return 'Theme akan dihapus dari trs_themes. Pastikan theme ini belum dipakai oleh tagging.';
+});
+
+const extractFirstError = (errors = {}) => {
+    const firstValue = Object.values(errors)[0];
+
+    if (Array.isArray(firstValue)) {
+        return firstValue[0] ?? 'Terjadi kesalahan.';
+    }
+
+    return firstValue ?? 'Terjadi kesalahan.';
+};
+
+const executeStructureDelete = () => {
+    if (!pendingStructureDelete.value) return;
+
+    structureDeleteForm.pilar = String(currentPilar.value);
+
+    const { type, item } = pendingStructureDelete.value;
+    const routeName = type === 'goal'
+        ? route('strategic-pillars.goals.destroy', item.id)
+        : route('strategic-pillars.themes.destroy', item.id);
+
+    structureDeleteForm.delete(routeName, {
+        preserveScroll: true,
+        onSuccess: () => {
+            showStructureDeleteModal.value = false;
+            pendingStructureDelete.value = null;
+        },
+        onError: (errors) => {
+            window.alert(extractFirstError(errors));
+        },
     });
 };
 </script>

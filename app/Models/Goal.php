@@ -14,7 +14,7 @@ class Goal extends Model
 
     protected $table = 'mst_goals';
 
-    protected $fillable = ['code', 'title', 'description'];
+    protected $fillable = ['code', 'title', 'pilar'];
 
     public function projects(): BelongsToMany
     {
