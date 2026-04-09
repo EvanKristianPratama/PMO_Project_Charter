@@ -82,7 +82,7 @@
                                         @click="toggleCompare"
                                         class="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-[#171717] dark:text-slate-300 dark:hover:bg-white/5"
                                     >
-                                        {{ showCompare ? 'Back to Charter' : 'Compare Changes' }}
+                                        {{ showCompare ? 'Close' : 'View Version Analysis' }}
                                     </button>
                                 </div>
                             </div>
