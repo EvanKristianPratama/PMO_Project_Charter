@@ -18,7 +18,7 @@ const fields = [
     { key: 'tgl_dokumen', fieldLabel: 'Document Date', previousLabel: 'Tanggal Dokumen', currentLabel: 'Document Date', format: 'date' },
     { key: 'background', fieldLabel: 'Latar belakang - Gap/peluang saat ini / Background', previousLabel: 'Latar belakang - Gap/peluang saat ini', currentLabel: 'Background', multiline: true },
     { key: 'objectives', fieldLabel: 'Tujuan / Objectives', previousLabel: 'Tujuan', currentLabel: 'Objectives', multiline: true },
-    { key: 'target_kpi', fieldLabel: 'Target KPI', previousLabel: 'Target KPI', currentLabel: 'Target KPI', multiline: true, showTerminologyRow: true },
+    { key: 'target_kpi', fieldLabel: 'Target KPI', previousLabel: 'Target KPI', currentLabel: 'Target KPI', multiline: true, showTerminologyRow: true, blockPreviousValue: true },
     { key: 'impact_value', fieldLabel: 'Dampak dan nilai bagi Pertamina / Impact Value', previousLabel: 'Dampak dan nilai bagi Pertamina', currentLabel: 'Impact Value', multiline: true },
     { key: 'key_personnel', fieldLabel: 'Personel Utama / Cross Functional Involvement', previousLabel: 'Personel Utama', currentLabel: 'Cross Functional Involvement', multiline: true },
     { key: 'key_items', fieldLabel: 'Item Utama / Key Items', previousLabel: 'Item Utama', currentLabel: 'Required Resources', multiline: true },
