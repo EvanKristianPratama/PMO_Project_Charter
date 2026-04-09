@@ -8,18 +8,36 @@ const props = defineProps({
 });
 
 const fields = [
+    { key: 'sponsor', label: 'Project Sponsor' },
     { key: 'owner', label: 'Project Owner' },
+    { key: 'leader', label: 'Project Leader' },
     { key: 'duration', label: 'Duration' },
     { key: 'tgl_dokumen', label: 'Document Date', format: 'date' },
     { key: 'background', label: 'Background', multiline: true },
     { key: 'objectives', label: 'Objectives', multiline: true },
+    { key: 'target_kpi', label: 'Target KPI', multiline: true },
     { key: 'impact_value', label: 'Impact Value', multiline: true },
-    { key: 'key_personnel', label: 'Key Personnel', multiline: true },
-    { key: 'key_items', label: 'Key Items', multiline: true },
+    { key: 'key_personnel', label: 'Cross Function Involvement', multiline: true },
+    { key: 'key_items', label: 'Required Resources', multiline: true },
     { key: 'budget', label: 'Budget' },
     { key: 'risks_identified', label: 'Risks Identified', multiline: true },
     { key: 'risk_mitigation', label: 'Risk Mitigation', multiline: true },
+    { key: 'key_milestone', label: 'Key Milestone & Due Date', multiline: true },
+    { key: 'notes', label: 'Notes', multiline: true },
 ];
+
+const resolveFieldSourceValue = (charter, field) => {
+    if (field.key === 'target_kpi') {
+        return charter?.target_kpi
+            ?? charter?.metadata?.target_kpi
+            ?? charter?.metadata?.targetKpi
+            ?? charter?.metadata?.kpi_target
+            ?? charter?.metadata?.kpi
+            ?? '';
+    }
+
+    return charter?.[field.key];
+};
 
 const normalizeLineValue = (value) => String(value ?? '')
     .split(/\r?\n/)
@@ -94,14 +112,16 @@ const previousVersionLabel = computed(() => resolveVersionLabel(props.previous, 
 const currentVersionLabel = computed(() => resolveVersionLabel(props.current, 'Current Version'));
 
 const rows = computed(() => fields.map((field) => {
-    const previousValue = normalizeFieldValue(props.previous?.[field.key], field);
-    const currentValue = normalizeFieldValue(props.current?.[field.key], field);
+    const previousSourceValue = resolveFieldSourceValue(props.previous, field);
+    const currentSourceValue = resolveFieldSourceValue(props.current, field);
+    const previousValue = normalizeFieldValue(previousSourceValue, field);
+    const currentValue = normalizeFieldValue(currentSourceValue, field);
 
     return {
         ...field,
         changed: previousValue !== currentValue,
-        previousText: displayFieldValue(props.previous?.[field.key], field),
-        currentText: displayFieldValue(props.current?.[field.key], field),
+        previousText: displayFieldValue(previousSourceValue, field),
+        currentText: displayFieldValue(currentSourceValue, field),
     };
 }));
 

@@ -19,28 +19,8 @@ const programImplementationItem = computed(() => {
     return navItems.value.find((item) => item.label === 'Program Implementation') ?? null;
 });
 
-const programImplementationInitiativeRelationShortcut = computed(() => {
-    const initiativeRelationItem = programPlanningChildren.value.find((item) => item.label === 'Initiative Relation');
-
-    if (!initiativeRelationItem) {
-        return null;
-    }
-
-    return {
-        ...initiativeRelationItem,
-        active: () => false,
-    };
-});
-
 const programImplementationChildren = computed(() => {
-    const implementationChildren = programImplementationItem.value?.children || [];
-    const hasInitiativeRelation = implementationChildren.some((item) => item.label === 'Initiative Relation');
-
-    if (hasInitiativeRelation || !programImplementationInitiativeRelationShortcut.value) {
-        return implementationChildren;
-    }
-
-    return [...implementationChildren, programImplementationInitiativeRelationShortcut.value];
+    return programImplementationItem.value?.children || [];
 });
 
 const programInformationItem = computed(() => {
