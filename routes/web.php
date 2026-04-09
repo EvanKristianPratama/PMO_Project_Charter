@@ -49,8 +49,10 @@ use App\Http\Controllers\ProgramPlanning\ProgramDefinition\IndexController as Pr
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\ITInitiatives\IndexController as ProgramDefinitionITInitiativesController;
 use App\Http\Controllers\ProgramPlanning\ProgramPlanningController;
 use App\Http\Controllers\ProgramPlanning\StrategicHouse\IndexController as ProgramPlanningStrategicHouseIndexController;
+use App\Http\Controllers\ProgramPlanning\StrategicPillars\GoalController as ProgramPlanningStrategicPillarGoalController;
 use App\Http\Controllers\ProgramPlanning\StrategicPillars\IndexController as ProgramPlanningStrategicPillarsIndexController;
 use App\Http\Controllers\ProgramPlanning\StrategicPillars\InitiativeTaggingController;
+use App\Http\Controllers\ProgramPlanning\StrategicPillars\ThemeController as ProgramPlanningStrategicPillarThemeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -223,6 +225,12 @@ Route::middleware(['auth', 'approved'])->group(function () {
     // Strategic Pillars
     Route::get('/strategic-house', ProgramPlanningStrategicHouseIndexController::class)->name('strategic-house.index');
     Route::get('/strategic-pillars/{goal?}', ProgramPlanningStrategicPillarsIndexController::class)->name('strategic-pillars.index');
+    Route::post('/strategic-pillars/goals', [ProgramPlanningStrategicPillarGoalController::class, 'store'])->name('strategic-pillars.goals.store');
+    Route::put('/strategic-pillars/goals/{goal}', [ProgramPlanningStrategicPillarGoalController::class, 'update'])->name('strategic-pillars.goals.update');
+    Route::delete('/strategic-pillars/goals/{goal}', [ProgramPlanningStrategicPillarGoalController::class, 'destroy'])->name('strategic-pillars.goals.destroy');
+    Route::post('/strategic-pillars/themes', [ProgramPlanningStrategicPillarThemeController::class, 'store'])->name('strategic-pillars.themes.store');
+    Route::put('/strategic-pillars/themes/{theme}', [ProgramPlanningStrategicPillarThemeController::class, 'update'])->name('strategic-pillars.themes.update');
+    Route::delete('/strategic-pillars/themes/{theme}', [ProgramPlanningStrategicPillarThemeController::class, 'destroy'])->name('strategic-pillars.themes.destroy');
     Route::post('/strategic-pillars/tagging', [InitiativeTaggingController::class, 'store'])->name('strategic-pillars.tagging.store');
     Route::delete('/strategic-pillars/tagging/{tagging}', [InitiativeTaggingController::class, 'destroy'])->name('strategic-pillars.tagging.destroy');
 
