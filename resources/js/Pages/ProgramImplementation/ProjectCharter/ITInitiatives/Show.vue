@@ -54,7 +54,7 @@
                             <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
                                 <select v-model="selectedCharterId"
                                     :disabled="charterVersions.length === 0 || isEditing"
-                                    class="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-white/10 dark:bg-[#131313] dark:text-slate-100 dark:disabled:bg-white/5">
+                                    class="min-w-0 w-48 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-white/10 dark:bg-[#131313] dark:text-slate-100 dark:disabled:bg-white/5">
                                     <option v-if="charterVersions.length === 0" value="">No saved version yet</option>
                                     <option v-for="charter in charterVersions" :key="charter.id"
                                         :value="String(charter.id)">
@@ -77,9 +77,12 @@
                                     </button>
                                     <button
                                         type="button"
-                                        class="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#171717] dark:text-slate-300 dark:hover:bg-white/5"
+                                        :disabled="!canCompare"
+                                        :title="canCompare ? 'Compare selected charter with the previous version' : 'No previous charter version available'"
+                                        @click="toggleCompare"
+                                        class="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-[#171717] dark:text-slate-300 dark:hover:bg-white/5"
                                     >
-                                        Change Visibility
+                                        {{ showCompare ? 'Back to Charter' : 'Compare Changes' }}
                                     </button>
                                 </div>
                             </div>
@@ -164,7 +167,14 @@
                 </section>
 
                 <main v-if="!showRoadmapPanel" class="print:m-0 print:p-0">
+                    <CharterCompare
+                        v-if="showCompare && selectedCharter && previousCharter"
+                        :current="selectedCharter"
+                        :previous="previousCharter"
+                        :project-name="itInitiative?.name ?? ''"
+                    />
                     <component
+                        v-else
                         :is="resolvedCharterComponent"
                         :it-initiative="editableItInitiative"
                         :form="form"
@@ -182,6 +192,7 @@
                         :selected-roadmap-version-id="roadmapVersionId"
                         :sequence="1" :year-start="2025" :year-end="2029" />
                 </section>
+
             </template>
         </div>
     </UserLayout>
@@ -196,6 +207,7 @@ import ItCharterDocument from '@/Components/ProjectCharter/ItCharterDocument.vue
 import AprovedCharterDocument from '@/Components/ProjectCharter/AprovedCharterDocument.vue';
 import ProjectRoadmap from '@/Components/Roadmap/ProjectRoadmap.vue';
 import StatusImplementationTable from '@/Components/ITInitiative/StatusImplementationTable.vue';
+import CharterCompare from '@/Components/ITInitiative/CharterCompare.vue';
 
 const route = useRouteHelper();
 
@@ -215,6 +227,7 @@ const props = defineProps({
     },
 });
 const page = usePage();
+const showCompare = ref(false);
 
 const statusOptions = computed(() => {
     const sourceStatusOptions = Array.isArray(props.statusOptions) ? props.statusOptions : [];
@@ -234,6 +247,20 @@ const statusOptions = computed(() => {
         { value: 5, label: 'Baseline' },
     ];
 });
+
+const resolveStatusLabel = (statusValue) => {
+    const numericStatusValue = Number(statusValue);
+
+    if (Number.isFinite(numericStatusValue)) {
+        const matchedStatus = statusOptions.value.find((statusOption) => statusOption.value === numericStatusValue);
+        if (matchedStatus) {
+            return matchedStatus.label;
+        }
+    }
+
+    const rawValue = String(statusValue ?? '').trim();
+    return rawValue !== '' ? rawValue : '-';
+};
 
 // --- Tabs ---
 const tabs = [
@@ -342,27 +369,40 @@ const roadmapMilestonesForCharter = (charter) => {
     }));
 };
 
-const charterVersions = computed(() => {
+const allCharterVersions = computed(() => {
     const items = Array.isArray(props.itInitiative?.charters) ? props.itInitiative.charters : [];
-    
-    // Group by status and take the latest one for each status
+
+    return [...items]
+        .sort((a, b) => Number(b?.id ?? 0) - Number(a?.id ?? 0))
+        .map((charter) => ({
+            ...charter,
+            resolved_status_label: resolveStatusLabel(charter?.status),
+        }));
+});
+
+const charterVersions = computed(() => {
     const uniqueStatusMap = new Map();
-    items.forEach((charter) => {
-        const statusId = Number(charter.status);
-        if (!uniqueStatusMap.has(statusId)) {
-            const statusObj = statusOptions.value.find((statusOption) => statusOption.value === statusId);
-            uniqueStatusMap.set(statusId, {
-                ...charter,
-                resolved_status_label: statusObj ? statusObj.label : `Status ${statusId}`,
-            });
+    allCharterVersions.value.forEach((charter) => {
+        const statusKey = String(charter?.status ?? '');
+
+        if (!uniqueStatusMap.has(statusKey)) {
+            uniqueStatusMap.set(statusKey, charter);
         }
     });
 
-    // Sort by status ID to keep order consistent (Draft, Propose, etc)
-    return Array.from(uniqueStatusMap.values()).sort((a, b) => Number(a.status) - Number(b.status));
+    return Array.from(uniqueStatusMap.values()).sort((a, b) => {
+        const leftStatus = Number(a?.status);
+        const rightStatus = Number(b?.status);
+
+        if (Number.isFinite(leftStatus) && Number.isFinite(rightStatus)) {
+            return leftStatus - rightStatus;
+        }
+
+        return String(a?.resolved_status_label ?? '').localeCompare(String(b?.resolved_status_label ?? ''));
+    });
 });
 
-const defaultCharter = computed(() => props.itInitiative?.charter ?? charterVersions.value[0] ?? null);
+const defaultCharter = computed(() => props.itInitiative?.charter ?? allCharterVersions.value[0] ?? null);
 const selectedCharterId = ref(defaultCharter.value ? String(defaultCharter.value.id) : '');
 const isEditing = ref(false);
 // true = creating a new version, false = editing existing charter in-place
@@ -371,8 +411,26 @@ const form = useForm(mapCharterToForm(defaultCharter.value, props.itInitiative))
 
 const selectedCharter = computed(() => {
     if (!selectedCharterId.value) return null;
-    return charterVersions.value.find((c) => String(c.id) === String(selectedCharterId.value)) || null;
+    return allCharterVersions.value.find((charter) => String(charter.id) === String(selectedCharterId.value))
+        || charterVersions.value.find((charter) => String(charter.id) === String(selectedCharterId.value))
+        || null;
 });
+
+const previousCharter = computed(() => {
+    if (!selectedCharter.value) {
+        return null;
+    }
+
+    const currentIndex = allCharterVersions.value.findIndex((charter) => String(charter.id) === String(selectedCharter.value.id));
+    return currentIndex >= 0 ? allCharterVersions.value[currentIndex + 1] ?? null : null;
+});
+
+const canCompare = computed(() => !isEditing.value && !!selectedCharter.value && !!previousCharter.value);
+
+const toggleCompare = () => {
+    if (!canCompare.value) return;
+    showCompare.value = !showCompare.value;
+};
 
 const selectedCharterForRoadmap = computed(() => {
     if (selectedCharter.value) {
@@ -486,6 +544,7 @@ const setFormValues = (charter, project = null) => {
 };
 
 watch(() => selectedCharterId.value, () => {
+    showCompare.value = false;
     if (isEditing.value) return;
     setFormValues(selectedCharter.value ?? defaultCharter.value);
 });
@@ -500,6 +559,7 @@ watch(() => charterVersions.value[0]?.id ?? null, (latestId) => {
 
 // Edit Charter: update the selected version in-place
 const startEdit = () => {
+    showCompare.value = false;
     setFormValues(selectedCharter.value ?? defaultCharter.value, props.itInitiative);
     isNewVersion.value = false;
     isEditing.value = true;
@@ -507,6 +567,7 @@ const startEdit = () => {
 
 // New Version: create a new charter record based on the selected version
 const startNewVersion = () => {
+    showCompare.value = false;
     const base = selectedCharter.value ?? defaultCharter.value;
     const values = mapCharterToForm(base, props.itInitiative);
 
@@ -552,6 +613,7 @@ const saveCharter = () => {
 };
 
 const cancelEdit = () => {
+    showCompare.value = false;
     isEditing.value = false;
     isNewVersion.value = false;
     setFormValues(selectedCharter.value ?? defaultCharter.value);
@@ -559,7 +621,30 @@ const cancelEdit = () => {
 
 const printCharter = () => window.print();
 
+const formatDateShort = (value) => {
+    const raw = String(value ?? '').trim();
+    if (raw === '') return null;
+
+    const parsed = new Date(raw);
+    if (Number.isNaN(parsed.getTime())) {
+        return raw;
+    }
+
+    return new Intl.DateTimeFormat('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+    }).format(parsed);
+};
+
 const charterOptionLabel = (charter) => {
-    return charter.resolved_status_label;
+    const statusLabel = String(charter?.resolved_status_label ?? resolveStatusLabel(charter?.status)).trim();
+    const versionLabel = String(charter?.version_label ?? '').trim();
+    const documentDate = formatDateShort(charter?.tgl_dokumen);
+    const suffixParts = [versionLabel, documentDate].filter(Boolean);
+
+    return suffixParts.length > 0
+        ? `${statusLabel} - ${suffixParts.join(' / ')}`
+        : statusLabel;
 };
 </script>
