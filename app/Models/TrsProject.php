@@ -54,6 +54,11 @@ class TrsProject extends Model
         return $this->hasOne(TrsProjectCharter::class, 'project_id')->latestOfMany('id');
     }
 
+    public function versionAnalysis(): HasMany
+    {
+        return $this->hasMany(TrsPcVersionAnalysis::class, 'project_id')->orderBy('id', 'desc');
+    }
+
     public function charters(): HasMany
     {
         return $this->projectCharters();

@@ -89,22 +89,40 @@
                         </div>
 
                         <div class="flex flex-wrap items-center gap-2">
+                            <button
+                                v-if="showCompare"
+                                type="button"
+                                :disabled="analysisForm.processing"
+                                class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-70"
+                                @click="saveVersionAnalysis"
+                            >
+                                <svg v-if="analysisForm.processing" class="h-3 w-3 animate-spin text-white" fill="none"
+                                    viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                        stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor"
+                                        d="M4 12a8 8 0 0 1 8-8V0C5.37 0 0 5.37 0 12h4Zm2 5.29A7.95 7.95 0 0 1 4 12H0c0 3.04 1.14 5.82 3 7.94l3-2.65Z">
+                                    </path>
+                                </svg>
+                                Save
+                            </button>
+
                             <!-- New Version button: always visible when not editing -->
-                            <button v-if="!isEditing" type="button"
+                            <button v-if="!showCompare && !isEditing" type="button"
                                 class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 dark:border-white/10 dark:text-slate-300"
                                 @click="startNewVersion">
                                 New Version
                             </button>
 
                             <!-- Edit Charter button: only when not already editing -->
-                            <button v-if="!isEditing && charterVersions.length > 0" type="button"
+                            <button v-if="!showCompare && !isEditing && charterVersions.length > 0" type="button"
                                 class="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white"
                                 @click="startEdit">
                                 Edit Charter
                             </button>
 
                             <!-- Editing controls -->
-                            <template v-if="isEditing">
+                            <template v-if="!showCompare && isEditing">
                                 <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">
                                     {{ isNewVersion ? 'New Version' : 'Edit Charter' }}
                                 </span>
@@ -128,7 +146,7 @@
                                 </button>
                             </template>
 
-                            <button type="button"
+                            <button v-if="!showCompare" type="button"
                                 class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 dark:border-white/10 dark:text-slate-300"
                                 @click="printCharter">
                                 Print
@@ -171,6 +189,9 @@
                         v-if="showCompare && selectedCharter && previousCharter"
                         :current="selectedCharter"
                         :previous="previousCharter"
+                        :analysis="selectedVersionAnalysis"
+                        :analysis-form="analysisForm"
+                        :editable="true"
                         :project-name="itInitiative?.name ?? ''"
                     />
                     <component
@@ -335,6 +356,26 @@ const CHARTER_FIELDS = [
     'budget', 'key_milestone', 'risks_identified', 'risk_mitigation', 'notes',
 ];
 
+const VERSION_ANALYSIS_FIELDS = [
+    'sponsor',
+    'owner',
+    'leader',
+    'category',
+    'duration',
+    'tgl_dokumen',
+    'background',
+    'objectives',
+    'target_kpi',
+    'impact_value',
+    'key_personnel',
+    'key_items',
+    'budget',
+    'key_milestone',
+    'risks_identified',
+    'risk_mitigation',
+    'notes',
+];
+
 const mapCharterToForm = (charter = null, project = null) => {
     const payload = {
         version_label: charter?.version_label ?? '',
@@ -353,6 +394,18 @@ const mapCharterToForm = (charter = null, project = null) => {
     for (const field of CHARTER_FIELDS) {
         payload[field] = charter?.[field] ?? '';
     }
+    return payload;
+};
+
+const mapVersionAnalysisToForm = (analysis = null, charter = null) => {
+    const payload = {
+        version_label: charter?.version_label ?? analysis?.version_label ?? '',
+    };
+
+    VERSION_ANALYSIS_FIELDS.forEach((field) => {
+        payload[field] = analysis?.[field] ?? '';
+    });
+
     return payload;
 };
 
@@ -378,6 +431,18 @@ const allCharterVersions = computed(() => {
             ...charter,
             resolved_status_label: resolveStatusLabel(charter?.status),
         }));
+});
+
+const versionAnalyses = computed(() => {
+    const source = props.itInitiative?.version_analysis ?? props.itInitiative?.versionAnalysis ?? [];
+
+    if (!Array.isArray(source)) {
+        return [];
+    }
+
+    return [...source]
+        .sort((a, b) => Number(b?.id ?? 0) - Number(a?.id ?? 0))
+        .map((analysis) => ({ ...analysis }));
 });
 
 const charterVersions = computed(() => {
@@ -408,6 +473,7 @@ const isEditing = ref(false);
 // true = creating a new version, false = editing existing charter in-place
 const isNewVersion = ref(false);
 const form = useForm(mapCharterToForm(defaultCharter.value, props.itInitiative));
+const analysisForm = useForm(mapVersionAnalysisToForm(null, defaultCharter.value));
 
 const selectedCharter = computed(() => {
     if (!selectedCharterId.value) return null;
@@ -425,10 +491,53 @@ const previousCharter = computed(() => {
     return currentIndex >= 0 ? allCharterVersions.value[currentIndex + 1] ?? null : null;
 });
 
+const selectedVersionAnalysis = computed(() => {
+    if (!selectedCharter.value) {
+        return null;
+    }
+
+    const selectedVersionLabel = String(selectedCharter.value?.version_label ?? '').trim();
+
+    if (selectedVersionLabel === '') {
+        return null;
+    }
+
+    return versionAnalyses.value.find((analysis) => String(analysis?.version_label ?? '').trim() === selectedVersionLabel) ?? null;
+});
+
+const selectedVersionAnalysisId = computed(() => {
+    const id = Number(selectedVersionAnalysis.value?.id ?? 0);
+    return id > 0 ? id : null;
+});
+
 const canCompare = computed(() => !isEditing.value && !!selectedCharter.value && !!previousCharter.value);
+
+const setAnalysisFormValues = (analysis = null, charter = null) => {
+    const values = mapVersionAnalysisToForm(analysis, charter ?? selectedCharter.value ?? defaultCharter.value);
+    Object.keys(values).forEach((key) => {
+        analysisForm[key] = values[key];
+    });
+    analysisForm.defaults(values);
+    analysisForm.clearErrors();
+};
+
+const captureAnalysisFormValues = () => {
+    const values = {
+        version_label: analysisForm.version_label,
+    };
+
+    VERSION_ANALYSIS_FIELDS.forEach((field) => {
+        values[field] = analysisForm[field];
+    });
+
+    return values;
+};
 
 const toggleCompare = () => {
     if (!canCompare.value) return;
+    if (!showCompare.value) {
+        setAnalysisFormValues(selectedVersionAnalysis.value, selectedCharter.value);
+    }
     showCompare.value = !showCompare.value;
 };
 
@@ -547,6 +656,7 @@ watch(() => selectedCharterId.value, () => {
     showCompare.value = false;
     if (isEditing.value) return;
     setFormValues(selectedCharter.value ?? defaultCharter.value);
+    setAnalysisFormValues(selectedVersionAnalysis.value, selectedCharter.value ?? defaultCharter.value);
 });
 
 watch(() => charterVersions.value[0]?.id ?? null, (latestId) => {
@@ -554,8 +664,20 @@ watch(() => charterVersions.value[0]?.id ?? null, (latestId) => {
     const hasSelected = charterVersions.value.some((c) => String(c.id) === String(selectedCharterId.value));
     if (hasSelected) return;
     selectedCharterId.value = String(latestId);
-    if (!isEditing.value) setFormValues(charterVersions.value[0]);
+    if (!isEditing.value) {
+        setFormValues(charterVersions.value[0]);
+        setAnalysisFormValues(selectedVersionAnalysis.value, charterVersions.value[0]);
+    }
 });
+
+watch(
+    [() => selectedCharter.value, () => selectedVersionAnalysis.value],
+    ([charter, analysis]) => {
+        if (!charter) return;
+        setAnalysisFormValues(analysis, charter);
+    },
+    { immediate: true }
+);
 
 // Edit Charter: update the selected version in-place
 const startEdit = () => {
@@ -620,6 +742,25 @@ const cancelEdit = () => {
 };
 
 const printCharter = () => window.print();
+
+const saveVersionAnalysis = () => {
+    const targetRoute = selectedVersionAnalysisId.value
+        ? route('it-initiatives.version-analysis.update', [props.itInitiative.id, selectedVersionAnalysisId.value])
+        : route('it-initiatives.version-analysis.store', props.itInitiative.id);
+    const requestMethod = selectedVersionAnalysisId.value
+        ? analysisForm.put.bind(analysisForm)
+        : analysisForm.post.bind(analysisForm);
+    const snapshot = captureAnalysisFormValues();
+
+    requestMethod(targetRoute, {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: () => {
+            analysisForm.defaults(snapshot);
+            analysisForm.clearErrors();
+        },
+    });
+};
 
 const charterOptionLabel = (charter) => {
     return String(charter?.resolved_status_label ?? resolveStatusLabel(charter?.status)).trim();

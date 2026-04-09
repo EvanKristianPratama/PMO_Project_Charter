@@ -5,23 +5,23 @@ namespace App\Models;
 use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class TrsProjectCharter extends Model
+class TrsPcVersionAnalysis extends Model
 {
     use LogsActivity;
 
-    protected $table = 'trs_project_charters';
+    protected $table = 'trs_pc_version_analysis';
 
     protected $fillable = [
         'project_id',
         'version_label',
         'sponsor',
-        'status',
         'owner',
         'leader',
         'category',
         'duration',
+        'tgl_dokumen',
+        'target_kpi',
         'start_year',
         'end_year',
         'background',
@@ -34,35 +34,10 @@ class TrsProjectCharter extends Model
         'risks_identified',
         'risk_mitigation',
         'notes',
-        'tgl_dokumen',
-        'status',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'metadata' => 'array',
-            'status' => 'integer',
-        ];
-    }
 
     public function project(): BelongsTo
     {
         return $this->belongsTo(TrsProject::class);
-    }
-
-    public function statusRef(): BelongsTo
-    {
-        return $this->belongsTo(InitiativeStatus::class, 'status');
-    }
-
-    public function milestones(): HasMany
-    {
-        return $this->hasMany(Milestone::class, 'pc_id');
-    }
-
-    public function projectStatusHistories(): HasMany
-    {
-        return $this->hasMany(ProjectStatusHistory::class, 'project_charter_id');
     }
 }

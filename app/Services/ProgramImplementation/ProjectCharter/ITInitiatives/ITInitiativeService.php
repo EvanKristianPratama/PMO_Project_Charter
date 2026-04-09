@@ -86,6 +86,7 @@ class ITInitiativeService
                 'charter',
                 'charter.milestones',
                 'charters' => static fn ($query) => $query->latest('id')->with('milestones'),
+                'versionAnalysis',
                 'owner',
                 'statusRef:id,name',
                 'pcStatusImplementations',

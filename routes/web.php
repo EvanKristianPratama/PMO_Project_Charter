@@ -23,6 +23,7 @@ use App\Http\Controllers\ProgramImplementation\ProjectCharter\DigitalInitiatives
 use App\Http\Controllers\ProgramImplementation\ProjectCharter\ITInitiatives\CharterController;
 use App\Http\Controllers\ProgramImplementation\ProjectCharter\ITInitiatives\ITInitiativeController;
 use App\Http\Controllers\ProgramImplementation\ProjectCharter\ITInitiatives\MilestoneController;
+use App\Http\Controllers\ProgramImplementation\ProjectCharter\ITInitiatives\VersionAnalysisController;
 use App\Http\Controllers\ProgramImplementation\Roadmap\RoadmapController;
 use App\Http\Controllers\ProgramPlanning\DashboardController as PlanningDashboardController;
 use App\Http\Controllers\ProgramPlanning\InitiativeRelation\InitiativeRelationController;
@@ -246,6 +247,8 @@ Route::middleware(['auth', 'approved'])->group(function () {
         ->parameters(['it-initiatives' => 'project']);
     Route::post('/it-initiatives/{project}/charter', [CharterController::class, 'store'])->name('it-initiatives.charter.store');
     Route::put('/it-initiatives/{project}/charter/{charter}', [CharterController::class, 'update'])->name('it-initiatives.charter.update');
+    Route::post('/it-initiatives/{project}/version-analysis', [VersionAnalysisController::class, 'store'])->name('it-initiatives.version-analysis.store');
+    Route::put('/it-initiatives/{project}/version-analysis/{analysis}', [VersionAnalysisController::class, 'update'])->name('it-initiatives.version-analysis.update');
     Route::post('/it-initiatives/{project}/milestones/versions', [MilestoneController::class, 'createVersion'])->name('it-initiatives.milestones.versions.store');
     Route::post('/it-initiatives/{project}/milestones', [MilestoneController::class, 'store'])->name('it-initiatives.milestones.store');
     Route::put('/it-initiatives/{project}/milestones/{milestone}', [MilestoneController::class, 'update'])->name('it-initiatives.milestones.update');
