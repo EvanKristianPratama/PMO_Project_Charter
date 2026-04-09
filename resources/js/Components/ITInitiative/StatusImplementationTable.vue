@@ -5,12 +5,13 @@
             <table class="w-full table-fixed divide-y divide-x divide-slate-200 text-[11px] dark:divide-white/10">
                 <colgroup>
                     <col class="w-[7%]">
-                    <col class="w-[16%]">
+                    <col class="w-[15%]">
                     <col class="w-[7%]">
                     <col class="w-[7%]">
                     <col class="w-[9%]">
-                    <col class="w-[12%]">
-                    <col class="w-[30%]">
+                    <col class="w-[8%]">
+                    <col class="w-[8%]">
+                    <col class="w-[27%]">
                     <col class="w-[12%]">
                 </colgroup>
                 <thead v-if="showHeader" class="bg-slate-50 dark:bg-white/[0.03]">
@@ -34,6 +35,9 @@
                             class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
                             Periode</th>
                         <th
+                            class="px-1 py-1.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                            Year</th>
+                        <th
                             class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
                             Description</th>
                         <th
@@ -48,21 +52,21 @@
                             <td v-if="logIndex === 0"
                                 :rowspan="getStatusRowCount(proj)"
                                 class="px-2 py-3 text-[11px] font-semibold text-slate-700 dark:text-slate-200 align-middle text-center border-b border-slate-200 dark:border-white/10">
-                                {{ proj.code || '-' }}
+                                {{ displayValue(proj.code) }}
                             </td>
                             <!-- Name: rowspan on first row -->
                             <td v-if="logIndex === 0"
                                 :rowspan="getStatusRowCount(proj)"
                                 class="whitespace-normal break-words px-2 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-200 align-middle text-center border-b border-slate-200 dark:border-white/10"
                                 :title="proj.name">
-                                {{ proj.name || '-' }}
+                                {{ displayValue(proj.name) }}
                             </td>
                             <!-- Target -->
                             <td class="px-1 py-2 align-middle text-center">
                                 <span v-if="log?.target != null" class="text-[11px] font-semibold text-slate-700 dark:text-slate-200">
                                     {{ log.target }}%
                                 </span>
-                                <span v-else class="text-[10px] italic text-slate-400">-</span>
+                                <span v-else class="text-[10px] italic text-slate-400">{{ EMPTY_VALUE }}</span>
                             </td>
                             <!-- Progres -->
                             <td class="px-1 py-2 align-middle text-center">
@@ -70,7 +74,7 @@
                                     class="text-[11px] font-semibold text-slate-700 dark:text-slate-200">
                                     {{ log.progress }}%
                                 </span>
-                                <span v-else class="text-[10px] italic text-slate-400">-</span>
+                                <span v-else class="text-[10px] italic text-slate-400">{{ EMPTY_VALUE }}</span>
                             </td>
                             <!-- Status -->
                             <td class="px-2 py-3 text-center text-[10px] font-medium text-slate-600 dark:text-slate-300">
@@ -79,15 +83,19 @@
                                     :class="statusBadgeClass(log.status)">
                                     {{ log.status }}
                                 </span>
-                                <span v-else class="text-[10px] italic text-slate-400">-</span>
+                                <span v-else class="text-[10px] italic text-slate-400">{{ EMPTY_VALUE }}</span>
                             </td>
                             <!-- Periode -->
                             <td class="px-2 py-3 text-[10px] font-medium text-slate-600 dark:text-slate-300">
                                 {{ getPeriodeLabel(log) }}
                             </td>
+                            <!-- Year -->
+                            <td class="px-2 py-3 text-center text-[10px] font-medium text-slate-600 dark:text-slate-300">
+                                {{ getYearLabel(log) }}
+                            </td>
                             <!-- Description -->
                             <td class="whitespace-pre-line break-words px-2 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-300">
-                                {{ log?.description || '-' }}
+                                {{ displayValue(log?.description) }}
                             </td>
                             <!-- Action -->
                             <td class="px-1 py-1 text-center align-middle">
@@ -104,7 +112,7 @@
                         </tr>
                     </template>
                     <tr v-if="projectList.length === 0">
-                        <td colspan="8" class="px-4 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
+                        <td colspan="9" class="px-4 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
                             Data status implementasi belum tersedia.
                         </td>
                     </tr>
@@ -148,13 +156,15 @@
                         </td>
                         <td class="px-2 py-3">
                             <span
+                                v-if="getRowStatus(row) !== null"
                                 class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-medium capitalize"
                                 :class="statusBadgeClassById(getRowStatus(row))">
                                 {{ statusLabelFromOptions(getRowStatus(row), statusOptions) }}
                             </span>
+                            <span v-else class="text-[10px] italic text-slate-400">{{ EMPTY_VALUE }}</span>
                         </td>
                         <td class="px-2 py-3 text-[11px] text-slate-700 dark:text-slate-200">
-                            {{ row.charter?.duration || '-' }}
+                            {{ displayValue(row.charter?.duration) }}
                         </td>
                         <td class="px-2 py-3 text-[10px] font-medium text-slate-600 dark:text-slate-300">
                             {{ formatDateLong(row.charter?.tgl_dokumen) }}
@@ -185,6 +195,8 @@
 import { computed, ref } from 'vue';
 import { statusLabelFromOptions } from '@/Composables/initiativeStatus';
 import StatusImplementationModal from './StatusImplementationModal.vue';
+
+const EMPTY_VALUE = 'N/A';
 
 const props = defineProps({
     project: {
@@ -282,7 +294,7 @@ const projectCharterRows = computed(() => {
                 key: `proj-${project?.id ?? projectIndex}-${projectIndex}-charter-empty`,
                 project,
                 charter: null,
-                versionLabel: '-',
+                versionLabel: EMPTY_VALUE,
             }];
         }
 
@@ -302,7 +314,7 @@ const getCharterVersionLabel = (charter, index, total) => {
     if (Number.isFinite(total) && total > 0) {
         return `v${total - index}`;
     }
-    return '-';
+    return EMPTY_VALUE;
 };
 
 const monthOrderMap = new Map([
@@ -319,6 +331,22 @@ const monthOrderMap = new Map([
     ['November', 11],
     ['Desember', 12],
 ]);
+
+const hasDisplayValue = (value) => {
+    if (value === null || value === undefined) {
+        return false;
+    }
+
+    if (typeof value === 'string') {
+        return value.trim() !== '';
+    }
+
+    return true;
+};
+
+const displayValue = (value) => {
+    return hasDisplayValue(value) ? value : EMPTY_VALUE;
+};
 
 const asArray = (value) => {
     if (Array.isArray(value)) {
@@ -388,18 +416,19 @@ const getStatusRowCount = (project) => {
 };
 
 const getPeriodeLabel = (log) => {
-    if (!log) return '-';
+    if (!log) return EMPTY_VALUE;
     const month = String(log?.month ?? '').trim();
-    const year = log?.year;
-    if (month && year) return `${month} ${year}`;
-    if (month) return month;
-    if (year) return String(year);
-    return '-';
+    return month || EMPTY_VALUE;
+};
+
+const getYearLabel = (log) => {
+    if (!log) return EMPTY_VALUE;
+    return displayValue(log?.year);
 };
 
 const formatDateLong = (value) => {
     const raw = String(value || '').trim();
-    if (!raw) return '-';
+    if (!raw) return EMPTY_VALUE;
     const parsed = new Date(raw);
     if (Number.isNaN(parsed.getTime())) return raw;
     return new Intl.DateTimeFormat('id-ID', {
@@ -437,7 +466,7 @@ const projectChartersFor = (project) => {
 
 const getTimelineDurationMonths = (project, charter) => {
     const charters = projectChartersFor(project);
-    if (!charters.length) return '-';
+    if (!charters.length) return EMPTY_VALUE;
 
     const sorted = [...charters].sort((a, b) => {
         const dateA = parseDateValue(a?.tgl_dokumen);
@@ -454,14 +483,14 @@ const getTimelineDurationMonths = (project, charter) => {
 
     const latest = sorted[0];
     const previous = sorted[1];
-    if (!latest || !previous) return '-';
+    if (!latest || !previous) return EMPTY_VALUE;
 
     if (String(charter?.id ?? '') !== String(latest?.id ?? '')) {
-        return '-';
+        return EMPTY_VALUE;
     }
 
     const diff = monthsBetween(previous?.tgl_dokumen, latest?.tgl_dokumen);
-    return diff === null ? '-' : String(diff);
+    return diff === null ? EMPTY_VALUE : String(diff);
 };
 
 const getRowStatus = (row) => {
