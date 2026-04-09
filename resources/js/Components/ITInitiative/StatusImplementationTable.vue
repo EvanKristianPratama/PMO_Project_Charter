@@ -1,123 +1,164 @@
 <template>
     <div class="space-y-3">
         <!-- Tabel 1: Code & Status Implementasi -->
-        <div class="overflow-x-auto rounded-lg border border-slate-200 dark:border-white/10">
-            <table class="w-full table-fixed divide-y divide-x divide-slate-200 text-[11px] dark:divide-white/10">
-                <colgroup>
-                    <col class="w-[7%]">
-                    <col class="w-[15%]">
-                    <col class="w-[7%]">
-                    <col class="w-[7%]">
-                    <col class="w-[9%]">
-                    <col class="w-[8%]">
-                    <col class="w-[8%]">
-                    <col class="w-[27%]">
-                    <col class="w-[12%]">
-                </colgroup>
-                <thead v-if="showHeader" class="bg-slate-50 dark:bg-white/[0.03]">
-                    <tr class="divide-x divide-slate-200 dark:divide-white/10">
-                        <th
-                            class="px-1 py-1.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-                            Code</th>
-                        <th
-                            class="px-1 py-1.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-                            Project Name</th>
-                        <th
-                            class="px-1 py-1.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-                            Target</th>
-                        <th
-                            class="px-1 py-1.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-                            Progres</th>
-                        <th
-                            class="px-1 py-1.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-                            Status</th>
-                        <th
-                            class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-                            Periode</th>
-                        <th
-                            class="px-1 py-1.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-                            Year</th>
-                        <th
-                            class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-                            Description</th>
-                        <th
-                            class="px-1 py-1.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-                            Action</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/10 dark:bg-[#1a1a1a]">
-                    <template v-for="(proj, projIndex) in projectList" :key="`proj-${proj?.id ?? projIndex}`">
-                        <tr v-for="(log, logIndex) in getStatusRows(proj)" :key="`t1-${proj?.id ?? projIndex}-${log?.id ?? logIndex}`" class="divide-x divide-slate-200 hover:bg-slate-50 dark:divide-white/10 dark:hover:bg-white/5 transition-colors">
-                            <!-- Code: rowspan on first row -->
-                            <td v-if="logIndex === 0"
-                                :rowspan="getStatusRowCount(proj)"
-                                class="px-2 py-3 text-[11px] font-semibold text-slate-700 dark:text-slate-200 align-middle text-center border-b border-slate-200 dark:border-white/10">
-                                {{ displayValue(proj.code) }}
-                            </td>
-                            <!-- Name: rowspan on first row -->
-                            <td v-if="logIndex === 0"
-                                :rowspan="getStatusRowCount(proj)"
-                                class="whitespace-normal break-words px-2 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-200 align-middle text-center border-b border-slate-200 dark:border-white/10"
-                                :title="proj.name">
-                                {{ displayValue(proj.name) }}
-                            </td>
-                            <!-- Target -->
-                            <td class="px-1 py-2 align-middle text-center">
-                                <span v-if="log?.target != null" class="text-[11px] font-semibold text-slate-700 dark:text-slate-200">
-                                    {{ log.target }}%
-                                </span>
-                                <span v-else class="text-[10px] italic text-slate-400">{{ EMPTY_VALUE }}</span>
-                            </td>
-                            <!-- Progres -->
-                            <td class="px-1 py-2 align-middle text-center">
-                                <span v-if="log?.progress != null"
-                                    class="text-[11px] font-semibold text-slate-700 dark:text-slate-200">
-                                    {{ log.progress }}%
-                                </span>
-                                <span v-else class="text-[10px] italic text-slate-400">{{ EMPTY_VALUE }}</span>
-                            </td>
-                            <!-- Status -->
-                            <td class="px-2 py-3 text-center text-[10px] font-medium text-slate-600 dark:text-slate-300">
-                                <span v-if="log?.status"
-                                    class="inline-flex rounded-md px-1.5 py-0.5 text-[9px] font-medium"
-                                    :class="statusBadgeClass(log.status)">
-                                    {{ log.status }}
-                                </span>
-                                <span v-else class="text-[10px] italic text-slate-400">{{ EMPTY_VALUE }}</span>
-                            </td>
-                            <!-- Periode -->
-                            <td class="px-2 py-3 text-[10px] font-medium text-slate-600 dark:text-slate-300">
-                                {{ getPeriodeLabel(log) }}
-                            </td>
-                            <!-- Year -->
-                            <td class="px-2 py-3 text-center text-[10px] font-medium text-slate-600 dark:text-slate-300">
-                                {{ getYearLabel(log) }}
-                            </td>
-                            <!-- Description -->
-                            <td class="whitespace-pre-line break-words px-2 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-300">
-                                {{ displayValue(log?.description) }}
-                            </td>
-                            <!-- Action -->
-                            <td class="px-1 py-1 text-center align-middle">
-                                <div class="flex items-center justify-center gap-1.5 w-max mx-auto">
-                                    <button v-if="logIndex === 0 && proj?.id" @click="openAddModal(proj)" class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-indigo-100 text-indigo-800 hover:bg-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:hover:bg-indigo-500/30 transition-colors cursor-pointer" title="Add Status">
-                                        <svg class="mr-0.5 h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                        Add
-                                    </button>
-                                    <button v-if="log?.id" @click="openEditModal(log)" class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-500/20 dark:text-amber-300 dark:hover:bg-amber-500/30 transition-colors cursor-pointer" title="Edit Status">
-                                        Edit
-                                    </button>
-                                </div>
+        <div class="rounded-lg border border-slate-200 dark:border-white/10">
+            <div
+                v-if="actionableProjects.length > 0"
+                class="flex flex-wrap items-center gap-2 border-b border-slate-200 bg-slate-50/80 px-3 py-2 dark:border-white/10 dark:bg-white/[0.03]"
+            >
+                <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                    Quick Action
+                </span>
+                <button
+                    v-for="(proj, projIndex) in actionableProjects"
+                    :key="`add-status-${proj?.id ?? projIndex}`"
+                    type="button"
+                    class="inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold bg-indigo-100 text-indigo-800 hover:bg-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:hover:bg-indigo-500/30 transition-colors cursor-pointer"
+                    :title="`Add status untuk ${getProjectActionLabel(proj)}`"
+                    @click="openAddModal(proj)"
+                >
+                    <svg class="mr-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add Status
+                    <span
+                        v-if="projectList.length > 1"
+                        class="ml-1.5 rounded-full bg-white/80 px-1.5 py-0.5 text-[9px] font-semibold text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-200"
+                    >
+                        {{ getProjectActionLabel(proj) }}
+                    </span>
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full table-fixed divide-y divide-x divide-slate-200 text-[11px] dark:divide-white/10">
+                    <colgroup>
+                        <col class="w-[7%]">
+                        <col class="w-[15%]">
+                        <col class="w-[7%]">
+                        <col class="w-[7%]">
+                        <col class="w-[9%]">
+                        <col class="w-[8%]">
+                        <col class="w-[8%]">
+                        <col class="w-[27%]">
+                        <col class="w-[12%]">
+                    </colgroup>
+                    <thead v-if="showHeader" class="bg-slate-50 dark:bg-white/[0.03]">
+                        <tr class="divide-x divide-slate-200 dark:divide-white/10">
+                            <th
+                                class="px-1 py-1.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                                Code</th>
+                            <th
+                                class="px-1 py-1.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                                Project Name</th>
+                            <th
+                                class="px-1 py-1.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                                Target</th>
+                            <th
+                                class="px-1 py-1.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                                Progres</th>
+                            <th
+                                class="px-1 py-1.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                                Status</th>
+                            <th
+                                class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                                Periode</th>
+                            <th
+                                class="px-1 py-1.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                                Year</th>
+                            <th
+                                class="px-1 py-1.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                                Description</th>
+                            <th
+                                class="px-1 py-1.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                                Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/10 dark:bg-[#1a1a1a]">
+                        <template v-for="(proj, projIndex) in projectList" :key="`proj-${proj?.id ?? projIndex}`">
+                            <tr v-for="(log, logIndex) in getStatusRows(proj)" :key="`t1-${proj?.id ?? projIndex}-${log?.id ?? logIndex}`" class="divide-x divide-slate-200 hover:bg-slate-50 dark:divide-white/10 dark:hover:bg-white/5 transition-colors">
+                                <!-- Code: rowspan on first row -->
+                                <td v-if="logIndex === 0"
+                                    :rowspan="getStatusRowCount(proj)"
+                                    class="px-2 py-3 text-[11px] font-semibold text-slate-700 dark:text-slate-200 align-middle text-center border-b border-slate-200 dark:border-white/10">
+                                    {{ displayValue(proj.code) }}
+                                </td>
+                                <!-- Name: rowspan on first row -->
+                                <td v-if="logIndex === 0"
+                                    :rowspan="getStatusRowCount(proj)"
+                                    class="whitespace-normal break-words px-2 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-200 align-middle text-center border-b border-slate-200 dark:border-white/10"
+                                    :title="proj.name">
+                                    {{ displayValue(proj.name) }}
+                                </td>
+                                <!-- Target -->
+                                <td class="px-1 py-2 align-middle text-center">
+                                    <span v-if="log?.target != null" class="text-[11px] font-semibold text-slate-700 dark:text-slate-200">
+                                        {{ log.target }}%
+                                    </span>
+                                    <span v-else class="text-[10px] italic text-slate-400">{{ EMPTY_VALUE }}</span>
+                                </td>
+                                <!-- Progres -->
+                                <td class="px-1 py-2 align-middle text-center">
+                                    <span v-if="log?.progress != null"
+                                        class="text-[11px] font-semibold text-slate-700 dark:text-slate-200">
+                                        {{ log.progress }}%
+                                    </span>
+                                    <span v-else class="text-[10px] italic text-slate-400">{{ EMPTY_VALUE }}</span>
+                                </td>
+                                <!-- Status -->
+                                <td class="px-2 py-3 text-center text-[10px] font-medium text-slate-600 dark:text-slate-300">
+                                    <span v-if="log?.status"
+                                        class="inline-flex rounded-md px-1.5 py-0.5 text-[9px] font-medium"
+                                        :class="statusBadgeClass(log.status)">
+                                        {{ log.status }}
+                                    </span>
+                                    <span v-else class="text-[10px] italic text-slate-400">{{ EMPTY_VALUE }}</span>
+                                </td>
+                                <!-- Periode -->
+                                <td class="px-2 py-3 text-[10px] font-medium text-slate-600 dark:text-slate-300">
+                                    {{ getPeriodeLabel(log) }}
+                                </td>
+                                <!-- Year -->
+                                <td class="px-2 py-3 text-center text-[10px] font-medium text-slate-600 dark:text-slate-300">
+                                    {{ getYearLabel(log) }}
+                                </td>
+                                <!-- Description -->
+                                <td class="whitespace-pre-line break-words px-2 py-3 text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                                    {{ displayValue(log?.description) }}
+                                </td>
+                                <!-- Action -->
+                                <td class="px-1 py-1 text-center align-middle">
+                                    <div v-if="log?.id" class="flex items-center justify-center gap-1.5 w-max mx-auto">
+                                        <button
+                                            type="button"
+                                            @click="openEditModal(log)"
+                                            class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-500/20 dark:text-amber-300 dark:hover:bg-amber-500/30 transition-colors cursor-pointer"
+                                            title="Edit Status"
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            type="button"
+                                            :disabled="deleteProcessing"
+                                            @click="openDeleteModal(log)"
+                                            class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-rose-100 text-rose-800 hover:bg-rose-200 disabled:opacity-50 dark:bg-rose-500/20 dark:text-rose-300 dark:hover:bg-rose-500/30 transition-colors cursor-pointer"
+                                            title="Delete Status"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                    <span v-else class="text-[10px] italic text-slate-400">{{ EMPTY_VALUE }}</span>
+                                </td>
+                            </tr>
+                        </template>
+                        <tr v-if="projectList.length === 0">
+                            <td colspan="9" class="px-4 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
+                                Data status implementasi belum tersedia.
                             </td>
                         </tr>
-                    </template>
-                    <tr v-if="projectList.length === 0">
-                        <td colspan="9" class="px-4 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
-                            Data status implementasi belum tersedia.
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- Tabel 2: Informasi Dasar & Timeline -->
@@ -188,11 +229,26 @@
             :project-id="selectedProjectIdForModal"
             @close="closeModal"
         />
+
+        <ConfirmationModal
+            :show="showDeleteModal"
+            title="Hapus Status Implementation"
+            :message="deleteModalMessage"
+            confirm-text="Ya, Hapus"
+            cancel-text="Batal"
+            type="danger"
+            :loading="deleteProcessing"
+            @close="closeDeleteModal"
+            @confirm="confirmDeleteStatus"
+        />
     </div>
 </template>
 
 <script setup>
+import { router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
+import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import { statusLabelFromOptions } from '@/Composables/initiativeStatus';
 import StatusImplementationModal from './StatusImplementationModal.vue';
 
@@ -221,9 +277,13 @@ const props = defineProps({
     },
 });
 
+const route = useRouteHelper();
 const isModalOpen = ref(false);
 const editingStatus = ref(null);
 const selectedProjectIdForModal = ref(0);
+const showDeleteModal = ref(false);
+const pendingDeleteStatus = ref(null);
+const deleteProcessing = ref(false);
 
 const openAddModal = (proj) => {
     editingStatus.value = null;
@@ -254,6 +314,10 @@ const projectList = computed(() => {
     return [];
 });
 
+const actionableProjects = computed(() => {
+    return projectList.value.filter((project) => project?.id !== null && project?.id !== undefined);
+});
+
 const statusOptions = computed(() => {
     const defaultOptions = [
         { id: 1, name: 'drafting', label: 'Drafting' },
@@ -279,6 +343,31 @@ const statusOptions = computed(() => {
             }
             : option
     );
+});
+
+const deleteModalMessage = computed(() => {
+    const log = pendingDeleteStatus.value;
+
+    if (!log) {
+        return 'Apakah Anda yakin ingin menghapus status implementation ini?';
+    }
+
+    const statusLabel = displayValue(log?.status);
+    const monthLabel = getPeriodeLabel(log);
+    const yearLabel = getYearLabel(log);
+    const periodeLabel = [monthLabel, yearLabel]
+        .filter((value) => value && value !== EMPTY_VALUE)
+        .join(' ');
+
+    if (statusLabel !== EMPTY_VALUE && periodeLabel) {
+        return `Status implementation ${statusLabel} untuk periode ${periodeLabel} akan dihapus permanen. Lanjutkan?`;
+    }
+
+    if (periodeLabel) {
+        return `Status implementation untuk periode ${periodeLabel} akan dihapus permanen. Lanjutkan?`;
+    }
+
+    return 'Apakah Anda yakin ingin menghapus status implementation ini?';
 });
 
 const projectCharterRows = computed(() => {
@@ -405,6 +494,20 @@ const getImplementationHistory = (project) => {
     ).sort(sortImplementationHistory);
 };
 
+const getProjectActionLabel = (project) => {
+    const code = String(project?.code ?? '').trim();
+    if (code) {
+        return code;
+    }
+
+    const name = String(project?.name ?? '').trim();
+    if (name) {
+        return name;
+    }
+
+    return `Project #${project?.id ?? EMPTY_VALUE}`;
+};
+
 // Returns all status rows for a project; at least 1 empty placeholder row if none
 const getStatusRows = (project) => {
     const history = getImplementationHistory(project);
@@ -413,6 +516,35 @@ const getStatusRows = (project) => {
 
 const getStatusRowCount = (project) => {
     return getStatusRows(project).length;
+};
+
+const openDeleteModal = (log) => {
+    pendingDeleteStatus.value = log;
+    showDeleteModal.value = true;
+};
+
+const closeDeleteModal = () => {
+    showDeleteModal.value = false;
+    pendingDeleteStatus.value = null;
+    deleteProcessing.value = false;
+};
+
+const confirmDeleteStatus = () => {
+    const statusId = pendingDeleteStatus.value?.id;
+
+    if (!statusId) {
+        closeDeleteModal();
+        return;
+    }
+
+    deleteProcessing.value = true;
+
+    router.delete(route('it-initiatives.implementation-status.destroy', statusId), {
+        preserveScroll: true,
+        onFinish: () => {
+            closeDeleteModal();
+        },
+    });
 };
 
 const getPeriodeLabel = (log) => {

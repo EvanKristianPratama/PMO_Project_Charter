@@ -235,7 +235,7 @@ watch(() => props.analysisForm, () => {
                     <div class="bar-main comparison-header-item comparison-header-item-field">Field</div>
                     <div class="bar-main comparison-header-item">{{ previousColumnLabel }}</div>
                     <div class="bar-main comparison-header-item">{{ currentColumnLabel }}</div>
-                    <div class="bar-main comparison-header-item">Notes Analysis</div>
+                    <div class="bar-main comparison-header-item">Notes</div>
                 </div>
 
                 <article
