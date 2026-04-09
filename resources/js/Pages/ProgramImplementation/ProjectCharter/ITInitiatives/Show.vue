@@ -621,30 +621,7 @@ const cancelEdit = () => {
 
 const printCharter = () => window.print();
 
-const formatDateShort = (value) => {
-    const raw = String(value ?? '').trim();
-    if (raw === '') return null;
-
-    const parsed = new Date(raw);
-    if (Number.isNaN(parsed.getTime())) {
-        return raw;
-    }
-
-    return new Intl.DateTimeFormat('id-ID', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-    }).format(parsed);
-};
-
 const charterOptionLabel = (charter) => {
-    const statusLabel = String(charter?.resolved_status_label ?? resolveStatusLabel(charter?.status)).trim();
-    const versionLabel = String(charter?.version_label ?? '').trim();
-    const documentDate = formatDateShort(charter?.tgl_dokumen);
-    const suffixParts = [versionLabel, documentDate].filter(Boolean);
-
-    return suffixParts.length > 0
-        ? `${statusLabel} - ${suffixParts.join(' / ')}`
-        : statusLabel;
+    return String(charter?.resolved_status_label ?? resolveStatusLabel(charter?.status)).trim();
 };
 </script>
