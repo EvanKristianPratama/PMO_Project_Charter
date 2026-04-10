@@ -47,10 +47,10 @@ class StrategicHousePageService
         'tone' => 'support',
     ];
 
-    private const FALLBACK_FOCUS_BANDS = [
-        ['id' => 'focus-1', 'label' => 'Maximizing value'],
-        ['id' => 'focus-2', 'label' => 'Expand to new markets & adjacencies'],
-        ['id' => 'focus-3', 'label' => 'Build Low Carbon Business'],
+    private const FALLBACK_DUAL_GROWTH_GOALS = [
+        ['id' => 'goal-a', 'code' => 'A', 'title' => 'Maximizing Value'],
+        ['id' => 'goal-b', 'code' => 'B', 'title' => 'Expand to new markets & adjacencies'],
+        ['id' => 'goal-c', 'code' => 'C', 'title' => 'Building low carbon business'],
     ];
 
     public function getPageProps(array $filters = []): array
@@ -58,6 +58,7 @@ class StrategicHousePageService
         $normalizedFilters = $this->normalizeFilters($filters);
         $initiativeType = $normalizedFilters['initiative_type'];
         $showEmpty = $normalizedFilters['show_empty'];
+        $dualGrowthGoals = $this->getDualGrowthGoals();
 
         $coeCatalog = $this->getCoeCatalog($initiativeType);
         $technologyCards = $this->buildSectionCards($coeCatalog, self::TECHNOLOGY_COE_CONFIG, $showEmpty);
@@ -88,7 +89,8 @@ class StrategicHousePageService
                 $tbcCard,
                 $unassignedInitiatives
             ),
-            'focusBands' => $this->getFocusBands(),
+            'focusBands' => $this->getFocusBands($dualGrowthGoals),
+            'dualGrowthGoals' => $dualGrowthGoals,
             'technologyCards' => $technologyCards,
             'strategyCards' => $strategyCards,
             'foundationCard' => $foundationCard,
@@ -216,7 +218,7 @@ class StrategicHousePageService
         ];
     }
 
-    private function getFocusBands(): array
+    private function getDualGrowthGoals(): array
     {
         $goals = Goal::query()
             ->select(['id', 'code', 'title'])
@@ -225,13 +227,27 @@ class StrategicHousePageService
             ->get();
 
         if ($goals->isEmpty()) {
-            return self::FALLBACK_FOCUS_BANDS;
+            return self::FALLBACK_DUAL_GROWTH_GOALS;
         }
 
         return $goals
             ->map(fn (Goal $goal): array => [
-                'id' => 'goal-'.$goal->id,
-                'label' => $goal->title,
+                'id' => (int) $goal->id,
+                'code' => $goal->code,
+                'title' => $goal->title,
+            ])
+            ->values()
+            ->all();
+    }
+
+    private function getFocusBands(array $dualGrowthGoals): array
+    {
+        return collect($dualGrowthGoals)
+            ->map(fn (array $goal): array => [
+                'id' => is_numeric($goal['id']) ? 'goal-'.$goal['id'] : (string) $goal['id'],
+                'code' => $goal['code'],
+                'title' => $goal['title'],
+                'label' => $goal['title'],
             ])
             ->values()
             ->all();

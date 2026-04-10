@@ -11,16 +11,13 @@
                             <div class="roof-main-label">{{ page.headline }}</div>
                             <div class="roof-sub-items">
                                 <div
-                                    v-for="(band, idx) in focusBands.slice(0, 2)"
+                                    v-for="band in focusBands.slice(0, 2)"
                                     :key="band.id"
                                     class="roof-sub-item"
                                 >
                                     {{ band.label }}
                                 </div>
                             </div>
-                        </div>
-                        <div v-if="focusBands.length > 2" class="roof-side">
-                            <span>{{ focusBands[2].label }}</span>
                         </div>
                     </div>
                 </div>
@@ -112,11 +109,14 @@
                 </div>
 
             </section>
+
+            <DualGrowth :goals="dualGrowthGoals" />
         </div>
     </UserLayout>
 </template>
 
 <script setup>
+import DualGrowth from '@/Components/StrategicHouse/DualGrowth.vue';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
 defineProps({
@@ -129,6 +129,10 @@ defineProps({
         default: () => ({}),
     },
     focusBands: {
+        type: Array,
+        default: () => [],
+    },
+    dualGrowthGoals: {
         type: Array,
         default: () => [],
     },
@@ -202,21 +206,6 @@ defineProps({
     color: #2a4a6a;
     text-align: center;
     border-radius: 4px;
-}
-
-.roof-side {
-    width: 160px;
-    background: #184f96;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 12px 16px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #fff;
-    line-height: 1.4;
 }
 
 /* ─── CONNECTORS ─── */
@@ -392,10 +381,6 @@ defineProps({
 @media (max-width: 768px) {
     .roof-top {
         flex-direction: column;
-    }
-
-    .roof-side {
-        width: 100%;
     }
 
     .dti-cards {
