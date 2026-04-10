@@ -5,19 +5,22 @@
 
                 <!-- ═══ ROOF: Focus Bands (Maximize Legacy Business + Build Low Carbon) ═══ -->
                 <div class="roof-section">
-                    <!-- Main roof bar -->
                     <div class="roof-top">
                         <div class="roof-main">
                             <div class="roof-main-label">{{ page.headline }}</div>
-                            <div class="roof-sub-items">
+                            <div v-if="roofSection.main_goal_themes?.length" class="roof-sub-items">
                                 <div
-                                    v-for="band in focusBands.slice(0, 2)"
-                                    :key="band.id"
+                                    v-for="theme in roofSection.main_goal_themes"
+                                    :key="theme.id"
                                     class="roof-sub-item"
                                 >
-                                    {{ band.label }}
+                                    {{ theme.label }}
                                 </div>
                             </div>
+                        </div>
+
+                        <div v-if="roofSection.side_goal" class="roof-side">
+                            <div class="roof-side-label">{{ roofSection.side_goal.title }}</div>
                         </div>
                     </div>
                 </div>
@@ -128,6 +131,14 @@ defineProps({
         type: Object,
         default: () => ({}),
     },
+    roofSection: {
+        type: Object,
+        default: () => ({
+            main_goal: null,
+            main_goal_themes: [],
+            side_goal: null,
+        }),
+    },
     focusBands: {
         type: Array,
         default: () => [],
@@ -180,6 +191,11 @@ defineProps({
     text-align: center;
 }
 
+.roof-side {
+    width: 260px;
+    display: flex;
+}
+
 .roof-main-label {
     background: #e8eff8;
     border: 1px solid #c5d6e8;
@@ -206,6 +222,22 @@ defineProps({
     color: #2a4a6a;
     text-align: center;
     border-radius: 4px;
+}
+
+.roof-side-label {
+    width: 100%;
+    background: linear-gradient(180deg, #3b64a8 0%, #2f5596 100%);
+    color: #fff;
+    border-radius: 10px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.35;
+    min-height: 88px;
 }
 
 /* ─── CONNECTORS ─── */
@@ -417,6 +449,10 @@ defineProps({
     background: #1e293b;
     border-color: #334155;
     color: #e2e8f0;
+}
+
+:deep(.dark) .roof-side-label {
+    background: linear-gradient(180deg, #274a87 0%, #1f3e74 100%);
 }
 
 :deep(.dark) .dti-section {

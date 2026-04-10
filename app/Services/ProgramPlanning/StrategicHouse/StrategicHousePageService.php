@@ -59,6 +59,7 @@ class StrategicHousePageService
         $initiativeType = $normalizedFilters['initiative_type'];
         $showEmpty = $normalizedFilters['show_empty'];
         $dualGrowthGoals = $this->getDualGrowthGoals();
+        $roofSection = $this->getRoofSection();
 
         $coeCatalog = $this->getCoeCatalog($initiativeType);
         $technologyCards = $this->buildSectionCards($coeCatalog, self::TECHNOLOGY_COE_CONFIG, $showEmpty);
@@ -72,7 +73,7 @@ class StrategicHousePageService
             'filters' => $normalizedFilters,
             'page' => [
                 'title' => 'Strategic House',
-                'headline' => 'Pertamina Group Dual Growth Strategy',
+                'headline' => $roofSection['main_goal']['title'] ?? 'Pertamina Group Dual Growth Strategy',
                 'visionTitle' => 'Visi Pertamina IT',
                 'visionText' => 'Meningkatkan peranan IT dari business enabler menjadi strategic value creator, mendorong transformasi digital untuk mendukung ambisi dual growth Pertamina Group.',
                 'initiativeLabel' => $initiativeType === 2
@@ -89,6 +90,7 @@ class StrategicHousePageService
                 $tbcCard,
                 $unassignedInitiatives
             ),
+            'roofSection' => $roofSection,
             'focusBands' => $this->getFocusBands($dualGrowthGoals),
             'dualGrowthGoals' => $dualGrowthGoals,
             'technologyCards' => $technologyCards,
@@ -251,6 +253,48 @@ class StrategicHousePageService
             ])
             ->values()
             ->all();
+    }
+
+    private function getRoofSection(): array
+    {
+        $goals = Goal::query()
+            ->with(['themes' => fn ($query) => $query->orderBy('theme_number')])
+            ->where('pilar', '2')
+            ->whereIn('code', ['A', 'B'])
+            ->get()
+            ->keyBy('code');
+
+        /** @var Goal|null $mainGoal */
+        $mainGoal = $goals->get('A');
+        /** @var Goal|null $sideGoal */
+        $sideGoal = $goals->get('B');
+
+        return [
+            'main_goal' => $mainGoal
+                ? [
+                    'id' => (int) $mainGoal->id,
+                    'code' => $mainGoal->code,
+                    'title' => $mainGoal->title,
+                ]
+                : null,
+            'main_goal_themes' => collect($mainGoal?->themes ?? [])
+                ->take(2)
+                ->map(fn ($theme): array => [
+                    'id' => (int) $theme->id,
+                    'theme_number' => (int) $theme->theme_number,
+                    'name' => $theme->name,
+                    'label' => $theme->name,
+                ])
+                ->values()
+                ->all(),
+            'side_goal' => $sideGoal
+                ? [
+                    'id' => (int) $sideGoal->id,
+                    'code' => $sideGoal->code,
+                    'title' => $sideGoal->title,
+                ]
+                : null,
+        ];
     }
 
     private function getUnassignedInitiatives(int $initiativeType): array
