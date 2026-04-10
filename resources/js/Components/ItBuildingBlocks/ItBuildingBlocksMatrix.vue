@@ -864,7 +864,7 @@ defineExpose({
                     v-if="showStatusColors"
                     class="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 border-t border-slate-100 dark:border-white/5"
                 >
-                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Implementation Status:</span>
+                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider">Implementation Status (November - Desember 2025):</span>
                     <div
                         v-for="status in statusLegend"
                         :key="`status-legend-${status.label}`"
