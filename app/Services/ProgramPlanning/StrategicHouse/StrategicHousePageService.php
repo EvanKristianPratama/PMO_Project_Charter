@@ -21,12 +21,77 @@ class StrategicHousePageService
     ];
 
     private const STRATEGY_COE_CONFIG = [
-        ['name' => 'User Interface and Experience', 'label' => 'User Interface', 'tone' => 'sky'],
-        ['name' => 'Integration and Automation', 'label' => 'Integration and Automation', 'tone' => 'blue'],
-        ['name' => 'Business Application System', 'label' => 'Business Application System', 'tone' => 'indigo'],
-        ['name' => 'Infrastructure', 'label' => 'Infrastructure', 'tone' => 'cyan'],
-        ['name' => 'Data and Analytics', 'label' => 'Data and Analytics', 'tone' => 'emerald'],
-        ['name' => 'Cybersecurity', 'label' => 'Cybersecurity', 'tone' => 'slate'],
+        [
+            'name' => 'User Interface and Experience',
+            'label' => 'User Interface',
+            'tone' => 'sky',
+            'description_lines' => [
+                'Memastikan',
+                'standarisasi UI/UX',
+                'pada seluruh aplikasi',
+            ],
+        ],
+        [
+            'name' => 'Integration and Automation',
+            'label' => 'Integration and Automation',
+            'tone' => 'blue',
+            'description_lines' => [
+                'Meningkatkan',
+                'interaksi sistem di',
+                'seluruh holding,',
+                'subholding, dan APFS',
+            ],
+        ],
+        [
+            'name' => 'Business Application System',
+            'label' => 'Business Application System',
+            'tone' => 'indigo',
+            'description_lines' => [
+                'Merasionalisasi dan',
+                'memodernisasi',
+                'aplikasi legacy,',
+                'termasuk membangun',
+                'groupwide ERP',
+            ],
+        ],
+        [
+            'name' => 'Infrastructure',
+            'label' => 'Infrastructure',
+            'tone' => 'cyan',
+            'description_lines' => [
+                'Membangun',
+                'infrastruktur best-in-',
+                'class untuk',
+                'mendukung',
+                'peningkatan',
+                'kompleksitas use case',
+                'digital',
+            ],
+        ],
+        [
+            'name' => 'Data and Analytics',
+            'label' => 'Data and Analytics',
+            'tone' => 'emerald',
+            'description_lines' => [
+                'AI platform;',
+                'Memastikan',
+                'ketersediaan dan',
+                'keandalan data untuk',
+                'mendukung use case',
+                'digital',
+            ],
+        ],
+        [
+            'name' => 'Cybersecurity',
+            'label' => 'Cybersecurity',
+            'tone' => 'slate',
+            'description_lines' => [
+                'Memperkuat kesiapan',
+                'menghadapi cyber',
+                'threats yang terus',
+                'meningkat',
+            ],
+        ],
     ];
 
     private const FOUNDATION_COE_CONFIG = [
@@ -59,6 +124,7 @@ class StrategicHousePageService
         $initiativeType = $normalizedFilters['initiative_type'];
         $showEmpty = $normalizedFilters['show_empty'];
         $dualGrowthGoals = $this->getDualGrowthGoals();
+        $roofSection = $this->getRoofSection();
 
         $coeCatalog = $this->getCoeCatalog($initiativeType);
         $technologyCards = $this->buildSectionCards($coeCatalog, self::TECHNOLOGY_COE_CONFIG, $showEmpty);
@@ -79,7 +145,7 @@ class StrategicHousePageService
                     ? 'IT transformation initiatives'
                     : 'Digital transformation initiatives',
                 'grandStrategyTitle' => 'Grand IT Strategy',
-                'grandStrategyText' => 'Single source of truth untuk capability CoE yang menopang roadmap digital dan IT secara groupwide.',
+                'grandStrategyText' => 'Single source of truth for groupwide IT reference architecture',
             ],
             'summary' => $this->buildSummary(
                 $technologyCards,
@@ -89,6 +155,7 @@ class StrategicHousePageService
                 $tbcCard,
                 $unassignedInitiatives
             ),
+            'roofSection' => $roofSection,
             'focusBands' => $this->getFocusBands($dualGrowthGoals),
             'dualGrowthGoals' => $dualGrowthGoals,
             'technologyCards' => $technologyCards,
@@ -155,6 +222,7 @@ class StrategicHousePageService
             ...$baseCard,
             'display_name' => $config['label'] ?? $baseCard['display_name'],
             'tone' => $config['tone'] ?? $baseCard['tone'],
+            'description_lines' => $config['description_lines'] ?? [],
         ];
     }
 
@@ -251,6 +319,48 @@ class StrategicHousePageService
             ])
             ->values()
             ->all();
+    }
+
+    private function getRoofSection(): array
+    {
+        $goals = Goal::query()
+            ->with(['themes' => fn ($query) => $query->orderBy('theme_number')])
+            ->where('pilar', '2')
+            ->whereIn('code', ['A', 'B'])
+            ->get()
+            ->keyBy('code');
+
+        /** @var Goal|null $mainGoal */
+        $mainGoal = $goals->get('A');
+        /** @var Goal|null $sideGoal */
+        $sideGoal = $goals->get('B');
+
+        return [
+            'main_goal' => $mainGoal
+                ? [
+                    'id' => (int) $mainGoal->id,
+                    'code' => $mainGoal->code,
+                    'title' => $mainGoal->title,
+                ]
+                : null,
+            'main_goal_themes' => collect($mainGoal?->themes ?? [])
+                ->take(2)
+                ->map(fn ($theme): array => [
+                    'id' => (int) $theme->id,
+                    'theme_number' => (int) $theme->theme_number,
+                    'name' => $theme->name,
+                    'label' => $theme->name,
+                ])
+                ->values()
+                ->all(),
+            'side_goal' => $sideGoal
+                ? [
+                    'id' => (int) $sideGoal->id,
+                    'code' => $sideGoal->code,
+                    'title' => $sideGoal->title,
+                ]
+                : null,
+        ];
     }
 
     private function getUnassignedInitiatives(int $initiativeType): array
