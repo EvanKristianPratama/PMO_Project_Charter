@@ -66,6 +66,20 @@ const activeRemovalKeys = computed(() => {
     return pendingInitiativeRemovalKeys.value;
 });
 
+const normalizeCoeName = (rawName) => {
+    let name = String(rawName ?? '').trim();
+    if (!name || name === '-' || name.toUpperCase() === 'NO COE') return 'Coe Not Identified';
+    
+    const upper = name.toUpperCase();
+    if (upper === 'IOT') return 'IoT';
+    if (upper.includes('CLOUD') || upper.includes('COMPUTING') || name === 'Advance Cloud') return 'Advance Cloud';
+    if (upper === 'RPA') return 'RPA';
+    if (upper.includes('ROBOT') || name === 'Robotics') return 'Robotics';
+    if (upper.includes('ANALYTICS') || name === 'AI / Adv. Analytics') return 'AI / Adv. Analytics';
+    
+    return name;
+};
+
 const displayGroups = computed(() => {
     return props.groups
         .map((group) => {
@@ -73,9 +87,17 @@ const displayGroups = computed(() => {
             const secondaryGroups = (group?.secondary_groups ?? [])
                 .map((secondaryGroup) => {
                     const initiatives = (secondaryGroup?.initiatives ?? []).filter((initiative) => {
-                        return !activeRemovalKeys.value.has(
+                        const isNotRemoved = !activeRemovalKeys.value.has(
                             createRemovalKey(group?.primary_id, secondaryGroup?.secondary_id, initiative?.initiative_id),
                         );
+                        
+                        const matchesOrg = !selectedOrganization.value || initiative.business_unit === selectedOrganization.value;
+                        
+                        // Gunakan normalisasi terpusat
+                        const coeName = normalizeCoeName(initiative.coe_name);
+                        const matchesCoe = !selectedCoe.value || coeName === selectedCoe.value;
+                        
+                        return isNotRemoved && matchesOrg && matchesCoe;
                     });
 
                     totalInitiativesCount += initiatives.length;
@@ -239,6 +261,23 @@ const initiativeOptionLabel = (initiative) => {
 const DEFAULT_INITIATIVE_COLUMN_COUNT = 6;
 const initiativeColumnOptions = [3, 4, 5, 6];
 const initiativeColumnCount = ref(DEFAULT_INITIATIVE_COLUMN_COUNT);
+const showBusinessUnit = ref(false);
+const selectedOrganization = ref('');
+const selectedCoe = ref('');
+
+const organizationOptions = computed(() => {
+    const orgs = new Set();
+    props.groups.forEach(group => {
+        (group.secondary_groups ?? []).forEach(sec => {
+            (sec.initiatives ?? []).forEach(ini => {
+                if (ini.business_unit && ini.business_unit !== '-') {
+                    orgs.add(ini.business_unit);
+                }
+            });
+        });
+    });
+    return Array.from(orgs).sort();
+});
 
 const buildInitiativeColumns = (initiatives = [], columnCount = initiativeColumnCount.value) => {
     const items = Array.isArray(initiatives)
@@ -657,63 +696,44 @@ const coeLegend = computed(() => {
         'Coe Not Identified',
     ];
 
-    const legendMap = new Map();
-    // Inisialisasi awal dengan 0 agar tetap muncul di legenda
-    desiredOrder.forEach((name) => {
-        legendMap.set(name, { id: null, count: 0 });
+    // Inisialisasi statistik
+    const stats = {};
+    desiredOrder.forEach(name => {
+        stats[name] = 0;
     });
 
     displayGroups.value.forEach((group) => {
         group.secondary_groups.forEach((secondaryGroup) => {
             secondaryGroup.initiatives.forEach((initiative) => {
-                const coeId = initiative.coe_id ?? 0;
-                let coeName = initiative.coe_name ?? 'Coe Not Identified';
-
-                // Normalisasi nama berdasarkan feedback user
-                if (coeName.toUpperCase() === 'NO COE' || coeName === 'No Coe') coeName = 'Coe Not Identified';
-                if (coeName === 'Advanced Computing') coeName = 'Advance Cloud';
-
-                if (!legendMap.has(coeName)) {
-                    legendMap.set(coeName, { id: coeId, count: 0 });
+                const name = normalizeCoeName(initiative.coe_name);
+                
+                if (stats.hasOwnProperty(name)) {
+                    stats[name]++;
+                } else {
+                    stats['Coe Not Identified']++;
                 }
-
-                const entry = legendMap.get(coeName);
-                entry.count++;
-                if (entry.id === null) entry.id = coeId;
             });
         });
     });
 
-    return Array.from(legendMap.entries())
-        .map(([name, data]) => ({
-            // Gunakan index dari desiredOrder sebagai fallback ID untuk warna agar konsisten
-            id: data.id ?? (desiredOrder.indexOf(name) !== -1 ? desiredOrder.indexOf(name) + 1 : 99),
-            name,
-            count: data.count,
-        }))
-        .sort((a, b) => {
-            const indexA = desiredOrder.indexOf(a.name);
-            const indexB = desiredOrder.indexOf(b.name);
-
-            if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-            if (indexA !== -1) return -1;
-            if (indexB !== -1) return 1;
-            return a.name.localeCompare(b.name);
-        });
+    return desiredOrder.map((name, index) => ({
+        id: index + 1,
+        name: name,
+        count: stats[name],
+    }));
 });
 
 const getCoeColorClass = (coeName) => {
-    const name = String(coeName ?? '').trim();
+    const name = normalizeCoeName(coeName);
 
     if (name === 'IoT') return 'coe-color-blue';
-    if (name === 'Advance Cloud' || name === 'Advanced Computing') return 'coe-color-emerald';
+    if (name === 'Advance Cloud') return 'coe-color-emerald';
     if (name === 'RPA') return 'coe-color-amber';
     if (name === 'Robotics') return 'coe-color-purple';
     if (name === 'AI / Adv. Analytics') return 'coe-color-rose';
-    if (name === 'Coe Not Identified' || name.toUpperCase() === 'NO COE') return 'coe-color-none';
+    if (name === 'Coe Not Identified') return 'coe-color-none';
 
-    // Fallback jika ada kategori baru
-    return 'coe-color-indigo';
+    return 'coe-color-none';
 };
 
 defineExpose({
@@ -757,10 +777,10 @@ defineExpose({
 
         <div
             v-if="hasGroups"
-            class="flex items-center justify-between"
+            class="space-y-4"
         >
-            <div class="flex flex-wrap gap-x-4 gap-y-2">
-                <!-- Legend COE with Counts -->
+            <!-- Row 1: Legend & Overall Total -->
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
                 <div
                     v-for="coe in coeLegend"
                     :key="`coe-legend-${coe.id}`"
@@ -783,20 +803,68 @@ defineExpose({
                 </div>
             </div>
 
-            <div class="initiative-view-switch">
-                <span class="initiative-view-switch__label">Tampilan kolom:</span>
-                <select
-                    v-model="initiativeColumnCount"
-                    class="initiative-view-select"
-                >
-                    <option
-                        v-for="option in initiativeColumnOptions"
-                        :key="`col-opt-${option}`"
-                        :value="option"
+            <!-- Row 2: Toolbar (Filters & Settings) -->
+            <div class="flex items-center justify-start">
+                <div class="initiative-view-switch">
+                    <select
+                        v-model="selectedOrganization"
+                        class="initiative-view-select mr-2"
                     >
-                        {{ option }} Kolom
-                    </option>
-                </select>
+                        <option value="">Semua Organisasi</option>
+                        <option
+                            v-for="org in organizationOptions"
+                            :key="`org-opt-${org}`"
+                            :value="org"
+                        >
+                            {{ org }}
+                        </option>
+                    </select>
+
+                    <select
+                        v-model="selectedCoe"
+                        class="initiative-view-select mr-2"
+                    >
+                        <option value="">Semua COE</option>
+                        <option
+                            v-for="coe in coeLegend"
+                            :key="`coe-opt-${coe.id}`"
+                            :value="coe.name"
+                        >
+                            {{ coe.name }}
+                        </option>
+                    </select>
+
+                    <button
+                        type="button"
+                        class="bu-toggle-btn"
+                        :class="{ 'bu-toggle-btn--active': showBusinessUnit }"
+                        title="Tampilkan/Sembunyikan Business Unit"
+                        @click="showBusinessUnit = !showBusinessUnit"
+                    >
+                        <svg v-if="showBusinessUnit" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <svg v-else class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                        </svg>
+                        <span>Business Unit</span>
+                    </button>
+
+                    <span class="initiative-view-switch__label ml-2">Tampilan kolom:</span>
+                    <select
+                        v-model="initiativeColumnCount"
+                        class="initiative-view-select"
+                    >
+                        <option
+                            v-for="option in initiativeColumnOptions"
+                            :key="`col-opt-${option}`"
+                            :value="option"
+                        >
+                            {{ option }} Kolom
+                        </option>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -926,7 +994,10 @@ defineExpose({
                                                     class="initiative-box__name"
                                                     :class="{ 'initiative-box__name--full': !initiativeDisplayCode(initiative) }"
                                                 >
-                                                    {{ initiativeDisplayName(initiative) }}
+                                                    <span class="initiative-box__label-text">{{ initiativeDisplayName(initiative) }}</span>
+                                                    <span v-if="showBusinessUnit" class="initiative-box__bu">
+                                                        {{ initiative.business_unit }}
+                                                    </span>
                                                 </span>
 
                                                 <button
@@ -1119,6 +1190,37 @@ defineExpose({
     font-weight: 700;
     color: #475569;
     white-space: nowrap;
+}
+
+.bu-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #ffffff;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    transition: all 0.15s ease;
+    cursor: pointer;
+}
+
+.bu-toggle-btn:hover {
+    border-color: #0f6fb7;
+    background: #f8fafc;
+}
+
+.bu-toggle-btn--active {
+    background: #0f6fb7;
+    border-color: #0f6fb7;
+    color: #ffffff;
+}
+
+.bu-toggle-btn--active:hover {
+    background: #0d5ea1;
+    border-color: #0d5ea1;
 }
 
 .initiative-view-select {
@@ -1370,10 +1472,30 @@ defineExpose({
 
 .initiative-box__name {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
     max-width: none;
     padding: 2px 16px 2px 5px;
     word-break: break-word;
+}
+
+.initiative-box__label-text {
+    line-height: 1.1;
+}
+
+.initiative-box__bu {
+    display: block;
+    width: 100%;
+    margin-top: 1px;
+    font-size: 7.5px;
+    font-weight: 700;
+    font-style: italic;
+    color: inherit;
+    opacity: 0.7;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .initiative-box__name--full {
