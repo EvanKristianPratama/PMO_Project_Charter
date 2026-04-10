@@ -4,9 +4,6 @@
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h1 class="text-2xl font-bold text-slate-900 dark:text-white">IT Building Blocks</h1>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">
-                        Kelola mapping Primary, Secondary, dan Digital Initiatives untuk melihat kontribusi IT terhadap inisiatif digital.
-                    </p>
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2">

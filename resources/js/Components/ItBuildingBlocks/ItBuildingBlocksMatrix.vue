@@ -96,8 +96,11 @@ const displayGroups = computed(() => {
                         // Gunakan normalisasi terpusat
                         const coeName = normalizeCoeName(initiative.coe_name);
                         const matchesCoe = !selectedCoe.value || coeName === selectedCoe.value;
+
+                        const implStatus = normalizeStatusLabel(initiative.implementation_status);
+                        const matchesStatus = !selectedStatus.value || implStatus === selectedStatus.value;
                         
-                        return isNotRemoved && matchesOrg && matchesCoe;
+                        return isNotRemoved && matchesOrg && matchesCoe && matchesStatus;
                     });
 
                     totalInitiativesCount += initiatives.length;
@@ -264,6 +267,7 @@ const initiativeColumnCount = ref(DEFAULT_INITIATIVE_COLUMN_COUNT);
 const showBusinessUnit = ref(false);
 const selectedOrganization = ref('');
 const selectedCoe = ref('');
+const selectedStatus = ref('');
 
 const organizationOptions = computed(() => {
     const orgs = new Set();
@@ -736,6 +740,56 @@ const getCoeColorClass = (coeName) => {
     return 'coe-color-none';
 };
 
+const normalizeStatusLabel = (rawStatus) => {
+    const s = String(rawStatus ?? '').trim();
+    if (!s) return null;
+    if (s === 'DF') return 'DF';
+    if (s === 'Done') return 'Done';
+    if (s === 'DT 2026') return 'DT 2026';
+    if (s === 'ITSBP') return 'ITSBP';
+    if (s === 'On Review') return 'On Review';
+    if (s === 'SH') return 'SH';
+    return s;
+};
+
+const getStatusColorClass = (status) => {
+    const s = normalizeStatusLabel(status);
+    if (!s) return '';
+    if (s === 'DF') return 'status-color-df';
+    if (s === 'Done') return 'status-color-done';
+    if (s === 'DT 2026') return 'status-color-dt2026';
+    if (s === 'ITSBP') return 'status-color-itsbp';
+    if (s === 'On Review') return 'status-color-onreview';
+    if (s === 'SH') return 'status-color-sh';
+    return '';
+};
+
+const statusDesiredOrder = ['DF', 'Done', 'DT 2026', 'ITSBP', 'On Review', 'SH'];
+
+const statusLegend = computed(() => {
+    const stats = {};
+    statusDesiredOrder.forEach(label => {
+        stats[label] = 0;
+    });
+
+    displayGroups.value.forEach((group) => {
+        group.secondary_groups.forEach((secondaryGroup) => {
+            secondaryGroup.initiatives.forEach((initiative) => {
+                const label = normalizeStatusLabel(initiative.implementation_status);
+                if (label && stats.hasOwnProperty(label)) {
+                    stats[label]++;
+                }
+            });
+        });
+    });
+
+    return statusDesiredOrder.map((label) => ({
+        label,
+        class: getStatusColorClass(label),
+        count: stats[label],
+    }));
+});
+
 defineExpose({
     openAddMappingModal,
 });
@@ -780,26 +834,49 @@ defineExpose({
             class="space-y-4"
         >
             <!-- Row 1: Legend & Overall Total -->
-            <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
-                <div
-                    v-for="coe in coeLegend"
-                    :key="`coe-legend-${coe.id}`"
-                    class="flex items-center gap-1.5"
-                >
-                    <span
-                        class="h-3 w-3 rounded-sm shadow-sm legend-swatch"
-                        :class="getCoeColorClass(coe.name)"
-                    ></span>
-                    <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">
-                        {{ coe.name }} <span class="text-slate-400 dark:text-slate-500 font-medium">({{ coe.count }})</span>
-                    </span>
+            <div class="space-y-2.5">
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+                    <div
+                        v-for="coe in coeLegend"
+                        :key="`coe-legend-${coe.id}`"
+                        class="flex items-center gap-1.5"
+                    >
+                        <span
+                            class="h-3 w-3 rounded-sm shadow-sm legend-swatch"
+                            :class="getCoeColorClass(coe.name)"
+                        ></span>
+                        <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                            {{ coe.name }} <span class="text-slate-400 dark:text-slate-500 font-medium">({{ coe.count }})</span>
+                        </span>
+                    </div>
+
+                    <!-- Total Overall -->
+                    <div class="flex items-center gap-1.5 border-l border-slate-300 pl-4 ml-1 dark:border-white/10">
+                        <span class="text-[11px] font-bold text-slate-800 dark:text-slate-200">
+                            Total Digital Initiatives <span class="text-slate-500 dark:text-slate-400 font-medium">({{ totalOverallInitiatives }})</span>
+                        </span>
+                    </div>
                 </div>
 
-                <!-- Total Overall -->
-                <div class="flex items-center gap-1.5 border-l border-slate-300 pl-4 ml-1 dark:border-white/10">
-                    <span class="text-[11px] font-bold text-slate-800 dark:text-slate-200">
-                        Total Digital Initiatives <span class="text-slate-500 dark:text-slate-400 font-medium">({{ totalOverallInitiatives }})</span>
-                    </span>
+                <!-- Status Implementation Legend -->
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 border-t border-slate-100 dark:border-white/5">
+                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider">Implementation Status (November - Desember 2025):</span>
+                    <div
+                        v-for="status in statusLegend"
+                        :key="`status-legend-${status.label}`"
+                        class="flex items-center gap-1.5 cursor-pointer select-none transition-opacity"
+                        :class="{ 'opacity-40': selectedStatus && selectedStatus !== status.label }"
+                        @click="selectedStatus = selectedStatus === status.label ? '' : status.label"
+                        :title="`Filter: ${status.label}`"
+                    >
+                        <span
+                            class="h-3 w-3 rounded-sm shadow-sm"
+                            :class="status.class"
+                        ></span>
+                        <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                            {{ status.label }} <span class="text-slate-400 dark:text-slate-500 font-medium">({{ status.count }})</span>
+                        </span>
+                    </div>
                 </div>
             </div>
 
@@ -831,6 +908,20 @@ defineExpose({
                             :value="coe.name"
                         >
                             {{ coe.name }}
+                        </option>
+                    </select>
+
+                    <select
+                        v-model="selectedStatus"
+                        class="initiative-view-select mr-2"
+                    >
+                        <option value="">Semua Status</option>
+                        <option
+                            v-for="status in statusLegend"
+                            :key="`status-opt-${status.label}`"
+                            :value="status.label"
+                        >
+                            {{ status.label }}
                         </option>
                     </select>
 
@@ -986,6 +1077,7 @@ defineExpose({
                                                 <span
                                                     v-if="initiativeDisplayCode(initiative)"
                                                     class="initiative-box__code"
+                                                    :class="getStatusColorClass(initiative.implementation_status)"
                                                 >
                                                     {{ initiativeDisplayCode(initiative) }}
                                                 </span>
@@ -1416,7 +1508,7 @@ defineExpose({
 .initiative-box {
     position: relative;
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-columns: 28px minmax(0, 1fr);
     min-height: 24px;
     width: 100%;
     align-items: stretch;
@@ -1454,6 +1546,14 @@ defineExpose({
 .coe-color-rose .initiative-box__code { border-right-color: #be123c; background-color: rgba(190, 18, 60, 0.1); }
 .coe-color-indigo .initiative-box__code { border-right-color: #4338ca; background-color: rgba(67, 56, 202, 0.1); }
 
+/* Implementation Status Colors — distinct from COE colors */
+.status-color-df { background-color: #0d9488 !important; color: #ffffff !important; border-color: #0f766e !important; }
+.status-color-done { background-color: #65a30d !important; color: #ffffff !important; border-color: #4d7c0f !important; }
+.status-color-dt2026 { background-color: #ea580c !important; color: #ffffff !important; border-color: #c2410c !important; }
+.status-color-itsbp { background-color: #06b6d4 !important; color: #ffffff !important; border-color: #0891b2 !important; }
+.status-color-onreview { background-color: #ca8a04 !important; color: #ffffff !important; border-color: #a16207 !important; }
+.status-color-sh { background-color: #ef4444 !important; color: #ffffff !important; border-color: #dc2626 !important; }
+
 .initiative-box--placeholder {
     visibility: hidden;
     pointer-events: none;
@@ -1468,6 +1568,9 @@ defineExpose({
     font-weight: 700;
     letter-spacing: 0.01em;
     white-space: nowrap;
+    min-width: 28px;
+    width: 28px;
+    flex-shrink: 0;
 }
 
 .initiative-box__name {

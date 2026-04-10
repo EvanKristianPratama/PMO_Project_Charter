@@ -162,6 +162,7 @@ class ItBuildingBlockController extends Controller
                 'initiative:id,code,name,coe_id,business_unit',
                 'initiative.coe:id,name',
                 'initiative.organization:id,name',
+                'initiative.latestStatusImplementation',
             ])
             ->get(['primary', 'secondary', 'initiative_id'])
             ->filter(fn (TrsMapItBuilding $item) => filled($item->initiative?->name))
@@ -195,6 +196,7 @@ class ItBuildingBlockController extends Controller
                                         'coe_id' => (int) ($item->initiative?->coe_id ?? 0),
                                         'coe_name' => $item->initiative?->coe?->name ?: 'No COE',
                                         'business_unit' => $item->initiative?->organization?->name ?: '-',
+                                        'implementation_status' => $item->initiative?->latestStatusImplementation?->review_status ?: null,
                                     ])
                                     ->unique('map_key')
                                     ->sortBy('name')
