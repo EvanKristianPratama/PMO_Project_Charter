@@ -3,6 +3,7 @@
 namespace App\Services\ProgramPlanning\StrategicHouse;
 
 use App\Models\Goal;
+use App\Models\InitiativeTagging;
 use App\Models\MstCoe;
 use App\Models\MstInitiative;
 use Illuminate\Support\Collection;
@@ -112,10 +113,44 @@ class StrategicHousePageService
         'tone' => 'support',
     ];
 
+    private const DUAL_GROWTH_GOAL_CODES = ['A', 'B'];
+
     private const FALLBACK_DUAL_GROWTH_GOALS = [
-        ['id' => 'goal-a', 'code' => 'A', 'title' => 'Maximizing Value'],
-        ['id' => 'goal-b', 'code' => 'B', 'title' => 'Expand to new markets & adjacencies'],
-        ['id' => 'goal-c', 'code' => 'C', 'title' => 'Building low carbon business'],
+        [
+            'id' => 'goal-a',
+            'code' => 'A',
+            'title' => 'Maximize Legacy Business',
+            'themes' => [
+                [
+                    'id' => 'theme-a1',
+                    'theme_number' => 1,
+                    'name' => 'Maximizing Value',
+                    'label' => 'Maximizing Value',
+                    'initiatives_count' => 0,
+                    'initiatives' => [],
+                ],
+                [
+                    'id' => 'theme-a2',
+                    'theme_number' => 2,
+                    'name' => 'Expand to new markets & adjacencies',
+                    'label' => 'Expand to new markets & adjacencies',
+                    'initiatives_count' => 0,
+                    'initiatives' => [],
+                ],
+            ],
+            'initiatives_count' => 0,
+            'direct_initiatives_count' => 0,
+            'direct_initiatives' => [],
+        ],
+        [
+            'id' => 'goal-b',
+            'code' => 'B',
+            'title' => 'Building low carbon business',
+            'themes' => [],
+            'initiatives_count' => 0,
+            'direct_initiatives_count' => 0,
+            'direct_initiatives' => [],
+        ],
     ];
 
     public function getPageProps(array $filters = []): array
@@ -243,6 +278,8 @@ class StrategicHousePageService
             })
             ->values();
 
+        $previewInitiatives = $initiatives->take(3)->values();
+
         return [
             'id' => (int) $coe->id,
             'name' => $coe->name,
@@ -250,7 +287,9 @@ class StrategicHousePageService
             'tone' => 'default',
             'initiatives_count' => $initiatives->count(),
             'is_empty' => $initiatives->isEmpty(),
-            'initiatives_preview' => $initiatives->take(4)->values()->all(),
+            'initiatives' => $initiatives->all(),
+            'initiatives_preview' => $previewInitiatives->all(),
+            'remaining_initiatives_count' => max(0, $initiatives->count() - $previewInitiatives->count()),
             'status_breakdown' => $this->buildStatusBreakdown($initiatives),
         ];
     }
@@ -288,24 +327,128 @@ class StrategicHousePageService
 
     private function getDualGrowthGoals(): array
     {
+        $directInitiativesByGoal = $this->getDirectDualGrowthInitiatives();
+
         $goals = Goal::query()
-            ->select(['id', 'code', 'title'])
-            ->where('pilar', '2')
-            ->orderBy('code')
+            ->select(['id', 'code', 'title', 'pilar'])
+            ->with([
+                'themes' => fn ($query) => $query
+                    ->select(['id', 'idGoal', 'theme_number', 'name'])
+                    ->with([
+                        'initiativeTaggings' => fn ($taggingQuery) => $taggingQuery
+                            ->select(['id', 'themes_id', 'initiative_id', 'pilar'])
+                            ->where('pilar', 2)
+                            ->with([
+                                'initiative' => fn ($initiativeQuery) => $initiativeQuery
+                                    ->select(['id', 'code', 'name', 'coe_id'])
+                                    ->with(['coe:id,name']),
+                            ]),
+                    ])
+                    ->orderBy('theme_number'),
+            ])
+            ->where('pilar', 2)
+            ->whereIn('code', self::DUAL_GROWTH_GOAL_CODES)
+            ->orderByRaw("case code when 'A' then 1 when 'B' then 2 else 99 end")
             ->get();
 
-        if ($goals->isEmpty()) {
-            return self::FALLBACK_DUAL_GROWTH_GOALS;
-        }
+        $goalsByCode = $goals->keyBy(fn (Goal $goal): string => strtoupper((string) $goal->code));
 
-        return $goals
-            ->map(fn (Goal $goal): array => [
-                'id' => (int) $goal->id,
-                'code' => $goal->code,
-                'title' => $goal->title,
-            ])
+        return collect(self::FALLBACK_DUAL_GROWTH_GOALS)
+            ->map(function (array $fallbackGoal) use ($goalsByCode, $directInitiativesByGoal): array {
+                /** @var Goal|null $goal */
+                $goal = $goalsByCode->get($fallbackGoal['code']);
+                $directInitiatives = $directInitiativesByGoal->get($fallbackGoal['code'], []);
+
+                if ($goal) {
+                    return $this->mapDualGrowthGoal($goal, $directInitiatives);
+                }
+
+                return [
+                    ...$fallbackGoal,
+                    'direct_initiatives_count' => count($directInitiatives),
+                    'direct_initiatives' => $directInitiatives,
+                    'initiatives_count' => (int) ($fallbackGoal['initiatives_count'] ?? 0) + count($directInitiatives),
+                ];
+            })
             ->values()
             ->all();
+    }
+
+    private function getDirectDualGrowthInitiatives(): Collection
+    {
+        return InitiativeTagging::query()
+            ->select(['id', 'goal', 'initiative_id', 'pilar', 'themes_id'])
+            ->with([
+                'initiative' => fn ($query) => $query
+                    ->select(['id', 'code', 'name', 'coe_id'])
+                    ->with(['coe:id,name']),
+            ])
+            ->where('pilar', 2)
+            ->whereIn('goal', self::DUAL_GROWTH_GOAL_CODES)
+            ->whereNull('themes_id')
+            ->get()
+            ->groupBy(fn ($tagging): string => strtoupper((string) $tagging->goal))
+            ->map(function (Collection $taggings): array {
+                return $taggings
+                    ->map(fn ($tagging) => $tagging->initiative)
+                    ->filter()
+                    ->unique('id')
+                    ->sortBy(fn ($initiative) => sprintf('%08s-%s', (string) $initiative->code, (string) $initiative->name))
+                    ->values()
+                    ->map(fn ($initiative): array => $this->mapDualGrowthInitiative($initiative))
+                    ->all();
+            });
+    }
+
+    private function mapDualGrowthGoal(Goal $goal, array $directInitiatives = []): array
+    {
+        $themes = collect($goal->themes ?? [])
+            ->map(fn ($theme): array => $this->mapDualGrowthTheme($theme))
+            ->values()
+            ->all();
+
+        return [
+            'id' => (int) $goal->id,
+            'code' => (string) $goal->code,
+            'title' => (string) $goal->title,
+            'themes' => $themes,
+            'direct_initiatives_count' => count($directInitiatives),
+            'direct_initiatives' => $directInitiatives,
+            'initiatives_count' => (int) collect($themes)->sum('initiatives_count') + count($directInitiatives),
+        ];
+    }
+
+    private function mapDualGrowthTheme($theme): array
+    {
+        $initiatives = collect($theme->initiativeTaggings ?? [])
+            ->map(fn ($tagging) => $tagging->initiative)
+            ->filter()
+            ->unique('id')
+            ->sortBy(fn ($initiative) => sprintf('%08s-%s', (string) $initiative->code, (string) $initiative->name))
+            ->values()
+            ->map(fn ($initiative): array => $this->mapDualGrowthInitiative($initiative))
+            ->all();
+
+        return [
+            'id' => (int) $theme->id,
+            'theme_number' => (int) $theme->theme_number,
+            'name' => (string) $theme->name,
+            'label' => (string) $theme->name,
+            'initiatives_count' => count($initiatives),
+            'initiatives' => $initiatives,
+        ];
+    }
+
+    private function mapDualGrowthInitiative($initiative): array
+    {
+        return [
+            'id' => (int) $initiative->id,
+            'code' => $initiative->code,
+            'name' => $initiative->name,
+            'coe_id' => $initiative->coe_id ? (int) $initiative->coe_id : null,
+            'coe_name' => $initiative->coe?->name,
+            'label' => trim(collect([$initiative->code, $initiative->name])->filter()->implode(' - ')),
+        ];
     }
 
     private function getFocusBands(array $dualGrowthGoals): array

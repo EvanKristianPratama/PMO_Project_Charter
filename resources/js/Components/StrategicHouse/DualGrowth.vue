@@ -1,76 +1,8 @@
-<template>
-    <section class="dual-growth-mockup">
-        <div class="mockup-header">
-            <div>
-                <p class="mockup-eyebrow">Mockup Preview</p>
-            </div>
-
-            <div class="mockup-legend">
-                <span class="legend-item">
-                    <span class="legend-swatch legend-swatch--core"></span>
-                    Core / operational
-                </span>
-                <span class="legend-item">
-                    <span class="legend-swatch legend-swatch--highlight"></span>
-                    Priority highlight
-                </span>
-                <span class="legend-item">
-                    <span class="legend-swatch legend-swatch--business"></span>
-                    Business / analytics
-                </span>
-                <span class="legend-item">
-                    <span class="legend-swatch legend-swatch--green"></span>
-                    Emerging / low carbon
-                </span>
-            </div>
-        </div>
-
-        <div class="mockup-board-scroll">
-            <div class="mockup-board">
-                <div class="board-header">
-                    <div class="board-header__group board-header__group--strategy">
-                        Dual Growth Strategy
-                    </div>
-                    <div class="board-header__group board-header__group--initiative">
-                        Digital Initiative
-                    </div>
-                </div>
-
-                <div
-                    v-for="section in displaySections"
-                    :key="section.code"
-                    class="board-row"
-                >
-                    <aside class="board-row__label">
-                        <span class="board-row__code">{{ section.code }}</span>
-                        <div class="board-row__pill">
-                            <span>{{ section.title }}</span>
-                        </div>
-                    </aside>
-
-                    <div
-                        class="board-row__lane"
-                        :class="`board-row__lane--${section.tone}`"
-                        :style="laneStyle(section)"
-                    >
-                        <article
-                            v-for="card in section.cards"
-                            :key="card.id"
-                            class="roadmap-card"
-                            :class="`roadmap-card--${card.variant}`"
-                            :style="cardStyle(card)"
-                        >
-                            {{ card.label }}
-                        </article>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-</template>
-
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+
+const initiativeColumnOptions = [2, 3, 4, 5, 6];
+const initiativeColumnCount = ref(6);
 
 const props = defineProps({
     goals: {
@@ -79,136 +11,367 @@ const props = defineProps({
     },
 });
 
-const sectionTemplates = [
+const fallbackGoals = [
     {
+        id: 'goal-a',
         code: 'A',
-        title: 'Maximizing Value',
-        tone: 'value',
-        cards: [
-            { id: 'a1', label: 'Predictive Maintenance', column: 1, row: 1, variant: 'highlight' },
-            { id: 'a2', label: 'AI Drilling in Upstream', column: 1, row: 2, variant: 'highlight' },
-            { id: 'a3', label: 'Profitability Analytic (PROFITOR)', column: 1, row: 4, variant: 'business' },
-            { id: 'a4', label: 'Smart Ship 2.0', column: 2, row: 1, variant: 'core' },
-            { id: 'a5', label: 'Smart Port & Terminal', column: 2, row: 2, variant: 'core' },
-            { id: 'a6', label: 'Fleet Predictive Maintenance', column: 2, row: 3, variant: 'core' },
-            { id: 'a7', label: 'Buspro X', column: 2, row: 4, variant: 'highlight' },
-            { id: 'a8', label: 'SiPGas & Cost of Gas Purchases Optimization', column: 2, row: 5, variant: 'highlight' },
-            { id: 'a9', label: 'Optigas', column: 2, row: 6, variant: 'highlight' },
-            { id: 'a10', label: 'AI for Jargas Customer Mapping', column: 2, row: 7, variant: 'highlight' },
-            { id: 'a11', label: 'Dynamic Scheduling Automation System (DSAS)', column: 3, row: 1, variant: 'highlight' },
-            { id: 'a12', label: 'ILO App (IPMAN Enhancement)', column: 3, row: 2, variant: 'highlight' },
-            { id: 'a13', label: 'Integrated Control Tower', column: 3, row: 3, variant: 'highlight' },
-            { id: 'a14', label: 'Digitalisasi Asset Management', column: 3, row: 4, variant: 'green' },
-            { id: 'a15', label: 'I-WIMS', column: 4, row: 1, variant: 'highlight' },
-            { id: 'a16', label: 'IMS Claims 2.0', column: 4, row: 2, variant: 'core' },
-            { id: 'a17', label: 'AIMS (DIGIO Integration) incl. GIS', column: 4, row: 3, variant: 'core' },
-            { id: 'a18', label: 'Integrated Plant Maintenance System', column: 4, row: 4, variant: 'core' },
-            { id: 'a19', label: 'Asset Lifecycle Management', column: 4, row: 5, variant: 'highlight' },
-            { id: 'a20', label: 'Smart Contract Internal Transaction', column: 4, row: 6, variant: 'core' },
-            { id: 'a21', label: 'VCITS', column: 5, row: 1, variant: 'business' },
-            { id: 'a22', label: 'Smart Meter to Control Gas Usage', column: 5, row: 2, variant: 'business' },
-            { id: 'a23', label: 'Realtime Stock in Transit & FSO', column: 5, row: 3, variant: 'business' },
-            { id: 'a24', label: 'Tonnage Planning & Fulfillment', column: 5, row: 4, variant: 'business' },
-            { id: 'a25', label: 'PMS', column: 5, row: 5, variant: 'business' },
-            { id: 'a26', label: 'B2B Portal & Customer Management', column: 5, row: 6, variant: 'business' },
-            { id: 'a27', label: 'SH IML Super Apps', column: 6, row: 1, variant: 'business' },
-            { id: 'a28', label: 'Bunker Optimization - Data Analytic', column: 6, row: 2, variant: 'business' },
-            { id: 'a29', label: 'LML Control Tower 24/7', column: 6, row: 3, variant: 'business' },
-            { id: 'a30', label: 'Data Democratization', column: 6, row: 4, variant: 'green' },
-            { id: 'a31', label: 'Tanker Pool Platform', column: 6, row: 5, variant: 'business' },
-            { id: 'a32', label: 'Digital Twin - Real Time Opt. (RTO)', column: 1, row: 7, variant: 'core', span: 2 },
+        title: 'Maximize Legacy Business',
+        themes: [
+            {
+                id: 'theme-a1',
+                theme_number: 1,
+                name: 'Maximizing Value',
+                initiatives: [],
+            },
+            {
+                id: 'theme-a2',
+                theme_number: 2,
+                name: 'Expand to new markets & adjacencies',
+                initiatives: [],
+            },
         ],
+        direct_initiatives: [],
     },
     {
+        id: 'goal-b',
         code: 'B',
-        title: 'Expand to new markets & adjacencies',
-        tone: 'market',
-        cards: [
-            { id: 'b1', label: 'Market Intelligence - Forecasting & Competition Assess.', column: 1, row: 1, variant: 'business' },
-            { id: 'b2', label: 'Digitalisasi Berlangganan Gas', column: 1, row: 2, variant: 'core' },
-            { id: 'b3', label: 'Voice of Customer Analytics', column: 1, row: 3, variant: 'highlight' },
-            { id: 'b4', label: 'Big Data / Analytics for Customer Behavior', column: 5, row: 1, variant: 'business' },
-            { id: 'b5', label: 'Supply Chain Optimization & Facility Modelling', column: 6, row: 1, variant: 'business' },
-        ],
-    },
-    {
-        code: 'C',
         title: 'Building low carbon business',
-        tone: 'carbon',
-        cards: [
-            { id: 'c1', label: 'Market Intelligence - Forecasting & Competition Assess.', column: 1, row: 1, variant: 'business' },
-            { id: 'c2', label: 'IMS Chartering', column: 1, row: 2, variant: 'green' },
-            { id: 'c3', label: 'Demand Forecasting', column: 2, row: 1, variant: 'highlight' },
-            { id: 'c4', label: 'Dynamic Fuel & Non-Fuel Price Forecast', column: 2, row: 2, variant: 'highlight' },
-            { id: 'c5', label: 'Integrated Weather System & Forecasting', column: 2, row: 3, variant: 'highlight' },
-            { id: 'c6', label: 'Digital Leadership Program', column: 5, row: 1, variant: 'business' },
-            { id: 'c7', label: 'Drone-based Utilization for Maintenance and Inspection', column: 5, row: 2, variant: 'green' },
-            { id: 'c8', label: 'Geohazard Mitigation Using Int. Real-time Monitoring System', column: 6, row: 1, variant: 'business' },
-            { id: 'c9', label: 'Inc. Accuracy of Production Forecasting Using Analytics', column: 6, row: 2, variant: 'business' },
-        ],
+        themes: [],
+        direct_initiatives: [],
     },
 ];
 
-const displaySections = computed(() => {
-    const sourceGoals = props.goals.length > 0
-        ? props.goals
-        : sectionTemplates.map((section) => ({
-            code: section.code,
-            title: section.title,
+const desiredLegendOrder = [
+    'IoT',
+    'Advance Cloud',
+    'RPA',
+    'Robotics',
+    'AI / Adv. Analytics',
+    'Coe Not Identified',
+];
+
+const normalizeCoeName = (rawName) => {
+    let name = String(rawName ?? '').trim();
+
+    if (!name || name === '-' || name.toUpperCase() === 'NO COE') return 'Coe Not Identified';
+
+    const upper = name.toUpperCase();
+
+    if (upper === 'IOT') return 'IoT';
+    if (upper.includes('CLOUD') || upper.includes('COMPUTING') || name === 'Advance Cloud') return 'Advance Cloud';
+    if (upper === 'RPA') return 'RPA';
+    if (upper.includes('ROBOT') || name === 'Robotics') return 'Robotics';
+    if (upper.includes('ANALYTICS') || name === 'AI / Adv. Analytics') return 'AI / Adv. Analytics';
+
+    return name;
+};
+
+const getCoeColorClass = (coeName) => {
+    const name = normalizeCoeName(coeName);
+
+    if (name === 'IoT') return 'coe-color-blue';
+    if (name === 'Advance Cloud') return 'coe-color-emerald';
+    if (name === 'RPA') return 'coe-color-amber';
+    if (name === 'Robotics') return 'coe-color-purple';
+    if (name === 'AI / Adv. Analytics') return 'coe-color-rose';
+    if (name === 'Coe Not Identified') return 'coe-color-none';
+
+    return 'coe-color-none';
+};
+
+const normalizeInitiative = (initiative, fallbackKey) => {
+    const code = String(initiative?.code ?? '').trim();
+    const name = String(initiative?.name ?? '').trim();
+    const label = String(initiative?.label ?? [code, name].filter(Boolean).join(' - ')).trim();
+    const coeName = normalizeCoeName(initiative?.coe_name);
+
+    return {
+        id: initiative?.id ?? fallbackKey,
+        code,
+        name,
+        label: label !== '' ? label : '-',
+        coe_name: coeName,
+    };
+};
+
+const buildInitiativeColumns = (initiatives = [], columnCount = initiativeColumnCount.value) => {
+    const items = Array.isArray(initiatives)
+        ? [...initiatives].sort((left, right) => {
+            const leftCode = String(left?.code ?? '').trim();
+            const rightCode = String(right?.code ?? '').trim();
+
+            if (leftCode !== '' || rightCode !== '') {
+                const codeCompare = leftCode.localeCompare(rightCode, undefined, {
+                    numeric: true,
+                    sensitivity: 'base',
+                });
+
+                if (codeCompare !== 0) {
+                    return codeCompare;
+                }
+            }
+
+            return String(left?.name ?? left?.label ?? '').localeCompare(
+                String(right?.name ?? right?.label ?? ''),
+                undefined,
+                { numeric: true, sensitivity: 'base' },
+            );
+        })
+        : [];
+
+    if (items.length === 0) {
+        return { items: [], rowCount: 0 };
+    }
+
+    return {
+        items,
+        rowCount: Math.ceil(items.length / Number(columnCount)),
+    };
+};
+
+const displayGoals = computed(() => {
+    const sourceByCode = new Map(
+        (Array.isArray(props.goals) ? props.goals : [])
+            .filter((goal) => goal?.code)
+            .map((goal) => [String(goal.code).toUpperCase(), goal]),
+    );
+
+    return fallbackGoals.map((fallbackGoal) => {
+        const rawGoal = sourceByCode.get(fallbackGoal.code) ?? fallbackGoal;
+
+        const themes = (Array.isArray(rawGoal?.themes) ? rawGoal.themes : fallbackGoal.themes)
+            .map((theme, index) => {
+                const initiatives = Array.isArray(theme?.initiatives)
+                    ? theme.initiatives.map((initiative, initiativeIndex) => normalizeInitiative(
+                        initiative,
+                        `${fallbackGoal.code}-theme-${index + 1}-initiative-${initiativeIndex + 1}`,
+                    ))
+                    : [];
+
+                return {
+                    id: theme?.id ?? `${fallbackGoal.code}-theme-${index + 1}`,
+                    theme_number: Number(theme?.theme_number ?? index + 1),
+                    name: String(theme?.name ?? theme?.label ?? `Theme ${index + 1}`),
+                    initiatives_count: Number(theme?.initiatives_count ?? initiatives.length),
+                    initiatives,
+                };
+            })
+            .sort((left, right) => left.theme_number - right.theme_number);
+
+        const directInitiatives = Array.isArray(rawGoal?.direct_initiatives)
+            ? rawGoal.direct_initiatives.map((initiative, initiativeIndex) => normalizeInitiative(
+                initiative,
+                `${fallbackGoal.code}-direct-${initiativeIndex + 1}`,
+            ))
+            : [];
+
+        const rows = themes.map((theme) => ({
+            key: `theme-${theme.id}`,
+            type: 'theme',
+            label: `${theme.theme_number}. ${theme.name}`,
+            initiatives: theme.initiatives,
         }));
 
-    return sourceGoals.map((goal, index) => {
-        const template = sectionTemplates[index] ?? {};
+        if (directInitiatives.length > 0) {
+            rows.push({
+                key: `${fallbackGoal.code}-direct`,
+                type: 'direct',
+                label: 'No themes',
+                initiatives: directInitiatives,
+            });
+        }
+
+        if (rows.length === 0) {
+            rows.push({
+                key: `${fallbackGoal.code}-empty`,
+                type: 'empty',
+                label: 'No themes',
+                initiatives: [],
+            });
+        }
 
         return {
-            code: String(goal?.code ?? template.code ?? String.fromCharCode(65 + index)),
-            title: String(goal?.title ?? goal?.label ?? template.title ?? `Goal ${index + 1}`),
-            tone: template.tone ?? 'market',
-            cards: Array.isArray(template.cards) ? template.cards : [],
+            id: rawGoal?.id ?? fallbackGoal.id,
+            code: fallbackGoal.code,
+            title: String(rawGoal?.title ?? fallbackGoal.title),
+            rows,
         };
     });
 });
 
-const cardStyle = (card) => ({
-    gridColumn: `${card.column} / span ${card.span ?? 1}`,
-    gridRow: `${card.row} / span ${card.rowSpan ?? 1}`,
+const coeLegend = computed(() => {
+    const stats = {};
+    desiredLegendOrder.forEach((name) => {
+        stats[name] = 0;
+    });
+
+    displayGoals.value.forEach((goal) => {
+        goal.rows.forEach((row) => {
+            (row.initiatives ?? []).forEach((initiative) => {
+                const name = normalizeCoeName(initiative.coe_name);
+
+                if (stats[name] !== undefined) {
+                    stats[name] += 1;
+                } else {
+                    stats['Coe Not Identified'] += 1;
+                }
+            });
+        });
+    });
+
+    return desiredLegendOrder.map((name, index) => ({
+        id: index + 1,
+        name,
+        count: stats[name] ?? 0,
+    }));
 });
 
-const laneStyle = (section) => {
-    const rowCount = Math.max(
-        1,
-        ...section.cards.map((card) => card.row + (card.rowSpan ?? 1) - 1),
-    );
+const initiativeDisplayName = (initiative) => {
+    const name = String(initiative?.name ?? '').trim();
 
-    return {
-        '--lane-rows': rowCount,
-    };
+    if (name !== '') {
+        return name;
+    }
+
+    return String(initiative?.label ?? '-').trim() || '-';
 };
 </script>
+
+<template>
+    <section class="dual-growth-mockup">
+        <div class="mockup-header flex items-center justify-between">
+            <p class="mockup-eyebrow">Mockup Preview</p>
+            <div class="flex items-center gap-2">
+                <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">Tampilan kolom:</span>
+                <select v-model="initiativeColumnCount" class="initiative-view-select">
+                    <option v-for="opt in initiativeColumnOptions" :key="opt" :value="opt">
+                        {{ opt }} Kolom
+                    </option>
+                </select>
+            </div>
+        </div>
+
+        <div class="dual-growth-legend">
+            <div
+                v-for="coe in coeLegend"
+                :key="`legend-${coe.id}`"
+                class="legend-item"
+            >
+                <span
+                    class="legend-swatch"
+                    :class="getCoeColorClass(coe.name)"
+                ></span>
+                <span class="legend-label">
+                    {{ coe.name }} <span class="legend-count">({{ coe.count }})</span>
+                </span>
+            </div>
+        </div>
+
+        <div class="mockup-board-scroll">
+            <table class="dg-table">
+                <thead>
+                    <tr>
+                        <th class="head-empty" colspan="2"></th>
+                        <th class="head-initiative">Digital Initiatives</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template v-for="goal in displayGoals" :key="goal.id ?? goal.code">
+                        <tr
+                            v-for="(row, rowIndex) in goal.rows"
+                            :key="row.key"
+                        >
+                            <td
+                                v-if="rowIndex === 0"
+                                class="goal-cell"
+                                :rowspan="goal.rows.length"
+                                :colspan="!goal.rows.some(r => r.type === 'theme') ? 2 : 1"
+                            >
+                                <div class="goal-cell__inner">
+                                    <span class="goal-cell__text">{{ goal.title }}</span>
+                                </div>
+                            </td>
+
+                            <td
+                                v-if="goal.rows.some(r => r.type === 'theme')"
+                                class="theme-cell"
+                                :class="{ 'theme-cell--empty': row.type !== 'theme' }"
+                            >
+                                <template v-if="row.type === 'theme'">
+                                    <div class="theme-cell__inner">
+                                        <span class="theme-cell__text">{{ row.label }}</span>
+                                    </div>
+                                </template>
+
+                                <template v-else>
+                                    <div class="theme-cell__placeholder">
+                                        {{ row.label }}
+                                    </div>
+                                </template>
+                            </td>
+
+                            <td class="initiatives-cell">
+                                <div
+                                    v-if="row.initiatives.length"
+                                    class="initiatives-grid"
+                                    :style="{
+                                        '--initiative-column-count': initiativeColumnCount,
+                                        '--row-count': buildInitiativeColumns(row.initiatives).rowCount,
+                                    }"
+                                >
+                                    <div
+                                        v-for="initiative in buildInitiativeColumns(row.initiatives).items"
+                                        :key="`${row.key}-${initiative.id}`"
+                                        class="initiative-box"
+                                        :class="getCoeColorClass(initiative.coe_name)"
+                                        :title="initiative.label"
+                                    >
+                                        <span
+                                            v-if="initiative.code"
+                                            class="initiative-box__code"
+                                        >
+                                            {{ initiative.code }}
+                                        </span>
+
+                                        <span
+                                            class="initiative-box__name"
+                                            :class="{ 'initiative-box__name--full': !initiative.code }"
+                                        >
+                                            <span class="initiative-box__label-text">
+                                                {{ initiativeDisplayName(initiative) }}
+                                            </span>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <span v-else class="initiative-empty">-</span>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</template>
 
 <style scoped>
 .dual-growth-mockup {
     margin-top: 24px;
-    border: 1px solid #d9e2ec;
-    border-radius: 28px;
-    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-    box-shadow: 0 18px 44px rgba(15, 23, 42, 0.08);
     overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 18px 44px rgba(15, 23, 42, 0.08);
 }
 
 .mockup-header {
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
-    padding: 22px 24px 16px;
+    padding: 18px 24px 12px;
     border-bottom: 1px solid #e2e8f0;
-    background:
-        radial-gradient(circle at top right, rgba(59, 130, 246, 0.08), transparent 30%),
-        linear-gradient(180deg, #fcfdff 0%, #f7fafc 100%);
+    background: #ffffff;
 }
 
 .mockup-eyebrow {
-    margin: 0 0 8px;
+    margin: 0;
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.18em;
@@ -216,302 +379,343 @@ const laneStyle = (section) => {
     color: #2563eb;
 }
 
-.mockup-title {
-    margin: 0;
-    font-size: 24px;
-    line-height: 1.15;
-    font-weight: 800;
-    color: #0f172a;
-}
-
-.mockup-subtitle {
-    margin: 10px 0 0;
-    max-width: 760px;
-    font-size: 13px;
-    line-height: 1.7;
-    color: #475569;
-}
-
-.mockup-legend {
+.dual-growth-legend {
     display: flex;
     flex-wrap: wrap;
-    align-content: flex-start;
-    justify-content: flex-end;
-    gap: 10px 14px;
-    min-width: 280px;
+    gap: 10px 16px;
+    padding: 12px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
 }
 
 .legend-item {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #334155;
 }
 
 .legend-swatch {
-    width: 14px;
-    height: 14px;
-    border-radius: 4px;
-    border: 2px solid transparent;
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    border: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-.legend-swatch--core {
-    background: #86c7f3;
-    border-color: #5096cb;
+.legend-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #334155;
 }
 
-.legend-swatch--highlight {
-    background: #86c7f3;
-    border-color: #ef4444;
-}
-
-.legend-swatch--business {
-    background: #facc15;
-    border-color: #f97316;
-}
-
-.legend-swatch--green {
-    background: #86efac;
-    border-color: #22c55e;
+.legend-count {
+    font-weight: 500;
+    color: #94a3b8;
 }
 
 .mockup-board-scroll {
     overflow-x: auto;
-    padding: 18px;
 }
 
-.mockup-board {
-    --goal-column-width: 148px;
-    min-width: 980px;
-    border: 1px solid #d4dde8;
-    border-radius: 18px;
-    background: #ffffff;
-    overflow: hidden;
+.dg-table {
+    width: 100%;
+    min-width: 1120px;
+    border-collapse: collapse;
+    table-layout: fixed;
 }
 
-.board-header {
-    display: grid;
-    grid-template-columns: var(--goal-column-width) minmax(0, 1fr);
-    gap: 0;
-    margin-bottom: 0;
+.dg-table thead th {
+    border: 1px solid #ffffff;
+    padding: 0;
+    background: #0f6fb7;
 }
 
-.board-header__group {
+.head-empty {
+    width: 160px;
+}
+
+.head-initiative {
+    padding: 12px 16px !important;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: #ffffff;
+}
+
+.initiatives-cell {
+    border: 1px solid #d7e1ea;
+    vertical-align: top;
+}
+
+.goal-cell,
+.theme-cell {
+    border: 1px solid #d7e1ea;
+    vertical-align: middle;
+}
+
+.goal-cell {
+    width: 88px;
+    background: #0f6fb7;
+}
+
+.goal-cell__inner,
+.theme-cell__inner {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 40px;
-    padding: 10px 12px;
-    border-bottom: 1px solid #d4dde8;
-    background: #0f6fb7;
-    color: #ffffff;
-    font-size: 13px;
-    font-weight: 800;
-    line-height: 1.15;
+    min-height: 100%;
+    padding: 16px 10px;
+}
+
+.goal-cell__text,
+.theme-cell__text {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
     text-align: center;
 }
 
-.board-header__group--initiative {
-    border-left: 1px solid rgba(255, 255, 255, 0.2);
+.goal-cell__text {
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.1;
+    color: #ffffff;
 }
 
-.board-row {
-    display: grid;
-    grid-template-columns: var(--goal-column-width) minmax(0, 1fr);
-    gap: 0;
-    align-items: stretch;
-    margin-bottom: 0;
+.theme-cell {
+    width: 72px;
+    background: linear-gradient(180deg, #78b8ea 0%, #63a9df 100%);
 }
 
-.board-row__label {
-    display: grid;
-    grid-template-columns: 36px minmax(0, 1fr);
-    align-items: stretch;
-    gap: 0;
-    border-right: 1px solid #d4dde8;
-    border-bottom: 1px solid #d4dde8;
-    background: #0f6fb7;
+.theme-cell__text {
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: #ffffff;
 }
 
-.board-row__code {
+.theme-cell--empty {
+    background: #ffffff;
+}
+
+.theme-cell__placeholder {
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 100%;
-    border-right: 1px solid rgba(255, 255, 255, 0.2);
-    background: linear-gradient(180deg, #8fd3ff 0%, #65baf5 100%);
-    color: #0f3f69;
-    font-size: 15px;
-    font-weight: 800;
+    padding: 14px 8px;
+    font-size: 10px;
+    font-style: italic;
+    text-align: center;
+    color: #94a3b8;
 }
 
-.board-row__pill {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    min-height: 100%;
-    padding: 12px 16px 12px 12px;
-    background: transparent;
-    color: #fff;
-    text-align: left;
-    font-size: 15px;
-    font-weight: 700;
-    line-height: 1.2;
+.initiatives-cell {
+    padding: 8px;
+    background: #ffffff;
 }
 
-.board-row__lane {
+.initiatives-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--initiative-column-count, 2), minmax(0, 1fr));
+    grid-auto-flow: column;
+    grid-template-rows: repeat(var(--row-count, 1), minmax(min-content, 1fr));
+    align-items: stretch;
+    gap: 8px;
+}
+
+.initiative-box {
     position: relative;
     display: grid;
-    grid-template-columns: repeat(6, minmax(118px, 1fr));
-    grid-template-rows: repeat(var(--lane-rows, 1), minmax(22px, auto));
-    gap: 6px 8px;
-    padding: 10px;
-    border-bottom: 1px solid #d4dde8;
+    grid-template-columns: auto minmax(0, 1fr);
+    min-height: 24px;
+    width: 100%;
+    align-items: stretch;
+    border: 1px solid #374151;
+    background: #ffffff;
+    font-size: 9px;
+    font-weight: 500;
+    line-height: 1.1;
+    color: #1f2937;
     overflow: hidden;
 }
 
-.board-row:last-child .board-row__label,
-.board-row:last-child .board-row__lane {
-    border-bottom: none;
-}
+.coe-color-blue { background-color: #eff6ff; border-color: #1d4ed8 !important; }
+.coe-color-emerald { background-color: #ecfdf5; border-color: #047857 !important; }
+.coe-color-amber { background-color: #fffbeb; border-color: #b45309 !important; }
+.coe-color-purple { background-color: #faf5ff; border-color: #6d28d9 !important; }
+.coe-color-rose { background-color: #fff1f2; border-color: #be123c !important; }
+.coe-color-none { background-color: #ffffff; border-color: #374151 !important; }
 
-.board-row__lane::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background:
-        linear-gradient(to right, rgba(37, 99, 235, 0.12) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(37, 99, 235, 0.08) 1px, transparent 1px),
-        radial-gradient(circle at 1px 1px, rgba(71, 85, 105, 0.16) 1px, transparent 1.2px);
-    background-size: calc(100% / 6) 100%, 100% calc(100% / var(--lane-rows, 1)), 14px 14px;
-    pointer-events: none;
-}
+.legend-swatch.coe-color-blue { background-color: #1d4ed8 !important; }
+.legend-swatch.coe-color-emerald { background-color: #047857 !important; }
+.legend-swatch.coe-color-amber { background-color: #b45309 !important; }
+.legend-swatch.coe-color-purple { background-color: #6d28d9 !important; }
+.legend-swatch.coe-color-rose { background-color: #be123c !important; }
+.legend-swatch.coe-color-none { background-color: #374151 !important; }
 
-.board-row__lane > * {
-    position: relative;
-    z-index: 1;
-}
+.coe-color-blue .initiative-box__code { border-right-color: #1d4ed8; background-color: rgba(29, 78, 216, 0.1); }
+.coe-color-emerald .initiative-box__code { border-right-color: #047857; background-color: rgba(4, 120, 87, 0.1); }
+.coe-color-amber .initiative-box__code { border-right-color: #b45309; background-color: rgba(180, 83, 9, 0.1); }
+.coe-color-purple .initiative-box__code { border-right-color: #6d28d9; background-color: rgba(109, 40, 217, 0.1); }
+.coe-color-rose .initiative-box__code { border-right-color: #be123c; background-color: rgba(190, 18, 60, 0.1); }
 
-.board-row__lane--value {
-    background: linear-gradient(180deg, #f6f3cc 0%, #f1edc0 100%);
-}
-
-.board-row__lane--market {
-    background: linear-gradient(180deg, #edf1fb 0%, #e7edf9 100%);
-}
-
-.board-row__lane--carbon {
-    background: linear-gradient(180deg, #e8eefb 0%, #e2ebfa 100%);
-}
-
-.roadmap-card {
+.initiative-box__code {
     display: flex;
     align-items: center;
-    min-height: 22px;
-    padding: 3px 6px;
-    border-radius: 0;
-    font-size: 10px;
-    font-weight: 600;
-    line-height: 1.15;
-    color: #163047;
-    box-shadow: 0 1px 0 rgba(15, 23, 42, 0.05);
+    justify-content: center;
+    border-right: 1px solid #374151;
+    padding: 2px 4px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
 }
 
-.roadmap-card--core {
-    background: #86c7f3;
-    border: 2px solid #4b98ca;
+.initiative-box__name {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2px 8px 2px 5px;
+    word-break: break-word;
 }
 
-.roadmap-card--highlight {
-    background: #86c7f3;
-    border: 2px solid #ef4444;
+.initiative-box__name--full {
+    grid-column: 1 / -1;
+    padding-left: 5px;
 }
 
-.roadmap-card--business {
-    background: #facc15;
-    border: 2px solid #f97316;
+.initiative-box__label-text {
+    line-height: 1.1;
 }
 
-.roadmap-card--green {
-    background: #86efac;
-    border: 2px solid #22c55e;
+.initiative-empty {
+    font-size: 13px;
+    font-style: italic;
+    color: #94a3b8;
+}
+
+.initiative-view-select {
+    appearance: none;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #ffffff;
+    padding: 4px 24px 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 6px center;
+    background-size: 12px;
+    transition: all 0.15s ease;
+}
+
+.initiative-view-select:hover {
+    border-color: #0f6fb7;
+    color: #0f6fb7;
+}
+
+.initiative-view-select:focus {
+    outline: none;
+    border-color: #0f6fb7;
+    box-shadow: 0 0 0 3px rgba(15, 111, 183, 0.1);
 }
 
 @media (max-width: 1024px) {
-    .mockup-header {
-        flex-direction: column;
-    }
-
-    .mockup-legend {
-        justify-content: flex-start;
-        min-width: 0;
+    .dg-table {
+        min-width: 980px;
     }
 }
 
 @media (max-width: 768px) {
-    .dual-growth-mockup {
-        border-radius: 22px;
-    }
-
     .mockup-header {
-        padding: 18px 18px 14px;
+        padding: 16px 18px 10px;
     }
 
-    .mockup-board-scroll {
-        padding: 14px;
+    .dual-growth-legend {
+        padding: 10px 18px;
+    }
+
+    .dg-table {
+        min-width: 860px;
+    }
+
+    .initiatives-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }
 }
 
 :deep(.dark) .dual-growth-mockup {
     border-color: rgba(148, 163, 184, 0.16);
-    background: linear-gradient(180deg, #111827 0%, #0f172a 100%);
+    background: #111827;
 }
 
-:deep(.dark) .mockup-board {
-    border-color: rgba(148, 163, 184, 0.18);
+:deep(.dark) .mockup-header,
+:deep(.dark) .dual-growth-legend {
+    border-bottom-color: rgba(148, 163, 184, 0.14);
+    background: #111827;
+}
+
+:deep(.dark) .legend-label,
+:deep(.dark) .mockup-eyebrow,
+:deep(.dark) .head-initiative,
+:deep(.dark) .goal-cell__text {
+    color: #e2e8f0;
+}
+
+:deep(.dark) .legend-count,
+:deep(.dark) .theme-cell__placeholder,
+:deep(.dark) .initiative-empty {
+    color: #94a3b8;
+}
+
+:deep(.dark) .dg-table thead th,
+:deep(.dark) .goal-cell,
+:deep(.dark) .theme-cell,
+:deep(.dark) .initiatives-cell {
+    border-color: rgba(148, 163, 184, 0.22);
+}
+
+:deep(.dark) .head-empty,
+:deep(.dark) .head-initiative,
+:deep(.dark) .theme-cell--empty,
+:deep(.dark) .initiatives-cell {
     background: #0f172a;
 }
 
-:deep(.dark) .mockup-header {
-    border-bottom-color: rgba(148, 163, 184, 0.14);
-    background:
-        radial-gradient(circle at top right, rgba(59, 130, 246, 0.16), transparent 30%),
-        linear-gradient(180deg, #111827 0%, #0f172a 100%);
+:deep(.dark) .goal-cell,
+:deep(.dark) .theme-cell {
+    background: #36588f;
 }
 
-:deep(.dark) .mockup-title,
-:deep(.dark) .board-row__code,
-:deep(.dark) .board-row__pill {
+:deep(.dark) .theme-cell__text {
+    color: rgba(226, 232, 240, 0.82);
+}
+
+:deep(.dark) .initiative-box {
     color: #f8fafc;
 }
 
-:deep(.dark) .mockup-subtitle,
-:deep(.dark) .legend-item {
+:deep(.dark) .initiative-box__code {
+    color: #f8fafc;
+}
+
+:deep(.dark) .coe-color-blue { background-color: rgba(29, 78, 216, 0.2); }
+:deep(.dark) .coe-color-emerald { background-color: rgba(4, 120, 87, 0.2); }
+:deep(.dark) .coe-color-amber { background-color: rgba(180, 83, 9, 0.2); }
+:deep(.dark) .coe-color-purple { background-color: rgba(109, 40, 217, 0.2); }
+:deep(.dark) .coe-color-rose { background-color: rgba(190, 18, 60, 0.2); }
+
+:deep(.dark) .initiative-view-select {
+    border-color: rgba(148, 163, 184, 0.22);
+    background-color: rgba(15, 23, 42, 0.9);
     color: #cbd5e1;
 }
 
-:deep(.dark) .board-header__group,
-:deep(.dark) .board-row__label,
-:deep(.dark) .board-row__lane {
-    border-color: rgba(148, 163, 184, 0.18);
-}
-
-:deep(.dark) .board-row__lane {
-    border-bottom-color: rgba(148, 163, 184, 0.18);
-}
-
-:deep(.dark) .board-row__lane--value {
-    background: linear-gradient(180deg, rgba(104, 95, 27, 0.45) 0%, rgba(86, 79, 23, 0.45) 100%);
-}
-
-:deep(.dark) .board-row__lane--market,
-:deep(.dark) .board-row__lane--carbon {
-    background: linear-gradient(180deg, rgba(30, 41, 59, 0.88) 0%, rgba(15, 23, 42, 0.88) 100%);
-}
-
-:deep(.dark) .roadmap-card {
-    color: #0f172a;
+:deep(.dark) .initiative-view-select:hover {
+    border-color: rgba(148, 163, 184, 0.4);
+    color: #bfdbfe;
 }
 </style>
