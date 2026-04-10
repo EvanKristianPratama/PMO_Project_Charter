@@ -159,7 +159,7 @@ class ItBuildingBlockController extends Controller
             ->with([
                 'primaryCoe:id,name',
                 'secondaryCoe:id,name',
-                'initiative:id,code,name,coe_id,business_unit',
+                'initiative:id,code,name,description,coe_id,business_unit',
                 'initiative.coe:id,name',
                 'initiative.organization:id,name',
                 'initiative.latestStatusImplementation',
@@ -193,6 +193,7 @@ class ItBuildingBlockController extends Controller
                                         'initiative_id' => (int) ($item->initiative_id ?? 0),
                                         'code' => $item->initiative?->code,
                                         'name' => $item->initiative?->name,
+                                        'description' => $item->initiative?->description,
                                         'coe_id' => (int) ($item->initiative?->coe_id ?? 0),
                                         'coe_name' => $item->initiative?->coe?->name ?: 'No COE',
                                         'business_unit' => $item->initiative?->organization?->name ?: '-',

@@ -68,7 +68,7 @@ const activeRemovalKeys = computed(() => {
 
 const normalizeCoeName = (rawName) => {
     let name = String(rawName ?? '').trim();
-    if (!name || name === '-' || name.toUpperCase() === 'NO COE') return 'Coe Not Identified';
+    if (!name || name === '-' || name.toUpperCase() === 'NO COE') return 'CoE Not Identified';
     
     const upper = name.toUpperCase();
     if (upper === 'IOT') return 'IoT';
@@ -265,6 +265,7 @@ const DEFAULT_INITIATIVE_COLUMN_COUNT = 6;
 const initiativeColumnOptions = [3, 4, 5, 6];
 const initiativeColumnCount = ref(DEFAULT_INITIATIVE_COLUMN_COUNT);
 const showBusinessUnit = ref(false);
+const showStatusColors = ref(true);
 const selectedOrganization = ref('');
 const selectedCoe = ref('');
 const selectedStatus = ref('');
@@ -697,7 +698,7 @@ const coeLegend = computed(() => {
         'RPA',
         'Robotics',
         'AI / Adv. Analytics',
-        'Coe Not Identified',
+        'CoE Not Identified',
     ];
 
     // Inisialisasi statistik
@@ -714,7 +715,7 @@ const coeLegend = computed(() => {
                 if (stats.hasOwnProperty(name)) {
                     stats[name]++;
                 } else {
-                    stats['Coe Not Identified']++;
+                    stats['CoE Not Identified']++;
                 }
             });
         });
@@ -735,7 +736,7 @@ const getCoeColorClass = (coeName) => {
     if (name === 'RPA') return 'coe-color-amber';
     if (name === 'Robotics') return 'coe-color-purple';
     if (name === 'AI / Adv. Analytics') return 'coe-color-rose';
-    if (name === 'Coe Not Identified') return 'coe-color-none';
+    if (name === 'CoE Not Identified') return 'coe-color-none';
 
     return 'coe-color-none';
 };
@@ -859,8 +860,11 @@ defineExpose({
                 </div>
 
                 <!-- Status Implementation Legend -->
-                <div class="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 border-t border-slate-100 dark:border-white/5">
-                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider">Implementation Status (November - Desember 2025):</span>
+                <div
+                    v-if="showStatusColors"
+                    class="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 border-t border-slate-100 dark:border-white/5"
+                >
+                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Implementation Status:</span>
                     <div
                         v-for="status in statusLegend"
                         :key="`status-legend-${status.label}`"
@@ -901,7 +905,7 @@ defineExpose({
                         v-model="selectedCoe"
                         class="initiative-view-select mr-2"
                     >
-                        <option value="">Semua COE</option>
+                        <option value="">Semua CoE</option>
                         <option
                             v-for="coe in coeLegend"
                             :key="`coe-opt-${coe.id}`"
@@ -940,6 +944,19 @@ defineExpose({
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
                         </svg>
                         <span>Business Unit</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="bu-toggle-btn"
+                        :class="{ 'bu-toggle-btn--active': showStatusColors }"
+                        title="Tampilkan/Sembunyikan Warna Status Implementasi"
+                        @click="showStatusColors = !showStatusColors"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                        </svg>
+                        <span>Status Impl.</span>
                     </button>
 
                     <span class="initiative-view-switch__label ml-2">Tampilan kolom:</span>
@@ -1069,15 +1086,17 @@ defineExpose({
                                         <div
                                             v-for="initiative in buildInitiativeColumns(secondaryGroup.initiatives, initiativeColumnCount).items"
                                             :key="`initiative-${initiative.map_key}`"
-                                            class="initiative-box"
+                                            class="initiative-box group"
                                             :class="getCoeColorClass(initiative.coe_name)"
-                                            :title="initiativeOptionLabel(initiative)"
                                         >
                                             <template v-if="initiative">
-                                                <span
+                                                <!-- Custom Smart Tooltip -->
+                                                <div class="absolute top-full left-1/2 z-50 mt-1 hidden -translate-x-1/2 w-max max-w-[250px] sm:max-w-xs md:max-w-sm bg-white border border-slate-800 shadow-sm px-1.5 py-1 text-left text-[9px] italic text-slate-800 group-hover:block pointer-events-none whitespace-normal break-words dark:bg-slate-800 dark:border-slate-600 dark:text-slate-200">
+                                                    {{ initiative.description || initiativeOptionLabel(initiative) }}
+                                                </div>                                                <span
                                                     v-if="initiativeDisplayCode(initiative)"
                                                     class="initiative-box__code"
-                                                    :class="getStatusColorClass(initiative.implementation_status)"
+                                                    :class="showStatusColors ? getStatusColorClass(initiative.implementation_status) : ''"
                                                 >
                                                     {{ initiativeDisplayCode(initiative) }}
                                                 </span>
@@ -1518,7 +1537,6 @@ defineExpose({
     font-weight: 500;
     line-height: 1.1;
     color: #1f2937;
-    overflow: hidden;
 }
 
 /* COE Color Classes - High Contrast & Deep Colors */
