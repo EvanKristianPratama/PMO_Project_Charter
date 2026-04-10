@@ -706,16 +706,14 @@ const getCoeColorClass = (coeName) => {
     const name = String(coeName ?? '').trim();
 
     if (name === 'IoT') return 'coe-color-blue';
-    if (name === 'Advance Cloud' || name === 'Advanced Computing') return 'coe-color-green';
-    if (name === 'RPA') return 'coe-color-orange';
+    if (name === 'Advance Cloud' || name === 'Advanced Computing') return 'coe-color-emerald';
+    if (name === 'RPA') return 'coe-color-amber';
     if (name === 'Robotics') return 'coe-color-purple';
     if (name === 'AI / Adv. Analytics') return 'coe-color-rose';
     if (name === 'Coe Not Identified' || name.toUpperCase() === 'NO COE') return 'coe-color-none';
 
-    // Fallback jika ada kategori baru di luar daftar utama
-    const colors = ['indigo', 'emerald', 'amber', 'blue'];
-    const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return `coe-color-${colors[hash % colors.length]}`;
+    // Fallback jika ada kategori baru
+    return 'coe-color-indigo';
 };
 
 defineExpose({
@@ -769,10 +767,10 @@ defineExpose({
                     class="flex items-center gap-1.5"
                 >
                     <span
-                        class="h-3 w-3 rounded-sm shadow-sm"
+                        class="h-3 w-3 rounded-sm shadow-sm legend-swatch"
                         :class="getCoeColorClass(coe.name)"
                     ></span>
-                    <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400">
+                    <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">
                         {{ coe.name }} <span class="text-slate-400 dark:text-slate-500 font-medium">({{ coe.count }})</span>
                     </span>
                 </div>
@@ -1238,7 +1236,7 @@ defineExpose({
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 8px;
     width: 100%;
 }
 
@@ -1246,13 +1244,13 @@ defineExpose({
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 4px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.3);
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 800;
     color: #ffffff;
     flex-shrink: 0;
@@ -1329,25 +1327,30 @@ defineExpose({
     overflow: hidden;
 }
 
-/* COE Color Classes */
-.coe-color-blue { background-color: #dbeafe; border-color: #3b82f6 !important; }
-.coe-color-green { background-color: #dcfce7; border-color: #22c55e !important; }
-.coe-color-orange { background-color: #ffedd5; border-color: #f97316 !important; }
-.coe-color-purple { background-color: #f3e8ff; border-color: #a855f7 !important; }
-.coe-color-rose { background-color: #ffe4e6; border-color: #f43f5e !important; }
-.coe-color-indigo { background-color: #e0e7ff; border-color: #6366f1 !important; }
-.coe-color-emerald { background-color: #ecfdf5; border-color: #10b981 !important; }
-.coe-color-amber { background-color: #fef3c7; border-color: #f59e0b !important; }
+/* COE Color Classes - High Contrast & Deep Colors */
+.coe-color-blue { background-color: #eff6ff; border-color: #1d4ed8 !important; }
+.coe-color-emerald { background-color: #ecfdf5; border-color: #047857 !important; }
+.coe-color-amber { background-color: #fffbeb; border-color: #b45309 !important; }
+.coe-color-purple { background-color: #faf5ff; border-color: #6d28d9 !important; }
+.coe-color-rose { background-color: #fff1f2; border-color: #be123c !important; }
+.coe-color-indigo { background-color: #eef2ff; border-color: #4338ca !important; }
 .coe-color-none { background-color: #ffffff; border-color: #374151 !important; }
 
-.coe-color-blue .initiative-box__code { border-right-color: #3b82f6; background-color: rgba(59, 130, 246, 0.1); }
-.coe-color-green .initiative-box__code { border-right-color: #22c55e; background-color: rgba(34, 197, 94, 0.1); }
-.coe-color-orange .initiative-box__code { border-right-color: #f97316; background-color: rgba(249, 115, 22, 0.1); }
-.coe-color-purple .initiative-box__code { border-right-color: #a855f7; background-color: rgba(168, 85, 247, 0.1); }
-.coe-color-rose .initiative-box__code { border-right-color: #f43f5e; background-color: rgba(244, 63, 94, 0.1); }
-.coe-color-indigo .initiative-box__code { border-right-color: #6366f1; background-color: rgba(99, 102, 241, 0.1); }
-.coe-color-emerald .initiative-box__code { border-right-color: #10b981; background-color: rgba(16, 185, 129, 0.1); }
-.coe-color-amber .initiative-box__code { border-right-color: #f59e0b; background-color: rgba(245, 158, 11, 0.1); }
+/* Legend Swatches - Solid Deep Colors */
+.legend-swatch.coe-color-blue { background-color: #1d4ed8 !important; }
+.legend-swatch.coe-color-emerald { background-color: #047857 !important; }
+.legend-swatch.coe-color-amber { background-color: #b45309 !important; }
+.legend-swatch.coe-color-purple { background-color: #6d28d9 !important; }
+.legend-swatch.coe-color-rose { background-color: #be123c !important; }
+.legend-swatch.coe-color-indigo { background-color: #4338ca !important; }
+.legend-swatch.coe-color-none { background-color: #374151 !important; }
+
+.coe-color-blue .initiative-box__code { border-right-color: #1d4ed8; background-color: rgba(29, 78, 216, 0.1); }
+.coe-color-emerald .initiative-box__code { border-right-color: #047857; background-color: rgba(4, 120, 87, 0.1); }
+.coe-color-amber .initiative-box__code { border-right-color: #b45309; background-color: rgba(180, 83, 9, 0.1); }
+.coe-color-purple .initiative-box__code { border-right-color: #6d28d9; background-color: rgba(109, 40, 217, 0.1); }
+.coe-color-rose .initiative-box__code { border-right-color: #be123c; background-color: rgba(190, 18, 60, 0.1); }
+.coe-color-indigo .initiative-box__code { border-right-color: #4338ca; background-color: rgba(67, 56, 202, 0.1); }
 
 .initiative-box--placeholder {
     visibility: hidden;
