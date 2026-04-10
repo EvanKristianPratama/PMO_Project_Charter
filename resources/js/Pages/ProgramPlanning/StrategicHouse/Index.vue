@@ -1,7 +1,15 @@
 <template>
     <UserLayout :title="page.title">
         <div class="strategic-house animate-fade-in">
-            <section class="overflow-hidden rounded-[28px] border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#171717] sm:p-6">
+            <section class="sh-mockup">
+                
+                <div class="mockup-header">
+                    <div>
+                        <p class="mockup-eyebrow">Mockup Preview</p>
+                    </div>
+                </div>
+
+                <div class="mockup-content">
 
                 <!-- ═══ ROOF: Focus Bands (Maximize Legacy Business + Build Low Carbon) ═══ -->
                 <div class="roof-section">
@@ -54,8 +62,21 @@
                 <!-- ═══ DIGITAL TRANSFORMATION INITIATIVES SECTION ═══ -->
                 <div class="dti-section">
                     <div class="dti-header">
-                        <p class="dti-count">{{ summary.total_initiatives }}</p>
-                        <p class="dti-label">{{ page.initiativeLabel }}</p>
+                        <div class="dti-header-copy">
+                            <p class="dti-count">{{ summary.total_initiatives }}</p>
+                            <p class="dti-label">{{ page.initiativeLabel }}</p>
+                        </div>
+                        <button
+                            type="button"
+                            class="dti-toggle"
+                            :aria-pressed="showCoeInitiatives"
+                            :aria-label="showCoeInitiatives ? 'Hide initiative names' : 'Show initiative names'"
+                            :title="showCoeInitiatives ? 'Hide initiative names' : 'Show initiative names'"
+                            @click="showCoeInitiatives = !showCoeInitiatives"
+                        >
+                            <EyeSlashIcon v-if="showCoeInitiatives" class="dti-toggle-icon" />
+                            <EyeIcon v-else class="dti-toggle-icon" />
+                        </button>
                     </div>
 
                     <div class="dti-cards">
@@ -63,8 +84,30 @@
                             v-for="card in technologyCards"
                             :key="card.name"
                             class="dti-card"
+                            :class="{ 'dti-card--compact': !showCoeInitiatives }"
+                            :title="coeTooltip(card)"
                         >
-                            {{ card.display_name }}
+                            <div class="dti-card-badge">
+                                {{ card.initiatives_count }}
+                            </div>
+                            <div class="dti-card-title">{{ card.display_name }}</div>
+                            <div v-if="showCoeInitiatives" class="dti-card-preview">
+                                <template v-if="card.initiatives_preview?.length">
+                                    <p
+                                        v-for="initiative in card.initiatives_preview"
+                                        :key="initiative.id"
+                                        class="dti-card-preview-item"
+                                    >
+                                        {{ initiative.code }} - {{ initiative.name }}
+                                    </p>
+                                    <p v-if="card.remaining_initiatives_count > 0" class="dti-card-preview-more">
+                                        +{{ card.remaining_initiatives_count }} initiative lagi
+                                    </p>
+                                </template>
+                                <p v-else class="dti-card-preview-empty">
+                                    Belum ada initiative
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -111,6 +154,7 @@
                         <span class="foundation-title">{{ foundationCard.display_name }}:</span>
                         <span class="foundation-desc">Memungkinkan pelaksanaan efektif dari semua digital dan IT initiative</span>
                     </div>
+                    </div>
                 </div>
 
             </section>
@@ -121,6 +165,8 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
 import DualGrowth from '@/Components/StrategicHouse/DualGrowth.vue';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
@@ -174,9 +220,52 @@ defineProps({
         default: () => [],
     },
 });
+
+const showCoeInitiatives = ref(true);
+
+const coeTooltip = (card) => {
+    if (!card?.initiatives?.length) {
+        return `${card?.display_name ?? 'CoE'}: belum ada initiative`;
+    }
+
+    const lines = card.initiatives.map((initiative) => initiative.label);
+
+    return `${card.display_name} (${card.initiatives_count})\n${lines.join('\n')}`;
+};
 </script>
 
 <style scoped>
+/* ─── MOCKUP WRAPPER ─── */
+.sh-mockup {
+    border: 1px solid #d9e2ec;
+    border-radius: 28px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    box-shadow: 0 18px 44px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+}
+
+.mockup-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 22px 24px 16px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #ffffff;
+}
+
+.mockup-eyebrow {
+    margin: 0 0 8px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #2563eb;
+}
+
+.mockup-content {
+    padding: 24px;
+}
+
 /* ─── ROOF SECTION ─── */
 .roof-section {
     margin-bottom: 0;
@@ -291,8 +380,17 @@ defineProps({
 }
 
 .dti-header {
-    text-align: center;
     margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.dti-header-copy {
+    flex: 1;
+    text-align: center;
 }
 
 .dti-count {
@@ -313,6 +411,31 @@ defineProps({
     display: inline;
 }
 
+.dti-toggle {
+    border: 1px solid rgba(13, 42, 74, 0.16);
+    background: rgba(255, 255, 255, 0.9);
+    color: #184f96;
+    border-radius: 999px;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.dti-toggle:hover {
+    background: #fff;
+    border-color: rgba(24, 79, 150, 0.32);
+}
+
+.dti-toggle-icon {
+    width: 18px;
+    height: 18px;
+    stroke-width: 1.8;
+}
+
 .dti-cards {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -323,11 +446,73 @@ defineProps({
     background: #fff;
     border: 1.5px solid #3b82c8;
     border-radius: 4px;
-    padding: 14px 12px;
+    padding: 12px 12px 10px;
+    text-align: left;
+    color: #184f96;
+    position: relative;
+    min-height: 118px;
+}
+
+.dti-card--compact {
+    min-height: 88px;
+}
+
+.dti-card-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    min-width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    background: #2f5596;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
+    box-shadow: 0 4px 12px rgba(47, 85, 150, 0.16);
+}
+
+.dti-card-title {
+    padding-right: 42px;
     text-align: center;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-top: 12px;
+}
+
+.dti-card-preview {
+    margin-top: 10px;
+    border-top: 1px dashed rgba(59, 130, 200, 0.35);
+    padding-top: 8px;
+}
+
+.dti-card-preview-item,
+.dti-card-preview-more,
+.dti-card-preview-empty {
+    font-size: 10px;
+    line-height: 1.35;
+}
+
+.dti-card-preview-item {
+    color: #365780;
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dti-card-preview-more {
     color: #184f96;
+    font-weight: 600;
+}
+
+.dti-card-preview-empty {
+    color: #6b85a8;
+    font-style: italic;
 }
 
 /* ─── GRAND IT STRATEGY SECTION ─── */
@@ -429,12 +614,33 @@ defineProps({
         width: 100%;
     }
 
+    .dti-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dti-header-copy {
+        text-align: center;
+    }
+
+    .dti-toggle {
+        align-self: center;
+    }
+
     .dti-cards {
         grid-template-columns: repeat(2, 1fr);
     }
 
     .gits-pillars {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    .mockup-header {
+        padding: 18px 18px 14px;
+    }
+
+    .mockup-content {
+        padding: 16px;
     }
 
     .vision-trapezoid {
@@ -458,6 +664,16 @@ defineProps({
 }
 
 /* ─── DARK MODE ─── */
+:deep(.dark) .sh-mockup {
+    border-color: rgba(148, 163, 184, 0.16);
+    background: linear-gradient(180deg, #111827 0%, #0f172a 100%);
+}
+
+:deep(.dark) .mockup-header {
+    border-bottom-color: rgba(148, 163, 184, 0.14);
+    background: #111827;
+}
+
 :deep(.dark) .roof-main-label,
 :deep(.dark) .roof-sub-item {
     background: #1e293b;
@@ -482,10 +698,42 @@ defineProps({
     color: #e2e8f0;
 }
 
+:deep(.dark) .dti-toggle {
+    background: rgba(15, 23, 42, 0.8);
+    border-color: rgba(148, 163, 184, 0.25);
+    color: #bfdbfe;
+}
+
+:deep(.dark) .dti-toggle:hover {
+    background: rgba(15, 23, 42, 0.95);
+    border-color: rgba(96, 165, 250, 0.35);
+}
+
 :deep(.dark) .dti-card {
     background: #1e293b;
     border-color: #3b82c8;
     color: #93c5fd;
+}
+
+:deep(.dark) .dti-card-badge {
+    background: #60a5fa;
+    color: #0f172a;
+}
+
+:deep(.dark) .dti-card-preview {
+    border-top-color: rgba(96, 165, 250, 0.25);
+}
+
+:deep(.dark) .dti-card-preview-item {
+    color: #cbd5e1;
+}
+
+:deep(.dark) .dti-card-preview-more {
+    color: #93c5fd;
+}
+
+:deep(.dark) .dti-card-preview-empty {
+    color: #94a3b8;
 }
 
 :deep(.dark) .gits-section {
