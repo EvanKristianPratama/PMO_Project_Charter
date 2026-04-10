@@ -21,12 +21,77 @@ class StrategicHousePageService
     ];
 
     private const STRATEGY_COE_CONFIG = [
-        ['name' => 'User Interface and Experience', 'label' => 'User Interface', 'tone' => 'sky'],
-        ['name' => 'Integration and Automation', 'label' => 'Integration and Automation', 'tone' => 'blue'],
-        ['name' => 'Business Application System', 'label' => 'Business Application System', 'tone' => 'indigo'],
-        ['name' => 'Infrastructure', 'label' => 'Infrastructure', 'tone' => 'cyan'],
-        ['name' => 'Data and Analytics', 'label' => 'Data and Analytics', 'tone' => 'emerald'],
-        ['name' => 'Cybersecurity', 'label' => 'Cybersecurity', 'tone' => 'slate'],
+        [
+            'name' => 'User Interface and Experience',
+            'label' => 'User Interface',
+            'tone' => 'sky',
+            'description_lines' => [
+                'Memastikan',
+                'standarisasi UI/UX',
+                'pada seluruh aplikasi',
+            ],
+        ],
+        [
+            'name' => 'Integration and Automation',
+            'label' => 'Integration and Automation',
+            'tone' => 'blue',
+            'description_lines' => [
+                'Meningkatkan',
+                'interaksi sistem di',
+                'seluruh holding,',
+                'subholding, dan APFS',
+            ],
+        ],
+        [
+            'name' => 'Business Application System',
+            'label' => 'Business Application System',
+            'tone' => 'indigo',
+            'description_lines' => [
+                'Merasionalisasi dan',
+                'memodernisasi',
+                'aplikasi legacy,',
+                'termasuk membangun',
+                'groupwide ERP',
+            ],
+        ],
+        [
+            'name' => 'Infrastructure',
+            'label' => 'Infrastructure',
+            'tone' => 'cyan',
+            'description_lines' => [
+                'Membangun',
+                'infrastruktur best-in-',
+                'class untuk',
+                'mendukung',
+                'peningkatan',
+                'kompleksitas use case',
+                'digital',
+            ],
+        ],
+        [
+            'name' => 'Data and Analytics',
+            'label' => 'Data and Analytics',
+            'tone' => 'emerald',
+            'description_lines' => [
+                'AI platform;',
+                'Memastikan',
+                'ketersediaan dan',
+                'keandalan data untuk',
+                'mendukung use case',
+                'digital',
+            ],
+        ],
+        [
+            'name' => 'Cybersecurity',
+            'label' => 'Cybersecurity',
+            'tone' => 'slate',
+            'description_lines' => [
+                'Memperkuat kesiapan',
+                'menghadapi cyber',
+                'threats yang terus',
+                'meningkat',
+            ],
+        ],
     ];
 
     private const FOUNDATION_COE_CONFIG = [
@@ -73,14 +138,14 @@ class StrategicHousePageService
             'filters' => $normalizedFilters,
             'page' => [
                 'title' => 'Strategic House',
-                'headline' => $roofSection['main_goal']['title'] ?? 'Pertamina Group Dual Growth Strategy',
+                'headline' => 'Pertamina Group Dual Growth Strategy',
                 'visionTitle' => 'Visi Pertamina IT',
                 'visionText' => 'Meningkatkan peranan IT dari business enabler menjadi strategic value creator, mendorong transformasi digital untuk mendukung ambisi dual growth Pertamina Group.',
                 'initiativeLabel' => $initiativeType === 2
                     ? 'IT transformation initiatives'
                     : 'Digital transformation initiatives',
                 'grandStrategyTitle' => 'Grand IT Strategy',
-                'grandStrategyText' => 'Single source of truth untuk capability CoE yang menopang roadmap digital dan IT secara groupwide.',
+                'grandStrategyText' => 'Single source of truth for groupwide IT reference architecture',
             ],
             'summary' => $this->buildSummary(
                 $technologyCards,
@@ -157,6 +222,7 @@ class StrategicHousePageService
             ...$baseCard,
             'display_name' => $config['label'] ?? $baseCard['display_name'],
             'tone' => $config['tone'] ?? $baseCard['tone'],
+            'description_lines' => $config['description_lines'] ?? [],
         ];
     }
 

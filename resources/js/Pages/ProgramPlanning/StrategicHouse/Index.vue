@@ -5,9 +5,11 @@
 
                 <!-- ═══ ROOF: Focus Bands (Maximize Legacy Business + Build Low Carbon) ═══ -->
                 <div class="roof-section">
+                    <div class="roof-headline">{{ page.headline }}</div>
+
                     <div class="roof-top">
                         <div class="roof-main">
-                            <div class="roof-main-label">{{ page.headline }}</div>
+                            <div class="roof-main-label">{{ roofSection.main_goal?.title ?? page.headline }}</div>
                             <div v-if="roofSection.main_goal_themes?.length" class="roof-sub-items">
                                 <div
                                     v-for="theme in roofSection.main_goal_themes"
@@ -92,12 +94,12 @@
                             <h3 class="gits-pillar-title">{{ card.display_name }}</h3>
                             <div class="gits-pillar-desc">
                                 <p
-                                    v-for="initiative in card.initiatives_preview"
-                                    :key="initiative.id"
+                                    v-for="(line, lineIndex) in (card.description_lines?.length ? card.description_lines : card.initiatives_preview.map(item => item.label))"
+                                    :key="`${card.name}-${lineIndex}`"
                                 >
-                                    {{ initiative.label }}
+                                    {{ line }}
                                 </p>
-                                <p v-if="card.is_empty" class="gits-pillar-empty">
+                                <p v-if="!card.description_lines?.length && card.is_empty" class="gits-pillar-empty">
                                     Belum ada initiative yang terhubung ke area ini.
                                 </p>
                             </div>
@@ -180,6 +182,14 @@ defineProps({
     margin-bottom: 0;
 }
 
+.roof-headline {
+    margin-bottom: 8px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 800;
+    color: #1a2a3a;
+}
+
 .roof-top {
     display: flex;
     gap: 12px;
@@ -199,8 +209,8 @@ defineProps({
 .roof-main-label {
     background: #e8eff8;
     border: 1px solid #c5d6e8;
-    padding: 12px 24px;
-    font-size: 15px;
+    padding: 10px 24px;
+    font-size: 14px;
     font-weight: 600;
     color: #1a2a3a;
     border-radius: 4px;
@@ -415,6 +425,10 @@ defineProps({
         flex-direction: column;
     }
 
+    .roof-side {
+        width: 100%;
+    }
+
     .dti-cards {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -449,6 +463,10 @@ defineProps({
     background: #1e293b;
     border-color: #334155;
     color: #e2e8f0;
+}
+
+:deep(.dark) .roof-headline {
+    color: #f8fafc;
 }
 
 :deep(.dark) .roof-side-label {
