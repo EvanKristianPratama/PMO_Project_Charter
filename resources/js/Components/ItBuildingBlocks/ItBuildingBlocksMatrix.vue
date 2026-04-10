@@ -237,7 +237,7 @@ const initiativeOptionLabel = (initiative) => {
 };
 
 const DEFAULT_INITIATIVE_COLUMN_COUNT = 6;
-const initiativeColumnOptions = [3, 6];
+const initiativeColumnOptions = [3, 4, 5, 6];
 const initiativeColumnCount = ref(DEFAULT_INITIATIVE_COLUMN_COUNT);
 
 const buildInitiativeColumns = (initiatives = [], columnCount = initiativeColumnCount.value) => {
@@ -246,11 +246,9 @@ const buildInitiativeColumns = (initiatives = [], columnCount = initiativeColumn
             const leftHasCoe = (left?.coe_id ?? 0) > 0;
             const rightHasCoe = (right?.coe_id ?? 0) > 0;
 
-            // Jika satu punya COE dan yang lain tidak, yang punya COE didahulukan
             if (leftHasCoe && !rightHasCoe) return -1;
             if (!leftHasCoe && rightHasCoe) return 1;
 
-            // Jika keduanya punya atau keduanya tidak punya COE, urutkan berdasarkan kode/nama
             const leftCode = initiativeDisplayCode(left);
             const rightCode = initiativeDisplayCode(right);
 
@@ -270,19 +268,15 @@ const buildInitiativeColumns = (initiatives = [], columnCount = initiativeColumn
         : [];
 
     if (items.length === 0) {
-        return [];
+        return { items: [], rowCount: 0 };
     }
 
-    const normalizedColumnCount = Number(columnCount) === 3 ? 3 : 6;
-    const rowsPerColumn = Math.ceil(items.length / normalizedColumnCount);
+    const rowCount = Math.ceil(items.length / Number(columnCount));
 
-    return Array.from({ length: normalizedColumnCount }, (_, columnIndex) => {
-        return Array.from({ length: rowsPerColumn }, (_, rowIndex) => {
-            const itemIndex = (columnIndex * rowsPerColumn) + rowIndex;
-
-            return items[itemIndex] ?? null;
-        });
-    });
+    return {
+        items,
+        rowCount,
+    };
 };
 
 const isValidId = (value) => {
@@ -708,14 +702,20 @@ const coeLegend = computed(() => {
         });
 });
 
-const getCoeColorClass = (coeId) => {
-    if (!coeId || coeId === 0) return 'coe-color-none';
+const getCoeColorClass = (coeName) => {
+    const name = String(coeName ?? '').trim();
 
-    // Siklus warna sederhana berdasarkan ID
-    const colors = ['blue', 'green', 'orange', 'purple', 'rose', 'indigo', 'emerald', 'amber'];
-    const color = colors[coeId % colors.length];
+    if (name === 'IoT') return 'coe-color-blue';
+    if (name === 'Advance Cloud' || name === 'Advanced Computing') return 'coe-color-green';
+    if (name === 'RPA') return 'coe-color-orange';
+    if (name === 'Robotics') return 'coe-color-purple';
+    if (name === 'AI / Adv. Analytics') return 'coe-color-rose';
+    if (name === 'Coe Not Identified' || name.toUpperCase() === 'NO COE') return 'coe-color-none';
 
-    return `coe-color-${color}`;
+    // Fallback jika ada kategori baru di luar daftar utama
+    const colors = ['indigo', 'emerald', 'amber', 'blue'];
+    const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return `coe-color-${colors[hash % colors.length]}`;
 };
 
 defineExpose({
@@ -770,7 +770,7 @@ defineExpose({
                 >
                     <span
                         class="h-3 w-3 rounded-sm shadow-sm"
-                        :class="getCoeColorClass(coe.id)"
+                        :class="getCoeColorClass(coe.name)"
                     ></span>
                     <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400">
                         {{ coe.name }} <span class="text-slate-400 dark:text-slate-500 font-medium">({{ coe.count }})</span>
@@ -785,20 +785,20 @@ defineExpose({
                 </div>
             </div>
 
-            <div class="initiative-view-switch" role="group" aria-label="Pilih jumlah kolom initiative">
-                <span class="initiative-view-switch__label">Tampilan initiative</span>
-                <div class="initiative-view-switch__options">
-                    <button
+            <div class="initiative-view-switch">
+                <span class="initiative-view-switch__label">Tampilan kolom:</span>
+                <select
+                    v-model="initiativeColumnCount"
+                    class="initiative-view-select"
+                >
+                    <option
                         v-for="option in initiativeColumnOptions"
-                        :key="`initiative-column-option-${option}`"
-                        type="button"
-                        class="initiative-view-switch__button"
-                        :class="{ 'initiative-view-switch__button--active': initiativeColumnCount === option }"
-                        @click="initiativeColumnCount = option"
+                        :key="`col-opt-${option}`"
+                        :value="option"
                     >
-                        {{ option }} kolom
-                    </button>
-                </div>
+                        {{ option }} Kolom
+                    </option>
+                </select>
             </div>
         </div>
 
@@ -809,10 +809,7 @@ defineExpose({
             <div class="overflow-x-auto">
                 <table
                     class="itb-table min-w-full border-collapse"
-                    :class="{
-                        'itb-table--three-cols': initiativeColumnCount === 3,
-                        'itb-table--six-cols': initiativeColumnCount === 6,
-                    }"
+                    :class="`itb-table--${initiativeColumnCount}-cols`"
                 >
                     <thead>
                         <tr>
@@ -907,54 +904,42 @@ defineExpose({
                                 <td class="initiatives-cell">
                                     <div
                                         class="initiatives-grid"
-                                        :class="{
-                                            'initiatives-grid--three': initiativeColumnCount === 3,
-                                            'initiatives-grid--six': initiativeColumnCount === 6,
+                                        :style="{
+                                            '--initiative-column-count': initiativeColumnCount,
+                                            '--row-count': buildInitiativeColumns(secondaryGroup.initiatives, initiativeColumnCount).rowCount
                                         }"
-                                        :style="{ '--initiative-column-count': initiativeColumnCount }"
                                     >
                                         <div
-                                            v-for="(initiativeColumn, columnIndex) in buildInitiativeColumns(secondaryGroup.initiatives, initiativeColumnCount)"
-                                            :key="`initiative-column-${group.primary_id}-${secondaryGroup.secondary_id}-${columnIndex}`"
-                                            class="initiatives-column"
+                                            v-for="initiative in buildInitiativeColumns(secondaryGroup.initiatives, initiativeColumnCount).items"
+                                            :key="`initiative-${initiative.map_key}`"
+                                            class="initiative-box"
+                                            :class="getCoeColorClass(initiative.coe_name)"
+                                            :title="initiativeOptionLabel(initiative)"
                                         >
-                                            <div
-                                                v-for="(initiative, initiativeIndex) in initiativeColumn"
-                                                :key="initiative
-                                                    ? `initiative-${initiative.map_key}`
-                                                    : `initiative-placeholder-${group.primary_id}-${secondaryGroup.secondary_id}-${columnIndex}-${initiativeIndex}`"
-                                                class="initiative-box"
-                                                :class="[
-                                                    { 'initiative-box--placeholder': !initiative },
-                                                    initiative ? getCoeColorClass(initiative.coe_id) : ''
-                                                ]"
-                                                :title="initiative ? initiativeOptionLabel(initiative) : ''"
-                                            >
-                                                <template v-if="initiative">
-                                                    <span
-                                                        v-if="initiativeDisplayCode(initiative)"
-                                                        class="initiative-box__code"
-                                                    >
-                                                        {{ initiativeDisplayCode(initiative) }}
-                                                    </span>
+                                            <template v-if="initiative">
+                                                <span
+                                                    v-if="initiativeDisplayCode(initiative)"
+                                                    class="initiative-box__code"
+                                                >
+                                                    {{ initiativeDisplayCode(initiative) }}
+                                                </span>
 
-                                                    <span
-                                                        class="initiative-box__name"
-                                                        :class="{ 'initiative-box__name--full': !initiativeDisplayCode(initiative) }"
-                                                    >
-                                                        {{ initiativeDisplayName(initiative) }}
-                                                    </span>
+                                                <span
+                                                    class="initiative-box__name"
+                                                    :class="{ 'initiative-box__name--full': !initiativeDisplayCode(initiative) }"
+                                                >
+                                                    {{ initiativeDisplayName(initiative) }}
+                                                </span>
 
-                                                    <button
-                                                        v-if="editable && isValidId(group.primary_id) && isValidId(secondaryGroup.secondary_id) && isValidId(initiative.initiative_id)"
-                                                        type="button"
-                                                        class="initiative-box__remove"
-                                                        @click="openDeleteInitiativeModal(group, secondaryGroup, initiative)"
-                                                    >
-                                                        x
-                                                    </button>
-                                                </template>
-                                            </div>
+                                                <button
+                                                    v-if="editable && isValidId(group.primary_id) && isValidId(secondaryGroup.secondary_id) && isValidId(initiative.initiative_id)"
+                                                    type="button"
+                                                    class="initiative-box__remove"
+                                                    @click="openDeleteInitiativeModal(group, secondaryGroup, initiative)"
+                                                >
+                                                    x
+                                                </button>
+                                            </template>
                                         </div>
                                     </div>
                                 </td>
@@ -1104,11 +1089,14 @@ defineExpose({
     width: 100%;
 }
 
-.itb-table--three-cols {
+/* Mendukung min-width pada tampilan kolom yang lebih sedikit agar tidak terlalu sempit */
+.itb-table--3-cols,
+.itb-table--4-cols,
+.itb-table--5-cols {
     min-width: 1080px;
 }
 
-.itb-table--six-cols {
+.itb-table--6-cols {
     min-width: 100%;
     table-layout: fixed;
 }
@@ -1123,11 +1111,9 @@ defineExpose({
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    border: 1px solid #cbd5e1;
-    border-radius: 16px;
-    background: #ffffff;
-    padding: 6px 10px;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+    border-radius: 12px;
+    background: transparent;
+    padding: 2px;
 }
 
 .initiative-view-switch__label {
@@ -1137,36 +1123,32 @@ defineExpose({
     white-space: nowrap;
 }
 
-.initiative-view-switch__options {
-    display: inline-grid;
-    grid-auto-flow: column;
-    gap: 4px;
-    border-radius: 12px;
-    background: #e2e8f0;
-    padding: 3px;
-}
-
-.initiative-view-switch__button {
-    border: 1px solid transparent;
-    border-radius: 10px;
-    background: transparent;
-    padding: 5px 12px;
-    font-size: 10px;
+.initiative-view-select {
+    appearance: none;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #ffffff;
+    padding: 4px 24px 4px 10px;
+    font-size: 11px;
     font-weight: 700;
     color: #475569;
-    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 6px center;
+    background-size: 12px;
+    transition: all 0.15s ease;
 }
 
-.initiative-view-switch__button:hover {
-    background: rgba(255, 255, 255, 0.82);
-    border-color: rgba(15, 111, 183, 0.12);
+.initiative-view-select:hover {
+    border-color: #0f6fb7;
     color: #0f6fb7;
 }
 
-.initiative-view-switch__button--active {
-    background: #0f6fb7;
-    color: #ffffff;
-    box-shadow: 0 2px 8px rgba(15, 111, 183, 0.18);
+.initiative-view-select:focus {
+    outline: none;
+    border-color: #0f6fb7;
+    box-shadow: 0 0 0 3px rgba(15, 111, 183, 0.1);
 }
 
 .top-head {
@@ -1325,29 +1307,24 @@ defineExpose({
 .initiatives-grid {
     display: grid;
     grid-template-columns: repeat(var(--initiative-column-count, 6), minmax(0, 1fr));
+    grid-auto-flow: column;
+    grid-template-rows: repeat(var(--row-count, 1), minmax(min-content, 1fr));
     align-items: stretch;
     gap: 8px;
-}
-
-.initiatives-column {
-    display: grid;
-    align-content: start;
-    gap: 8px;
-    min-width: 0;
 }
 
 .initiative-box {
     position: relative;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
-    min-height: 30px;
+    min-height: 24px;
     width: 100%;
     align-items: stretch;
     border: 1px solid #374151;
     background: #ffffff;
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 500;
-    line-height: 1.25;
+    line-height: 1.1;
     color: #1f2937;
     overflow: hidden;
 }
@@ -1382,7 +1359,7 @@ defineExpose({
     align-items: center;
     justify-content: center;
     border-right: 1px solid #374151;
-    padding: 4px 8px;
+    padding: 2px 4px;
     font-weight: 700;
     letter-spacing: 0.01em;
     white-space: nowrap;
@@ -1392,54 +1369,29 @@ defineExpose({
     display: flex;
     align-items: center;
     max-width: none;
-    padding: 4px 24px 4px 8px;
+    padding: 2px 16px 2px 5px;
     word-break: break-word;
 }
 
 .initiative-box__name--full {
     grid-column: 1 / -1;
-    padding-left: 8px;
+    padding-left: 5px;
 }
 
 .initiative-box__remove {
     position: absolute;
-    top: 4px;
-    right: 6px;
+    top: 2px;
+    right: 4px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     border: none;
     background: transparent;
     padding: 0;
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 700;
     color: #dc2626;
     cursor: pointer;
-}
-
-.initiatives-grid--six .initiative-box {
-    min-height: 26px;
-    font-size: 9px;
-}
-
-.initiatives-grid--six .initiative-box__code {
-    padding: 2px 5px;
-    min-width: 30px;
-}
-
-.initiatives-grid--six .initiative-box__name {
-    padding: 2px 16px 2px 5px;
-    line-height: 1.1;
-}
-
-.initiatives-grid--six .initiative-box__name--full {
-    padding-left: 5px;
-}
-
-.initiatives-grid--six .initiative-box__remove {
-    top: 2px;
-    right: 4px;
-    font-size: 8px;
 }
 
 .itb-table--six-cols .top-head {
