@@ -69,6 +69,7 @@ const activeRemovalKeys = computed(() => {
 const displayGroups = computed(() => {
     return props.groups
         .map((group) => {
+            let totalInitiativesCount = 0;
             const secondaryGroups = (group?.secondary_groups ?? [])
                 .map((secondaryGroup) => {
                     const initiatives = (secondaryGroup?.initiatives ?? []).filter((initiative) => {
@@ -76,6 +77,8 @@ const displayGroups = computed(() => {
                             createRemovalKey(group?.primary_id, secondaryGroup?.secondary_id, initiative?.initiative_id),
                         );
                     });
+
+                    totalInitiativesCount += initiatives.length;
 
                     return {
                         ...secondaryGroup,
@@ -87,6 +90,7 @@ const displayGroups = computed(() => {
             return {
                 ...group,
                 secondary_groups: secondaryGroups,
+                total_initiatives: totalInitiativesCount,
             };
         })
         .filter((group) => group.secondary_groups.length > 0);
@@ -94,6 +98,10 @@ const displayGroups = computed(() => {
 
 const hasGroups = computed(() => displayGroups.value.length > 0);
 const hasPendingInitiativeRemovals = computed(() => pendingInitiativeRemovals.value.length > 0);
+
+const totalOverallInitiatives = computed(() => {
+    return displayGroups.value.reduce((sum, group) => sum + (group.total_initiatives ?? 0), 0);
+});
 
 const existingMappingKeys = computed(() => {
     const keys = new Set();
@@ -235,6 +243,14 @@ const initiativeColumnCount = ref(DEFAULT_INITIATIVE_COLUMN_COUNT);
 const buildInitiativeColumns = (initiatives = [], columnCount = initiativeColumnCount.value) => {
     const items = Array.isArray(initiatives)
         ? [...initiatives].sort((left, right) => {
+            const leftHasCoe = (left?.coe_id ?? 0) > 0;
+            const rightHasCoe = (right?.coe_id ?? 0) > 0;
+
+            // Jika satu punya COE dan yang lain tidak, yang punya COE didahulukan
+            if (leftHasCoe && !rightHasCoe) return -1;
+            if (!leftHasCoe && rightHasCoe) return 1;
+
+            // Jika keduanya punya atau keduanya tidak punya COE, urutkan berdasarkan kode/nama
             const leftCode = initiativeDisplayCode(left);
             const rightCode = initiativeDisplayCode(right);
 
@@ -637,6 +653,71 @@ const handleModalConfirm = () => {
     }
 };
 
+const coeLegend = computed(() => {
+    const desiredOrder = [
+        'IoT',
+        'Advance Cloud',
+        'RPA',
+        'Robotics',
+        'AI / Adv. Analytics',
+        'Coe Not Identified',
+    ];
+
+    const legendMap = new Map();
+    // Inisialisasi awal dengan 0 agar tetap muncul di legenda
+    desiredOrder.forEach((name) => {
+        legendMap.set(name, { id: null, count: 0 });
+    });
+
+    displayGroups.value.forEach((group) => {
+        group.secondary_groups.forEach((secondaryGroup) => {
+            secondaryGroup.initiatives.forEach((initiative) => {
+                const coeId = initiative.coe_id ?? 0;
+                let coeName = initiative.coe_name ?? 'Coe Not Identified';
+
+                // Normalisasi nama berdasarkan feedback user
+                if (coeName.toUpperCase() === 'NO COE' || coeName === 'No Coe') coeName = 'Coe Not Identified';
+                if (coeName === 'Advanced Computing') coeName = 'Advance Cloud';
+
+                if (!legendMap.has(coeName)) {
+                    legendMap.set(coeName, { id: coeId, count: 0 });
+                }
+
+                const entry = legendMap.get(coeName);
+                entry.count++;
+                if (entry.id === null) entry.id = coeId;
+            });
+        });
+    });
+
+    return Array.from(legendMap.entries())
+        .map(([name, data]) => ({
+            // Gunakan index dari desiredOrder sebagai fallback ID untuk warna agar konsisten
+            id: data.id ?? (desiredOrder.indexOf(name) !== -1 ? desiredOrder.indexOf(name) + 1 : 99),
+            name,
+            count: data.count,
+        }))
+        .sort((a, b) => {
+            const indexA = desiredOrder.indexOf(a.name);
+            const indexB = desiredOrder.indexOf(b.name);
+
+            if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+            if (indexA !== -1) return -1;
+            if (indexB !== -1) return 1;
+            return a.name.localeCompare(b.name);
+        });
+});
+
+const getCoeColorClass = (coeId) => {
+    if (!coeId || coeId === 0) return 'coe-color-none';
+
+    // Siklus warna sederhana berdasarkan ID
+    const colors = ['blue', 'green', 'orange', 'purple', 'rose', 'indigo', 'emerald', 'amber'];
+    const color = colors[coeId % colors.length];
+
+    return `coe-color-${color}`;
+};
+
 defineExpose({
     openAddMappingModal,
 });
@@ -678,8 +759,32 @@ defineExpose({
 
         <div
             v-if="hasGroups"
-            class="flex justify-end"
+            class="flex items-center justify-between"
         >
+            <div class="flex flex-wrap gap-x-4 gap-y-2">
+                <!-- Legend COE with Counts -->
+                <div
+                    v-for="coe in coeLegend"
+                    :key="`coe-legend-${coe.id}`"
+                    class="flex items-center gap-1.5"
+                >
+                    <span
+                        class="h-3 w-3 rounded-sm shadow-sm"
+                        :class="getCoeColorClass(coe.id)"
+                    ></span>
+                    <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400">
+                        {{ coe.name }} <span class="text-slate-400 dark:text-slate-500 font-medium">({{ coe.count }})</span>
+                    </span>
+                </div>
+
+                <!-- Total Overall -->
+                <div class="flex items-center gap-1.5 border-l border-slate-300 pl-4 ml-1 dark:border-white/10">
+                    <span class="text-[11px] font-bold text-slate-800 dark:text-slate-200">
+                        Total Digital Initiatives <span class="text-slate-500 dark:text-slate-400 font-medium">({{ totalOverallInitiatives }})</span>
+                    </span>
+                </div>
+            </div>
+
             <div class="initiative-view-switch" role="group" aria-label="Pilih jumlah kolom initiative">
                 <span class="initiative-view-switch__label">Tampilan initiative</span>
                 <div class="initiative-view-switch__options">
@@ -743,7 +848,7 @@ defineExpose({
                                     <div class="primary-cell__content">
                                         <div class="primary-label-wrapper">
                                             <span>{{ group.primary }}</span>
-                                            <span class="count-capsule">{{ group.secondary_groups.length }}</span>
+                                            <span class="count-capsule">{{ group.total_initiatives }}</span>
                                         </div>
 
                                         <div
@@ -819,7 +924,10 @@ defineExpose({
                                                     ? `initiative-${initiative.map_key}`
                                                     : `initiative-placeholder-${group.primary_id}-${secondaryGroup.secondary_id}-${columnIndex}-${initiativeIndex}`"
                                                 class="initiative-box"
-                                                :class="{ 'initiative-box--placeholder': !initiative }"
+                                                :class="[
+                                                    { 'initiative-box--placeholder': !initiative },
+                                                    initiative ? getCoeColorClass(initiative.coe_id) : ''
+                                                ]"
                                                 :title="initiative ? initiativeOptionLabel(initiative) : ''"
                                             >
                                                 <template v-if="initiative">
@@ -1089,7 +1197,7 @@ defineExpose({
 }
 
 .sub-head-primary {
-    width: 10%;
+    width: 8%;
 }
 
 .sub-head-secondary {
@@ -1244,6 +1352,26 @@ defineExpose({
     overflow: hidden;
 }
 
+/* COE Color Classes */
+.coe-color-blue { background-color: #dbeafe; border-color: #3b82f6 !important; }
+.coe-color-green { background-color: #dcfce7; border-color: #22c55e !important; }
+.coe-color-orange { background-color: #ffedd5; border-color: #f97316 !important; }
+.coe-color-purple { background-color: #f3e8ff; border-color: #a855f7 !important; }
+.coe-color-rose { background-color: #ffe4e6; border-color: #f43f5e !important; }
+.coe-color-indigo { background-color: #e0e7ff; border-color: #6366f1 !important; }
+.coe-color-emerald { background-color: #ecfdf5; border-color: #10b981 !important; }
+.coe-color-amber { background-color: #fef3c7; border-color: #f59e0b !important; }
+.coe-color-none { background-color: #ffffff; border-color: #374151 !important; }
+
+.coe-color-blue .initiative-box__code { border-right-color: #3b82f6; background-color: rgba(59, 130, 246, 0.1); }
+.coe-color-green .initiative-box__code { border-right-color: #22c55e; background-color: rgba(34, 197, 94, 0.1); }
+.coe-color-orange .initiative-box__code { border-right-color: #f97316; background-color: rgba(249, 115, 22, 0.1); }
+.coe-color-purple .initiative-box__code { border-right-color: #a855f7; background-color: rgba(168, 85, 247, 0.1); }
+.coe-color-rose .initiative-box__code { border-right-color: #f43f5e; background-color: rgba(244, 63, 94, 0.1); }
+.coe-color-indigo .initiative-box__code { border-right-color: #6366f1; background-color: rgba(99, 102, 241, 0.1); }
+.coe-color-emerald .initiative-box__code { border-right-color: #10b981; background-color: rgba(16, 185, 129, 0.1); }
+.coe-color-amber .initiative-box__code { border-right-color: #f59e0b; background-color: rgba(245, 158, 11, 0.1); }
+
 .initiative-box--placeholder {
     visibility: hidden;
     pointer-events: none;
@@ -1330,10 +1458,6 @@ defineExpose({
 .itb-table--six-cols .sub-head {
     padding: 5px 8px;
     font-size: 11px;
-}
-
-.itb-table--six-cols .sub-head-primary {
-    width: 8%;
 }
 
 .itb-table--six-cols .sub-head-secondary {
@@ -1429,6 +1553,17 @@ defineExpose({
     border-color: rgba(148, 163, 184, 0.2);
     color: #bfdbfe;
 }
+
+:deep(.dark) .coe-color-blue { background-color: rgba(59, 130, 246, 0.2); }
+:deep(.dark) .coe-color-green { background-color: rgba(34, 197, 94, 0.2); }
+:deep(.dark) .coe-color-orange { background-color: rgba(249, 115, 22, 0.2); }
+:deep(.dark) .coe-color-purple { background-color: rgba(168, 85, 247, 0.2); }
+:deep(.dark) .coe-color-rose { background-color: rgba(244, 63, 94, 0.2); }
+:deep(.dark) .coe-color-indigo { background-color: rgba(99, 102, 241, 0.2); }
+:deep(.dark) .coe-color-emerald { background-color: rgba(16, 185, 129, 0.2); }
+:deep(.dark) .coe-color-amber { background-color: rgba(245, 158, 11, 0.2); }
+:deep(.dark) .initiative-box { color: #f8fafc; }
+:deep(.dark) .initiative-box__code { color: #f8fafc; }
 
 @media (max-width: 1024px) {
     .itb-toolbar {
