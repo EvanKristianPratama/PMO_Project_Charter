@@ -170,6 +170,7 @@ const displayGoals = computed(() => {
             type: 'theme',
             label: `${theme.theme_number}. ${theme.name}`,
             initiatives: theme.initiatives,
+            initiatives_count: theme.initiatives.length,
         }));
 
         if (directInitiatives.length > 0) {
@@ -178,6 +179,7 @@ const displayGoals = computed(() => {
                 type: 'direct',
                 label: 'No themes',
                 initiatives: directInitiatives,
+                initiatives_count: directInitiatives.length,
             });
         }
 
@@ -187,13 +189,20 @@ const displayGoals = computed(() => {
                 type: 'empty',
                 label: 'No themes',
                 initiatives: [],
+                initiatives_count: 0,
             });
         }
+
+        const totalInitiatives = rows.reduce(
+            (sum, row) => sum + Number(row.initiatives_count ?? row.initiatives?.length ?? 0),
+            0,
+        );
 
         return {
             id: rawGoal?.id ?? fallbackGoal.id,
             code: fallbackGoal.code,
             title: String(rawGoal?.title ?? fallbackGoal.title),
+            total_initiatives: totalInitiatives,
             rows,
         };
     });
@@ -272,8 +281,21 @@ const initiativeDisplayName = (initiative) => {
             <table class="dg-table">
                 <thead>
                     <tr>
-                        <th class="head-empty" colspan="2"></th>
-                        <th class="head-initiative">Digital Initiatives</th>
+                        <th colspan="2" class="top-head top-head-left">
+                            Dual Growth Strategy
+                        </th>
+                        <th class="top-head top-head-right">
+                            Digital Initiatives
+                        </th>
+                    </tr>
+                    <tr>
+                        <th class="sub-head sub-head-goal">
+                            Goal
+                        </th>
+                        <th class="sub-head sub-head-theme">
+                            Theme
+                        </th>
+                        <th class="sub-head sub-head-initiative"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -289,7 +311,10 @@ const initiativeDisplayName = (initiative) => {
                                 :colspan="!goal.rows.some(r => r.type === 'theme') ? 2 : 1"
                             >
                                 <div class="goal-cell__inner">
-                                    <span class="goal-cell__text">{{ goal.title }}</span>
+                                    <div class="goal-label-wrapper">
+                                        <span class="goal-cell__text">{{ goal.title }}</span>
+                                        <span class="count-capsule">{{ goal.total_initiatives }}</span>
+                                    </div>
                                 </div>
                             </td>
 
@@ -300,13 +325,22 @@ const initiativeDisplayName = (initiative) => {
                             >
                                 <template v-if="row.type === 'theme'">
                                     <div class="theme-cell__inner">
-                                        <span class="theme-cell__text">{{ row.label }}</span>
+                                        <div class="theme-label-wrapper">
+                                            <span class="theme-cell__text">{{ row.label }}</span>
+                                            <span class="count-capsule">{{ row.initiatives_count }}</span>
+                                        </div>
                                     </div>
                                 </template>
 
                                 <template v-else>
                                     <div class="theme-cell__placeholder">
-                                        {{ row.label }}
+                                        <span>{{ row.label }}</span>
+                                        <span
+                                            v-if="row.initiatives_count > 0"
+                                            class="count-capsule count-capsule--muted"
+                                        >
+                                            {{ row.initiatives_count }}
+                                        </span>
                                     </div>
                                 </template>
                             </td>
@@ -422,73 +456,108 @@ const initiativeDisplayName = (initiative) => {
     min-width: 1120px;
     border-collapse: collapse;
     table-layout: fixed;
+    background: #ffffff;
 }
 
-.dg-table thead th {
-    border: 1px solid #ffffff;
-    padding: 0;
+.dg-table th,
+.dg-table td {
+    border: 1px solid #c7d2de;
+    vertical-align: top;
+}
+
+.top-head {
+    padding: 10px 12px;
     background: #0f6fb7;
-}
-
-.head-empty {
-    width: 160px;
-}
-
-.head-initiative {
-    padding: 12px 16px !important;
-    text-align: center;
+    color: #ffffff;
     font-size: 14px;
     font-weight: 800;
-    letter-spacing: 0.02em;
-    color: #ffffff;
+    line-height: 1.1;
+    text-align: center;
 }
 
-.initiatives-cell {
-    border: 1px solid #d7e1ea;
-    vertical-align: top;
+.top-head-left {
+    width: 26%;
+}
+
+.top-head-right {
+    width: 74%;
+}
+
+.sub-head {
+    padding: 6px 10px;
+    background: #eef4f8;
+    color: #4f6b85;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: left;
+}
+
+.sub-head-goal {
+    width: 12%;
+}
+
+.sub-head-theme {
+    width: 14%;
+}
+
+.sub-head-initiative {
+    width: 74%;
 }
 
 .goal-cell,
 .theme-cell {
-    border: 1px solid #d7e1ea;
-    vertical-align: middle;
+    padding: 0;
+    vertical-align: middle !important;
+    text-align: center;
 }
 
 .goal-cell {
-    width: 88px;
+    width: 140px;
     background: #0f6fb7;
 }
 
 .goal-cell__inner,
 .theme-cell__inner {
     display: flex;
+    min-height: 100%;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 100%;
-    padding: 16px 10px;
+    gap: 8px;
+    padding: 16px 12px;
+    text-align: center;
+}
+
+.goal-label-wrapper,
+.theme-label-wrapper {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .goal-cell__text,
 .theme-cell__text {
-    writing-mode: vertical-rl;
-    transform: rotate(180deg);
+    display: block;
     text-align: center;
+    word-break: break-word;
 }
 
 .goal-cell__text {
-    font-size: 18px;
+    font-size: 14px;
     font-weight: 800;
-    line-height: 1.1;
+    line-height: 1.2;
     color: #ffffff;
 }
 
 .theme-cell {
-    width: 72px;
+    width: 180px;
     background: linear-gradient(180deg, #78b8ea 0%, #63a9df 100%);
 }
 
 .theme-cell__text {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     line-height: 1.25;
     color: #ffffff;
@@ -500,19 +569,50 @@ const initiativeDisplayName = (initiative) => {
 
 .theme-cell__placeholder {
     display: flex;
+    min-height: 100%;
     align-items: center;
     justify-content: center;
-    min-height: 100%;
-    padding: 14px 8px;
-    font-size: 10px;
+    gap: 8px;
+    padding: 14px 10px;
+    font-size: 11px;
+    font-weight: 600;
     font-style: italic;
     text-align: center;
     color: #94a3b8;
 }
 
+.count-capsule {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    padding: 0;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    background: rgba(255, 255, 255, 0.14);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    font-size: 13px;
+    font-weight: 800;
+    font-style: normal;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.count-capsule--muted {
+    border-color: #cbd5e1;
+    background: #e2e8f0;
+    box-shadow: none;
+    color: #475569;
+}
+
 .initiatives-cell {
     padding: 8px;
-    background: #ffffff;
+    background: #f8fafc;
 }
 
 .initiatives-grid {
@@ -627,6 +727,14 @@ const initiativeDisplayName = (initiative) => {
     .dg-table {
         min-width: 980px;
     }
+
+    .goal-cell {
+        width: 120px;
+    }
+
+    .theme-cell {
+        width: 160px;
+    }
 }
 
 @media (max-width: 768px) {
@@ -640,6 +748,32 @@ const initiativeDisplayName = (initiative) => {
 
     .dg-table {
         min-width: 860px;
+    }
+
+    .top-head {
+        font-size: 13px;
+    }
+
+    .sub-head {
+        font-size: 11px;
+    }
+
+    .goal-cell__inner,
+    .theme-cell__inner {
+        padding: 12px 10px;
+    }
+
+    .goal-cell__text,
+    .theme-cell__text {
+        font-size: 11px;
+    }
+
+    .count-capsule {
+        width: 30px;
+        min-width: 30px;
+        height: 30px;
+        padding: 0;
+        font-size: 12px;
     }
 
     .initiatives-grid {
@@ -660,7 +794,8 @@ const initiativeDisplayName = (initiative) => {
 
 :deep(.dark) .legend-label,
 :deep(.dark) .mockup-eyebrow,
-:deep(.dark) .head-initiative,
+:deep(.dark) .top-head,
+:deep(.dark) .sub-head,
 :deep(.dark) .goal-cell__text {
     color: #e2e8f0;
 }
@@ -678,8 +813,8 @@ const initiativeDisplayName = (initiative) => {
     border-color: rgba(148, 163, 184, 0.22);
 }
 
-:deep(.dark) .head-empty,
-:deep(.dark) .head-initiative,
+:deep(.dark) .top-head,
+:deep(.dark) .sub-head,
 :deep(.dark) .theme-cell--empty,
 :deep(.dark) .initiatives-cell {
     background: #0f172a;
@@ -690,8 +825,22 @@ const initiativeDisplayName = (initiative) => {
     background: #36588f;
 }
 
+:deep(.dark) .theme-cell--empty {
+    background: #0f172a;
+}
+
+:deep(.dark) .sub-head {
+    color: #cbd5e1;
+}
+
 :deep(.dark) .theme-cell__text {
     color: rgba(226, 232, 240, 0.82);
+}
+
+:deep(.dark) .count-capsule--muted {
+    border-color: rgba(148, 163, 184, 0.26);
+    background: rgba(51, 65, 85, 0.9);
+    color: #cbd5e1;
 }
 
 :deep(.dark) .initiative-box {
