@@ -199,7 +199,41 @@ class StrategicHousePageService
             'architectureCard' => $architectureCard,
             'tbcCard' => $tbcCard,
             'unassignedInitiatives' => $unassignedInitiatives,
+            'coeOptions' => $this->getCoeOptions(),
+            'digitalInitiativeOptions' => $this->getDigitalInitiativeOptions(),
         ];
+    }
+
+    private function getCoeOptions(): Collection
+    {
+        return MstCoe::query()
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn (MstCoe $coe): array => [
+                'id' => (int) $coe->id,
+                'name' => $coe->name,
+            ]);
+    }
+
+    private function getDigitalInitiativeOptions(): Collection
+    {
+        return MstInitiative::query()
+            ->with(['coe:id,name', 'organization:id,name', 'latestStatusImplementation'])
+            ->where('tipe_initiative', 1)
+            ->orderBy('code')
+            ->orderBy('name')
+            ->get(['id', 'code', 'name', 'description', 'coe_id', 'business_unit', 'tipe_initiative'])
+            ->map(fn (MstInitiative $initiative): array => [
+                'id' => (int) $initiative->id,
+                'code' => $initiative->code,
+                'name' => $initiative->name,
+                'description' => $initiative->description,
+                'coe_id' => (int) $initiative->coe_id,
+                'coe_name' => $initiative->coe?->name ?: 'No COE',
+                'business_unit' => $initiative->organization?->name ?: '-',
+                'implementation_status' => $initiative->latestStatusImplementation?->status ?: null,
+                'tipe_initiative' => (int) $initiative->tipe_initiative,
+            ]);
     }
 
     private function normalizeFilters(array $filters): array
@@ -340,36 +374,25 @@ class StrategicHousePageService
                             ->where('pilar', 2)
                             ->with([
                                 'initiative' => fn ($initiativeQuery) => $initiativeQuery
-                                    ->select(['id', 'code', 'name', 'coe_id'])
-                                    ->with(['coe:id,name']),
+                                    ->select(['id', 'code', 'name', 'coe_id', 'business_unit'])
+                                    ->with([
+                                        'coe:id,name',
+                                        'organization:id,name',
+                                        'latestStatusImplementation',
+                                    ]),
                             ]),
                     ])
                     ->orderBy('theme_number'),
             ])
             ->where('pilar', 2)
-            ->whereIn('code', self::DUAL_GROWTH_GOAL_CODES)
             ->orderByRaw("case code when 'A' then 1 when 'B' then 2 else 99 end")
+            ->orderBy('code')
             ->get();
 
-        $goalsByCode = $goals->keyBy(fn (Goal $goal): string => strtoupper((string) $goal->code));
-
-        return collect(self::FALLBACK_DUAL_GROWTH_GOALS)
-            ->map(function (array $fallbackGoal) use ($goalsByCode, $directInitiativesByGoal): array {
-                /** @var Goal|null $goal */
-                $goal = $goalsByCode->get($fallbackGoal['code']);
-                $directInitiatives = $directInitiativesByGoal->get($fallbackGoal['code'], []);
-
-                if ($goal) {
-                    return $this->mapDualGrowthGoal($goal, $directInitiatives);
-                }
-
-                return [
-                    ...$fallbackGoal,
-                    'direct_initiatives_count' => count($directInitiatives),
-                    'direct_initiatives' => $directInitiatives,
-                    'initiatives_count' => (int) ($fallbackGoal['initiatives_count'] ?? 0) + count($directInitiatives),
-                ];
-            })
+        return $goals->map(fn (Goal $goal): array => $this->mapDualGrowthGoal(
+            $goal,
+            $directInitiativesByGoal->get(strtoupper((string) $goal->code), [])
+        ))
             ->values()
             ->all();
     }
@@ -380,11 +403,14 @@ class StrategicHousePageService
             ->select(['id', 'goal', 'initiative_id', 'pilar', 'themes_id'])
             ->with([
                 'initiative' => fn ($query) => $query
-                    ->select(['id', 'code', 'name', 'coe_id'])
-                    ->with(['coe:id,name']),
+                    ->select(['id', 'code', 'name', 'coe_id', 'business_unit'])
+                    ->with([
+                        'coe:id,name',
+                        'organization:id,name',
+                        'latestStatusImplementation',
+                    ]),
             ])
             ->where('pilar', 2)
-            ->whereIn('goal', self::DUAL_GROWTH_GOAL_CODES)
             ->whereNull('themes_id')
             ->get()
             ->groupBy(fn ($tagging): string => strtoupper((string) $tagging->goal))
@@ -448,6 +474,8 @@ class StrategicHousePageService
             'coe_id' => $initiative->coe_id ? (int) $initiative->coe_id : null,
             'coe_name' => $initiative->coe?->name,
             'label' => trim(collect([$initiative->code, $initiative->name])->filter()->implode(' - ')),
+            'business_unit' => $initiative->organization?->name,
+            'implementation_status' => $initiative->latestStatusImplementation?->status,
         ];
     }
 

@@ -208,22 +208,34 @@ const buildInitiativeColumns = (initiatives = [], columnCount = initiativeColumn
 };
 
 const displayGoals = computed(() => {
-    const sourceByCode = new Map(
-        (Array.isArray(props.goals) ? props.goals : [])
-            .filter((goal) => goal?.code)
-            .map((goal) => [String(goal.code).toUpperCase(), goal]),
-    );
+    const goalsFromProps = Array.isArray(props.goals) ? props.goals : [];
+    
+    if (goalsFromProps.length === 0) {
+        return fallbackGoals.map((fallbackGoal) => {
+            return {
+                ...fallbackGoal,
+                total_initiatives: 0,
+                rows: [
+                    {
+                        key: `${fallbackGoal.code}-empty`,
+                        type: 'empty',
+                        label: 'No themes',
+                        initiatives: [],
+                        initiatives_count: 0,
+                    }
+                ],
+            };
+        });
+    }
 
-    return fallbackGoals.map((fallbackGoal) => {
-        const rawGoal = sourceByCode.get(fallbackGoal.code) ?? fallbackGoal;
-
-        const themes = (Array.isArray(rawGoal?.themes) ? rawGoal.themes : fallbackGoal.themes)
+    return goalsFromProps.map((rawGoal) => {
+        const themes = (Array.isArray(rawGoal?.themes) ? rawGoal.themes : [])
             .map((theme, index) => {
                 const initiatives = Array.isArray(theme?.initiatives)
                     ? theme.initiatives
                         .map((initiative, initiativeIndex) => normalizeInitiative(
                             initiative,
-                            `${fallbackGoal.code}-theme-${index + 1}-initiative-${initiativeIndex + 1}`,
+                            `${rawGoal.code}-theme-${index + 1}-initiative-${initiativeIndex + 1}`,
                         ))
                         .filter((ini) => {
                             const matchesOrg = !selectedOrganization.value || ini.business_unit === selectedOrganization.value;
@@ -235,7 +247,7 @@ const displayGoals = computed(() => {
                     : [];
 
                 return {
-                    id: theme?.id ?? `${fallbackGoal.code}-theme-${index + 1}`,
+                    id: theme?.id ?? `${rawGoal.code}-theme-${index + 1}`,
                     theme_number: Number(theme?.theme_number ?? index + 1),
                     name: String(theme?.name ?? theme?.label ?? `Theme ${index + 1}`),
                     initiatives_count: initiatives.length,
@@ -248,7 +260,7 @@ const displayGoals = computed(() => {
             ? rawGoal.direct_initiatives
                 .map((initiative, initiativeIndex) => normalizeInitiative(
                     initiative,
-                    `${fallbackGoal.code}-direct-${initiativeIndex + 1}`,
+                    `${rawGoal.code}-direct-${initiativeIndex + 1}`,
                 ))
                 .filter((ini) => {
                     const matchesOrg = !selectedOrganization.value || ini.business_unit === selectedOrganization.value;
@@ -269,7 +281,7 @@ const displayGoals = computed(() => {
 
         if (directInitiatives.length > 0) {
             rows.push({
-                key: `${fallbackGoal.code}-direct`,
+                key: `${rawGoal.code}-direct`,
                 type: 'direct',
                 label: 'No themes',
                 initiatives: directInitiatives,
@@ -279,7 +291,7 @@ const displayGoals = computed(() => {
 
         if (rows.length === 0) {
             rows.push({
-                key: `${fallbackGoal.code}-empty`,
+                key: `${rawGoal.code}-empty`,
                 type: 'empty',
                 label: 'No themes',
                 initiatives: [],
@@ -293,9 +305,9 @@ const displayGoals = computed(() => {
         );
 
         return {
-            id: rawGoal?.id ?? fallbackGoal.id,
-            code: fallbackGoal.code,
-            title: String(rawGoal?.title ?? fallbackGoal.title),
+            id: rawGoal?.id ?? rawGoal.code,
+            code: rawGoal.code,
+            title: String(rawGoal?.title ?? rawGoal.code),
             total_initiatives: totalInitiatives,
             rows,
         };

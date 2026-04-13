@@ -15,14 +15,21 @@
                         ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                         : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
                     @click="viewMode = 'digital-block'">
-                    Dual Growth Strategy
+                    Dual Growth Strategy V1
                 </button>
                 <button type="button" class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
                     :class="viewMode === 'block'
                         ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                         : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
                     @click="viewMode = 'block'">
-                    IT Building Blocks
+                    Dual Growth Strategy V2
+                </button>
+                <button type="button" class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
+                    :class="viewMode === 'digital-transformation-initiatives'
+                        ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
+                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
+                    @click="viewMode = 'digital-transformation-initiatives'">
+                    Digital Transformation Initiatives
                 </button>
             </div>
 
@@ -155,21 +162,28 @@
                         </div>
                     </div>
                 </div>
-
             </section>
 
             <DualGrowth v-if="viewMode === 'digital-block'" :goals="dualGrowthGoals" />
+            <DualGrowthFull v-if="viewMode === 'block'" :goals="dualGrowthGoals" />
+
+            <DigitalBuildingBlock
+                v-if="viewMode === 'digital-transformation-initiatives'"
+                :items="allInitiatives"
+            />
         </div>
     </UserLayout>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
 import DualGrowth from '@/Components/StrategicHouse/DualGrowth.vue';
+import DualGrowthFull from '@/Components/StrategicHouse/DualGrowthFull.vue';
+import DigitalBuildingBlock from '@/Components/ItBuildingBlocks/DigitalBuildingBlock.vue';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
-defineProps({
+const props = defineProps({
     page: {
         type: Object,
         default: () => ({}),
@@ -222,6 +236,55 @@ defineProps({
 
 const viewMode = ref('mapping');
 const showCoeInitiatives = ref(true);
+
+const allInitiatives = computed(() => {
+    const list = [];
+
+    // Dari technologyCards
+    (props.technologyCards || []).forEach(card => {
+        (card.initiatives || []).forEach(ini => list.push({
+            ...ini,
+            coe_name: card.name
+        }));
+    });
+
+    // Dari strategyCards
+    (props.strategyCards || []).forEach(card => {
+        (card.initiatives || []).forEach(ini => list.push({
+            ...ini,
+            coe_name: card.name
+        }));
+    });
+
+    // Dari foundationCard
+    if (props.foundationCard?.initiatives) {
+        props.foundationCard.initiatives.forEach(ini => list.push({
+            ...ini,
+            coe_name: props.foundationCard.name
+        }));
+    }
+
+    // Dari architectureCard
+    if (props.architectureCard?.initiatives) {
+        props.architectureCard.initiatives.forEach(ini => list.push({
+            ...ini,
+            coe_name: props.architectureCard.name
+        }));
+    }
+
+    // Dari tbcCard
+    if (props.tbcCard?.initiatives) {
+        props.tbcCard.initiatives.forEach(ini => list.push({
+            ...ini,
+            coe_name: props.tbcCard.name
+        }));
+    }
+
+    // Unassigned
+    (props.unassignedInitiatives || []).forEach(ini => list.push(ini));
+
+    return list;
+});
 
 const coeTooltip = (card) => {
     if (!card?.initiatives?.length) {
