@@ -266,6 +266,7 @@ const initiativeColumnOptions = [3, 4, 5, 6];
 const initiativeColumnCount = ref(DEFAULT_INITIATIVE_COLUMN_COUNT);
 const showBusinessUnit = ref(false);
 const showStatusColors = ref(true);
+const showInitiativeCode = ref(true);
 const selectedOrganization = ref('');
 const selectedCoe = ref('');
 const selectedStatus = ref('');
@@ -959,6 +960,19 @@ defineExpose({
                         <span>Status Impl.</span>
                     </button>
 
+                    <button
+                        type="button"
+                        class="bu-toggle-btn"
+                        :class="{ 'bu-toggle-btn--active': showInitiativeCode }"
+                        title="Tampilkan/Sembunyikan Code Initiative"
+                        @click="showInitiativeCode = !showInitiativeCode"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                        </svg>
+                        <span>Code</span>
+                    </button>
+
                     <span class="initiative-view-switch__label ml-2">Tampilan kolom:</span>
                     <select
                         v-model="initiativeColumnCount"
@@ -1087,14 +1101,17 @@ defineExpose({
                                             v-for="initiative in buildInitiativeColumns(secondaryGroup.initiatives, initiativeColumnCount).items"
                                             :key="`initiative-${initiative.map_key}`"
                                             class="initiative-box group"
-                                            :class="getCoeColorClass(initiative.coe_name)"
+                                            :class="[
+                                                getCoeColorClass(initiative.coe_name),
+                                                { 'initiative-box--no-code': !showInitiativeCode || !initiativeDisplayCode(initiative) }
+                                            ]"
                                         >
                                             <template v-if="initiative">
                                                 <!-- Custom Smart Tooltip -->
                                                 <div class="absolute top-full left-1/2 z-50 mt-1 hidden -translate-x-1/2 w-max max-w-[250px] sm:max-w-xs md:max-w-sm bg-white border border-slate-800 shadow-sm px-1.5 py-1 text-left text-[9px] italic text-slate-800 group-hover:block pointer-events-none whitespace-normal break-words dark:bg-slate-800 dark:border-slate-600 dark:text-slate-200">
                                                     {{ initiative.description || initiativeOptionLabel(initiative) }}
                                                 </div>                                                <span
-                                                    v-if="initiativeDisplayCode(initiative)"
+                                                    v-if="showInitiativeCode && initiativeDisplayCode(initiative)"
                                                     class="initiative-box__code"
                                                     :class="showStatusColors ? getStatusColorClass(initiative.implementation_status) : ''"
                                                 >
@@ -1103,7 +1120,7 @@ defineExpose({
 
                                                 <span
                                                     class="initiative-box__name"
-                                                    :class="{ 'initiative-box__name--full': !initiativeDisplayCode(initiative) }"
+                                                    :class="{ 'initiative-box__name--full': !showInitiativeCode || !initiativeDisplayCode(initiative) }"
                                                 >
                                                     <span class="initiative-box__label-text">{{ initiativeDisplayName(initiative) }}</span>
                                                     <span v-if="showBusinessUnit" class="initiative-box__bu">
@@ -1537,6 +1554,10 @@ defineExpose({
     font-weight: 500;
     line-height: 1.1;
     color: #1f2937;
+}
+
+.initiative-box--no-code {
+    grid-template-columns: 1fr !important;
 }
 
 /* COE Color Classes - High Contrast & Deep Colors */
