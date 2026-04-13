@@ -229,25 +229,13 @@
             :project-id="selectedProjectIdForModal"
             @close="closeModal"
         />
-
-        <ConfirmationModal
-            :show="showDeleteModal"
-            title="Hapus Status Implementation"
-            :message="deleteModalMessage"
-            confirm-text="Ya, Hapus"
-            cancel-text="Batal"
-            type="danger"
-            :loading="deleteProcessing"
-            @close="closeDeleteModal"
-            @confirm="confirmDeleteStatus"
-        />
     </div>
 </template>
 
 <script setup>
 import { router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
-import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import Swal from 'sweetalert2';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
 import { statusLabelFromOptions } from '@/Composables/initiativeStatus';
 import StatusImplementationModal from './StatusImplementationModal.vue';
@@ -281,8 +269,6 @@ const route = useRouteHelper();
 const isModalOpen = ref(false);
 const editingStatus = ref(null);
 const selectedProjectIdForModal = ref(0);
-const showDeleteModal = ref(false);
-const pendingDeleteStatus = ref(null);
 const deleteProcessing = ref(false);
 
 const openAddModal = (proj) => {
@@ -343,31 +329,6 @@ const statusOptions = computed(() => {
             }
             : option
     );
-});
-
-const deleteModalMessage = computed(() => {
-    const log = pendingDeleteStatus.value;
-
-    if (!log) {
-        return 'Apakah Anda yakin ingin menghapus status implementation ini?';
-    }
-
-    const statusLabel = displayValue(log?.status);
-    const monthLabel = getPeriodeLabel(log);
-    const yearLabel = getYearLabel(log);
-    const periodeLabel = [monthLabel, yearLabel]
-        .filter((value) => value && value !== EMPTY_VALUE)
-        .join(' ');
-
-    if (statusLabel !== EMPTY_VALUE && periodeLabel) {
-        return `Status implementation ${statusLabel} untuk periode ${periodeLabel} akan dihapus permanen. Lanjutkan?`;
-    }
-
-    if (periodeLabel) {
-        return `Status implementation untuk periode ${periodeLabel} akan dihapus permanen. Lanjutkan?`;
-    }
-
-    return 'Apakah Anda yakin ingin menghapus status implementation ini?';
 });
 
 const projectCharterRows = computed(() => {
@@ -519,30 +480,42 @@ const getStatusRowCount = (project) => {
 };
 
 const openDeleteModal = (log) => {
-    pendingDeleteStatus.value = log;
-    showDeleteModal.value = true;
+    Swal.fire({
+        title: 'Apakah Anda yakin?',
+        text: "Data status implementation ini akan dihapus permanen!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, hapus!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            deleteStatus(log);
+        }
+    });
 };
 
-const closeDeleteModal = () => {
-    showDeleteModal.value = false;
-    pendingDeleteStatus.value = null;
-    deleteProcessing.value = false;
-};
-
-const confirmDeleteStatus = () => {
-    const statusId = pendingDeleteStatus.value?.id;
-
-    if (!statusId) {
-        closeDeleteModal();
-        return;
-    }
+const deleteStatus = (log) => {
+    const statusId = log?.id;
+    if (!statusId) return;
 
     deleteProcessing.value = true;
 
     router.delete(route('it-initiatives.implementation-status.destroy', statusId), {
         preserveScroll: true,
+        onSuccess: () => {
+            Swal.fire({
+                title: 'Terhapus!',
+                text: 'Data status implementation berhasil dihapus.',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        },
         onFinish: () => {
-            closeDeleteModal();
+            deleteProcessing.value = false;
         },
     });
 };

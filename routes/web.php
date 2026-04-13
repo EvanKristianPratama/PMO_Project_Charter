@@ -240,6 +240,8 @@ Route::middleware(['auth', 'approved'])->group(function () {
         ->name('digital-initiatives.implementation-status.store');
     Route::put('/digital-initiatives/implementation-status/{statusId}', [DigitalInitiativeController::class, 'updateImplementationStatus'])
         ->name('digital-initiatives.implementation-status.update');
+    Route::delete('/digital-initiatives/implementation-status/{statusId}', [DigitalInitiativeController::class, 'destroyImplementationStatus'])
+        ->name('digital-initiatives.implementation-status.destroy');
     Route::resource('digital-initiatives', DigitalInitiativeController::class);
     Route::put('/digital-initiatives/{digital_initiative}/project-status-history/{history}', [DigitalInitiativeController::class, 'updateProjectStatusHistory'])->name('digital-initiatives.project-status-history.update');
     Route::delete('/digital-initiatives/{digital_initiative}/project-status-history/{history}', [DigitalInitiativeController::class, 'destroyProjectStatusHistory'])->name('digital-initiatives.project-status-history.destroy');

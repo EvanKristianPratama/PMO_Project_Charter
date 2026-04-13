@@ -134,11 +134,18 @@
                             {{ item.updated_status || '-' }}
                         </td>
                         <td class="px-4 py-4 text-center">
-                            <button type="button"
-                                class="inline-flex items-center justify-center rounded-full bg-amber-100 px-3 py-1 text-[9px] font-semibold text-amber-800 transition hover:bg-amber-200 dark:bg-amber-500/20 dark:text-amber-300 dark:hover:bg-amber-500/30"
-                                @click="openEditModal(item)">
-                                Edit
-                            </button>
+                            <div class="flex items-center justify-center gap-1.5">
+                                <button type="button"
+                                    class="inline-flex items-center justify-center rounded-full bg-amber-100 px-3 py-1 text-[9px] font-semibold text-amber-800 transition hover:bg-amber-200 dark:bg-amber-500/20 dark:text-amber-300 dark:hover:bg-amber-500/30"
+                                    @click="openEditModal(item)">
+                                    Edit
+                                </button>
+                                <button type="button"
+                                    class="inline-flex items-center justify-center rounded-full bg-rose-100 px-3 py-1 text-[9px] font-semibold text-rose-800 transition hover:bg-rose-200 dark:bg-rose-500/20 dark:text-rose-300 dark:hover:bg-rose-500/30"
+                                    @click="deleteItem(item)">
+                                    Delete
+                                </button>
+                            </div>
                         </td>
                     </tr>
 
@@ -161,7 +168,10 @@
 
 <script setup>
 import { computed, ref } from 'vue';
+import { router } from '@inertiajs/vue3';
+import Swal from 'sweetalert2';
 import StatusImplementationModal from '@/Components/DigitalInitiative/StatusImplementationModal.vue';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 
 const props = defineProps({
     items: {
@@ -177,6 +187,8 @@ const props = defineProps({
         default: () => [],
     },
 });
+
+const route = useRouteHelper();
 
 const selectedOrganization = ref('all');
 const selectedInitiative = ref('all');
@@ -227,6 +239,42 @@ const openEditModal = (item) => {
 const closeModal = () => {
     isModalOpen.value = false;
     editingItem.value = null;
+};
+
+const deleteItem = (item) => {
+    Swal.fire({
+        title: 'Apakah Anda yakin?',
+        text: "Data status implementation ini akan dihapus permanen!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, hapus!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            router.delete(route('digital-initiatives.implementation-status.destroy', item.id), {
+                preserveScroll: true,
+                onSuccess: () => {
+                    Swal.fire({
+                        title: 'Terhapus!',
+                        text: 'Data status implementation berhasil dihapus.',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                },
+                onError: () => {
+                    Swal.fire({
+                        title: 'Gagal!',
+                        text: 'Terjadi kesalahan saat menghapus data.',
+                        icon: 'error'
+                    });
+                }
+            });
+        }
+    });
 };
 
 const normalizedItems = computed(() => {

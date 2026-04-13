@@ -158,6 +158,7 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3';
 import { watch, computed } from 'vue';
+import Swal from 'sweetalert2';
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
 
@@ -216,16 +217,26 @@ const closeModal = () => {
 };
 
 const submit = () => {
+    const requestOptions = {
+        preserveScroll: true,
+        onSuccess: () => {
+            closeModal();
+            Swal.fire({
+                title: 'Berhasil!',
+                text: isEditing.value 
+                    ? 'Status implementation berhasil diperbarui.' 
+                    : 'Status implementation berhasil ditambahkan.',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false,
+            });
+        },
+    };
+
     if (isEditing.value) {
-        form.put(route('it-initiatives.implementation-status.update', props.statusData.id), {
-            preserveScroll: true,
-            onSuccess: () => closeModal(),
-        });
+        form.put(route('it-initiatives.implementation-status.update', props.statusData.id), requestOptions);
     } else {
-        form.post(route('it-initiatives.implementation-status.store', props.projectId), {
-            preserveScroll: true,
-            onSuccess: () => closeModal(),
-        });
+        form.post(route('it-initiatives.implementation-status.store', props.projectId), requestOptions);
     }
 };
 </script>

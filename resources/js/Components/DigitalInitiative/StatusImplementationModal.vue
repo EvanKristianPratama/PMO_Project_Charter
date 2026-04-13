@@ -163,6 +163,7 @@
 <script setup>
 import { computed, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
+import Swal from 'sweetalert2';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
 
@@ -305,7 +306,18 @@ const submit = () => {
 
     const requestOptions = {
         preserveScroll: true,
-        onSuccess: () => closeModal(),
+        onSuccess: () => {
+            closeModal();
+            Swal.fire({
+                title: 'Berhasil!',
+                text: isEditing.value 
+                    ? 'Status implementation berhasil diperbarui.' 
+                    : 'Status implementation berhasil ditambahkan.',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false,
+            });
+        },
     };
 
     if (isEditing.value) {

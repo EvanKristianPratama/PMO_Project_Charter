@@ -174,6 +174,11 @@ class DigitalInitiativeService
         ]);
     }
 
+    public function deleteImplementationStatus(int $statusId): void
+    {
+        TrsStatusImplementation::query()->findOrFail($statusId)->delete();
+    }
+
     public function updateProjectStatusHistory(
         TrsProject $digitalInitiative,
         ProjectStatusHistory $history,

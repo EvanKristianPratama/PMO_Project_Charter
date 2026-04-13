@@ -98,6 +98,13 @@ class DigitalInitiativeController extends Controller
         return back()->with('success', 'Status implementation berhasil diperbarui.');
     }
 
+    public function destroyImplementationStatus(int $statusId): RedirectResponse
+    {
+        $this->digitalInitiativeService->deleteImplementationStatus($statusId);
+
+        return back()->with('success', 'Status implementation berhasil dihapus.');
+    }
+
     public function updateProjectStatusHistory(
         UpdateProjectStatusHistoryRequest $request,
         TrsProject $digitalInitiative,
