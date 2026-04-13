@@ -44,7 +44,7 @@ export function useNavigation() {
                 active: (url) => url.startsWith('/strategic-pillars'),
             },
             {
-                label: 'IT Building Blocks',
+                label: 'Building Blocks',
                 href: safeRoute('program-planning.it-building-blocks.index'),
                 icon: DocumentTextIcon,
                 active: (url) => url.startsWith('/program-planning/it-building-blocks'),

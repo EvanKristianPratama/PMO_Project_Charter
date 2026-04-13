@@ -1,165 +1,164 @@
 <template>
     <UserLayout :title="page.title">
         <div class="strategic-house animate-fade-in">
-            <section class="sh-mockup">
-                
-                <div class="mockup-header">
-                    <div>
-                        <p class="mockup-eyebrow">Mockup Preview</p>
-                    </div>
-                </div>
+            <!-- View Mode Switcher -->
+            <div class="inline-flex items-center gap-1 rounded-xl bg-slate-200/50 p-1 dark:bg-white/5 w-fit mb-5">
+                <button type="button" class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
+                    :class="viewMode === 'mapping'
+                        ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
+                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
+                    @click="viewMode = 'mapping'">
+                    Strategic House
+                </button>
+                <button type="button" class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
+                    :class="viewMode === 'digital-block'
+                        ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
+                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
+                    @click="viewMode = 'digital-block'">
+                    Dual Growth Strategy
+                </button>
+                <button type="button" class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
+                    :class="viewMode === 'block'
+                        ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
+                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
+                    @click="viewMode = 'block'">
+                    IT Building Blocks
+                </button>
+            </div>
 
+            <section v-if="viewMode === 'mapping'" class="sh-mockup">
                 <div class="mockup-content">
 
-                <!-- ═══ ROOF: Focus Bands (Maximize Legacy Business + Build Low Carbon) ═══ -->
-                <div class="roof-section">
-                    <div class="roof-headline">{{ page.headline }}</div>
+                    <!-- ═══ ROOF: Focus Bands (Maximize Legacy Business + Build Low Carbon) ═══ -->
+                    <div class="roof-section">
+                        <div class="roof-headline">{{ page.headline }}</div>
 
-                    <div class="roof-top">
-                        <div class="roof-main">
-                            <div class="roof-main-label">{{ roofSection.main_goal?.title ?? page.headline }}</div>
-                            <div v-if="roofSection.main_goal_themes?.length" class="roof-sub-items">
-                                <div
-                                    v-for="theme in roofSection.main_goal_themes"
-                                    :key="theme.id"
-                                    class="roof-sub-item"
-                                >
-                                    {{ theme.label }}
+                        <div class="roof-top">
+                            <div class="roof-main">
+                                <div class="roof-main-label">{{ roofSection.main_goal?.title ?? page.headline }}</div>
+                                <div v-if="roofSection.main_goal_themes?.length" class="roof-sub-items">
+                                    <div v-for="theme in roofSection.main_goal_themes" :key="theme.id"
+                                        class="roof-sub-item">
+                                        {{ theme.label }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div v-if="roofSection.side_goal" class="roof-side">
+                                <div class="roof-side-label">{{ roofSection.side_goal.title }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═══ CONNECTOR: small decorative chain ═══ -->
+                    <div class="connector-chain">
+                        <svg width="20" height="28" viewBox="0 0 20 28">
+                            <circle cx="10" cy="6" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5" />
+                            <line x1="10" y1="11" x2="10" y2="17" stroke="#9cb8d8" stroke-width="1.5" />
+                            <circle cx="10" cy="22" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5" />
+                        </svg>
+                    </div>
+
+                    <!-- ═══ VISION TRAPEZOID ═══ -->
+                    <div class="vision-trapezoid">
+                        <p class="vision-title">{{ page.visionTitle }}:</p>
+                        <p class="vision-text">{{ page.visionText }}</p>
+                    </div>
+
+                    <!-- ═══ CONNECTOR ═══ -->
+                    <div class="connector-chain">
+                        <svg width="20" height="28" viewBox="0 0 20 28">
+                            <circle cx="10" cy="6" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5" />
+                            <line x1="10" y1="11" x2="10" y2="17" stroke="#9cb8d8" stroke-width="1.5" />
+                            <circle cx="10" cy="22" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5" />
+                        </svg>
+                    </div>
+
+                    <!-- ═══ DIGITAL TRANSFORMATION INITIATIVES SECTION ═══ -->
+                    <div class="dti-section">
+                        <div class="dti-header">
+                            <div class="dti-header-copy">
+                                <p class="dti-count">{{ summary.total_initiatives }}</p>
+                                <p class="dti-label">{{ page.initiativeLabel }}</p>
+                            </div>
+                            <button type="button" class="dti-toggle" :aria-pressed="showCoeInitiatives"
+                                :aria-label="showCoeInitiatives ? 'Hide initiative names' : 'Show initiative names'"
+                                :title="showCoeInitiatives ? 'Hide initiative names' : 'Show initiative names'"
+                                @click="showCoeInitiatives = !showCoeInitiatives">
+                                <EyeSlashIcon v-if="showCoeInitiatives" class="dti-toggle-icon" />
+                                <EyeIcon v-else class="dti-toggle-icon" />
+                            </button>
+                        </div>
+
+                        <div class="dti-cards">
+                            <div v-for="card in technologyCards" :key="card.name" class="dti-card"
+                                :class="{ 'dti-card--compact': !showCoeInitiatives }" :title="coeTooltip(card)">
+                                <div class="dti-card-badge">
+                                    {{ card.initiatives_count }}
+                                </div>
+                                <div class="dti-card-title">{{ card.display_name }}</div>
+                                <div v-if="showCoeInitiatives" class="dti-card-preview">
+                                    <template v-if="card.initiatives_preview?.length">
+                                        <p v-for="initiative in card.initiatives_preview" :key="initiative.id"
+                                            class="dti-card-preview-item">
+                                            {{ initiative.code }} - {{ initiative.name }}
+                                        </p>
+                                        <p v-if="card.remaining_initiatives_count > 0" class="dti-card-preview-more">
+                                            +{{ card.remaining_initiatives_count }} initiative lagi
+                                        </p>
+                                    </template>
+                                    <p v-else class="dti-card-preview-empty">
+                                        Belum ada initiative
+                                    </p>
                                 </div>
                             </div>
                         </div>
-
-                        <div v-if="roofSection.side_goal" class="roof-side">
-                            <div class="roof-side-label">{{ roofSection.side_goal.title }}</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ═══ CONNECTOR: small decorative chain ═══ -->
-                <div class="connector-chain">
-                    <svg width="20" height="28" viewBox="0 0 20 28">
-                        <circle cx="10" cy="6" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5"/>
-                        <line x1="10" y1="11" x2="10" y2="17" stroke="#9cb8d8" stroke-width="1.5"/>
-                        <circle cx="10" cy="22" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5"/>
-                    </svg>
-                </div>
-
-                <!-- ═══ VISION TRAPEZOID ═══ -->
-                <div class="vision-trapezoid">
-                    <p class="vision-title">{{ page.visionTitle }}:</p>
-                    <p class="vision-text">{{ page.visionText }}</p>
-                </div>
-
-                <!-- ═══ CONNECTOR ═══ -->
-                <div class="connector-chain">
-                    <svg width="20" height="28" viewBox="0 0 20 28">
-                        <circle cx="10" cy="6" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5"/>
-                        <line x1="10" y1="11" x2="10" y2="17" stroke="#9cb8d8" stroke-width="1.5"/>
-                        <circle cx="10" cy="22" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5"/>
-                    </svg>
-                </div>
-
-                <!-- ═══ DIGITAL TRANSFORMATION INITIATIVES SECTION ═══ -->
-                <div class="dti-section">
-                    <div class="dti-header">
-                        <div class="dti-header-copy">
-                            <p class="dti-count">{{ summary.total_initiatives }}</p>
-                            <p class="dti-label">{{ page.initiativeLabel }}</p>
-                        </div>
-                        <button
-                            type="button"
-                            class="dti-toggle"
-                            :aria-pressed="showCoeInitiatives"
-                            :aria-label="showCoeInitiatives ? 'Hide initiative names' : 'Show initiative names'"
-                            :title="showCoeInitiatives ? 'Hide initiative names' : 'Show initiative names'"
-                            @click="showCoeInitiatives = !showCoeInitiatives"
-                        >
-                            <EyeSlashIcon v-if="showCoeInitiatives" class="dti-toggle-icon" />
-                            <EyeIcon v-else class="dti-toggle-icon" />
-                        </button>
                     </div>
 
-                    <div class="dti-cards">
-                        <div
-                            v-for="card in technologyCards"
-                            :key="card.name"
-                            class="dti-card"
-                            :class="{ 'dti-card--compact': !showCoeInitiatives }"
-                            :title="coeTooltip(card)"
-                        >
-                            <div class="dti-card-badge">
-                                {{ card.initiatives_count }}
-                            </div>
-                            <div class="dti-card-title">{{ card.display_name }}</div>
-                            <div v-if="showCoeInitiatives" class="dti-card-preview">
-                                <template v-if="card.initiatives_preview?.length">
-                                    <p
-                                        v-for="initiative in card.initiatives_preview"
-                                        :key="initiative.id"
-                                        class="dti-card-preview-item"
-                                    >
-                                        {{ initiative.code }} - {{ initiative.name }}
+                    <!-- ═══ CONNECTOR ═══ -->
+                    <div class="connector-chain">
+                        <svg width="20" height="28" viewBox="0 0 20 28">
+                            <circle cx="10" cy="6" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5" />
+                            <line x1="10" y1="11" x2="10" y2="17" stroke="#9cb8d8" stroke-width="1.5" />
+                            <circle cx="10" cy="22" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5" />
+                        </svg>
+                    </div>
+
+                    <!-- ═══ GRAND IT STRATEGY SECTION ═══ -->
+                    <div class="gits-section">
+                        <div class="gits-header">
+                            <h2 class="gits-title">{{ page.grandStrategyTitle }}</h2>
+                            <p class="gits-subtitle">{{ page.grandStrategyText }}</p>
+                        </div>
+
+                        <div class="gits-pillars">
+                            <article v-for="card in strategyCards" :key="card.name" class="gits-pillar">
+                                <h3 class="gits-pillar-title">{{ card.display_name }}</h3>
+                                <div class="gits-pillar-desc">
+                                    <p v-for="(line, lineIndex) in (card.description_lines?.length ? card.description_lines : card.initiatives_preview.map(item => item.label))"
+                                        :key="`${card.name}-${lineIndex}`">
+                                        {{ line }}
                                     </p>
-                                    <p v-if="card.remaining_initiatives_count > 0" class="dti-card-preview-more">
-                                        +{{ card.remaining_initiatives_count }} initiative lagi
+                                    <p v-if="!card.description_lines?.length && card.is_empty"
+                                        class="gits-pillar-empty">
+                                        Belum ada initiative yang terhubung ke area ini.
                                     </p>
-                                </template>
-                                <p v-else class="dti-card-preview-empty">
-                                    Belum ada initiative
-                                </p>
-                            </div>
+                                </div>
+                            </article>
                         </div>
-                    </div>
-                </div>
 
-                <!-- ═══ CONNECTOR ═══ -->
-                <div class="connector-chain">
-                    <svg width="20" height="28" viewBox="0 0 20 28">
-                        <circle cx="10" cy="6" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5"/>
-                        <line x1="10" y1="11" x2="10" y2="17" stroke="#9cb8d8" stroke-width="1.5"/>
-                        <circle cx="10" cy="22" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5"/>
-                    </svg>
-                </div>
-
-                <!-- ═══ GRAND IT STRATEGY SECTION ═══ -->
-                <div class="gits-section">
-                    <div class="gits-header">
-                        <h2 class="gits-title">{{ page.grandStrategyTitle }}</h2>
-                        <p class="gits-subtitle">{{ page.grandStrategyText }}</p>
-                    </div>
-
-                    <div class="gits-pillars">
-                        <article
-                            v-for="card in strategyCards"
-                            :key="card.name"
-                            class="gits-pillar"
-                        >
-                            <h3 class="gits-pillar-title">{{ card.display_name }}</h3>
-                            <div class="gits-pillar-desc">
-                                <p
-                                    v-for="(line, lineIndex) in (card.description_lines?.length ? card.description_lines : card.initiatives_preview.map(item => item.label))"
-                                    :key="`${card.name}-${lineIndex}`"
-                                >
-                                    {{ line }}
-                                </p>
-                                <p v-if="!card.description_lines?.length && card.is_empty" class="gits-pillar-empty">
-                                    Belum ada initiative yang terhubung ke area ini.
-                                </p>
-                            </div>
-                        </article>
-                    </div>
-
-                    <!-- ═══ FOUNDATION BAR ═══ -->
-                    <div v-if="foundationCard" class="foundation-bar">
-                        <span class="foundation-title">{{ foundationCard.display_name }}:</span>
-                        <span class="foundation-desc">Memungkinkan pelaksanaan efektif dari semua digital dan IT initiative</span>
-                    </div>
+                        <!-- ═══ FOUNDATION BAR ═══ -->
+                        <div v-if="foundationCard" class="foundation-bar">
+                            <span class="foundation-title">{{ foundationCard.display_name }}:</span>
+                            <span class="foundation-desc">Memungkinkan pelaksanaan efektif dari semua digital dan IT
+                                initiative</span>
+                        </div>
                     </div>
                 </div>
 
             </section>
 
-            <DualGrowth :goals="dualGrowthGoals" />
+            <DualGrowth v-if="viewMode === 'digital-block'" :goals="dualGrowthGoals" />
         </div>
     </UserLayout>
 </template>
@@ -221,6 +220,7 @@ defineProps({
     },
 });
 
+const viewMode = ref('mapping');
 const showCoeInitiatives = ref(true);
 
 const coeTooltip = (card) => {
@@ -366,7 +366,7 @@ const coeTooltip = (card) => {
     margin-top: 8px;
     font-size: 12px;
     line-height: 1.7;
-    color: rgba(255,255,255,0.92);
+    color: rgba(255, 255, 255, 0.92);
     max-width: 720px;
     margin-left: auto;
     margin-right: auto;
@@ -565,7 +565,7 @@ const coeTooltip = (card) => {
 .gits-pillar-desc {
     font-size: 10px;
     line-height: 1.5;
-    color: rgba(255,255,255,0.85);
+    color: rgba(255, 255, 255, 0.85);
     flex: 1;
 }
 
@@ -574,7 +574,7 @@ const coeTooltip = (card) => {
 }
 
 .gits-pillar-empty {
-    color: rgba(255,255,255,0.6);
+    color: rgba(255, 255, 255, 0.6);
     font-style: italic;
 }
 
@@ -595,7 +595,7 @@ const coeTooltip = (card) => {
 }
 
 .foundation-desc {
-    color: rgba(255,255,255,0.85);
+    color: rgba(255, 255, 255, 0.85);
 }
 
 /* ─── RESPONSIVE ─── */

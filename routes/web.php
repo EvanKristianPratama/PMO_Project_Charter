@@ -16,7 +16,7 @@ use App\Http\Controllers\MasterData\ScopeCharter\ScopeCharterController;
 use App\Http\Controllers\ProgramEvaluation\ReviewTimelineController;
 use App\Http\Controllers\ProgramEvaluation\TrsReviewPCController;
 use App\Http\Controllers\ProgramImplementation\DashboardController;
-use App\Http\Controllers\ProgramImplementation\ItBuildingBlockController;
+use App\Http\Controllers\ProgramPlanning\ItBuildingBlockController;
 use App\Http\Controllers\ProgramImplementation\ProgramImplementationController;
 use App\Http\Controllers\ProgramImplementation\ResourceManagementController;
 use App\Http\Controllers\ProgramImplementation\ProjectCharter\DigitalInitiatives\DigitalInitiativeController;

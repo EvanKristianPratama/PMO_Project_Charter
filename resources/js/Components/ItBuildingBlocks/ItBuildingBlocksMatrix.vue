@@ -994,6 +994,7 @@ defineExpose({
             v-if="hasGroups"
             class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]"
         >
+            <h1 class="text-center text-l font-bold mt-4 mb-4 ">IT Building Blocks Supporting for Digital Initiative</h1>
             <div class="overflow-x-auto">
                 <table
                     class="itb-table min-w-full border-collapse"

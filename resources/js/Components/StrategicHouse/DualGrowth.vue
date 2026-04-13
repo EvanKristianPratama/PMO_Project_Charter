@@ -238,34 +238,35 @@ const initiativeDisplayName = (initiative) => {
 </script>
 
 <template>
-    <section class="dual-growth-mockup">
-        <div class="mockup-header flex items-center justify-between">
-            <p class="mockup-eyebrow">Mockup Preview</p>
-            <div class="flex items-center gap-2">
-                <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">Tampilan kolom:</span>
-                <select v-model="initiativeColumnCount" class="initiative-view-select">
-                    <option v-for="opt in initiativeColumnOptions" :key="opt" :value="opt">
-                        {{ opt }} Kolom
-                    </option>
-                </select>
-            </div>
+    <h1 class="text-center text-l font-bold mb-4">Pertamina Group Dual Growth Strategy</h1>
+    <div class="mockup-header flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">Tampilan kolom:</span>
+            <select v-model="initiativeColumnCount" class="initiative-view-select">
+                <option v-for="opt in initiativeColumnOptions" :key="opt" :value="opt">
+                    {{ opt }} Kolom
+                </option>
+            </select>
         </div>
+    </div>
 
-        <div class="dual-growth-legend">
-            <div
-                v-for="coe in coeLegend"
-                :key="`legend-${coe.id}`"
-                class="legend-item"
-            >
-                <span
-                    class="legend-swatch"
-                    :class="getCoeColorClass(coe.name)"
-                ></span>
-                <span class="legend-label">
-                    {{ coe.name }} <span class="legend-count">({{ coe.count }})</span>
-                </span>
-            </div>
+    <div class="dual-growth-legend">
+        <div
+            v-for="coe in coeLegend"
+            :key="`legend-${coe.id}`"
+            class="legend-item"
+        >
+            <span
+                class="legend-swatch"
+                :class="getCoeColorClass(coe.name)"
+            ></span>
+            <span class="legend-label">
+                {{ coe.name }} <span class="legend-count">({{ coe.count }})</span>
+            </span>
         </div>
+    </div>
+    
+    <section class="dual-growth-mockup">
 
         <div class="mockup-board-scroll">
             <table class="dg-table">
@@ -356,7 +357,6 @@ const initiativeDisplayName = (initiative) => {
 
 <style scoped>
 .dual-growth-mockup {
-    margin-top: 24px;
     overflow: hidden;
     border: 1px solid #e2e8f0;
     border-radius: 20px;
