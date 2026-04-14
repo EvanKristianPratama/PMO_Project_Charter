@@ -494,11 +494,17 @@ const filteredPillars = computed(() => {
 const switchPilar = (pilarId) => {
     if (String(pilarId) === currentPilar.value) return;
 
-    const payload = { pilar: pilarId };
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('pilar', pilarId);
 
     if (selectedOrgId.value) {
-        payload.org_id = selectedOrgId.value;
+        urlParams.set('org_id', selectedOrgId.value);
+    } else {
+        urlParams.delete('org_id');
     }
+
+    // Preserve other existing params
+    const payload = Object.fromEntries(urlParams.entries());
 
     router.get(route(props.baseUrlRoute), payload, {
         preserveScroll: true,

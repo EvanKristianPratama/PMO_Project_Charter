@@ -38,12 +38,6 @@ export function useNavigation() {
                 active: (url) => url.startsWith('/strategic-house'),
             },
             {
-                label: 'Strategic Pillars',
-                href: safeRoute('strategic-pillars.index'),
-                icon: FlagIcon,
-                active: (url) => url.startsWith('/strategic-pillars'),
-            },
-            {
                 label: 'Digital Initiative Definition',
                 href: safeRoute('program-planning.program-definition.digital-initiatives'),
                 icon: DocumentTextIcon,
