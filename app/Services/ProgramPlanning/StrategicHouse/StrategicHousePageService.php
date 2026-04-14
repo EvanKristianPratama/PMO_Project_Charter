@@ -231,7 +231,7 @@ class StrategicHousePageService
                 'coe_id' => (int) $initiative->coe_id,
                 'coe_name' => $initiative->coe?->name ?: 'No COE',
                 'business_unit' => $initiative->organization?->name ?: '-',
-                'implementation_status' => $initiative->latestStatusImplementation?->status ?: null,
+                'implementation_status' => $initiative->latestStatusImplementation?->review_status ?: null,
                 'tipe_initiative' => (int) $initiative->tipe_initiative,
             ]);
     }

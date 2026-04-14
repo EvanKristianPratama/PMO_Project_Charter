@@ -86,7 +86,7 @@
                         :initiative-options="initiativeOptions"
                         @cancel-add-mapping="isEditMode = false"
                     />
-                    <ItBuildingBlockViewBlockMode
+                    <ItBuildingBlock
                         v-else-if="viewMode === 'block'"
                         :items="initiativeOptions"
                         :coe-options="coeOptions"
@@ -105,7 +105,7 @@
 <script setup>
 import { nextTick, ref } from 'vue';
 import ItBuildingBlocksMatrix from '@/Components/ItBuildingBlocks/ItBuildingBlocksMatrix.vue';
-import ItBuildingBlockViewBlockMode from '@/Components/ItBuildingBlocks/ItBuildingBlockViewBlockMode.vue';
+import ItBuildingBlock from '@/Components/ItBuildingBlocks/ItBuildingBlock.vue';
 import DigitalBuildingBlock from '@/Components/ItBuildingBlocks/DigitalBuildingBlock.vue';
 import UserLayout from '@/Layouts/UserLayout.vue';
 

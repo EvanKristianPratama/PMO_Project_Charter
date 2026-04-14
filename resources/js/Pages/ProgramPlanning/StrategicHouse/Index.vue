@@ -33,144 +33,164 @@
                 </button>
             </div>
 
-            <section v-if="viewMode === 'mapping'" class="sh-mockup">
-                <div class="mockup-content">
+            <!-- Conditional View Rendering -->
+            <div class="relative min-h-[400px]">
+                <Transition
+                    enter-active-class="transition duration-300 ease-out"
+                    enter-from-class="transform opacity-0 translate-y-4"
+                    enter-to-class="transform opacity-100 translate-y-0"
+                    leave-active-class="transition duration-200 ease-in"
+                    leave-from-class="transform opacity-100 translate-y-0"
+                    leave-to-class="transform opacity-0 translate-y-4"
+                    mode="out-in"
+                >
+                    <section v-if="viewMode === 'mapping'" key="mapping" class="sh-mockup">
+                        <div class="mockup-content">
 
-                    <!-- ═══ ROOF: Focus Bands (Maximize Legacy Business + Build Low Carbon) ═══ -->
-                    <div class="roof-section">
-                        <div class="roof-headline">{{ page.headline }}</div>
+                            <!-- ═══ ROOF: Focus Bands (Maximize Legacy Business + Build Low Carbon) ═══ -->
+                            <div class="roof-section">
+                                <div class="roof-headline">{{ page.headline }}</div>
 
-                        <div class="roof-top">
-                            <div class="roof-main">
-                                <div class="roof-main-label">{{ roofSection.main_goal?.title ?? page.headline }}</div>
-                                <div v-if="roofSection.main_goal_themes?.length" class="roof-sub-items">
-                                    <div v-for="theme in roofSection.main_goal_themes" :key="theme.id"
-                                        class="roof-sub-item">
-                                        {{ theme.label }}
+                                <div class="roof-top">
+                                    <div class="roof-main">
+                                        <div class="roof-main-label">{{ roofSection.main_goal?.title ?? page.headline }}</div>
+                                        <div v-if="roofSection.main_goal_themes?.length" class="roof-sub-items">
+                                            <div v-for="theme in roofSection.main_goal_themes" :key="theme.id"
+                                                class="roof-sub-item">
+                                                {{ theme.label }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div v-if="roofSection.side_goal" class="roof-side">
+                                        <div class="roof-side-label">{{ roofSection.side_goal.title }}</div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div v-if="roofSection.side_goal" class="roof-side">
-                                <div class="roof-side-label">{{ roofSection.side_goal.title }}</div>
+                            <!-- ═══ CONNECTOR: small decorative chain ═══ -->
+                            <div class="connector-chain">
+                                <svg width="20" height="28" viewBox="0 0 20 28">
+                                    <circle cx="10" cy="6" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5" />
+                                    <line x1="10" y1="11" x2="10" y2="17" stroke="#9cb8d8" stroke-width="1.5" />
+                                    <circle cx="10" cy="22" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5" />
+                                </svg>
                             </div>
-                        </div>
-                    </div>
 
-                    <!-- ═══ CONNECTOR: small decorative chain ═══ -->
-                    <div class="connector-chain">
-                        <svg width="20" height="28" viewBox="0 0 20 28">
-                            <circle cx="10" cy="6" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5" />
-                            <line x1="10" y1="11" x2="10" y2="17" stroke="#9cb8d8" stroke-width="1.5" />
-                            <circle cx="10" cy="22" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5" />
-                        </svg>
-                    </div>
-
-                    <!-- ═══ VISION TRAPEZOID ═══ -->
-                    <div class="vision-trapezoid">
-                        <p class="vision-title">{{ page.visionTitle }}:</p>
-                        <p class="vision-text">{{ page.visionText }}</p>
-                    </div>
-
-                    <!-- ═══ CONNECTOR ═══ -->
-                    <div class="connector-chain">
-                        <svg width="20" height="28" viewBox="0 0 20 28">
-                            <circle cx="10" cy="6" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5" />
-                            <line x1="10" y1="11" x2="10" y2="17" stroke="#9cb8d8" stroke-width="1.5" />
-                            <circle cx="10" cy="22" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5" />
-                        </svg>
-                    </div>
-
-                    <!-- ═══ DIGITAL TRANSFORMATION INITIATIVES SECTION ═══ -->
-                    <div class="dti-section">
-                        <div class="dti-header">
-                            <div class="dti-header-copy">
-                                <p class="dti-count">{{ summary.total_initiatives }}</p>
-                                <p class="dti-label">{{ page.initiativeLabel }}</p>
+                            <!-- ═══ VISION TRAPEZOID ═══ -->
+                            <div class="vision-trapezoid">
+                                <p class="vision-title">{{ page.visionTitle }}:</p>
+                                <p class="vision-text">{{ page.visionText }}</p>
                             </div>
-                            <button type="button" class="dti-toggle" :aria-pressed="showCoeInitiatives"
-                                :aria-label="showCoeInitiatives ? 'Hide initiative names' : 'Show initiative names'"
-                                :title="showCoeInitiatives ? 'Hide initiative names' : 'Show initiative names'"
-                                @click="showCoeInitiatives = !showCoeInitiatives">
-                                <EyeSlashIcon v-if="showCoeInitiatives" class="dti-toggle-icon" />
-                                <EyeIcon v-else class="dti-toggle-icon" />
-                            </button>
-                        </div>
 
-                        <div class="dti-cards">
-                            <div v-for="card in technologyCards" :key="card.name" class="dti-card"
-                                :class="{ 'dti-card--compact': !showCoeInitiatives }" :title="coeTooltip(card)">
-                                <div class="dti-card-badge">
-                                    {{ card.initiatives_count }}
+                            <!-- ═══ CONNECTOR ═══ -->
+                            <div class="connector-chain">
+                                <svg width="20" height="28" viewBox="0 0 20 28">
+                                    <circle cx="10" cy="6" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5" />
+                                    <line x1="10" y1="11" x2="10" y2="17" stroke="#9cb8d8" stroke-width="1.5" />
+                                    <circle cx="10" cy="22" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5" />
+                                </svg>
+                            </div>
+
+                            <!-- ═══ DIGITAL TRANSFORMATION INITIATIVES SECTION ═══ -->
+                            <div class="dti-section">
+                                <div class="dti-header">
+                                    <div class="dti-header-copy">
+                                        <p class="dti-count">{{ summary.total_initiatives }}</p>
+                                        <p class="dti-label">{{ page.initiativeLabel }}</p>
+                                    </div>
+                                    <button type="button" class="dti-toggle" :aria-pressed="showCoeInitiatives"
+                                        :aria-label="showCoeInitiatives ? 'Hide initiative names' : 'Show initiative names'"
+                                        :title="showCoeInitiatives ? 'Hide initiative names' : 'Show initiative names'"
+                                        @click="showCoeInitiatives = !showCoeInitiatives">
+                                        <EyeSlashIcon v-if="showCoeInitiatives" class="dti-toggle-icon" />
+                                        <EyeIcon v-else class="dti-toggle-icon" />
+                                    </button>
                                 </div>
-                                <div class="dti-card-title">{{ card.display_name }}</div>
-                                <div v-if="showCoeInitiatives" class="dti-card-preview">
-                                    <template v-if="card.initiatives_preview?.length">
-                                        <p v-for="initiative in card.initiatives_preview" :key="initiative.id"
-                                            class="dti-card-preview-item">
-                                            {{ initiative.code }} - {{ initiative.name }}
-                                        </p>
-                                        <p v-if="card.remaining_initiatives_count > 0" class="dti-card-preview-more">
-                                            +{{ card.remaining_initiatives_count }} initiative lagi
-                                        </p>
-                                    </template>
-                                    <p v-else class="dti-card-preview-empty">
-                                        Belum ada initiative
-                                    </p>
+
+                                <div class="dti-cards">
+                                    <div v-for="card in technologyCards" :key="card.name" class="dti-card"
+                                        :class="{ 'dti-card--compact': !showCoeInitiatives }" :title="coeTooltip(card)">
+                                        <div class="dti-card-badge">
+                                            {{ card.initiatives_count }}
+                                        </div>
+                                        <div class="dti-card-title">{{ card.display_name }}</div>
+                                        <div v-if="showCoeInitiatives" class="dti-card-preview">
+                                            <template v-if="card.initiatives_preview?.length">
+                                                <p v-for="initiative in card.initiatives_preview" :key="initiative.id"
+                                                    class="dti-card-preview-item">
+                                                    {{ initiative.code }} - {{ initiative.name }}
+                                                </p>
+                                                <p v-if="card.remaining_initiatives_count > 0" class="dti-card-preview-more">
+                                                    +{{ card.remaining_initiatives_count }} initiative lagi
+                                                </p>
+                                            </template>
+                                            <p v-else class="dti-card-preview-empty">
+                                                Belum ada initiative
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <!-- ═══ CONNECTOR ═══ -->
-                    <div class="connector-chain">
-                        <svg width="20" height="28" viewBox="0 0 20 28">
-                            <circle cx="10" cy="6" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5" />
-                            <line x1="10" y1="11" x2="10" y2="17" stroke="#9cb8d8" stroke-width="1.5" />
-                            <circle cx="10" cy="22" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5" />
-                        </svg>
-                    </div>
+                            <!-- ═══ CONNECTOR ═══ -->
+                            <div class="connector-chain">
+                                <svg width="20" height="28" viewBox="0 0 20 28">
+                                    <circle cx="10" cy="6" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5" />
+                                    <line x1="10" y1="11" x2="10" y2="17" stroke="#9cb8d8" stroke-width="1.5" />
+                                    <circle cx="10" cy="22" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5" />
+                                </svg>
+                            </div>
 
-                    <!-- ═══ GRAND IT STRATEGY SECTION ═══ -->
-                    <div class="gits-section">
-                        <div class="gits-header">
-                            <h2 class="gits-title">{{ page.grandStrategyTitle }}</h2>
-                            <p class="gits-subtitle">{{ page.grandStrategyText }}</p>
-                        </div>
-
-                        <div class="gits-pillars">
-                            <article v-for="card in strategyCards" :key="card.name" class="gits-pillar">
-                                <h3 class="gits-pillar-title">{{ card.display_name }}</h3>
-                                <div class="gits-pillar-desc">
-                                    <p v-for="(line, lineIndex) in (card.description_lines?.length ? card.description_lines : card.initiatives_preview.map(item => item.label))"
-                                        :key="`${card.name}-${lineIndex}`">
-                                        {{ line }}
-                                    </p>
-                                    <p v-if="!card.description_lines?.length && card.is_empty"
-                                        class="gits-pillar-empty">
-                                        Belum ada initiative yang terhubung ke area ini.
-                                    </p>
+                            <!-- ═══ GRAND IT STRATEGY SECTION ═══ -->
+                            <div class="gits-section">
+                                <div class="gits-header">
+                                    <h2 class="gits-title">{{ page.grandStrategyTitle }}</h2>
+                                    <p class="gits-subtitle">{{ page.grandStrategyText }}</p>
                                 </div>
-                            </article>
-                        </div>
 
-                        <!-- ═══ FOUNDATION BAR ═══ -->
-                        <div v-if="foundationCard" class="foundation-bar">
-                            <span class="foundation-title">{{ foundationCard.display_name }}:</span>
-                            <span class="foundation-desc">Memungkinkan pelaksanaan efektif dari semua digital dan IT
-                                initiative</span>
+                                <div class="gits-pillars">
+                                    <article v-for="card in strategyCards" :key="card.name" class="gits-pillar">
+                                        <h3 class="gits-pillar-title">{{ card.display_name }}</h3>
+                                        <div class="gits-pillar-desc">
+                                            <p v-for="(line, lineIndex) in (card.description_lines?.length ? card.description_lines : card.initiatives_preview.map(item => item.label))"
+                                                :key="`${card.name}-${lineIndex}`">
+                                                {{ line }}
+                                            </p>
+                                            <p v-if="!card.description_lines?.length && card.is_empty"
+                                                class="gits-pillar-empty">
+                                                Belum ada initiative yang terhubung ke area ini.
+                                            </p>
+                                        </div>
+                                    </article>
+                                </div>
+
+                                <!-- ═══ FOUNDATION BAR ═══ -->
+                                <div v-if="foundationCard" class="foundation-bar">
+                                    <span class="foundation-title">{{ foundationCard.display_name }}:</span>
+                                    <span class="foundation-desc">Memungkinkan pelaksanaan efektif dari semua digital dan IT
+                                        initiative</span>
+                                </div>
+                            </div>
                         </div>
+                    </section>
+
+                    <div v-else-if="viewMode === 'digital-block'" key="digital-block">
+                        <DualGrowth :goals="dualGrowthGoals" />
                     </div>
-                </div>
-            </section>
 
-            <DualGrowth v-if="viewMode === 'digital-block'" :goals="dualGrowthGoals" />
-            <DualGrowthFull v-if="viewMode === 'block'" :goals="dualGrowthGoals" />
+                    <div v-else-if="viewMode === 'block'" key="block">
+                        <DualGrowthFull :goals="dualGrowthGoals" />
+                    </div>
 
-            <DigitalBuildingBlock
-                v-if="viewMode === 'digital-transformation-initiatives'"
-                :items="allInitiatives"
-            />
+                    <div v-else-if="viewMode === 'digital-transformation-initiatives'" key="digital-transformation-initiatives">
+                        <DigitalBuildingBlock
+                            :items="digitalInitiativeOptions"
+                            :coe-options="coeOptions"
+                        />
+                    </div>
+                </Transition>
+            </div>
         </div>
     </UserLayout>
 </template>
@@ -229,6 +249,14 @@ const props = defineProps({
         default: null,
     },
     unassignedInitiatives: {
+        type: Array,
+        default: () => [],
+    },
+    coeOptions: {
+        type: Array,
+        default: () => [],
+    },
+    digitalInitiativeOptions: {
         type: Array,
         default: () => [],
     },

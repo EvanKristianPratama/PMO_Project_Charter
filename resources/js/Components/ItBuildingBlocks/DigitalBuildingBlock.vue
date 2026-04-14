@@ -180,7 +180,7 @@ const statusLegend = computed(() => {
                         :title="`Filter: ${status.label}`"
                     >
                         <span
-                            class="h-3 w-3 rounded-sm shadow-sm"
+                            class="h-3 w-3 rounded-sm shadow-sm legend-swatch"
                             :class="status.class"
                         ></span>
                         <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
@@ -366,4 +366,14 @@ const statusLegend = computed(() => {
 .status-color-itsbp { background-color: #06b6d4 !important; color: #ffffff !important; border-color: #0891b2 !important; }
 .status-color-onreview { background-color: #ca8a04 !important; color: #ffffff !important; border-color: #a16207 !important; }
 .status-color-sh { background-color: #ef4444 !important; color: #ffffff !important; border-color: #dc2626 !important; }
+
+.legend-swatch {
+    display: block;
+    width: 12px;
+    height: 12px;
+    min-width: 12px;
+    min-height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
 </style>

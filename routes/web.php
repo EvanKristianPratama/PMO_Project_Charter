@@ -41,6 +41,7 @@ use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Ed
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\IndexController as ProgramDefinitionDigitalInitiativesController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Mapping\IndexController as ProgramDefinitionDigitalInitiativesMappingIndexController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\MasterDigitalInitiative\IndexController as ProgramDefinitionDigitalInitiativesMasterIndexController;
+use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Summary\IndexController as ProgramDefinitionDigitalInitiativesSummaryIndexController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Roadmap\CreateController as ProgramDefinitionDigitalInitiativesRoadmapCreateController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Roadmap\EditController as ProgramDefinitionDigitalInitiativesRoadmapEditController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Roadmap\IndexController as ProgramDefinitionDigitalInitiativesRoadmapIndexController;
@@ -98,6 +99,9 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::put('/program-planning/program-definition/digital-initiatives/{digitalInitiative}', ProgramDefinitionDigitalInitiativesUpdateController::class)
         ->whereNumber('digitalInitiative')
         ->name('program-planning.program-definition.digital-initiatives.update');
+    Route::get('/program-planning/program-definition/digital-initiatives/{initiative}/summary', ProgramDefinitionDigitalInitiativesSummaryIndexController::class)
+        ->whereNumber('initiative')
+        ->name('program-planning.program-definition.digital-initiatives.summary.index');
 
     Route::prefix('/program-planning/program-definition/digital-initiatives/appendix')->name('program-planning.program-definition.digital-initiatives.appendix.')->group(function () {
         Route::get('/', ProgramDefinitionDigitalInitiativesAppendixIndexController::class)->name('index');
