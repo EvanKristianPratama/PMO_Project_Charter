@@ -44,12 +44,6 @@ export function useNavigation() {
                 active: (url) => url.startsWith('/strategic-pillars'),
             },
             {
-                label: 'Building Blocks',
-                href: safeRoute('program-planning.it-building-blocks.index'),
-                icon: DocumentTextIcon,
-                active: (url) => url.startsWith('/program-planning/it-building-blocks'),
-            },
-            {
                 label: 'Digital Initiative Definition',
                 href: safeRoute('program-planning.program-definition.digital-initiatives'),
                 icon: DocumentTextIcon,

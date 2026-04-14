@@ -45,6 +45,14 @@
                     @click="viewMode = 'it-initiatives'">
                     IT Initiatives
                 </button>
+                <button type="button" class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
+                    :class="viewMode === 'strategic-pillars'
+                        ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
+                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
+                    @click="viewMode = 'strategic-pillars'">
+                    Strategic Pillars
+                </button>
+
             </div>
 
             <!-- Conditional View Rendering -->
@@ -202,18 +210,12 @@
                     </div>
 
                     <div v-else-if="viewMode === 'it-building-blocs'" key="it-building-blocs">
-                        <ItInitiatives
-                            :groups="itBuildingBlockMatrix"
-                            :coe-options="coeOptions"
-                            :initiative-options="itInitiativeOptions"
-                        />
+                        <ItInitiatives :groups="itBuildingBlockMatrix" :coe-options="coeOptions"
+                            :initiative-options="digitalInitiativeOptions" />
                     </div>
 
                     <div v-else-if="viewMode === 'it-initiatives'" key="it-initiatives">
-                        <ItBuildingBlocks
-                            :items="itInitiativeOptions"
-                            :coe-options="coeOptions"
-                        />
+                        <ItBuildingBlocks :items="itInitiativeOptions" :coe-options="coeOptions" />
                     </div>
                 </Transition>
             </div>

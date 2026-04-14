@@ -6,6 +6,7 @@ use App\Models\Goal;
 use App\Models\InitiativeTagging;
 use App\Models\MstCoe;
 use App\Models\MstInitiative;
+use App\Services\ProgramPlanning\ItBuildingBlockService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
@@ -203,47 +204,15 @@ class StrategicHousePageService
             'architectureCard' => $architectureCard,
             'tbcCard' => $tbcCard,
             'unassignedInitiatives' => $unassignedInitiatives,
-            'coeOptions' => $this->getCoeOptions(),
-            'digitalInitiativeOptions' => $this->getDigitalInitiativeOptions(),
+            'coeOptions' => $this->itBuildingBlockService->getCoeOptions(),
+            'digitalInitiativeOptions' => $this->itBuildingBlockService->getDigitalInitiativeOptions(),
             'itBuildingBlockMatrix' => $this->itBuildingBlockService->getGroupedMappings(),
             'itInitiativeOptions' => $this->itBuildingBlockService->getItInitiativeOptions(),
         ];
     }
 
-    private function getCoeOptions(): Collection
-    {
-        return MstCoe::query()
-            ->orderBy('name')
-            ->get(['id', 'name'])
-            ->map(fn (MstCoe $coe): array => [
-                'id' => (int) $coe->id,
-                'name' => $coe->name,
-            ]);
-    }
-
-    private function getDigitalInitiativeOptions(): Collection
-    {
-        return MstInitiative::query()
-            ->with(['coe:id,name', 'organization:id,name,groub_id', 'latestStatusImplementation'])
-            ->where('tipe_initiative', 1)
-            ->orderBy('code')
-            ->orderBy('name')
-            ->get(['id', 'code', 'name', 'description', 'coe_id', 'business_unit', 'tipe_initiative'])
-            ->map(fn (MstInitiative $initiative): array => [
-                'id' => (int) $initiative->id,
-                'code' => $initiative->code,
-                'name' => $initiative->name,
-                'description' => $initiative->description,
-                'coe_id' => (int) $initiative->coe_id,
-                'coe_name' => $initiative->coe?->name ?: 'No COE',
-                'business_unit' => $initiative->organization?->name ?: '-',
-                'groub_id' => $initiative->organization?->groub_id,
-                'implementation_status' => $initiative->latestStatusImplementation?->review_status ?: null,
-                'tipe_initiative' => (int) $initiative->tipe_initiative,
-            ]);
-    }
-
     private function normalizeFilters(array $filters): array
+
     {
         $initiativeType = (int) ($filters['initiative_type'] ?? self::DEFAULT_INITIATIVE_TYPE);
 
