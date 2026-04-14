@@ -35,15 +35,12 @@
 
             <!-- Conditional View Rendering -->
             <div class="relative min-h-[400px]">
-                <Transition
-                    enter-active-class="transition duration-300 ease-out"
+                <Transition enter-active-class="transition duration-300 ease-out"
                     enter-from-class="transform opacity-0 translate-y-4"
                     enter-to-class="transform opacity-100 translate-y-0"
                     leave-active-class="transition duration-200 ease-in"
                     leave-from-class="transform opacity-100 translate-y-0"
-                    leave-to-class="transform opacity-0 translate-y-4"
-                    mode="out-in"
-                >
+                    leave-to-class="transform opacity-0 translate-y-4" mode="out-in">
                     <section v-if="viewMode === 'mapping'" key="mapping" class="sh-mockup">
                         <div class="mockup-content">
 
@@ -53,7 +50,8 @@
 
                                 <div class="roof-top">
                                     <div class="roof-main">
-                                        <div class="roof-main-label">{{ roofSection.main_goal?.title ?? page.headline }}</div>
+                                        <div class="roof-main-label">{{ roofSection.main_goal?.title ?? page.headline }}
+                                        </div>
                                         <div v-if="roofSection.main_goal_themes?.length" class="roof-sub-items">
                                             <div v-for="theme in roofSection.main_goal_themes" :key="theme.id"
                                                 class="roof-sub-item">
@@ -96,8 +94,8 @@
                             <div class="dti-section">
                                 <div class="dti-header">
                                     <div class="dti-header-copy">
-                                        <p class="dti-count">{{ summary.total_initiatives }}</p>
-                                        <p class="dti-label">{{ page.initiativeLabel }}</p>
+                                        <p class="dti-count">{{ summary.total_initiatives }} Digital transformation
+                                            initiatives</p>
                                     </div>
                                     <button type="button" class="dti-toggle" :aria-pressed="showCoeInitiatives"
                                         :aria-label="showCoeInitiatives ? 'Hide initiative names' : 'Show initiative names'"
@@ -121,7 +119,8 @@
                                                     class="dti-card-preview-item">
                                                     {{ initiative.code }} - {{ initiative.name }}
                                                 </p>
-                                                <p v-if="card.remaining_initiatives_count > 0" class="dti-card-preview-more">
+                                                <p v-if="card.remaining_initiatives_count > 0"
+                                                    class="dti-card-preview-more">
                                                     +{{ card.remaining_initiatives_count }} initiative lagi
                                                 </p>
                                             </template>
@@ -168,8 +167,8 @@
                                 <!-- ═══ FOUNDATION BAR ═══ -->
                                 <div v-if="foundationCard" class="foundation-bar">
                                     <span class="foundation-title">{{ foundationCard.display_name }}:</span>
-                                    <span class="foundation-desc">Memungkinkan pelaksanaan efektif dari semua digital dan IT
-                                        initiative</span>
+                                    <span class="foundation-desc">Memungkinkan pelaksanaan efektif dari semua digital
+                                        dan IT initiative</span>
                                 </div>
                             </div>
                         </div>
@@ -183,11 +182,9 @@
                         <DualGrowthFull :goals="dualGrowthGoals" />
                     </div>
 
-                    <div v-else-if="viewMode === 'digital-transformation-initiatives'" key="digital-transformation-initiatives">
-                        <DigitalBuildingBlock
-                            :items="digitalInitiativeOptions"
-                            :coe-options="coeOptions"
-                        />
+                    <div v-else-if="viewMode === 'digital-transformation-initiatives'"
+                        key="digital-transformation-initiatives">
+                        <DigitalBuildingBlock :items="digitalInitiativeOptions" :coe-options="coeOptions" />
                     </div>
                 </Transition>
             </div>
@@ -374,6 +371,8 @@ const coeTooltip = (card) => {
     display: flex;
     gap: 12px;
     align-items: stretch;
+    width: 80%;
+    margin: 0 auto;
 }
 
 .roof-main {
@@ -389,7 +388,7 @@ const coeTooltip = (card) => {
 .roof-main-label {
     background: #e8eff8;
     border: 1px solid #c5d6e8;
-    padding: 10px 24px;
+    padding: 2px 24px;
     font-size: 14px;
     font-weight: 600;
     color: #1a2a3a;
@@ -424,8 +423,8 @@ const coeTooltip = (card) => {
     align-items: center;
     justify-content: center;
     text-align: center;
-    font-size: 16px;
-    font-weight: 700;
+    font-size: 14px;
+    font-weight: 600;
     line-height: 1.35;
     min-height: 88px;
 }
@@ -442,19 +441,18 @@ const coeTooltip = (card) => {
     background: linear-gradient(180deg, #1e6dc0 0%, #184f96 100%);
     color: #fff;
     text-align: center;
-    padding: 24px 40px;
+    padding: 17px 40px;
     clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%);
     border-radius: 6px;
 }
 
 .vision-title {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
     letter-spacing: 0.02em;
 }
 
 .vision-text {
-    margin-top: 8px;
     font-size: 12px;
     line-height: 1.7;
     color: rgba(255, 255, 255, 0.92);
@@ -545,7 +543,13 @@ const coeTooltip = (card) => {
 }
 
 .dti-card--compact {
-    min-height: 88px;
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+}
+
+.dti-card--compact .dti-card-title {
+    margin-top: 0;
 }
 
 .dti-card-badge {
@@ -619,15 +623,14 @@ const coeTooltip = (card) => {
 }
 
 .gits-title {
-    font-size: 20px;
+    font-size: 17px;
     font-weight: 700;
     color: #0d2a4a;
 }
 
 .gits-subtitle {
-    font-size: 12px;
+    font-size: 15px;
     color: #3a5a7a;
-    margin-top: 4px;
 }
 
 .gits-pillars {
@@ -648,6 +651,7 @@ const coeTooltip = (card) => {
 
 .gits-pillar-title {
     font-size: 14px;
+    text-align: center;
     font-weight: 700;
     line-height: 1.3;
     margin-bottom: 8px;
@@ -655,7 +659,8 @@ const coeTooltip = (card) => {
 
 .gits-pillar-desc {
     font-size: 10px;
-    line-height: 1.5;
+    text-align: center;
+    line-height: 1;
     color: rgba(255, 255, 255, 0.85);
     flex: 1;
 }
@@ -676,17 +681,18 @@ const coeTooltip = (card) => {
     padding: 14px 24px;
     color: #fff;
     text-align: center;
-    font-size: 13px;
     line-height: 1.5;
 }
 
 .foundation-title {
     font-weight: 700;
+    font-size: 13px;
     margin-right: 4px;
 }
 
 .foundation-desc {
     color: rgba(255, 255, 255, 0.85);
+    font-size: 10px;
 }
 
 /* ─── RESPONSIVE ─── */
@@ -699,6 +705,7 @@ const coeTooltip = (card) => {
 @media (max-width: 768px) {
     .roof-top {
         flex-direction: column;
+        width: 90%;
     }
 
     .roof-side {
