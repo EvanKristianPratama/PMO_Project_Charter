@@ -153,6 +153,10 @@ class StrategicHousePageService
         ],
     ];
 
+    public function __construct(
+        protected ItBuildingBlockService $itBuildingBlockService
+    ) {}
+
     public function getPageProps(array $filters = []): array
     {
         $normalizedFilters = $this->normalizeFilters($filters);
@@ -201,6 +205,8 @@ class StrategicHousePageService
             'unassignedInitiatives' => $unassignedInitiatives,
             'coeOptions' => $this->getCoeOptions(),
             'digitalInitiativeOptions' => $this->getDigitalInitiativeOptions(),
+            'itBuildingBlockMatrix' => $this->itBuildingBlockService->getGroupedMappings(),
+            'itInitiativeOptions' => $this->itBuildingBlockService->getItInitiativeOptions(),
         ];
     }
 

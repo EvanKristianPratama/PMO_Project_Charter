@@ -31,6 +31,20 @@
                     @click="viewMode = 'digital-transformation-initiatives'">
                     Digital Transformation Initiatives
                 </button>
+                <button type="button" class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
+                    :class="viewMode === 'it-building-blocs'
+                        ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
+                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
+                    @click="viewMode = 'it-building-blocs'">
+                    IT Building Blocks
+                </button>
+                <button type="button" class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
+                    :class="viewMode === 'it-initiatives'
+                        ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
+                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
+                    @click="viewMode = 'it-initiatives'">
+                    IT Initiatives
+                </button>
             </div>
 
             <!-- Conditional View Rendering -->
@@ -186,6 +200,21 @@
                         key="digital-transformation-initiatives">
                         <DigitalBuildingBlock :items="digitalInitiativeOptions" :coe-options="coeOptions" />
                     </div>
+
+                    <div v-else-if="viewMode === 'it-building-blocs'" key="it-building-blocs">
+                        <ItInitiatives
+                            :groups="itBuildingBlockMatrix"
+                            :coe-options="coeOptions"
+                            :initiative-options="itInitiativeOptions"
+                        />
+                    </div>
+
+                    <div v-else-if="viewMode === 'it-initiatives'" key="it-initiatives">
+                        <ItBuildingBlocks
+                            :items="itInitiativeOptions"
+                            :coe-options="coeOptions"
+                        />
+                    </div>
                 </Transition>
             </div>
         </div>
@@ -198,6 +227,8 @@ import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
 import DualGrowth from '@/Components/StrategicHouse/DualGrowth.vue';
 import DualGrowthFull from '@/Components/StrategicHouse/DualGrowthFull.vue';
 import DigitalBuildingBlock from '@/Components/ItBuildingBlocks/DigitalBuildingBlock.vue';
+import ItBuildingBlocks from '@/Components/ItBuildingBlocks/ItBuildingBlock.vue';
+import ItInitiatives from '@/Components/ItBuildingBlocks/ItBuildingBlocksMatrix.vue';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
 const props = defineProps({
@@ -254,6 +285,14 @@ const props = defineProps({
         default: () => [],
     },
     digitalInitiativeOptions: {
+        type: Array,
+        default: () => [],
+    },
+    itBuildingBlockMatrix: {
+        type: Array,
+        default: () => [],
+    },
+    itInitiativeOptions: {
         type: Array,
         default: () => [],
     },
@@ -405,7 +444,7 @@ const coeTooltip = (card) => {
     flex: 1;
     background: #e8eff8;
     border: 1px solid #c5d6e8;
-    padding: 10px 16px;
+    padding: 2px 16px;
     font-size: 12px;
     font-weight: 500;
     color: #2a4a6a;
@@ -418,15 +457,13 @@ const coeTooltip = (card) => {
     background: linear-gradient(180deg, #3b64a8 0%, #2f5596 100%);
     color: #fff;
     border-radius: 10px;
-    padding: 18px 20px;
+    padding: 2px 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
     font-size: 14px;
     font-weight: 600;
-    line-height: 1.35;
-    min-height: 88px;
 }
 
 /* ─── CONNECTORS ─── */
