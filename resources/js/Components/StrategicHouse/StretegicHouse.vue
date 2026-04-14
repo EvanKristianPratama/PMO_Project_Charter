@@ -194,7 +194,19 @@ const coeTooltip = (card) => {
                         <div v-if="showDetails" class="dti-card-badge" :title="coeTooltip(card)">
                             {{ card.initiatives_count }}
                         </div>
-                        <div class="dti-card-title">{{ card.display_name }}</div>
+                        <div class="dti-card-content">
+                            <div class="dti-card-title">{{ card.display_name }}</div>
+                            <div v-if="showDetails" class="dti-card-list-wrapper">
+                                <ul v-if="card.initiatives?.length" class="dti-card-list">
+                                    <li v-for="(ini, idx) in card.initiatives" :key="`${card.name}-ini-${idx}`" class="dti-card-list-item">
+                                        {{ ini.label }}
+                                    </li>
+                                </ul>
+                                <div v-else class="dti-card-list-empty">
+                                    Belum ada initiative
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Not Classified Card -->
@@ -202,7 +214,19 @@ const coeTooltip = (card) => {
                         <div v-if="showDetails" class="dti-card-badge" :title="coeTooltip(unassignedCard)">
                             {{ unassignedCard.initiatives_count }}
                         </div>
-                        <div class="dti-card-title">{{ unassignedCard.display_name }}</div>
+                        <div class="dti-card-content">
+                            <div class="dti-card-title">{{ unassignedCard.display_name }}</div>
+                            <div v-if="showDetails" class="dti-card-list-wrapper">
+                                <ul v-if="unassignedCard.initiatives?.length" class="dti-card-list">
+                                    <li v-for="(ini, idx) in unassignedCard.initiatives" :key="`${unassignedCard.name}-ini-${idx}`" class="dti-card-list-item">
+                                        {{ ini.label }}
+                                    </li>
+                                </ul>
+                                <div v-else class="dti-card-list-empty">
+                                    Belum ada initiative
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -474,8 +498,27 @@ const coeTooltip = (card) => {
     align-items: center;
 }
 
+/* When showing details, increase height to fit the list */
+:not(.dti-cards--hidden) .dti-card--compact {
+    min-height: 140px;
+    align-items: flex-start;
+    padding-top: 10px;
+}
+
+.dti-card-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
 .dti-card--compact .dti-card-title {
     margin-top: 0;
+}
+
+/* Title adjustments when list is visible */
+:not(.dti-cards--hidden) .dti-card-title {
+    margin-top: 4px;
+    padding-right: 36px;
 }
 
 .dti-card-badge {
@@ -494,6 +537,7 @@ const coeTooltip = (card) => {
     justify-content: center;
     padding: 0 8px;
     box-shadow: 0 4px 12px rgba(47, 85, 150, 0.16);
+    z-index: 10;
 }
 
 .dti-card-title {
@@ -508,6 +552,57 @@ const coeTooltip = (card) => {
 
 .dti-cards--hidden .dti-card-title {
     padding-right: 0;
+}
+
+.dti-card-list-wrapper {
+    margin-top: 8px;
+    border-top: 1px dashed rgba(59, 130, 200, 0.4);
+    padding-top: 8px;
+    width: 100%;
+    max-height: 85px;
+    overflow: hidden;
+}
+
+.dti-card-list {
+    overflow-y: auto;
+    max-height: 80px;
+    padding-right: 4px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.dti-card-list-item {
+    font-size: 10px;
+    line-height: 1.3;
+    color: #365780;
+    margin-bottom: 4px;
+    padding: 2px 4px;
+    background: rgba(59, 130, 200, 0.05);
+    border-radius: 2px;
+}
+
+.dti-card-list-empty {
+    font-size: 10px;
+    font-style: italic;
+    color: #6b85a8;
+    text-align: center;
+    padding-top: 10px;
+}
+
+/* Custom scrollbar for initiative list */
+.dti-card-list::-webkit-scrollbar {
+    width: 3px;
+}
+.dti-card-list::-webkit-scrollbar-track {
+    background: rgba(59, 130, 200, 0.05);
+}
+.dti-card-list::-webkit-scrollbar-thumb {
+    background: rgba(47, 85, 150, 0.3);
+    border-radius: 3px;
+}
+.dti-card-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(47, 85, 150, 0.5);
 }
 
 .dti-card-preview {
