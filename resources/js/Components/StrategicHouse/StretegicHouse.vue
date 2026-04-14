@@ -47,6 +47,7 @@ const props = defineProps({
 
 const selectedSource = ref('all');
 const showDetails = ref(true);
+const showStrategyDetails = ref(true);
 
 const filterInitiatives = (initiatives) => {
     if (!initiatives) return [];
@@ -243,14 +244,20 @@ const coeTooltip = (card) => {
             <!-- ═══ GRAND IT STRATEGY SECTION ═══ -->
             <div class="gits-section">
                 <div class="gits-header">
-                    <h2 class="gits-title">{{ page.grandStrategyTitle }}</h2>
-                    <p class="gits-subtitle">{{ page.grandStrategyText }}</p>
+                    <div class="gits-header-content">
+                        <h2 class="gits-title">{{ page.grandStrategyTitle }}</h2>
+                        <p class="gits-subtitle">{{ page.grandStrategyText }}</p>
+                    </div>
+                    <button @click="showStrategyDetails = !showStrategyDetails" class="dti-toggle" :title="showStrategyDetails ? 'Hide Descriptions' : 'Show Descriptions'">
+                        <EyeIcon v-if="showStrategyDetails" class="dti-toggle-icon" />
+                        <EyeSlashIcon v-else class="dti-toggle-icon" />
+                    </button>
                 </div>
 
-                <div class="gits-pillars">
+                <div class="gits-pillars" :class="{ 'gits-pillars--hidden': !showStrategyDetails }">
                     <article v-for="card in filteredStrategyCards" :key="card.name" class="gits-pillar">
                         <h3 class="gits-pillar-title">{{ card.display_name }}</h3>
-                        <div class="gits-pillar-desc">
+                        <div v-if="showStrategyDetails" class="gits-pillar-desc">
                             <p v-for="(line, lineIndex) in (card.description_lines?.length ? card.description_lines : card.initiatives_preview.map(item => item.label))"
                                 :key="`${card.name}-${lineIndex}`">
                                 {{ line }}
@@ -264,8 +271,8 @@ const coeTooltip = (card) => {
 
                 <!-- ═══ FOUNDATION BAR ═══ -->
                 <div v-if="foundationCard" class="foundation-bar">
-                    <span class="foundation-title">{{ foundationCard.display_name }}:</span>
-                    <span class="foundation-desc">Memungkinkan pelaksanaan efektif dari semua digital
+                    <span class="foundation-title">{{ foundationCard.display_name }}<template v-if="showStrategyDetails">:</template></span>
+                    <span v-if="showStrategyDetails" class="foundation-desc">Memungkinkan pelaksanaan efektif dari semua digital
                         dan IT initiative</span>
                 </div>
             </div>
@@ -644,8 +651,16 @@ const coeTooltip = (card) => {
 }
 
 .gits-header {
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
     margin-bottom: 20px;
+}
+
+.gits-header-content {
+    flex: 1;
+    text-align: center;
 }
 
 .gits-title {
@@ -673,6 +688,14 @@ const coeTooltip = (card) => {
     color: #fff;
     display: flex;
     flex-direction: column;
+    min-height: 140px;
+    transition: all 0.2s ease;
+}
+
+.gits-pillars--hidden .gits-pillar {
+    min-height: 52px;
+    justify-content: center;
+    padding: 10px 14px;
 }
 
 .gits-pillar-title {
@@ -681,6 +704,10 @@ const coeTooltip = (card) => {
     font-weight: 700;
     line-height: 1.3;
     margin-bottom: 8px;
+}
+
+.gits-pillars--hidden .gits-pillar-title {
+    margin-bottom: 0;
 }
 
 .gits-pillar-desc {
@@ -738,12 +765,14 @@ const coeTooltip = (card) => {
         width: 100%;
     }
 
-    .dti-header {
+    .dti-header,
+    .gits-header {
         flex-direction: column;
         align-items: stretch;
     }
 
-    .dti-header-copy {
+    .dti-header-copy,
+    .gits-header-content {
         text-align: center;
     }
 
