@@ -27,8 +27,15 @@ class IndexController extends Controller
 
         // 1. Project Charter (DigitalInitiativeDocument)
         $projectCharter = TrsProject::query()
-            ->whereHas('mappedInitiatives', function ($q) use ($initiative) {
-                $q->where('initiative_id', $initiative->id);
+            ->where(function ($query) use ($initiative) {
+                $query->whereHas('mappedInitiatives', function ($q) use ($initiative) {
+                    $q->where('initiative_id', $initiative->id);
+                })
+                ->orWhere('code', sprintf('AUTO-MI-%d', $initiative->id))
+                ->orWhere(function ($q) use ($initiative) {
+                    $q->where('name', $initiative->name)
+                      ->where('tipe_inisiative', (string) $initiative->tipe_initiative);
+                });
             })
             ->with([
                 'charter',

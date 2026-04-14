@@ -124,11 +124,8 @@ const narrativeSections = computed(() => {
         </div>
 
         <div class="space-y-4 px-6 pb-6">
-            <section
-                v-for="section in narrativeSections"
-                :key="section.key"
-                class="rounded-xl border border-slate-200 bg-slate-50/60 p-4"
-            >
+            <section v-for="section in narrativeSections" :key="section.key"
+                class="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
                 <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-500">
                     {{ section.label }}
                 </h2>
