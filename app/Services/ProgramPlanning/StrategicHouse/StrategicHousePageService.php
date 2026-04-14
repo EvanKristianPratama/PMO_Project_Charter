@@ -169,11 +169,15 @@ class StrategicHousePageService
         $roofSection = $this->getRoofSection();
 
         $coeCatalog = $this->getCoeCatalog($initiativeType);
+        
+        // Grand IT Strategy section always shows IT Transformation initiatives (type 2)
+        $itCoeCatalog = ($initiativeType === 2) ? $coeCatalog : $this->getCoeCatalog(2);
+
         $technologyCards = $this->buildSectionCards($coeCatalog, self::TECHNOLOGY_COE_CONFIG, $showEmpty);
-        $strategyCards = $this->buildSectionCards($coeCatalog, self::STRATEGY_COE_CONFIG, $showEmpty);
-        $foundationCard = $this->buildSingleCard($coeCatalog, self::FOUNDATION_COE_CONFIG);
-        $architectureCard = $this->buildSingleCard($coeCatalog, self::ARCHITECTURE_COE_CONFIG);
-        $tbcCard = $this->buildSingleCard($coeCatalog, self::TBC_COE_CONFIG);
+        $strategyCards = $this->buildSectionCards($itCoeCatalog, self::STRATEGY_COE_CONFIG, $showEmpty);
+        $foundationCard = $this->buildSingleCard($itCoeCatalog, self::FOUNDATION_COE_CONFIG);
+        $architectureCard = $this->buildSingleCard($itCoeCatalog, self::ARCHITECTURE_COE_CONFIG);
+        $tbcCard = $this->buildSingleCard($itCoeCatalog, self::TBC_COE_CONFIG);
         $unassignedInitiatives = $this->getUnassignedInitiatives($initiativeType);
 
         // Strategic Pillar data

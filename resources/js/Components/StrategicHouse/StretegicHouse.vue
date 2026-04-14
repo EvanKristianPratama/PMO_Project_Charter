@@ -78,6 +78,28 @@ const processedCards = (cards) => {
 const filteredTechnologyCards = computed(() => processedCards(props.technologyCards));
 const filteredStrategyCards = computed(() => processedCards(props.strategyCards));
 
+const filteredFoundationCard = computed(() => {
+    if (!props.foundationCard) return null;
+    const card = props.foundationCard;
+    const filteredInis = filterInitiatives(card.initiatives || []);
+    return {
+        ...card,
+        initiatives: filteredInis,
+        initiatives_count: filteredInis.length,
+    };
+});
+
+const filteredArchitectureCard = computed(() => {
+    if (!props.architectureCard) return null;
+    const card = props.architectureCard;
+    const filteredInis = filterInitiatives(card.initiatives || []);
+    return {
+        ...card,
+        initiatives: filteredInis,
+        initiatives_count: filteredInis.length,
+    };
+});
+
 const unassignedCard = computed(() => {
     const filteredInis = filterInitiatives(props.unassignedInitiatives || []);
     if (filteredInis.length === 0) return null;
@@ -256,7 +278,12 @@ const coeTooltip = (card) => {
 
                 <div class="gits-pillars" :class="{ 'gits-pillars--hidden': !showStrategyDetails }">
                     <article v-for="card in filteredStrategyCards" :key="card.name" class="gits-pillar">
+                        <div v-if="!showStrategyDetails && card.initiatives_count > 0" class="gits-capsule-badge" :title="coeTooltip(card)">
+                            {{ card.initiatives_count }}
+                        </div>
                         <h3 class="gits-pillar-title">{{ card.display_name }}</h3>
+                        
+                        <!-- Description View -->
                         <div v-if="showStrategyDetails" class="gits-pillar-desc">
                             <p v-for="(line, lineIndex) in (card.description_lines?.length ? card.description_lines : card.initiatives_preview.map(item => item.label))"
                                 :key="`${card.name}-${lineIndex}`">
@@ -266,14 +293,43 @@ const coeTooltip = (card) => {
                                 Belum ada initiative yang terhubung ke area ini.
                             </p>
                         </div>
+
+                        <!-- Initiatives View (Visible when showStrategyDetails is false) -->
+                        <div v-else class="gits-pillar-list-wrapper">
+                            <ul v-if="card.initiatives?.length" class="gits-pillar-list">
+                                <li v-for="(ini, idx) in card.initiatives" :key="`${card.name}-ini-${idx}`" class="gits-pillar-list-item">
+                                    {{ ini.label }}
+                                </li>
+                            </ul>
+                            <div v-else class="gits-pillar-list-empty">
+                                Belum ada initiative
+                            </div>
+                        </div>
                     </article>
                 </div>
 
                 <!-- ═══ FOUNDATION BAR ═══ -->
-                <div v-if="foundationCard" class="foundation-bar">
-                    <span class="foundation-title">{{ foundationCard.display_name }}<template v-if="showStrategyDetails">:</template></span>
+                <div v-if="filteredFoundationCard" class="foundation-bar" :class="{ 'foundation-bar--expanded': !showStrategyDetails }">
+                    <div class="foundation-header">
+                        <span class="foundation-title">{{ filteredFoundationCard.display_name }}<template v-if="showStrategyDetails">:</template></span>
+                        <div v-if="!showStrategyDetails && filteredFoundationCard.initiatives_count > 0" class="gits-capsule-badge gits-capsule-badge--dark">
+                            {{ filteredFoundationCard.initiatives_count }}
+                        </div>
+                    </div>
+                    
                     <span v-if="showStrategyDetails" class="foundation-desc">Memungkinkan pelaksanaan efektif dari semua digital
                         dan IT initiative</span>
+                    
+                    <div v-else class="gits-pillar-list-wrapper">
+                        <ul v-if="filteredFoundationCard.initiatives?.length" class="gits-pillar-list gits-pillar-list--horizontal">
+                            <li v-for="(ini, idx) in filteredFoundationCard.initiatives" :key="`foundation-ini-${idx}`" class="gits-pillar-list-item">
+                                {{ ini.label }}
+                            </li>
+                        </ul>
+                        <div v-else class="gits-pillar-list-empty">
+                            Belum ada initiative
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -422,6 +478,7 @@ const coeTooltip = (card) => {
     background: #b8d4f0;
     border-radius: 6px;
     padding: 20px 20px 24px;
+    transition: all 0.3s ease-in-out;
 }
 
 .dti-header {
@@ -486,6 +543,7 @@ const coeTooltip = (card) => {
     grid-auto-columns: 1fr;
     grid-auto-flow: column;
     gap: 10px;
+    transition: all 0.3s ease-in-out;
 }
 
 .dti-card {
@@ -496,18 +554,20 @@ const coeTooltip = (card) => {
     text-align: left;
     color: #184f96;
     position: relative;
-    min-height: 118px;
+    min-height: auto;
+    height: 100%;
+    transition: all 0.3s ease-in-out;
 }
 
 .dti-card--compact {
-    min-height: 52px;
+    min-height: auto;
     display: flex;
     align-items: center;
 }
 
 /* When showing details, increase height to fit the list */
 :not(.dti-cards--hidden) .dti-card--compact {
-    min-height: 140px;
+    min-height: 120px;
     align-items: flex-start;
     padding-top: 10px;
 }
@@ -555,6 +615,7 @@ const coeTooltip = (card) => {
     line-height: 1.3;
     margin-top: 12px;
     width: 100%;
+    transition: all 0.2s ease;
 }
 
 .dti-cards--hidden .dti-card-title {
@@ -566,13 +627,14 @@ const coeTooltip = (card) => {
     border-top: 1px dashed rgba(59, 130, 200, 0.4);
     padding-top: 8px;
     width: 100%;
-    max-height: 85px;
+    max-height: 120px;
     overflow: hidden;
+    transition: all 0.3s ease-in-out;
 }
 
 .dti-card-list {
     overflow-y: auto;
-    max-height: 80px;
+    max-height: 110px;
     padding-right: 4px;
     list-style: none;
     margin: 0;
@@ -648,6 +710,7 @@ const coeTooltip = (card) => {
     background: #dde8f4;
     border-radius: 6px;
     padding: 24px 20px;
+    transition: all 0.3s ease-in-out;
 }
 
 .gits-header {
@@ -679,6 +742,7 @@ const coeTooltip = (card) => {
     grid-template-columns: repeat(6, 1fr);
     gap: 10px;
     margin-bottom: 16px;
+    transition: all 0.3s ease-in-out;
 }
 
 .gits-pillar {
@@ -688,12 +752,18 @@ const coeTooltip = (card) => {
     color: #fff;
     display: flex;
     flex-direction: column;
-    min-height: 140px;
-    transition: all 0.2s ease;
+    min-height: auto;
+    height: 100%;
+    transition: all 0.3s ease-in-out;
+    position: relative;
+}
+
+:not(.gits-pillars--hidden) .gits-pillar {
+    min-height: 120px;
 }
 
 .gits-pillars--hidden .gits-pillar {
-    min-height: 52px;
+    min-height: auto;
     justify-content: center;
     padding: 10px 14px;
 }
@@ -704,6 +774,7 @@ const coeTooltip = (card) => {
     font-weight: 700;
     line-height: 1.3;
     margin-bottom: 8px;
+    transition: all 0.2s ease;
 }
 
 .gits-pillars--hidden .gits-pillar-title {
@@ -716,15 +787,107 @@ const coeTooltip = (card) => {
     line-height: 1;
     color: rgba(255, 255, 255, 0.85);
     flex: 1;
+    transition: all 0.3s ease-in-out;
 }
 
 .gits-pillar-desc p {
     margin-bottom: 4px;
 }
 
+.gits-pillar-list-wrapper {
+    margin-top: 8px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.3);
+    padding-top: 8px;
+    width: 100%;
+    max-height: 120px;
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+}
+
+.gits-pillar-list {
+    overflow-y: auto;
+    max-height: 110px;
+    padding-right: 4px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.gits-pillar-list-item {
+    font-size: 10px;
+    line-height: 1.3;
+    color: #fff;
+    margin-bottom: 4px;
+    padding: 2px 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    text-align: left;
+}
+
+.gits-pillar-list-empty {
+    font-size: 10px;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.6);
+    text-align: center;
+    padding-top: 10px;
+}
+
+/* Custom scrollbar for gits initiative list */
+.gits-pillar-list::-webkit-scrollbar {
+    width: 3px;
+}
+.gits-pillar-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+.gits-pillar-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+.gits-pillar-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
 .gits-pillar-empty {
     color: rgba(255, 255, 255, 0.6);
     font-style: italic;
+}
+
+/* Capsule Badge for GITS */
+.gits-capsule-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: #ffffff;
+    color: #184f96;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 1px 6px;
+    border-radius: 999px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+}
+
+.gits-capsule-badge--dark {
+    background: rgba(0, 0, 0, 0.2);
+    border-color: rgba(0, 0, 0, 0.1);
+    position: static;
+    display: inline-block;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.gits-pillar-list--horizontal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    max-height: none;
+    overflow: visible;
+}
+
+.gits-pillar-list--horizontal .gits-pillar-list-item {
+    margin-bottom: 0;
+    white-space: nowrap;
 }
 
 /* ─── FOUNDATION BAR ─── */
@@ -735,6 +898,17 @@ const coeTooltip = (card) => {
     color: #fff;
     text-align: center;
     line-height: 1.5;
+    transition: all 0.3s ease-in-out;
+}
+
+.foundation-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.foundation-bar--expanded {
+    padding: 16px 24px;
 }
 
 .foundation-title {
