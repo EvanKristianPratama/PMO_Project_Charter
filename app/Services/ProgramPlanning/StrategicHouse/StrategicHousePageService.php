@@ -7,6 +7,7 @@ use App\Models\InitiativeTagging;
 use App\Models\MstCoe;
 use App\Models\MstInitiative;
 use App\Services\ProgramPlanning\ItBuildingBlockService;
+use App\Services\ProgramPlanning\StrategicPillars\StrategicPillarPageService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
@@ -155,7 +156,8 @@ class StrategicHousePageService
     ];
 
     public function __construct(
-        protected ItBuildingBlockService $itBuildingBlockService
+        protected ItBuildingBlockService $itBuildingBlockService,
+        protected StrategicPillarPageService $strategicPillarPageService
     ) {}
 
     public function getPageProps(array $filters = []): array
@@ -173,6 +175,14 @@ class StrategicHousePageService
         $architectureCard = $this->buildSingleCard($coeCatalog, self::ARCHITECTURE_COE_CONFIG);
         $tbcCard = $this->buildSingleCard($coeCatalog, self::TBC_COE_CONFIG);
         $unassignedInitiatives = $this->getUnassignedInitiatives($initiativeType);
+
+        // Strategic Pillar data
+        $pilarId = (string) ($filters['pilar'] ?? '1');
+        $pillarData = $this->strategicPillarPageService->getPageProps(
+            $filters['goal_id'] ?? null,
+            $filters['org_id'] ?? null,
+            $pilarId
+        );
 
         return [
             'filters' => $normalizedFilters,
@@ -208,6 +218,17 @@ class StrategicHousePageService
             'digitalInitiativeOptions' => $this->itBuildingBlockService->getDigitalInitiativeOptions(),
             'itBuildingBlockMatrix' => $this->itBuildingBlockService->getGroupedMappings(),
             'itInitiativeOptions' => $this->itBuildingBlockService->getItInitiativeOptions(),
+
+            // Merge Strategic Pillar props
+            'strategicPillars' => $pillarData['strategicPillars'] instanceof \Closure ? $pillarData['strategicPillars']() : $pillarData['strategicPillars'],
+            'taggings' => $pillarData['taggings'] instanceof \Closure ? $pillarData['taggings']() : $pillarData['taggings'],
+            'allGoals' => $pillarData['allGoals'] instanceof \Closure ? $pillarData['allGoals']() : $pillarData['allGoals'],
+            'allOrganizations' => $pillarData['allOrganizations'] instanceof \Closure ? $pillarData['allOrganizations']() : $pillarData['allOrganizations'],
+            'allInitiatives' => $pillarData['allInitiatives'] instanceof \Closure ? $pillarData['allInitiatives']() : $pillarData['allInitiatives'],
+            'allThemes' => $pillarData['allThemes'] instanceof \Closure ? $pillarData['allThemes']() : $pillarData['allThemes'],
+            'matrixInitiatives' => $pillarData['matrixInitiatives'] instanceof \Closure ? $pillarData['matrixInitiatives']() : $pillarData['matrixInitiatives'],
+            'pilarOptions' => $pillarData['pilarOptions'],
+            'pillarFilters' => $pillarData['filters'],
         ];
     }
 
