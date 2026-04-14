@@ -16,6 +16,9 @@ class IndexRequest extends FormRequest
         return [
             'initiative_type' => ['nullable', 'integer', 'in:1,2'],
             'show_empty' => ['nullable', 'boolean'],
+            'pilar' => ['nullable', 'string'],
+            'goal_id' => ['nullable', 'integer'],
+            'org_id' => ['nullable', 'integer'],
         ];
     }
 
@@ -28,6 +31,9 @@ class IndexRequest extends FormRequest
             'show_empty' => $this->has('show_empty')
                 ? $this->boolean('show_empty')
                 : true,
+            'pilar' => $this->input('pilar'),
+            'goal_id' => $this->input('goal_id'),
+            'org_id' => $this->input('org_id'),
         ];
     }
 }

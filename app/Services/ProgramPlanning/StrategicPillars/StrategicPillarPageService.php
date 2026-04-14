@@ -24,19 +24,19 @@ class StrategicPillarPageService
         ],
     ];
 
-    public function getPageProps(?string $goalId, ?string $organizationId, ?string $pilarId): array
+    public function getPageProps(?string $goalId, ?string $organizationId, ?string $pilarId, int $initiativeType = 1): array
     {
         $selectedPilar = $this->normalizePilar($pilarId);
 
         return [
             'strategicPillars' => fn () => $this->getStrategicPillars($selectedPilar),
-            'taggings' => fn () => $this->getTaggings($selectedPilar),
+            'taggings' => fn () => $this->getTaggings($selectedPilar, $initiativeType),
             'filters' => $this->getFilters($goalId, $organizationId, $selectedPilar),
             'allGoals' => fn () => $this->getAllGoals($selectedPilar),
             'allOrganizations' => fn () => $this->getAllOrganizations(),
             'allInitiatives' => fn () => $this->getAllInitiatives(),
             'allThemes' => fn () => $this->getAllThemes($selectedPilar),
-            'matrixInitiatives' => fn () => $this->getMatrixInitiatives($selectedPilar),
+            'matrixInitiatives' => fn () => $this->getMatrixInitiatives($selectedPilar, $initiativeType),
             'pilarOptions' => $this->getPilarOptions(),
         ];
     }
@@ -61,7 +61,7 @@ class StrategicPillarPageService
         return $query->get();
     }
 
-    public function getTaggings(string $pilarId): Collection
+    public function getTaggings(string $pilarId, int $initiativeType = 1): Collection
     {
         $query = InitiativeTagging::query()
             ->with([
@@ -72,7 +72,7 @@ class StrategicPillarPageService
                 'initiative.mappedProjects:id',
                 'theme:id,name,idGoal',
             ])
-            ->whereHas('initiative', fn ($query) => $query->where('tipe_initiative', 1))
+            ->whereHas('initiative', fn ($query) => $query->where('tipe_initiative', $initiativeType))
             ->orderByDesc('created_at');
 
         $this->applyTaggingPilarFilter($query, $pilarId);
@@ -132,11 +132,11 @@ class StrategicPillarPageService
             ->get();
     }
 
-    public function getMatrixInitiatives(string $pilarId): Collection
+    public function getMatrixInitiatives(string $pilarId, int $initiativeType = 1): Collection
     {
         return MstInitiative::query()
             ->select('id', 'code', 'name')
-            ->where('tipe_initiative', 1)
+            ->where('tipe_initiative', $initiativeType)
             ->whereHas('taggings', function ($query) use ($pilarId): void {
                 $this->applyTaggingPilarFilter($query, $pilarId);
             })

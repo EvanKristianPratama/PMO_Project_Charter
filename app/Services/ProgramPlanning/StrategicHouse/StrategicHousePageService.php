@@ -154,7 +154,7 @@ class StrategicHousePageService
             'direct_initiatives' => [],
         ],
     ];
-
+    
     public function __construct(
         protected ItBuildingBlockService $itBuildingBlockService,
         protected StrategicPillarPageService $strategicPillarPageService
@@ -181,7 +181,8 @@ class StrategicHousePageService
         $pillarData = $this->strategicPillarPageService->getPageProps(
             $filters['goal_id'] ?? null,
             $filters['org_id'] ?? null,
-            $pilarId
+            $pilarId,
+            $initiativeType
         );
 
         return [

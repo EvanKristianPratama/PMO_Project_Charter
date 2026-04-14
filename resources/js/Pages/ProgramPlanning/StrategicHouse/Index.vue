@@ -217,6 +217,21 @@
                     <div v-else-if="viewMode === 'it-initiatives'" key="it-initiatives">
                         <ItBuildingBlocks :items="itInitiativeOptions" :coe-options="coeOptions" />
                     </div>
+
+                    <div v-else-if="viewMode === 'strategic-pillars'" key="strategic-pillars">
+                        <StrategicPillarView
+                            :strategic-pillars="strategicPillars"
+                            :all-goals="allGoals"
+                            :taggings="taggings"
+                            :all-initiatives="allInitiatives"
+                            :all-themes="allThemes"
+                            :matrix-initiatives="matrixInitiatives"
+                            :all-organizations="allOrganizations"
+                            :pilar-options="pilarOptions"
+                            :filters="pillarFilters"
+                            base-url-route="strategic-house.index"
+                        />
+                    </div>
                 </Transition>
             </div>
         </div>
@@ -231,6 +246,7 @@ import DualGrowthFull from '@/Components/StrategicHouse/DualGrowthFull.vue';
 import DigitalBuildingBlock from '@/Components/ItBuildingBlocks/DigitalBuildingBlock.vue';
 import ItBuildingBlocks from '@/Components/ItBuildingBlocks/ItBuildingBlock.vue';
 import ItInitiatives from '@/Components/ItBuildingBlocks/ItBuildingBlocksMatrix.vue';
+import StrategicPillarView from '@/Components/StrategicPillar/StrategicPillarView.vue';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
 const props = defineProps({
@@ -298,9 +314,27 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    // Strategic Pillar props
+    strategicPillars: { type: Array, default: () => [] },
+    allGoals:         { type: Array, default: () => [] },
+    taggings:         { type: Array, default: () => [] },
+    allInitiatives:   { type: Array, default: () => [] },
+    allThemes:        { type: Array, default: () => [] },
+    matrixInitiatives:{ type: Array, default: () => [] },
+    allOrganizations: { type: Array, default: () => [] },
+    pilarOptions:     { type: Array, default: () => [] },
+    pillarFilters:    { type: Object, default: () => ({}) },
 });
 
-const viewMode = ref('mapping');
+const getInitialViewMode = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('pilar') || urlParams.has('goal_id') || urlParams.has('org_id')) {
+        return 'strategic-pillars';
+    }
+    return 'mapping';
+};
+
+const viewMode = ref(getInitialViewMode());
 const showCoeInitiatives = ref(true);
 
 const allInitiatives = computed(() => {
