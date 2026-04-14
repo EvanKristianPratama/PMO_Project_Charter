@@ -218,7 +218,7 @@ class StrategicHousePageService
     private function getDigitalInitiativeOptions(): Collection
     {
         return MstInitiative::query()
-            ->with(['coe:id,name', 'organization:id,name', 'latestStatusImplementation'])
+            ->with(['coe:id,name', 'organization:id,name,groub_id', 'latestStatusImplementation'])
             ->where('tipe_initiative', 1)
             ->orderBy('code')
             ->orderBy('name')
@@ -231,6 +231,7 @@ class StrategicHousePageService
                 'coe_id' => (int) $initiative->coe_id,
                 'coe_name' => $initiative->coe?->name ?: 'No COE',
                 'business_unit' => $initiative->organization?->name ?: '-',
+                'groub_id' => $initiative->organization?->groub_id,
                 'implementation_status' => $initiative->latestStatusImplementation?->review_status ?: null,
                 'tipe_initiative' => (int) $initiative->tipe_initiative,
             ]);

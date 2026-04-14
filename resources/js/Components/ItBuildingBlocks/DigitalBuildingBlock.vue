@@ -84,16 +84,26 @@ const displayGroups = computed(() => {
     // 2. Ambil semua CoE yang ditemukan di data
     const foundCoeNames = Array.from(coeMap.keys());
 
-    // 3. Map ke format tampilan dan sort initiatives di dalam tiap group
+    // 3. Map ke format tampilan dan split holding/sub-holding dan sort initiatives di dalam tiap group
     const coeGroups = foundCoeNames.map(name => {
         const initiatives = coeMap.get(name) || [];
+        
+        // Sorting function
+        const sortByCode = (a, b) => {
+            const codeA = String(a?.code ?? '');
+            const codeB = String(b?.code ?? '');
+            return codeA.localeCompare(codeB, undefined, { numeric: true, sensitivity: 'base' });
+        };
+        
+        // Split by groub_id: 2 is Sub Holding, others (1 or null) are Holding (default grouping)
+        const holdingInitiatives = initiatives.filter(i => i.groub_id !== 2).sort(sortByCode);
+        const subHoldingInitiatives = initiatives.filter(i => i.groub_id === 2).sort(sortByCode);
+
         return {
             name,
-            initiatives: initiatives.sort((a, b) => {
-                const codeA = String(a?.code ?? '');
-                const codeB = String(b?.code ?? '');
-                return codeA.localeCompare(codeB, undefined, { numeric: true, sensitivity: 'base' });
-            }),
+            initiatives: initiatives.sort(sortByCode),
+            holdingInitiatives,
+            subHoldingInitiatives,
             total: initiatives.length
         };
     });
@@ -265,8 +275,12 @@ const statusLegend = computed(() => {
                     <table class="itb-table min-w-full border-collapse" :class="`itb-table--${initiativeColumnCount}-cols`">
                         <thead>
                             <tr>
-                                <th class="top-head top-head-left" style="width: 15%;">CoE</th>
-                                <th class="top-head top-head-right" style="width: 85%;">Digital Initiatives</th>
+                                <th rowspan="2" class="top-head top-head-left" style="width: 15%; vertical-align: middle;">CoE</th>
+                                <th colspan="2" class="top-head top-head-right" style="width: 85%;">Digital Initiatives</th>
+                            </tr>
+                            <tr>
+                                <th class="top-head top-head-center border-t-0" style="width: 42.5%; background-color: #0d5ea1;">Holding</th>
+                                <th class="top-head top-head-center border-t-0" style="width: 42.5%; background-color: #0d5ea1;">Sub Holding</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -279,13 +293,43 @@ const statusLegend = computed(() => {
                                         </div>
                                     </div>
                                 </td>
-                                <td class="initiatives-cell">
+                                
+                                <!-- Holding Cell -->
+                                <td class="initiatives-cell border-r border-[#c7d2de]">
                                     <div class="initiatives-grid" :style="{
-                                        '--initiative-column-count': initiativeColumnCount,
-                                        '--row-count': buildInitiativeColumns(group.initiatives).rowCount
+                                        '--initiative-column-count': Math.max(1, Math.floor(initiativeColumnCount / 2)),
+                                        '--row-count': buildInitiativeColumns(group.holdingInitiatives, Math.max(1, Math.floor(initiativeColumnCount / 2))).rowCount
                                     }">
                                         <div
-                                            v-for="initiative in buildInitiativeColumns(group.initiatives).items"
+                                            v-for="initiative in buildInitiativeColumns(group.holdingInitiatives, Math.max(1, Math.floor(initiativeColumnCount / 2))).items"
+                                            :key="initiative.id"
+                                            class="initiative-box group"
+                                            :class="[
+                                                { 'initiative-box--no-code': !showInitiativeCode || !initiative.code }
+                                            ]"
+                                        >
+                                            <div class="absolute top-full left-1/2 z-50 mt-1 hidden -translate-x-1/2 w-max max-w-sm bg-white border border-slate-800 shadow-sm px-1.5 py-1 text-[9px] italic group-hover:block dark:bg-slate-800">
+                                                {{ initiative.name }}
+                                            </div>
+                                            <span v-if="showInitiativeCode && initiative.code" class="initiative-box__code" :class="showStatusColors ? getStatusColorClass(initiative.implementation_status) : ''">
+                                                {{ initiative.code }}
+                                            </span>
+                                            <span class="initiative-box__name" :class="{ 'initiative-box__name--full': !showInitiativeCode || !initiative.code }">
+                                                <span class="initiative-box__label-text">{{ initiative.name }}</span>
+                                                <span v-if="showBusinessUnit" class="initiative-box__bu">{{ initiative.business_unit }}</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+                                
+                                <!-- Sub Holding Cell -->
+                                <td class="initiatives-cell">
+                                    <div class="initiatives-grid" :style="{
+                                        '--initiative-column-count': Math.max(1, Math.ceil(initiativeColumnCount / 2)),
+                                        '--row-count': buildInitiativeColumns(group.subHoldingInitiatives, Math.max(1, Math.ceil(initiativeColumnCount / 2))).rowCount
+                                    }">
+                                        <div
+                                            v-for="initiative in buildInitiativeColumns(group.subHoldingInitiatives, Math.max(1, Math.ceil(initiativeColumnCount / 2))).items"
                                             :key="initiative.id"
                                             class="initiative-box group"
                                             :class="[
