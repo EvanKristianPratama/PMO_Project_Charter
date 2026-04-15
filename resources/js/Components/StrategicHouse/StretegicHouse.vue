@@ -252,7 +252,7 @@ const initiativeProjectCharterTitle = (initiative) => {
                                     </li>
                                 </ul>
                                 <div v-else class="dti-card-list-empty">
-                                    Belum ada initiative
+                                    -
                                 </div>
                             </div>
                         </div>

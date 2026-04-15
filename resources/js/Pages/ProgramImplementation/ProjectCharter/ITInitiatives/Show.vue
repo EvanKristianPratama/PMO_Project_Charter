@@ -39,36 +39,21 @@
                         <StatusImplementationTable :projects="relatedProjects" codeLabel="Progres status history" />
                     </div>
                 </div>
-
-                <!-- Evaluation panel -->
-                <div v-if="activeTab === 'Evaluation'" class="border-t border-slate-100 dark:border-white/5">
-                    <div class="px-3 py-12 text-center">
-                        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5">
-                            <svg class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
-                        </div>
-                        <h3 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">Belum Ada Evaluasi</h3>
-                        <p class="mt-2 text-xs text-slate-500">
-                            Halaman evaluasi sedang dalam pengembangan.
-                        </p>
-                    </div>
-                </div>
             </section>
 
-            <!-- Project Charter + Roadmap Section (Planning) -->
-            <template v-if="activeTab === 'Planning'">
+            <!-- Planning panel (Charter + Roadmap) -->
+            <div v-if="activeTab === 'Planning'" class="space-y-6 animate-fade-in">
+                <!-- Project Charter Section -->
                 <section
-                    class="print:hidden rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                    <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                    class="print:hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                    <div class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                         <div class="w-full lg:flex-1 lg:max-w-4xl">
                             <label
                                 class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 Charter Status Timeline
                             </label>
                             <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-                                <select v-model="selectedCharterId"
-                                    :disabled="charterVersions.length === 0 || isEditing"
+                                <select v-model="selectedCharterId" :disabled="charterVersions.length === 0 || isEditing"
                                     class="min-w-0 w-48 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-white/10 dark:bg-[#131313] dark:text-slate-100 dark:disabled:bg-white/5">
                                     <option v-if="charterVersions.length === 0" value="">No saved version yet</option>
                                     <option v-for="charter in charterVersions" :key="charter.id"
@@ -90,13 +75,10 @@
                                         :disabled="!resolvedRoadmapPcId" @click="addRoadmap">
                                         {{ hasRoadmap ? 'Edit Roadmap' : 'Add Roadmap' }}
                                     </button>
-                                    <button
-                                        type="button"
-                                        :disabled="!canCompare"
+                                    <button type="button" :disabled="!canCompare"
                                         :title="canCompare ? 'Compare selected charter with the previous version' : 'No previous charter version available'"
                                         @click="toggleCompare"
-                                        class="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-[#171717] dark:text-slate-300 dark:hover:bg-white/5"
-                                    >
+                                        class="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-[#171717] dark:text-slate-300 dark:hover:bg-white/5">
                                         {{ showCompare ? 'Close' : 'View Version Analysis' }}
                                     </button>
                                 </div>
@@ -104,13 +86,9 @@
                         </div>
 
                         <div class="flex flex-wrap items-center gap-2">
-                            <button
-                                v-if="showCompare"
-                                type="button"
-                                :disabled="analysisForm.processing"
+                            <button v-if="showCompare" type="button" :disabled="analysisForm.processing"
                                 class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-70"
-                                @click="saveVersionAnalysis"
-                            >
+                                @click="saveVersionAnalysis">
                                 <svg v-if="analysisForm.processing" class="h-3 w-3 animate-spin text-white" fill="none"
                                     viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
@@ -122,21 +100,18 @@
                                 Save
                             </button>
 
-                            <!-- New Version button: always visible when not editing -->
                             <button v-if="!showCompare && !isEditing" type="button"
                                 class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 dark:border-white/10 dark:text-slate-300"
                                 @click="startNewVersion">
                                 New Version
                             </button>
 
-                            <!-- Edit Charter button: only when not already editing -->
                             <button v-if="!showCompare && !isEditing && charterVersions.length > 0" type="button"
                                 class="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white"
                                 @click="startEdit">
                                 Edit Charter
                             </button>
 
-                            <!-- Editing controls -->
                             <template v-if="!showCompare && isEditing">
                                 <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">
                                     {{ isNewVersion ? 'New Version' : 'Edit Charter' }}
@@ -169,9 +144,8 @@
                         </div>
                     </div>
 
-                    <!-- Edit fields: only show when editing -->
-                    <div v-if="isEditing" class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                        <!-- Version Label -->
+                    <!-- Edit fields -->
+                    <div v-if="isEditing" class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                         <div>
                             <label
                                 class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Version
@@ -179,57 +153,70 @@
                             <input v-model="form.version_label" type="text"
                                 class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-100"
                                 placeholder="e.g., v2 - reviewed" />
-                            <p v-if="form.errors.version_label" class="mt-1 text-xs text-red-500">{{
-                                form.errors.version_label }}</p>
                         </div>
-
-                        <!-- Status -->
                         <div>
                             <label
                                 class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Status</label>
                             <select v-model="form.status"
                                 class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#131313] dark:text-slate-100">
                                 <option value="">-- Pilih Status --</option>
-                                <option v-for="s in statusOptions" :key="s.value" :value="s.value">{{ s.label }}
-                                </option>
+                                <option v-for="s in statusOptions" :key="s.value" :value="s.value">{{ s.label }}</option>
                             </select>
-                            <p v-if="form.errors.status" class="mt-1 text-xs text-red-500">{{ form.errors.status }}</p>
                         </div>
                     </div>
 
+                    <main v-if="!showRoadmapPanel" class="print:m-0 print:p-0">
+                        <CharterCompare v-if="showCompare && selectedCharter && previousCharter" :current="selectedCharter"
+                            :previous="previousCharter" :analysis="selectedVersionAnalysis" :analysis-form="analysisForm"
+                            :editable="true" :project-name="itInitiative?.name ?? ''" />
+                        <component v-else :is="resolvedCharterComponent" :it-initiative="editableItInitiative" :form="form"
+                            :status-timeline="form.status" :editable="isEditing" />
+                    </main>
                 </section>
 
-                <main v-if="!showRoadmapPanel" class="print:m-0 print:p-0">
-                    <CharterCompare
-                        v-if="showCompare && selectedCharter && previousCharter"
-                        :current="selectedCharter"
-                        :previous="previousCharter"
-                        :analysis="selectedVersionAnalysis"
-                        :analysis-form="analysisForm"
-                        :editable="true"
-                        :project-name="itInitiative?.name ?? ''"
-                    />
-                    <component
-                        v-else
-                        :is="resolvedCharterComponent"
-                        :it-initiative="editableItInitiative"
-                        :form="form"
-                        :status-timeline="form.status"
-                        :editable="isEditing"
-                    />
-                </main>
+                <!-- Project Roadmap Section -->
                 <section v-if="showRoadmapPanel"
-                    class="print:hidden rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                    <div class="mb-3 flex items-center justify-between">
-                        <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Project Roadmap</h3>
+                    class="print:hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                    <div class="mb-4 flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Project Roadmap</h3>
                     </div>
                     <ProjectRoadmap :project="roadmapProject"
                         :form="{ objectives: roadmapProject?.charter?.objectives ?? '', duration: roadmapProject?.charter?.duration ?? '' }"
-                        :selected-roadmap-version-id="roadmapVersionId"
-                        :sequence="1" :year-start="2025" :year-end="2029" />
+                        :selected-roadmap-version-id="roadmapVersionId" :sequence="1" :year-start="2025"
+                        :year-end="2029" />
                 </section>
+            </div>
 
-            </template>
+            <!-- Implementation Additional Content (Status Only) -->
+            <div v-if="activeTab === 'Implementation'" class="animate-fade-in">
+                <!-- Status Implementation Table dipindahkan ke kontainer tersendiri jika ingin benar-benar pisah dari Top Bar, 
+                     tapi di sini kita biarkan di Top Bar agar konsisten dengan struktur sebelumnya, 
+                     namun jika Anda ingin benar-benar di luar Top Bar, kita bisa taruh di sini -->
+            </div>
+
+            <!-- Evaluation panel -->
+            <div v-if="activeTab === 'Evaluation'" class="border-t border-slate-100 dark:border-white/5">
+                <div v-if="review" class="px-3 py-6 space-y-6">
+                    <ReviewContent
+                        :review="review"
+                        :penjelasan-items="penjelasanItems"
+                        :why-items="whyItems"
+                        :how-parsed="howParsed"
+                        :project-profile-items="projectProfileItems"
+                    />
+                </div>
+                <div v-else class="px-3 py-12 text-center">
+                    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5">
+                        <svg class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </div>
+                    <h3 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">Belum Ada Data Review</h3>
+                    <p class="mt-2 text-xs text-slate-500">
+                        Data review untuk inisiatif ini belum tersedia.
+                    </p>
+                </div>
+            </div>
         </div>
     </UserLayout>
 </template>
@@ -244,6 +231,7 @@ import AprovedCharterDocument from '@/Components/ProjectCharter/AprovedCharterDo
 import ProjectRoadmap from '@/Components/Roadmap/ProjectRoadmap.vue';
 import StatusImplementationTable from '@/Components/ITInitiative/StatusImplementationTable.vue';
 import CharterCompare from '@/Components/ITInitiative/CharterCompare.vue';
+import ReviewContent from '@/Components/ReviewPC/ReviewContent.vue';
 
 const route = useRouteHelper();
 
@@ -265,9 +253,40 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    review: {
+        type: Object,
+        default: null,
+    },
 });
+
 const page = usePage();
 const showCompare = ref(false);
+
+// --- Review Parsing Helpers ---
+const parseBulletPoints = (text) => {
+    if (!text) return [];
+    return String(text)
+        .split('\n')
+        .map(line => line.replace(/^[\s•*-]+/, '').trim())
+        .filter(line => line.length > 0);
+};
+
+const parseHowField = (text) => {
+    const lines = String(text || '').split('\n').filter(l => l.trim().length > 0);
+    if (lines.length === 0) return { intro: '', steps: [] };
+
+    // If first line doesn't look like a step, treat it as intro
+    const hasIntro = lines[0] && !/^[\s•*-\d.]+/.test(lines[0]);
+    return {
+        intro: hasIntro ? lines[0] : '',
+        steps: hasIntro ? lines.slice(1).map(l => l.replace(/^[\s•*-\d.]+/, '').trim()) : lines.map(l => l.replace(/^[\s•*-\d.]+/, '').trim()),
+    };
+};
+
+const penjelasanItems = computed(() => parseBulletPoints(props.review?.penjelasan));
+const whyItems = computed(() => parseBulletPoints(props.review?.why));
+const projectProfileItems = computed(() => parseBulletPoints(props.review?.project_profile));
+const howParsed = computed(() => parseHowField(props.review?.how));
 
 const statusOptions = computed(() => {
     const sourceStatusOptions = Array.isArray(props.statusOptions) ? props.statusOptions : [];
@@ -325,7 +344,7 @@ const parseTabFromUrl = () => {
         return 'Evaluation';
     }
 
-    return 'Planning';
+    return 'Implementation';
 };
 
 const activeTab = ref(parseTabFromUrl());

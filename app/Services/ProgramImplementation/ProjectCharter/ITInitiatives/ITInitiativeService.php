@@ -10,6 +10,8 @@ use App\Services\ProgramImplementation\ProjectCharter\ProjectCharterStatusServic
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+use App\Models\TrsReviewPC;
+
 class ITInitiativeService
 {
     public function __construct(
@@ -94,11 +96,18 @@ class ITInitiativeService
             ])
             ->findOrFail($project->id);
 
+        $initiativeIds = $project->mappedInitiatives->pluck('id');
+
+        $review = TrsReviewPC::query()
+            ->whereIn('initiative_id', $initiativeIds)
+            ->latest('id')
+            ->first();
+
         $relatedProjects = TrsProject::query()
-            ->whereIn('id', function ($query) use ($project) {
+            ->whereIn('id', function ($query) use ($initiativeIds) {
                 $query->select('pc_id')
                     ->from('trs_pc_initiative')
-                    ->whereIn('initiative_id', $project->mappedInitiatives->pluck('id'));
+                    ->whereIn('initiative_id', $initiativeIds);
             })
             ->with([
                 'charter' => static fn ($query) => $query->select([
@@ -144,6 +153,7 @@ class ITInitiativeService
             'relatedProjects' => $relatedProjects,
             'projectOptions' => $projectOptions,
             'statusOptions' => $this->projectCharterStatusService->getStatusOptions(),
+            'review' => $review,
         ];
     }
 
