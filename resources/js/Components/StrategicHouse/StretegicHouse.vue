@@ -455,6 +455,13 @@ const coeTooltip = (card) => {
     justify-content: center;
 }
 
+.connector-chain img {
+    background-color: #fff;
+    padding: 6px;
+    border-radius: 9999px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
 /* ─── VISION TRAPEZOID ─── */
 .vision-trapezoid {
     background: linear-gradient(180deg, #1e6dc0 0%, #184f96 100%);
