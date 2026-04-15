@@ -28,6 +28,10 @@ const props = defineProps({
         type: [String, Number, null],
         default: null,
     },
+    editMode: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const emit = defineEmits([
@@ -35,17 +39,8 @@ const emit = defineEmits([
     'update:selectedOrgId',
     'navigate',
     'delete-tag',
+    'add-tag',
 ]);
-
-const statusDesiredOrder = [
-    'Drafting',
-    'Propose',
-    'Review',
-    'Approve',
-    'Baseline',
-    'In Progress',
-    'On Hold',
-];
 
 const neutralStatusToneClass = 'bg-slate-50 border-slate-300 text-slate-700 dark:bg-slate-800/60 dark:border-slate-600 dark:text-slate-200';
 const neutralStatusChipClass = 'bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600';
@@ -125,18 +120,6 @@ const getStatusChipClass = (status) => {
     if (label === 'Baseline') return 'bg-violet-500/10 text-violet-700 border-violet-500/20 dark:bg-violet-500/10 dark:text-violet-400 dark:border-violet-500/20';
     if (label === 'In Progress') return 'bg-cyan-500/10 text-cyan-700 border-cyan-500/20 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-500/20';
     if (label === 'On Hold') return 'bg-rose-500/10 text-rose-700 border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20';
-
-    return neutralStatusChipClass;
-};
-
-const getStatusLegendClass = (label) => {
-    if (label === 'Drafting') return getStatusChipClass('Drafting');
-    if (label === 'Propose') return getStatusChipClass('Propose');
-    if (label === 'Review') return getStatusChipClass('Review');
-    if (label === 'Approve') return getStatusChipClass('Approve');
-    if (label === 'Baseline') return getStatusChipClass('Baseline');
-    if (label === 'In Progress') return getStatusChipClass('In Progress');
-    if (label === 'On Hold') return getStatusChipClass('On Hold');
 
     return neutralStatusChipClass;
 };
@@ -344,7 +327,7 @@ const displayGoals = computed(() => {
                 rows.push({
                     key: `${goalCode}-direct`,
                     type: 'direct',
-                    label: 'No themes',
+                    label: 'Part of Goal',
                     initiatives: directInitiatives,
                     initiatives_count: directInitiatives.length,
                 });
@@ -354,7 +337,7 @@ const displayGoals = computed(() => {
                 rows.push({
                     key: `${goalCode}-empty`,
                     type: 'empty',
-                    label: 'No themes',
+                    label: 'No initiatives',
                     initiatives: [],
                     initiatives_count: 0,
                 });
@@ -381,13 +364,13 @@ const displayGoals = computed(() => {
             goals.push({
                 id: 'tbc-goal',
                 code: 'TBC',
-                title: 'Di luar Strategic Pillar',
+                title: 'not clasified',
                 total_initiatives: tbcItems.length,
                 rows: [
                     {
                         key: 'tbc-direct',
                         type: 'direct',
-                        label: 'No themes',
+                        label: 'Part of Goal',
                         initiatives: tbcItems,
                         initiatives_count: tbcItems.length,
                     },
@@ -399,51 +382,10 @@ const displayGoals = computed(() => {
     return goals;
 });
 
-const statusLegend = computed(() => {
-    const stats = {};
-    statusDesiredOrder.forEach((label) => {
-        stats[label] = 0;
-    });
-
-    displayGoals.value.forEach((goal) => {
-        goal.rows.forEach((row) => {
-            (row.initiatives ?? []).forEach((initiative) => {
-                const label = normalizeStatusLabel(initiative.implementation_status);
-                if (label && stats[label] !== undefined) {
-                    stats[label] += 1;
-                }
-            });
-        });
-    });
-
-    return statusDesiredOrder.map((label, index) => ({
-        id: index + 1,
-        label,
-        class: getStatusLegendClass(label),
-        count: stats[label],
-    }));
-});
-
-const totalOverallInitiatives = computed(() => displayGoals.value.reduce((sum, goal) => sum + Number(goal.total_initiatives ?? 0), 0));
 </script>
 
 <template>
     <div class="mb-4 space-y-4">
-        <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <div v-for="status in statusLegend" :key="`status-legend-${status.id}`" class="flex items-center gap-1.5">
-                <span class="h-3 w-3 rounded-sm shadow-sm legend-swatch" :class="status.class"></span>
-                <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">
-                    {{ status.label }} <span class="text-slate-400 dark:text-slate-500 font-medium">({{ status.count }})</span>
-                </span>
-            </div>
-
-            <div class="flex items-center gap-1.5 border-l border-slate-300 pl-4 ml-1 dark:border-white/10">
-                <span class="text-[11px] font-bold text-slate-800 dark:text-slate-200">
-                    Total Digital Initiatives <span class="text-slate-500 dark:text-slate-400 font-medium">({{ totalOverallInitiatives }})</span>
-                </span>
-            </div>
-        </div>
-
         <div class="mockup-header flex items-center justify-between">
             <div class="flex items-center justify-start">
                 <div class="initiative-view-switch">
@@ -531,6 +473,18 @@ const totalOverallInitiatives = computed(() => displayGoals.value.reduce((sum, g
                             {{ option }} Kolom
                         </option>
                     </select>
+
+                    <button
+                        v-if="editMode"
+                        type="button"
+                        class="inline-flex items-center rounded px-2.5 py-1.5 text-xs font-semibold bg-emerald-600 text-white shadow-sm transition-colors hover:bg-emerald-700"
+                        @click="emit('add-tag')"
+                    >
+                        <svg class="mr-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Add Tagging
+                    </button>
                 </div>
             </div>
         </div>
@@ -583,7 +537,10 @@ const totalOverallInitiatives = computed(() => displayGoals.value.reduce((sum, g
                             <td
                                 v-if="goal.rows.some((item) => item.type === 'theme')"
                                 class="theme-cell"
-                                :class="{ 'theme-cell--empty': row.type !== 'theme' }"
+                                :class="{
+                                    'theme-cell--empty': row.type !== 'theme' && row.type !== 'direct',
+                                    'theme-cell--direct': row.type === 'direct',
+                                }"
                             >
                                 <template v-if="row.type === 'theme'">
                                     <div class="theme-cell__inner">
@@ -595,11 +552,12 @@ const totalOverallInitiatives = computed(() => displayGoals.value.reduce((sum, g
                                 </template>
 
                                 <template v-else>
-                                    <div class="theme-cell__placeholder">
+                                    <div class="theme-cell__placeholder" :class="{ 'theme-cell__placeholder--direct': row.type === 'direct' }">
                                         <span>{{ row.label }}</span>
                                         <span
                                             v-if="row.initiatives_count > 0"
-                                            class="count-capsule count-capsule--muted"
+                                            class="count-capsule"
+                                            :class="{ 'count-capsule--muted': row.type !== 'direct' }"
                                         >
                                             {{ row.initiatives_count }}
                                         </span>
@@ -648,6 +606,7 @@ const totalOverallInitiatives = computed(() => displayGoals.value.reduce((sum, g
                                         </span>
 
                                         <button
+                                            v-if="editMode"
                                             type="button"
                                             class="initiative-box__remove"
                                             title="Remove"
@@ -887,6 +846,10 @@ const totalOverallInitiatives = computed(() => displayGoals.value.reduce((sum, g
     background: #ffffff;
 }
 
+.theme-cell--direct {
+    background: #0f6fb7;
+}
+
 .theme-cell__placeholder {
     display: flex;
     min-height: 100%;
@@ -899,6 +862,11 @@ const totalOverallInitiatives = computed(() => displayGoals.value.reduce((sum, g
     font-style: italic;
     text-align: center;
     color: #94a3b8;
+}
+
+.theme-cell__placeholder--direct {
+    font-style: normal;
+    color: #ffffff;
 }
 
 .count-capsule {

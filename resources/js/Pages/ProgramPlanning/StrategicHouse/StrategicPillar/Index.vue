@@ -51,6 +51,19 @@
                             </template>
                         </button>
 
+                        <button
+                            @click="toggleBoardEditMode"
+                            :class="boardEditMode
+                                ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                                : 'bg-slate-200 hover:bg-slate-300 text-slate-700 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600'"
+                            class="inline-flex items-center rounded px-2.5 py-1.5 text-xs font-semibold transition-colors shadow-sm"
+                        >
+                            <svg class="mr-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11 19H8v-3l11.586-11.586z" />
+                            </svg>
+                            Edit
+                        </button>
+
                         <!-- Add Tagging Button -->
                         <button @click="showTaggingModal = true" class="inline-flex items-center rounded px-2.5 py-1.5 text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-sm">
                             <svg class="mr-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -172,10 +185,12 @@
                 :strategic-pillars="strategicPillars"
                 :taggings="taggings"
                 :all-organizations="allOrganizations"
+                :edit-mode="boardEditMode"
                 v-model:selectedGoalId="selectedGoalId"
                 v-model:selectedOrgId="selectedOrgId"
                 @navigate="navigateToScope"
                 @delete-tag="confirmDelete"
+                @add-tag="showTaggingModal = true"
             />
 
             <!-- ===================== MATRIX VIEW ===================== -->
@@ -191,17 +206,25 @@
                     <div class="overflow-auto" style="max-height: calc(100vh - 180px)">
                         <table class="matrix-grid border-collapse text-[8px]" style="min-width: max-content">
                             <thead>
+                                <!-- Group header row -->
                                 <tr class="bg-slate-200 dark:bg-slate-700 sticky top-0 z-10">
-                                    <th class="matrix-initiative-header sticky left-0 z-20 bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 px-2 py-1.5 text-left font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap min-w-55">
+                                    <th rowspan="2" class="matrix-initiative-header sticky left-0 z-20 bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 px-2 py-1.5 text-left font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap min-w-55">
                                         Initiative
                                     </th>
-                                    <th v-for="theme in sortedMatrixThemes" :key="theme.id" class="matrix-theme-header border border-slate-300 dark:border-slate-600 px-1 py-1 text-center font-semibold text-slate-600 dark:text-slate-400 whitespace-normal wrap-break-word w-32 min-w-32 max-w-32 align-middle" :title="`${theme.goal?.code ?? '-'} · ${theme.theme_number}. ${theme.name}`">
-                                        <div class="matrix-theme-header__label flex min-h-16 items-center justify-center text-[8px] font-semibold leading-tight">
-                                            {{ theme.name }}
-                                        </div>
+                                    <th v-for="group in themeGroupsWithCount" :key="group.label" :colspan="group.count" class="border border-slate-300 dark:border-slate-600 px-2 py-1 text-center text-[8px] font-bold text-slate-700 dark:text-slate-200 whitespace-nowrap">
+                                        {{ group.label }}
                                     </th>
-                                    <th class="matrix-tbc-header border border-slate-300 dark:border-slate-600 px-2 py-1 text-center text-[8px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap w-13 bg-slate-100 dark:bg-slate-800">
+                                    <!-- TBC group header -->
+                                    <th rowspan="2" class="matrix-tbc-header border border-slate-300 dark:border-slate-600 px-2 py-1 text-center text-[8px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap w-13 bg-slate-100 dark:bg-slate-800">
                                         TBC
+                                    </th>
+                                </tr>
+                                <!-- Theme number row -->
+                                <tr class="bg-slate-100 dark:bg-slate-800 sticky top-7.25 z-10">
+                                    <th v-for="theme in sortedMatrixThemes" :key="theme.id" class="matrix-theme-header border border-slate-300 dark:border-slate-600 px-1 py-1 text-center font-semibold text-slate-600 dark:text-slate-400 whitespace-nowrap w-11 min-w-11 max-w-11 align-middle" :title="`${theme.goal?.code ?? '-'} · ${theme.theme_number}. ${theme.name}`">
+                                        <div class="matrix-theme-header__label flex min-h-16 items-center justify-center text-[8px] font-semibold leading-tight">
+                                            T{{ theme.theme_number }}
+                                        </div>
                                     </th>
                                 </tr>
                             </thead>
@@ -219,17 +242,17 @@
                                     <td
                                         v-for="theme in sortedMatrixThemes"
                                         :key="theme.id"
-                                        class="matrix-map-cell border border-slate-300 dark:border-slate-600 text-center py-1 w-32 min-w-32 max-w-32"
-                                        :class="getMatrixCellClass(initiative.id, theme.id)"
-                                        :title="isTagged(initiative.id, theme.id) ? `${initiative.code} → ${theme.name}` : ''"
+                                        class="matrix-map-cell border border-slate-300 dark:border-slate-600 text-center py-1 w-11 min-w-11 max-w-11 bg-white dark:bg-slate-900/10"
+                                        :title="isTagged(initiative.id, theme.id) ? `${initiative.code} → T${theme.theme_number}` : ''"
                                     >
+                                        <span v-if="isTagged(initiative.id, theme.id)" class="inline-block h-3.5 w-3.5 rounded-sm bg-indigo-500 dark:bg-indigo-400"></span>
                                     </td>
                                     <!-- TBC column -->
                                     <td
-                                        class="matrix-map-cell border border-slate-300 dark:border-slate-600 text-center py-1 w-13 bg-slate-50/50 dark:bg-slate-900/10"
-                                        :class="getMatrixTbcCellClass(initiative.id)"
+                                        class="matrix-map-cell border border-slate-300 dark:border-slate-600 text-center py-1 w-13 bg-white dark:bg-slate-900/10"
                                         :title="isTBCTagged(initiative.id) ? `${initiative.code} → TBC` : ''"
                                     >
+                                        <span v-if="isTBCTagged(initiative.id)" class="inline-block h-3.5 w-3.5 rounded-sm bg-slate-400 dark:bg-slate-500"></span>
                                     </td>
                                 </tr>
                             </tbody>
@@ -439,6 +462,7 @@ const getStatusColor = (tag) => {
 const showTaggingModal = ref(false);
 const showDeleteModal  = ref(false);
 const matrixMode       = ref(true);
+const boardEditMode    = ref(false);
 const pendingDeleteTag = ref(null);
 const deleteForm       = useForm({});
 const showGoalFormModal = ref(false);
@@ -451,6 +475,14 @@ const structureDeleteForm = useForm({
     pilar: String(currentPilar.value),
 });
 
+const toggleBoardEditMode = () => {
+    boardEditMode.value = !boardEditMode.value;
+
+    if (boardEditMode.value && matrixMode.value) {
+        matrixMode.value = false;
+    }
+};
+
 // --- Matrix helpers ---
 const sortedMatrixThemes = computed(() =>
     [...props.allThemes].sort((left, right) => {
@@ -458,6 +490,15 @@ const sortedMatrixThemes = computed(() =>
         if (goalCompare !== 0) return goalCompare;
         return Number(left.theme_number ?? 0) - Number(right.theme_number ?? 0);
     })
+);
+
+const themeGroupsWithCount = computed(() =>
+    props.strategicPillars
+        .map(goal => ({
+            label: `${goal.code} - ${goal.title}`,
+            count: (goal.themes ?? []).length,
+        }))
+        .filter(group => group.count > 0)
 );
 
 // initiative_id-theme_id pairs that are tagged
@@ -480,18 +521,6 @@ const tbcTaggedSet = computed(() => {
 
 const isTagged    = (initiativeId, themeId) => taggedSet.value.has(`${initiativeId}-${themeId}`);
 const isTBCTagged = (initiativeId)          => tbcTaggedSet.value.has(initiativeId);
-
-const getMatrixCellClass = (initiativeId, themeId) => (
-    isTagged(initiativeId, themeId)
-        ? 'matrix-map-cell--mapped'
-        : 'matrix-map-cell--empty'
-);
-
-const getMatrixTbcCellClass = (initiativeId) => (
-    isTBCTagged(initiativeId)
-        ? 'matrix-map-cell--mapped matrix-map-cell--tbc'
-        : 'matrix-map-cell--empty'
-);
 
 const matrixTaggedCount = computed(() => taggedSet.value.size + tbcTaggedSet.value.size);
 
