@@ -10,6 +10,42 @@ const displayValue = (value) => {
     return trimmed === '' ? '-' : trimmed;
 };
 
+const normalizeNumericValue = (value) => {
+    const digits = String(value ?? '').trim().replace(/[^\d-]/g, '');
+    if (digits === '') return null;
+
+    const parsed = Number(digits);
+    return Number.isFinite(parsed) ? parsed : null;
+};
+
+const pickDisplayValue = (...values) => {
+    for (const value of values) {
+        const trimmed = String(value ?? '').trim();
+        if (trimmed !== '') {
+            return trimmed;
+        }
+    }
+
+    return '-';
+};
+
+const headerTitle = computed(() => (
+    pickDisplayValue(
+        props.initiative?.name,
+        props.initiative?.useCase,
+        props.initiative?.usecase
+    )
+));
+
+const headerDescription = computed(() => (
+    pickDisplayValue(
+        props.initiative?.description,
+        props.initiative?.detail_useCase_description,
+        props.initiative?.code,
+        props.initiative?.no
+    )
+));
+
 const mapSourceCreated = (source) => {
     if (!source) return '-';
 
@@ -26,8 +62,26 @@ const mapSourceCreated = (source) => {
     return '-';
 };
 
+const isGoalPillarOne = (tag) => {
+    const theme = tag?.theme ?? tag?.themes ?? null;
+    const goal = theme?.goal ?? null;
+
+    return [
+        goal?.pilar,
+        goal?.id,
+        theme?.idGoal,
+        tag?.pilar,
+        tag?.goal,
+    ].some((value) => normalizeNumericValue(value) === 1);
+};
+
 const mappedInitiatives = computed(() => {
-    const source = props.initiative?.mapped_initiatives ?? props.initiative?.mappedInitiatives ?? [];
+    let source = props.initiative?.mapped_initiatives ?? props.initiative?.mappedInitiatives;
+    
+    if (!source && props.initiative) {
+        source = [props.initiative];
+    }
+    
     const list = Array.isArray(source) ? source : [];
 
     return list.map((mi) => {
@@ -91,7 +145,12 @@ const headerMeta = computed(() => {
 });
 
 const mappedInitiativeGoals = computed(() => {
-    const source = props.initiative?.mapped_initiatives ?? props.initiative?.mappedInitiatives ?? [];
+    let source = props.initiative?.mapped_initiatives ?? props.initiative?.mappedInitiatives;
+    
+    if (!source && props.initiative) {
+        source = [props.initiative];
+    }
+    
     const list = Array.isArray(source) ? source : [];
 
     return list.flatMap((mi) => {
@@ -101,16 +160,26 @@ const mappedInitiativeGoals = computed(() => {
                 ? mi.initiative_taggings
                 : [];
 
-        return taggings.map((tag) => {
-            const theme = tag.theme ?? tag.themes ?? null;
-            return {
-                initiativeCode: String(mi.code ?? '').trim().replace(/#/g, ''),
-                goal: tag.goal ?? '-',
-                strategicPillar: theme?.strategic_pillar ?? '-',
-                themeCode: String(theme?.theme_code ?? theme?.theme_number ?? theme?.code ?? '-').replace(/#/g, ''),
-                themeName: theme?.theme_name ?? theme?.name ?? '-',
-            };
-        });
+        return taggings
+            .filter((tag) => isGoalPillarOne(tag))
+            .map((tag) => {
+                const theme = tag.theme ?? tag.themes ?? null;
+                const goal = theme?.goal ?? null;
+
+                // Reference: AppendixCharterDocument.vue rjppDisplayLabel logic
+                const goalCode = String(goal?.code ?? theme?.code ?? theme?.goal_code ?? tag.goal ?? '-').trim().replace(/#/g, '');
+                const strategicPillar = String(goal?.title ?? theme?.strategic_pillar ?? theme?.goal ?? theme?.strategic_pillar_title ?? tag.pilar ?? '-').trim();
+                const themeCode = String(theme?.theme_number ?? theme?.theme_code ?? theme?.code ?? '-').trim().replace(/#/g, '');
+                const themeName = String(theme?.name ?? theme?.theme_name ?? theme?.themes ?? '-').trim();
+
+                return {
+                    initiativeCode: String(mi.code ?? '').trim().replace(/#/g, ''),
+                    goal: goalCode,
+                    strategicPillar: strategicPillar,
+                    themeCode: themeCode,
+                    themeName: themeName,
+                };
+            });
     });
 });
 </script>
@@ -125,11 +194,11 @@ const mappedInitiativeGoals = computed(() => {
                         <h1 class="text-[18px] font-extrabold leading-tight text-slate-900">
                             <span class="shrink-0 text-[#3b5e96]">Digital Initiative</span>
                             <span class="mx-2 shrink-0 text-slate-400">|</span>
-                            <span class="">{{ displayValue(initiative.no || initiative.code) }}</span>
+                            <span>{{ headerTitle }}</span>
                         </h1>
                     </div>
                     <p class="mt-1 text-[13px] text-slate-600">
-                        {{ displayValue(initiative.useCase || initiative.name) }}
+                        {{ headerDescription }}
                     </p>
                 </div>
             </div>

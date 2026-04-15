@@ -47,7 +47,7 @@ class IndexController extends Controller
                 'mappedInitiatives.organization:id,name,groub_id',
                 'mappedInitiatives.organization.groub:id,name',
                 'mappedInitiatives.sourceData:id,name,month,year,created_at',
-                'mappedInitiatives.taggings.theme:id,idGoal,code,name,strategic_pillar,theme_code,theme_number,theme_name',
+                'mappedInitiatives.taggings.theme:id,idGoal,theme_number,name',
                 'mappedInitiatives.taggings.theme.goal:id,code,title',
             ])
             ->first();
@@ -234,11 +234,14 @@ class IndexController extends Controller
 
 
         return Inertia::render('ProgramPlanning/ProgramDefinition/DigitalInitiatives/Summary/Index', [
-            'initiativeMaster' => [
-                'id' => $initiative->id,
-                'code' => $initiative->code,
-                'name' => $initiative->name,
-            ],
+            'initiativeMaster' => $initiative->load([
+                'coe:id,name',
+                'organization:id,name,groub_id',
+                'organization.groub:id,name',
+                'sourceData:id,name,month,year,created_at',
+                'taggings.theme:id,idGoal,theme_number,name',
+                'taggings.theme.goal:id,code,title',
+            ]),
             'projectCharter' => $projectCharter,
             'compendiumData' => $compendiumData,
             'appendixData' => $appendixData,

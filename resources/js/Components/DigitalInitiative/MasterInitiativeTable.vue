@@ -112,7 +112,7 @@
                                     v-if="hasLinkedInitiative(item)"
                                     :href="initiativeHref(item)"
                                     :class="actionCellClass(true)"
-                                    title="View Scope Charter"
+                                    title="View Capsule Summary"
                                 >
                                     Scope Charter
                                 </Link>
@@ -120,18 +120,11 @@
                                     v-else
                                     type="button"
                                     :class="actionCellClass(false)"
-                                    title="View Scope Charter"
+                                    title="View Capsule Summary"
                                     @click="showNoDataModal = true"
                                 >
                                     Scope Charter
                                 </button>
-                                <Link
-                                    :href="route('program-planning.program-definition.digital-initiatives.summary.index', item.id)"
-                                    class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-indigo-100 text-indigo-800 hover:bg-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:hover:bg-indigo-500/30 transition-colors cursor-pointer"
-                                    title="View Capsule Summary"
-                                >
-                                    Summary
-                                </Link>
                                 <Link
                                     :href="editHref(item)"
                                     class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-500/20 dark:text-amber-300 dark:hover:bg-amber-500/30 transition-colors cursor-pointer"
@@ -274,10 +267,7 @@ const resolveLinkedInitiative = (item) => {
 const hasLinkedInitiative = (item) => Boolean(resolveLinkedInitiative(item)?.id);
 
 const initiativeHref = (item) => {
-    const matchedInitiative = resolveLinkedInitiative(item);
-    return matchedInitiative?.id
-        ? route('program-planning.program-definition.digital-initiatives.compendium.edit', matchedInitiative.id)
-        : route('program-planning.program-definition.digital-initiatives.compendium.index');
+    return route('program-planning.program-definition.digital-initiatives.summary.index', item.id);
 };
 
 const editHref = (item) => {

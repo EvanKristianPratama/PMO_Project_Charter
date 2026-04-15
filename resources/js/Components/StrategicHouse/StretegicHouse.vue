@@ -1,6 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
+import { Link } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 
 const props = defineProps({
     page: {
@@ -45,6 +47,7 @@ const props = defineProps({
     },
 });
 
+const route = useRouteHelper();
 const selectedSource = ref('all');
 const showDetails = ref(true);
 const showStrategyDetails = ref(true);
@@ -140,6 +143,18 @@ const coeTooltip = (card) => {
 
     return `${card.display_name} (${card.initiatives_count})\n${lines.join('\n')}`;
 };
+
+const initiativeSummaryHref = (initiative) => {
+    const initiativeId = Number(initiative?.id ?? 0);
+    return initiativeId > 0
+        ? route('program-planning.program-definition.digital-initiatives.summary.index', initiativeId)
+        : null;
+};
+
+const initiativeSummaryTitle = (initiative) => {
+    const label = String(initiative?.label ?? initiative?.name ?? initiative?.code ?? 'initiative').trim();
+    return `Lihat capsule summary untuk ${label}`;
+};
 </script>
 
 <template>
@@ -213,7 +228,15 @@ const coeTooltip = (card) => {
                             <div v-if="showDetails" class="dti-card-list-wrapper">
                                 <ul v-if="card.initiatives?.length" class="dti-card-list">
                                     <li v-for="(ini, idx) in card.initiatives" :key="`${card.name}-ini-${idx}`" class="dti-card-list-item">
-                                        {{ ini.label }}
+                                        <Link
+                                            v-if="initiativeSummaryHref(ini)"
+                                            :href="initiativeSummaryHref(ini)"
+                                            class="initiative-link initiative-link--dti"
+                                            :title="initiativeSummaryTitle(ini)"
+                                        >
+                                            {{ ini.label }}
+                                        </Link>
+                                        <span v-else>{{ ini.label }}</span>
                                     </li>
                                 </ul>
                                 <div v-else class="dti-card-list-empty">
@@ -233,7 +256,15 @@ const coeTooltip = (card) => {
                             <div v-if="showDetails" class="dti-card-list-wrapper">
                                 <ul v-if="unassignedCard.initiatives?.length" class="dti-card-list">
                                     <li v-for="(ini, idx) in unassignedCard.initiatives" :key="`${unassignedCard.name}-ini-${idx}`" class="dti-card-list-item">
-                                        {{ ini.label }}
+                                        <Link
+                                            v-if="initiativeSummaryHref(ini)"
+                                            :href="initiativeSummaryHref(ini)"
+                                            class="initiative-link initiative-link--dti"
+                                            :title="initiativeSummaryTitle(ini)"
+                                        >
+                                            {{ ini.label }}
+                                        </Link>
+                                        <span v-else>{{ ini.label }}</span>
                                     </li>
                                 </ul>
                                 <div v-else class="dti-card-list-empty">
@@ -285,7 +316,15 @@ const coeTooltip = (card) => {
                         <div v-else class="gits-pillar-list-wrapper">
                             <ul v-if="card.initiatives?.length" class="gits-pillar-list">
                                 <li v-for="(ini, idx) in card.initiatives" :key="`${card.name}-ini-${idx}`" class="gits-pillar-list-item">
-                                    {{ ini.label }}
+                                    <Link
+                                        v-if="initiativeSummaryHref(ini)"
+                                        :href="initiativeSummaryHref(ini)"
+                                        class="initiative-link initiative-link--gits"
+                                        :title="initiativeSummaryTitle(ini)"
+                                    >
+                                        {{ ini.label }}
+                                    </Link>
+                                    <span v-else>{{ ini.label }}</span>
                                 </li>
                             </ul>
                             <div v-else class="gits-pillar-list-empty">
@@ -310,7 +349,15 @@ const coeTooltip = (card) => {
                     <div v-else class="gits-pillar-list-wrapper">
                         <ul v-if="filteredFoundationCard.initiatives?.length" class="gits-pillar-list gits-pillar-list--horizontal">
                             <li v-for="(ini, idx) in filteredFoundationCard.initiatives" :key="`foundation-ini-${idx}`" class="gits-pillar-list-item">
-                                {{ ini.label }}
+                                <Link
+                                    v-if="initiativeSummaryHref(ini)"
+                                    :href="initiativeSummaryHref(ini)"
+                                    class="initiative-link initiative-link--gits"
+                                    :title="initiativeSummaryTitle(ini)"
+                                >
+                                    {{ ini.label }}
+                                </Link>
+                                <span v-else>{{ ini.label }}</span>
                             </li>
                         </ul>
                         <div v-else class="gits-pillar-list-empty">
@@ -331,7 +378,15 @@ const coeTooltip = (card) => {
                     <div class="gits-pillar-list-wrapper">
                         <ul v-if="filteredArchitectureCard.initiatives?.length" class="gits-pillar-list gits-pillar-list--horizontal">
                             <li v-for="(ini, idx) in filteredArchitectureCard.initiatives" :key="`architecture-ini-${idx}`" class="gits-pillar-list-item">
-                                {{ ini.label }}
+                                <Link
+                                    v-if="initiativeSummaryHref(ini)"
+                                    :href="initiativeSummaryHref(ini)"
+                                    class="initiative-link initiative-link--gits"
+                                    :title="initiativeSummaryTitle(ini)"
+                                >
+                                    {{ ini.label }}
+                                </Link>
+                                <span v-else>{{ ini.label }}</span>
                             </li>
                         </ul>
                         <div v-else class="gits-pillar-list-empty">
@@ -692,6 +747,27 @@ const coeTooltip = (card) => {
     border-radius: 2px;
 }
 
+.initiative-link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+    transition: opacity 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.initiative-link:hover {
+    text-decoration: underline;
+}
+
+.initiative-link:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+    border-radius: 3px;
+}
+
+.initiative-link--dti:hover {
+    opacity: 0.8;
+}
+
 .dti-card-list-empty {
     font-size: 10px;
     font-style: italic;
@@ -863,6 +939,10 @@ const coeTooltip = (card) => {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 2px;
     text-align: left;
+}
+
+.initiative-link--gits:hover {
+    opacity: 0.85;
 }
 
 .gits-pillar-list-empty {
