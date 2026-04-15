@@ -8,6 +8,7 @@ use App\Models\MstCoe;
 use App\Models\MstInitiative;
 use App\Services\ProgramPlanning\ItBuildingBlockService;
 use App\Services\ProgramPlanning\StrategicPillars\StrategicPillarPageService;
+use App\Services\ProgramPlanning\InitiativeRelation\InitiativeRelationService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
@@ -157,7 +158,8 @@ class StrategicHousePageService
     
     public function __construct(
         protected ItBuildingBlockService $itBuildingBlockService,
-        protected StrategicPillarPageService $strategicPillarPageService
+        protected StrategicPillarPageService $strategicPillarPageService,
+        protected InitiativeRelationService $initiativeRelationService
     ) {}
 
     public function getPageProps(array $filters = []): array
@@ -188,6 +190,8 @@ class StrategicHousePageService
             $pilarId,
             $initiativeType
         );
+
+        $relationData = $this->initiativeRelationService->getIndexProps();
 
         return [
             'filters' => $normalizedFilters,
@@ -234,6 +238,12 @@ class StrategicHousePageService
             'matrixInitiatives' => $pillarData['matrixInitiatives'] instanceof \Closure ? $pillarData['matrixInitiatives']() : $pillarData['matrixInitiatives'],
             'pilarOptions' => $pillarData['pilarOptions'],
             'pillarFilters' => $pillarData['filters'],
+
+            // Initiative Relation props
+            'mstInitiatives' => $relationData['mstInitiatives'],
+            'initiativeRelations' => $relationData['initiativeRelations'],
+            'modelRelationOptions' => $relationData['modelRelationOptions'],
+            'typeRelationOptions' => $relationData['typeRelationOptions'],
         ];
     }
 

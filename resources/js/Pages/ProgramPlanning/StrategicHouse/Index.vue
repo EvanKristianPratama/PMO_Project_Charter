@@ -39,6 +39,13 @@
                     IT Initiatives
                 </button>
                 <button type="button" class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
+                    :class="viewMode === 'initiative-relation'
+                        ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
+                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
+                    @click="viewMode = 'initiative-relation'">
+                    Initiative Relation
+                </button>
+                <button type="button" class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
                     :class="viewMode === 'strategic-pillars'
                         ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                         : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
@@ -99,6 +106,29 @@
                         <ItBuildingBlocks :items="itInitiativeOptions" :coe-options="coeOptions" />
                     </div>
 
+                    <div v-else-if="viewMode === 'initiative-relation'" key="initiative-relation">
+                        <div class="space-y-6 animate-fade-in-up">
+                            <div class="flex flex-wrap items-center justify-between gap-3">
+                                <div>
+                                    <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Initiatives Relations</h1>
+                                    <p class="text-sm text-slate-500 dark:text-slate-400">Kelola dependensi antar initiative.</p>
+                                </div>
+                                <Link
+                                    :href="initiativeRelationCreatePath"
+                                    class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 dark:bg-white dark:text-slate-900"
+                                >
+                                    Tambah Relation
+                                </Link>
+                            </div>
+
+                            <InitiativeRelationDependency
+                                :mst-initiatives="mstInitiatives"
+                                :model-relation-options="modelRelationOptions"
+                                @edit-relation="goToEdit"
+                            />
+                        </div>
+                    </div>
+
                     <div v-else-if="viewMode === 'strategic-pillars'" key="strategic-pillars">
                         <StrategicPillarView
                             :strategic-pillars="strategicPillars"
@@ -129,7 +159,9 @@ import ItBuildingBlocks from '@/Components/ItBuildingBlocks/ItBuildingBlock.vue'
 import ItInitiatives from '@/Components/ItBuildingBlocks/ItBuildingBlocksMatrix.vue';
 import StrategicPillarView from '@/Components/StrategicPillar/StrategicPillarView.vue';
 import StretegicHouse from '@/Components/StrategicHouse/StretegicHouse.vue';
+import InitiativeRelationDependency from '@/Components/InitiativeRelation/InitiativeRelationDependency.vue';
 import UserLayout from '@/Layouts/UserLayout.vue';
+import { Link, router } from '@inertiajs/vue3';
 
 const props = defineProps({
     page: {
@@ -206,6 +238,24 @@ const props = defineProps({
     allOrganizations: { type: Array, default: () => [] },
     pilarOptions:     { type: Array, default: () => [] },
     pillarFilters:    { type: Object, default: () => ({}) },
+
+    // Initiative Relation props
+    mstInitiatives: {
+        type: Array,
+        default: () => [],
+    },
+    initiativeRelations: {
+        type: Array,
+        default: () => [],
+    },
+    modelRelationOptions: {
+        type: Array,
+        default: () => [],
+    },
+    typeRelationOptions: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const getInitialViewMode = () => {
@@ -214,9 +264,23 @@ const getInitialViewMode = () => {
     if (urlParams.has('pilar') || urlParams.has('goal_id') || urlParams.has('org_id')) {
         return 'strategic-pillars';
     }
+    if (urlParams.has('model_relasi')) {
+        return 'initiative-relation';
+    }
     return 'mapping';
 };
 
 const viewMode = ref(getInitialViewMode());
 const showEnabler = ref(false);
+
+const initiativeRelationIndexPath = '/program-planning/initiative-relation';
+const initiativeRelationCreatePath = `${initiativeRelationIndexPath}/create`;
+const initiativeRelationEditPath = (initiativeRelationId) => `${initiativeRelationIndexPath}/${initiativeRelationId}/edit`;
+
+function goToEdit({ relation }) {
+    const id = relation?.id;
+    if (id != null) {
+        router.visit(initiativeRelationEditPath(id));
+    }
+}
 </script>
