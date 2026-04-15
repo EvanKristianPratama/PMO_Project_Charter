@@ -23,26 +23,41 @@
                         </option>
                     </select>
 
-                    <div class="ml-auto flex items-center gap-1.5">
+                    <div class="ml-auto flex items-center gap-1.5 rounded-lg bg-slate-100 p-1 dark:bg-white/5">
                         <button v-for="tab in tabs" :key="tab.key" type="button"
-                            class="rounded-md px-2.5 py-1 text-[10px] font-semibold"
-                            :class="activeTab === tab.key ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900' : 'text-slate-500 dark:text-slate-400'"
+                            class="rounded-md px-3 py-1 text-xs font-semibold transition-all"
+                            :class="activeTab === tab.key ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-[#1A1A1A] dark:text-blue-400' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'"
                             @click="toggleTab(tab.key)">
                             {{ tab.label }}
                         </button>
                     </div>
                 </div>
 
-                <!-- Detail panel (Status Implementation) -->
-                <div v-if="activeTab === 'detail'" class="border-t border-slate-100 dark:border-white/5">
+                <!-- Implementation panel (Status Implementation) -->
+                <div v-if="activeTab === 'Implementation'" class="border-t border-slate-100 dark:border-white/5">
                     <div class="px-3 py-3">
                         <StatusImplementationTable :projects="relatedProjects" codeLabel="Progres status history" />
                     </div>
                 </div>
+
+                <!-- Evaluation panel -->
+                <div v-if="activeTab === 'Evaluation'" class="border-t border-slate-100 dark:border-white/5">
+                    <div class="px-3 py-12 text-center">
+                        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5">
+                            <svg class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                        </div>
+                        <h3 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">Belum Ada Evaluasi</h3>
+                        <p class="mt-2 text-xs text-slate-500">
+                            Halaman evaluasi sedang dalam pengembangan.
+                        </p>
+                    </div>
+                </div>
             </section>
 
-            <!-- Project Charter + Roadmap Section -->
-            <template v-if="activeTab === 'charter'">
+            <!-- Project Charter + Roadmap Section (Planning) -->
+            <template v-if="activeTab === 'Planning'">
                 <section
                     class="print:hidden rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-white/10 dark:bg-[#171717]">
                     <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
@@ -289,23 +304,28 @@ const resolveStatusLabel = (statusValue) => {
 
 // --- Tabs ---
 const tabs = [
-    { key: 'detail', label: 'Status Implementation' },
-    { key: 'charter', label: 'Project Charter' },
+    { key: 'Planning', label: 'Planning' },
+    { key: 'Implementation', label: 'Implementation' },
+    { key: 'Evaluation', label: 'Evaluation' },
 ];
 const parseTabFromUrl = () => {
     const query = String(page.url ?? '').split('?')[1] ?? '';
     const params = new URLSearchParams(query);
     const tab = String(params.get('tab') ?? '').trim().toLowerCase();
 
-    if (['detail', 'scope', 'scope-charter', 'scope_charter'].includes(tab)) {
-        return 'detail';
+    if (['detail', 'implementation', 'status-implementation'].includes(tab)) {
+        return 'Implementation';
     }
 
-    if (['charter', 'project-charter', 'project_charter'].includes(tab)) {
-        return 'charter';
+    if (['charter', 'planning', 'project-charter'].includes(tab)) {
+        return 'Planning';
     }
 
-    return 'charter';
+    if (['evaluation'].includes(tab)) {
+        return 'Evaluation';
+    }
+
+    return 'Planning';
 };
 
 const activeTab = ref(parseTabFromUrl());
