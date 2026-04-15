@@ -106,43 +106,12 @@
                     <div v-else-if="viewMode === 'it-building-blocs'" key="it-building-blocs">
                         <div class="space-y-6 animate-fade-in-up">
                             <div class="flex flex-wrap items-center justify-between gap-3">
-                                <div class="flex flex-col gap-2">                    
-                                    <!-- View Mode Switcher -->
-                                    <div class="inline-flex items-center gap-1 rounded-xl bg-slate-200/50 p-1 dark:bg-white/5 w-fit">
-                                        <button
-                                            type="button"
-                                            class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
-                                            :class="viewModeBuildingBlock === 'mapping' 
-                                                ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white' 
-                                                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
-                                            @click="viewModeBuildingBlock = 'mapping'"
-                                        >
-                                            IT Enabler
-                                        </button>
-                                        <button
-                                            type="button"
-                                            class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
-                                            :class="viewModeBuildingBlock === 'digital-block' 
-                                                ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white' 
-                                                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
-                                            @click="viewModeBuildingBlock = 'digital-block'"
-                                        >
-                                            Center of Excellence
-                                        </button>
-                                        <button
-                                            type="button"
-                                            class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
-                                            :class="viewModeBuildingBlock === 'block' 
-                                                ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white' 
-                                                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
-                                            @click="viewModeBuildingBlock = 'block'"
-                                        >
-                                            IT Building Blocks
-                                        </button>
-                                    </div>
+                                <div>
+                                    <h1 class="text-2xl font-bold text-slate-900 dark:text-white">IT Enabler</h1>
+                                    <p class="text-sm text-slate-500 dark:text-slate-400">Kelola mapping IT Building Blocks dan Center of Excellence.</p>
                                 </div>
 
-                                <div v-if="viewModeBuildingBlock === 'mapping'" class="flex flex-wrap items-center gap-2">
+                                <div class="flex flex-wrap items-center gap-2">
                                     <button
                                         type="button"
                                         v-if="!isEditModeBuildingBlock"
@@ -170,36 +139,15 @@
                                 </div>
                             </div>
 
-                            <div class="relative">
-                                <Transition
-                                    enter-active-class="transition duration-300 ease-out"
-                                    enter-from-class="transform opacity-0 translate-y-4"
-                                    enter-to-class="transform opacity-100 translate-y-0"
-                                    leave-active-class="transition duration-200 ease-in"
-                                    leave-from-class="transform opacity-100 translate-y-0"
-                                    leave-to-class="transform opacity-0 translate-y-4"
-                                    mode="out-in"
-                                >
-                                    <ItInitiatives
-                                        v-if="viewModeBuildingBlock === 'mapping'"
-                                        ref="matrixRefBuildingBlock"
-                                        :groups="itBuildingBlockMatrix"
-                                        :editable="isEditModeBuildingBlock"
-                                        :coe-options="coeOptions"
-                                        :initiative-options="itInitiativeOptions"
-                                        @cancel-add-mapping="isEditModeBuildingBlock = false"
-                                    />
-                                    <ItBuildingBlocks
-                                        v-else-if="viewModeBuildingBlock === 'block'"
-                                        :items="itInitiativeOptions"
-                                        :coe-options="coeOptions"
-                                    />
-                                    <DigitalBuildingBlock
-                                        v-else-if="viewModeBuildingBlock === 'digital-block'"
-                                        :items="digitalInitiativeOptions"
-                                        :coe-options="coeOptions"
-                                    />
-                                </Transition>
+                            <div class="relative min-h-[400px]">
+                                <ItInitiatives
+                                    ref="matrixRefBuildingBlock"
+                                    :groups="itBuildingBlockMatrix"
+                                    :editable="isEditModeBuildingBlock"
+                                    :coe-options="coeOptions"
+                                    :initiative-options="itInitiativeOptions"
+                                    @cancel-add-mapping="isEditModeBuildingBlock = false"
+                                />
                             </div>
                         </div>
                     </div>
