@@ -169,7 +169,7 @@ const coeTooltip = (card) => {
 
             <!-- ═══ CONNECTOR: small decorative chain ═══ -->
             <div class="connector-chain">
-                <img src="/chain-strategic-house.png" alt="Chain" class="w-6 h-auto" />
+                <img src="/chain-strategic-house.png" alt="Chain" class="w-7 h-auto" />
             </div>
 
             <!-- ═══ VISION TRAPEZOID ═══ -->
@@ -180,7 +180,7 @@ const coeTooltip = (card) => {
 
             <!-- ═══ CONNECTOR ═══ -->
             <div class="connector-chain">
-                <img src="/chain-strategic-house.png" alt="Chain" class="w-6 h-auto" />
+                <img src="/chain-strategic-house.png" alt="Chain" class="w-7 h-auto" />
             </div>
 
             <!-- ═══ DIGITAL TRANSFORMATION INITIATIVES SECTION ═══ -->
@@ -247,7 +247,7 @@ const coeTooltip = (card) => {
 
             <!-- ═══ CONNECTOR ═══ -->
             <div class="connector-chain">
-                <img src="/chain-strategic-house.png" alt="Chain" class="w-6 h-auto" />
+                <img src="/chain-strategic-house.png" alt="Chain" class="w-7 h-auto" />
             </div>
 
             <!-- ═══ GRAND IT STRATEGY SECTION ═══ -->
@@ -453,13 +453,6 @@ const coeTooltip = (card) => {
 .connector-chain {
     display: flex;
     justify-content: center;
-}
-
-.connector-chain img {
-    background-color: #fff;
-    padding: 6px;
-    border-radius: 9999px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 /* ─── VISION TRAPEZOID ─── */
