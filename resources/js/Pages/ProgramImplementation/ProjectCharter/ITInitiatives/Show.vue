@@ -5,13 +5,13 @@
             <section
                 class="print:hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="flex flex-wrap items-center gap-2 px-3 py-2.5">
-                    <Link :href="route('it-initiatives.index')"
-                        class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+                    <button @click="goBack"
+                        class="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-50 dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/5">
                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 19-7-7 7-7" />
                         </svg>
                         Kembali
-                    </Link>
+                    </button>
 
                     <span class="text-slate-300 dark:text-slate-600">|</span>
 

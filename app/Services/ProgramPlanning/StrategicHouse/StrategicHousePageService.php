@@ -295,7 +295,10 @@ class StrategicHousePageService
                 'initiatives' => fn ($query) => $query
                     ->select(['id', 'coe_id', 'code', 'name', 'status', 'source'])
                     ->where('tipe_initiative', $initiativeType)
-                    ->with('latestStatus')
+                    ->with([
+                        'latestStatus',
+                        'mappedProjects:id',
+                    ])
                     ->orderBy('code'),
             ])
             ->withCount([
@@ -339,12 +342,14 @@ class StrategicHousePageService
         $initiatives = ($coe->initiatives ?? collect())
             ->map(function (MstInitiative $initiative): array {
                 $status = $this->normalizeStatus($initiative->latestPlanningStatusValue());
+                $mappedProjectId = (int) ($initiative->mappedProjects?->first()?->id ?? 0);
 
                 return [
                     'id' => (int) $initiative->id,
                     'code' => $initiative->code,
                     'name' => $initiative->name,
                     'label' => trim(collect([$initiative->code, $initiative->name])->filter()->implode(' - ')),
+                    'mapped_project_id' => $mappedProjectId > 0 ? $mappedProjectId : null,
                     'status' => $status,
                     'status_label' => $this->statusLabel($status),
                     'source' => !is_null($initiative->source) ? (int) $initiative->source : null,

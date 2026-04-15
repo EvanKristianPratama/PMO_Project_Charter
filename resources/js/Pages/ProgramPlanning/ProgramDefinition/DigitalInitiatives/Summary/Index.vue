@@ -5,13 +5,13 @@
             <section
                 class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="flex flex-wrap items-center gap-3 px-4 py-3">
-                    <Link :href="route('program-planning.program-definition.digital-initiatives')"
+                    <button @click="goBack"
                         class="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-50 dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/5">
                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 19-7-7 7-7" />
                         </svg>
                         Kembali
-                    </Link>
+                    </button>
 
                     <div class="h-6 w-px bg-slate-200 dark:bg-white/10" />
 
@@ -28,60 +28,36 @@
                     </select>
                 </div>
             </section>
-
-            <!-- Error fallback if data doesn't exist -->
-            <div v-if="!hasAnyData"
-                class="rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-12 text-center dark:border-white/10 dark:bg-white/5">
-                <div
-                    class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5">
-                    <svg class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 6v6m0 4h.01M6 20h12a2 2 0 0 0 2-2V8l-6-6H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2z" />
-                    </svg>
+            
+            <!-- 1. Digital Project Charter Document -->
+            <div v-if="initiativeMaster" class="space-y-4">
+                <div class="flex items-center gap-2 px-1">
+                    <div class="h-6 w-1 rounded-full bg-[#1e4f8f]"></div>
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Scope Charter</h2>
                 </div>
-                <h3 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">Kosong / Empty</h3>
-                <p class="mt-2 text-xs text-slate-500">
-                    Belum ada data Charter, Compendium, Appendix, maupun Roadmap untuk inisiatif ini.
-                </p>
+                <DigitalInitiativeCharterDocument :initiative="initiativeMaster" />
             </div>
 
-            <!-- 1. Digital Roadmap Component -->
+            <!-- 2. Digital Roadmap Component -->
             <div v-if="roadmapItems && roadmapItems.length"
                 class="space-y-4 pt-6 mt-6 border-t border-slate-200 dark:border-white/10">
                 <div class="flex items-center gap-2 px-1">
                     <div class="h-6 w-1 rounded-full bg-purple-600"></div>
-                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Digital Initiative Roadmap 2024-2029</h2>
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Digital Initiative Roadmap</h2>
                 </div>
                 <DigitalRoadmapComponent :data="roadmapItems" :start-year="roadmapStartYear"
                     :end-year="roadmapEndYear" />
             </div>
 
             <!-- Roadmap not available message -->
-            <div v-else class="space-y-4 pt-6 mt-6 border-t border-slate-200 dark:border-white/10">
+            <div v-else class="space-y-1 pt-6 mt-6 border-t border-slate-200 dark:border-white/10">
                 <div class="flex items-center gap-2 px-1">
                     <div class="h-6 w-1 rounded-full bg-purple-600"></div>
-                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Digital Initiative Roadmap 2024-2029</h2>
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Digital Initiative Roadmap</h2>
                 </div>
-                <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-6 text-center dark:border-white/10 dark:bg-white/5">
-                    <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5">
-                        <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                    </div>
-                    <h3 class="mt-3 text-sm font-bold text-slate-900 dark:text-white">Belum Ada Roadmap</h3>
-                    <p class="mt-1 text-xs text-slate-500">
-                        Belum ada roadmap pada initiative terkait.
-                    </p>
+                <div class="rounded-1xl border border-dashed border-slate-300 bg-slate-50/50 p-1 text-center dark:border-white/10 dark:bg-white/5">
+                    <h3 class="mt-1 mb-1 text-sm font-bold text-slate-900 dark:text-white">Roadmap Not Available</h3>
                 </div>
-            </div>
-
-            <!-- 2. Digital Project Charter Document -->
-            <div v-if="initiativeMaster" class="space-y-4">
-                <div class="flex items-center gap-2 px-1">
-                    <div class="h-6 w-1 rounded-full bg-[#1e4f8f]"></div>
-                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Project Charter</h2>
-                </div>
-                <DigitalInitiativeCharterDocument :initiative="initiativeMaster" />
             </div>
 
             <!-- 3. Compendium Charter Document -->
@@ -137,6 +113,10 @@ const props = defineProps({
 });
 
 const route = useRouteHelper();
+
+const goBack = () => {
+    window.history.back();
+};
 
 const initiativeId = computed(() => Number(props.initiativeMaster?.id ?? 0));
 

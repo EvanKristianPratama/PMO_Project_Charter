@@ -151,9 +151,21 @@ const initiativeSummaryHref = (initiative) => {
         : null;
 };
 
+const initiativeProjectCharterHref = (initiative) => {
+    const mappedProjectId = Number(initiative?.mapped_project_id ?? 0);
+    return mappedProjectId > 0
+        ? route('it-initiatives.show', { project: mappedProjectId, tab: 'charter' })
+        : null;
+};
+
 const initiativeSummaryTitle = (initiative) => {
     const label = String(initiative?.label ?? initiative?.name ?? initiative?.code ?? 'initiative').trim();
     return `Lihat capsule summary untuk ${label}`;
+};
+
+const initiativeProjectCharterTitle = (initiative) => {
+    const label = String(initiative?.label ?? initiative?.name ?? initiative?.code ?? 'initiative').trim();
+    return `Lihat project charter IT untuk ${label}`;
 };
 </script>
 
@@ -317,10 +329,10 @@ const initiativeSummaryTitle = (initiative) => {
                             <ul v-if="card.initiatives?.length" class="gits-pillar-list">
                                 <li v-for="(ini, idx) in card.initiatives" :key="`${card.name}-ini-${idx}`" class="gits-pillar-list-item">
                                     <Link
-                                        v-if="initiativeSummaryHref(ini)"
-                                        :href="initiativeSummaryHref(ini)"
+                                        v-if="initiativeProjectCharterHref(ini)"
+                                        :href="initiativeProjectCharterHref(ini)"
                                         class="initiative-link initiative-link--gits"
-                                        :title="initiativeSummaryTitle(ini)"
+                                        :title="initiativeProjectCharterTitle(ini)"
                                     >
                                         {{ ini.label }}
                                     </Link>
@@ -350,10 +362,10 @@ const initiativeSummaryTitle = (initiative) => {
                         <ul v-if="filteredFoundationCard.initiatives?.length" class="gits-pillar-list gits-pillar-list--horizontal">
                             <li v-for="(ini, idx) in filteredFoundationCard.initiatives" :key="`foundation-ini-${idx}`" class="gits-pillar-list-item">
                                 <Link
-                                    v-if="initiativeSummaryHref(ini)"
-                                    :href="initiativeSummaryHref(ini)"
+                                    v-if="initiativeProjectCharterHref(ini)"
+                                    :href="initiativeProjectCharterHref(ini)"
                                     class="initiative-link initiative-link--gits"
-                                    :title="initiativeSummaryTitle(ini)"
+                                    :title="initiativeProjectCharterTitle(ini)"
                                 >
                                     {{ ini.label }}
                                 </Link>
@@ -379,10 +391,10 @@ const initiativeSummaryTitle = (initiative) => {
                         <ul v-if="filteredArchitectureCard.initiatives?.length" class="gits-pillar-list gits-pillar-list--horizontal">
                             <li v-for="(ini, idx) in filteredArchitectureCard.initiatives" :key="`architecture-ini-${idx}`" class="gits-pillar-list-item">
                                 <Link
-                                    v-if="initiativeSummaryHref(ini)"
-                                    :href="initiativeSummaryHref(ini)"
+                                    v-if="initiativeProjectCharterHref(ini)"
+                                    :href="initiativeProjectCharterHref(ini)"
                                     class="initiative-link initiative-link--gits"
-                                    :title="initiativeSummaryTitle(ini)"
+                                    :title="initiativeProjectCharterTitle(ini)"
                                 >
                                     {{ ini.label }}
                                 </Link>
