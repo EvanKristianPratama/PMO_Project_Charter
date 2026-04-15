@@ -232,6 +232,10 @@ import CharterCompare from '@/Components/ITInitiative/CharterCompare.vue';
 
 const route = useRouteHelper();
 
+const goBack = () => {
+    window.history.back();
+};
+
 const props = defineProps({
     itInitiative: Object,
     relatedProjects: {
