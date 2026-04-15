@@ -192,7 +192,7 @@ const coeTooltip = (card) => {
             </div>
 
             <!-- ═══ DIGITAL TRANSFORMATION INITIATIVES SECTION ═══ -->
-            <div class="dti-section">
+            <div class="dti-section" :class="{ 'dti-section--compact': !showDetails }">
                 <div class="dti-header">
                     <div class="dti-header-copy">
                         <p class="dti-count">{{ filteredDtiInitiativesCount }} Digital transformation
@@ -322,6 +322,27 @@ const coeTooltip = (card) => {
                     <div v-else class="gits-pillar-list-wrapper">
                         <ul v-if="filteredFoundationCard.initiatives?.length" class="gits-pillar-list gits-pillar-list--horizontal">
                             <li v-for="(ini, idx) in filteredFoundationCard.initiatives" :key="`foundation-ini-${idx}`" class="gits-pillar-list-item">
+                                {{ ini.label }}
+                            </li>
+                        </ul>
+                        <div v-else class="gits-pillar-list-empty">
+                            Belum ada initiative
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ ARCHITECTURE BAR ═══ -->
+                <div v-if="!showStrategyDetails && filteredArchitectureCard" class="architecture-bar">
+                    <div class="architecture-header">
+                        <span class="architecture-title">{{ filteredArchitectureCard.display_name }}</span>
+                        <div v-if="filteredArchitectureCard.initiatives_count > 0" class="gits-capsule-badge gits-capsule-badge--dark">
+                            {{ filteredArchitectureCard.initiatives_count }}
+                        </div>
+                    </div>
+                    
+                    <div class="gits-pillar-list-wrapper">
+                        <ul v-if="filteredArchitectureCard.initiatives?.length" class="gits-pillar-list gits-pillar-list--horizontal">
+                            <li v-for="(ini, idx) in filteredArchitectureCard.initiatives" :key="`architecture-ini-${idx}`" class="gits-pillar-list-item">
                                 {{ ini.label }}
                             </li>
                         </ul>
@@ -545,6 +566,11 @@ const coeTooltip = (card) => {
     transition: all 0.3s ease-in-out;
 }
 
+.dti-cards--hidden {
+    align-items: start;
+    grid-auto-rows: min-content;
+}
+
 .dti-card {
     background: #fff;
     border: 1.5px solid #3b82c8;
@@ -554,8 +580,20 @@ const coeTooltip = (card) => {
     color: #184f96;
     position: relative;
     min-height: auto;
-    height: 100%;
+    height: auto;
     transition: all 0.3s ease-in-out;
+}
+
+.dti-cards--hidden .dti-card {
+    min-height: 0;
+    height: fit-content;
+    align-self: start;
+    padding-top: 14px;
+    padding-bottom: 14px;
+}
+
+:not(.dti-cards--hidden) .dti-card {
+    height: 100%;
 }
 
 .dti-card--compact {
@@ -569,6 +607,10 @@ const coeTooltip = (card) => {
     min-height: 120px;
     align-items: flex-start;
     padding-top: 10px;
+}
+
+.dti-cards--hidden .dti-card--compact {
+    display: block;
 }
 
 .dti-card-content {
@@ -867,8 +909,8 @@ const coeTooltip = (card) => {
 }
 
 .gits-capsule-badge--dark {
-    background: rgba(0, 0, 0, 0.2);
-    border-color: rgba(0, 0, 0, 0.1);
+    background: #ffffff;
+    color: #184f96;
     position: static;
     display: inline-block;
     margin-left: 8px;
@@ -919,6 +961,31 @@ const coeTooltip = (card) => {
 .foundation-desc {
     color: rgba(255, 255, 255, 0.85);
     font-size: 10px;
+}
+
+/* ─── ARCHITECTURE BAR ─── */
+.architecture-bar {
+    margin-top: 10px;
+    background: linear-gradient(90deg, #1b4f93 0%, #215da8 50%, #1b4f93 100%);
+    border-radius: 8px;
+    padding: 12px 24px;
+    color: #fff;
+    text-align: center;
+    line-height: 1.5;
+    transition: all 0.3s ease-in-out;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.architecture-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.architecture-title {
+    font-weight: 700;
+    font-size: 13px;
+    margin-right: 4px;
 }
 
 /* ─── RESPONSIVE ─── */
