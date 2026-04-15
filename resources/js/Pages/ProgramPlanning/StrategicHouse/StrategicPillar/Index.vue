@@ -191,25 +191,17 @@
                     <div class="overflow-auto" style="max-height: calc(100vh - 180px)">
                         <table class="matrix-grid border-collapse text-[8px]" style="min-width: max-content">
                             <thead>
-                                <!-- Group header row -->
                                 <tr class="bg-slate-200 dark:bg-slate-700 sticky top-0 z-10">
-                                    <th rowspan="2" class="matrix-initiative-header sticky left-0 z-20 bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 px-2 py-1.5 text-left font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap min-w-55">
+                                    <th class="matrix-initiative-header sticky left-0 z-20 bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 px-2 py-1.5 text-left font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap min-w-55">
                                         Initiative
                                     </th>
-                                    <th v-for="group in themeGroupsWithCount" :key="group.label" :colspan="group.count" class="border border-slate-300 dark:border-slate-600 px-2 py-1 text-center text-[8px] font-bold text-slate-700 dark:text-slate-200 whitespace-nowrap">
-                                        {{ group.label }}
-                                    </th>
-                                    <!-- TBC group header -->
-                                    <th rowspan="2" class="matrix-tbc-header border border-slate-300 dark:border-slate-600 px-2 py-1 text-center text-[8px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap w-13 bg-slate-100 dark:bg-slate-800">
-                                        TBC
-                                    </th>
-                                </tr>
-                                <!-- Theme number row -->
-                                <tr class="bg-slate-100 dark:bg-slate-800 sticky top-7.25 z-10">
                                     <th v-for="theme in sortedMatrixThemes" :key="theme.id" class="matrix-theme-header border border-slate-300 dark:border-slate-600 px-1 py-1 text-center font-semibold text-slate-600 dark:text-slate-400 whitespace-normal wrap-break-word w-32 min-w-32 max-w-32 align-middle" :title="`${theme.goal?.code ?? '-'} · ${theme.theme_number}. ${theme.name}`">
                                         <div class="matrix-theme-header__label flex min-h-16 items-center justify-center text-[8px] font-semibold leading-tight">
                                             {{ theme.name }}
                                         </div>
+                                    </th>
+                                    <th class="matrix-tbc-header border border-slate-300 dark:border-slate-600 px-2 py-1 text-center text-[8px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap w-13 bg-slate-100 dark:bg-slate-800">
+                                        TBC
                                     </th>
                                 </tr>
                             </thead>
@@ -466,15 +458,6 @@ const sortedMatrixThemes = computed(() =>
         if (goalCompare !== 0) return goalCompare;
         return Number(left.theme_number ?? 0) - Number(right.theme_number ?? 0);
     })
-);
-
-const themeGroupsWithCount = computed(() =>
-    props.strategicPillars
-        .map(goal => ({
-            label: `${goal.code} - ${goal.title}`,
-            count: (goal.themes ?? []).length,
-        }))
-        .filter(group => group.count > 0)
 );
 
 // initiative_id-theme_id pairs that are tagged
