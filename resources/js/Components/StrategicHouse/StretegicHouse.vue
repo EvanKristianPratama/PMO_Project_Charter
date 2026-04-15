@@ -55,11 +55,6 @@ const filterInitiatives = (initiatives) => {
     return initiatives.filter(ini => ini.source == selectedSource.value);
 };
 
-const countInis = (card) => {
-    if (!card) return 0;
-    return filterInitiatives(card.initiatives || []).length;
-};
-
 const processedCards = (cards) => {
     return cards.map(card => {
         const filteredInis = filterInitiatives(card.initiatives || []);
@@ -77,6 +72,7 @@ const processedCards = (cards) => {
 
 const filteredTechnologyCards = computed(() => processedCards(props.technologyCards));
 const filteredStrategyCards = computed(() => processedCards(props.strategyCards));
+const filteredUnassignedInitiatives = computed(() => filterInitiatives(props.unassignedInitiatives || []));
 
 const filteredFoundationCard = computed(() => {
     if (!props.foundationCard) return null;
@@ -101,7 +97,7 @@ const filteredArchitectureCard = computed(() => {
 });
 
 const unassignedCard = computed(() => {
-    const filteredInis = filterInitiatives(props.unassignedInitiatives || []);
+    const filteredInis = filteredUnassignedInitiatives.value;
     if (filteredInis.length === 0) return null;
 
     const previewInis = filteredInis.slice(0, 3);
@@ -116,20 +112,23 @@ const unassignedCard = computed(() => {
     };
 });
 
-const filteredSummary = computed(() => {
-    const totalMapped = 
-        filteredTechnologyCards.value.reduce((acc, card) => acc + card.initiatives_count, 0) +
-        filteredStrategyCards.value.reduce((acc, card) => acc + card.initiatives_count, 0) +
-        countInis(props.foundationCard) +
-        countInis(props.architectureCard) +
-        countInis(props.tbcCard);
-    
-    const filteredUnassigned = filterInitiatives(props.unassignedInitiatives || []);
-    
-    return {
-        ...props.summary,
-        total_initiatives: totalMapped + filteredUnassigned.length
-    };
+const filteredDtiInitiativesCount = computed(() => {
+    const initiativeKeys = new Set();
+    const initiativeGroups = [
+        ...filteredTechnologyCards.value.map(card => card.initiatives || []),
+        filteredUnassignedInitiatives.value,
+    ];
+
+    initiativeGroups.forEach((initiatives) => {
+        initiatives.forEach((initiative) => {
+            const key = initiative?.id ?? [initiative?.code, initiative?.name].filter(Boolean).join('::');
+            if (key) {
+                initiativeKeys.add(String(key));
+            }
+        });
+    });
+
+    return initiativeKeys.size;
 });
 
 const coeTooltip = (card) => {
@@ -196,7 +195,7 @@ const coeTooltip = (card) => {
             <div class="dti-section">
                 <div class="dti-header">
                     <div class="dti-header-copy">
-                        <p class="dti-count">{{ filteredSummary.total_initiatives }} Digital transformation
+                        <p class="dti-count">{{ filteredDtiInitiativesCount }} Digital transformation
                             initiatives</p>
                     </div>
                     <div class="flex items-center gap-2">
