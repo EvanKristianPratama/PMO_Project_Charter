@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 use Inertia\Response;
 
+use App\Models\TrsStatusImplementation;
+
 class IndexController extends Controller
 {
     public function __invoke(MstInitiative $initiative): Response|RedirectResponse
@@ -24,6 +26,12 @@ class IndexController extends Controller
         if (request()->user()?->isAdminUser()) {
             return redirect()->route('admin.dashboard');
         }
+
+        // 0. Status Implementation
+        $statusImplementations = TrsStatusImplementation::query()
+            ->where('initiative_id', $initiative->id)
+            ->latest()
+            ->get();
 
         // 1. Project Charter (DigitalInitiativeDocument)
         $projectCharter = TrsProject::query()
@@ -254,6 +262,7 @@ class IndexController extends Controller
             'themeOptions' => $themeOptions,
             'organizationOptions' => $organizationOptions,
             'initiativeOptions' => $initiativeOptions,
+            'statusImplementations' => $statusImplementations,
         ]);
     }
 

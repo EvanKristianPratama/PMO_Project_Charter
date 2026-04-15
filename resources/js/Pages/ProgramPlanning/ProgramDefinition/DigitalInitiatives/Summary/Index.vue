@@ -26,65 +26,138 @@
                             {{ formatInitiativeLabel(option) }}
                         </option>
                     </select>
+
+                    <div class="ml-auto flex items-center gap-1.5 rounded-lg bg-slate-100 p-1 dark:bg-white/5">
+                        <button
+                            v-for="tab in ['Planning', 'Implementation', 'Evaluation']"
+                            :key="tab"
+                            @click="activeTab = tab"
+                            class="rounded-md px-3 py-1 text-xs font-semibold transition-all"
+                            :class="activeTab === tab ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-[#1A1A1A] dark:text-blue-400' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'"
+                        >
+                            {{ tab }}
+                        </button>
+                    </div>
                 </div>
             </section>
-            
-            <!-- 1. Digital Project Charter Document -->
-            <div v-if="initiativeMaster" class="space-y-4">
-                <div class="flex items-center gap-2 px-1">
-                    <div class="h-6 w-1 rounded-full bg-[#1e4f8f]"></div>
-                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Scope Charter</h2>
+
+            <!-- Planning Tab Content -->
+            <div v-if="activeTab === 'Planning'" class="space-y-6">
+                <!-- 1. Digital Project Charter Document -->
+                <div v-if="initiativeMaster" class="space-y-4">
+                    <div class="flex items-center gap-2 px-1">
+                        <div class="h-6 w-1 rounded-full bg-[#1e4f8f]"></div>
+                        <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Scope Charter</h2>
+                    </div>
+                    <DigitalInitiativeCharterDocument :initiative="initiativeMaster" />
                 </div>
-                <DigitalInitiativeCharterDocument :initiative="initiativeMaster" />
+
+                <!-- 2. Digital Roadmap Component -->
+                <div v-if="roadmapItems && roadmapItems.length"
+                    class="space-y-4 pt-6 mt-6 border-t border-slate-200 dark:border-white/10">
+                    <div class="flex items-center gap-2 px-1">
+                        <div class="h-6 w-1 rounded-full bg-purple-600"></div>
+                        <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Digital Initiative Roadmap</h2>
+                    </div>
+                    <DigitalRoadmapComponent :data="roadmapItems" :start-year="roadmapStartYear"
+                        :end-year="roadmapEndYear" />
+                </div>
+
+                <!-- Roadmap not available message -->
+                <div v-else class="space-y-1 pt-6 mt-6 border-t border-slate-200 dark:border-white/10">
+                    <div class="flex items-center gap-2 px-1">
+                        <div class="h-6 w-1 rounded-full bg-purple-600"></div>
+                        <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Digital Initiative Roadmap</h2>
+                    </div>
+                    <div class="rounded-1xl border border-dashed border-slate-300 bg-slate-50/50 p-1 text-center dark:border-white/10 dark:bg-white/5">
+                        <h3 class="mt-1 mb-1 text-sm font-bold text-slate-900 dark:text-white">Roadmap Not Available</h3>
+                    </div>
+                </div>
+
+                <!-- 3. Compendium Charter Document -->
+                <div v-if="compendiumData" class="space-y-4 pt-6 mt-6 border-t border-slate-200 dark:border-white/10">
+                    <div class="flex items-center gap-2 px-1">
+                        <div class="h-6 w-1 rounded-full bg-[#3b5e96]"></div>
+                        <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Compendium</h2>
+                    </div>
+                    <CompendiumCharterDocument :form="compendiumData" :editable="false" :coe-options="coeOptions"
+                        :source-options="sourceOptions" :theme-options="themeOptions" />
+                </div>
+
+                <!-- 4. Appendix Charter Document -->
+                <div v-if="appendixData" class="space-y-4 pt-6 mt-6 border-t border-slate-200 dark:border-white/10">
+                    <div class="flex items-center gap-2 px-1">
+                        <div class="h-6 w-1 rounded-full bg-emerald-600"></div>
+                        <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Appendix</h2>
+                    </div>
+                    <AppendixCharterDocument :initiative="computedAppendixData" :editable="false" :coe-options="coeOptions"
+                        :theme-options="themeOptions" :organization-options="organizationOptions" />
+                </div>
             </div>
 
-            <!-- 2. Digital Roadmap Component -->
-            <div v-if="roadmapItems && roadmapItems.length"
-                class="space-y-4 pt-6 mt-6 border-t border-slate-200 dark:border-white/10">
+            <!-- Implementation Tab Content -->
+            <div v-if="activeTab === 'Implementation'" class="space-y-6">
                 <div class="flex items-center gap-2 px-1">
-                    <div class="h-6 w-1 rounded-full bg-purple-600"></div>
-                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Digital Initiative Roadmap</h2>
+                    <div class="h-6 w-1 rounded-full bg-blue-600"></div>
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">StatusImplementation</h2>
                 </div>
-                <DigitalRoadmapComponent :data="roadmapItems" :start-year="roadmapStartYear"
-                    :end-year="roadmapEndYear" />
+
+                <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#1A1A1A]">
+                    <table class="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+                        <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:bg-white/5 dark:text-slate-400">
+                            <tr>
+                                <th class="px-4 py-3">Start</th>
+                                <th class="px-4 py-3">End</th>
+                                <th class="px-4 py-3">Year</th>
+                                <th class="px-4 py-3">Review Status</th>
+                                <th class="px-4 py-3">Status Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 dark:divide-white/10">
+                            <tr v-for="impl in statusImplementations" :key="impl.id" class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition-colors">
+                                <td class="px-4 py-3">{{ impl.start || '-' }}</td>
+                                <td class="px-4 py-3">{{ impl.end || '-' }}</td>
+                                <td class="px-4 py-3 font-medium">{{ impl.year || '-' }}</td>
+                                <td class="px-4 py-3">
+                                    <span class="inline-flex rounded-full bg-blue-100 px-2.5 py-0.5 text-[10px] font-medium text-blue-800 dark:bg-blue-500/20 dark:text-blue-300">
+                                        {{ impl.review_status || '-' }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3">{{ impl.status_updated || '-' }}</td>
+                            </tr>
+                            <tr v-if="!statusImplementations || !statusImplementations.length">
+                                <td colspan="6" class="px-4 py-12 text-center text-slate-500 italic">
+                                    Status Implementation Not Available
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
-            <!-- Roadmap not available message -->
-            <div v-else class="space-y-1 pt-6 mt-6 border-t border-slate-200 dark:border-white/10">
-                <div class="flex items-center gap-2 px-1">
-                    <div class="h-6 w-1 rounded-full bg-purple-600"></div>
-                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Digital Initiative Roadmap</h2>
-                </div>
-                <div class="rounded-1xl border border-dashed border-slate-300 bg-slate-50/50 p-1 text-center dark:border-white/10 dark:bg-white/5">
-                    <h3 class="mt-1 mb-1 text-sm font-bold text-slate-900 dark:text-white">Roadmap Not Available</h3>
-                </div>
-            </div>
-
-            <!-- 3. Compendium Charter Document -->
-            <div v-if="compendiumData" class="space-y-4 pt-6 mt-6 border-t border-slate-200 dark:border-white/10">
-                <div class="flex items-center gap-2 px-1">
-                    <div class="h-6 w-1 rounded-full bg-[#3b5e96]"></div>
-                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Compendium</h2>
-                </div>
-                <CompendiumCharterDocument :form="compendiumData" :editable="false" :coe-options="coeOptions"
-                    :source-options="sourceOptions" :theme-options="themeOptions" />
-            </div>
-
-            <!-- 4. Appendix Charter Document -->
-            <div v-if="appendixData" class="space-y-4 pt-6 mt-6 border-t border-slate-200 dark:border-white/10">
+            <!-- Evaluation Tab Content -->
+            <div v-if="activeTab === 'Evaluation'" class="space-y-6">
                 <div class="flex items-center gap-2 px-1">
                     <div class="h-6 w-1 rounded-full bg-emerald-600"></div>
-                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Appendix</h2>
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Evaluation</h2>
                 </div>
-                <AppendixCharterDocument :initiative="computedAppendixData" :editable="false" :coe-options="coeOptions"
-                    :theme-options="themeOptions" :organization-options="organizationOptions" />
+                <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-12 text-center dark:border-white/10 dark:bg-white/5">
+                    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5">
+                        <svg class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </div>
+                    <h3 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">Belum Ada Evaluasi</h3>
+                    <p class="mt-2 text-xs text-slate-500">
+                        Halaman evaluasi sedang dalam pengembangan.
+                    </p>
+                </div>
             </div>
-        </div>
-    </UserLayout>
-</template>
-
+            </div>
+            </UserLayout>
+            </template>
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
@@ -103,6 +176,7 @@ const props = defineProps({
     roadmapItems: { type: Array, default: () => [] },
     roadmapStartYear: { type: Number, default: 2024 },
     roadmapEndYear: { type: Number, default: 2029 },
+    statusImplementations: { type: Array, default: () => [] },
 
     // Options
     coeOptions: { type: Array, default: () => [] },
@@ -112,6 +186,7 @@ const props = defineProps({
     initiativeOptions: { type: Array, default: () => [] },
 });
 
+const activeTab = ref('Planning');
 const route = useRouteHelper();
 
 const goBack = () => {
