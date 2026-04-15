@@ -169,11 +169,7 @@ const coeTooltip = (card) => {
 
             <!-- ═══ CONNECTOR: small decorative chain ═══ -->
             <div class="connector-chain">
-                <svg width="20" height="28" viewBox="0 0 20 28">
-                    <circle cx="10" cy="6" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5" />
-                    <line x1="10" y1="11" x2="10" y2="17" stroke="#9cb8d8" stroke-width="1.5" />
-                    <circle cx="10" cy="22" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5" />
-                </svg>
+                <img src="/chain-strategic-house.png" alt="Chain" class="w-6 h-auto" />
             </div>
 
             <!-- ═══ VISION TRAPEZOID ═══ -->
@@ -184,11 +180,7 @@ const coeTooltip = (card) => {
 
             <!-- ═══ CONNECTOR ═══ -->
             <div class="connector-chain">
-                <svg width="20" height="28" viewBox="0 0 20 28">
-                    <circle cx="10" cy="6" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5" />
-                    <line x1="10" y1="11" x2="10" y2="17" stroke="#9cb8d8" stroke-width="1.5" />
-                    <circle cx="10" cy="22" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5" />
-                </svg>
+                <img src="/chain-strategic-house.png" alt="Chain" class="w-6 h-auto" />
             </div>
 
             <!-- ═══ DIGITAL TRANSFORMATION INITIATIVES SECTION ═══ -->
@@ -255,11 +247,7 @@ const coeTooltip = (card) => {
 
             <!-- ═══ CONNECTOR ═══ -->
             <div class="connector-chain">
-                <svg width="20" height="28" viewBox="0 0 20 28">
-                    <circle cx="10" cy="6" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5" />
-                    <line x1="10" y1="11" x2="10" y2="17" stroke="#9cb8d8" stroke-width="1.5" />
-                    <circle cx="10" cy="22" r="5" fill="none" stroke="#9cb8d8" stroke-width="1.5" />
-                </svg>
+                <img src="/chain-strategic-house.png" alt="Chain" class="w-6 h-auto" />
             </div>
 
             <!-- ═══ GRAND IT STRATEGY SECTION ═══ -->
@@ -465,7 +453,6 @@ const coeTooltip = (card) => {
 .connector-chain {
     display: flex;
     justify-content: center;
-    padding: 4px 0;
 }
 
 /* ─── VISION TRAPEZOID ─── */
@@ -501,6 +488,10 @@ const coeTooltip = (card) => {
     transition: all 0.3s ease-in-out;
 }
 
+.dti-section--compact {
+    padding: 12px 20px 16px;
+}
+
 .dti-header {
     margin-bottom: 16px;
     display: flex;
@@ -508,6 +499,11 @@ const coeTooltip = (card) => {
     justify-content: space-between;
     gap: 12px;
     flex-wrap: wrap;
+    transition: all 0.3s ease;
+}
+
+.dti-section--compact .dti-header {
+    margin-bottom: 10px;
 }
 
 .dti-header-copy {
@@ -569,6 +565,7 @@ const coeTooltip = (card) => {
 .dti-cards--hidden {
     align-items: start;
     grid-auto-rows: min-content;
+    gap: 8px;
 }
 
 .dti-card {
@@ -588,8 +585,8 @@ const coeTooltip = (card) => {
     min-height: 0;
     height: fit-content;
     align-self: start;
-    padding-top: 14px;
-    padding-bottom: 14px;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
 :not(.dti-cards--hidden) .dti-card {
@@ -661,7 +658,10 @@ const coeTooltip = (card) => {
 
 .dti-cards--hidden .dti-card-title {
     padding-right: 0;
+    margin-top: 0;
 }
+
+/* Removed redundant selector */
 
 .dti-card-list-wrapper {
     margin-top: 8px;

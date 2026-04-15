@@ -11,18 +11,11 @@
                     Strategic House
                 </button>
                 <button type="button" class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
-                    :class="viewMode === 'digital-block'
+                    :class="viewMode === 'dual-growth'
                         ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                         : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
-                    @click="viewMode = 'digital-block'">
-                    Dual Growth Strategy V1
-                </button>
-                <button type="button" class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
-                    :class="viewMode === 'block'
-                        ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
-                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
-                    @click="viewMode = 'block'">
-                    Dual Growth Strategy V2
+                    @click="viewMode = 'dual-growth'">
+                    Dual Growth Strategy
                 </button>
                 <button type="button" class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
                     :class="viewMode === 'digital-transformation-initiatives'
@@ -55,6 +48,16 @@
 
             </div>
 
+            <!-- Dual Growth Enabler Toggle -->
+            <div v-if="viewMode === 'dual-growth'" class="mb-5 flex justify-end">
+                <button type="button" 
+                    @click="showEnabler = !showEnabler"
+                    class="inline-flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all bg-slate-200/50 hover:bg-slate-300/50 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200">
+                    <component :is="showEnabler ? EyeIcon : EyeSlashIcon" class="w-3.5 h-3.5" />
+                    {{ showEnabler ? 'Hide Enabler' : 'Show Enabler' }}
+                </button>
+            </div>
+
             <!-- Conditional View Rendering -->
             <div class="relative min-h-[400px]">
                 <Transition enter-active-class="transition duration-300 ease-out"
@@ -77,12 +80,9 @@
                         />
                     </section>
 
-                    <div v-else-if="viewMode === 'digital-block'" key="digital-block">
-                        <DualGrowth :goals="dualGrowthGoals" />
-                    </div>
-
-                    <div v-else-if="viewMode === 'block'" key="block">
-                        <DualGrowthFull :goals="dualGrowthGoals" />
+                    <div v-else-if="viewMode === 'dual-growth'" key="dual-growth">
+                        <DualGrowthFull v-if="showEnabler" :goals="dualGrowthGoals" />
+                        <DualGrowth v-else :goals="dualGrowthGoals" />
                     </div>
 
                     <div v-else-if="viewMode === 'digital-transformation-initiatives'"
@@ -121,6 +121,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
 import DualGrowth from '@/Components/StrategicHouse/DualGrowth.vue';
 import DualGrowthFull from '@/Components/StrategicHouse/DualGrowthFull.vue';
 import DigitalBuildingBlock from '@/Components/ItBuildingBlocks/DigitalBuildingBlock.vue';
@@ -217,4 +218,5 @@ const getInitialViewMode = () => {
 };
 
 const viewMode = ref(getInitialViewMode());
+const showEnabler = ref(false);
 </script>
