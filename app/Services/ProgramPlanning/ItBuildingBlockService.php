@@ -6,6 +6,7 @@ use App\Models\MstCoe;
 use App\Models\MstInitiative;
 use App\Models\TrsMapItBuilding;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 
 class ItBuildingBlockService
 {
@@ -123,5 +124,91 @@ class ItBuildingBlockService
             ->sortBy('primary')
             ->values()
             ->all();
+    }
+
+    public function storeMapping(array $data): int
+    {
+        $initiativeIds = collect($data['initiative_ids'] ?? [])
+            ->when(isset($data['initiative_id']), fn ($collection) => $collection->push($data['initiative_id']))
+            ->map(fn ($initiativeId) => (int) $initiativeId)
+            ->filter(fn (int $initiativeId) => $initiativeId > 0)
+            ->unique()
+            ->values();
+
+        if ($initiativeIds->isEmpty()) {
+            throw ValidationException::withMessages([
+                'initiative_ids' => 'Pilih minimal satu initiative.',
+            ]);
+        }
+
+        $existingInitiativeIds = TrsMapItBuilding::query()
+            ->where('primary', $data['primary'])
+            ->where('secondary', $data['secondary'])
+            ->whereIn('initiative_id', $initiativeIds->all())
+            ->pluck('initiative_id')
+            ->map(fn ($initiativeId) => (int) $initiativeId);
+
+        $initiativeIdsToCreate = $initiativeIds
+            ->reject(fn (int $initiativeId) => $existingInitiativeIds->contains($initiativeId))
+            ->values();
+
+        if ($initiativeIdsToCreate->isEmpty()) {
+            throw ValidationException::withMessages([
+                'initiative_ids' => 'Semua initiative yang dipilih sudah termapping pada kombinasi Primary dan Secondary ini.',
+            ]);
+        }
+
+        TrsMapItBuilding::query()->insert(
+            $initiativeIdsToCreate
+                ->map(fn (int $initiativeId): array => [
+                    'primary' => $data['primary'],
+                    'secondary' => $data['secondary'],
+                    'initiative_id' => $initiativeId,
+                ])
+                ->all(),
+        );
+
+        return $initiativeIdsToCreate->count();
+    }
+
+    public function deletePrimary(int $primaryId): void
+    {
+        TrsMapItBuilding::query()
+            ->where('primary', $primaryId)
+            ->delete();
+    }
+
+    public function deleteSecondary(int $primaryId, int $secondaryId): void
+    {
+        TrsMapItBuilding::query()
+            ->where('primary', $primaryId)
+            ->where('secondary', $secondaryId)
+            ->delete();
+    }
+
+    public function deleteInitiative(int $primaryId, int $secondaryId, int $initiativeId): void
+    {
+        TrsMapItBuilding::query()
+            ->where('primary', $primaryId)
+            ->where('secondary', $secondaryId)
+            ->where('initiative_id', $initiativeId)
+            ->delete();
+    }
+
+    public function deleteMultipleMappings(array $removals): void
+    {
+        collect($removals)
+            ->unique(fn (array $item): string => implode(':', [
+                $item['primary'],
+                $item['secondary'],
+                $item['initiative_id'],
+            ]))
+            ->each(function (array $item): void {
+                TrsMapItBuilding::query()
+                    ->where('primary', $item['primary'])
+                    ->where('secondary', $item['secondary'])
+                    ->where('initiative_id', $item['initiative_id'])
+                    ->delete();
+            });
     }
 }

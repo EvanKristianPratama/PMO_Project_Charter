@@ -247,6 +247,32 @@ class StrategicHousePageService
         ];
     }
 
+    public function storeItBuildingBlockMapping(array $data): int
+    {
+        return $this->itBuildingBlockService->storeMapping($data);
+    }
+
+    public function deleteItBuildingBlockPrimary(int $primaryId): void
+    {
+        $this->itBuildingBlockService->deletePrimary($primaryId);
+    }
+
+    public function deleteItBuildingBlockSecondary(int $primaryId, int $secondaryId): void
+    {
+        $this->itBuildingBlockService->deleteSecondary($primaryId, $secondaryId);
+    }
+
+    public function deleteItBuildingBlockInitiative(int $primaryId, int $secondaryId, int $initiativeId): void
+    {
+        $this->itBuildingBlockService->deleteInitiative($primaryId, $secondaryId, $initiativeId);
+    }
+
+    public function deleteItBuildingBlockMultipleMappings(array $removals): void
+    {
+        $this->itBuildingBlockService->deleteMultipleMappings($removals);
+    }
+
+
     private function normalizeFilters(array $filters): array
 
     {
