@@ -46,18 +46,18 @@
                     Initiative Relations
                 </button>
                 <button type="button" class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
-                    :class="viewMode === 'strategic-pillars'
-                        ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
-                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
-                    @click="viewMode = 'strategic-pillars'">
-                    Strategic Pillars
-                </button>
-                <button type="button" class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
                     :class="viewMode === 'roadmap'
                         ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                         : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
                     @click="viewMode = 'roadmap'">
                     Roadmap
+                </button>
+                <button type="button" class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
+                    :class="viewMode === 'strategic-pillars'
+                        ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
+                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
+                    @click="viewMode = 'strategic-pillars'">
+                    Strategic Pillars
                 </button>
             </div>
 
@@ -104,52 +104,12 @@
                     </div>
 
                     <div v-else-if="viewMode === 'it-building-blocs'" key="it-building-blocs">
-                        <div class="space-y-6 animate-fade-in-up">
-                            <div class="flex flex-wrap items-center justify-between gap-3">
-                                <div>
-                                    <h1 class="text-2xl font-bold text-slate-900 dark:text-white">IT Enabler</h1>
-                                    <p class="text-sm text-slate-500 dark:text-slate-400">Kelola mapping IT Building Blocks dan Center of Excellence.</p>
-                                </div>
-
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <button
-                                        type="button"
-                                        v-if="!isEditModeBuildingBlock"
-                                        class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 dark:bg-white dark:text-slate-900"
-                                        @click="openAddMappingBuildingBlock"
-                                    >
-                                        Tambah Primary
-                                    </button>
-                                    <button
-                                        v-if="!isEditModeBuildingBlock"
-                                        type="button"
-                                        class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2 dark:border-white/10 dark:bg-transparent dark:text-slate-200 dark:hover:bg-white/5"
-                                        @click="isEditModeBuildingBlock = true"
-                                    >
-                                        Edit Mapping
-                                    </button>
-                                    <button
-                                        v-else
-                                        type="button"
-                                        class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2 dark:border-white/10 dark:bg-transparent dark:text-slate-200 dark:hover:bg-white/5"
-                                        @click="isEditModeBuildingBlock = false"
-                                    >
-                                        Selesai Edit
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="relative min-h-[400px]">
-                                <ItInitiatives
-                                    ref="matrixRefBuildingBlock"
-                                    :groups="itBuildingBlockMatrix"
-                                    :editable="isEditModeBuildingBlock"
-                                    :coe-options="coeOptions"
-                                    :initiative-options="itInitiativeOptions"
-                                    @cancel-add-mapping="isEditModeBuildingBlock = false"
-                                />
-                            </div>
-                        </div>
+                        <StrategicHouseItBuildingBlocksPage
+                            :embedded="true"
+                            :groups="itBuildingBlockMatrix"
+                            :coe-options="coeOptions"
+                            :initiative-options="itInitiativeOptions"
+                        />
                     </div>
 
                     <div v-else-if="viewMode === 'it-initiatives'" key="it-initiatives">
@@ -157,30 +117,17 @@
                     </div>
 
                     <div v-else-if="viewMode === 'initiative-relation'" key="initiative-relation">
-                        <div class="space-y-6 animate-fade-in-up">
-                            <div class="flex flex-wrap items-center justify-between gap-3">
-                                <div>
-                                    <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Initiatives Relations</h1>
-                                    <p class="text-sm text-slate-500 dark:text-slate-400">Kelola dependensi antar initiative.</p>
-                                </div>
-                                <Link
-                                    :href="initiativeRelationCreatePath"
-                                    class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 dark:bg-white dark:text-slate-900"
-                                >
-                                    Tambah Relation
-                                </Link>
-                            </div>
-
-                            <InitiativeRelationDependency
-                                :mst-initiatives="mstInitiatives"
-                                :model-relation-options="modelRelationOptions"
-                                @edit-relation="goToEdit"
-                            />
-                        </div>
+                        <StrategicHouseInitiativeRelationPage
+                            :embedded="true"
+                            :mst-initiatives="mstInitiatives"
+                            :initiative-relations="initiativeRelations"
+                            :model-relation-options="modelRelationOptions"
+                        />
                     </div>
 
                     <div v-else-if="viewMode === 'strategic-pillars'" key="strategic-pillars">
-                        <StrategicPillarView
+                        <StrategicHouseStrategicPillarPage
+                            :embedded="true"
                             :strategic-pillars="strategicPillars"
                             :all-goals="allGoals"
                             :taggings="taggings"
@@ -200,18 +147,17 @@
 </template>
 
 <script setup>
-import { nextTick, ref } from 'vue';
+import { ref } from 'vue';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
 import DualGrowth from '@/Components/StrategicHouse/DualGrowth.vue';
 import DualGrowthFull from '@/Components/StrategicHouse/DualGrowthFull.vue';
 import DigitalBuildingBlock from '@/Components/ItBuildingBlocks/DigitalBuildingBlock.vue';
 import ItBuildingBlocks from '@/Components/ItBuildingBlocks/ItBuildingBlock.vue';
-import ItInitiatives from '@/Components/ItBuildingBlocks/ItBuildingBlocksMatrix.vue';
-import StrategicPillarView from '@/Components/StrategicPillar/StrategicPillarView.vue';
+import StrategicHouseItBuildingBlocksPage from '@/Pages/ProgramPlanning/StrategicHouse/ItBuildingBlocks/Index.vue';
+import StrategicHouseInitiativeRelationPage from '@/Pages/ProgramPlanning/StrategicHouse/InitiativeRelation/Index.vue';
+import StrategicHouseStrategicPillarPage from '@/Pages/ProgramPlanning/StrategicHouse/StrategicPillar/Index.vue';
 import StretegicHouse from '@/Components/StrategicHouse/StretegicHouse.vue';
-import InitiativeRelationDependency from '@/Components/InitiativeRelation/InitiativeRelationDependency.vue';
 import UserLayout from '@/Layouts/UserLayout.vue';
-import { Link, router } from '@inertiajs/vue3';
 
 const props = defineProps({
     page: {
@@ -322,31 +268,4 @@ const getInitialViewMode = () => {
 
 const viewMode = ref(getInitialViewMode());
 const showEnabler = ref(false);
-
-// IT Building Blocks sub-navigation
-const isEditModeBuildingBlock = ref(false);
-const viewModeBuildingBlock = ref('mapping');
-const matrixRefBuildingBlock = ref(null);
-
-const openAddMappingBuildingBlock = async () => {
-    if (!isEditModeBuildingBlock.value) {
-        isEditModeBuildingBlock.value = true;
-        await nextTick();
-    }
-
-    matrixRefBuildingBlock.value?.openAddMappingModal?.({
-        exitEditOnCancel: true,
-    });
-};
-
-const initiativeRelationIndexPath = '/program-planning/initiative-relation';
-const initiativeRelationCreatePath = `${initiativeRelationIndexPath}/create`;
-const initiativeRelationEditPath = (initiativeRelationId) => `${initiativeRelationIndexPath}/${initiativeRelationId}/edit`;
-
-function goToEdit({ relation }) {
-    const id = relation?.id;
-    if (id != null) {
-        router.visit(initiativeRelationEditPath(id));
-    }
-}
 </script>

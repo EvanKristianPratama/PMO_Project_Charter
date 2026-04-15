@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="IT Building Blocks">
+    <component :is="pageContainer" v-bind="pageContainerProps">
         <div class="space-y-6 animate-fade-in-up">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <div>
@@ -46,11 +46,11 @@
                 />
             </div>
         </div>
-    </UserLayout>
+    </component>
 </template>
 
 <script setup>
-import { nextTick, ref } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 import ItBuildingBlocksMatrix from '@/Components/ItBuildingBlocks/ItBuildingBlocksMatrix.vue';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
@@ -68,7 +68,11 @@ const openAddMapping = async () => {
     });
 };
 
-defineProps({
+const props = defineProps({
+    embedded: {
+        type: Boolean,
+        default: false,
+    },
     groups: {
         type: Array,
         default: () => [],
@@ -82,5 +86,7 @@ defineProps({
         default: () => [],
     },
 });
-</script>
 
+const pageContainer = computed(() => (props.embedded ? 'div' : UserLayout));
+const pageContainerProps = computed(() => (props.embedded ? {} : { title: 'IT Building Blocks' }));
+</script>

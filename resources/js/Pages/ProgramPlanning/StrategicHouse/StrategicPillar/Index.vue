@@ -1,5 +1,5 @@
 <template>
-    <UserLayout :title="pageTitle">
+    <component :is="pageContainer" v-bind="pageContainerProps">
         <div class="animate-fade-in">
             <div v-if="flash.success" class="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
                 {{ flash.success }}
@@ -435,7 +435,7 @@
                 @confirm="executeStructureDelete"
             />
         </div>
-    </UserLayout>
+    </component>
 </template>
 
 <script setup>
@@ -452,6 +452,10 @@ const route = useRouteHelper();
 const page = usePage();
 
 const props = defineProps({
+    embedded: {
+        type: Boolean,
+        default: false,
+    },
     strategicPillars: { type: Array, default: () => [] },
     allGoals:         { type: Array, default: () => [] },
     taggings:         { type: Array, default: () => [] },
@@ -461,6 +465,7 @@ const props = defineProps({
     allOrganizations: { type: Array, default: () => [] },
     filters:          { type: Object, default: () => ({}) },
     pilarOptions:     { type: Array, default: () => [] },
+    baseUrlRoute:     { type: String, default: 'strategic-pillars.index' },
 });
 
 // --- Filters (client-side only) ---
@@ -483,6 +488,8 @@ const currentPilarOption = computed(() =>
     }
 );
 const pageTitle = computed(() => currentPilarOption.value.name);
+const pageContainer = computed(() => (props.embedded ? 'div' : UserLayout));
+const pageContainerProps = computed(() => (props.embedded ? {} : { title: pageTitle.value }));
 const canManageStructure = computed(() => currentPilar.value === '2');
 const hasStructureGoals = computed(() => props.strategicPillars.length > 0);
 
@@ -500,7 +507,7 @@ const switchPilar = (pilarId) => {
         payload.org_id = selectedOrgId.value;
     }
 
-    router.get(route('strategic-pillars.index'), payload, {
+    router.get(route(props.baseUrlRoute), payload, {
         preserveScroll: true,
     });
 };

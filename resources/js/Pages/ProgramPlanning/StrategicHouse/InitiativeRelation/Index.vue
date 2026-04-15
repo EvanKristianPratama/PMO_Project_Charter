@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Initiative Relation">
+    <component :is="pageContainer" v-bind="pageContainerProps">
         <div class="space-y-6 animate-fade-in-up">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <div>
@@ -21,11 +21,20 @@
             />
 
         </div>
-    </UserLayout>
+    </component>
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue';
+import InitiativeRelationDependency from '@/Components/InitiativeRelation/InitiativeRelationDependency.vue';
+import { Link, router } from '@inertiajs/vue3';
+import UserLayout from '@/Layouts/UserLayout.vue';
+
+const props = defineProps({
+    embedded: {
+        type: Boolean,
+        default: false,
+    },
     mstInitiatives: {
         type: Array,
         default: () => [],
@@ -40,13 +49,11 @@ defineProps({
     },
 });
 
-import InitiativeRelationDependency from '@/Components/InitiativeRelation/InitiativeRelationDependency.vue';
-import { Link, router } from '@inertiajs/vue3';
-import UserLayout from '@/Layouts/UserLayout.vue';
-
 const initiativeRelationIndexPath = '/program-planning/initiative-relation';
 const initiativeRelationCreatePath = `${initiativeRelationIndexPath}/create`;
 const initiativeRelationEditPath = (initiativeRelationId) => `${initiativeRelationIndexPath}/${initiativeRelationId}/edit`;
+const pageContainer = computed(() => (props.embedded ? 'div' : UserLayout));
+const pageContainerProps = computed(() => (props.embedded ? {} : { title: 'Initiative Relation' }));
 
 function goToEdit({ relation }) {
     const id = relation?.id;
