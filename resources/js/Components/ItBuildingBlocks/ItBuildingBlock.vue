@@ -181,7 +181,7 @@ const getCoeColorClass = (coeName) => {
     if (name === 'Advance Cloud') return 'coe-color-emerald';
     if (name === 'RPA') return 'coe-color-amber';
     if (name === 'Robotics') return 'coe-color-purple';
-    if (name === 'AI / Adv. Analytics') return 'coe-color-rose';
+    if (name === 'AI / Adv. Analytics') return 'coe-color-none';
     if (name === 'CoE Not Identified') return 'coe-color-none';
     return 'coe-color-none';
 };
@@ -195,7 +195,7 @@ const getCoeColorClass = (coeName) => {
             <div class="space-y-2.5">
                 <!-- Status Implementation Legend -->
                 <div v-if="showStatusColors" class="flex flex-wrap items-center gap-x-4 gap-y-2 dark:border-white/5">
-                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider">Implementation Status (Projects):</span>
+                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider">Implementation Status (IT Initiative):</span>
                     <div
                         v-for="status in statusLegend"
                         :key="`status-legend-${status.label}`"
