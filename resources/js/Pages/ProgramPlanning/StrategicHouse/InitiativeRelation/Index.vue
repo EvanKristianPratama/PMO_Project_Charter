@@ -2,10 +2,6 @@
     <component :is="pageContainer" v-bind="pageContainerProps">
         <div class="space-y-6 animate-fade-in-up">
             <div class="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                    <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Initiatives Relations</h1>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">Kelola dependensi antar initiative.</p>
-                </div>
                 <Link
                     :href="initiativeRelationCreatePath"
                     class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 dark:bg-white dark:text-slate-900"

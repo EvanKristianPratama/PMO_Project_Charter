@@ -51,12 +51,6 @@ export function useNavigation() {
                 icon: DocumentTextIcon,
                 active: (url) => url.startsWith('/program-planning/program-definition/it-initiatives'),
             },
-            {
-                label: 'Initiative Relation',
-                href: safeRoute('initiative-relations.index'),
-                icon: TableCellsIcon,
-                active: (url) => url.startsWith('/program-planning/initiative-relation'),
-            },
         ];
 
         const programEvaluationChildren = [
