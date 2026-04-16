@@ -207,7 +207,7 @@
                         <table class="matrix-grid border-collapse text-[8px]" style="min-width: max-content">
                             <thead>
                                 <!-- Group header row -->
-                                <tr class="bg-slate-200 dark:bg-slate-700 sticky top-0 z-10">
+                                <tr class="bg-slate-200 dark:bg-slate-700">
                                     <th rowspan="2" class="matrix-initiative-header sticky left-0 z-20 bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 px-2 py-1.5 text-left font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap min-w-55">
                                         Initiative
                                     </th>
@@ -220,7 +220,7 @@
                                     </th>
                                 </tr>
                                 <!-- Theme number row -->
-                                <tr class="bg-slate-100 dark:bg-slate-800 sticky top-7.25 z-10">
+                                <tr class="bg-slate-100 dark:bg-slate-800">
                                     <th v-for="theme in sortedMatrixThemes" :key="theme.id" class="matrix-theme-header border border-slate-300 dark:border-slate-600 px-1 py-1 text-center font-semibold text-slate-600 dark:text-slate-400 whitespace-nowrap w-11 min-w-11 max-w-11 align-middle" :title="`${theme.goal?.code ?? '-'} · ${theme.theme_number}. ${theme.name}`">
                                         <div class="matrix-theme-header__label flex min-h-16 items-center justify-center text-[8px] font-semibold leading-tight">
                                             T{{ theme.theme_number }}

@@ -327,7 +327,7 @@ const displayGoals = computed(() => {
                 rows.push({
                     key: `${goalCode}-direct`,
                     type: 'direct',
-                    label: 'Part of Goal',
+                    label: '',
                     initiatives: directInitiatives,
                     initiatives_count: directInitiatives.length,
                 });
@@ -370,7 +370,7 @@ const displayGoals = computed(() => {
                     {
                         key: 'tbc-direct',
                         type: 'direct',
-                        label: 'Part of Goal',
+                        label: '',
                         initiatives: tbcItems,
                         initiatives_count: tbcItems.length,
                     },
@@ -553,7 +553,7 @@ const displayGoals = computed(() => {
 
                                 <template v-else>
                                     <div class="theme-cell__placeholder" :class="{ 'theme-cell__placeholder--direct': row.type === 'direct' }">
-                                        <span>{{ row.label }}</span>
+                                        <span v-if="row.type !== 'direct'">{{ row.label }}</span>
                                         <span
                                             v-if="row.initiatives_count > 0"
                                             class="count-capsule"
