@@ -16,6 +16,7 @@ class InitiativeRelationService
                     'initiativeRelationsRow',
                     'initiativeRelationsColumn',
                     'coe:id,name',
+                    'latestStatusImplementation',
                     'latestStatus',
                 ])
                 ->get(),

@@ -51,6 +51,7 @@ use App\Http\Controllers\ProgramPlanning\ProgramDefinition\IndexController as Pr
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\ITInitiatives\IndexController as ProgramDefinitionITInitiativesController;
 use App\Http\Controllers\ProgramPlanning\ProgramPlanningController;
 use App\Http\Controllers\ProgramPlanning\StrategicHouse\IndexController as ProgramPlanningStrategicHouseIndexController;
+use App\Http\Controllers\ProgramPlanning\StrategicHouse\RoadMap\IndexController as StrategicHouseRoadmapIndexController;
 use App\Http\Controllers\ProgramPlanning\StrategicPillars\GoalController as ProgramPlanningStrategicPillarGoalController;
 use App\Http\Controllers\ProgramPlanning\StrategicPillars\IndexController as ProgramPlanningStrategicPillarsIndexController;
 use App\Http\Controllers\ProgramPlanning\StrategicPillars\InitiativeTaggingController;
@@ -229,6 +230,8 @@ Route::middleware(['auth', 'approved'])->group(function () {
 
     // Strategic Pillars
     Route::get('/strategic-house', ProgramPlanningStrategicHouseIndexController::class)->name('strategic-house.index');
+    Route::get('/program-planning/strategic-house/roadmap', StrategicHouseRoadmapIndexController::class)
+        ->name('program-planning.strategic-house.roadmap.index');
     Route::get('/strategic-pillars/{goal?}', ProgramPlanningStrategicPillarsIndexController::class)->name('strategic-pillars.index');
     Route::post('/strategic-pillars/goals', [ProgramPlanningStrategicPillarGoalController::class, 'store'])->name('strategic-pillars.goals.store');
     Route::put('/strategic-pillars/goals/{goal}', [ProgramPlanningStrategicPillarGoalController::class, 'update'])->name('strategic-pillars.goals.update');

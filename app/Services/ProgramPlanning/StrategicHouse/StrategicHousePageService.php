@@ -7,6 +7,7 @@ use App\Models\InitiativeTagging;
 use App\Models\MstCoe;
 use App\Models\MstInitiative;
 use App\Services\ProgramPlanning\ItBuildingBlockService;
+use App\Services\ProgramPlanning\StrategicHouse\RoadMap\ItInitiativeRoadmapService;
 use App\Services\ProgramPlanning\StrategicPillars\StrategicPillarPageService;
 use App\Services\ProgramPlanning\InitiativeRelation\InitiativeRelationService;
 use Illuminate\Support\Collection;
@@ -155,11 +156,12 @@ class StrategicHousePageService
             'direct_initiatives' => [],
         ],
     ];
-    
+
     public function __construct(
         protected ItBuildingBlockService $itBuildingBlockService,
         protected StrategicPillarPageService $strategicPillarPageService,
-        protected InitiativeRelationService $initiativeRelationService
+        protected InitiativeRelationService $initiativeRelationService,
+        protected ItInitiativeRoadmapService $itInitiativeRoadmapService
     ) {}
 
     public function getPageProps(array $filters = []): array
@@ -171,7 +173,7 @@ class StrategicHousePageService
         $roofSection = $this->getRoofSection();
 
         $coeCatalog = $this->getCoeCatalog($initiativeType);
-        
+
         // Grand IT Strategy section always shows IT Transformation initiatives (type 2)
         $itCoeCatalog = ($initiativeType === 2) ? $coeCatalog : $this->getCoeCatalog(2);
 
@@ -192,6 +194,7 @@ class StrategicHousePageService
         );
 
         $relationData = $this->initiativeRelationService->getIndexProps();
+        $roadmapData  = $this->itInitiativeRoadmapService->getPageProps();
 
         return [
             'filters' => $normalizedFilters,
@@ -244,6 +247,13 @@ class StrategicHousePageService
             'initiativeRelations' => $relationData['initiativeRelations'],
             'modelRelationOptions' => $relationData['modelRelationOptions'],
             'typeRelationOptions' => $relationData['typeRelationOptions'],
+
+            // IT Initiative Roadmap props (pre-loaded once, no extra HTTP request)
+            'itRoadmapGroups'               => $roadmapData['groups'],
+            'itRoadmapStartYear'            => $roadmapData['startYear'],
+            'itRoadmapEndYear'              => $roadmapData['endYear'],
+            'itRoadmapTotalCount'           => $roadmapData['totalCount'],
+            'itRoadmapMilestoneTypeOptions' => $roadmapData['milestoneTypeOptions'],
         ];
     }
 
