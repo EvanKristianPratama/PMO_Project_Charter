@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
 
 const props = defineProps({
     items: {
@@ -47,31 +47,54 @@ const showBusinessUnit = ref(false);
 const showStatusColors = ref(true);
 const showInitiativeCode = ref(true);
 const selectedStatus = ref('');
-const selectedMonth = ref('Desember');
+const selectedPeriod = ref('latest');
 
 const monthsOrder = [
     'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
 ];
 
-const availableMonths = computed(() => {
-    const monthSet = new Set();
+const availablePeriods = computed(() => {
+    const periodSet = new Set();
     props.items.forEach(initiative => {
         if (initiative.statuses && Array.isArray(initiative.statuses)) {
             initiative.statuses.forEach(s => {
-                if (s.month) monthSet.add(s.month);
+                if (s.month && s.year) {
+                    periodSet.add(`${s.month}-${s.year}`);
+                }
             });
         }
     });
     
-    return Array.from(monthSet).sort((a, b) => monthsOrder.indexOf(a) - monthsOrder.indexOf(b));
+    const list = Array.from(periodSet).map(period => {
+        const [month, year] = period.split('-');
+        return { 
+            label: `${month} ${year}`, 
+            value: period, 
+            month, 
+            year: parseInt(year) 
+        };
+    }).sort((a, b) => {
+        if (a.year !== b.year) return b.year - a.year;
+        return monthsOrder.indexOf(b.month) - monthsOrder.indexOf(a.month);
+    });
+
+    return [{ label: 'Latest Status Update', value: 'latest' }, ...list];
 });
 
-const getInitiativeStatusByMonth = (initiative, month) => {
-    if (!initiative.statuses || !Array.isArray(initiative.statuses)) {
+// Set default period to 'latest'
+onMounted(() => {
+    selectedPeriod.value = 'latest';
+});
+
+const getInitiativeStatusByPeriod = (initiative, periodValue) => {
+    if (periodValue === 'latest') {
         return initiative.implementation_status;
     }
-    const found = initiative.statuses.find(s => s.month === month);
+    if (!initiative.statuses || !Array.isArray(initiative.statuses)) {
+        return null;
+    }
+    const found = initiative.statuses.find(s => `${s.month}-${s.year}` === periodValue);
     return found ? found.status : null;
 };
 
@@ -94,11 +117,11 @@ const statusLegend = computed(() => {
     });
     stats['Other'] = 0;
 
-    // Kalkulasi status berdasarkan seluruh inisiatif di bulan yang dipilih (tanpa filter status)
+    // Kalkulasi status berdasarkan seluruh inisiatif di periode yang dipilih (tanpa filter status)
     props.items.forEach((initiative) => {
         if (Number(initiative.tipe_initiative) !== 2) return;
         
-        const status = getInitiativeStatusByMonth(initiative, selectedMonth.value);
+        const status = getInitiativeStatusByPeriod(initiative, selectedPeriod.value);
         if (!status) return;
 
         const label = statusDesiredOrder.find(
@@ -133,10 +156,9 @@ const displayGroups = computed(() => {
     const coeMap = new Map();
     const UNIDENTIFIED = 'CoE Not Identified';
 
-    // Grouping dan Filter
     props.items.forEach(initiative => {
         const isItInitiative = Number(initiative.tipe_initiative) === 2;
-        const currentStatus = getInitiativeStatusByMonth(initiative, selectedMonth.value);
+        const currentStatus = getInitiativeStatusByPeriod(initiative, selectedPeriod.value);
         const statusLabel = String(currentStatus ?? '').trim();
         const matchesStatus = !selectedStatus.value || statusLabel.toLowerCase() === selectedStatus.value.toLowerCase();
 
@@ -152,10 +174,7 @@ const displayGroups = computed(() => {
         }
     });
 
-    // Ambil semua CoE yang ditemukan di data
     const foundCoeNames = Array.from(coeMap.keys());
-
-    // Map ke format tampilan dan sort initiatives di dalam tiap group
     const coeGroups = foundCoeNames.map(name => {
         const initiatives = coeMap.get(name) || [];
         return {
@@ -169,17 +188,13 @@ const displayGroups = computed(() => {
         };
     });
 
-    // Sort urutan group (baris CoE) berdasarkan kode initiative terkecil di dalamnya
     coeGroups.sort((a, b) => {
         if (a.name === UNIDENTIFIED && b.name !== UNIDENTIFIED) return 1;
         if (b.name === UNIDENTIFIED && a.name !== UNIDENTIFIED) return -1;
-
         const codeA = a.initiatives.length > 0 ? String(a.initiatives[0]?.code ?? '') : '';
         const codeB = b.initiatives.length > 0 ? String(b.initiatives[0]?.code ?? '') : '';
-        
         if (codeA === '' && codeB !== '') return 1;
         if (codeB === '' && codeA !== '') return -1;
-
         return codeA.localeCompare(codeB, undefined, { numeric: true, sensitivity: 'base' });
     });
 
@@ -209,8 +224,8 @@ const getCoeColorClass = (coeName) => {
 
 <template>
     <div class="space-y-4">
-        <template v-if="displayGroups.length > 0">
-            <!-- Legend Section -->
+        <div class="space-y-4">
+            <!-- Legend Section (Always Visible) -->
             <div class="space-y-2.5">
                 <!-- Status Implementation Legend -->
                 <div v-if="showStatusColors" class="flex flex-wrap items-center gap-x-4 gap-y-2 dark:border-white/5">
@@ -233,7 +248,7 @@ const getCoeColorClass = (coeName) => {
                     </div>
 
                     <!-- Total Overall -->
-                    <div class="flex items-center gap-1.5 border-l border-slate-300 pl-4 ml-1 dark:border-white/10">
+                    <div v-if="totalOverallInitiatives > 0" class="flex items-center gap-1.5 border-l border-slate-300 pl-4 ml-1 dark:border-white/10">
                         <span class="text-[10px] font-bold text-slate-800 dark:text-slate-200">
                             Total IT Initiatives <span class="text-slate-500 dark:text-slate-400 font-medium">({{ totalOverallInitiatives }})</span>
                         </span>
@@ -241,11 +256,12 @@ const getCoeColorClass = (coeName) => {
                 </div>
             </div>
 
-            <!-- Toolbar -->
+            <!-- Toolbar (Always Visible) -->
             <div class="flex items-center justify-start">
                 <div class="initiative-view-switch">
-                    <select v-model="selectedMonth" class="initiative-view-select mr-2">
-                        <option v-for="month in availableMonths" :key="month" :value="month">{{ month }}</option>
+                    <select v-model="selectedPeriod" class="initiative-view-select mr-2">
+                        <option value="" disabled>Pilih Periode</option>
+                        <option v-for="period in availablePeriods" :key="period.value" :value="period.value">{{ period.label }}</option>
                     </select>
 
                     <select v-model="selectedStatus" class="initiative-view-select mr-2">
@@ -303,67 +319,69 @@ const getCoeColorClass = (coeName) => {
                 </div>
             </div>
 
-            <!-- Table Matrix -->
-            <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                <div class="overflow-x-auto">
-                    <h1 class="text-center text-l font-bold mt-4 mb-4 ">IT Initiative bases on IT Building Blocks</h1>
-                    <table class="itb-table min-w-full border-collapse" :class="`itb-table--${initiativeColumnCount}-cols`">
-                        <thead>
-                            <tr>
-                                <th class="top-head top-head-left" style="width: 15%;">IT Building Blocks</th>
-                                <th class="top-head top-head-right" style="width: 85%;">IT Initiatives</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="group in displayGroups" :key="group.name">
-                                <td class="primary-cell" :class="getCoeColorClass(group.name)">
-                                    <div class="primary-cell__content">
-                                        <div class="primary-label-wrapper">
-                                            <span class="text-xs">{{ group.name }}</span>
-                                            <span class="count-capsule">{{ group.total }}</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="initiatives-cell">
-                                    <div class="initiatives-grid" :style="{
-                                        '--initiative-column-count': initiativeColumnCount,
-                                        '--row-count': buildInitiativeColumns(group.initiatives).rowCount
-                                    }">
-                                        <div
-                                            v-for="initiative in buildInitiativeColumns(group.initiatives).items"
-                                            :key="initiative.id"
-                                            class="initiative-box group"
-                                            :class="[
-                                                getCoeColorClass(initiative.coe_name || initiative.coe?.name),
-                                                { 'initiative-box--no-code': !showInitiativeCode || !initiative.code }
-                                            ]"
-                                        >
-                                            <div class="absolute top-full left-1/2 z-50 mt-1 hidden -translate-x-1/2 w-max max-w-sm bg-white border border-slate-800 shadow-sm px-1.5 py-1 text-[9px] italic group-hover:block dark:bg-slate-800">
-                                                {{ initiative.name }}
+            <!-- Table Matrix or Empty State -->
+            <template v-if="displayGroups.length > 0">
+                <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                    <div class="overflow-x-auto">
+                        <h1 class="text-center text-l font-bold mt-4 mb-4 ">IT Initiative bases on IT Building Blocks</h1>
+                        <table class="itb-table min-w-full border-collapse" :class="`itb-table--${initiativeColumnCount}-cols`">
+                            <thead>
+                                <tr>
+                                    <th class="top-head top-head-left" style="width: 15%;">IT Building Blocks</th>
+                                    <th class="top-head top-head-right" style="width: 85%;">IT Initiatives</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="group in displayGroups" :key="group.name">
+                                    <td class="primary-cell" :class="getCoeColorClass(group.name)">
+                                        <div class="primary-cell__content">
+                                            <div class="primary-label-wrapper">
+                                                <span class="text-xs">{{ group.name }}</span>
+                                                <span class="count-capsule">{{ group.total }}</span>
                                             </div>
-                                            <span v-if="showInitiativeCode && initiative.code" 
-                                                class="initiative-box__code"
-                                                :class="showStatusColors ? getStatusColorClass(initiative.display_status) : ''"
-                                            >
-                                                {{ initiative.code }}
-                                            </span>
-                                            <span class="initiative-box__name" :class="{ 'initiative-box__name--full': !showInitiativeCode || !initiative.code }">
-                                                <span class="initiative-box__label-text">{{ initiative.name }}</span>
-                                                <span v-if="showBusinessUnit" class="initiative-box__bu">{{ initiative.business_unit }}</span>
-                                            </span>
                                         </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-        </template>
+                                    </td>
+                                    <td class="initiatives-cell">
+                                        <div class="initiatives-grid" :style="{
+                                            '--initiative-column-count': initiativeColumnCount,
+                                            '--row-count': buildInitiativeColumns(group.initiatives).rowCount
+                                        }">
+                                            <div
+                                                v-for="initiative in buildInitiativeColumns(group.initiatives).items"
+                                                :key="initiative.id"
+                                                class="initiative-box group"
+                                                :class="[
+                                                    getCoeColorClass(initiative.coe_name || initiative.coe?.name),
+                                                    { 'initiative-box--no-code': !showInitiativeCode || !initiative.code }
+                                                ]"
+                                            >
+                                                <div class="absolute top-full left-1/2 z-50 mt-1 hidden -translate-x-1/2 w-max max-w-sm bg-white border border-slate-800 shadow-sm px-1.5 py-1 text-[9px] italic group-hover:block dark:bg-slate-800">
+                                                    {{ initiative.name }}
+                                                </div>
+                                                <span v-if="showInitiativeCode && initiative.code" 
+                                                    class="initiative-box__code"
+                                                    :class="showStatusColors ? getStatusColorClass(initiative.display_status) : ''"
+                                                >
+                                                    {{ initiative.code }}
+                                                </span>
+                                                <span class="initiative-box__name" :class="{ 'initiative-box__name--full': !showInitiativeCode || !initiative.code }">
+                                                    <span class="initiative-box__label-text">{{ initiative.name }}</span>
+                                                    <span v-if="showBusinessUnit" class="initiative-box__bu">{{ initiative.business_unit }}</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </template>
 
-        <section v-else class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-white/15 dark:bg-[#171717]">
-            <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Tidak ada data inisiatif untuk kriteria ini.</p>
-        </section>
+            <section v-else class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-white/15 dark:bg-[#171717]">
+                <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Tidak ada data inisiatif untuk kriteria ini.</p>
+            </section>
+        </div>
     </div>
 </template>
 
