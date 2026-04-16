@@ -7,6 +7,10 @@ const { navItems } = useNavigation();
 const page = usePage();
 const currentUrl = computed(() => page.url);
 
+const strategicHouseItem = computed(() => {
+    return navItems.value.find((item) => item.label === 'Strategic House') ?? null;
+});
+
 const programPlanningItem = computed(() => {
     return navItems.value.find((item) => item.label === 'Program Planning') ?? null;
 });
@@ -27,14 +31,13 @@ const programInformationItem = computed(() => {
     return navItems.value.find((item) => item.label === 'Program Evaluation') ?? null;
 });
 
-const showInformationChildren = computed(() => {
-    if (programInformationItem.value?.active(currentUrl.value)) {
+const showStrategicHouseChildren = computed(() => {
+    if (strategicHouseItem.value?.active(currentUrl.value)) {
         return true;
     }
 
-    return programInformationItem.value?.children?.some((item) => item.active(currentUrl.value));
+    return strategicHouseItem.value?.children?.some((item) => item.active(currentUrl.value)) ?? false;
 });
-
 
 const showPlanningChildren = computed(() => {
     if (programPlanningItem.value?.active(currentUrl.value)) {
@@ -51,11 +54,40 @@ const showImplementationChildren = computed(() => {
 
     return programImplementationChildren.value.some((item) => item.active(currentUrl.value));
 });
+
+const showInformationChildren = computed(() => {
+    if (programInformationItem.value?.active(currentUrl.value)) {
+        return true;
+    }
+
+    return programInformationItem.value?.children?.some((item) => item.active(currentUrl.value));
+});
 </script>
 
 <template>
     <div class="inline-flex flex-col gap-1.5">
         <div class="inline-flex flex-wrap items-center gap-0.5">
+            <Link
+                v-if="strategicHouseItem"
+                :href="strategicHouseItem.href"
+                class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
+                :class="[
+                    showStrategicHouseChildren
+                        ? 'bg-blue-500 text-white shadow-sm'
+                        : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200'
+                ]"
+            >
+                <component :is="strategicHouseItem.icon" v-if="strategicHouseItem.icon" class="h-3.5 w-3.5 shrink-0" />
+                <span>{{ strategicHouseItem.label }}</span>
+            </Link>
+
+            <span
+                v-if="strategicHouseItem && (programPlanningItem || programImplementationItem || programInformationItem)"
+                class="select-none px-0.5 text-slate-300 dark:text-slate-600"
+            >
+                ·
+            </span>
+
             <Link
                 v-if="programPlanningItem"
                 :href="programPlanningItem.href"
@@ -113,9 +145,9 @@ const showImplementationChildren = computed(() => {
             </Link>
         </div>
 
-        <div v-if="showPlanningChildren || showImplementationChildren || showInformationChildren" class="ml-2 inline-flex flex-wrap items-center gap-1">
+        <div v-if="showPlanningChildren || showImplementationChildren || showInformationChildren || showStrategicHouseChildren" class="ml-2 inline-flex flex-wrap items-center gap-1">
             <Link
-                v-for="item in showPlanningChildren ? programPlanningChildren : showImplementationChildren ? programImplementationChildren : programInformationItem?.children || []"
+                v-for="item in showStrategicHouseChildren ? (strategicHouseItem?.children || []) : showPlanningChildren ? programPlanningChildren : showImplementationChildren ? programImplementationChildren : programInformationItem?.children || []"
                 :key="'left-child-' + item.label"
                 :href="item.href"
                 class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all duration-150"

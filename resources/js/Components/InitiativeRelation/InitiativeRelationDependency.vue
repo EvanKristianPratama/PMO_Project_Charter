@@ -49,6 +49,22 @@
             </div>
         </div>
 
+        <div class="flex flex-wrap items-center gap-2 border-b border-slate-200 px-5 py-3 text-[11px] font-semibold text-slate-600 dark:border-white/10 dark:text-slate-300">
+            <span class="uppercase tracking-wider text-slate-500 dark:text-slate-400">Legend Status</span>
+            <span
+                v-for="legend in statusLegend"
+                :key="legend.key"
+                class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 shadow-sm dark:border-white/10 dark:bg-[#1f1f1f]"
+            >
+                <span
+                    class="h-2.5 w-2.5 rounded-sm border"
+                    :style="legend.swatchStyle"
+                ></span>
+                <span>{{ legend.label }}</span>
+                <span class="text-slate-400 dark:text-slate-500">({{ legend.count }})</span>
+            </span>
+        </div>
+
         <div class="overflow-x-auto">
             <table class="w-full border-collapse text-sm">
                 <colgroup>
@@ -109,7 +125,7 @@
                                 <td
                                     class="border border-slate-200 px-4 py-3 text-sm text-slate-800 dark:border-white/10 dark:text-slate-200 overflow-hidden">
                                     <span v-if="relation"
-                                        class="inline-block break-words rounded px-2 py-0.5"
+                                        class="inline-block wrap-break-word rounded px-2 py-0.5"
                                         :style="relationInitiativeChipStyle(relation.predecessor_id)">
                                         {{ relation.predecessor }}
                                     </span>
@@ -131,7 +147,7 @@
                                     class="border border-slate-200 px-4 py-3 text-sm text-slate-800 dark:border-white/10 dark:text-slate-200 overflow-hidden">
                                     <span
                                         v-if="relation"
-                                        class="inline-block break-words rounded px-2 py-0.5"
+                                        class="inline-block wrap-break-word rounded px-2 py-0.5"
                                         :style="relationInitiativeChipStyle(relation.successor_id)"
                                     >
                                         {{ relation.successor }}
@@ -208,7 +224,11 @@
                                                     :zoom-on-double-click="false"
                                                     :min-zoom="0.35"
                                                     :max-zoom="1.5"
-                                                />
+                                                >
+                                                        <template #node-initiative-status-card="nodeProps">
+                                                            <InitiativeRelationFlowNode :data="nodeProps.data" :selected="nodeProps.selected" />
+                                                    </template>
+                                                </VueFlow>
                                             </div>
                                         </div>
                                     </div>
@@ -266,7 +286,7 @@
                             <td
                                 class="border border-slate-200 px-4 py-3 text-sm text-slate-800 dark:border-white/10 dark:text-slate-200 overflow-hidden">
                                 <span
-                                    class="inline-block break-words rounded px-2 py-0.5"
+                                    class="inline-block wrap-break-word rounded px-2 py-0.5"
                                     :style="relationInitiativeChipStyle(relation.predecessor_id)"
                                 >
                                     {{ relation.predecessor }}
@@ -284,7 +304,7 @@
                             <td
                                 class="border border-slate-200 px-4 py-3 text-sm text-slate-800 dark:border-white/10 dark:text-slate-200 overflow-hidden">
                                 <span
-                                    class="inline-block break-words rounded px-2 py-0.5"
+                                    class="inline-block wrap-break-word rounded px-2 py-0.5"
                                     :style="relationInitiativeChipStyle(relation.successor_id)"
                                 >
                                     {{ relation.successor }}
@@ -350,7 +370,11 @@
                                                 :zoom-on-double-click="false"
                                                 :min-zoom="0.3"
                                                 :max-zoom="1.6"
-                                            />
+                                            >
+                                                <template #node-initiative-status-card="nodeProps">
+                                                    <InitiativeRelationFlowNode :data="nodeProps.data" :selected="nodeProps.selected" />
+                                                </template>
+                                            </VueFlow>
                                         </div>
                                     </div>
                                 </div>
@@ -368,6 +392,7 @@ import { computed, ref, watch } from 'vue';
 import { MarkerType, Position, VueFlow } from '@vue-flow/core';
 import '@vue-flow/core/dist/style.css';
 import '@vue-flow/core/dist/theme-default.css';
+import InitiativeRelationFlowNode from '@/Components/InitiativeRelation/InitiativeRelationFlowNode.vue';
 
 const props = defineProps({
     mstInitiatives: {
@@ -422,15 +447,12 @@ const initiativeOptions = computed(() => {
     return props.mstInitiatives.map((initiative) => {
         const code = initiative.code ?? initiative.id ?? '-';
         const name = initiative.name ?? '-';
-        const coeName = initiative?.coe?.name ?? initiative?.coe_name ?? '';
-        const baseLabel = `${code} - ${name}`;
-        const label = coeName ? `${baseLabel} (CoE: ${coeName})` : baseLabel;
 
         return {
             id: initiative.id,
             code,
             name,
-            label,
+            label: `${code} - ${name}`,
             type: initiative.tipe_initiative != null ? Number(initiative.tipe_initiative) : null,
         };
     });
@@ -468,6 +490,130 @@ const filteredInitiatives = computed(() => {
     return initiatives;
 });
 
+const IT_STATUS_PALETTE = {
+    'On Track': {
+        className: 'status-on-track',
+        borderColor: '#16a34a',
+        backgroundColor: '#dcfce7',
+        textColor: '#166534',
+        swatchColor: '#16a34a',
+    },
+    'At Risk': {
+        className: 'status-at-risk',
+        borderColor: '#d97706',
+        backgroundColor: '#fef3c7',
+        textColor: '#92400e',
+        swatchColor: '#f59e0b',
+    },
+    'Not Signed': {
+        className: 'status-not-signed',
+        borderColor: '#dc2626',
+        backgroundColor: '#fee2e2',
+        textColor: '#991b1b',
+        swatchColor: '#ef4444',
+    },
+    'Not Started': {
+        className: 'status-not-started',
+        borderColor: '#2563eb',
+        backgroundColor: '#dbeafe',
+        textColor: '#1e3a8a',
+        swatchColor: '#2563eb',
+    },
+};
+
+const normalizeItStatus = (rawStatus) => {
+    const normalized = String(rawStatus ?? '').trim().toLowerCase();
+
+    if (!normalized || normalized === '-' || normalized === 'null') {
+        return 'Not Started';
+    }
+
+    if (normalized.includes('on track')) return 'On Track';
+    if (normalized.includes('at risk')) return 'At Risk';
+    if (normalized.includes('not signed')) return 'Not Signed';
+    if (normalized.includes('not started')) return 'Not Started';
+
+    if (normalized === '4' || normalized === 'approved' || normalized === 'done' || normalized === 'completed') {
+        return 'On Track';
+    }
+
+    if (normalized === '3' || normalized === 'review' || normalized === 'propose') {
+        return 'At Risk';
+    }
+
+    if (normalized === '2' || normalized === 'draft' || normalized === 'drafting' || normalized === '0' || normalized === '1') {
+        return 'Not Started';
+    }
+
+    return 'Not Started';
+};
+
+const resolveInitiativeStatusLabel = (initiative) => normalizeItStatus(
+    initiative?.latestStatusImplementation?.review_status
+    ?? initiative?.latest_status_implementation?.review_status
+    ?? initiative?.latestStatus?.review_status
+    ?? initiative?.latestStatus?.status
+    ?? initiative?.status
+    ?? ''
+);
+
+const getStatusColorClass = (statusLabel) => {
+    const normalized = normalizeItStatus(statusLabel);
+    return IT_STATUS_PALETTE[normalized]?.className ?? IT_STATUS_PALETTE['Not Started'].className;
+};
+
+const statusLegend = computed(() => {
+    const order = ['On Track', 'At Risk', 'Not Signed', 'Not Started'];
+    const counts = order.reduce((accumulator, label) => {
+        accumulator[label] = 0;
+        return accumulator;
+    }, {});
+
+    filteredInitiatives.value.forEach((initiative) => {
+        const label = resolveInitiativeStatusLabel(initiative);
+        if (counts[label] !== undefined) {
+            counts[label] += 1;
+            return;
+        }
+
+        counts['Not Started'] += 1;
+    });
+
+    return order.map((label) => ({
+        key: label,
+        label,
+        count: counts[label] ?? 0,
+        swatchStyle: {
+            backgroundColor: IT_STATUS_PALETTE[label].swatchColor,
+            borderColor: IT_STATUS_PALETTE[label].borderColor,
+        },
+    }));
+});
+
+const buildInitiativeNodeData = (initiative, fallbackCode, isCurrent = false) => {
+    const code = initiative?.code ?? initiative?.id ?? fallbackCode ?? '-';
+    const name = initiative?.name ?? '-';
+    const statusLabel = resolveInitiativeStatusLabel(initiative);
+
+    return {
+        code,
+        name,
+        statusLabel,
+        statusClass: getStatusColorClass(statusLabel),
+        isCurrent,
+        label: formatInitiative(initiative, fallbackCode),
+    };
+};
+
+const resolveInitiativeNodeStyle = () => ({
+    backgroundColor: 'transparent',
+    border: 'none',
+    boxShadow: 'none',
+    padding: '0',
+    width: 'auto',
+    height: 'auto',
+});
+
 const initiativeById = computed(() => {
     const map = new Map();
     props.mstInitiatives.forEach((initiative) => {
@@ -484,7 +630,7 @@ const formatInitiative = (initiative, fallbackCode) => {
     if (!name) {
         return code;
     }
-    return `${code} - ${name}`;
+    return `[${code}] ${name}`;
 };
 
 const toNumericId = (value) => {
@@ -585,12 +731,13 @@ const resolveInitiativeBlockStyle = (initiative, isCurrent = false) => {
 
 const relationInitiativeChipStyle = (initiativeId) => {
     const initiative = findInitiativeById(initiativeId);
-    const palette = STATUS_BLOCK_STYLE_MAP[resolveInitiativeStatusKey(initiative)] ?? STATUS_BLOCK_STYLE_MAP.drafting;
+    const statusLabel = resolveInitiativeStatusLabel(initiative);
+    const palette = IT_STATUS_PALETTE[statusLabel] ?? IT_STATUS_PALETTE['Not Started'];
 
     return {
         borderColor: palette.borderColor,
         backgroundColor: palette.backgroundColor,
-        color: palette.color,
+        color: palette.textColor,
         borderWidth: '1px',
         borderStyle: 'solid',
         fontSize: '0.95em',
@@ -828,13 +975,14 @@ const buildGraphForInitiative = (initiative, relations) => {
         {
             id: initiativeNodeId(currentId),
             position: { x: 360, y: centerY },
-            data: { label: formatInitiative(initiative, currentId) },
-            class: 'initiative-node-block initiative-node-block--focus',
+            data: buildInitiativeNodeData(initiative, currentId, true),
+            type: 'initiative-status-card',
+            class: 'initiative-status-card initiative-status-card--focus',
             sourcePosition: Position.Right,
             targetPosition: Position.Left,
             draggable: false,
             selectable: false,
-            style: resolveInitiativeBlockStyle(initiative, true),
+            style: resolveInitiativeNodeStyle(initiative, true),
         },
     ];
 
@@ -844,13 +992,14 @@ const buildGraphForInitiative = (initiative, relations) => {
         nodes.push({
             id: initiativeNodeId(initiativeId),
             position: { x: 30, y: predecessorStartY + (index * rowGap) },
-            data: { label: formatInitiative(linkedInitiative, initiativeId) },
-            class: 'initiative-node-block',
+            data: buildInitiativeNodeData(linkedInitiative, initiativeId),
+            type: 'initiative-status-card',
+            class: 'initiative-status-card',
             sourcePosition: Position.Right,
             targetPosition: Position.Right,
             draggable: false,
             selectable: false,
-            style: resolveInitiativeBlockStyle(linkedInitiative),
+            style: resolveInitiativeNodeStyle(linkedInitiative),
         });
     });
 
@@ -860,13 +1009,14 @@ const buildGraphForInitiative = (initiative, relations) => {
         nodes.push({
             id: initiativeNodeId(initiativeId),
             position: { x: 690, y: successorStartY + (index * rowGap) },
-            data: { label: formatInitiative(linkedInitiative, initiativeId) },
-            class: 'initiative-node-block',
+            data: buildInitiativeNodeData(linkedInitiative, initiativeId),
+            type: 'initiative-status-card',
+            class: 'initiative-status-card',
             sourcePosition: Position.Left,
             targetPosition: Position.Left,
             draggable: false,
             selectable: false,
-            style: resolveInitiativeBlockStyle(linkedInitiative),
+            style: resolveInitiativeNodeStyle(linkedInitiative),
         });
     });
 
@@ -1024,15 +1174,14 @@ const buildGraphForAll = (relations) => {
                     x: baseX + (level * colGap),
                     y: baseY + (rowIndex * rowGap),
                 },
-                data: {
-                    label: formatInitiative(initiative, nodeId),
-                },
-                class: 'initiative-node-block',
+                data: buildInitiativeNodeData(initiative, nodeId),
+                type: 'initiative-status-card',
+                class: 'initiative-status-card',
                 sourcePosition: Position.Right,
                 targetPosition: Position.Left,
                 draggable: false,
                 selectable: false,
-                style: resolveInitiativeBlockStyle(initiative),
+                style: resolveInitiativeNodeStyle(initiative),
             });
         });
     });
