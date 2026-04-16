@@ -46,6 +46,7 @@ const initiativeColumnCount = ref(DEFAULT_INITIATIVE_COLUMN_COUNT);
 const showBusinessUnit = ref(false);
 const showStatusColors = ref(true);
 const showInitiativeCode = ref(true);
+const showLastUpdatePeriod = ref(true);
 const selectedStatus = ref('');
 const selectedPeriod = ref('latest');
 
@@ -88,14 +89,30 @@ onMounted(() => {
 });
 
 const getInitiativeStatusByPeriod = (initiative, periodValue) => {
-    if (periodValue === 'latest') {
-        return initiative.implementation_status;
-    }
     if (!initiative.statuses || !Array.isArray(initiative.statuses)) {
-        return null;
+        return { 
+            status: initiative.implementation_status, 
+            period: null 
+        };
     }
+
+    if (periodValue === 'latest') {
+        const sorted = [...initiative.statuses].sort((a, b) => {
+            if (a.year !== b.year) return b.year - a.year;
+            return monthsOrder.indexOf(b.month) - monthsOrder.indexOf(a.month);
+        });
+        const latest = sorted[0];
+        return {
+            status: latest ? latest.status : initiative.implementation_status,
+            period: latest ? `${latest.month} ${latest.year}` : null
+        };
+    }
+
     const found = initiative.statuses.find(s => `${s.month}-${s.year}` === periodValue);
-    return found ? found.status : null;
+    return {
+        status: found ? found.status : null,
+        period: found ? `${found.month} ${found.year}` : null
+    };
 };
 
 const getStatusColorClass = (status) => {
@@ -121,7 +138,8 @@ const statusLegend = computed(() => {
     props.items.forEach((initiative) => {
         if (Number(initiative.tipe_initiative) !== 2) return;
         
-        const status = getInitiativeStatusByPeriod(initiative, selectedPeriod.value);
+        const periodData = getInitiativeStatusByPeriod(initiative, selectedPeriod.value);
+        const status = periodData.status;
         if (!status) return;
 
         const label = statusDesiredOrder.find(
@@ -156,9 +174,11 @@ const displayGroups = computed(() => {
     const coeMap = new Map();
     const UNIDENTIFIED = 'CoE Not Identified';
 
+    // 1. Grouping dan Filter
     props.items.forEach(initiative => {
         const isItInitiative = Number(initiative.tipe_initiative) === 2;
-        const currentStatus = getInitiativeStatusByPeriod(initiative, selectedPeriod.value);
+        const periodData = getInitiativeStatusByPeriod(initiative, selectedPeriod.value);
+        const currentStatus = periodData.status;
         const statusLabel = String(currentStatus ?? '').trim();
         const matchesStatus = !selectedStatus.value || statusLabel.toLowerCase() === selectedStatus.value.toLowerCase();
 
@@ -169,12 +189,16 @@ const displayGroups = computed(() => {
             }
             coeMap.get(coeName).push({
                 ...initiative,
-                display_status: currentStatus
+                display_status: currentStatus,
+                display_period: periodData.period
             });
         }
     });
 
+    // 2. Ambil semua CoE yang ditemukan di data
     const foundCoeNames = Array.from(coeMap.keys());
+
+    // 3. Map ke format tampilan dan sort initiatives di dalam tiap group
     const coeGroups = foundCoeNames.map(name => {
         const initiatives = coeMap.get(name) || [];
         return {
@@ -188,13 +212,18 @@ const displayGroups = computed(() => {
         };
     });
 
+    // 4. Sort urutan group (baris CoE) berdasarkan kode initiative terkecil di dalamnya
     coeGroups.sort((a, b) => {
         if (a.name === UNIDENTIFIED && b.name !== UNIDENTIFIED) return 1;
         if (b.name === UNIDENTIFIED && a.name !== UNIDENTIFIED) return -1;
+
         const codeA = a.initiatives.length > 0 ? String(a.initiatives[0]?.code ?? '') : '';
         const codeB = b.initiatives.length > 0 ? String(b.initiatives[0]?.code ?? '') : '';
+        
+        // Handle empty codes to be placed last or evaluated properly
         if (codeA === '' && codeB !== '') return 1;
         if (codeB === '' && codeA !== '') return -1;
+
         return codeA.localeCompare(codeB, undefined, { numeric: true, sensitivity: 'base' });
     });
 
@@ -204,7 +233,7 @@ const displayGroups = computed(() => {
 const buildInitiativeColumns = (initiatives = [], columnCount = initiativeColumnCount.value) => {
     if (!initiatives.length) return { items: [], rowCount: 0 };
     return { 
-        items: initiatives,
+        items: initiatives, // Sudah diurutkan di displayGroups
         rowCount: Math.ceil(initiatives.length / Number(columnCount)) 
     };
 };
@@ -312,6 +341,19 @@ const getCoeColorClass = (coeName) => {
                         <span>Code</span>
                     </button>
 
+                    <button
+                        type="button"
+                        class="bu-toggle-btn"
+                        :class="{ 'bu-toggle-btn--active': showLastUpdatePeriod }"
+                        title="Tampilkan/Sembunyikan Periode Update"
+                        @click="showLastUpdatePeriod = !showLastUpdatePeriod"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span>Periode</span>
+                    </button>
+
                     <span class="initiative-view-switch__label ml-2">Tampilan kolom:</span>
                     <select v-model="initiativeColumnCount" class="initiative-view-select">
                         <option v-for="option in initiativeColumnOptions" :key="option" :value="option">{{ option }} Kolom</option>
@@ -366,6 +408,9 @@ const getCoeColorClass = (coeName) => {
                                                 </span>
                                                 <span class="initiative-box__name" :class="{ 'initiative-box__name--full': !showInitiativeCode || !initiative.code }">
                                                     <span class="initiative-box__label-text">{{ initiative.name }}</span>
+                                                    <span v-if="showLastUpdatePeriod && initiative.display_period" class="initiative-box__period">
+                                                        {{ initiative.display_period }}
+                                                    </span>
                                                     <span v-if="showBusinessUnit" class="initiative-box__bu">{{ initiative.business_unit }}</span>
                                                 </span>
                                             </div>
@@ -412,6 +457,7 @@ const getCoeColorClass = (coeName) => {
 }
 
 .initiative-box__name { display: flex; flex-direction: column; padding: 2px 5px; word-break: break-word; justify-content: center; }
+.initiative-box__period { font-size: 7.5px; font-weight: 700; font-style: italic; color: #64748b; margin-top: 1px; }
 .initiative-box__bu { font-size: 7.5px; font-weight: 700; font-style: italic; opacity: 0.7; }
 .initiative-box__name--full { grid-column: 1 / -1; }
 
