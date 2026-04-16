@@ -146,7 +146,7 @@ export function useNavigation() {
         const items = [
             {
                 label: 'Program Planning',
-                href: safeRoute('dashboard-monitoring'),
+                href: safeRoute('strategic-house.index'),
                 icon: Squares2X2Icon,
                 active: (url) =>
                     url.startsWith('/dashboard-monitoring')

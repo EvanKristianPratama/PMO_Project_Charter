@@ -105,6 +105,6 @@ class SsoController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        return redirect()->route('dashboard-monitoring');
+        return redirect()->route('strategic-house.index');
     }
 }
