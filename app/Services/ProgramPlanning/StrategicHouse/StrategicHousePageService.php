@@ -298,6 +298,7 @@ class StrategicHousePageService
                     ->with([
                         'latestStatus',
                         'mappedProjects:id',
+                        'latestStatusImplementation',
                     ])
                     ->orderBy('code'),
             ])
@@ -352,6 +353,7 @@ class StrategicHousePageService
                     'mapped_project_id' => $mappedProjectId > 0 ? $mappedProjectId : null,
                     'status' => $status,
                     'status_label' => $this->statusLabel($status),
+                    'implementation_status' => $initiative->latestStatusImplementation?->review_status,
                     'source' => !is_null($initiative->source) ? (int) $initiative->source : null,
                 ];
             })
@@ -584,7 +586,7 @@ class StrategicHousePageService
     {
         return MstInitiative::query()
             ->select(['id', 'code', 'name', 'status', 'source'])
-            ->with('latestStatus')
+            ->with(['latestStatus', 'latestStatusImplementation'])
             ->where('tipe_initiative', $initiativeType)
             ->whereNull('coe_id')
             ->orderBy('code')
@@ -599,6 +601,7 @@ class StrategicHousePageService
                     'label' => trim(collect([$initiative->code, $initiative->name])->filter()->implode(' - ')),
                     'status' => $status,
                     'status_label' => $this->statusLabel($status),
+                    'implementation_status' => $initiative->latestStatusImplementation?->review_status,
                     'source' => !is_null($initiative->source) ? (int) $initiative->source : null,
                 ];
             })

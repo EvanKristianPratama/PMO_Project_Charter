@@ -135,6 +135,54 @@ const buildInitiativeColumns = (initiatives = [], columnCount = initiativeColumn
 };
 
 
+const coeLegend = computed(() => {
+    const desiredOrder = [
+        'IoT',
+        'Advance Cloud',
+        'RPA',
+        'Robotics',
+        'AI / Adv. Analytics',
+        'CoE Not Identified',
+    ];
+
+    const stats = {};
+    desiredOrder.forEach(name => {
+        stats[name] = 0;
+    });
+
+    displayGroups.value.forEach((group) => {
+        const name = group.name;
+        if (stats.hasOwnProperty(name)) {
+            stats[name] += group.total;
+        } else {
+            stats['CoE Not Identified'] += group.total;
+        }
+    });
+
+    return desiredOrder.map((name, index) => ({
+        id: index + 1,
+        name: name,
+        count: stats[name],
+    }));
+});
+
+const totalOverallInitiatives = computed(() => {
+    return displayGroups.value.reduce((sum, group) => sum + group.total, 0);
+});
+
+const getCoeColorClass = (coeName) => {
+    const name = normalizeCoeName(coeName);
+
+    if (name === 'IoT') return 'coe-color-blue';
+    if (name === 'Advance Cloud') return 'coe-color-emerald';
+    if (name === 'RPA') return 'coe-color-amber';
+    if (name === 'Robotics') return 'coe-color-purple';
+    if (name === 'AI / Adv. Analytics') return 'coe-color-rose';
+    if (name === 'CoE Not Identified') return 'coe-color-none';
+
+    return 'coe-color-none';
+};
+
 const getStatusColorClass = (status) => {
     const s = normalizeStatusLabel(status);
     if (s === 'DF') return 'status-color-df';
@@ -174,11 +222,35 @@ const statusLegend = computed(() => {
 <template>
     <div class="space-y-4">
         <div v-if="displayGroups.length > 0" class="space-y-4">
-            <!-- Status Implementation Legend -->
+            <!-- Legend & Overall Total -->
             <div class="space-y-2.5">
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+                    <div
+                        v-for="coe in coeLegend"
+                        :key="`coe-legend-${coe.id}`"
+                        class="flex items-center gap-1.5"
+                    >
+                        <span
+                            class="h-3 w-3 rounded-sm shadow-sm legend-swatch"
+                            :class="getCoeColorClass(coe.name)"
+                        ></span>
+                        <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                            {{ coe.name }} <span class="text-slate-400 dark:text-slate-500 font-medium">({{ coe.count }})</span>
+                        </span>
+                    </div>
+
+                    <!-- Total Overall -->
+                    <div class="flex items-center gap-1.5 border-l border-slate-300 pl-4 ml-1 dark:border-white/10">
+                        <span class="text-[11px] font-bold text-slate-800 dark:text-slate-200">
+                            Total Digital Initiatives <span class="text-slate-500 dark:text-slate-400 font-medium">({{ totalOverallInitiatives }})</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Status Implementation Legend -->
                 <div
                     v-if="showStatusColors"
-                    class="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 border-slate-100 dark:border-white/5"
+                    class="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 border-t border-slate-100 dark:border-white/5"
                 >
                     <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider">Implementation Status (November - Desember 2025):</span>
                     <div
@@ -285,7 +357,7 @@ const statusLegend = computed(() => {
                         </thead>
                         <tbody>
                             <tr v-for="group in displayGroups" :key="group.name">
-                                <td class="primary-cell">
+                                <td class="primary-cell" :class="getCoeColorClass(group.name)">
                                     <div class="primary-cell__content">
                                         <div class="primary-label-wrapper">
                                             <span class="text-xs">{{ group.name }}</span>
@@ -305,6 +377,7 @@ const statusLegend = computed(() => {
                                             :key="initiative.id"
                                             class="initiative-box group"
                                             :class="[
+                                                getCoeColorClass(group.name),
                                                 { 'initiative-box--no-code': !showInitiativeCode || !initiative.code }
                                             ]"
                                         >
@@ -333,6 +406,7 @@ const statusLegend = computed(() => {
                                             :key="initiative.id"
                                             class="initiative-box group"
                                             :class="[
+                                                getCoeColorClass(group.name),
                                                 { 'initiative-box--no-code': !showInitiativeCode || !initiative.code }
                                             ]"
                                         >
@@ -410,6 +484,32 @@ const statusLegend = computed(() => {
 .status-color-itsbp { background-color: #06b6d4 !important; color: #ffffff !important; border-color: #0891b2 !important; }
 .status-color-onreview { background-color: #ca8a04 !important; color: #ffffff !important; border-color: #a16207 !important; }
 .status-color-sh { background-color: #ef4444 !important; color: #ffffff !important; border-color: #dc2626 !important; }
+
+/* COE Color Classes - High Contrast & Deep Colors */
+.coe-color-blue { background-color: #eff6ff; border-color: #1d4ed8 !important; }
+.coe-color-emerald { background-color: #ecfdf5; border-color: #047857 !important; }
+.coe-color-amber { background-color: #fffbeb; border-color: #b45309 !important; }
+.coe-color-purple { background-color: #faf5ff; border-color: #6d28d9 !important; }
+.coe-color-rose { background-color: #fff1f2; border-color: #be123c !important; }
+.coe-color-indigo { background-color: #eef2ff; border-color: #4338ca !important; }
+.coe-color-none { background-color: #ffffff; border-color: #374151 !important; }
+
+/* Legend Swatches - Solid Deep Colors */
+.legend-swatch.coe-color-blue { background-color: #1d4ed8 !important; }
+.legend-swatch.coe-color-emerald { background-color: #047857 !important; }
+.legend-swatch.coe-color-amber { background-color: #b45309 !important; }
+.legend-swatch.coe-color-purple { background-color: #6d28d9 !important; }
+.legend-swatch.coe-color-rose { background-color: #be123c !important; }
+.legend-swatch.coe-color-indigo { background-color: #4338ca !important; }
+.legend-swatch.coe-color-none { background-color: #374151 !important; }
+
+/* Dark mode overrides for CoE Colors */
+:deep(.dark) .coe-color-blue { background-color: rgba(59, 130, 246, 0.2); }
+:deep(.dark) .coe-color-emerald { background-color: rgba(16, 185, 129, 0.2); }
+:deep(.dark) .coe-color-amber { background-color: rgba(245, 158, 11, 0.2); }
+:deep(.dark) .coe-color-purple { background-color: rgba(168, 85, 247, 0.2); }
+:deep(.dark) .coe-color-rose { background-color: rgba(244, 63, 94, 0.2); }
+:deep(.dark) .coe-color-indigo { background-color: rgba(99, 102, 241, 0.2); }
 
 .legend-swatch {
     display: block;

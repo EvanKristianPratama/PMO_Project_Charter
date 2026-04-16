@@ -24,23 +24,58 @@ class ItBuildingBlockService
     public function getItInitiativeOptions(): Collection
     {
         return MstInitiative::query()
-            ->with(['coe:id,name', 'organization:id,name,groub_id', 'latestStatusImplementation'])
+            ->with([
+                'coe:id,name', 
+                'organization:id,name,groub_id', 
+                'mappedProjects.pcStatusImplementations' => fn($q) => $query = $q->orderBy('year', 'desc')->orderByRaw("CASE 
+                    WHEN month = 'Desember' THEN 12
+                    WHEN month = 'November' THEN 11
+                    WHEN month = 'Oktober' THEN 10
+                    WHEN month = 'September' THEN 9
+                    WHEN month = 'Agustus' THEN 8
+                    WHEN month = 'Juli' THEN 7
+                    WHEN month = 'Juni' THEN 6
+                    WHEN month = 'Mei' THEN 5
+                    WHEN month = 'April' THEN 4
+                    WHEN month = 'Maret' THEN 3
+                    WHEN month = 'Februari' THEN 2
+                    WHEN month = 'Januari' THEN 1
+                    ELSE 0 END DESC")->orderBy('id', 'desc')
+            ])
             ->where('tipe_initiative', 2)
             ->orderBy('code')
             ->orderBy('name')
             ->get(['id', 'code', 'name', 'description', 'coe_id', 'business_unit', 'tipe_initiative'])
-            ->map(fn (MstInitiative $initiative): array => [
-                'id' => (int) $initiative->id,
-                'code' => $initiative->code,
-                'name' => $initiative->name,
-                'description' => $initiative->description,
-                'coe_id' => (int) $initiative->coe_id,
-                'coe_name' => $initiative->coe?->name ?: 'No COE',
-                'business_unit' => $initiative->organization?->name ?: '-',
-                'groub_id' => $initiative->organization?->groub_id,
-                'implementation_status' => $initiative->latestStatusImplementation?->review_status ?: null,
-                'tipe_initiative' => (int) $initiative->tipe_initiative,
-            ]);
+            ->map(function (MstInitiative $initiative): array {
+                // Ambil status terbaru dari semua proyek yang dimapping
+                $latestStatus = $initiative->mappedProjects
+                    ->flatMap(fn($project) => $project->pcStatusImplementations)
+                    ->sortByDesc(fn($status) => $status->year . str_pad($this->monthToNumber($status->month), 2, '0', STR_PAD_LEFT) . str_pad($status->id, 10, '0', STR_PAD_LEFT))
+                    ->first();
+
+                return [
+                    'id' => (int) $initiative->id,
+                    'code' => $initiative->code,
+                    'name' => $initiative->name,
+                    'description' => $initiative->description,
+                    'coe_id' => (int) $initiative->coe_id,
+                    'coe_name' => $initiative->coe?->name ?: 'No COE',
+                    'business_unit' => $initiative->organization?->name ?: '-',
+                    'groub_id' => $initiative->organization?->groub_id,
+                    'implementation_status' => $latestStatus?->status ?: null,
+                    'tipe_initiative' => (int) $initiative->tipe_initiative,
+                ];
+            });
+    }
+
+    private function monthToNumber(?string $month): int
+    {
+        return match (trim((string)$month)) {
+            'Januari' => 1, 'Februari' => 2, 'Maret' => 3, 'April' => 4,
+            'Mei' => 5, 'Juni' => 6, 'Juli' => 7, 'Agustus' => 8,
+            'September' => 9, 'Oktober' => 10, 'November' => 11, 'Desember' => 12,
+            default => 0,
+        };
     }
 
     public function getDigitalInitiativeOptions(): Collection

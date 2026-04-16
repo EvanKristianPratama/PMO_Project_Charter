@@ -70,6 +70,7 @@ class StrategicPillarPageService
                 'initiative.organization:id,name',
                 'initiative.mapSc:id,sc_id,initiative_id',
                 'initiative.mappedProjects:id',
+                'initiative.latestStatusImplementation',
                 'theme:id,name,idGoal',
             ])
             ->whereHas('initiative', fn ($query) => $query->where('tipe_initiative', $initiativeType))
@@ -104,7 +105,7 @@ class StrategicPillarPageService
     {
         return MstInitiative::query()
             ->select('id', 'code', 'name', 'business_unit', 'tipe_initiative', 'source')
-            ->with('organization:id,name')
+            ->with(['organization:id,name', 'latestStatusImplementation'])
             ->orderBy('code')
             ->get()
             ->map(fn (MstInitiative $initiative): array => [
@@ -113,6 +114,7 @@ class StrategicPillarPageService
                 'name' => $initiative->name,
                 'tipe_initiative' => $initiative->tipe_initiative,
                 'source' => $initiative->source ? (int) $initiative->source : null,
+                'implementation_status' => $initiative->latestStatusImplementation?->review_status,
                 'organization' => $initiative->organization
                     ? ['id' => $initiative->organization->id, 'name' => $initiative->organization->name]
                     : null,
@@ -137,6 +139,7 @@ class StrategicPillarPageService
     {
         return MstInitiative::query()
             ->select('id', 'code', 'name', 'source')
+            ->with('latestStatusImplementation')
             ->where('tipe_initiative', $initiativeType)
             ->whereHas('taggings', function ($query) use ($pilarId): void {
                 $this->applyTaggingPilarFilter($query, $pilarId);
@@ -148,6 +151,7 @@ class StrategicPillarPageService
                 'code' => $initiative->code,
                 'name' => $initiative->name,
                 'source' => $initiative->source ? (int) $initiative->source : null,
+                'implementation_status' => $initiative->latestStatusImplementation?->review_status,
             ])
             ->values();
     }

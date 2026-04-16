@@ -163,6 +163,7 @@ const normalizeInitiative = (initiative, fallbackKey) => {
 
     // Ambil status dari atribut langsung atau dari relasi latest_status_implementation
     const implementationStatus = initiative?.implementation_status 
+        ?? initiative?.latest_status_implementation?.review_status
         ?? initiative?.latest_status_implementation?.status 
         ?? initiative?.latest_status_implementation?.implementation_status;
 

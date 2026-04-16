@@ -44,9 +44,61 @@ const DEFAULT_INITIATIVE_COLUMN_COUNT = 6;
 const initiativeColumnOptions = [3, 4, 5, 6];
 const initiativeColumnCount = ref(DEFAULT_INITIATIVE_COLUMN_COUNT);
 const showBusinessUnit = ref(false);
+const showStatusColors = ref(true);
 const showInitiativeCode = ref(true);
 const selectedOrganization = ref('');
 const selectedCoe = ref('');
+const selectedStatus = ref('');
+
+const statusDesiredOrder = ['On Track', 'Delayed', 'At Risk', 'Completed', 'Done', 'Not Started'];
+
+const getStatusColorClass = (status) => {
+    const normalized = String(status ?? '').trim().toLowerCase();
+    if (normalized === 'on track') return 'status-color-ontrack';
+    if (normalized === 'done' || normalized === 'completed') return 'status-color-done';
+    if (normalized === 'at risk') return 'status-color-atrisk';
+    if (normalized === 'delayed') return 'status-color-delayed';
+    if (normalized === 'not started') return 'status-color-notstarted';
+    return '';
+};
+
+const statusLegend = computed(() => {
+    const stats = {};
+    statusDesiredOrder.forEach(label => {
+        stats[label] = 0;
+    });
+
+    displayGroups.value.forEach((group) => {
+        group.initiatives.forEach((initiative) => {
+            const label = statusDesiredOrder.find(
+                s => s.toLowerCase() === String(initiative.implementation_status ?? '').trim().toLowerCase()
+            ) || (initiative.implementation_status ? 'Other' : null);
+            
+            if (label && stats.hasOwnProperty(label)) {
+                stats[label]++;
+            } else if (label === 'Other') {
+                if (!stats['Other']) stats['Other'] = 0;
+                stats['Other']++;
+            }
+        });
+    });
+
+    const legend = statusDesiredOrder.map((label) => ({
+        label,
+        class: getStatusColorClass(label),
+        count: stats[label],
+    })).filter(item => item.count > 0);
+
+    if (stats['Other'] > 0) {
+        legend.push({
+            label: 'Other',
+            class: '',
+            count: stats['Other']
+        });
+    }
+
+    return legend;
+});
 
 const organizationOptions = computed(() => {
     const orgs = new Set();
@@ -68,8 +120,11 @@ const displayGroups = computed(() => {
         const matchesOrg = !selectedOrganization.value || initiative.business_unit === selectedOrganization.value;
         const coeName = normalizeCoeName(initiative.coe_name || initiative.coe?.name);
         const matchesCoe = !selectedCoe.value || coeName === selectedCoe.value;
+        
+        const statusLabel = String(initiative.implementation_status ?? '').trim();
+        const matchesStatus = !selectedStatus.value || statusLabel.toLowerCase() === selectedStatus.value.toLowerCase();
 
-        if (isItInitiative && matchesOrg && matchesCoe) {
+        if (isItInitiative && matchesOrg && matchesCoe && matchesStatus) {
             if (!coeMap.has(coeName)) {
                 coeMap.set(coeName, []);
             }
@@ -126,6 +181,8 @@ const getCoeColorClass = (coeName) => {
     if (name === 'Advance Cloud') return 'coe-color-emerald';
     if (name === 'RPA') return 'coe-color-amber';
     if (name === 'Robotics') return 'coe-color-purple';
+    if (name === 'AI / Adv. Analytics') return 'coe-color-rose';
+    if (name === 'CoE Not Identified') return 'coe-color-none';
     return 'coe-color-none';
 };
 
@@ -133,7 +190,31 @@ const getCoeColorClass = (coeName) => {
 
 <template>
     <div class="space-y-4">
-        <div v-if="displayGroups.length > 0" class="space-y-4">
+        <template v-if="displayGroups.length > 0">
+            <!-- Legend Section -->
+            <div class="space-y-2.5">
+                <!-- Status Implementation Legend -->
+                <div v-if="showStatusColors" class="flex flex-wrap items-center gap-x-4 gap-y-2 dark:border-white/5">
+                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider">Implementation Status (Projects):</span>
+                    <div
+                        v-for="status in statusLegend"
+                        :key="`status-legend-${status.label}`"
+                        class="flex items-center gap-1.5 cursor-pointer select-none transition-opacity"
+                        :class="{ 'opacity-40': selectedStatus && selectedStatus !== status.label }"
+                        @click="selectedStatus = selectedStatus === status.label ? '' : status.label"
+                        :title="`Filter: ${status.label}`"
+                    >
+                        <span
+                            class="h-3 w-3 rounded-sm shadow-sm legend-swatch"
+                            :class="status.class"
+                        ></span>
+                        <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                            {{ status.label }} <span class="text-slate-400 dark:text-slate-500 font-medium">({{ status.count }})</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
             <!-- Toolbar -->
             <div class="flex items-center justify-start">
                 <div class="initiative-view-switch">
@@ -145,6 +226,11 @@ const getCoeColorClass = (coeName) => {
                     <select v-model="selectedCoe" class="initiative-view-select mr-2">
                         <option value="">Semua CoE</option>
                         <option v-for="coe in ['IoT', 'Advance Cloud', 'RPA', 'Robotics', 'AI / Adv. Analytics', 'CoE Not Identified']" :key="coe" :value="coe">{{ coe }}</option>
+                    </select>
+
+                    <select v-model="selectedStatus" class="initiative-view-select mr-2">
+                        <option value="">Semua Status</option>
+                        <option v-for="st in statusDesiredOrder" :key="st" :value="st">{{ st }}</option>
                     </select>
 
                     <button
@@ -162,6 +248,19 @@ const getCoeColorClass = (coeName) => {
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
                         </svg>
                         <span>Business Unit</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="bu-toggle-btn"
+                        :class="{ 'bu-toggle-btn--active': showStatusColors }"
+                        title="Tampilkan/Sembunyikan Warna Status Implementasi"
+                        @click="showStatusColors = !showStatusColors"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                        </svg>
+                        <span>Status Impl.</span>
                     </button>
 
                     <button
@@ -222,7 +321,10 @@ const getCoeColorClass = (coeName) => {
                                             <div class="absolute top-full left-1/2 z-50 mt-1 hidden -translate-x-1/2 w-max max-w-sm bg-white border border-slate-800 shadow-sm px-1.5 py-1 text-[9px] italic group-hover:block dark:bg-slate-800">
                                                 {{ initiative.name }}
                                             </div>
-                                            <span v-if="showInitiativeCode && initiative.code" class="initiative-box__code">
+                                            <span v-if="showInitiativeCode && initiative.code" 
+                                                class="initiative-box__code"
+                                                :class="showStatusColors ? getStatusColorClass(initiative.implementation_status) : ''"
+                                            >
                                                 {{ initiative.code }}
                                             </span>
                                             <span class="initiative-box__name" :class="{ 'initiative-box__name--full': !showInitiativeCode || !initiative.code }">
@@ -237,7 +339,7 @@ const getCoeColorClass = (coeName) => {
                     </table>
                 </div>
             </section>
-        </div>
+        </template>
 
         <section v-else class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-white/15 dark:bg-[#171717]">
             <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Tidak ada data inisiatif untuk kriteria ini.</p>
@@ -279,7 +381,26 @@ const getCoeColorClass = (coeName) => {
 .coe-color-emerald { background-color: #ecfdf5; color: #047857; border-left: 4px solid #047857 !important; }
 .coe-color-amber { background-color: #fffbeb; color: #b45309; border-left: 4px solid #b45309 !important; }
 .coe-color-purple { background-color: #faf5ff; color: #6d28d9; border-left: 4px solid #6d28d9 !important; }
+.coe-color-rose { background-color: #fff1f2; color: #be123c; border-left: 4px solid #be123c !important; }
+.coe-color-indigo { background-color: #eef2ff; color: #4338ca; border-left: 4px solid #4338ca !important; }
 .coe-color-none { background-color: #ffffff; color: #475569; }
+
+/* Status colors consistent with IT Initiative */
+.status-color-ontrack { background-color: #10b981 !important; color: #ffffff !important; border-color: #059669 !important; }
+.status-color-done { background-color: #3b82f6 !important; color: #ffffff !important; border-color: #2563eb !important; }
+.status-color-atrisk { background-color: #f59e0b !important; color: #ffffff !important; border-color: #d97706 !important; }
+.status-color-delayed { background-color: #f43f5e !important; color: #ffffff !important; border-color: #e11d48 !important; }
+.status-color-notstarted { background-color: #64748b !important; color: #ffffff !important; border-color: #475569 !important; }
+
+.legend-swatch {
+    display: block;
+    width: 12px;
+    height: 12px;
+    min-width: 12px;
+    min-height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
 
 .initiative-view-switch { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 10px; border-radius: 12px; background: transparent; padding: 2px; }
 .initiative-view-switch__label { font-size: 11px; font-weight: 700; color: #475569; white-space: nowrap; }
@@ -291,4 +412,3 @@ const getCoeColorClass = (coeName) => {
 .bu-toggle-btn--active { background: #0f6fb7; border-color: #0f6fb7; color: #ffffff; }
 .bu-toggle-btn--active:hover { background: #0d5ea1; border-color: #0d5ea1; }
 </style>
-
