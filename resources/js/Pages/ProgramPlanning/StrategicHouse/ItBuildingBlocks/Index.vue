@@ -2,11 +2,6 @@
     <component :is="pageContainer" v-bind="pageContainerProps">
         <div class="space-y-6 animate-fade-in-up">
             <div class="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                    <h1 class="text-2xl font-bold text-slate-900 dark:text-white">IT Enabler</h1>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">Kelola mapping IT Building Blocks dan Center of Excellence.</p>
-                </div>
-
                 <div class="flex flex-wrap items-center gap-2">
                     <button
                         type="button"

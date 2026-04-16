@@ -520,7 +520,7 @@ class StrategicHousePageService
             'coe_name' => $initiative->coe?->name,
             'label' => trim(collect([$initiative->code, $initiative->name])->filter()->implode(' - ')),
             'business_unit' => $initiative->organization?->name,
-            'implementation_status' => $initiative->latestStatusImplementation?->status,
+            'implementation_status' => $initiative->latestStatusImplementation?->review_status,
             'source' => !is_null($initiative->source) ? (int) $initiative->source : null,
         ];
     }

@@ -123,13 +123,13 @@ const desiredLegendOrder = [
     'RPA',
     'Robotics',
     'AI / Adv. Analytics',
-    'Coe Not Identified',
+    'CoE Not Identified',
 ];
 
 const normalizeCoeName = (rawName) => {
     let name = String(rawName ?? '').trim();
 
-    if (!name || name === '-' || name.toUpperCase() === 'NO COE') return 'Coe Not Identified';
+    if (!name || name === '-' || name.toUpperCase() === 'NO COE') return 'CoE Not Identified';
 
     const upper = name.toUpperCase();
 
@@ -150,7 +150,7 @@ const getCoeColorClass = (coeName) => {
     if (name === 'RPA') return 'coe-color-amber';
     if (name === 'Robotics') return 'coe-color-purple';
     if (name === 'AI / Adv. Analytics') return 'coe-color-rose';
-    if (name === 'Coe Not Identified') return 'coe-color-none';
+    if (name === 'CoE Not Identified') return 'coe-color-none';
 
     return 'coe-color-none';
 };
@@ -161,6 +161,11 @@ const normalizeInitiative = (initiative, fallbackKey) => {
     const label = String(initiative?.label ?? [code, name].filter(Boolean).join(' - ')).trim();
     const coeName = normalizeCoeName(initiative?.coe_name || initiative?.coe?.name);
 
+    // Ambil status dari atribut langsung atau dari relasi latest_status_implementation
+    const implementationStatus = initiative?.implementation_status 
+        ?? initiative?.latest_status_implementation?.status 
+        ?? initiative?.latest_status_implementation?.implementation_status;
+
     return {
         id: initiative?.id ?? fallbackKey,
         code,
@@ -168,7 +173,7 @@ const normalizeInitiative = (initiative, fallbackKey) => {
         label: label !== '' ? label : '-',
         coe_name: coeName,
         business_unit: initiative?.business_unit,
-        implementation_status: initiative?.implementation_status,
+        implementation_status: implementationStatus,
     };
 };
 
@@ -316,7 +321,7 @@ const coeLegend = computed(() => {
                 if (stats[name] !== undefined) {
                     stats[name] += 1;
                 } else {
-                    stats['Coe Not Identified'] += 1;
+                    stats['CoE Not Identified'] += 1;
                 }
             });
         });
@@ -342,21 +347,47 @@ const initiativeDisplayName = (initiative) => {
 
 <template>
     <div class="mb-4 space-y-4">
-        <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <div v-for="coe in coeLegend" :key="`coe-legend-${coe.id}`" class="flex items-center gap-1.5">
-                <span class="h-3 w-3 rounded-sm shadow-sm legend-swatch" :class="getCoeColorClass(coe.name)"></span>
-                <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">
-                    {{ coe.name }} <span class="text-slate-400 dark:text-slate-500 font-medium">({{ coe.count
-                    }})</span>
-                </span>
+        <div class="space-y-2.5">
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+                <div v-for="coe in coeLegend" :key="`coe-legend-${coe.id}`" class="flex items-center gap-1.5">
+                    <span class="h-3 w-3 rounded-sm shadow-sm legend-swatch" :class="getCoeColorClass(coe.name)"></span>
+                    <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                        {{ coe.name }} <span class="text-slate-400 dark:text-slate-500 font-medium">({{ coe.count
+                        }})</span>
+                    </span>
+                </div>
+
+                <!-- Total Overall -->
+                <div class="flex items-center gap-1.5 border-l border-slate-300 pl-4 ml-1 dark:border-white/10">
+                    <span class="text-[11px] font-bold text-slate-800 dark:text-slate-200">
+                        Total Digital Initiatives <span class="text-slate-500 dark:text-slate-400 font-medium">({{
+                            totalOverallInitiatives }})</span>
+                    </span>
+                </div>
             </div>
 
-            <!-- Total Overall -->
-            <div class="flex items-center gap-1.5 border-l border-slate-300 pl-4 ml-1 dark:border-white/10">
-                <span class="text-[11px] font-bold text-slate-800 dark:text-slate-200">
-                    Total Digital Initiatives <span class="text-slate-500 dark:text-slate-400 font-medium">({{
-                        totalOverallInitiatives }})</span>
-                </span>
+            <!-- Status Implementation Legend -->
+            <div
+                v-if="showStatusColors"
+                class="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 border-t border-slate-100 dark:border-white/5"
+            >
+                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider">Implementation Status (November - Desember 2025):</span>
+                <div
+                    v-for="status in statusLegend"
+                    :key="`status-legend-${status.label}`"
+                    class="flex items-center gap-1.5 cursor-pointer select-none transition-opacity"
+                    :class="{ 'opacity-40': selectedStatus && selectedStatus !== status.label }"
+                    @click="selectedStatus = selectedStatus === status.label ? '' : status.label"
+                    :title="`Filter: ${status.label}`"
+                >
+                    <span
+                        class="h-3 w-3 rounded-sm shadow-sm"
+                        :class="status.class"
+                    ></span>
+                    <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                        {{ status.label }} <span class="text-slate-400 dark:text-slate-500 font-medium">({{ status.count }})</span>
+                    </span>
+                </div>
             </div>
         </div>
         <div class="mockup-header flex items-center justify-between">
