@@ -46,11 +46,34 @@ const initiativeColumnCount = ref(DEFAULT_INITIATIVE_COLUMN_COUNT);
 const showBusinessUnit = ref(false);
 const showStatusColors = ref(true);
 const showInitiativeCode = ref(true);
-const selectedOrganization = ref('');
-const selectedCoe = ref('');
 const selectedStatus = ref('');
+const selectedMonth = ref('Desember');
 
-const statusDesiredOrder = ['On Track', 'Delayed', 'At Risk', 'Completed', 'Done', 'Not Started'];
+const monthsOrder = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+];
+
+const availableMonths = computed(() => {
+    const monthSet = new Set();
+    props.items.forEach(initiative => {
+        if (initiative.statuses && Array.isArray(initiative.statuses)) {
+            initiative.statuses.forEach(s => {
+                if (s.month) monthSet.add(s.month);
+            });
+        }
+    });
+    
+    return Array.from(monthSet).sort((a, b) => monthsOrder.indexOf(a) - monthsOrder.indexOf(b));
+});
+
+const getInitiativeStatusByMonth = (initiative, month) => {
+    if (!initiative.statuses || !Array.isArray(initiative.statuses)) {
+        return initiative.implementation_status;
+    }
+    const found = initiative.statuses.find(s => s.month === month);
+    return found ? found.status : null;
+};
 
 const getStatusColorClass = (status) => {
     const normalized = String(status ?? '').trim().toLowerCase();
@@ -62,25 +85,27 @@ const getStatusColorClass = (status) => {
     return '';
 };
 
+const statusDesiredOrder = ['On Track', 'Delayed', 'At Risk', 'Completed', 'Done', 'Not Started'];
+
 const statusLegend = computed(() => {
     const stats = {};
     statusDesiredOrder.forEach(label => {
         stats[label] = 0;
     });
+    stats['Other'] = 0;
 
-    displayGroups.value.forEach((group) => {
-        group.initiatives.forEach((initiative) => {
-            const label = statusDesiredOrder.find(
-                s => s.toLowerCase() === String(initiative.implementation_status ?? '').trim().toLowerCase()
-            ) || (initiative.implementation_status ? 'Other' : null);
-            
-            if (label && stats.hasOwnProperty(label)) {
-                stats[label]++;
-            } else if (label === 'Other') {
-                if (!stats['Other']) stats['Other'] = 0;
-                stats['Other']++;
-            }
-        });
+    // Kalkulasi status berdasarkan seluruh inisiatif di bulan yang dipilih (tanpa filter status)
+    props.items.forEach((initiative) => {
+        if (Number(initiative.tipe_initiative) !== 2) return;
+        
+        const status = getInitiativeStatusByMonth(initiative, selectedMonth.value);
+        if (!status) return;
+
+        const label = statusDesiredOrder.find(
+            s => s.toLowerCase() === String(status).trim().toLowerCase()
+        ) || 'Other';
+        
+        stats[label]++;
     });
 
     const legend = statusDesiredOrder.map((label) => ({
@@ -100,42 +125,37 @@ const statusLegend = computed(() => {
     return legend;
 });
 
-const organizationOptions = computed(() => {
-    const orgs = new Set();
-    props.items.forEach(ini => {
-        if (ini.business_unit && ini.business_unit !== '-') {
-            orgs.add(ini.business_unit);
-        }
-    });
-    return Array.from(orgs).sort();
+const totalOverallInitiatives = computed(() => {
+    return statusLegend.value.reduce((sum, item) => sum + item.count, 0);
 });
 
 const displayGroups = computed(() => {
     const coeMap = new Map();
     const UNIDENTIFIED = 'CoE Not Identified';
 
-    // 1. Grouping dan Filter
+    // Grouping dan Filter
     props.items.forEach(initiative => {
         const isItInitiative = Number(initiative.tipe_initiative) === 2;
-        const matchesOrg = !selectedOrganization.value || initiative.business_unit === selectedOrganization.value;
-        const coeName = normalizeCoeName(initiative.coe_name || initiative.coe?.name);
-        const matchesCoe = !selectedCoe.value || coeName === selectedCoe.value;
-        
-        const statusLabel = String(initiative.implementation_status ?? '').trim();
+        const currentStatus = getInitiativeStatusByMonth(initiative, selectedMonth.value);
+        const statusLabel = String(currentStatus ?? '').trim();
         const matchesStatus = !selectedStatus.value || statusLabel.toLowerCase() === selectedStatus.value.toLowerCase();
 
-        if (isItInitiative && matchesOrg && matchesCoe && matchesStatus) {
+        if (isItInitiative && matchesStatus) {
+            const coeName = normalizeCoeName(initiative.coe_name || initiative.coe?.name);
             if (!coeMap.has(coeName)) {
                 coeMap.set(coeName, []);
             }
-            coeMap.get(coeName).push(initiative);
+            coeMap.get(coeName).push({
+                ...initiative,
+                display_status: currentStatus
+            });
         }
     });
 
-    // 2. Ambil semua CoE yang ditemukan di data
+    // Ambil semua CoE yang ditemukan di data
     const foundCoeNames = Array.from(coeMap.keys());
 
-    // 3. Map ke format tampilan dan sort initiatives di dalam tiap group
+    // Map ke format tampilan dan sort initiatives di dalam tiap group
     const coeGroups = foundCoeNames.map(name => {
         const initiatives = coeMap.get(name) || [];
         return {
@@ -149,7 +169,7 @@ const displayGroups = computed(() => {
         };
     });
 
-    // 4. Sort urutan group (baris CoE) berdasarkan kode initiative terkecil di dalamnya
+    // Sort urutan group (baris CoE) berdasarkan kode initiative terkecil di dalamnya
     coeGroups.sort((a, b) => {
         if (a.name === UNIDENTIFIED && b.name !== UNIDENTIFIED) return 1;
         if (b.name === UNIDENTIFIED && a.name !== UNIDENTIFIED) return -1;
@@ -157,7 +177,6 @@ const displayGroups = computed(() => {
         const codeA = a.initiatives.length > 0 ? String(a.initiatives[0]?.code ?? '') : '';
         const codeB = b.initiatives.length > 0 ? String(b.initiatives[0]?.code ?? '') : '';
         
-        // Handle empty codes to be placed last or evaluated properly
         if (codeA === '' && codeB !== '') return 1;
         if (codeB === '' && codeA !== '') return -1;
 
@@ -170,7 +189,7 @@ const displayGroups = computed(() => {
 const buildInitiativeColumns = (initiatives = [], columnCount = initiativeColumnCount.value) => {
     if (!initiatives.length) return { items: [], rowCount: 0 };
     return { 
-        items: initiatives, // Sudah diurutkan di displayGroups
+        items: initiatives,
         rowCount: Math.ceil(initiatives.length / Number(columnCount)) 
     };
 };
@@ -212,20 +231,21 @@ const getCoeColorClass = (coeName) => {
                             {{ status.label }} <span class="text-slate-400 dark:text-slate-500 font-medium">({{ status.count }})</span>
                         </span>
                     </div>
+
+                    <!-- Total Overall -->
+                    <div class="flex items-center gap-1.5 border-l border-slate-300 pl-4 ml-1 dark:border-white/10">
+                        <span class="text-[10px] font-bold text-slate-800 dark:text-slate-200">
+                            Total IT Initiatives <span class="text-slate-500 dark:text-slate-400 font-medium">({{ totalOverallInitiatives }})</span>
+                        </span>
+                    </div>
                 </div>
             </div>
 
             <!-- Toolbar -->
             <div class="flex items-center justify-start">
                 <div class="initiative-view-switch">
-                    <select v-model="selectedOrganization" class="initiative-view-select mr-2">
-                        <option value="">Semua Organisasi</option>
-                        <option v-for="org in organizationOptions" :key="org" :value="org">{{ org }}</option>
-                    </select>
-
-                    <select v-model="selectedCoe" class="initiative-view-select mr-2">
-                        <option value="">Semua CoE</option>
-                        <option v-for="coe in ['IoT', 'Advance Cloud', 'RPA', 'Robotics', 'AI / Adv. Analytics', 'CoE Not Identified']" :key="coe" :value="coe">{{ coe }}</option>
+                    <select v-model="selectedMonth" class="initiative-view-select mr-2">
+                        <option v-for="month in availableMonths" :key="month" :value="month">{{ month }}</option>
                     </select>
 
                     <select v-model="selectedStatus" class="initiative-view-select mr-2">
@@ -323,7 +343,7 @@ const getCoeColorClass = (coeName) => {
                                             </div>
                                             <span v-if="showInitiativeCode && initiative.code" 
                                                 class="initiative-box__code"
-                                                :class="showStatusColors ? getStatusColorClass(initiative.implementation_status) : ''"
+                                                :class="showStatusColors ? getStatusColorClass(initiative.display_status) : ''"
                                             >
                                                 {{ initiative.code }}
                                             </span>

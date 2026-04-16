@@ -63,6 +63,13 @@ class ItBuildingBlockService
                     'business_unit' => $initiative->organization?->name ?: '-',
                     'groub_id' => $initiative->organization?->groub_id,
                     'implementation_status' => $latestStatus?->status ?: null,
+                    'statuses' => $initiative->mappedProjects
+                        ->flatMap(fn($project) => $project->pcStatusImplementations)
+                        ->map(fn($s) => [
+                            'month' => $s->month,
+                            'year' => $s->year,
+                            'status' => $s->status,
+                        ])->values()->all(),
                     'tipe_initiative' => (int) $initiative->tipe_initiative,
                 ];
             });
