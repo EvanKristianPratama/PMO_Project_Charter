@@ -89,7 +89,7 @@ class InitiativeSupportService
                     'it_id' => $itId,
                     'notes' => $note !== '' ? $note : null,
                     'created_at' => $timestamp,
-                    'updated-at' => $timestamp,
+                    'updated_at' => $timestamp,
                 ];
             }
         }
