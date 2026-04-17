@@ -81,6 +81,18 @@
                     type="button"
                     class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
                     :class="
+                        viewMode === 'initiative-support'
+                            ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
+                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                    "
+                    @click="viewMode = 'initiative-support'"
+                >
+                    Initiative Support
+                </button>
+                <button
+                    type="button"
+                    class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
+                    :class="
                         viewMode === 'roadmap'
                             ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                             : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
@@ -170,6 +182,20 @@
                     </div>
 
                     <div
+                        v-else-if="viewMode === 'initiative-support'"
+                        key="initiative-support"
+                    >
+                        <StrategicHouseInitiativeSupportPage
+                            :embedded="true"
+                            :groups="initiativeSupportGroups"
+                            :digital-initiative-options="
+                                initiativeSupportDigitalOptions
+                            "
+                            :it-initiative-options="initiativeSupportItOptions"
+                        />
+                    </div>
+
+                    <div
                         v-else-if="viewMode === 'it-building-blocs'"
                         key="it-building-blocs"
                     >
@@ -247,6 +273,7 @@ import DualGrowth from "@/Components/StrategicHouse/DualGrowth.vue";
 import DualGrowthFull from "@/Components/StrategicHouse/DualGrowthFull.vue";
 import DigitalBuildingBlock from "@/Components/ItBuildingBlocks/DigitalBuildingBlock.vue";
 import ItBuildingBlocks from "@/Components/ItBuildingBlocks/ItBuildingBlock.vue";
+import StrategicHouseInitiativeSupportPage from "@/Pages/ProgramPlanning/StrategicHouse/InitiativeSupport/Index.vue";
 import StrategicHouseItBuildingBlocksPage from "@/Pages/ProgramPlanning/StrategicHouse/ItBuildingBlocks/Index.vue";
 import StrategicHouseInitiativeRelationPage from "@/Pages/ProgramPlanning/StrategicHouse/InitiativeRelation/Index.vue";
 import StrategicHouseStrategicPillarPage from "@/Pages/ProgramPlanning/StrategicHouse/StrategicPillar/Index.vue";
@@ -315,6 +342,18 @@ const props = defineProps({
         default: () => [],
     },
     itInitiativeOptions: {
+        type: Array,
+        default: () => [],
+    },
+    initiativeSupportGroups: {
+        type: Array,
+        default: () => [],
+    },
+    initiativeSupportDigitalOptions: {
+        type: Array,
+        default: () => [],
+    },
+    initiativeSupportItOptions: {
         type: Array,
         default: () => [],
     },

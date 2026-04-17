@@ -1,0 +1,963 @@
+<script setup>
+import { computed, reactive, ref, watch } from 'vue';
+import { router } from '@inertiajs/vue3';
+import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
+
+const route = useRouteHelper();
+const emit = defineEmits(['cancel-add-support']);
+
+const props = defineProps({
+    groups: {
+        type: Array,
+        default: () => [],
+    },
+    editable: {
+        type: Boolean,
+        default: false,
+    },
+    digitalOptions: {
+        type: Array,
+        default: () => [],
+    },
+    itOptions: {
+        type: Array,
+        default: () => [],
+    },
+});
+
+const EMPTY_NOTE_LABEL = 'Belum ada catatan dukungan.';
+
+const addForm = reactive({
+    digital_ids: [],
+    it_ids: [],
+    notes: '',
+});
+
+const saveProcessing = ref(false);
+const deleteProcessing = ref(false);
+const activeModal = ref('');
+const isModalVisible = ref(false);
+const modalError = ref('');
+const shouldExitEditOnCancel = ref(false);
+const deleteTarget = reactive({
+    label: '',
+    mappingIds: [],
+    digitalCount: 0,
+    itCount: 0,
+});
+
+const createMappingKey = (digitalId, itId) => {
+    return `${Number(digitalId ?? 0)}:${Number(itId ?? 0)}`;
+};
+
+const firstErrorMessage = (errors = {}) => {
+    return Object.values(errors)
+        .flat()
+        .map((value) => String(value ?? '').trim())
+        .find((value) => value !== '');
+};
+
+const normalizeTechCapability = (value) => {
+    const name = String(value ?? '').trim();
+
+    if (name === '' || name.toUpperCase() === 'NO COE') {
+        return 'No CoE';
+    }
+
+    return name;
+};
+
+const stripInitiativePrefix = (name, code) => {
+    const rawName = String(name ?? '').trim();
+    const rawCode = String(code ?? '').trim().replace(/#/g, '');
+
+    if (rawName === '' || rawCode === '') {
+        return rawName;
+    }
+
+    const escapedCode = rawCode.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const pattern = new RegExp(`^\\s*(\\[\\s*)?${escapedCode}(\\s*\\])?\\s*[-|.:)]?\\s*`, 'i');
+    const cleanedName = rawName.replace(pattern, '').trim();
+
+    return cleanedName !== '' ? cleanedName : rawName;
+};
+
+const initiativeDisplayCode = (initiative) => {
+    return String(initiative?.code ?? '').trim().replace(/#/g, '');
+};
+
+const initiativeDisplayName = (initiative) => {
+    const code = initiativeDisplayCode(initiative);
+    const name = stripInitiativePrefix(initiative?.name ?? '', code);
+
+    return name || '-';
+};
+
+const initiativeOptionLabel = (initiative) => {
+    const code = initiativeDisplayCode(initiative);
+    const name = initiativeDisplayName(initiative);
+
+    if (code !== '' && name !== '-') {
+        return `[${code}] ${name}`;
+    }
+
+    return name !== '-' ? name : code || '-';
+};
+
+const initiativeSortKey = (initiative) => {
+    return [
+        normalizeTechCapability(initiative?.coe_name),
+        initiativeDisplayCode(initiative),
+        initiativeDisplayName(initiative),
+    ].join('::').toLowerCase();
+};
+
+const existingMappingKeys = computed(() => {
+    return new Set(
+        props.groups.flatMap((group) => {
+            return (group?.mappings ?? []).map((mapping) => {
+                return createMappingKey(mapping?.digital_id, mapping?.it_id);
+            });
+        }),
+    );
+});
+
+const hasGroups = computed(() => props.groups.length > 0);
+
+const totalDigitalCount = computed(() => {
+    return props.groups.reduce((sum, group) => sum + (group?.digital_initiatives?.length ?? 0), 0);
+});
+
+const totalItCount = computed(() => {
+    return props.groups.reduce((sum, group) => sum + (group?.it_initiatives?.length ?? 0), 0);
+});
+
+const selectedDigitalInitiatives = computed(() => {
+    return addForm.digital_ids
+        .map((initiativeId) => {
+            return props.digitalOptions.find((option) => Number(option?.id) === Number(initiativeId)) ?? {
+                id: Number(initiativeId),
+                code: '',
+                name: `Digital Initiative ${initiativeId}`,
+            };
+        });
+});
+
+const selectedItInitiatives = computed(() => {
+    return addForm.it_ids
+        .map((initiativeId) => {
+            return props.itOptions.find((option) => Number(option?.id) === Number(initiativeId)) ?? {
+                id: Number(initiativeId),
+                code: '',
+                name: `IT Initiative ${initiativeId}`,
+            };
+        });
+});
+
+const totalPendingPairs = computed(() => addForm.digital_ids.length * addForm.it_ids.length);
+
+const duplicatePendingPairs = computed(() => {
+    let totalDuplicates = 0;
+
+    addForm.digital_ids.forEach((digitalId) => {
+        addForm.it_ids.forEach((itId) => {
+            if (existingMappingKeys.value.has(createMappingKey(digitalId, itId))) {
+                totalDuplicates += 1;
+            }
+        });
+    });
+
+    return totalDuplicates;
+});
+
+const newPendingPairs = computed(() => Math.max(0, totalPendingPairs.value - duplicatePendingPairs.value));
+
+const displayRows = computed(() => {
+    const rows = [];
+
+    props.groups.forEach((group) => {
+        const digitals = Array.isArray(group?.digital_initiatives)
+            ? [...group.digital_initiatives].sort((left, right) => {
+                return initiativeSortKey(left).localeCompare(initiativeSortKey(right), undefined, {
+                    numeric: true,
+                    sensitivity: 'base',
+                });
+            })
+            : [];
+
+        if (digitals.length === 0) {
+            return;
+        }
+
+        digitals.forEach((digital, index) => {
+            rows.push({
+                key: `${group.group_key}:${digital.id}`,
+                group,
+                digital,
+                techCapability: normalizeTechCapability(digital?.coe_name),
+                showTechCapability: false,
+                techCapabilityRowspan: 1,
+                showNoteCell: index === 0,
+                noteRowspan: digitals.length,
+                showSupportCell: index === 0,
+                supportRowspan: digitals.length,
+            });
+        });
+    });
+
+    let activeTechCapabilityIndex = -1;
+
+    rows.forEach((row, index) => {
+        const previousRow = rows[index - 1];
+
+        if (previousRow && previousRow.techCapability === row.techCapability) {
+            row.showTechCapability = false;
+            rows[activeTechCapabilityIndex].techCapabilityRowspan += 1;
+            return;
+        }
+
+        row.showTechCapability = true;
+        row.techCapabilityRowspan = 1;
+        activeTechCapabilityIndex = index;
+    });
+
+    return rows;
+});
+
+const techCapabilityCount = computed(() => {
+    return new Set(displayRows.value.map((row) => row.techCapability)).size;
+});
+
+const isAddModal = computed(() => activeModal.value === 'add-support');
+const modalTitle = computed(() => (activeModal.value === 'delete-group' ? 'Hapus Grup Support' : 'Tambah Initiative Support'));
+const modalMessage = computed(() => {
+    if (activeModal.value === 'delete-group') {
+        return 'Seluruh mapping pada grup support ini akan dihapus.';
+    }
+
+    return 'Pilih satu atau lebih Digital Initiative, tentukan IT Initiative pendukung, lalu isi catatan dukungannya bila diperlukan.';
+});
+const modalType = computed(() => (isAddModal.value ? 'info' : 'warning'));
+const modalConfirmText = computed(() => (isAddModal.value ? 'Simpan' : 'Hapus'));
+const modalLoading = computed(() => (isAddModal.value ? saveProcessing.value : deleteProcessing.value));
+
+const resetAddForm = () => {
+    addForm.digital_ids = [];
+    addForm.it_ids = [];
+    addForm.notes = '';
+};
+
+const resetDeleteTarget = () => {
+    deleteTarget.label = '';
+    deleteTarget.mappingIds = [];
+    deleteTarget.digitalCount = 0;
+    deleteTarget.itCount = 0;
+};
+
+const closeModal = (force = false) => {
+    if (modalLoading.value && !force) {
+        return;
+    }
+
+    const shouldExitEdit = activeModal.value === 'add-support' && shouldExitEditOnCancel.value && !force;
+    isModalVisible.value = false;
+
+    if (shouldExitEdit) {
+        emit('cancel-add-support');
+    }
+};
+
+const handleModalAfterLeave = () => {
+    if (isAddModal.value) {
+        resetAddForm();
+    }
+
+    activeModal.value = '';
+    modalError.value = '';
+    shouldExitEditOnCancel.value = false;
+    resetDeleteTarget();
+};
+
+const openAddSupportModal = (options = {}) => {
+    resetAddForm();
+    resetDeleteTarget();
+    modalError.value = '';
+    shouldExitEditOnCancel.value = Boolean(options.exitEditOnCancel);
+    activeModal.value = 'add-support';
+    isModalVisible.value = true;
+};
+
+const openDeleteGroupModal = (group) => {
+    resetDeleteTarget();
+    deleteTarget.label = String(group?.note_label ?? EMPTY_NOTE_LABEL);
+    deleteTarget.mappingIds = Array.isArray(group?.mapping_ids)
+        ? group.mapping_ids.map((value) => Number(value)).filter((value) => Number.isInteger(value) && value > 0)
+        : [];
+    deleteTarget.digitalCount = Number(group?.digital_initiatives?.length ?? 0);
+    deleteTarget.itCount = Number(group?.it_initiatives?.length ?? 0);
+    modalError.value = '';
+    shouldExitEditOnCancel.value = false;
+    activeModal.value = 'delete-group';
+    isModalVisible.value = true;
+};
+
+const addSelection = (field, initiativeId) => {
+    const numericId = Number(initiativeId);
+
+    if (!Number.isInteger(numericId) || numericId <= 0 || addForm[field].includes(numericId)) {
+        return;
+    }
+
+    addForm[field] = [...addForm[field], numericId];
+};
+
+const removeSelection = (field, initiativeId) => {
+    addForm[field] = addForm[field].filter((value) => Number(value) !== Number(initiativeId));
+};
+
+const onDigitalSelect = (event) => {
+    const selectedValue = event?.target?.value ?? '';
+
+    event.target.value = '';
+    addSelection('digital_ids', selectedValue);
+};
+
+const onItSelect = (event) => {
+    const selectedValue = event?.target?.value ?? '';
+
+    event.target.value = '';
+    addSelection('it_ids', selectedValue);
+};
+
+const submitSupport = () => {
+    if (addForm.digital_ids.length === 0) {
+        modalError.value = 'Pilih minimal satu Digital Initiative.';
+        return;
+    }
+
+    if (addForm.it_ids.length === 0) {
+        modalError.value = 'Pilih minimal satu IT Initiative.';
+        return;
+    }
+
+    if (newPendingPairs.value === 0) {
+        modalError.value = 'Semua kombinasi Digital Initiative dan IT Initiative yang dipilih sudah ada.';
+        return;
+    }
+
+    modalError.value = '';
+    saveProcessing.value = true;
+
+    router.post(route('program-planning.strategic-house.initiative-support.store'), {
+        digital_ids: addForm.digital_ids.map((value) => Number(value)),
+        it_ids: addForm.it_ids.map((value) => Number(value)),
+        notes: String(addForm.notes ?? '').trim() || null,
+    }, {
+        preserveScroll: true,
+        preserveState: true,
+        onError: (errors) => {
+            const message = firstErrorMessage(errors);
+
+            if (message) {
+                modalError.value = message;
+            }
+        },
+        onSuccess: () => {
+            closeModal(true);
+            resetAddForm();
+        },
+        onFinish: () => {
+            saveProcessing.value = false;
+        },
+    });
+};
+
+const confirmDeleteGroup = () => {
+    if (deleteTarget.mappingIds.length === 0) {
+        modalError.value = 'Tidak ada mapping yang bisa dihapus pada grup ini.';
+        return;
+    }
+
+    modalError.value = '';
+    deleteProcessing.value = true;
+
+    router.post(route('program-planning.strategic-house.initiative-support.mappings.destroy'), {
+        mapping_ids: deleteTarget.mappingIds,
+    }, {
+        preserveScroll: true,
+        preserveState: true,
+        onError: (errors) => {
+            const message = firstErrorMessage(errors);
+
+            if (message) {
+                modalError.value = message;
+            }
+        },
+        onSuccess: () => {
+            closeModal(true);
+        },
+        onFinish: () => {
+            deleteProcessing.value = false;
+        },
+    });
+};
+
+const handleModalConfirm = () => {
+    if (activeModal.value === 'delete-group') {
+        confirmDeleteGroup();
+        return;
+    }
+
+    submitSupport();
+};
+
+watch(
+    () => props.editable,
+    (editable) => {
+        if (!editable && isModalVisible.value) {
+            closeModal(true);
+        }
+    },
+);
+
+defineExpose({
+    openAddSupportModal,
+});
+</script>
+
+<template>
+    <div class="space-y-5">
+        <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#111827]">
+            <div class="flex flex-wrap items-start justify-between gap-4">
+                <div class="space-y-1">
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">
+                        IT Initiative Support Potential
+                    </h3>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                    <span class="support-metric">{{ props.groups.length }} Grup</span>
+                    <span class="support-metric">{{ techCapabilityCount }} Tech Capability</span>
+                    <span class="support-metric">{{ totalDigitalCount }} Digital</span>
+                    <span class="support-metric">{{ totalItCount }} IT</span>
+                </div>
+            </div>
+        </section>
+
+        <section
+            v-if="hasGroups"
+            class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#111827]"
+        >
+            <div class="overflow-x-auto">
+                <table class="support-table">
+                    <thead>
+                        <tr>
+                            <th class="support-table__head-cell support-table__head-cell--tech">Tech Capability</th>
+                            <th class="support-table__head-cell support-table__head-cell--digital">Digital Initiatives</th>
+                            <th class="support-table__head-cell support-table__head-cell--it">Potensi Dukungan IT Initiatives</th>
+                            <th class="support-table__head-cell support-table__head-cell--notes">Notes / Catatan</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr
+                            v-for="row in displayRows"
+                            :key="row.key"
+                            class="support-table__row"
+                        >
+                            <td
+                                v-if="row.showTechCapability"
+                                :rowspan="row.techCapabilityRowspan"
+                                class="support-table__cell support-table__cell--tech"
+                            >
+                                <div class="tech-capability">
+                                    <span class="tech-capability__label">{{ row.techCapability }}</span>
+                                    <span v-if="row.techCapabilityRowspan > 1" class="tech-capability__meta">
+                                        {{ row.techCapabilityRowspan }} initiatives
+                                    </span>
+                                </div>
+                            </td>
+
+                            <td class="support-table__cell support-table__cell--digital">
+                                <div class="digital-initiative">
+                                    <span v-if="initiativeDisplayCode(row.digital)" class="support-code-badge">
+                                        {{ initiativeDisplayCode(row.digital) }}
+                                    </span>
+                                    <span class="leading-snug text-slate-800 dark:text-slate-100">
+                                        {{ initiativeDisplayName(row.digital) }}
+                                    </span>
+                                </div>
+                            </td>
+
+                            <td
+                                v-if="row.showSupportCell"
+                                :rowspan="row.supportRowspan"
+                                class="support-table__cell support-table__cell--it"
+                            >
+                                <div class="support-panel">
+                                    <div class="flex flex-wrap items-start justify-between gap-3">
+                                        <button
+                                            v-if="editable && Array.isArray(row.group?.mapping_ids) && row.group.mapping_ids.length > 0"
+                                            type="button"
+                                            class="support-delete-btn"
+                                            @click="openDeleteGroupModal(row.group)"
+                                        >
+                                            Hapus Grup
+                                        </button>
+                                    </div>
+
+                                    <ol class="support-list">
+                                        <li
+                                            v-for="initiative in row.group?.it_initiatives ?? []"
+                                            :key="`it-${row.group?.group_key}-${initiative.id}`"
+                                            class="support-list__item"
+                                        >
+                                            <span v-if="initiativeDisplayCode(initiative)" class="support-code-badge support-code-badge--it">
+                                                {{ initiativeDisplayCode(initiative) }}
+                                            </span>
+                                            <span class="leading-snug text-slate-800 dark:text-slate-100">
+                                                {{ initiativeDisplayName(initiative) }}
+                                            </span>
+                                        </li>
+                                    </ol>
+                                </div>
+                            </td>
+
+                            <td
+                                v-if="row.showNoteCell"
+                                :rowspan="row.noteRowspan"
+                                class="support-table__cell support-table__cell--notes"
+                            >
+                                <div class="note-card" :class="{ 'note-card--muted': !(row.group?.note ?? '').trim() }">
+                                    {{ row.group?.note || EMPTY_NOTE_LABEL }}
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section
+            v-else
+            class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center dark:border-white/10 dark:bg-white/[0.03]"
+        >
+            <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                Belum ada data initiative support.
+            </p>
+            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                {{ editable ? 'Klik tombol Tambah Support untuk menambahkan mapping pertama.' : 'Masuk ke mode edit lalu gunakan tombol Tambah Support untuk mulai menambahkan data.' }}
+            </p>
+        </section>
+
+        <ConfirmationModal
+            :show="isModalVisible"
+            :title="modalTitle"
+            :message="modalMessage"
+            :type="modalType"
+            :loading="modalLoading"
+            :confirm-text="modalConfirmText"
+            cancel-text="Batal"
+            max-width="2xl"
+            @close="closeModal"
+            @confirm="handleModalConfirm"
+            @after-leave="handleModalAfterLeave"
+        >
+            <div v-if="isAddModal" class="space-y-4">
+                <div class="space-y-1.5">
+                    <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Digital Initiatives</label>
+                    <div class="space-y-2">
+                        <select class="edit-select" @change="onDigitalSelect">
+                            <option value="">+ Pilih Digital Initiative...</option>
+                            <option
+                                v-for="option in digitalOptions"
+                                :key="`digital-option-${option.id}`"
+                                :value="String(option.id)"
+                                :disabled="addForm.digital_ids.includes(Number(option.id))"
+                            >
+                                {{ initiativeOptionLabel(option) }}
+                            </option>
+                        </select>
+
+                        <div v-if="selectedDigitalInitiatives.length > 0" class="flex flex-wrap gap-2">
+                            <span
+                                v-for="initiative in selectedDigitalInitiatives"
+                                :key="`selected-digital-${initiative.id}`"
+                                class="initiative-tag"
+                            >
+                                {{ initiativeOptionLabel(initiative) }}
+                                <button
+                                    type="button"
+                                    class="initiative-tag__remove"
+                                    @click="removeSelection('digital_ids', initiative.id)"
+                                >
+                                    x
+                                </button>
+                            </span>
+                        </div>
+                        <p v-else class="text-[11px] text-slate-500 dark:text-slate-400">
+                            Anda bisa memilih lebih dari satu digital initiative untuk grup dukungan yang sama.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300">IT Initiatives</label>
+                    <div class="space-y-2">
+                        <select class="edit-select" @change="onItSelect">
+                            <option value="">+ Pilih IT Initiative...</option>
+                            <option
+                                v-for="option in itOptions"
+                                :key="`it-option-${option.id}`"
+                                :value="String(option.id)"
+                                :disabled="addForm.it_ids.includes(Number(option.id))"
+                            >
+                                {{ initiativeOptionLabel(option) }}
+                            </option>
+                        </select>
+
+                        <div v-if="selectedItInitiatives.length > 0" class="flex flex-wrap gap-2">
+                            <span
+                                v-for="initiative in selectedItInitiatives"
+                                :key="`selected-it-${initiative.id}`"
+                                class="initiative-tag"
+                            >
+                                {{ initiativeOptionLabel(initiative) }}
+                                <button
+                                    type="button"
+                                    class="initiative-tag__remove"
+                                    @click="removeSelection('it_ids', initiative.id)"
+                                >
+                                    x
+                                </button>
+                            </span>
+                        </div>
+                        <p v-else class="text-[11px] text-slate-500 dark:text-slate-400">
+                            Tambahkan satu atau lebih IT initiative pendukung untuk grup ini.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Catatan Dukungan</label>
+                    <textarea
+                        v-model="addForm.notes"
+                        rows="4"
+                        class="edit-textarea"
+                        placeholder="Contoh: Menyediakan panduan arsitektur dan kebijakan cloud computing melalui IT initiatives."
+                    />
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                        Catatan ini akan tampil pada kolom Notes / Catatan.
+                    </p>
+                </div>
+
+                <div class="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-800">
+                    <span v-if="totalPendingPairs === 0">
+                        Pilih Digital Initiative dan IT Initiative untuk membentuk pasangan mapping.
+                    </span>
+                    <span v-else-if="duplicatePendingPairs === 0">
+                        {{ newPendingPairs }} pasangan mapping baru siap disimpan.
+                    </span>
+                    <span v-else>
+                        {{ newPendingPairs }} pasangan mapping baru akan disimpan, {{ duplicatePendingPairs }} pasangan duplikat akan dilewati.
+                    </span>
+                </div>
+
+                <p
+                    v-if="modalError"
+                    class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700"
+                >
+                    {{ modalError }}
+                </p>
+            </div>
+
+            <div v-else class="space-y-3">
+                <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                    <p class="font-semibold text-slate-900">{{ deleteTarget.label }}</p>
+                    <p class="mt-1">
+                        Grup ini mencakup {{ deleteTarget.digitalCount }} digital initiative, {{ deleteTarget.itCount }} IT initiative, dan {{ deleteTarget.mappingIds.length }} baris mapping.
+                    </p>
+                </div>
+
+                <p
+                    v-if="modalError"
+                    class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700"
+                >
+                    {{ modalError }}
+                </p>
+            </div>
+        </ConfirmationModal>
+    </div>
+</template>
+
+<style scoped>
+.support-metric {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    padding: 0.45rem 0.8rem;
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+}
+
+.support-table {
+    width: 100%;
+    min-width: 1180px;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.support-table__head-cell {
+    padding: 14px 16px;
+    border-bottom: 1px solid #dbe3ee;
+    border-right: 1px solid #dbe3ee;
+    background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+    font-size: 12px;
+    font-weight: 800;
+    text-align: left;
+    color: #0f172a;
+}
+
+.support-table__head-cell:last-child,
+.support-table__cell:last-child {
+    border-right: none;
+}
+
+.support-table__cell {
+    padding: 14px 16px;
+    border-bottom: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+    vertical-align: top;
+    background: #ffffff;
+}
+
+.support-table__row:last-child .support-table__cell {
+    border-bottom: none;
+}
+
+.support-table__cell--tech {
+    width: 17%;
+    background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+    vertical-align: middle;
+}
+
+.support-table__cell--digital {
+    width: 24%;
+    background: #f8fafc;
+}
+
+.support-table__cell--notes {
+    width: 24%;
+}
+
+.support-table__cell--it {
+    width: 35%;
+}
+
+.tech-capability {
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+}
+
+.tech-capability__label {
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.35;
+    color: #0f172a;
+}
+
+.tech-capability__meta {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    border-radius: 9999px;
+    background: rgba(15, 23, 42, 0.08);
+    padding: 4px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #475569;
+}
+
+.digital-initiative {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.note-card {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.55;
+    color: #1e293b;
+}
+
+.note-card--muted {
+    color: #64748b;
+    font-style: italic;
+}
+
+.support-panel {
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.support-list {
+    display: grid;
+    gap: 10px;
+    padding-left: 18px;
+}
+
+.support-list__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13px;
+}
+
+.support-code-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    border-radius: 9999px;
+    background: #e0f2fe;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #075985;
+    flex-shrink: 0;
+}
+
+.support-code-badge--it {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.support-delete-btn {
+    border: 1px solid #fecaca;
+    border-radius: 9999px;
+    background: #fff1f2;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #be123c;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.support-delete-btn:hover {
+    background: #ffe4e6;
+    border-color: #fda4af;
+}
+
+.edit-select,
+.edit-textarea {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.75rem;
+    background: #ffffff;
+    font-size: 12px;
+    color: #0f172a;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.edit-select {
+    height: 40px;
+    padding: 0 0.875rem;
+}
+
+.edit-textarea {
+    padding: 0.875rem;
+    resize: vertical;
+}
+
+.edit-select:focus,
+.edit-textarea:focus {
+    border-color: #0f6fb7;
+    box-shadow: 0 0 0 4px rgba(15, 111, 183, 0.12);
+}
+
+.initiative-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #bfdbfe;
+    border-radius: 9999px;
+    background: #eff6ff;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #1e4f8f;
+}
+
+.initiative-tag__remove {
+    border: none;
+    background: transparent;
+    padding: 0;
+    font-size: 10px;
+    font-weight: 700;
+    color: #1e3a8a;
+    cursor: pointer;
+}
+
+:deep(.dark) .support-metric {
+    border-color: rgba(148, 163, 184, 0.16);
+    background: rgba(255, 255, 255, 0.04);
+    color: #cbd5e1;
+}
+
+:deep(.dark) .support-table__head-cell {
+    border-bottom-color: rgba(148, 163, 184, 0.14);
+    border-right-color: rgba(148, 163, 184, 0.14);
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%);
+    color: #f8fafc;
+}
+
+:deep(.dark) .support-table__cell {
+    border-bottom-color: rgba(148, 163, 184, 0.14);
+    border-right-color: rgba(148, 163, 184, 0.14);
+    background: rgba(15, 23, 42, 0.3);
+}
+
+:deep(.dark) .support-table__cell--tech {
+    background: linear-gradient(180deg, rgba(51, 65, 85, 0.85) 0%, rgba(30, 41, 59, 0.85) 100%);
+}
+
+:deep(.dark) .support-table__cell--digital {
+    background: rgba(15, 23, 42, 0.55);
+}
+
+:deep(.dark) .tech-capability__label,
+:deep(.dark) .note-card {
+    color: #e2e8f0;
+}
+
+:deep(.dark) .tech-capability__meta {
+    background: rgba(255, 255, 255, 0.08);
+    color: #cbd5e1;
+}
+
+:deep(.dark) .note-card--muted {
+    color: #94a3b8;
+}
+
+:deep(.dark) .edit-select,
+:deep(.dark) .edit-textarea {
+    border-color: rgba(148, 163, 184, 0.18);
+    background: rgba(15, 23, 42, 0.75);
+    color: #f8fafc;
+}
+</style>

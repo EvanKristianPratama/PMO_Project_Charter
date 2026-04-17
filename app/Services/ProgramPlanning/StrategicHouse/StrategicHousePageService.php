@@ -7,6 +7,7 @@ use App\Models\InitiativeTagging;
 use App\Models\MstCoe;
 use App\Models\MstInitiative;
 use App\Services\ProgramPlanning\ItBuildingBlockService;
+use App\Services\ProgramPlanning\StrategicHouse\InitiativeSupport\InitiativeSupportService;
 use App\Services\ProgramPlanning\StrategicHouse\RoadMap\ItInitiativeRoadmapService;
 use App\Services\ProgramPlanning\StrategicPillars\StrategicPillarPageService;
 use App\Services\ProgramPlanning\InitiativeRelation\InitiativeRelationService;
@@ -159,6 +160,7 @@ class StrategicHousePageService
 
     public function __construct(
         protected ItBuildingBlockService $itBuildingBlockService,
+        protected InitiativeSupportService $initiativeSupportService,
         protected StrategicPillarPageService $strategicPillarPageService,
         protected InitiativeRelationService $initiativeRelationService,
         protected ItInitiativeRoadmapService $itInitiativeRoadmapService
@@ -195,6 +197,7 @@ class StrategicHousePageService
 
         $relationData = $this->initiativeRelationService->getIndexProps();
         $roadmapData  = $this->itInitiativeRoadmapService->getPageProps();
+        $initiativeSupportData = $this->initiativeSupportService->getPageProps();
 
         return [
             'filters' => $normalizedFilters,
@@ -230,6 +233,9 @@ class StrategicHousePageService
             'digitalInitiativeOptions' => $this->itBuildingBlockService->getDigitalInitiativeOptions(),
             'itBuildingBlockMatrix' => $this->itBuildingBlockService->getGroupedMappings(),
             'itInitiativeOptions' => $this->itBuildingBlockService->getItInitiativeOptions(),
+            'initiativeSupportGroups' => $initiativeSupportData['groups'],
+            'initiativeSupportDigitalOptions' => $initiativeSupportData['digitalInitiativeOptions'],
+            'initiativeSupportItOptions' => $initiativeSupportData['itInitiativeOptions'],
 
             // Merge Strategic Pillar props
             'strategicPillars' => $pillarData['strategicPillars'] instanceof \Closure ? $pillarData['strategicPillars']() : $pillarData['strategicPillars'],
