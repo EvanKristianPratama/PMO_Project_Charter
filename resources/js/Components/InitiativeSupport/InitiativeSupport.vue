@@ -24,10 +24,6 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
-    coeOptions: {
-        type: Array,
-        default: () => [],
-    },
 });
 
 const EMPTY_NOTE_LABEL = 'Belum ada catatan dukungan.';
@@ -49,48 +45,6 @@ const deleteTarget = reactive({
     mappingIds: [],
     digitalCount: 0,
     itCount: 0,
-});
-
-/**
- * Mengelompokkan pilihan digital initiatives berdasarkan CoE.
- */
-const groupedDigitalOptions = computed(() => {
-    const groups = {};
-    props.digitalOptions.forEach((option) => {
-        const coeName = normalizeTechCapability(option?.coe_name);
-        if (!groups[coeName]) {
-            groups[coeName] = [];
-        }
-        groups[coeName].push(option);
-    });
-    
-    return Object.keys(groups).sort().reduce((acc, coe) => {
-        acc[coe] = groups[coe].sort((a, b) => {
-            return initiativeSortKey(a).localeCompare(initiativeSortKey(b));
-        });
-        return acc;
-    }, {});
-});
-
-/**
- * Mengelompokkan pilihan IT initiatives berdasarkan CoE.
- */
-const groupedItOptions = computed(() => {
-    const groups = {};
-    props.itOptions.forEach((option) => {
-        const coeName = normalizeTechCapability(option?.coe_name);
-        if (!groups[coeName]) {
-            groups[coeName] = [];
-        }
-        groups[coeName].push(option);
-    });
-
-    return Object.keys(groups).sort().reduce((acc, coe) => {
-        acc[coe] = groups[coe].sort((a, b) => {
-            return initiativeSortKey(a).localeCompare(initiativeSortKey(b));
-        });
-        return acc;
-    }, {});
 });
 
 const createMappingKey = (digitalId, itId) => {
@@ -149,10 +103,6 @@ const initiativeOptionLabel = (initiative) => {
     }
 
     return name !== '-' ? name : code || '-';
-};
-
-const initiativeSortKey = (initiative) => {
-    return String(initiative?.id || 0).padStart(10, '0');
 };
 
 const existingMappingKeys = computed(() => {
@@ -219,68 +169,18 @@ const displayRows = computed(() => {
     const rows = [];
 
     props.groups.forEach((group) => {
-        const digitals = Array.isArray(group?.digital_initiatives)
-            ? [...group.digital_initiatives].sort((left, right) => {
-                return initiativeSortKey(left).localeCompare(initiativeSortKey(right), undefined, {
-                    numeric: true,
-                    sensitivity: 'base',
-                });
-            })
-            : [];
+        const digital = group.digital_initiatives?.[0];
+        if (!digital) return;
 
-        const sortedIts = Array.isArray(group?.it_initiatives)
-            ? [...group.it_initiatives].sort((left, right) => {
-                return initiativeSortKey(left).localeCompare(initiativeSortKey(right), undefined, {
-                    numeric: true,
-                    sensitivity: 'base',
-                });
-            })
-            : [];
-
-        if (digitals.length === 0) {
-            return;
-        }
-
-        digitals.forEach((digital, index) => {
-            rows.push({
-                key: `${group.group_key}:${digital.id}`,
-                group: {
-                    ...group,
-                    it_initiatives: sortedIts
-                },
-                digital,
-                techCapability: normalizeTechCapability(digital?.coe_name),
-                showTechCapability: false,
-                techCapabilityRowspan: 1,
-                showNoteCell: index === 0,
-                noteRowspan: digitals.length,
-                showSupportCell: index === 0,
-                supportRowspan: digitals.length,
-            });
+        rows.push({
+            key: `${group.group_key}:${digital.id}`,
+            group,
+            digital,
+            techCapability: normalizeTechCapability(digital?.coe_name),
         });
     });
 
-    let activeTechCapabilityIndex = -1;
-
-    rows.forEach((row, index) => {
-        const previousRow = rows[index - 1];
-
-        if (previousRow && previousRow.techCapability === row.techCapability) {
-            row.showTechCapability = false;
-            rows[activeTechCapabilityIndex].techCapabilityRowspan += 1;
-            return;
-        }
-
-        row.showTechCapability = true;
-        row.techCapabilityRowspan = 1;
-        activeTechCapabilityIndex = index;
-    });
-
     return rows;
-});
-
-const techCapabilityCount = computed(() => {
-    return new Set(displayRows.value.map((row) => row.techCapability)).size;
 });
 
 const isAddModal = computed(() => activeModal.value === 'add-support');
@@ -491,10 +391,8 @@ defineExpose({
                 </div>
 
                 <div class="flex flex-wrap gap-2">
-                    <span class="support-metric">{{ props.groups.length }} Grup</span>
-                    <span class="support-metric">{{ techCapabilityCount }} Tech Capability</span>
-                    <span class="support-metric">{{ totalDigitalCount }} Digital</span>
-                    <span class="support-metric">{{ totalItCount }} IT</span>
+                    <span class="support-metric">{{ props.groups.length }} Initiatives</span>
+                    <span class="support-metric">{{ totalItCount }} IT Supports</span>
                 </div>
             </div>
         </section>
@@ -520,16 +418,9 @@ defineExpose({
                             :key="row.key"
                             class="support-table__row"
                         >
-                            <td
-                                v-if="row.showTechCapability"
-                                :rowspan="row.techCapabilityRowspan"
-                                class="support-table__cell support-table__cell--tech"
-                            >
+                            <td class="support-table__cell support-table__cell--tech">
                                 <div class="tech-capability">
                                     <span class="tech-capability__label">{{ row.techCapability }}</span>
-                                    <span v-if="row.techCapabilityRowspan > 1" class="tech-capability__meta">
-                                        {{ row.techCapabilityRowspan }}
-                                    </span>
                                 </div>
                             </td>
 
@@ -544,11 +435,7 @@ defineExpose({
                                 </div>
                             </td>
 
-                            <td
-                                v-if="row.showSupportCell"
-                                :rowspan="row.supportRowspan"
-                                class="support-table__cell support-table__cell--it"
-                            >
+                            <td class="support-table__cell support-table__cell--it">
                                 <div class="support-panel">
                                     <div class="flex flex-wrap items-start justify-between gap-3">
                                         <button
@@ -557,7 +444,7 @@ defineExpose({
                                             class="support-delete-btn"
                                             @click="openDeleteGroupModal(row.group)"
                                         >
-                                            Hapus Grup
+                                            Hapus
                                         </button>
                                     </div>
 
@@ -578,11 +465,7 @@ defineExpose({
                                 </div>
                             </td>
 
-                            <td
-                                v-if="row.showNoteCell"
-                                :rowspan="row.noteRowspan"
-                                class="support-table__cell support-table__cell--notes"
-                            >
+                            <td class="support-table__cell support-table__cell--notes">
                                 <div class="note-card" :class="{ 'note-card--muted': !(row.group?.note ?? '').trim() }">
                                     {{ row.group?.note || EMPTY_NOTE_LABEL }}
                                 </div>
@@ -624,20 +507,14 @@ defineExpose({
                     <div class="space-y-2">
                         <select class="edit-select" @change="onDigitalSelect">
                             <option value="">+ Pilih Digital Initiative...</option>
-                            <optgroup
-                                v-for="(options, coe) in groupedDigitalOptions"
-                                :key="`digital-group-${coe}`"
-                                :label="coe"
+                            <option
+                                v-for="option in digitalOptions"
+                                :key="`digital-option-${option.id}`"
+                                :value="String(option.id)"
+                                :disabled="addForm.digital_ids.includes(Number(option.id))"
                             >
-                                <option
-                                    v-for="option in options"
-                                    :key="`digital-option-${option.id}`"
-                                    :value="String(option.id)"
-                                    :disabled="addForm.digital_ids.includes(Number(option.id))"
-                                >
-                                    {{ initiativeOptionLabel(option) }}
-                                </option>
-                            </optgroup>
+                                {{ initiativeOptionLabel(option) }}
+                            </option>
                         </select>
 
                         <div v-if="selectedDigitalInitiatives.length > 0" class="flex flex-wrap gap-2">
@@ -656,9 +533,6 @@ defineExpose({
                                 </button>
                             </span>
                         </div>
-                        <p v-else class="text-[11px] text-slate-500 dark:text-slate-400">
-                            Anda bisa memilih lebih dari satu digital initiative untuk grup dukungan yang sama.
-                        </p>
                     </div>
                 </div>
 
@@ -667,20 +541,14 @@ defineExpose({
                     <div class="space-y-2">
                         <select class="edit-select" @change="onItSelect">
                             <option value="">+ Pilih IT Initiative...</option>
-                            <optgroup
-                                v-for="(options, coe) in groupedItOptions"
-                                :key="`it-group-${coe}`"
-                                :label="coe"
+                            <option
+                                v-for="option in itOptions"
+                                :key="`it-option-${option.id}`"
+                                :value="String(option.id)"
+                                :disabled="addForm.it_ids.includes(Number(option.id))"
                             >
-                                <option
-                                    v-for="option in options"
-                                    :key="`it-option-${option.id}`"
-                                    :value="String(option.id)"
-                                    :disabled="addForm.it_ids.includes(Number(option.id))"
-                                >
-                                    {{ initiativeOptionLabel(option) }}
-                                </option>
-                            </optgroup>
+                                {{ initiativeOptionLabel(option) }}
+                            </option>
                         </select>
 
                         <div v-if="selectedItInitiatives.length > 0" class="flex flex-wrap gap-2">
@@ -699,9 +567,6 @@ defineExpose({
                                 </button>
                             </span>
                         </div>
-                        <p v-else class="text-[11px] text-slate-500 dark:text-slate-400">
-                            Tambahkan satu atau lebih IT initiative pendukung untuk grup ini.
-                        </p>
                     </div>
                 </div>
 
@@ -711,23 +576,8 @@ defineExpose({
                         v-model="addForm.notes"
                         rows="4"
                         class="edit-textarea"
-                        placeholder="Contoh: Menyediakan panduan arsitektur dan kebijakan cloud computing melalui IT initiatives."
+                        placeholder="Isi catatan dukungan bila diperlukan."
                     />
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400">
-                        Catatan ini akan tampil pada kolom Notes / Catatan.
-                    </p>
-                </div>
-
-                <div class="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-800">
-                    <span v-if="totalPendingPairs === 0">
-                        Pilih Digital Initiative dan IT Initiative untuk membentuk pasangan mapping.
-                    </span>
-                    <span v-else-if="duplicatePendingPairs === 0">
-                        {{ newPendingPairs }} pasangan mapping baru siap disimpan.
-                    </span>
-                    <span v-else>
-                        {{ newPendingPairs }} pasangan mapping baru akan disimpan, {{ duplicatePendingPairs }} pasangan duplikat akan dilewati.
-                    </span>
                 </div>
 
                 <p
@@ -742,7 +592,7 @@ defineExpose({
                 <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
                     <p class="font-semibold text-slate-900">{{ deleteTarget.label }}</p>
                     <p class="mt-1">
-                        Grup ini mencakup {{ deleteTarget.digitalCount }} digital initiative, {{ deleteTarget.itCount }} IT initiative, dan {{ deleteTarget.mappingIds.length }} baris mapping.
+                        Dukungan ini akan dihapus dari sistem.
                     </p>
                 </div>
 
@@ -808,12 +658,10 @@ defineExpose({
 .support-table__cell--tech {
     width: 17%;
     background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
-    vertical-align: middle;
 }
 
 .support-table__cell--digital {
     width: 24%;
-    background: #f8fafc;
 }
 
 .support-table__cell--notes {
@@ -828,10 +676,7 @@ defineExpose({
     display: flex;
     min-height: 100%;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
     gap: 8px;
-    text-align: center;
 }
 
 .tech-capability__label {
@@ -839,18 +684,6 @@ defineExpose({
     font-weight: 800;
     line-height: 1.35;
     color: #0f172a;
-}
-
-.tech-capability__meta {
-    display: inline-flex;
-    align-items: center;
-    width: fit-content;
-    border-radius: 9999px;
-    background: rgba(15, 23, 42, 0.08);
-    padding: 4px 10px;
-    font-size: 10px;
-    font-weight: 700;
-    color: #475569;
 }
 
 .digital-initiative {
@@ -1002,18 +835,9 @@ defineExpose({
     background: linear-gradient(180deg, rgba(51, 65, 85, 0.85) 0%, rgba(30, 41, 59, 0.85) 100%);
 }
 
-:deep(.dark) .support-table__cell--digital {
-    background: rgba(15, 23, 42, 0.55);
-}
-
 :deep(.dark) .tech-capability__label,
 :deep(.dark) .note-card {
     color: #e2e8f0;
-}
-
-:deep(.dark) .tech-capability__meta {
-    background: rgba(255, 255, 255, 0.08);
-    color: #cbd5e1;
 }
 
 :deep(.dark) .note-card--muted {

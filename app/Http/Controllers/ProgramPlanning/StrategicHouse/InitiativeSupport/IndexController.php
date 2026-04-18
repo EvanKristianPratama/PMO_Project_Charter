@@ -22,6 +22,7 @@ class IndexController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
+        // Return data with original database order from the service
         return Inertia::render(
             'ProgramPlanning/StrategicHouse/InitiativeSupport/Index',
             $this->initiativeSupportService->getPageProps()

@@ -18,7 +18,6 @@ class InitiativeSupportService
             'groups' => $this->getGroupedMappings(),
             'digitalInitiativeOptions' => $this->getInitiativeOptions(1)->all(),
             'itInitiativeOptions' => $this->getInitiativeOptions(2)->all(),
-            'coeOptions' => MstCoe::query()->orderBy('name')->get(['id', 'name'])->all(),
         ];
     }
 
@@ -33,16 +32,11 @@ class InitiativeSupportService
             ])
             ->whereHas('digitalInitiative', fn (Builder $query) => $query->where('tipe_initiative', 1))
             ->whereHas('itInitiative', fn (Builder $query) => $query->where('tipe_initiative', 2))
+            ->orderBy('id')
             ->get()
             ->groupBy(fn (TrsInitiativeSupport $mapping): string => $this->resolveGroupKey($mapping))
             ->map(fn (Collection $mappings, string $groupKey): array => $this->mapGroup($mappings, $groupKey))
-            ->sortBy(fn (array $group): string => $group['sort_key'])
             ->values()
-            ->map(function (array $group): array {
-                unset($group['sort_key']);
-
-                return $group;
-            })
             ->all();
     }
 
@@ -129,9 +123,7 @@ class InitiativeSupportService
         return MstInitiative::query()
             ->with(['coe:id,name'])
             ->where('tipe_initiative', $initiativeType)
-            ->orderByRaw("case when code is null or code = '' then 1 else 0 end")
-            ->orderBy('code')
-            ->orderBy('name')
+            ->orderBy('id')
             ->get(['id', 'code', 'name', 'coe_id'])
             ->map(fn (MstInitiative $initiative): array => $this->mapInitiative($initiative));
     }
@@ -144,17 +136,13 @@ class InitiativeSupportService
             ->map(fn (TrsInitiativeSupport $mapping): ?array => $this->mapInitiative($mapping->digitalInitiative))
             ->filter()
             ->unique('id')
-            ->sortBy(fn (array $initiative): string => $this->sortKeyForInitiative($initiative))
             ->values();
 
         $itInitiatives = $mappings
             ->map(fn (TrsInitiativeSupport $mapping): ?array => $this->mapInitiative($mapping->itInitiative))
             ->filter()
             ->unique('id')
-            ->sortBy(fn (array $initiative): string => $this->sortKeyForInitiative($initiative))
             ->values();
-
-        $sortInitiative = $digitalInitiatives->first() ?? $itInitiatives->first() ?? ['label' => '~'];
 
         return [
             'group_key' => $groupKey,
@@ -172,7 +160,6 @@ class InitiativeSupportService
                 ->values()
                 ->all(),
             'total_mappings' => (int) $mappings->count(),
-            'sort_key' => $this->sortKeyForInitiative($sortInitiative),
         ];
     }
 
@@ -196,28 +183,12 @@ class InitiativeSupportService
 
     private function resolveGroupKey(TrsInitiativeSupport $mapping): string
     {
-        $coeId = (int) ($mapping->digitalInitiative?->coe_id ?? 0);
-        $note = trim((string) $mapping->notes);
-
-        if ($note !== '') {
-            return "coe:{$coeId}|note:".Str::lower($note);
-        }
-
-        return "coe:{$coeId}|digital:".(int) $mapping->digital_id;
+        return 'digital:'.(int) $mapping->digital_id;
     }
 
     private function mappingKey(int $digitalId, int $itId): string
     {
         return $digitalId.':'.$itId;
-    }
-
-    private function sortKeyForInitiative(array $initiative): string
-    {
-        return sprintf(
-            '%s-%s',
-            Str::lower((string) ($initiative['code'] ?? '')),
-            Str::lower((string) ($initiative['name'] ?? $initiative['label'] ?? '')),
-        );
     }
 
     private function buildInitiativeLabel(string $code, string $name): string
