@@ -2,6 +2,7 @@
 
 namespace App\Services\ProgramPlanning\StrategicHouse\InitiativeSupport;
 
+use App\Models\MstCoe;
 use App\Models\MstInitiative;
 use App\Models\TrsInitiativeSupport;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,6 +18,7 @@ class InitiativeSupportService
             'groups' => $this->getGroupedMappings(),
             'digitalInitiativeOptions' => $this->getInitiativeOptions(1)->all(),
             'itInitiativeOptions' => $this->getInitiativeOptions(2)->all(),
+            'coeOptions' => MstCoe::query()->orderBy('name')->get(['id', 'name'])->all(),
         ];
     }
 
@@ -194,13 +196,14 @@ class InitiativeSupportService
 
     private function resolveGroupKey(TrsInitiativeSupport $mapping): string
     {
+        $coeId = (int) ($mapping->digitalInitiative?->coe_id ?? 0);
         $note = trim((string) $mapping->notes);
 
         if ($note !== '') {
-            return 'note:'.Str::lower($note);
+            return "coe:{$coeId}|note:".Str::lower($note);
         }
 
-        return 'digital:'.(int) $mapping->digital_id;
+        return "coe:{$coeId}|digital:".(int) $mapping->digital_id;
     }
 
     private function mappingKey(int $digitalId, int $itId): string

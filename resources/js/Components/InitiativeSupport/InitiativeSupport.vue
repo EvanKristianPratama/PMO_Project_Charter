@@ -24,6 +24,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    coeOptions: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const EMPTY_NOTE_LABEL = 'Belum ada catatan dukungan.';
@@ -45,6 +49,48 @@ const deleteTarget = reactive({
     mappingIds: [],
     digitalCount: 0,
     itCount: 0,
+});
+
+/**
+ * Mengelompokkan pilihan digital initiatives berdasarkan CoE.
+ */
+const groupedDigitalOptions = computed(() => {
+    const groups = {};
+    props.digitalOptions.forEach((option) => {
+        const coeName = normalizeTechCapability(option?.coe_name);
+        if (!groups[coeName]) {
+            groups[coeName] = [];
+        }
+        groups[coeName].push(option);
+    });
+    
+    return Object.keys(groups).sort().reduce((acc, coe) => {
+        acc[coe] = groups[coe].sort((a, b) => {
+            return initiativeSortKey(a).localeCompare(initiativeSortKey(b));
+        });
+        return acc;
+    }, {});
+});
+
+/**
+ * Mengelompokkan pilihan IT initiatives berdasarkan CoE.
+ */
+const groupedItOptions = computed(() => {
+    const groups = {};
+    props.itOptions.forEach((option) => {
+        const coeName = normalizeTechCapability(option?.coe_name);
+        if (!groups[coeName]) {
+            groups[coeName] = [];
+        }
+        groups[coeName].push(option);
+    });
+
+    return Object.keys(groups).sort().reduce((acc, coe) => {
+        acc[coe] = groups[coe].sort((a, b) => {
+            return initiativeSortKey(a).localeCompare(initiativeSortKey(b));
+        });
+        return acc;
+    }, {});
 });
 
 const createMappingKey = (digitalId, itId) => {
@@ -106,11 +152,7 @@ const initiativeOptionLabel = (initiative) => {
 };
 
 const initiativeSortKey = (initiative) => {
-    return [
-        normalizeTechCapability(initiative?.coe_name),
-        initiativeDisplayCode(initiative),
-        initiativeDisplayName(initiative),
-    ].join('::').toLowerCase();
+    return String(initiative?.id || 0).padStart(10, '0');
 };
 
 const existingMappingKeys = computed(() => {
@@ -186,6 +228,15 @@ const displayRows = computed(() => {
             })
             : [];
 
+        const sortedIts = Array.isArray(group?.it_initiatives)
+            ? [...group.it_initiatives].sort((left, right) => {
+                return initiativeSortKey(left).localeCompare(initiativeSortKey(right), undefined, {
+                    numeric: true,
+                    sensitivity: 'base',
+                });
+            })
+            : [];
+
         if (digitals.length === 0) {
             return;
         }
@@ -193,7 +244,10 @@ const displayRows = computed(() => {
         digitals.forEach((digital, index) => {
             rows.push({
                 key: `${group.group_key}:${digital.id}`,
-                group,
+                group: {
+                    ...group,
+                    it_initiatives: sortedIts
+                },
                 digital,
                 techCapability: normalizeTechCapability(digital?.coe_name),
                 showTechCapability: false,
@@ -474,7 +528,7 @@ defineExpose({
                                 <div class="tech-capability">
                                     <span class="tech-capability__label">{{ row.techCapability }}</span>
                                     <span v-if="row.techCapabilityRowspan > 1" class="tech-capability__meta">
-                                        {{ row.techCapabilityRowspan }} initiatives
+                                        {{ row.techCapabilityRowspan }}
                                     </span>
                                 </div>
                             </td>
@@ -570,14 +624,20 @@ defineExpose({
                     <div class="space-y-2">
                         <select class="edit-select" @change="onDigitalSelect">
                             <option value="">+ Pilih Digital Initiative...</option>
-                            <option
-                                v-for="option in digitalOptions"
-                                :key="`digital-option-${option.id}`"
-                                :value="String(option.id)"
-                                :disabled="addForm.digital_ids.includes(Number(option.id))"
+                            <optgroup
+                                v-for="(options, coe) in groupedDigitalOptions"
+                                :key="`digital-group-${coe}`"
+                                :label="coe"
                             >
-                                {{ initiativeOptionLabel(option) }}
-                            </option>
+                                <option
+                                    v-for="option in options"
+                                    :key="`digital-option-${option.id}`"
+                                    :value="String(option.id)"
+                                    :disabled="addForm.digital_ids.includes(Number(option.id))"
+                                >
+                                    {{ initiativeOptionLabel(option) }}
+                                </option>
+                            </optgroup>
                         </select>
 
                         <div v-if="selectedDigitalInitiatives.length > 0" class="flex flex-wrap gap-2">
@@ -607,14 +667,20 @@ defineExpose({
                     <div class="space-y-2">
                         <select class="edit-select" @change="onItSelect">
                             <option value="">+ Pilih IT Initiative...</option>
-                            <option
-                                v-for="option in itOptions"
-                                :key="`it-option-${option.id}`"
-                                :value="String(option.id)"
-                                :disabled="addForm.it_ids.includes(Number(option.id))"
+                            <optgroup
+                                v-for="(options, coe) in groupedItOptions"
+                                :key="`it-group-${coe}`"
+                                :label="coe"
                             >
-                                {{ initiativeOptionLabel(option) }}
-                            </option>
+                                <option
+                                    v-for="option in options"
+                                    :key="`it-option-${option.id}`"
+                                    :value="String(option.id)"
+                                    :disabled="addForm.it_ids.includes(Number(option.id))"
+                                >
+                                    {{ initiativeOptionLabel(option) }}
+                                </option>
+                            </optgroup>
                         </select>
 
                         <div v-if="selectedItInitiatives.length > 0" class="flex flex-wrap gap-2">

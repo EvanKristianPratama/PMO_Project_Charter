@@ -21,32 +21,7 @@ class DashboardController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        $statusOptions = $this->statusOptions();
-        $baselineStatusId = $this->baselineStatusId($statusOptions);
-        $flowStatusOptions = $this->flowStatusOptions();
-
-        $digitalProjects = $this->projectsByType(1);
-        $itProjects = $this->projectsByType(2);
-        $digitalStatusCounts = $this->projectStatusCounts($digitalProjects);
-        $itStatusCounts = $this->projectStatusCounts($itProjects);
-        $digitalApprovedFromMst = $this->mstApprovedCountByType(1);
-        $itApprovedFromMst = $this->mstApprovedCountByType(2);
-
-        return Inertia::render('ProgramImplementation/Dashboard', [
-            'overview' => [
-                'total_projects' => TrsProject::query()->count(),
-                'total_digital_initiatives' => $digitalProjects->count(),
-                'total_it_initiatives' => $itProjects->count(),
-                'status_options' => $flowStatusOptions,
-                'it_status_counts' => $itStatusCounts,
-                'digital_status_counts' => $digitalStatusCounts,
-                'total_digital_approved' => $digitalApprovedFromMst,
-                'total_it_approved' => $itApprovedFromMst,
-            ],
-            'completedStatusId' => $baselineStatusId,
-            'openDigitalInitiatives' => $digitalProjects,
-            'openItInitiatives' => $itProjects,
-        ]);
+        return redirect()->route('strategic-house.index');
     }
 
     // ── Private helpers ──────────────────────────────────────────────────
