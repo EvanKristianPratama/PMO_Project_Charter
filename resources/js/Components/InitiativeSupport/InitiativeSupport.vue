@@ -27,6 +27,7 @@ const props = defineProps({
 });
 
 const EMPTY_NOTE_LABEL = 'Belum ada catatan dukungan.';
+const BUSINESS_UNIT_STORAGE_KEY = 'initiative-support.show-business-unit';
 
 const addForm = reactive({
     digital_ids: [],
@@ -34,8 +35,18 @@ const addForm = reactive({
     notes: '',
 });
 
+const resolveInitialBusinessUnitVisibility = () => {
+    if (typeof window === 'undefined') {
+        return false;
+    }
+
+    return window.localStorage.getItem(BUSINESS_UNIT_STORAGE_KEY) === 'true';
+};
+
 const saveProcessing = ref(false);
 const deleteProcessing = ref(false);
+const selectedNote = ref('');
+const showBusinessUnit = ref(resolveInitialBusinessUnitVisibility());
 const activeModal = ref('');
 const isModalVisible = ref(false);
 const modalError = ref('');
@@ -45,6 +56,17 @@ const deleteTarget = reactive({
     mappingIds: [],
     digitalCount: 0,
     itCount: 0,
+});
+
+const noteOptions = computed(() => {
+    const notes = new Set();
+    props.groups.forEach(group => {
+        const note = (group.note ?? '').trim();
+        if (note) {
+            notes.add(note);
+        }
+    });
+    return Array.from(notes).sort();
 });
 
 const createMappingKey = (digitalId, itId) => {
@@ -105,6 +127,12 @@ const initiativeOptionLabel = (initiative) => {
     return name !== '-' ? name : code || '-';
 };
 
+const initiativeBusinessUnitLabel = (initiative) => {
+    const businessUnit = String(initiative?.business_unit ?? '').trim();
+
+    return businessUnit !== '' ? businessUnit : '-';
+};
+
 const existingMappingKeys = computed(() => {
     return new Set(
         props.groups.flatMap((group) => {
@@ -115,14 +143,60 @@ const existingMappingKeys = computed(() => {
     );
 });
 
-const hasGroups = computed(() => props.groups.length > 0);
+const displayGroups = computed(() => {
+    let groups = props.groups;
+
+    if (selectedNote.value !== '') {
+        groups = groups.filter(group => 
+            (group.note ?? '').trim() === selectedNote.value
+        );
+    }
+
+    return groups
+        .map((group, groupIndex) => {
+            const digitalRows = (group?.digital_initiatives ?? [])
+                .filter((digital) => Boolean(digital?.id))
+                .map((digital, digitalIndex) => ({
+                    key: `${group?.group_key ?? 'support-group'}:${digital.id}:${digitalIndex}`,
+                    digital,
+                    techCapability: normalizeTechCapability(digital?.coe_name),
+                    isFirstRow: digitalIndex === 0,
+                }));
+
+            return {
+                key: group?.group_key ?? `support-group-${groupIndex}`,
+                group,
+                digitalRows,
+                rowSpan: digitalRows.length || 1,
+            };
+        })
+        .filter((group) => group.digitalRows.length > 0)
+        .map((group, index, groups) => ({
+            ...group,
+            isLastGroup: index === groups.length - 1,
+        }));
+});
+
+const hasGroups = computed(() => displayGroups.value.length > 0);
 
 const totalDigitalCount = computed(() => {
-    return props.groups.reduce((sum, group) => sum + (group?.digital_initiatives?.length ?? 0), 0);
+    return new Set(
+        displayGroups.value.flatMap((item) => {
+            return (item.group?.digital_initiatives ?? [])
+                .map((initiative) => Number(initiative?.id))
+                .filter((id) => Number.isInteger(id) && id > 0);
+        }),
+    ).size;
 });
 
 const totalItCount = computed(() => {
-    return props.groups.reduce((sum, group) => sum + (group?.it_initiatives?.length ?? 0), 0);
+    return new Set(
+        displayGroups.value.flatMap((item) => {
+            return (item.group?.it_initiatives ?? [])
+                .map((initiative) => Number(initiative?.id))
+                .filter((id) => Number.isInteger(id) && id > 0);
+        }),
+    ).size;
 });
 
 const selectedDigitalInitiatives = computed(() => {
@@ -165,26 +239,11 @@ const duplicatePendingPairs = computed(() => {
 
 const newPendingPairs = computed(() => Math.max(0, totalPendingPairs.value - duplicatePendingPairs.value));
 
-const displayRows = computed(() => {
-    const rows = [];
-
-    props.groups.forEach((group) => {
-        const digital = group.digital_initiatives?.[0];
-        if (!digital) return;
-
-        rows.push({
-            key: `${group.group_key}:${digital.id}`,
-            group,
-            digital,
-            techCapability: normalizeTechCapability(digital?.coe_name),
-        });
-    });
-
-    return rows;
-});
-
 const isAddModal = computed(() => activeModal.value === 'add-support');
 const modalTitle = computed(() => (activeModal.value === 'delete-group' ? 'Hapus Grup Support' : 'Tambah Initiative Support'));
+const businessUnitToggleLabel = computed(() => (
+    showBusinessUnit.value ? 'Business Unit' : 'Business Unit'
+));
 const modalMessage = computed(() => {
     if (activeModal.value === 'delete-group') {
         return 'Seluruh mapping pada grup support ini akan dihapus.';
@@ -366,6 +425,10 @@ const handleModalConfirm = () => {
     submitSupport();
 };
 
+const toggleBusinessUnit = () => {
+    showBusinessUnit.value = !showBusinessUnit.value;
+};
+
 watch(
     () => props.editable,
     (editable) => {
@@ -375,25 +438,59 @@ watch(
     },
 );
 
+watch(showBusinessUnit, (value) => {
+    if (typeof window === 'undefined') {
+        return;
+    }
+
+    window.localStorage.setItem(BUSINESS_UNIT_STORAGE_KEY, value ? 'true' : 'false');
+});
+
 defineExpose({
     openAddSupportModal,
 });
 </script>
 
 <template>
-    <div class="space-y-5">
-        <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#111827]">
-            <div class="flex flex-wrap items-start justify-between gap-4">
-                <div class="space-y-1">
-                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">
-                        IT Initiative Support Potential
-                    </h3>
-                </div>
+    <div class="space-y-5">        
+        <section class="flex flex-wrap items-center justify-between gap-4">
+            <div class="flex flex-wrap gap-2">
+                <span class="support-metric">{{ displayGroups.length }} Tech Capability</span>
+                <span class="support-metric">{{ totalDigitalCount }} Digital Initiatives</span>
+                <span class="support-metric">{{ totalItCount }} IT Initiatives</span>
+            </div>
 
-                <div class="flex flex-wrap gap-2">
-                    <span class="support-metric">{{ props.groups.length }} Initiatives</span>
-                    <span class="support-metric">{{ totalItCount }} IT Supports</span>
-                </div>
+            <div class="flex items-center gap-2">
+                <button
+                    type="button"
+                    class="bu-toggle-btn"
+                    :class="{ 'bu-toggle-btn--active': showBusinessUnit }"
+                    :title="businessUnitToggleLabel"
+                    @click="toggleBusinessUnit"
+                >
+                    <svg v-if="showBusinessUnit" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <svg v-else class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                    </svg>
+                    <span>{{ businessUnitToggleLabel }}</span>
+                </button>
+
+                <select
+                    v-model="selectedNote"
+                    class="initiative-view-select"
+                >
+                    <option value="">Semua Catatan</option>
+                    <option
+                        v-for="note in noteOptions"
+                        :key="`note-opt-${note}`"
+                        :value="note"
+                    >
+                        {{ note.length > 50 ? note.substring(0, 50) + '...' : note }}
+                    </option>
+                </select>
             </div>
         </section>
 
@@ -402,6 +499,9 @@ defineExpose({
             class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#111827]"
         >
             <div class="overflow-x-auto">
+                <h1 class="text-center text-l font-bold mt-4 mb-4 ">
+                        IT Initiative Support Potential
+                </h1>
                 <table class="support-table">
                     <thead>
                         <tr>
@@ -413,64 +513,83 @@ defineExpose({
                     </thead>
 
                     <tbody>
-                        <tr
-                            v-for="row in displayRows"
-                            :key="row.key"
-                            class="support-table__row"
-                        >
-                            <td class="support-table__cell support-table__cell--tech">
-                                <div class="tech-capability">
-                                    <span class="tech-capability__label">{{ row.techCapability }}</span>
-                                </div>
-                            </td>
-
-                            <td class="support-table__cell support-table__cell--digital">
-                                <div class="digital-initiative">
-                                    <span v-if="initiativeDisplayCode(row.digital)" class="support-code-badge">
-                                        {{ initiativeDisplayCode(row.digital) }}
-                                    </span>
-                                    <span class="leading-snug text-slate-800 dark:text-slate-100">
-                                        {{ initiativeDisplayName(row.digital) }}
-                                    </span>
-                                </div>
-                            </td>
-
-                            <td class="support-table__cell support-table__cell--it">
-                                <div class="support-panel">
-                                    <div class="flex flex-wrap items-start justify-between gap-3">
-                                        <button
-                                            v-if="editable && Array.isArray(row.group?.mapping_ids) && row.group.mapping_ids.length > 0"
-                                            type="button"
-                                            class="support-delete-btn"
-                                            @click="openDeleteGroupModal(row.group)"
-                                        >
-                                            Hapus
-                                        </button>
+                        <template v-for="groupRow in displayGroups" :key="groupRow.key">
+                            <tr
+                                v-for="row in groupRow.digitalRows"
+                                :key="row.key"
+                                class="support-table__row"
+                            >
+                                <td class="support-table__cell support-table__cell--tech">
+                                    <div class="tech-capability">
+                                        <span class="tech-capability__label">{{ row.techCapability }}</span>
                                     </div>
+                                </td>
 
-                                    <ol class="support-list">
-                                        <li
-                                            v-for="initiative in row.group?.it_initiatives ?? []"
-                                            :key="`it-${row.group?.group_key}-${initiative.id}`"
-                                            class="support-list__item"
-                                        >
-                                            <span v-if="initiativeDisplayCode(initiative)" class="support-code-badge support-code-badge--it">
-                                                {{ initiativeDisplayCode(initiative) }}
-                                            </span>
+                                <td class="support-table__cell support-table__cell--digital">
+                                    <div class="digital-initiative">
+                                        <span v-if="initiativeDisplayCode(row.digital)" class="support-code-badge">
+                                            {{ initiativeDisplayCode(row.digital) }}
+                                        </span>
+                                        <div class="flex flex-col min-w-0">
                                             <span class="leading-snug text-slate-800 dark:text-slate-100">
-                                                {{ initiativeDisplayName(initiative) }}
+                                                {{ initiativeDisplayName(row.digital) }}
                                             </span>
-                                        </li>
-                                    </ol>
-                                </div>
-                            </td>
+                                            <span v-if="showBusinessUnit" class="support-bu-label">
+                                                {{ initiativeBusinessUnitLabel(row.digital) }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
 
-                            <td class="support-table__cell support-table__cell--notes">
-                                <div class="note-card" :class="{ 'note-card--muted': !(row.group?.note ?? '').trim() }">
-                                    {{ row.group?.note || EMPTY_NOTE_LABEL }}
-                                </div>
-                            </td>
-                        </tr>
+                                <td
+                                    v-if="row.isFirstRow"
+                                    :rowspan="groupRow.rowSpan"
+                                    class="support-table__cell support-table__cell--it support-table__cell--grouped"
+                                    :class="{ 'support-table__cell--last-group': groupRow.isLastGroup }"
+                                >
+                                    <div class="support-panel">
+                                        <div class="flex flex-wrap items-start justify-between gap-3">
+                                            <button
+                                                v-if="editable && Array.isArray(groupRow.group?.mapping_ids) && groupRow.group.mapping_ids.length > 0"
+                                                type="button"
+                                                class="support-delete-btn"
+                                                @click="openDeleteGroupModal(groupRow.group)"
+                                            >
+                                                Hapus
+                                            </button>
+                                        </div>
+
+                                        <ol class="support-list">
+                                            <li
+                                                v-for="initiative in groupRow.group?.it_initiatives ?? []"
+                                                :key="`it-${groupRow.group?.group_key}-${initiative.id}`"
+                                                class="support-list__item"
+                                            >
+                                                <span v-if="initiativeDisplayCode(initiative)" class="support-code-badge support-code-badge--it">
+                                                    {{ initiativeDisplayCode(initiative) }}
+                                                </span>
+                                                <div class="flex flex-col min-w-0">
+                                                    <span class="leading-snug text-slate-800 dark:text-slate-100">
+                                                        {{ initiativeDisplayName(initiative) }}
+                                                    </span>
+                                                </div>
+                                            </li>
+                                        </ol>
+                                    </div>
+                                </td>
+
+                                <td
+                                    v-if="row.isFirstRow"
+                                    :rowspan="groupRow.rowSpan"
+                                    class="support-table__cell support-table__cell--notes support-table__cell--grouped"
+                                    :class="{ 'support-table__cell--last-group': groupRow.isLastGroup }"
+                                >
+                                    <div class="note-card" :class="{ 'note-card--muted': !(groupRow.group?.note ?? '').trim() }">
+                                        {{ groupRow.group?.note || EMPTY_NOTE_LABEL }}
+                                    </div>
+                                </td>
+                            </tr>
+                        </template>
                     </tbody>
                 </table>
             </div>
@@ -628,23 +747,23 @@ defineExpose({
 }
 
 .support-table__head-cell {
-    padding: 14px 16px;
+    padding: 10px 16px;
     border-bottom: 1px solid #dbe3ee;
     border-right: 1px solid #dbe3ee;
-    background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+    background: #0f6fb7;
+    color: #ffffff;
     font-size: 12px;
     font-weight: 800;
     text-align: left;
-    color: #0f172a;
 }
 
-.support-table__head-cell:last-child,
-.support-table__cell:last-child {
-    border-right: none;
+.support-table__head-cell--notes,
+.support-table__cell--notes {
+    border-right: none !important;
 }
 
 .support-table__cell {
-    padding: 14px 16px;
+    padding: 8px 16px;
     border-bottom: 1px solid #e2e8f0;
     border-right: 1px solid #e2e8f0;
     vertical-align: top;
@@ -656,12 +775,12 @@ defineExpose({
 }
 
 .support-table__cell--tech {
-    width: 17%;
+    width: 12%;
     background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
 }
 
 .support-table__cell--digital {
-    width: 24%;
+    width: 32%;
 }
 
 .support-table__cell--notes {
@@ -669,18 +788,26 @@ defineExpose({
 }
 
 .support-table__cell--it {
-    width: 35%;
+    width: 32%;
+}
+
+.support-table__cell--grouped {
+    vertical-align: top;
+}
+
+.support-table__cell--last-group {
+    border-bottom: none;
 }
 
 .tech-capability {
     display: flex;
     min-height: 100%;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
 }
 
 .tech-capability__label {
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 800;
     line-height: 1.35;
     color: #0f172a;
@@ -710,12 +837,12 @@ defineExpose({
     display: flex;
     min-height: 100%;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
 }
 
 .support-list {
     display: grid;
-    gap: 10px;
+    gap: 6px;
     padding-left: 18px;
 }
 
@@ -759,6 +886,78 @@ defineExpose({
 .support-delete-btn:hover {
     background: #ffe4e6;
     border-color: #fda4af;
+}
+
+.bu-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #ffffff;
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    transition: all 0.15s ease;
+    cursor: pointer;
+}
+
+.bu-toggle-btn:hover {
+    border-color: #0f6fb7;
+    background: #f8fafc;
+}
+
+.bu-toggle-btn--active {
+    background: #0f6fb7;
+    border-color: #0f6fb7;
+    color: #ffffff;
+}
+
+.bu-toggle-btn--active:hover {
+    background: #0d5ea1;
+    border-color: #0d5ea1;
+}
+
+.support-bu-label {
+    display: block;
+    width: 100%;
+    margin-top: 2px;
+    font-size: 8px;
+    font-weight: 700;
+    font-style: italic;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.initiative-view-select {
+    appearance: none;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #ffffff;
+    padding: 6px 32px 6px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 14px;
+    transition: all 0.15s ease;
+}
+
+.initiative-view-select:hover {
+    border-color: #0f6fb7;
+    color: #0f6fb7;
+}
+
+.initiative-view-select:focus {
+    outline: none;
+    border-color: #0f6fb7;
+    box-shadow: 0 0 0 3px rgba(15, 111, 183, 0.1);
 }
 
 .edit-select,

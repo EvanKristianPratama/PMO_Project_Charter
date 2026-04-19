@@ -2,12 +2,10 @@
 
 namespace App\Services\ProgramPlanning\StrategicHouse\InitiativeSupport;
 
-use App\Models\MstCoe;
 use App\Models\MstInitiative;
 use App\Models\TrsInitiativeSupport;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class InitiativeSupportService
@@ -23,19 +21,27 @@ class InitiativeSupportService
 
     public function getGroupedMappings(): array
     {
-        return TrsInitiativeSupport::query()
+        $mappings = TrsInitiativeSupport::query()
             ->with([
-                'digitalInitiative:id,code,name,tipe_initiative,coe_id',
-                'digitalInitiative.coe:id,name',
-                'itInitiative:id,code,name,tipe_initiative,coe_id',
-                'itInitiative.coe:id,name',
+                'digitalInitiative.coe',
+                'digitalInitiative.organization',
+                'itInitiative.coe',
+                'itInitiative.organization',
             ])
             ->whereHas('digitalInitiative', fn (Builder $query) => $query->where('tipe_initiative', 1))
             ->whereHas('itInitiative', fn (Builder $query) => $query->where('tipe_initiative', 2))
             ->orderBy('id')
-            ->get()
-            ->groupBy(fn (TrsInitiativeSupport $mapping): string => $this->resolveGroupKey($mapping))
-            ->map(fn (Collection $mappings, string $groupKey): array => $this->mapGroup($mappings, $groupKey))
+            ->get();
+
+        $digitalGroups = $mappings
+            ->groupBy(fn (TrsInitiativeSupport $mapping): string => $this->resolveDigitalNoteKey($mapping))
+            ->map(fn (Collection $groupMappings): array => $this->mapDigitalGroup($groupMappings))
+            ->values()
+            ->all();
+
+        return collect($digitalGroups)
+            ->groupBy(fn (array $group): string => $this->resolveSharedSupportKey($group))
+            ->map(fn (Collection $groupedDigitals, string $groupKey): array => $this->mapSharedGroup($groupedDigitals, $groupKey))
             ->values()
             ->all();
     }
@@ -121,22 +127,17 @@ class InitiativeSupportService
     private function getInitiativeOptions(int $initiativeType): Collection
     {
         return MstInitiative::query()
-            ->with(['coe:id,name'])
+            ->with(['coe', 'organization'])
             ->where('tipe_initiative', $initiativeType)
             ->orderBy('id')
-            ->get(['id', 'code', 'name', 'coe_id'])
+            ->get()
             ->map(fn (MstInitiative $initiative): array => $this->mapInitiative($initiative));
     }
 
-    private function mapGroup(Collection $mappings, string $groupKey): array
+    private function mapDigitalGroup(Collection $mappings): array
     {
-        $note = trim((string) ($mappings->first()?->notes ?? ''));
-
-        $digitalInitiatives = $mappings
-            ->map(fn (TrsInitiativeSupport $mapping): ?array => $this->mapInitiative($mapping->digitalInitiative))
-            ->filter()
-            ->unique('id')
-            ->values();
+        $note = $this->normalizeNote($mappings->first()?->notes);
+        $digitalInitiative = $this->mapInitiative($mappings->first()?->digitalInitiative);
 
         $itInitiatives = $mappings
             ->map(fn (TrsInitiativeSupport $mapping): ?array => $this->mapInitiative($mapping->itInitiative))
@@ -145,11 +146,11 @@ class InitiativeSupportService
             ->values();
 
         return [
-            'group_key' => $groupKey,
+            'digital_initiative' => $digitalInitiative,
+            'digital_id' => (int) ($digitalInitiative['id'] ?? 0),
             'note' => $note,
-            'note_label' => $note !== '' ? $note : 'Belum ada catatan dukungan.',
-            'digital_initiatives' => $digitalInitiatives->all(),
             'it_initiatives' => $itInitiatives->all(),
+            'first_mapping_id' => (int) ($mappings->first()?->id ?? 0),
             'mapping_ids' => $mappings->pluck('id')->map(fn ($id): int => (int) $id)->values()->all(),
             'mappings' => $mappings
                 ->map(fn (TrsInitiativeSupport $mapping): array => [
@@ -160,6 +161,47 @@ class InitiativeSupportService
                 ->values()
                 ->all(),
             'total_mappings' => (int) $mappings->count(),
+        ];
+    }
+
+    private function mapSharedGroup(Collection $digitalGroups, string $groupKey): array
+    {
+        $orderedDigitalGroups = $digitalGroups
+            ->sortBy('first_mapping_id')
+            ->values();
+
+        $note = $this->normalizeNote($orderedDigitalGroups->first()['note'] ?? null);
+
+        $digitalInitiatives = $orderedDigitalGroups
+            ->map(fn (array $group): ?array => $group['digital_initiative'] ?? null)
+            ->filter()
+            ->unique('id')
+            ->values();
+
+        $itInitiatives = $orderedDigitalGroups
+            ->flatMap(fn (array $group): array => $group['it_initiatives'] ?? [])
+            ->filter()
+            ->unique('id')
+            ->values();
+
+        $mappingIds = $orderedDigitalGroups
+            ->flatMap(fn (array $group): array => $group['mapping_ids'] ?? [])
+            ->map(fn ($id): int => (int) $id)
+            ->unique()
+            ->values();
+
+        return [
+            'group_key' => $groupKey,
+            'note' => $note,
+            'note_label' => $note !== '' ? $note : 'Belum ada catatan dukungan.',
+            'digital_initiatives' => $digitalInitiatives->all(),
+            'it_initiatives' => $itInitiatives->all(),
+            'mapping_ids' => $mappingIds->all(),
+            'mappings' => $orderedDigitalGroups
+                ->flatMap(fn (array $group): array => $group['mappings'] ?? [])
+                ->values()
+                ->all(),
+            'total_mappings' => $mappingIds->count(),
         ];
     }
 
@@ -178,12 +220,25 @@ class InitiativeSupportService
             'name' => $name,
             'label' => $this->buildInitiativeLabel($code, $name),
             'coe_name' => trim((string) ($initiative->coe?->name ?? 'No CoE')),
+            'business_unit' => trim((string) ($initiative->organization?->name ?? $initiative->business_unit ?? '')),
         ];
     }
 
-    private function resolveGroupKey(TrsInitiativeSupport $mapping): string
+    private function resolveDigitalNoteKey(TrsInitiativeSupport $mapping): string
     {
-        return 'digital:'.(int) $mapping->digital_id;
+        return 'digital:'.(int) $mapping->digital_id.'|note:'.md5($this->normalizeNote($mapping->notes));
+    }
+
+    private function resolveSharedSupportKey(array $group): string
+    {
+        $itIds = collect($group['it_initiatives'] ?? [])
+            ->map(fn (array $initiative): int => (int) ($initiative['id'] ?? 0))
+            ->filter(fn (int $id): bool => $id > 0)
+            ->sort()
+            ->values()
+            ->implode('-');
+
+        return 'note:'.md5($this->normalizeNote($group['note'] ?? null)).'|it:'.$itIds;
     }
 
     private function mappingKey(int $digitalId, int $itId): string
@@ -213,5 +268,10 @@ class InitiativeSupportService
         $cleanedName = trim((string) $cleanedName);
 
         return $cleanedName !== '' ? $cleanedName : $rawName;
+    }
+
+    private function normalizeNote(?string $note): string
+    {
+        return trim((string) $note);
     }
 }
