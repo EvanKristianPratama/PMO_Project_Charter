@@ -46,6 +46,8 @@ const resolveInitialBusinessUnitVisibility = () => {
 const saveProcessing = ref(false);
 const deleteProcessing = ref(false);
 const selectedNote = ref('');
+const selectedCoE = ref('');
+const selectedOrg = ref('');
 const showBusinessUnit = ref(resolveInitialBusinessUnitVisibility());
 const activeModal = ref('');
 const isModalVisible = ref(false);
@@ -69,6 +71,38 @@ const noteOptions = computed(() => {
     return Array.from(notes).sort();
 });
 
+const getCategoryByNote = (note) => {
+    const text = (note ?? '').toLowerCase();
+    if (text.includes('data analystic & ai')) return 'AI/Analytics';
+    if (text.includes('iot')) return 'IoT';
+    if (text.includes('cloud computing')) return 'Cloud & Advanced Computing';
+    return null;
+};
+
+const coeOptions = computed(() => {
+    const coes = new Set();
+    props.groups.forEach(group => {
+        const noteCategory = getCategoryByNote(group.note);
+        (group.digital_initiatives ?? []).forEach(digital => {
+            const coe = normalizeTechCapability(digital?.coe_name);
+            const finalCategory = coe === 'CoE Not Available' ? coe : (noteCategory || coe);
+            coes.add(finalCategory);
+        });
+    });
+    return Array.from(coes).sort();
+});
+
+const orgOptions = computed(() => {
+    const orgs = new Set();
+    props.groups.forEach(group => {
+        (group.digital_initiatives ?? []).forEach(digital => {
+            const org = initiativeBusinessUnitLabel(digital);
+            if (org !== '-') orgs.add(org);
+        });
+    });
+    return Array.from(orgs).sort();
+});
+
 const createMappingKey = (digitalId, itId) => {
     return `${Number(digitalId ?? 0)}:${Number(itId ?? 0)}`;
 };
@@ -81,10 +115,13 @@ const firstErrorMessage = (errors = {}) => {
 };
 
 const normalizeTechCapability = (value) => {
-    const name = String(value ?? '').trim();
+    if (value === null || value === undefined) return 'CoE Not Available';
+    
+    const name = String(value).trim();
+    const upper = name.toUpperCase();
 
-    if (name === '' || name.toUpperCase() === 'NO COE') {
-        return 'No CoE';
+    if (name === '' || upper === 'NO COE' || upper === 'NULL' || upper === 'UNDEFINED' || name === '-') {
+        return 'CoE Not Available';
     }
 
     return name;
@@ -154,27 +191,81 @@ const displayGroups = computed(() => {
 
     return groups
         .map((group, groupIndex) => {
-            const digitalRows = (group?.digital_initiatives ?? [])
+            const noteCategory = getCategoryByNote(group.note);
+            let digitalRows = (group?.digital_initiatives ?? [])
                 .filter((digital) => Boolean(digital?.id))
-                .map((digital, digitalIndex) => ({
-                    key: `${group?.group_key ?? 'support-group'}:${digital.id}:${digitalIndex}`,
-                    digital,
-                    techCapability: normalizeTechCapability(digital?.coe_name),
-                    isFirstRow: digitalIndex === 0,
-                }));
+                .map((digital, digitalIndex) => {
+                    const coe = normalizeTechCapability(digital?.coe_name);
+                    const finalCategory = coe === 'CoE Not Available' ? coe : (noteCategory || coe);
+
+                    return {
+                        key: `${group?.group_key ?? 'support-group'}:${digital.id}:${digitalIndex}`,
+                        digital,
+                        techCapability: finalCategory,
+                        org: initiativeBusinessUnitLabel(digital),
+                        isFirstRow: digitalIndex === 0,
+                    };
+                });
+            if (selectedCoE.value !== '') {
+                digitalRows = digitalRows.filter(row => row.techCapability === selectedCoE.value);
+            }
+
+            if (selectedOrg.value !== '') {
+                digitalRows = digitalRows.filter(row => row.org === selectedOrg.value);
+            }
 
             return {
                 key: group?.group_key ?? `support-group-${groupIndex}`,
                 group,
                 digitalRows,
-                rowSpan: digitalRows.length || 1,
             };
         })
         .filter((group) => group.digitalRows.length > 0)
-        .map((group, index, groups) => ({
-            ...group,
-            isLastGroup: index === groups.length - 1,
-        }));
+        .map((group, index, groups) => {
+            const finalDigitalRows = group.digitalRows.map((row, idx) => ({
+                ...row,
+                isFirstRow: idx === 0,
+            }));
+
+            return {
+                ...group,
+                digitalRows: finalDigitalRows,
+                rowSpan: finalDigitalRows.length,
+                isLastGroup: index === groups.length - 1,
+            };
+        });
+});
+
+const coeSpanMap = computed(() => {
+    const map = new Map();
+    const allDigitalRows = displayGroups.value.flatMap((group) => group.digitalRows);
+
+    let i = 0;
+    while (i < allDigitalRows.length) {
+        const startRow = allDigitalRows[i];
+        const uniqueDigitalIds = new Set();
+        let j = i;
+        
+        while (
+            j < allDigitalRows.length &&
+            allDigitalRows[j].techCapability === startRow.techCapability
+        ) {
+            if (allDigitalRows[j].digital?.id) {
+                uniqueDigitalIds.add(allDigitalRows[j].digital.id);
+            }
+            j++;
+        }
+
+        map.set(startRow.key, {
+            span: j - i,
+            isLastRow: j === allDigitalRows.length,
+            digitalCount: uniqueDigitalIds.size,
+        });
+
+        i = j;
+    }
+
+    return map;
 });
 
 const hasGroups = computed(() => displayGroups.value.length > 0);
@@ -452,7 +543,7 @@ defineExpose({
 </script>
 
 <template>
-    <div class="space-y-5">        
+    <div class="space-y-5">
         <section class="flex flex-wrap items-center justify-between gap-4">
             <div class="flex flex-wrap gap-2">
                 <span class="support-metric">{{ displayGroups.length }} Tech Capability</span>
@@ -461,67 +552,77 @@ defineExpose({
             </div>
 
             <div class="flex items-center gap-2">
-                <button
-                    type="button"
-                    class="bu-toggle-btn"
-                    :class="{ 'bu-toggle-btn--active': showBusinessUnit }"
-                    :title="businessUnitToggleLabel"
-                    @click="toggleBusinessUnit"
-                >
-                    <svg v-if="showBusinessUnit" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                <button type="button" class="bu-toggle-btn" :class="{ 'bu-toggle-btn--active': showBusinessUnit }"
+                    :title="businessUnitToggleLabel" @click="toggleBusinessUnit">
+                    <svg v-if="showBusinessUnit" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
                     <svg v-else class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
                     </svg>
                     <span>{{ businessUnitToggleLabel }}</span>
                 </button>
 
-                <select
-                    v-model="selectedNote"
-                    class="initiative-view-select"
-                >
+                <select v-model="selectedCoE" class="initiative-view-select">
+                    <option value="">Semua CoE</option>
+                    <option v-for="coe in coeOptions" :key="`coe-opt-${coe}`" :value="coe">
+                        {{ coe }}
+                    </option>
+                </select>
+
+                <select v-model="selectedOrg" class="initiative-view-select">
+                    <option value="">Semua Organisasi</option>
+                    <option v-for="org in orgOptions" :key="`org-opt-${org}`" :value="org">
+                        {{ org }}
+                    </option>
+                </select>
+
+                <select v-model="selectedNote" class="initiative-view-select">
                     <option value="">Semua Catatan</option>
-                    <option
-                        v-for="note in noteOptions"
-                        :key="`note-opt-${note}`"
-                        :value="note"
-                    >
+                    <option v-for="note in noteOptions" :key="`note-opt-${note}`" :value="note">
                         {{ note.length > 50 ? note.substring(0, 50) + '...' : note }}
                     </option>
                 </select>
             </div>
         </section>
 
-        <section
-            v-if="hasGroups"
-            class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#111827]"
-        >
+        <section v-if="hasGroups"
+            class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#111827]">
             <div class="overflow-x-auto">
                 <h1 class="text-center text-l font-bold mt-4 mb-4 ">
-                        IT Initiative Support Potential
+                    IT Initiative Support Potential
                 </h1>
                 <table class="support-table">
                     <thead>
                         <tr>
-                            <th class="support-table__head-cell support-table__head-cell--tech">Tech Capability</th>
-                            <th class="support-table__head-cell support-table__head-cell--digital">Digital Initiatives</th>
-                            <th class="support-table__head-cell support-table__head-cell--it">Potensi Dukungan IT Initiatives</th>
-                            <th class="support-table__head-cell support-table__head-cell--notes">Notes / Catatan</th>
+                            <th class="support-table__head-cell support-table__head-cell--tech">Tech Capability / CoE
+                            </th>
+                            <th class="support-table__head-cell support-table__head-cell--digital">Digital Initiatives
+                            </th>
+                            <th class="support-table__head-cell support-table__head-cell--it">Potensi Dukungan IT
+                                Initiatives & Notes</th>
                         </tr>
                     </thead>
 
                     <tbody>
                         <template v-for="groupRow in displayGroups" :key="groupRow.key">
-                            <tr
-                                v-for="row in groupRow.digitalRows"
-                                :key="row.key"
-                                class="support-table__row"
-                            >
-                                <td class="support-table__cell support-table__cell--tech">
+                            <tr v-for="row in groupRow.digitalRows" :key="row.key" class="support-table__row">
+                                <td
+                                    v-if="coeSpanMap.has(row.key)"
+                                    :rowspan="coeSpanMap.get(row.key).span"
+                                    class="support-table__cell support-table__cell--tech"
+                                    :class="{ 'support-table__cell--last-group': coeSpanMap.get(row.key).isLastRow }"
+                                >
                                     <div class="tech-capability">
                                         <span class="tech-capability__label">{{ row.techCapability }}</span>
+                                        <span class="tech-capability__counter">
+                                            {{ coeSpanMap.get(row.key).digitalCount }}
+                                        </span>
                                     </div>
                                 </td>
 
@@ -541,31 +642,30 @@ defineExpose({
                                     </div>
                                 </td>
 
-                                <td
-                                    v-if="row.isFirstRow"
-                                    :rowspan="groupRow.rowSpan"
+                                <td v-if="row.isFirstRow" :rowspan="groupRow.rowSpan"
                                     class="support-table__cell support-table__cell--it support-table__cell--grouped"
-                                    :class="{ 'support-table__cell--last-group': groupRow.isLastGroup }"
-                                >
+                                    :class="{ 'support-table__cell--last-group': groupRow.isLastGroup }">
                                     <div class="support-panel">
                                         <div class="flex flex-wrap items-start justify-between gap-3">
                                             <button
                                                 v-if="editable && Array.isArray(groupRow.group?.mapping_ids) && groupRow.group.mapping_ids.length > 0"
-                                                type="button"
-                                                class="support-delete-btn"
-                                                @click="openDeleteGroupModal(groupRow.group)"
-                                            >
+                                                type="button" class="support-delete-btn"
+                                                @click="openDeleteGroupModal(groupRow.group)">
                                                 Hapus
                                             </button>
                                         </div>
 
+                                        <div class="note-card"
+                                            :class="{ 'note-card--muted': !(groupRow.group?.note ?? '').trim() }">
+                                            {{ groupRow.group?.note || EMPTY_NOTE_LABEL }}
+                                        </div>
+
                                         <ol class="support-list">
-                                            <li
-                                                v-for="initiative in groupRow.group?.it_initiatives ?? []"
+                                            <li v-for="initiative in groupRow.group?.it_initiatives ?? []"
                                                 :key="`it-${groupRow.group?.group_key}-${initiative.id}`"
-                                                class="support-list__item"
-                                            >
-                                                <span v-if="initiativeDisplayCode(initiative)" class="support-code-badge support-code-badge--it">
+                                                class="support-list__item">
+                                                <span v-if="initiativeDisplayCode(initiative)"
+                                                    class="support-code-badge support-code-badge--it">
                                                     {{ initiativeDisplayCode(initiative) }}
                                                 </span>
                                                 <div class="flex flex-col min-w-0">
@@ -577,17 +677,6 @@ defineExpose({
                                         </ol>
                                     </div>
                                 </td>
-
-                                <td
-                                    v-if="row.isFirstRow"
-                                    :rowspan="groupRow.rowSpan"
-                                    class="support-table__cell support-table__cell--notes support-table__cell--grouped"
-                                    :class="{ 'support-table__cell--last-group': groupRow.isLastGroup }"
-                                >
-                                    <div class="note-card" :class="{ 'note-card--muted': !(groupRow.group?.note ?? '').trim() }">
-                                        {{ groupRow.group?.note || EMPTY_NOTE_LABEL }}
-                                    </div>
-                                </td>
                             </tr>
                         </template>
                     </tbody>
@@ -595,10 +684,8 @@ defineExpose({
             </div>
         </section>
 
-        <section
-            v-else
-            class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center dark:border-white/10 dark:bg-white/[0.03]"
-        >
+        <section v-else
+            class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center dark:border-white/10 dark:bg-white/[0.03]">
             <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">
                 Belum ada data initiative support.
             </p>
@@ -607,47 +694,28 @@ defineExpose({
             </p>
         </section>
 
-        <ConfirmationModal
-            :show="isModalVisible"
-            :title="modalTitle"
-            :message="modalMessage"
-            :type="modalType"
-            :loading="modalLoading"
-            :confirm-text="modalConfirmText"
-            cancel-text="Batal"
-            max-width="2xl"
-            @close="closeModal"
-            @confirm="handleModalConfirm"
-            @after-leave="handleModalAfterLeave"
-        >
+        <ConfirmationModal :show="isModalVisible" :title="modalTitle" :message="modalMessage" :type="modalType"
+            :loading="modalLoading" :confirm-text="modalConfirmText" cancel-text="Batal" max-width="2xl"
+            @close="closeModal" @confirm="handleModalConfirm" @after-leave="handleModalAfterLeave">
             <div v-if="isAddModal" class="space-y-4">
                 <div class="space-y-1.5">
-                    <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Digital Initiatives</label>
+                    <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Digital
+                        Initiatives</label>
                     <div class="space-y-2">
                         <select class="edit-select" @change="onDigitalSelect">
                             <option value="">+ Pilih Digital Initiative...</option>
-                            <option
-                                v-for="option in digitalOptions"
-                                :key="`digital-option-${option.id}`"
-                                :value="String(option.id)"
-                                :disabled="addForm.digital_ids.includes(Number(option.id))"
-                            >
+                            <option v-for="option in digitalOptions" :key="`digital-option-${option.id}`"
+                                :value="String(option.id)" :disabled="addForm.digital_ids.includes(Number(option.id))">
                                 {{ initiativeOptionLabel(option) }}
                             </option>
                         </select>
 
                         <div v-if="selectedDigitalInitiatives.length > 0" class="flex flex-wrap gap-2">
-                            <span
-                                v-for="initiative in selectedDigitalInitiatives"
-                                :key="`selected-digital-${initiative.id}`"
-                                class="initiative-tag"
-                            >
+                            <span v-for="initiative in selectedDigitalInitiatives"
+                                :key="`selected-digital-${initiative.id}`" class="initiative-tag">
                                 {{ initiativeOptionLabel(initiative) }}
-                                <button
-                                    type="button"
-                                    class="initiative-tag__remove"
-                                    @click="removeSelection('digital_ids', initiative.id)"
-                                >
+                                <button type="button" class="initiative-tag__remove"
+                                    @click="removeSelection('digital_ids', initiative.id)">
                                     x
                                 </button>
                             </span>
@@ -660,28 +728,18 @@ defineExpose({
                     <div class="space-y-2">
                         <select class="edit-select" @change="onItSelect">
                             <option value="">+ Pilih IT Initiative...</option>
-                            <option
-                                v-for="option in itOptions"
-                                :key="`it-option-${option.id}`"
-                                :value="String(option.id)"
-                                :disabled="addForm.it_ids.includes(Number(option.id))"
-                            >
+                            <option v-for="option in itOptions" :key="`it-option-${option.id}`"
+                                :value="String(option.id)" :disabled="addForm.it_ids.includes(Number(option.id))">
                                 {{ initiativeOptionLabel(option) }}
                             </option>
                         </select>
 
                         <div v-if="selectedItInitiatives.length > 0" class="flex flex-wrap gap-2">
-                            <span
-                                v-for="initiative in selectedItInitiatives"
-                                :key="`selected-it-${initiative.id}`"
-                                class="initiative-tag"
-                            >
+                            <span v-for="initiative in selectedItInitiatives" :key="`selected-it-${initiative.id}`"
+                                class="initiative-tag">
                                 {{ initiativeOptionLabel(initiative) }}
-                                <button
-                                    type="button"
-                                    class="initiative-tag__remove"
-                                    @click="removeSelection('it_ids', initiative.id)"
-                                >
+                                <button type="button" class="initiative-tag__remove"
+                                    @click="removeSelection('it_ids', initiative.id)">
                                     x
                                 </button>
                             </span>
@@ -691,18 +749,12 @@ defineExpose({
 
                 <div class="space-y-1.5">
                     <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Catatan Dukungan</label>
-                    <textarea
-                        v-model="addForm.notes"
-                        rows="4"
-                        class="edit-textarea"
-                        placeholder="Isi catatan dukungan bila diperlukan."
-                    />
+                    <textarea v-model="addForm.notes" rows="4" class="edit-textarea"
+                        placeholder="Isi catatan dukungan bila diperlukan." />
                 </div>
 
-                <p
-                    v-if="modalError"
-                    class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700"
-                >
+                <p v-if="modalError"
+                    class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700">
                     {{ modalError }}
                 </p>
             </div>
@@ -715,10 +767,8 @@ defineExpose({
                     </p>
                 </div>
 
-                <p
-                    v-if="modalError"
-                    class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700"
-                >
+                <p v-if="modalError"
+                    class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700">
                     {{ modalError }}
                 </p>
             </div>
@@ -775,20 +825,17 @@ defineExpose({
 }
 
 .support-table__cell--tech {
-    width: 12%;
+    width: 15%;
     background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+    vertical-align: middle !important;
 }
 
 .support-table__cell--digital {
-    width: 32%;
-}
-
-.support-table__cell--notes {
-    width: 24%;
+    width: 35%;
 }
 
 .support-table__cell--it {
-    width: 32%;
+    width: 50%;
 }
 
 .support-table__cell--grouped {
@@ -803,6 +850,9 @@ defineExpose({
     display: flex;
     min-height: 100%;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
     gap: 4px;
 }
 
@@ -811,6 +861,24 @@ defineExpose({
     font-weight: 800;
     line-height: 1.35;
     color: #0f172a;
+}
+
+.tech-capability__counter {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    background: #0f6fb7;
+    padding: 2px 10px;
+    font-size: 9px;
+    font-weight: 800;
+    color: #ffffff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
+}
+
+:deep(.dark) .tech-capability__counter {
+    background: #3b82f6;
+    color: #ffffff;
 }
 
 .digital-initiative {
