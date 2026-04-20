@@ -433,6 +433,17 @@ const initiativeDisplayName = (initiative) => {
 
     return String(initiative?.label ?? '-').trim() || '-';
 };
+
+const initiativeOptionLabel = (initiative) => {
+    const code = String(initiative?.code ?? '').trim();
+    const name = initiativeDisplayName(initiative);
+
+    if (code !== '' && name !== '-') {
+        return `[${code}] ${name}`;
+    }
+
+    return name !== '-' ? name : code || '-';
+};
 </script>
 
 <template>
@@ -676,8 +687,8 @@ const initiativeDisplayName = (initiative) => {
                                         ]"
                                     >
                                         <!-- Custom Smart Tooltip -->
-                                        <div class="absolute top-full left-1/2 z-50 mt-1 hidden -translate-x-1/2 w-max max-w-sm bg-white border border-slate-800 shadow-sm px-1.5 py-1 text-[9px] italic group-hover:block dark:bg-slate-800">
-                                            {{ initiative.description || initiative.name }}
+                                        <div class="absolute top-full left-1/2 z-50 mt-1 hidden -translate-x-1/2 w-max max-w-[250px] sm:max-w-xs md:max-w-sm bg-white border border-slate-800 shadow-sm px-1.5 py-1 text-left text-[9px] italic text-slate-800 group-hover:block pointer-events-none whitespace-normal break-words dark:bg-slate-800 dark:border-slate-600 dark:text-slate-200">
+                                            {{ initiative.description || initiativeOptionLabel(initiative) }}
                                         </div>
 
                                         <span v-if="showInitiativeCode && initiative.code"

@@ -154,11 +154,11 @@ const props = defineProps({
     },
     storeRouteName: {
         type: String,
-        default: 'it-initiatives.implementation-status.store',
+        default: 'program-evaluation.review-timeline.review-status.store',
     },
     updateRouteName: {
         type: String,
-        default: 'it-initiatives.implementation-status.update',
+        default: 'program-evaluation.review-timeline.review-status.update',
     },
 });
 

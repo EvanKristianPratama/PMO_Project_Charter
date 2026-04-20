@@ -21,7 +21,7 @@ class InitiativeRelationController extends Controller
     public function index(): Response
     {
         return Inertia::render(
-            'ProgramPlanning/InitiativeRelation/Index',
+            'ProgramPlanning/StrategicHouse/InitiativeRelation/Index',
             $this->initiativeRelationService->getIndexProps()
         );
     }
@@ -29,7 +29,7 @@ class InitiativeRelationController extends Controller
     public function create(): Response
     {
         return Inertia::render(
-            'ProgramPlanning/InitiativeRelation/Create',
+            'ProgramPlanning/StrategicHouse/InitiativeRelation/Create',
             $this->initiativeRelationService->getCreateProps()
         );
     }
@@ -53,7 +53,7 @@ class InitiativeRelationController extends Controller
     public function edit(MstInitiativeRelation $initiativeRelation): Response
     {
         return Inertia::render(
-            'ProgramPlanning/InitiativeRelation/Edit',
+            'ProgramPlanning/StrategicHouse/InitiativeRelation/Edit',
             $this->initiativeRelationService->getEditProps($initiativeRelation)
         );
     }

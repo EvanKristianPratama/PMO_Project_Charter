@@ -200,7 +200,12 @@
 
                 <section v-if="activeNav === 'roadmap'" id="roadmap" class="print:hidden">
                     <div class="px-3 py-3">
-                        <StatusImplementationTable :projects="mappedProjects" />
+                        <StatusImplementationTable
+                            :projects="mappedProjects"
+                            history-source="review"
+                            store-route-name="program-evaluation.review-timeline.review-status.store"
+                            update-route-name="program-evaluation.review-timeline.review-status.update"
+                        />
                         <div v-if="allRoadmapVersions.length > 0" class="mt-3 flex flex-col overflow-hidden rounded-xl border border-[#d0dce8] shadow-sm dark:border-white/10">
                             <template v-for="(roadmapProject, idx) in allRoadmapVersions" :key="`rm-road-${roadmapProject.roadmap_key}`">
                                 <ProjectRoadmapSummary 

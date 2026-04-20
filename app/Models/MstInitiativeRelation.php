@@ -18,6 +18,13 @@ class MstInitiativeRelation extends Model
         'initiative_code_column',
         'type_relation',
         'justifikasi',
+        'x',
+        'y',
+    ];
+
+    protected $casts = [
+        'x' => 'float',
+        'y' => 'float',
     ];
 
     public function initiativeRow(): BelongsTo

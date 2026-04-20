@@ -45,9 +45,8 @@ const props = defineProps({
     },
 });
 
-const initiativeRelationIndexPath = '/program-planning/initiative-relation';
-const initiativeRelationCreatePath = `${initiativeRelationIndexPath}/create`;
-const initiativeRelationEditPath = (initiativeRelationId) => `${initiativeRelationIndexPath}/${initiativeRelationId}/edit`;
+const initiativeRelationCreatePath = route('initiative-relations.create');
+const initiativeRelationEditPath = (initiativeRelationId) => route('initiative-relations.edit', initiativeRelationId);
 const pageContainer = computed(() => (props.embedded ? 'div' : UserLayout));
 const pageContainerProps = computed(() => (props.embedded ? {} : { title: 'Initiative Relation' }));
 

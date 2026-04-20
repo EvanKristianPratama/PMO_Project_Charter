@@ -23,8 +23,10 @@ class InitiativeSupportService
     {
         $mappings = TrsInitiativeSupport::query()
             ->with([
+                'digitalInitiative:id,name,code,description,coe_id,business_unit',
                 'digitalInitiative.coe',
                 'digitalInitiative.organization',
+                'itInitiative:id,name,code,description,coe_id,business_unit',
                 'itInitiative.coe',
                 'itInitiative.organization',
             ])
@@ -127,6 +129,7 @@ class InitiativeSupportService
     private function getInitiativeOptions(int $initiativeType): Collection
     {
         return MstInitiative::query()
+            ->select(['id', 'name', 'code', 'description', 'coe_id', 'business_unit'])
             ->with(['coe', 'organization'])
             ->where('tipe_initiative', $initiativeType)
             ->orderBy('id')
@@ -218,6 +221,7 @@ class InitiativeSupportService
             'id' => (int) $initiative->id,
             'code' => $code,
             'name' => $name,
+            'description' => $initiative->description,
             'label' => $this->buildInitiativeLabel($code, $name),
             'coe_name' => trim((string) ($initiative->coe?->name ?? 'No CoE')),
             'business_unit' => trim((string) ($initiative->organization?->name ?? $initiative->business_unit ?? '')),
