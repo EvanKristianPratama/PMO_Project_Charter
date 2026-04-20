@@ -309,7 +309,7 @@ class StrategicHousePageService
             ->select(['id', 'name'])
             ->with([
                 'initiatives' => fn ($query) => $query
-                    ->select(['id', 'coe_id', 'code', 'name', 'status', 'source'])
+                    ->select(['id', 'coe_id', 'code', 'name', 'status', 'source', 'description'])
                     ->where('tipe_initiative', $initiativeType)
                     ->with([
                         'latestStatus',
@@ -366,6 +366,7 @@ class StrategicHousePageService
                     'id' => (int) $initiative->id,
                     'code' => $initiative->code,
                     'name' => $initiative->name,
+                    'description' => $initiative->description,
                     'label' => trim(collect([$initiative->code, $initiative->name])->filter()->implode(' - ')),
                     'mapped_project_id' => $mappedProjectId > 0 ? $mappedProjectId : null,
                     'status' => $status,
@@ -439,7 +440,7 @@ class StrategicHousePageService
                             ->where('pilar', 2)
                             ->with([
                                 'initiative' => fn ($initiativeQuery) => $initiativeQuery
-                                    ->select(['id', 'code', 'name', 'coe_id', 'business_unit', 'source'])
+                                    ->select(['id', 'code', 'name', 'coe_id', 'business_unit', 'source', 'description'])
                                     ->with([
                                         'coe:id,name',
                                         'organization:id,name',
@@ -468,7 +469,7 @@ class StrategicHousePageService
             ->select(['id', 'goal', 'initiative_id', 'pilar', 'themes_id'])
             ->with([
                 'initiative' => fn ($query) => $query
-                    ->select(['id', 'code', 'name', 'coe_id', 'business_unit', 'source'])
+                    ->select(['id', 'code', 'name', 'coe_id', 'business_unit', 'source', 'description'])
                     ->with([
                         'coe:id,name',
                         'organization:id,name',
@@ -536,6 +537,7 @@ class StrategicHousePageService
             'id' => (int) $initiative->id,
             'code' => $initiative->code,
             'name' => $initiative->name,
+            'description' => $initiative->description,
             'coe_id' => $initiative->coe_id ? (int) $initiative->coe_id : null,
             'coe_name' => $initiative->coe?->name,
             'label' => trim(collect([$initiative->code, $initiative->name])->filter()->implode(' - ')),
@@ -603,7 +605,7 @@ class StrategicHousePageService
     private function getUnassignedInitiatives(int $initiativeType): array
     {
         return MstInitiative::query()
-            ->select(['id', 'code', 'name', 'status', 'source'])
+            ->select(['id', 'code', 'name', 'status', 'source', 'description'])
             ->with(['latestStatus', 'latestStatusImplementation', 'sourceData:id,name'])
             ->where('tipe_initiative', $initiativeType)
             ->whereNull('coe_id')
@@ -616,6 +618,7 @@ class StrategicHousePageService
                     'id' => (int) $initiative->id,
                     'code' => $initiative->code,
                     'name' => $initiative->name,
+                    'description' => $initiative->description,
                     'label' => trim(collect([$initiative->code, $initiative->name])->filter()->implode(' - ')),
                     'status' => $status,
                     'status_label' => $this->statusLabel($status),

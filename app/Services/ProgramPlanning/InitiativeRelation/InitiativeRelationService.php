@@ -128,6 +128,8 @@ class InitiativeRelationService
             'type_relation' => $initiativeRelation->type_relation,
             'justifikasi' => $justifikasi,
             'description' => $justifikasi,
+            'x' => $initiativeRelation->x,
+            'y' => $initiativeRelation->y,
             'initiative_row' => $initiativeRelation->initiativeRow
                 ? [
                     'id' => (int) $initiativeRelation->initiativeRow->id,

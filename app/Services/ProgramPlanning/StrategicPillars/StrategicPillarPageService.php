@@ -65,7 +65,7 @@ class StrategicPillarPageService
     {
         $query = InitiativeTagging::query()
             ->with([
-                'initiative:id,name,code,status,business_unit,tipe_initiative,source',
+                'initiative:id,name,code,status,business_unit,tipe_initiative,source,description',
                 'initiative.latestStatus',
                 'initiative.organization:id,name',
                 'initiative.mapSc:id,sc_id,initiative_id',
@@ -104,7 +104,7 @@ class StrategicPillarPageService
     public function getAllInitiatives(): Collection
     {
         return MstInitiative::query()
-            ->select('id', 'code', 'name', 'business_unit', 'tipe_initiative', 'source')
+            ->select('id', 'code', 'name', 'description', 'business_unit', 'tipe_initiative', 'source')
             ->with(['organization:id,name', 'latestStatusImplementation'])
             ->orderBy('code')
             ->get()
@@ -112,6 +112,7 @@ class StrategicPillarPageService
                 'id' => $initiative->id,
                 'code' => $initiative->code,
                 'name' => $initiative->name,
+                'description' => $initiative->description,
                 'tipe_initiative' => $initiative->tipe_initiative,
                 'source' => $initiative->source ? (int) $initiative->source : null,
                 'implementation_status' => $initiative->latestStatusImplementation?->review_status,
@@ -138,7 +139,7 @@ class StrategicPillarPageService
     public function getMatrixInitiatives(string $pilarId, int $initiativeType = 1): Collection
     {
         return MstInitiative::query()
-            ->select('id', 'code', 'name', 'source')
+            ->select('id', 'code', 'name', 'description', 'source')
             ->with('latestStatusImplementation')
             ->where('tipe_initiative', $initiativeType)
             ->whereHas('taggings', function ($query) use ($pilarId): void {
@@ -150,6 +151,7 @@ class StrategicPillarPageService
                 'id' => $initiative->id,
                 'code' => $initiative->code,
                 'name' => $initiative->name,
+                'description' => $initiative->description,
                 'source' => $initiative->source ? (int) $initiative->source : null,
                 'implementation_status' => $initiative->latestStatusImplementation?->review_status,
             ])

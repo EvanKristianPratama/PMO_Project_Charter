@@ -246,6 +246,68 @@
                                 Total Relasi: {{ allRelationRows.length }}
                             </td>
                         </tr>
+                        <tr>
+                            <td colspan="6"
+                                class="border border-slate-200 bg-slate-50/70 px-4 py-4 dark:border-white/10 dark:bg-[#141414]">
+                                <div class="rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-[#101010]">
+                                    <div
+                                        class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-white/10">
+                                        <div>
+                                            <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                                Diagram Relasi Semua Initiative
+                                            </h3>
+                                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                                Mode `all` memprioritaskan posisi node dari koordinat `x` dan `y` pada `mst_initiative_relation`.
+                                            </p>
+                                        </div>
+                                        <div class="flex flex-wrap items-center gap-3 text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                                            <span class="inline-flex items-center gap-1.5">
+                                                <span class="h-0.5 w-6 rounded bg-emerald-600 dark:bg-emerald-400"></span>
+                                                Garis Predecessor
+                                            </span>
+                                            <span class="inline-flex items-center gap-1.5">
+                                                <span class="h-0.5 w-6 rounded bg-blue-600 dark:bg-blue-400"></span>
+                                                Garis Successor
+                                            </span>
+                                            <span v-if="allRelationGraph.usesStoredPositions" class="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300">
+                                                Posisi dari `x/y` tersimpan: {{ allRelationGraph.storedPositionCount }}
+                                            </span>
+                                            <span v-if="allRelationGraph.missingPositionCount" class="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-amber-700 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-300">
+                                                Fallback otomatis: {{ allRelationGraph.missingPositionCount }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="p-4">
+                                        <div v-if="!allRelationRows.length"
+                                            class="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-center text-sm text-slate-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-400">
+                                            Tidak ada relasi untuk divisualisasikan pada filter saat ini.
+                                        </div>
+                                        <div v-else class="overflow-x-auto rounded-lg border border-slate-200 dark:border-white/10">
+                                            <div
+                                                :style="{ width: `${allRelationGraph.width}px`, height: `${allRelationGraph.height}px` }"
+                                            >
+                                                <VueFlow
+                                                    class="initiative-relation-flow"
+                                                    :nodes="allRelationGraph.nodes"
+                                                    :edges="allRelationGraph.edges"
+                                                    :fit-view-on-init="true"
+                                                    :nodes-draggable="false"
+                                                    :nodes-connectable="false"
+                                                    :elements-selectable="false"
+                                                    :zoom-on-double-click="false"
+                                                    :min-zoom="0.25"
+                                                    :max-zoom="1.5"
+                                                >
+                                                    <template #node-initiative-status-card="nodeProps">
+                                                        <InitiativeRelationFlowNode :data="nodeProps.data" :selected="nodeProps.selected" />
+                                                    </template>
+                                                </VueFlow>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
                         <tr class="bg-slate-50 dark:bg-white/5">
                             <th
                                 class="border border-slate-200 bg-slate-50 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-400">
@@ -327,57 +389,6 @@
                                 >
                                     Edit
                                 </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="6"
-                                class="border border-slate-200 bg-slate-50/70 px-4 py-4 dark:border-white/10 dark:bg-[#141414]">
-                                <div class="rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-[#101010]">
-                                    <div
-                                        class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-4 py-3 dark:border-white/10">
-                                        <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                                            Diagram Relasi Predecessor -> Successor (All)
-                                        </h3>
-                                        <div class="flex flex-wrap items-center gap-3 text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                                            <span class="inline-flex items-center gap-1.5">
-                                                <span class="h-0.5 w-6 rounded bg-emerald-600 dark:bg-emerald-400"></span>
-                                                Garis Predecessor
-                                            </span>
-                                            <span class="inline-flex items-center gap-1.5">
-                                                <span class="h-0.5 w-6 rounded bg-blue-600 dark:bg-blue-400"></span>
-                                                Garis Successor
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="p-4">
-                                        <div v-if="!allRelationRows.length"
-                                            class="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-center text-sm text-slate-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-400">
-                                            Belum ada relasi untuk divisualisasikan.
-                                        </div>
-                                        <div
-                                            v-else
-                                            class="rounded-lg border border-slate-200 dark:border-white/10"
-                                            :style="{ height: `${relationGraphAll.height}px` }"
-                                        >
-                                            <VueFlow
-                                                class="initiative-relation-flow"
-                                                :nodes="relationGraphAll.nodes"
-                                                :edges="relationGraphAll.edges"
-                                                :fit-view-on-init="true"
-                                                :nodes-draggable="false"
-                                                :nodes-connectable="false"
-                                                :elements-selectable="false"
-                                                :zoom-on-double-click="false"
-                                                :min-zoom="0.3"
-                                                :max-zoom="1.6"
-                                            >
-                                                <template #node-initiative-status-card="nodeProps">
-                                                    <InitiativeRelationFlowNode :data="nodeProps.data" :selected="nodeProps.selected" />
-                                                </template>
-                                            </VueFlow>
-                                        </div>
-                                    </div>
-                                </div>
                             </td>
                         </tr>
                     </template>
@@ -638,6 +649,11 @@ const toNumericId = (value) => {
     return Number.isFinite(parsed) ? parsed : null;
 };
 
+const toCoordinate = (value) => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+};
+
 const getRelationDirection = (relation) => {
     const typeRelation = relation?.type_relation != null ? Number(relation.type_relation) : null;
     const rowId = toNumericId(relation?.initiative_code_row);
@@ -657,6 +673,12 @@ const getRelationDirection = (relation) => {
 };
 
 const initiativeNodeId = (initiativeId) => `initiative-${initiativeId}`;
+const FLOW_NODE_WIDTH = 240;
+const FLOW_NODE_HEIGHT = 74;
+const FLOW_GRAPH_PADDING = 56;
+const ALL_GRAPH_FALLBACK_COLUMNS = 4;
+const ALL_GRAPH_FALLBACK_X_GAP = 320;
+const ALL_GRAPH_FALLBACK_Y_GAP = 112;
 
 const STATUS_BLOCK_STYLE_MAP = {
     drafting: {
@@ -834,9 +856,13 @@ const extractRelations = (initiative) => {
             successor: formatInitiative(findInitiativeById(successorId), successorId),
             predecessor_id: predecessorId,
             successor_id: successorId,
+            row_initiative_id: toNumericId(relation?.initiative_code_row),
+            column_initiative_id: toNumericId(relation?.initiative_code_column),
             justifikasi: justifikasiValue(relation),
             model_relasi: relation.model_relasi ?? '-',
             type_relation: relation.type_relation != null ? Number(relation.type_relation) : null,
+            x: toCoordinate(relation?.x),
+            y: toCoordinate(relation?.y),
         });
     });
 
@@ -859,9 +885,13 @@ const extractRelations = (initiative) => {
             successor: formatInitiative(findInitiativeById(successorId), successorId),
             predecessor_id: predecessorId,
             successor_id: successorId,
+            row_initiative_id: toNumericId(relation?.initiative_code_row),
+            column_initiative_id: toNumericId(relation?.initiative_code_column),
             justifikasi: justifikasiValue(relation),
             model_relasi: relation.model_relasi ?? '-',
             type_relation: relation.type_relation != null ? Number(relation.type_relation) : null,
+            x: toCoordinate(relation?.x),
+            y: toCoordinate(relation?.y),
         });
     });
 
@@ -928,6 +958,203 @@ const allRelationRows = computed(() => {
 const initiativeFromRelation = (relation) => (
     findInitiativeById(relation?.predecessor_id) ?? findInitiativeById(relation?.successor_id) ?? null
 );
+
+const resolveStoredAllGraphPositions = (relations) => {
+    const positionCandidates = new Map();
+
+    const registerCandidate = (initiativeId, x, y) => {
+        const resolvedId = toNumericId(initiativeId);
+        const resolvedX = toCoordinate(x);
+        const resolvedY = toCoordinate(y);
+
+        if (resolvedId == null || resolvedX == null || resolvedY == null) {
+            return;
+        }
+
+        if (!positionCandidates.has(resolvedId)) {
+            positionCandidates.set(resolvedId, []);
+        }
+
+        positionCandidates.get(resolvedId).push({ x: resolvedX, y: resolvedY });
+    };
+
+    relations.forEach((relation) => {
+        registerCandidate(relation?.row_initiative_id, relation?.x, relation?.y);
+    });
+
+    return new Map(
+        Array.from(positionCandidates.entries()).map(([initiativeId, candidates]) => {
+            const counts = new Map();
+
+            candidates.forEach(({ x, y }) => {
+                const key = `${x}|${y}`;
+                counts.set(key, (counts.get(key) ?? 0) + 1);
+            });
+
+            let selectedKey = null;
+            let selectedCount = -1;
+
+            counts.forEach((count, key) => {
+                if (count > selectedCount) {
+                    selectedKey = key;
+                    selectedCount = count;
+                }
+            });
+
+            const [x, y] = String(selectedKey).split('|').map(Number);
+
+            return [initiativeId, { x, y }];
+        }),
+    );
+};
+
+const buildGraphForAllRelations = (relations) => {
+    if (!relations.length) {
+        return {
+            nodes: [],
+            edges: [],
+            width: 960,
+            height: 360,
+            storedPositionCount: 0,
+            missingPositionCount: 0,
+            usesStoredPositions: false,
+        };
+    }
+
+    const uniqueInitiativeIds = Array.from(
+        new Set(
+            relations.flatMap((relation) => [
+                toNumericId(relation?.predecessor_id),
+                toNumericId(relation?.successor_id),
+            ]).filter((initiativeId) => initiativeId != null),
+        ),
+    ).sort((left, right) => left - right);
+
+    if (!uniqueInitiativeIds.length) {
+        return {
+            nodes: [],
+            edges: [],
+            width: 960,
+            height: 360,
+            storedPositionCount: 0,
+            missingPositionCount: 0,
+            usesStoredPositions: false,
+        };
+    }
+
+    const storedPositions = resolveStoredAllGraphPositions(relations);
+    const rawPositions = new Map(storedPositions);
+    const storedPositionCount = storedPositions.size;
+    const missingPositionCount = Math.max(uniqueInitiativeIds.length - storedPositionCount, 0);
+    const storedPositionValues = Array.from(storedPositions.values());
+    const fallbackAnchorX = storedPositionValues.length
+        ? Math.max(...storedPositionValues.map(({ x }) => x)) + ALL_GRAPH_FALLBACK_X_GAP
+        : 0;
+    const fallbackAnchorY = storedPositionValues.length
+        ? Math.min(...storedPositionValues.map(({ y }) => y))
+        : 0;
+
+    let fallbackIndex = 0;
+    uniqueInitiativeIds.forEach((initiativeId) => {
+        if (rawPositions.has(initiativeId)) {
+            return;
+        }
+
+        const column = fallbackIndex % ALL_GRAPH_FALLBACK_COLUMNS;
+        const row = Math.floor(fallbackIndex / ALL_GRAPH_FALLBACK_COLUMNS);
+
+        rawPositions.set(initiativeId, {
+            x: fallbackAnchorX + (column * ALL_GRAPH_FALLBACK_X_GAP),
+            y: fallbackAnchorY + (row * ALL_GRAPH_FALLBACK_Y_GAP),
+        });
+
+        fallbackIndex += 1;
+    });
+
+    const rawPositionValues = Array.from(rawPositions.values());
+    const minX = Math.min(...rawPositionValues.map(({ x }) => x));
+    const maxX = Math.max(...rawPositionValues.map(({ x }) => x));
+    const minY = Math.min(...rawPositionValues.map(({ y }) => y));
+    const maxY = Math.max(...rawPositionValues.map(({ y }) => y));
+
+    const normalizedPositions = new Map(
+        Array.from(rawPositions.entries()).map(([initiativeId, position]) => [
+            initiativeId,
+            {
+                x: position.x - minX + FLOW_GRAPH_PADDING,
+                y: position.y - minY + FLOW_GRAPH_PADDING,
+            },
+        ]),
+    );
+
+    const nodes = uniqueInitiativeIds.map((initiativeId) => {
+        const linkedInitiative = findInitiativeById(initiativeId);
+
+        return {
+            id: initiativeNodeId(initiativeId),
+            position: normalizedPositions.get(initiativeId) ?? { x: FLOW_GRAPH_PADDING, y: FLOW_GRAPH_PADDING },
+            data: buildInitiativeNodeData(linkedInitiative, initiativeId),
+            type: 'initiative-status-card',
+            class: 'initiative-status-card',
+            sourcePosition: Position.Right,
+            targetPosition: Position.Left,
+            draggable: false,
+            selectable: false,
+            style: resolveInitiativeNodeStyle(linkedInitiative),
+        };
+    });
+
+    const edges = relations
+        .map((relation, index) => {
+            const predecessorId = toNumericId(relation?.predecessor_id);
+            const successorId = toNumericId(relation?.successor_id);
+
+            if (predecessorId == null || successorId == null) {
+                return null;
+            }
+
+            const lineColor = relationLineColor(relation?.type_relation);
+
+            return {
+                id: relation?.id != null ? `all-relation-${relation.id}` : `all-relation-${index}`,
+                source: initiativeNodeId(predecessorId),
+                target: initiativeNodeId(successorId),
+                markerEnd: {
+                    type: MarkerType.ArrowClosed,
+                    color: lineColor,
+                },
+                type: 'smoothstep',
+                style: {
+                    stroke: lineColor,
+                    strokeWidth: 2.1,
+                },
+                label: relation?.model_relasi && relation.model_relasi !== '-' ? relation.model_relasi : undefined,
+                labelStyle: {
+                    fill: '#475569',
+                    fontSize: 11,
+                    fontWeight: 600,
+                },
+                labelBgStyle: {
+                    fill: '#ffffff',
+                    fillOpacity: 0.95,
+                },
+                labelBgPadding: [4, 2],
+                selectable: false,
+                focusable: false,
+            };
+        })
+        .filter(Boolean);
+
+    return {
+        nodes,
+        edges,
+        width: Math.max(960, (maxX - minX) + FLOW_NODE_WIDTH + (FLOW_GRAPH_PADDING * 2)),
+        height: Math.max(360, (maxY - minY) + FLOW_NODE_HEIGHT + (FLOW_GRAPH_PADDING * 2)),
+        storedPositionCount,
+        missingPositionCount,
+        usesStoredPositions: storedPositionCount > 0,
+    };
+};
 
 const buildGraphForInitiative = (initiative, relations) => {
     const currentId = toNumericId(initiative?.id);
@@ -1068,171 +1295,6 @@ const buildGraphForInitiative = (initiative, relations) => {
     };
 };
 
-const buildGraphForAll = (relations) => {
-    if (!relations.length) {
-        return { nodes: [], edges: [], height: 320 };
-    }
-
-    const nodeIds = new Set();
-    const adjacency = new Map();
-    const indegree = new Map();
-
-    const registerNode = (idValue) => {
-        const nodeId = toNumericId(idValue);
-        if (nodeId == null || nodeIds.has(nodeId)) {
-            return;
-        }
-        nodeIds.add(nodeId);
-        adjacency.set(nodeId, []);
-        indegree.set(nodeId, 0);
-    };
-
-    relations.forEach((relation) => {
-        registerNode(relation?.predecessor_id);
-        registerNode(relation?.successor_id);
-    });
-
-    relations.forEach((relation) => {
-        const sourceId = toNumericId(relation?.predecessor_id);
-        const targetId = toNumericId(relation?.successor_id);
-        if (sourceId == null || targetId == null || sourceId === targetId) {
-            return;
-        }
-
-        adjacency.get(sourceId)?.push(targetId);
-        indegree.set(targetId, (indegree.get(targetId) ?? 0) + 1);
-    });
-
-    const levelByNode = new Map();
-    const queue = [];
-    indegree.forEach((value, key) => {
-        if (value === 0) {
-            queue.push(key);
-            levelByNode.set(key, 0);
-        }
-    });
-
-    const pendingIndegree = new Map(indegree);
-    while (queue.length) {
-        const current = queue.shift();
-        const currentLevel = levelByNode.get(current) ?? 0;
-        const targets = adjacency.get(current) ?? [];
-
-        targets.forEach((target) => {
-            const nextLevel = Math.max(levelByNode.get(target) ?? 0, currentLevel + 1);
-            levelByNode.set(target, nextLevel);
-
-            const remaining = (pendingIndegree.get(target) ?? 0) - 1;
-            pendingIndegree.set(target, remaining);
-            if (remaining === 0) {
-                queue.push(target);
-            }
-        });
-    }
-
-    let fallbackLevel = 0;
-    nodeIds.forEach((nodeId) => {
-        if (!levelByNode.has(nodeId)) {
-            levelByNode.set(nodeId, fallbackLevel);
-            fallbackLevel += 1;
-        }
-    });
-
-    const maxLevel = Math.max(...levelByNode.values(), 0);
-    const columns = Array.from({ length: maxLevel + 1 }, () => []);
-    nodeIds.forEach((nodeId) => {
-        const level = levelByNode.get(nodeId) ?? 0;
-        columns[level].push(nodeId);
-    });
-
-    columns.forEach((column) => {
-        column.sort((left, right) => {
-            const leftInitiative = findInitiativeById(left);
-            const rightInitiative = findInitiativeById(right);
-            const leftCode = Number(leftInitiative?.code ?? left);
-            const rightCode = Number(rightInitiative?.code ?? right);
-            if (Number.isFinite(leftCode) && Number.isFinite(rightCode) && leftCode !== rightCode) {
-                return leftCode - rightCode;
-            }
-            return left - right;
-        });
-    });
-
-    const colGap = 330;
-    const rowGap = 92;
-    const baseX = 30;
-    const baseY = 30;
-    const maxRows = columns.reduce((max, column) => Math.max(max, column.length), 1);
-
-    const nodes = [];
-    columns.forEach((column, level) => {
-        column.forEach((nodeId, rowIndex) => {
-            const initiative = findInitiativeById(nodeId);
-            nodes.push({
-                id: initiativeNodeId(nodeId),
-                position: {
-                    x: baseX + (level * colGap),
-                    y: baseY + (rowIndex * rowGap),
-                },
-                data: buildInitiativeNodeData(initiative, nodeId),
-                type: 'initiative-status-card',
-                class: 'initiative-status-card',
-                sourcePosition: Position.Right,
-                targetPosition: Position.Left,
-                draggable: false,
-                selectable: false,
-                style: resolveInitiativeNodeStyle(initiative),
-            });
-        });
-    });
-
-    const edges = relations
-        .map((relation, index) => {
-            const predecessorId = toNumericId(relation?.predecessor_id);
-            const successorId = toNumericId(relation?.successor_id);
-            if (predecessorId == null || successorId == null) {
-                return null;
-            }
-
-            const lineColor = relationLineColor(relation?.type_relation);
-
-            return {
-                id: relation?.id != null ? `all-relation-${relation.id}` : `all-relation-${index}`,
-                source: initiativeNodeId(predecessorId),
-                target: initiativeNodeId(successorId),
-                markerEnd: {
-                    type: MarkerType.ArrowClosed,
-                    color: lineColor,
-                },
-                type: 'smoothstep',
-                style: {
-                    stroke: lineColor,
-                    strokeWidth: 2.1,
-                },
-                label: relation?.model_relasi && relation.model_relasi !== '-' ? relation.model_relasi : undefined,
-                labelStyle: {
-                    fill: '#475569',
-                    fontSize: 11,
-                    fontWeight: 600,
-                },
-                labelBgStyle: {
-                    fill: '#ffffff',
-                    fillOpacity: 0.95,
-                },
-                labelBgPadding: [4, 2],
-                selectable: false,
-                focusable: false,
-            };
-        })
-        .filter(Boolean);
-
-    return {
-        nodes,
-        edges,
-        height: Math.max(320, Math.min(900, maxRows * rowGap + 140)),
-    };
-};
-
 const relationGraphByInitiativeId = computed(() => {
     const map = new Map();
     props.mstInitiatives.forEach((initiative) => {
@@ -1246,7 +1308,7 @@ const relationGraphByInitiative = (initiative) => (
     relationGraphByInitiativeId.value.get(Number(initiative?.id)) ?? { nodes: [], edges: [], height: 260 }
 );
 
-const relationGraphAll = computed(() => buildGraphForAll(allRelationRows.value));
+const allRelationGraph = computed(() => buildGraphForAllRelations(allRelationRows.value));
 
 </script>
 
