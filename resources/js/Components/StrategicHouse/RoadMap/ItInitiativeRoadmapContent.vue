@@ -67,16 +67,29 @@ function toQIdx(value) {
 }
 
 /* ── Compute bar range ───────────────────────────────── */
-function getRange(projects, keyword) {
+function getRange(projects, statusFilter) {
     if (!Array.isArray(projects) || projects.length === 0) return null;
 
-    const pool = keyword
-        ? projects.filter((p) =>
-              String(p.version_label ?? "")
-                  .toLowerCase()
-                  .includes(keyword),
-          )
-        : projects;
+    let pool = projects;
+    
+    // Filter by status if specified
+    if (statusFilter) {
+        pool = projects.filter((p) => {
+            const status = Number(p.status ?? 0);
+            
+            if (statusFilter === 'baseline') {
+                // Status 5 = Baseline
+                return status === 5;
+            }
+            
+            if (statusFilter === 'approved') {
+                // Status 4 = Approved
+                return status === 4;
+            }
+            
+            return true;
+        });
+    }
 
     if (pool.length === 0) return null;
 
@@ -103,8 +116,8 @@ function getRange(projects, keyword) {
 
 function barRange(projects) {
     if (showMode.value === "baseline") return getRange(projects, "baseline");
-    if (showMode.value === "approved") return getRange(projects, "approv");
-    return getRange(projects, "");
+    if (showMode.value === "approved") return getRange(projects, "approved");
+    return getRange(projects, null);
 }
 
 /* ── Build cell descriptors ──────────────────────────── */
