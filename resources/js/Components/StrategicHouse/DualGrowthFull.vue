@@ -1,5 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue';
+import { Link } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 
 const initiativeColumnOptions = [2, 3, 4, 5, 6];
 const initiativeColumnCount = ref(6);
@@ -17,6 +19,34 @@ const props = defineProps({
         default: () => [],
     },
 });
+
+const route = useRouteHelper();
+
+const initiativeSummaryHref = (initiative) => {
+    const initiativeId = Number(initiative?.id ?? 0);
+    return initiativeId > 0
+        ? route('program-planning.program-definition.digital-initiatives.summary.index', initiativeId)
+        : null;
+};
+
+const initiativeProjectCharterHref = (initiative) => {
+    const mappedProjectId = Number(initiative?.mapped_project_id ?? 0);
+    return mappedProjectId > 0
+        ? route('it-initiatives.show', { project: mappedProjectId, tab: 'charter' })
+        : null;
+};
+
+const initiativeLinkHref = (initiative) => {
+    return initiativeProjectCharterHref(initiative) || initiativeSummaryHref(initiative);
+};
+
+const initiativeLinkTitle = (initiative) => {
+    const label = String(initiative?.label ?? initiative?.name ?? initiative?.code ?? 'initiative').trim();
+    if (initiativeProjectCharterHref(initiative)) {
+        return `Lihat project charter IT untuk ${label}`;
+    }
+    return `Lihat capsule summary untuk ${label}`;
+};
 
 const statusDesiredOrder = ['DF', 'Done', 'DT 2026', 'ITSBP', 'On Review', 'SH'];
 
@@ -219,6 +249,7 @@ const normalizeInitiative = (initiative, fallbackKey) => {
         implementation_status: implementationStatus,
         source: initiative?.source,
         source_name: initiative?.source_name,
+        description: initiative?.description,
     };
 };
 
@@ -632,13 +663,23 @@ const initiativeDisplayName = (initiative) => {
                                     '--initiative-column-count': initiativeColumnCount,
                                     '--row-count': buildInitiativeColumns(row.initiatives).rowCount,
                                 }">
-                                    <div v-for="initiative in buildInitiativeColumns(row.initiatives).items"
-                                        :key="`${row.key}-${initiative.id}`" class="initiative-box"
+                                    <component
+                                        :is="initiativeLinkHref(initiative) ? Link : 'div'"
+                                        v-for="initiative in buildInitiativeColumns(row.initiatives).items"
+                                        :key="`${row.key}-${initiative.id}`"
+                                        :href="initiativeLinkHref(initiative)"
+                                        class="initiative-box group"
                                         :class="[
                                             getCoeColorClass(initiative.coe_name),
-                                            { 'initiative-box--no-code': !showInitiativeCode || !initiative.code }
+                                            { 'initiative-box--no-code': !showInitiativeCode || !initiative.code },
+                                            { 'initiative-box--clickable': initiativeLinkHref(initiative) }
                                         ]"
-                                        :title="initiative.label">
+                                    >
+                                        <!-- Custom Smart Tooltip -->
+                                        <div class="absolute top-full left-1/2 z-50 mt-1 hidden -translate-x-1/2 w-max max-w-sm bg-white border border-slate-800 shadow-sm px-1.5 py-1 text-[9px] italic group-hover:block dark:bg-slate-800">
+                                            {{ initiative.description || initiative.name }}
+                                        </div>
+
                                         <span v-if="showInitiativeCode && initiative.code"
                                             class="initiative-box__code"
                                             :class="showStatusColors ? getStatusColorClass(initiative.implementation_status) : ''">
@@ -652,7 +693,7 @@ const initiativeDisplayName = (initiative) => {
                                             </span>
                                             <span v-if="showBusinessUnit" class="initiative-box__bu">{{ initiative.business_unit }}</span>
                                         </span>
-                                    </div>
+                                    </component>
                                 </div>
 
                                 <span v-else class="initiative-empty">-</span>
@@ -907,7 +948,23 @@ const initiativeDisplayName = (initiative) => {
     font-weight: 500;
     line-height: 1.1;
     color: #1f2937;
-    overflow: hidden;
+}
+
+.initiative-box--clickable {
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.initiative-box--clickable:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    z-index: 10;
+}
+
+/* Ensure Link doesn't have default <a> styles */
+a.initiative-box {
+    text-decoration: none;
+    color: inherit;
 }
 
 .initiative-box--no-code {

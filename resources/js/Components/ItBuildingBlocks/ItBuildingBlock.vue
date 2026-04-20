@@ -432,7 +432,7 @@ const getCoeColorClass = (coeName) => {
                                                 ]"
                                             >
                                                 <div class="absolute top-full left-1/2 z-50 mt-1 hidden -translate-x-1/2 w-max max-w-sm bg-white border border-slate-800 shadow-sm px-1.5 py-1 text-[9px] italic group-hover:block dark:bg-slate-800">
-                                                    {{ initiative.name }}
+                                                    {{ initiative.description || initiative.name }}
                                                 </div>
                                                 <span v-if="showInitiativeCode && initiative.code" 
                                                     class="initiative-box__code"

@@ -1,10 +1,36 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { router, Link } from '@inertiajs/vue3';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
 
 const route = useRouteHelper();
+
+const initiativeSummaryHref = (initiative) => {
+    const initiativeId = Number(initiative?.initiative_id ?? initiative?.id ?? 0);
+    return initiativeId > 0
+        ? route('program-planning.program-definition.digital-initiatives.summary.index', initiativeId)
+        : null;
+};
+
+const initiativeProjectCharterHref = (initiative) => {
+    const mappedProjectId = Number(initiative?.mapped_project_id ?? 0);
+    return mappedProjectId > 0
+        ? route('it-initiatives.show', { project: mappedProjectId, tab: 'charter' })
+        : null;
+};
+
+const initiativeLinkHref = (initiative) => {
+    return initiativeProjectCharterHref(initiative) || initiativeSummaryHref(initiative);
+};
+
+const initiativeLinkTitle = (initiative) => {
+    const label = String(initiative?.label ?? initiative?.name ?? initiative?.code ?? 'initiative').trim();
+    if (initiativeProjectCharterHref(initiative)) {
+        return `Lihat project charter IT untuk ${label}`;
+    }
+    return `Lihat capsule summary untuk ${label}`;
+};
 const emit = defineEmits(['cancel-add-mapping']);
 
 const props = defineProps({
@@ -974,7 +1000,7 @@ defineExpose({
                         v-model="selectedSource"
                         class="initiative-view-select mr-2"
                     >
-                        <option value="">Semua Sumber</option>
+                        <option value="">All Initiatives</option>
                         <option
                             v-for="source in sourceOptions"
                             :key="`source-opt-${source.value}`"
@@ -1152,13 +1178,17 @@ defineExpose({
                                             '--row-count': buildInitiativeColumns(secondaryGroup.initiatives, initiativeColumnCount).rowCount
                                         }"
                                     >
-                                        <div
+                                        <component
+                                            :is="initiativeLinkHref(initiative) ? Link : 'div'"
                                             v-for="initiative in buildInitiativeColumns(secondaryGroup.initiatives, initiativeColumnCount).items"
                                             :key="`initiative-${initiative.map_key}`"
+                                            :href="initiativeLinkHref(initiative)"
+                                            :title="initiativeLinkTitle(initiative)"
                                             class="initiative-box group"
                                             :class="[
                                                 getCoeColorClass(initiative.coe_name),
-                                                { 'initiative-box--no-code': !showInitiativeCode || !initiativeDisplayCode(initiative) }
+                                                { 'initiative-box--no-code': !showInitiativeCode || !initiativeDisplayCode(initiative) },
+                                                { 'initiative-box--clickable': initiativeLinkHref(initiative) }
                                             ]"
                                         >
                                             <template v-if="initiative">
@@ -1187,12 +1217,12 @@ defineExpose({
                                                     v-if="editable && isValidId(group.primary_id) && isValidId(secondaryGroup.secondary_id) && isValidId(initiative.initiative_id)"
                                                     type="button"
                                                     class="initiative-box__remove"
-                                                    @click="openDeleteInitiativeModal(group, secondaryGroup, initiative)"
+                                                    @click.stop.prevent="openDeleteInitiativeModal(group, secondaryGroup, initiative)"
                                                 >
                                                     x
                                                 </button>
                                             </template>
-                                        </div>
+                                        </component>
                                     </div>
                                 </td>
                             </tr>
@@ -1609,6 +1639,23 @@ defineExpose({
     font-weight: 500;
     line-height: 1.1;
     color: #1f2937;
+}
+
+.initiative-box--clickable {
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.initiative-box--clickable:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    z-index: 10;
+}
+
+/* Ensure Link doesn't have default <a> styles */
+a.initiative-box {
+    text-decoration: none;
+    color: inherit;
 }
 
 .initiative-box--no-code {
