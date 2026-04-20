@@ -152,10 +152,11 @@ const getStatusColorClass = (status) => {
     if (normalized === 'at risk') return 'status-color-atrisk';
     if (normalized === 'delayed') return 'status-color-delayed';
     if (normalized === 'not started') return 'status-color-notstarted';
+    if (normalized === 'not signed') return 'status-color-notsigned';
     return '';
 };
 
-const statusDesiredOrder = ['On Track', 'Delayed', 'At Risk', 'Completed', 'Done', 'Not Started'];
+const statusDesiredOrder = ['On Track', 'Delayed', 'At Risk', 'Completed', 'Done', 'Not Started', 'Not Signed'];
 
 const statusLegend = computed(() => {
     const stats = {};

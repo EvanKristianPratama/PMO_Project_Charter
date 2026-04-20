@@ -811,18 +811,31 @@ const getCoeColorClass = (coeName) => {
 const normalizeStatusLabel = (rawStatus) => {
     const s = String(rawStatus ?? '').trim();
     if (!s) return null;
-    if (s === 'DF') return 'DF';
-    if (s === 'Done') return 'Done';
-    if (s === 'DT 2026') return 'DT 2026';
-    if (s === 'ITSBP') return 'ITSBP';
-    if (s === 'On Review') return 'On Review';
-    if (s === 'SH') return 'SH';
+    const normalized = s.toLowerCase();
+
+    if (normalized === 'df') return 'DF';
+    if (normalized === 'done' || normalized === 'completed') return 'Done';
+    if (normalized === 'dt 2026') return 'DT 2026';
+    if (normalized === 'itsbp') return 'ITSBP';
+    if (normalized === 'on review') return 'On Review';
+    if (normalized === 'sh') return 'SH';
+    if (normalized === 'on track') return 'On Track';
+    if (normalized === 'at risk') return 'At Risk';
+    if (normalized === 'delayed') return 'Delayed';
+    if (normalized === 'not started') return 'Not Started';
+    if (normalized === 'not signed') return 'Not Signed';
+
     return s;
 };
 
 const getStatusColorClass = (status) => {
     const s = normalizeStatusLabel(status);
     if (!s) return '';
+    if (s === 'On Track') return 'status-color-ontrack';
+    if (s === 'At Risk') return 'status-color-atrisk';
+    if (s === 'Delayed') return 'status-color-delayed';
+    if (s === 'Not Started') return 'status-color-notstarted';
+    if (s === 'Not Signed') return 'status-color-notsigned';
     if (s === 'DF') return 'status-color-df';
     if (s === 'Done') return 'status-color-done';
     if (s === 'DT 2026') return 'status-color-dt2026';
@@ -832,7 +845,19 @@ const getStatusColorClass = (status) => {
     return '';
 };
 
-const statusDesiredOrder = ['DF', 'Done', 'DT 2026', 'ITSBP', 'On Review', 'SH'];
+const statusDesiredOrder = [
+    'On Track',
+    'Delayed',
+    'At Risk',
+    'Not Started',
+    'Not Signed',
+    'Done',
+    'DF',
+    'DT 2026',
+    'ITSBP',
+    'On Review',
+    'SH',
+];
 
 const statusLegend = computed(() => {
     const stats = {};
