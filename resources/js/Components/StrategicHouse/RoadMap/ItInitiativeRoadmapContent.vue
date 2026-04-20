@@ -362,7 +362,7 @@ function badgeClass(status) {
                 </div>
 
                 <label class="period-filter">
-                    <span class="period-filter__label">Periode Status</span>
+                    <span class="period-filter__label">Status Review Implementation Period</span>
                     <select v-model="selectedPeriod" class="period-filter__select">
                         <option
                             v-if="availablePeriods.length === 0"
@@ -726,7 +726,6 @@ function badgeClass(status) {
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.06em;
-    text-transform: uppercase;
     color: #59769a;
     white-space: nowrap;
 }
