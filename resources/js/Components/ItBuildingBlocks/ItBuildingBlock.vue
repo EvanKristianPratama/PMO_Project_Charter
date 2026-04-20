@@ -1,5 +1,7 @@
 <script setup>
 import { computed, ref, onMounted, watch } from 'vue';
+import { Link } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 
 const props = defineProps({
     items: {
@@ -11,6 +13,34 @@ const props = defineProps({
         default: () => [],
     },
 });
+
+const route = useRouteHelper();
+
+const initiativeSummaryHref = (initiative) => {
+    const initiativeId = Number(initiative?.id ?? 0);
+    return initiativeId > 0
+        ? route('program-planning.program-definition.digital-initiatives.summary.index', initiativeId)
+        : null;
+};
+
+const initiativeProjectCharterHref = (initiative) => {
+    const mappedProjectId = Number(initiative?.mapped_project_id ?? 0);
+    return mappedProjectId > 0
+        ? route('it-initiatives.show', { project: mappedProjectId, tab: 'charter' })
+        : null;
+};
+
+const initiativeLinkHref = (initiative) => {
+    return initiativeProjectCharterHref(initiative) || initiativeSummaryHref(initiative);
+};
+
+const initiativeLinkTitle = (initiative) => {
+    const label = String(initiative?.label ?? initiative?.name ?? initiative?.code ?? 'initiative').trim();
+    if (initiativeProjectCharterHref(initiative)) {
+        return `Lihat project charter IT untuk ${label}`;
+    }
+    return `Lihat capsule summary untuk ${label}`;
+};
 
 
 
@@ -388,13 +418,17 @@ const getCoeColorClass = (coeName) => {
                                             '--initiative-column-count': initiativeColumnCount,
                                             '--row-count': buildInitiativeColumns(group.initiatives).rowCount
                                         }">
-                                            <div
+                                            <component
+                                                :is="initiativeLinkHref(initiative) ? Link : 'div'"
                                                 v-for="initiative in buildInitiativeColumns(group.initiatives).items"
                                                 :key="initiative.id"
+                                                :href="initiativeLinkHref(initiative)"
+                                                :title="initiativeLinkTitle(initiative)"
                                                 class="initiative-box group"
                                                 :class="[
                                                     getCoeColorClass(initiative.coe_name || initiative.coe?.name),
-                                                    { 'initiative-box--no-code': !showInitiativeCode || !initiative.code }
+                                                    { 'initiative-box--no-code': !showInitiativeCode || !initiative.code },
+                                                    { 'initiative-box--clickable': initiativeLinkHref(initiative) }
                                                 ]"
                                             >
                                                 <div class="absolute top-full left-1/2 z-50 mt-1 hidden -translate-x-1/2 w-max max-w-sm bg-white border border-slate-800 shadow-sm px-1.5 py-1 text-[9px] italic group-hover:block dark:bg-slate-800">
@@ -413,7 +447,7 @@ const getCoeColorClass = (coeName) => {
                                                     </span>
                                                     <span v-if="showBusinessUnit" class="initiative-box__bu">{{ initiative.business_unit }}</span>
                                                 </span>
-                                            </div>
+                                            </component>
                                         </div>
                                     </td>
                                 </tr>
@@ -441,6 +475,24 @@ const getCoeColorClass = (coeName) => {
 .initiatives-cell { padding: 8px; background: #f8fafc; }
 .initiatives-grid { display: grid; grid-template-columns: repeat(var(--initiative-column-count, 6), minmax(0, 1fr)); grid-auto-flow: column; grid-template-rows: repeat(var(--row-count, 1), minmax(min-content, 1fr)); gap: 8px; align-items: stretch; }
 .initiative-box { position: relative; display: grid; grid-template-columns: 28px minmax(0, 1fr); min-height: 24px; width: 100%; align-items: stretch; border: 1px solid #374151; background: #ffffff; font-size: 9px; font-weight: 500; line-height: 1.1; color: #1f2937; }
+
+.initiative-box--clickable {
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.initiative-box--clickable:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    z-index: 10;
+}
+
+/* Ensure Link doesn't have default <a> styles */
+a.initiative-box {
+    text-decoration: none;
+    color: inherit;
+}
+
 .initiative-box--no-code { grid-template-columns: 1fr !important; }
 .initiative-box__code { display: flex; align-items: center; justify-content: center; border-right: 1px solid #374151; padding: 2px 4px; font-weight: 700; min-width: 28px; background: rgba(0,0,0,0.03); }
 

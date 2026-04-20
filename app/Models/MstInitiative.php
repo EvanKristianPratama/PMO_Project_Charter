@@ -100,7 +100,7 @@ class MstInitiative extends Model
 
     public function sourceData(): BelongsTo
     {
-        return $this->belongsTo(DataSource::class, 'source');
+        return $this->belongsTo(MstScSource::class, 'source');
     }
 
     public function mapSc(): HasMany

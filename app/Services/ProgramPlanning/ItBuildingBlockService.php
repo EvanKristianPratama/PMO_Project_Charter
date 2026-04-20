@@ -27,6 +27,7 @@ class ItBuildingBlockService
             ->with([
                 'coe:id,name', 
                 'organization:id,name,groub_id', 
+                'sourceData:id,name',
                 'mappedProjects.pcStatusImplementations' => fn($q) => $query = $q->orderBy('year', 'desc')->orderByRaw("CASE 
                     WHEN month = 'Desember' THEN 12
                     WHEN month = 'November' THEN 11
@@ -45,7 +46,7 @@ class ItBuildingBlockService
             ->where('tipe_initiative', 2)
             ->orderBy('code')
             ->orderBy('name')
-            ->get(['id', 'code', 'name', 'description', 'coe_id', 'business_unit', 'tipe_initiative'])
+            ->get(['id', 'code', 'name', 'description', 'coe_id', 'business_unit', 'tipe_initiative', 'source'])
             ->map(function (MstInitiative $initiative): array {
                 // Ambil status terbaru dari semua proyek yang dimapping
                 $latestStatus = $initiative->mappedProjects
@@ -71,6 +72,8 @@ class ItBuildingBlockService
                             'status' => $s->status,
                         ])->values()->all(),
                     'tipe_initiative' => (int) $initiative->tipe_initiative,
+                    'source' => $initiative->source,
+                    'source_name' => $initiative->sourceData?->name,
                 ];
             });
     }
@@ -88,11 +91,11 @@ class ItBuildingBlockService
     public function getDigitalInitiativeOptions(): Collection
     {
         return MstInitiative::query()
-            ->with(['coe:id,name', 'organization:id,name,groub_id', 'latestStatusImplementation'])
+            ->with(['coe:id,name', 'organization:id,name,groub_id', 'latestStatusImplementation', 'sourceData:id,name'])
             ->where('tipe_initiative', 1)
             ->orderBy('code')
             ->orderBy('name')
-            ->get(['id', 'code', 'name', 'description', 'coe_id', 'business_unit', 'tipe_initiative'])
+            ->get(['id', 'code', 'name', 'description', 'coe_id', 'business_unit', 'tipe_initiative', 'source'])
             ->map(fn (MstInitiative $initiative): array => [
                 'id' => (int) $initiative->id,
                 'code' => $initiative->code,
@@ -104,6 +107,8 @@ class ItBuildingBlockService
                 'groub_id' => $initiative->organization?->groub_id,
                 'implementation_status' => $initiative->latestStatusImplementation?->review_status ?: null,
                 'tipe_initiative' => (int) $initiative->tipe_initiative,
+                'source' => $initiative->source,
+                'source_name' => $initiative->sourceData?->name,
             ]);
     }
 
@@ -113,10 +118,11 @@ class ItBuildingBlockService
             ->with([
                 'primaryCoe:id,name',
                 'secondaryCoe:id,name',
-                'initiative:id,code,name,description,coe_id,business_unit',
+                'initiative:id,code,name,description,coe_id,business_unit,source',
                 'initiative.coe:id,name',
                 'initiative.organization:id,name',
                 'initiative.latestStatusImplementation',
+                'initiative.sourceData:id,name',
             ])
             ->get(['primary', 'secondary', 'initiative_id'])
             ->filter(fn (TrsMapItBuilding $item) => filled($item->initiative?->name))
@@ -152,6 +158,8 @@ class ItBuildingBlockService
                                         'coe_name' => $item->initiative?->coe?->name ?: 'No COE',
                                         'business_unit' => $item->initiative?->organization?->name ?: '-',
                                         'implementation_status' => $item->initiative?->latestStatusImplementation?->review_status ?: null,
+                                        'source' => !is_null($item->initiative?->source) ? (int) $item->initiative->source : null,
+                                        'source_name' => $item->initiative?->sourceData?->name,
                                     ])
                                     ->unique('map_key')
                                     ->sortBy('name')

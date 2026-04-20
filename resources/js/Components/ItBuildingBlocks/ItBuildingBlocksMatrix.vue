@@ -99,8 +99,9 @@ const displayGroups = computed(() => {
 
                         const implStatus = normalizeStatusLabel(initiative.implementation_status);
                         const matchesStatus = !selectedStatus.value || implStatus === selectedStatus.value;
+                        const matchesSource = !selectedSource.value || initiative.source == selectedSource.value;
                         
-                        return isNotRemoved && matchesOrg && matchesCoe && matchesStatus;
+                        return isNotRemoved && matchesOrg && matchesCoe && matchesStatus && matchesSource;
                     });
 
                     totalInitiativesCount += initiatives.length;
@@ -270,6 +271,7 @@ const showInitiativeCode = ref(true);
 const selectedOrganization = ref('');
 const selectedCoe = ref('');
 const selectedStatus = ref('');
+const selectedSource = ref('');
 
 const organizationOptions = computed(() => {
     const orgs = new Set();
@@ -283,6 +285,44 @@ const organizationOptions = computed(() => {
         });
     });
     return Array.from(orgs).sort();
+});
+
+const sourceOptions = computed(() => {
+    const sourceMap = new Map();
+    
+    props.groups.forEach(group => {
+        (group.secondary_groups ?? []).forEach(sec => {
+            (sec.initiatives ?? []).forEach(ini => {
+                const id = ini.source;
+                let name = ini.source_name;
+
+                // Fallback labels based on IDs provided by user
+                if (!name) {
+                    if (id == 3) name = 'Baseline RSTI 2025-2029';
+                    else if (id == 4) name = 'New Initiatives 2026';
+                }
+
+                if (id !== undefined && id !== null && name) {
+                    if (!sourceMap.has(id)) {
+                        sourceMap.set(id, name);
+                    }
+                }
+            });
+        });
+    });
+
+    const desiredOrder = ['Baseline RSTI 2025-2029', 'New Initiatives 2026'];
+    
+    return Array.from(sourceMap.entries())
+        .map(([id, name]) => ({ value: id, label: name }))
+        .sort((a, b) => {
+            const indexA = desiredOrder.indexOf(a.label);
+            const indexB = desiredOrder.indexOf(b.label);
+            if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+            if (indexA !== -1) return -1;
+            if (indexB !== -1) return 1;
+            return a.label.localeCompare(b.label);
+        });
 });
 
 const buildInitiativeColumns = (initiatives = [], columnCount = initiativeColumnCount.value) => {
@@ -927,6 +967,20 @@ defineExpose({
                             :value="status.label"
                         >
                             {{ status.label }}
+                        </option>
+                    </select>
+
+                    <select
+                        v-model="selectedSource"
+                        class="initiative-view-select mr-2"
+                    >
+                        <option value="">Semua Sumber</option>
+                        <option
+                            v-for="source in sourceOptions"
+                            :key="`source-opt-${source.value}`"
+                            :value="source.value"
+                        >
+                            {{ source.label }}
                         </option>
                     </select>
 

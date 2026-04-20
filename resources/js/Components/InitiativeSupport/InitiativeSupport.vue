@@ -603,7 +603,7 @@ defineExpose({
             class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#111827]">
             <div class="overflow-x-auto">
                 <h1 class="text-center text-l font-bold mt-4 mb-4 ">
-                    IT Initiative Support Potential
+                    Analisis Konsolidasi Kapabilitas Technology /CoE seiring dengan arahan restrukturisasi bisnis hilir
                 </h1>
                 <table class="support-table">
                     <thead>

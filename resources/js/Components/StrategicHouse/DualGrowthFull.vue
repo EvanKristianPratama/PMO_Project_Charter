@@ -9,6 +9,7 @@ const showInitiativeCode = ref(true);
 const selectedOrganization = ref('');
 const selectedCoe = ref('');
 const selectedStatus = ref('');
+const selectedSource = ref('');
 
 const props = defineProps({
     goals: {
@@ -59,6 +60,47 @@ const organizationOptions = computed(() => {
         }
     });
     return Array.from(orgs).sort();
+});
+
+const sourceOptions = computed(() => {
+    const sourceMap = new Map();
+    const allInitiatives = [];
+
+    (props.goals || []).forEach((goal) => {
+        (goal.themes || []).forEach((theme) => {
+            (theme.initiatives || []).forEach((ini) => allInitiatives.push(ini));
+        });
+        (goal.direct_initiatives || []).forEach((ini) => allInitiatives.push(ini));
+    });
+
+    allInitiatives.forEach(ini => {
+        const id = ini.source;
+        let name = ini.source_name;
+
+        if (!name) {
+            if (id == 3) name = 'Baseline RSTI 2025-2029';
+            else if (id == 4) name = 'New Initiatives 2026';
+        }
+
+        if (id !== undefined && id !== null && name) {
+            if (!sourceMap.has(id)) {
+                sourceMap.set(id, name);
+            }
+        }
+    });
+
+    const desiredOrder = ['Baseline RSTI 2025-2029', 'New Initiatives 2026'];
+    
+    return Array.from(sourceMap.entries())
+        .map(([id, name]) => ({ value: id, label: name }))
+        .sort((a, b) => {
+            const indexA = desiredOrder.indexOf(a.label);
+            const indexB = desiredOrder.indexOf(b.label);
+            if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+            if (indexA !== -1) return -1;
+            if (indexB !== -1) return 1;
+            return a.label.localeCompare(b.label);
+        });
 });
 
 const statusLegend = computed(() => {
@@ -175,6 +217,8 @@ const normalizeInitiative = (initiative, fallbackKey) => {
         coe_name: coeName,
         business_unit: initiative?.business_unit,
         implementation_status: implementationStatus,
+        source: initiative?.source,
+        source_name: initiative?.source_name,
     };
 };
 
@@ -248,7 +292,8 @@ const displayGoals = computed(() => {
                             const matchesCoe = !selectedCoe.value || ini.coe_name === selectedCoe.value;
                             const implStatus = normalizeStatusLabel(ini.implementation_status);
                             const matchesStatus = !selectedStatus.value || implStatus === selectedStatus.value;
-                            return matchesOrg && matchesCoe && matchesStatus;
+                            const matchesSource = !selectedSource.value || ini.source == selectedSource.value;
+                            return matchesOrg && matchesCoe && matchesStatus && matchesSource;
                         })
                     : [];
 
@@ -273,7 +318,8 @@ const displayGoals = computed(() => {
                     const matchesCoe = !selectedCoe.value || ini.coe_name === selectedCoe.value;
                     const implStatus = normalizeStatusLabel(ini.implementation_status);
                     const matchesStatus = !selectedStatus.value || implStatus === selectedStatus.value;
-                    return matchesOrg && matchesCoe && matchesStatus;
+                    const matchesSource = !selectedSource.value || ini.source == selectedSource.value;
+                    return matchesOrg && matchesCoe && matchesStatus && matchesSource;
                 })
             : [];
 
@@ -403,7 +449,7 @@ const initiativeDisplayName = (initiative) => {
                 </div>
             </div>
         </div>
-        <div class="mockup-header flex items-center justify-between">
+        <div class="flex items-center justify-between">
             <div class="flex items-center justify-start">
                 <div class="initiative-view-switch">
                     <select
@@ -445,6 +491,20 @@ const initiativeDisplayName = (initiative) => {
                             :value="status.label"
                         >
                             {{ status.label }}
+                        </option>
+                    </select>
+
+                    <select
+                        v-model="selectedSource"
+                        class="initiative-view-select mr-2"
+                    >
+                        <option value="">Semua Sumber</option>
+                        <option
+                            v-for="source in sourceOptions"
+                            :key="`source-opt-${source.value}`"
+                            :value="source.value"
+                        >
+                            {{ source.label }}
                         </option>
                     </select>
 
@@ -491,7 +551,6 @@ const initiativeDisplayName = (initiative) => {
                         <span>Code</span>
                     </button>
 
-                    <span class="initiative-view-switch__label ml-2">Tampilan kolom:</span>
                     <select
                         v-model="initiativeColumnCount"
                         class="initiative-view-select"
@@ -613,12 +672,6 @@ const initiativeDisplayName = (initiative) => {
     border-radius: 20px;
     background: #ffffff;
     box-shadow: 0 18px 44px rgba(15, 23, 42, 0.08);
-}
-
-.mockup-header {
-    padding: 18px 24px 12px;
-    border-bottom: 1px solid #e2e8f0;
-    background: #ffffff;
 }
 
 .mockup-eyebrow {
@@ -1103,10 +1156,6 @@ const initiativeDisplayName = (initiative) => {
 }
 
 @media (max-width: 768px) {
-    .mockup-header {
-        padding: 16px 18px 10px;
-    }
-
     .dual-growth-legend {
         padding: 10px 18px;
     }

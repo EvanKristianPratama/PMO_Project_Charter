@@ -104,9 +104,7 @@ export function useNavigation() {
                 children: [
                     {
                         label: "Roadmap Project Charter",
-                        href: safeRoute("it-initiatives.index", {
-                            tableMode: "roadmap",
-                        }),
+                        href: safeRoute("roadmap.index"),
                         icon: ClipboardDocumentCheckIcon,
                         active: (url) =>
                             url.startsWith("/roadmap") &&
@@ -187,7 +185,7 @@ export function useNavigation() {
             },
             {
                 label: "Program Implementation",
-                href: safeRoute("dashboard"),
+                href: safeRoute("program-implementation.index"),
                 icon: ChartBarIcon,
                 active: (url) =>
                     url.startsWith("/program-implementation") ||
