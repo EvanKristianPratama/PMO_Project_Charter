@@ -221,6 +221,14 @@ const displayGroups = computed(() => {
             };
         })
         .filter((group) => group.digitalRows.length > 0)
+        .sort((a, b) => {
+            const aHasNotAvailable = a.digitalRows.some(row => row.techCapability === 'CoE Not Available');
+            const bHasNotAvailable = b.digitalRows.some(row => row.techCapability === 'CoE Not Available');
+
+            if (aHasNotAvailable && !bHasNotAvailable) return 1;
+            if (!aHasNotAvailable && bHasNotAvailable) return -1;
+            return 0;
+        })
         .map((group, index, groups) => {
             const finalDigitalRows = group.digitalRows.map((row, idx) => ({
                 ...row,
