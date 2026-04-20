@@ -19,9 +19,7 @@ const toggleBtns = [
 const legendItems = [
     { label: "On Track", status: "On Track" },
     { label: "At Risk", status: "At Risk" },
-    { label: "Delayed", status: "Delayed" },
     { label: "Done", status: "Done" },
-    { label: "On Review", status: "On Review" },
     { label: "Not Started", status: "Not Started" },
     { label: "Not Signed", status: "Not Signed" },
 ];
@@ -294,12 +292,21 @@ const legendItemsWithCounts = computed(() => {
         Array.isArray(group?.initiatives) ? group.initiatives : [],
     );
 
-    return legendItems.map((item) => ({
+    const statusItems = legendItems.map((item) => ({
         ...item,
         count: initiatives.filter((initiative) => {
             return normalizeStatusLabel(initiative?.display_status) === item.status;
         }).length,
     }));
+
+    return [
+        ...statusItems,
+        {
+            label: "Total",
+            status: "Total",
+            count: initiatives.length,
+        },
+    ];
 });
 
 function normalizeStatusLabel(rawStatus) {
@@ -398,6 +405,7 @@ function badgeClass(status) {
                     class="legend-item"
                 >
                     <span
+                        v-if="item.status !== 'Total'"
                         :class="[
                             'legend-swatch',
                             badgeClass(item.status),
