@@ -202,24 +202,22 @@ function coeRowspan(group) {
 
                 <!-- Single header row — year labels only -->
                 <thead>
-                    <tr class="border-b border-slate-200 dark:border-white/10">
+                    <tr class="border-b border-[#c9d2dd]">
                         <th
-                            class="th-cell bg-slate-50 dark:bg-white/5 text-slate-500 dark:text-slate-400 border-r border-slate-200 dark:border-white/10"
+                            class="th-cell bg-[#326eb2] text-white border-r border-white/30"
                         >
-                            IT Architecture Building Block
+                            IT Building Blocks
                         </th>
                         <th
-                            class="th-cell th-left bg-slate-50 dark:bg-white/5 text-slate-500 dark:text-slate-400 border-r border-slate-200 dark:border-white/10"
+                            class="th-cell th-left bg-[#326eb2] text-white border-r border-white/30"
                         >
-                            List of ITSP Initiatives {{ startYear }}-{{
-                                endYear
-                            }}
+                            IT Initiatives
                         </th>
                         <th
                             v-for="year in years"
                             :key="`yr-${year}`"
                             colspan="4"
-                            class="th-year bg-slate-50 dark:bg-white/5 text-slate-700 dark:text-slate-200 border-l border-slate-200 dark:border-white/10"
+                            class="th-year bg-[#326eb2] text-white border-l border-white/30"
                         >
                             {{ year }}
                         </th>
@@ -292,6 +290,7 @@ function coeRowspan(group) {
     min-width: 820px;
     table-layout: fixed;
     border-collapse: collapse;
+    --timeline-thickness: 8px;
 }
 
 .gantt-table th,
@@ -309,16 +308,15 @@ function coeRowspan(group) {
     width: 23%;
 }
 .col-quarter {
-    width: calc(66% / var(--qcount));
+    width: calc(40% / var(--qcount));
 }
 
 /* ── Header cells ────────────────────────────────────── */
 .th-cell {
-    font-size: 10px;
+    font-size: 15px;
     font-weight: 700;
-    text-transform: uppercase;
     letter-spacing: 0.05em;
-    padding: 8px 10px;
+    padding: 10px 10px;
     text-align: left;
     vertical-align: middle;
     white-space: nowrap;
@@ -329,7 +327,7 @@ function coeRowspan(group) {
 }
 
 .th-year {
-    font-size: 11px;
+    font-size: 15px;
     font-weight: 700;
     text-align: center;
     padding: 8px 4px;
@@ -373,14 +371,27 @@ function coeRowspan(group) {
 }
 
 /* ── Timeline cells ──────────────────────────────────── */
-.cell-gap {
-    height: 16px;
+.cell-gap,
+.gantt-table td.cell-bar {
+    position: relative;
+    height: auto;
+    vertical-align: middle;
 }
 
 .gantt-table td.cell-bar {
-    height: 16px;
+    background: transparent;
+}
+
+.gantt-table td.cell-bar::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: var(--timeline-thickness);
+    transform: translateY(-50%);
     background: #1a4b8c;
-    border-radius: 2px;
+    border-radius: 999px;
 }
 
 /* Year boundary — subtle dashed separator */

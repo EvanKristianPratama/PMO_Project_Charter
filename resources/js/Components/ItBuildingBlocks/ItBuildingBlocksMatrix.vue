@@ -1382,7 +1382,7 @@ defineExpose({
 
 .top-head {
     padding: 10px 12px;
-    background: #0f6fb7;
+    background: #326eb2;
     color: #ffffff;
     font-size: 14px;
     font-weight: 800;
