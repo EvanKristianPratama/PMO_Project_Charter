@@ -9,10 +9,12 @@ const props = defineProps({
     milestoneTypeOptions: { type: Array, default: () => [] },
 });
 
+/* ── Constants ───────────────────────────────────────── */
 const roadmapLegendItems = [
     { key: "baseline", label: "Baseline" },
     { key: "approved", label: "Approved" },
 ];
+
 const statusLegendOrder = [
     "On Track",
     "At Risk",
@@ -22,23 +24,32 @@ const statusLegendOrder = [
     "Not Signed",
     "On Review",
 ];
+
+const monthsOrder = [
+    "Januari",   "Februari", "Maret",    "April",
+    "Mei",       "Juni",     "Juli",     "Agustus",
+    "September", "Oktober",  "November", "Desember",
+];
+
+/**
+ * Single source of truth for status label → display label and badge CSS modifier.
+ * Keyed by the lowercase version of the raw status string.
+ */
+const STATUS_MAP = {
+    "on track":    { label: "On Track",    badge: "badge--on-track"    },
+    "at risk":     { label: "At Risk",     badge: "badge--at-risk"     },
+    "delayed":     { label: "Delayed",     badge: "badge--delayed"     },
+    "not started": { label: "Not Started", badge: "badge--not-started" },
+    "not signed":  { label: "Not Signed",  badge: "badge--not-signed"  },
+    "done":        { label: "Done",        badge: "badge--done"        },
+    "completed":   { label: "Done",        badge: "badge--done"        }, // alias
+    "on review":   { label: "On Review",   badge: "badge--on-review"   },
+};
+
+/* ── Reactive state ──────────────────────────────────── */
 const visibleRoadmapLayers = ref(["baseline", "approved"]);
 const selectedReviewStatus = ref("Total");
 const selectedPeriod = ref("");
-const monthsOrder = [
-    "Januari",
-    "Februari",
-    "Maret",
-    "April",
-    "Mei",
-    "Juni",
-    "Juli",
-    "Agustus",
-    "September",
-    "Oktober",
-    "November",
-    "Desember",
-];
 
 /* ── Year / Quarter grid ─────────────────────────────── */
 const years = computed(() =>
@@ -56,83 +67,92 @@ const quarterCells = computed(() =>
 
 const totalCells = computed(() => quarterCells.value.length);
 
-/* ── Date → quarter index ────────────────────────────── */
+/* ── Helpers ─────────────────────────────────────────── */
+
+/** Convert a date string (YYYY-MM-...) to a quarter index relative to startYear. */
 function toQIdx(value) {
     if (!value) return null;
     const m = String(value).match(/^(\d{4})-(\d{2})/);
     if (!m) return null;
-    const year = parseInt(m[1], 10);
+    const year  = parseInt(m[1], 10);
     const month = parseInt(m[2], 10) - 1;
-    const raw = (year - props.startYear) * 4 + Math.floor(month / 3);
+    const raw   = (year - props.startYear) * 4 + Math.floor(month / 3);
     return Math.max(0, Math.min(raw, totalCells.value - 1));
 }
 
+/**
+ * Normalise a raw roadmap status to "baseline" | "approved" | <raw>.
+ * Handles common typos (e.g. "aproved").
+ */
 function normalizeRoadmapStatus(rawStatus) {
     const normalized = String(rawStatus ?? "").trim().toLowerCase();
-
     if (!normalized) return "";
     if (normalized.includes("baseline")) return "baseline";
-    if (["approve", "approved", "aproved"].includes(normalized)) {
-        return "approved";
-    }
-    if (normalized.includes("approve")) return "approved";
-
+    if (normalized.includes("approve")) return "approved"; // covers "approved", "approve", "aproved"
     return normalized;
 }
 
+/** Return the canonical display label for an implementation status string. */
+function normalizeStatusLabel(rawStatus) {
+    const value = String(rawStatus ?? "").trim();
+    if (!value) return "";
+    return STATUS_MAP[value.toLowerCase()]?.label ?? value;
+}
+
+/** Return the BEM modifier class for a status badge. */
+function badgeClass(status) {
+    const value = String(status ?? "").trim();
+    if (!value) return "badge--default";
+    return STATUS_MAP[value.toLowerCase()]?.badge ?? "badge--default";
+}
+
+/* ── Roadmap layer visibility ────────────────────────── */
 function isRoadmapLayerVisible(layerKey) {
     return visibleRoadmapLayers.value.includes(layerKey);
 }
 
 function toggleRoadmapLayer(layerKey) {
-    if (visibleRoadmapLayers.value.includes(layerKey)) {
-        if (visibleRoadmapLayers.value.length === 1) {
-            return;
-        }
+    const isVisible = visibleRoadmapLayers.value.includes(layerKey);
 
+    if (isVisible) {
+        // Prevent deselecting the last remaining layer.
+        if (visibleRoadmapLayers.value.length === 1) return;
         visibleRoadmapLayers.value = visibleRoadmapLayers.value.filter(
-            (item) => item !== layerKey,
+            (k) => k !== layerKey,
         );
         return;
     }
 
+    // Re-add layerKey while preserving the canonical order from roadmapLegendItems.
     visibleRoadmapLayers.value = roadmapLegendItems
         .map((item) => item.key)
-        .filter(
-            (itemKey) =>
-                itemKey === layerKey
-                || visibleRoadmapLayers.value.includes(itemKey),
-        );
+        .filter((k) => k === layerKey || visibleRoadmapLayers.value.includes(k));
 }
 
+/* ── Review status filter ────────────────────────────── */
 function isSelectedReviewStatus(status) {
     return selectedReviewStatus.value === status;
 }
 
 function toggleReviewStatus(status) {
-    if (status === "Total" || selectedReviewStatus.value === status) {
-        selectedReviewStatus.value = "Total";
-        return;
-    }
-
-    selectedReviewStatus.value = status;
+    selectedReviewStatus.value =
+        status === "Total" || selectedReviewStatus.value === status ? "Total" : status;
 }
 
-/* ── Compute bar range ───────────────────────────────── */
+/* ── Range computation ───────────────────────────────── */
+
+/** Compute the quarter-index range that covers all milestones in `projects`. */
 function getRange(projects, statusFilter) {
     if (!Array.isArray(projects) || projects.length === 0) return null;
 
-    let pool = projects;
-
-    if (statusFilter) {
-        pool = projects.filter((project) => {
-            const statusKey = normalizeRoadmapStatus(
-                project?.status_ref?.name ?? project?.status,
-            );
-
-            return statusKey === statusFilter;
-        });
-    }
+    const pool = statusFilter
+        ? projects.filter((project) => {
+              const statusKey = normalizeRoadmapStatus(
+                  project?.status_ref?.name ?? project?.status,
+              );
+              return statusKey === statusFilter;
+          })
+        : projects;
 
     if (pool.length === 0) return null;
 
@@ -157,7 +177,9 @@ function getRange(projects, statusFilter) {
     return { start: Math.min(s, e), end: Math.max(s, e) };
 }
 
-/* ── Build cell descriptors ──────────────────────────── */
+/* ── Cell builder ────────────────────────────────────── */
+
+/** Build an array of cell descriptors (gap | bar) for a given quarter range. */
 function buildCells(range, keyPrefix = "default") {
     const total = totalCells.value;
 
@@ -172,17 +194,12 @@ function buildCells(range, keyPrefix = "default") {
 
     const { start, end } = range;
     const safeStart = Math.max(0, Math.min(start, total - 1));
-    const safeEnd = Math.max(safeStart, Math.min(end, total - 1));
-    const cells = [];
-    let c = 0;
+    const safeEnd   = Math.max(safeStart, Math.min(end, total - 1));
+    const cells     = [];
+    let   c         = 0;
 
     while (c < safeStart) {
-        cells.push({
-            type: "gap",
-            span: 1,
-            key: `${keyPrefix}-g${c}`,
-            endsYear: (c + 1) % 4 === 0,
-        });
+        cells.push({ type: "gap", span: 1, key: `${keyPrefix}-g${c}`, endsYear: (c + 1) % 4 === 0 });
         c++;
     }
 
@@ -195,56 +212,53 @@ function buildCells(range, keyPrefix = "default") {
     c = safeEnd + 1;
 
     while (c < total) {
-        cells.push({
-            type: "gap",
-            span: 1,
-            key: `${keyPrefix}-g${c}`,
-            endsYear: (c + 1) % 4 === 0,
-        });
+        cells.push({ type: "gap", span: 1, key: `${keyPrefix}-g${c}`, endsYear: (c + 1) % 4 === 0 });
         c++;
     }
 
     return cells;
 }
 
+/**
+ * Build the set of timeline rows for a single initiative.
+ * Returns one row per visible roadmap layer that has data,
+ * or a single placeholder row when no layer has data.
+ */
 function buildInitiativeTimelineRows(initiative) {
     const initiativeId = initiative?.id ?? "initiative";
-    const projects = Array.isArray(initiative?.projects) ? initiative.projects : [];
+    const projects     = Array.isArray(initiative?.projects) ? initiative.projects : [];
 
     const rows = roadmapLegendItems
         .filter((item) => isRoadmapLayerVisible(item.key))
         .map((item) => {
             const range = getRange(projects, item.key);
-
-            if (!range) {
-                return null;
-            }
+            if (!range) return null;
 
             return {
-                key: `${initiativeId}-${item.key}`,
-                layerKey: item.key,
-                label: item.label,
+                key:           `${initiativeId}-${item.key}`,
+                layerKey:      item.key,
+                label:         item.label,
                 isPlaceholder: false,
-                cells: buildCells(range, `${initiativeId}-${item.key}`),
+                cells:         buildCells(range, `${initiativeId}-${item.key}`),
             };
         })
         .filter(Boolean);
 
-    if (rows.length > 0) {
-        return rows;
-    }
+    if (rows.length > 0) return rows;
 
+    // Fallback: render a single empty row so the Gantt table stays aligned.
     return [
         {
-            key: `${initiativeId}-empty`,
-            layerKey: "empty",
-            label: "",
+            key:           `${initiativeId}-empty`,
+            layerKey:      "empty",
+            label:         "",
             isPlaceholder: true,
-            cells: buildCells(null, `${initiativeId}-empty`),
+            cells:         buildCells(null, `${initiativeId}-empty`),
         },
     ];
 }
 
+/* ── Derived data ────────────────────────────────────── */
 const allInitiatives = computed(() =>
     (Array.isArray(props.groups) ? props.groups : []).flatMap((group) =>
         Array.isArray(group?.initiatives) ? group.initiatives : [],
@@ -260,45 +274,30 @@ const availablePeriods = computed(() => {
             : [];
 
         reviewStatuses.forEach((statusItem) => {
-            const value = String(statusItem?.period_key ?? "").trim();
-            const label = String(statusItem?.periode_label ?? "").trim();
-            const year = Number(statusItem?.year ?? 0);
-            const startMonth = String(statusItem?.start ?? "").trim();
-            const endMonth = String(statusItem?.end ?? "").trim();
+            const value      = String(statusItem?.period_key    ?? "").trim();
+            const label      = String(statusItem?.periode_label ?? "").trim();
+            const year       = Number(statusItem?.year          ?? 0);
+            const startMonth = String(statusItem?.start         ?? "").trim();
+            const endMonth   = String(statusItem?.end           ?? "").trim();
 
-            if (!value || !label || periods.has(value)) {
-                return;
-            }
+            if (!value || !label || periods.has(value)) return;
 
-            periods.set(value, {
-                value,
-                label,
-                year,
-                startMonth,
-                endMonth,
-            });
+            periods.set(value, { value, label, year, startMonth, endMonth });
         });
     });
 
-    const sortedPeriods = Array.from(periods.values()).sort((left, right) => {
-        if (left.year !== right.year) {
-            return right.year - left.year;
-        }
+    return Array.from(periods.values()).sort((left, right) => {
+        if (left.year !== right.year) return right.year - left.year;
 
-        const leftStartIndex = monthsOrder.indexOf(left.startMonth);
-        const rightStartIndex = monthsOrder.indexOf(right.startMonth);
-        if (leftStartIndex !== rightStartIndex) {
-            return rightStartIndex - leftStartIndex;
-        }
+        const li = monthsOrder.indexOf(left.startMonth);
+        const ri = monthsOrder.indexOf(right.startMonth);
+        if (li !== ri) return ri - li;
 
-        const leftEndIndex = monthsOrder.indexOf(left.endMonth);
-        const rightEndIndex = monthsOrder.indexOf(right.endMonth);
-        return rightEndIndex - leftEndIndex;
+        return monthsOrder.indexOf(right.endMonth) - monthsOrder.indexOf(left.endMonth);
     });
-
-    return sortedPeriods;
 });
 
+// Auto-select the first available period; reset when the list becomes empty.
 watch(
     availablePeriods,
     (periods) => {
@@ -306,38 +305,29 @@ watch(
             selectedPeriod.value = "";
             return;
         }
-
-        const hasSelectedPeriod = periods.some(
-            (period) => period.value === selectedPeriod.value,
-        );
-
-        if (!hasSelectedPeriod) {
-            selectedPeriod.value = periods[0].value;
-        }
+        const stillValid = periods.some((p) => p.value === selectedPeriod.value);
+        if (!stillValid) selectedPeriod.value = periods[0].value;
     },
     { immediate: true },
 );
 
+/**
+ * Return the implementation status and period label for an initiative
+ * at a specific review period. Falls back to `implementation_status` when
+ * no period-specific record is found.
+ */
 function resolveInitiativeStatusByPeriod(initiative, periodValue) {
     const reviewStatuses = Array.isArray(initiative?.review_statuses)
         ? initiative.review_statuses
         : [];
 
     if (reviewStatuses.length === 0) {
-        return {
-            status: initiative?.implementation_status ?? null,
-            period: null,
-        };
+        return { status: initiative?.implementation_status ?? null, period: null };
     }
 
-    let selected = null;
-    for (let index = reviewStatuses.length - 1; index >= 0; index -= 1) {
-        const statusItem = reviewStatuses[index];
-        if (String(statusItem?.period_key ?? "") === String(periodValue)) {
-            selected = statusItem;
-            break;
-        }
-    }
+    const selected = reviewStatuses.findLast(
+        (item) => String(item?.period_key ?? "") === String(periodValue),
+    );
 
     return {
         status: selected?.review_status ?? initiative?.implementation_status ?? null,
@@ -347,18 +337,17 @@ function resolveInitiativeStatusByPeriod(initiative, periodValue) {
 
 const baseDisplayGroups = computed(() =>
     (Array.isArray(props.groups) ? props.groups : []).map((group) => {
-        const initiatives = (Array.isArray(group?.initiatives) ? group.initiatives : []).map((initiative) => {
-            const periodState = resolveInitiativeStatusByPeriod(
-                initiative,
-                selectedPeriod.value,
-            );
+        const initiatives = (
+            Array.isArray(group?.initiatives) ? group.initiatives : []
+        ).map((initiative) => {
+            const periodState  = resolveInitiativeStatusByPeriod(initiative, selectedPeriod.value);
             const timelineRows = buildInitiativeTimelineRows(initiative);
 
             return {
                 ...initiative,
-                display_status: periodState.status,
-                display_period: periodState.period,
-                timeline_rows: timelineRows,
+                display_status:   periodState.status,
+                display_period:   periodState.period,
+                timeline_rows:    timelineRows,
                 timeline_rowspan: timelineRows.length,
             };
         });
@@ -367,7 +356,7 @@ const baseDisplayGroups = computed(() =>
             ...group,
             initiatives,
             timeline_rowspan: initiatives.reduce(
-                (total, initiative) => total + (initiative.timeline_rowspan || 1),
+                (sum, ini) => sum + (ini.timeline_rowspan || 1),
                 0,
             ),
         };
@@ -383,24 +372,20 @@ const baseDisplayInitiatives = computed(() =>
 const displayGroups = computed(() =>
     baseDisplayGroups.value
         .map((group) => {
-            const initiatives = (Array.isArray(group?.initiatives) ? group.initiatives : [])
-                .filter((initiative) => {
-                    if (selectedReviewStatus.value === "Total") {
-                        return true;
-                    }
+            const initiatives = (
+                Array.isArray(group?.initiatives) ? group.initiatives : []
+            ).filter((initiative) => {
+                if (selectedReviewStatus.value === "Total") return true;
+                return normalizeStatusLabel(initiative?.display_status) === selectedReviewStatus.value;
+            });
 
-                    return normalizeStatusLabel(initiative?.display_status) === selectedReviewStatus.value;
-                });
-
-            if (initiatives.length === 0) {
-                return null;
-            }
+            if (initiatives.length === 0) return null;
 
             return {
                 ...group,
                 initiatives,
                 timeline_rowspan: initiatives.reduce(
-                    (total, initiative) => total + (initiative.timeline_rowspan || 1),
+                    (sum, ini) => sum + (ini.timeline_rowspan || 1),
                     0,
                 ),
             };
@@ -410,89 +395,36 @@ const displayGroups = computed(() =>
 
 const hasDisplayGroups = computed(() => displayGroups.value.length > 0);
 
-const selectedPeriodLabel = computed(() => {
-    return (
-        availablePeriods.value.find((period) => period.value === selectedPeriod.value)?.label
-        ?? "-"
-    );
-});
+const selectedPeriodLabel = computed(
+    () => availablePeriods.value.find((p) => p.value === selectedPeriod.value)?.label ?? "-",
+);
 
 const reviewStatusLegendItems = computed(() => {
     const counts = baseDisplayInitiatives.value.reduce((carry, initiative) => {
         const status = normalizeStatusLabel(initiative?.display_status);
-
-        if (!status) {
-            return carry;
-        }
-
+        if (!status) return carry;
         carry.set(status, (carry.get(status) ?? 0) + 1);
-
         return carry;
     }, new Map());
 
     return [
-        {
-            label: "Total",
-            status: "Total",
-            count: baseDisplayInitiatives.value.length,
-        },
+        { label: "Total", status: "Total", count: baseDisplayInitiatives.value.length },
         ...statusLegendOrder
-            .map((status) => ({
-                label: status,
-                status,
-                count: counts.get(status) ?? 0,
-            }))
+            .map((status) => ({ label: status, status, count: counts.get(status) ?? 0 }))
             .filter((item) => item.count > 0),
     ];
 });
-
-function normalizeStatusLabel(rawStatus) {
-    const value = String(rawStatus ?? "").trim();
-    if (!value) return "";
-
-    const normalized = value.toLowerCase();
-
-    if (normalized === "on track") return "On Track";
-    if (normalized === "at risk") return "At Risk";
-    if (normalized === "delayed") return "Delayed";
-    if (normalized === "not started") return "Not Started";
-    if (normalized === "not signed") return "Not Signed";
-    if (normalized === "done" || normalized === "completed") return "Done";
-    if (normalized === "on review") return "On Review";
-
-    return value;
-}
-
-function badgeClass(status) {
-    const normalized = normalizeStatusLabel(status);
-
-    if (normalized === "On Track") return "badge--on-track";
-    if (normalized === "At Risk") return "badge--at-risk";
-    if (normalized === "Delayed") return "badge--delayed";
-    if (normalized === "Not Started") return "badge--not-started";
-    if (normalized === "Not Signed") return "badge--not-signed";
-    if (normalized === "Done") return "badge--done";
-    if (normalized === "On Review") return "badge--on-review";
-
-    return "badge--default";
-}
 </script>
 
 <template>
     <div class="space-y-3">
         <!-- ── Header ─────────────────────────────────── -->
-        <div
-            class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
-        >
+        <div class="content-header">
             <div class="flex flex-wrap items-center gap-2 shrink-0">
                 <label class="period-filter">
                     <span class="period-filter__label">Status Review Implementation Period</span>
                     <select v-model="selectedPeriod" class="period-filter__select">
-                        <option
-                            v-if="availablePeriods.length === 0"
-                            value=""
-                            disabled
-                        >
+                        <option v-if="availablePeriods.length === 0" value="" disabled>
                             Belum ada periode
                         </option>
                         <option
@@ -507,10 +439,8 @@ function badgeClass(status) {
             </div>
         </div>
 
-        <div
-            v-if="groups && groups.length"
-            class="legend-panel"
-        >
+        <!-- ── Legend panel ──────────────────────────── -->
+        <div v-if="groups && groups.length" class="legend-panel">
             <div class="legend-panel__header">
                 <div class="legend-panel__title">Legend</div>
                 <div class="legend-panel__period">{{ selectedPeriodLabel }}</div>
@@ -531,12 +461,7 @@ function badgeClass(status) {
                         ]"
                         @click="toggleRoadmapLayer(item.key)"
                     >
-                        <span
-                            :class="[
-                                'legend-swatch',
-                                `timeline-swatch--${item.key}`,
-                            ]"
-                        />
+                        <span :class="['legend-swatch', `timeline-swatch--${item.key}`]" />
                         <span class="legend-label">{{ item.label }}</span>
                         <span class="legend-toggle">
                             {{ isRoadmapLayerVisible(item.key) ? "Shown" : "Hidden" }}
@@ -562,43 +487,40 @@ function badgeClass(status) {
                     >
                         <span
                             v-if="item.status !== 'Total'"
-                            :class="[
-                                'legend-swatch',
-                                badgeClass(item.status),
-                            ]"
+                            :class="['legend-swatch', badgeClass(item.status)]"
                         />
                         <span class="legend-label">
-                            {{ item.label }} <span class="legend-count">({{ item.count }})</span>
+                            {{ item.label }}
+                            <span class="legend-count">({{ item.count }})</span>
                         </span>
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- ── Empty state ─────────────────────────────── -->
+        <!-- ── Empty states ──────────────────────────── -->
         <div
             v-if="!groups || groups.length === 0"
-            class="rounded-xl border border-dashed border-slate-200 dark:border-white/10 bg-white dark:bg-[#171717] p-10 text-center"
+            class="empty-state rounded-xl border-dashed dark:border-white/10 dark:bg-[#171717]"
         >
-            <p class="text-sm text-slate-500 dark:text-slate-400">
+            <p class="empty-state__text dark:text-slate-400">
                 Belum ada data roadmap IT Strategic Initiative.
             </p>
         </div>
 
         <div
             v-else-if="!hasDisplayGroups"
-            class="rounded-xl border border-dashed border-slate-200 dark:border-white/10 bg-white dark:bg-[#171717] p-10 text-center"
+            class="empty-state rounded-xl border-dashed dark:border-white/10 dark:bg-[#171717]"
         >
-            <p class="text-sm text-slate-500 dark:text-slate-400">
+            <p class="empty-state__text dark:text-slate-400">
                 Tidak ada initiative yang cocok dengan filter status review yang dipilih.
             </p>
         </div>
 
-        <!-- ── Gantt Table ─────────────────────────────── -->
+        <!-- ── Gantt table ────────────────────────────── -->
         <div
             v-else
-            class="overflow-x-auto border border-slate-200 dark:border-white/10 bg-white dark:bg-[#171717]"
-            style="min-width: 0"
+            class="gantt-wrapper dark:border-white/10 dark:bg-[#171717]"
         >
             <table
                 class="gantt-table"
@@ -614,31 +536,26 @@ function badgeClass(status) {
                     />
                 </colgroup>
 
-                <!-- Single header row — year labels only -->
+                <!-- Year header -->
                 <thead>
-                    <tr class="border-b border-[#c9d2dd]">
-                        <th
-                            class="th-cell bg-[#326eb2] text-white border-r border-white/30"
-                        >
+                    <tr class="gantt-header-row">
+                        <th class="th-cell th-header border-r border-white/30">
                             IT Building Blocks
                         </th>
-                        <th
-                            class="th-cell th-left bg-[#326eb2] text-white border-r border-white/30"
-                        >
+                        <th class="th-cell th-left th-header border-r border-white/30">
                             IT Initiatives
                         </th>
                         <th
                             v-for="year in years"
                             :key="`yr-${year}`"
                             colspan="4"
-                            class="th-year bg-[#326eb2] text-white border-l border-white/30"
+                            class="th-year th-header border-l border-white/30"
                         >
                             {{ year }}
                         </th>
                     </tr>
                 </thead>
 
-                <!-- Body -->
                 <tbody>
                     <template
                         v-for="group in displayGroups"
@@ -651,9 +568,15 @@ function badgeClass(status) {
                             <tr
                                 v-for="(timelineRow, rowIdx) in initiative.timeline_rows"
                                 :key="`ini-${initiative.id}-${timelineRow.key}`"
-                                class="row-data"
+                                :class="[
+                                    'row-data',
+                                    idx === group.initiatives.length - 1 &&
+                                    rowIdx === initiative.timeline_rows.length - 1
+                                        ? 'group-end-row'
+                                        : '',
+                                ]"
                             >
-                                <!-- CoE cell -->
+                                <!-- CoE label — spans all rows in this group -->
                                 <td
                                     v-if="idx === 0 && rowIdx === 0"
                                     :rowspan="group.timeline_rowspan"
@@ -662,30 +585,23 @@ function badgeClass(status) {
                                     {{ group.coe_name }}
                                 </td>
 
-                                <!-- Initiative name -->
+                                <!-- Initiative label — spans all timeline rows for this initiative -->
                                 <td
                                     v-if="rowIdx === 0"
                                     :rowspan="initiative.timeline_rowspan"
                                     class="cell-initiative"
                                 >
-                                    <div class="flex items-center gap-1.5">
-                                        <span
-                                            :class="[
-                                                'badge',
-                                                badgeClass(initiative.display_status),
-                                            ]"
-                                        >
+                                    <div class="initiative-label">
+                                        <span :class="['badge', badgeClass(initiative.display_status)]">
                                             {{ initiative.no }}
                                         </span>
-                                        <span
-                                            class="ini-name text-slate-700 dark:text-slate-200"
-                                        >
+                                        <span class="ini-name dark:text-slate-200">
                                             {{ initiative.name }}
                                         </span>
                                     </div>
                                 </td>
 
-                                <!-- Timeline cells -->
+                                <!-- Timeline bar / gap cells -->
                                 <td
                                     v-for="cell in timelineRow.cells"
                                     :key="cell.key"
@@ -708,19 +624,55 @@ function badgeClass(status) {
 </template>
 
 <style scoped>
-/* ── Layout only — colors handled by Tailwind classes ── */
+/* ─────────────────────────────────────────────────────
+   Design tokens — scoped to the Gantt table root
+   so they don't leak to the global stylesheet.
+   ───────────────────────────────────────────────────── */
+.gantt-table {
+    --timeline-thickness:  10px;
+    --group-sep-color:     #8ca9c7;
+    --group-sep-width:     1px;
+    --row-border-color:    #eef2f7;
+    --cell-border-color:   #e2e8f0;
+    --badge-size:          17px;
+    --badge-font:          9px;
+}
 
+/* ─────────────────────────────────────────────────────
+   Layout
+   ───────────────────────────────────────────────────── */
+.content-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+@media (min-width: 640px) {
+    .content-header {
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: space-between;
+    }
+}
+
+.gantt-wrapper {
+    overflow-x: auto;
+    border: 1px solid #d9e4ef;
+    background: #ffffff;
+    min-width: 0;
+}
+
+/* ─────────────────────────────────────────────────────
+   Gantt table shell
+   ───────────────────────────────────────────────────── */
 .gantt-table {
     width: 100%;
     min-width: 820px;
     table-layout: fixed;
     border-collapse: collapse;
-    --timeline-thickness: 8px;
-    --group-separator: #8ca9c7;
-    --group-soft: #edf4fb;
-    --group-separator-width: 1px;
 }
 
+/* Reset all borders; specific selectors below re-add only what's needed. */
 .gantt-table th,
 .gantt-table td {
     border: none;
@@ -728,18 +680,26 @@ function badgeClass(status) {
     overflow: hidden;
 }
 
-/* ── Column widths ───────────────────────────────────── */
-.col-coe {
-    width: 11%;
-}
-.col-initiative {
-    width: 23%;
-}
-.col-quarter {
-    width: calc(40% / var(--qcount));
+/* ─────────────────────────────────────────────────────
+   Column widths
+   11% CoE + 23% Initiative + 66% timeline area.
+   col-quarter claims 40% / qcount from that pool;
+   table-layout: fixed distributes the remainder.
+   ───────────────────────────────────────────────────── */
+.col-coe        { width: 11%; }
+.col-initiative { width: 23%; }
+.col-quarter    { width: calc(40% / var(--qcount)); }
+
+/* ─────────────────────────────────────────────────────
+   Header
+   ───────────────────────────────────────────────────── */
+.gantt-header-row { border-bottom: 1px solid #c9d2dd; }
+
+.th-header {
+    background-color: #326eb2;
+    color: #ffffff;
 }
 
-/* ── Header cells ────────────────────────────────────── */
 .th-cell {
     font-size: 15px;
     font-weight: 700;
@@ -751,9 +711,7 @@ function badgeClass(status) {
     line-height: 1.35;
 }
 
-.th-left {
-    text-align: left;
-}
+.th-left { text-align: left; }
 
 .th-year {
     font-size: 15px;
@@ -764,8 +722,25 @@ function badgeClass(status) {
     line-height: 1.2;
 }
 
-/* ── CoE cell ────────────────────────────────────────── */
-.cell-coe {
+/* ─────────────────────────────────────────────────────
+   Body rows
+   ───────────────────────────────────────────────────── */
+.row-data {
+    border-bottom: 1px solid var(--row-border-color);
+    transition: background-color 0.18s ease;
+}
+
+.row-data:hover { background: #f8fbff; }
+
+/* Group separator — higher specificity than the .gantt-table td reset above */
+.gantt-table tr.group-end-row > td {
+    border-bottom: var(--group-sep-width) solid var(--group-sep-color);
+}
+
+/* ─────────────────────────────────────────────────────
+   CoE cell
+   ───────────────────────────────────────────────────── */
+.gantt-table td.cell-coe {
     font-size: 10.5px;
     font-weight: 600;
     padding: 10px 12px;
@@ -774,64 +749,116 @@ function badgeClass(status) {
     word-break: break-word;
     color: #334155;
     background: linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%);
-    border-bottom: var(--group-separator-width) solid var(--group-separator) !important;
+    border-bottom: var(--group-sep-width) solid var(--group-sep-color);
 }
 
-/* ── Initiative cell ─────────────────────────────────── */
-.cell-initiative {
+/* ─────────────────────────────────────────────────────
+   Initiative cell
+   ───────────────────────────────────────────────────── */
+.gantt-table td.cell-initiative {
     padding: 7px 10px;
     vertical-align: middle;
-    border-right: 1px solid #e2e8f0 !important;
+    border-right: 1px solid var(--cell-border-color);
+    border-bottom: 1px solid var(--row-border-color);
 }
 
+.initiative-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ini-name {
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.35;
+    word-break: break-word;
+    color: #475569;
+}
+
+/* ─────────────────────────────────────────────────────
+   Badge (status dot)
+   ───────────────────────────────────────────────────── */
 .badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    width: 17px;
-    height: 17px;
+    width:       var(--badge-size);
+    height:      var(--badge-size);
     border-radius: 50%;
-    font-size: 9px;
+    font-size:   var(--badge-font);
     font-weight: 700;
     line-height: 1;
     color: #ffffff;
 }
 
-.badge--default {
-    background: #2d8fe2;
+.badge--default     { background: #2d8fe2; }
+.badge--on-track    { background: #8fcfff; color: #214f87; }
+.badge--at-risk     { background: #ffea00; color: #7b5d00; }
+.badge--delayed     { background: #f97316; }
+.badge--not-started { background: #2d8fe2; }
+.badge--not-signed  { background: #ff1d1d; }
+.badge--done        { background: #1fb34a; }
+.badge--on-review   { background: #f59e0b; }
+
+/* ─────────────────────────────────────────────────────
+   Timeline cells
+   ───────────────────────────────────────────────────── */
+.gantt-table td.cell-gap,
+.gantt-table td.cell-bar {
+    position: relative;
+    height: 22px;
+    vertical-align: middle;
+    background: #ffffff;
+    border-bottom: 1px solid var(--row-border-color);
 }
 
-.badge--on-track {
-    background: #8fcfff;
-    color: #214f87;
+.gantt-table td.cell-bar { background: transparent; }
+
+.gantt-table td.cell-bar::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: calc(var(--timeline-thickness) - 2px);
+    transform: translateY(-50%);
+    background: #1a4b8c;
+    border-radius: 999px;
 }
 
-.badge--at-risk {
-    background: #ffea00;
-    color: #7b5d00;
+.gantt-table td.cell-bar--baseline::after {
+    background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%);
 }
 
-.badge--delayed {
-    background: #f97316;
+.gantt-table td.cell-bar--approved::after {
+    background: linear-gradient(90deg, #34d399 0%, #16a34a 100%);
 }
 
-.badge--not-started {
-    background: #2d8fe2;
+.gantt-table td.cell-gap--placeholder { background: #fafcff; }
+
+/* Year boundary — dashed vertical separator */
+.gantt-table td.year-sep { border-right: 1px dashed #cbd5e0; }
+
+/* ─────────────────────────────────────────────────────
+   Empty state
+   ───────────────────────────────────────────────────── */
+.empty-state {
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    padding: 40px;
+    text-align: center;
 }
 
-.badge--not-signed {
-    background: #ff1d1d;
+.empty-state__text {
+    font-size: 13px;
+    color: #64748b;
 }
 
-.badge--done {
-    background: #1fb34a;
-}
-
-.badge--on-review {
-    background: #f59e0b;
-}
-
+/* ─────────────────────────────────────────────────────
+   Legend panel
+   ───────────────────────────────────────────────────── */
 .legend-panel {
     display: flex;
     flex-direction: column;
@@ -913,14 +940,8 @@ function badgeClass(status) {
     box-shadow: 0 0 0 3px rgba(93, 140, 192, 0.18);
 }
 
-.legend-item--active {
-    border-color: #5d8cc0;
-    background: #eef6ff;
-}
-
-.legend-item--muted {
-    opacity: 0.5;
-}
+.legend-item--active { border-color: #5d8cc0; background: #eef6ff; }
+.legend-item--muted  { opacity: 0.5; }
 
 .legend-swatch {
     display: inline-flex;
@@ -938,23 +959,13 @@ function badgeClass(status) {
     background: linear-gradient(90deg, #34d399 0%, #16a34a 100%);
 }
 
-.legend-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: #475569;
-}
+.legend-label  { font-size: 11px; font-weight: 600; color: #475569; }
+.legend-toggle { font-size: 10px; font-weight: 700; color: #6b7280; }
+.legend-count  { color: #64748b;  font-weight: 700; }
 
-.legend-toggle {
-    font-size: 10px;
-    font-weight: 700;
-    color: #6b7280;
-}
-
-.legend-count {
-    color: #64748b;
-    font-weight: 700;
-}
-
+/* ─────────────────────────────────────────────────────
+   Period filter
+   ───────────────────────────────────────────────────── */
 .period-filter {
     display: inline-flex;
     align-items: center;
@@ -995,118 +1006,27 @@ function badgeClass(status) {
     box-shadow: 0 0 0 3px rgba(93, 140, 192, 0.14);
 }
 
-.ini-name {
-    font-size: 11px;
-    font-weight: 500;
-    line-height: 1.35;
-    word-break: break-word;
-}
-
-/* ── Timeline cells ──────────────────────────────────── */
-.cell-gap,
-.gantt-table td.cell-bar {
-    position: relative;
-    height: auto;
-    vertical-align: middle;
-    background: #ffffff;
-    border-bottom: 1px solid #eef2f7 !important;
-}
-
-.gantt-table td.cell-bar {
-    background: transparent;
-}
-
-.gantt-table td.cell-bar::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 50%;
-    height: var(--timeline-thickness);
-    transform: translateY(-50%);
-    background: #1a4b8c;
-    border-radius: 999px;
-}
-
-.gantt-table td.cell-bar--baseline::after {
-    background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%);
-}
-
-.gantt-table td.cell-bar--approved::after {
-    background: linear-gradient(90deg, #34d399 0%, #16a34a 100%);
-}
-
-.cell-gap--placeholder {
-    background: #fafcff;
-}
-
-/* Year boundary — subtle dashed separator */
-.year-sep {
-    border-right: 1px dashed #cbd5e0 !important;
-}
-
-.row-data {
-    transition: background-color 0.18s ease;
-}
-
-.row-data:hover {
-    background: #f8fbff;
-}
-
-/* ── Responsive ──────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────
+   Responsive
+   ───────────────────────────────────────────────────── */
 @media (max-width: 1280px) {
-    .col-coe {
-        width: 13%;
-    }
-    .col-initiative {
-        width: 27%;
-    }
-    .col-quarter {
-        width: calc(60% / var(--qcount));
-    }
-    .ini-name {
-        font-size: 10px;
-    }
-    .badge {
-        width: 15px;
-        height: 15px;
-        font-size: 8px;
-    }
-    .legend-list {
-        gap: 8px 14px;
-    }
-    .period-filter__select {
-        min-width: 170px;
-    }
+    .col-coe        { width: 13%; }
+    .col-initiative { width: 27%; }
+    .col-quarter    { width: calc(60% / var(--qcount)); }
+    .ini-name       { font-size: 10px; }
+    .badge          { width: 15px; height: 15px; font-size: 8px; }
+    .legend-list    { gap: 8px 14px; }
+    .period-filter__select { min-width: 170px; }
 }
 
 @media (max-width: 900px) {
-    .col-coe {
-        width: 15%;
-    }
-    .col-initiative {
-        width: 32%;
-    }
-    .col-quarter {
-        width: calc(53% / var(--qcount));
-    }
-    .legend-panel {
-        padding: 12px 14px;
-    }
-    .legend-item--button {
-        width: 100%;
-        justify-content: space-between;
-    }
-    .legend-label {
-        font-size: 10px;
-    }
-    .period-filter {
-        width: 100%;
-        justify-content: space-between;
-    }
-    .period-filter__select {
-        min-width: 0;
-        width: 100%;
-    }
+    .col-coe              { width: 15%; }
+    .col-initiative       { width: 32%; }
+    .col-quarter          { width: calc(53% / var(--qcount)); }
+    .legend-panel         { padding: 12px 14px; }
+    .legend-item--button  { width: 100%; justify-content: space-between; }
+    .legend-label         { font-size: 10px; }
+    .period-filter        { width: 100%; justify-content: space-between; }
+    .period-filter__select { min-width: 0; width: 100%; }
 }
 </style>
