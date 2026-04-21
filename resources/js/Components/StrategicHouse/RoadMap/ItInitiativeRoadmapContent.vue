@@ -651,7 +651,13 @@ function badgeClass(status) {
                             <tr
                                 v-for="(timelineRow, rowIdx) in initiative.timeline_rows"
                                 :key="`ini-${initiative.id}-${timelineRow.key}`"
-                                class="row-data"
+                                :class="[
+                                    'row-data',
+                                    idx === group.initiatives.length - 1
+                                    && rowIdx === initiative.timeline_rows.length - 1
+                                        ? 'group-end-row'
+                                        : '',
+                                ]"
                             >
                                 <!-- CoE cell -->
                                 <td
@@ -1049,6 +1055,10 @@ function badgeClass(status) {
 .row-data {
     border-bottom: 1px solid #eef2f7;
     transition: background-color 0.18s ease;
+}
+
+.group-end-row > td {
+    border-bottom: 1px solid var(--group-separator) !important;
 }
 
 .row-data:hover {
