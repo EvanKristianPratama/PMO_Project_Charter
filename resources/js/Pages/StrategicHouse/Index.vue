@@ -13,9 +13,21 @@
                             ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                             : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                     "
-                    @click="viewMode = 'mapping'"
+                    @click="setViewMode('mapping')"
                 >
                     Strategic House
+                </button>
+                <button
+                    type="button"
+                    class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
+                    :class="
+                        viewMode === 'business-strategy'
+                            ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
+                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                    "
+                    @click="setViewMode('business-strategy')"
+                >
+                    Business Strategy
                 </button>
                 <button
                     type="button"
@@ -25,7 +37,7 @@
                             ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                             : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                     "
-                    @click="viewMode = 'dual-growth'"
+                    @click="setViewMode('dual-growth')"
                 >
                     Dual Growth Strategy
                 </button>
@@ -37,7 +49,7 @@
                             ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                             : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                     "
-                    @click="viewMode = 'digital-transformation-initiatives'"
+                    @click="setViewMode('digital-transformation-initiatives')"
                 >
                     Digital Transformation Initiatives
                 </button>
@@ -49,7 +61,7 @@
                             ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                             : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                     "
-                    @click="viewMode = 'it-building-blocs'"
+                    @click="setViewMode('it-building-blocs')"
                 >
                     IT Building Blocks
                 </button>
@@ -61,7 +73,7 @@
                             ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                             : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                     "
-                    @click="viewMode = 'it-initiatives'"
+                    @click="setViewMode('it-initiatives')"
                 >
                     IT Initiatives
                 </button>
@@ -73,7 +85,7 @@
                             ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                             : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                     "
-                    @click="viewMode = 'initiative-relation'"
+                    @click="setViewMode('initiative-relation')"
                 >
                     Initiative Relations
                 </button>
@@ -85,7 +97,7 @@
                             ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                             : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                     "
-                    @click="viewMode = 'initiative-support'"
+                    @click="setViewMode('initiative-support')"
                 >
                     Initiative Support
                 </button>
@@ -97,7 +109,7 @@
                             ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                             : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                     "
-                    @click="viewMode = 'roadmap'"
+                    @click="setViewMode('roadmap')"
                 >
                     Roadmap
                 </button>
@@ -109,7 +121,7 @@
                             ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                             : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                     "
-                    @click="viewMode = 'strategic-pillars'"
+                    @click="setViewMode('strategic-pillars')"
                 >
                     Strategic Pillars
                 </button>
@@ -157,6 +169,22 @@
                             :unassigned-initiatives="unassignedInitiatives"
                         />
                     </section>
+
+                    <div
+                        v-else-if="viewMode === 'business-strategy'"
+                        key="business-strategy"
+                    >
+                        <StrategicHouseBusinessStrategyPage
+                            :embedded="true"
+                            :page="businessStrategyPage"
+                            :summary="businessStrategySummary"
+                            :groups="businessStrategyGroups"
+                            :strategy-columns="businessStrategyColumns"
+                            :organization-options="
+                                businessStrategyOrganizationOptions
+                            "
+                        />
+                    </div>
 
                     <div
                         v-else-if="viewMode === 'dual-growth'"
@@ -281,6 +309,7 @@ import DualGrowth from "@/Components/StrategicHouse/DualGrowth.vue";
 import DualGrowthFull from "@/Components/StrategicHouse/DualGrowthFull.vue";
 import DigitalBuildingBlock from "@/Components/ItBuildingBlocks/DigitalBuildingBlock.vue";
 import ItBuildingBlocks from "@/Components/ItBuildingBlocks/ItBuildingBlock.vue";
+import StrategicHouseBusinessStrategyPage from "@/Pages/StrategicHouse/BusinessStrategy/Index.vue";
 import StrategicHouseInitiativeSupportPage from "@/Pages/StrategicHouse/InitiativeSupport/Index.vue";
 import StrategicHouseItBuildingBlocksPage from "@/Pages/StrategicHouse/ItBuildingBlocks/Index.vue";
 import StrategicHouseInitiativeRelationPage from "@/Pages/StrategicHouse/InitiativeRelation/Index.vue";
@@ -296,6 +325,26 @@ const props = defineProps({
     summary: {
         type: Object,
         default: () => ({}),
+    },
+    businessStrategyPage: {
+        type: Object,
+        default: () => ({}),
+    },
+    businessStrategySummary: {
+        type: Object,
+        default: () => ({}),
+    },
+    businessStrategyGroups: {
+        type: Array,
+        default: () => [],
+    },
+    businessStrategyColumns: {
+        type: Array,
+        default: () => [],
+    },
+    businessStrategyOrganizationOptions: {
+        type: Array,
+        default: () => [],
     },
     roofSection: {
         type: Object,
@@ -406,9 +455,28 @@ const props = defineProps({
     },
 });
 
+const availableViewModes = new Set([
+    "mapping",
+    "business-strategy",
+    "dual-growth",
+    "digital-transformation-initiatives",
+    "it-building-blocs",
+    "it-initiatives",
+    "initiative-relation",
+    "initiative-support",
+    "roadmap",
+    "strategic-pillars",
+]);
+
 const getInitialViewMode = () => {
     if (typeof window === "undefined") return "mapping";
     const urlParams = new URLSearchParams(window.location.search);
+    const requestedView = urlParams.get("view");
+
+    if (requestedView && availableViewModes.has(requestedView)) {
+        return requestedView;
+    }
+
     if (
         urlParams.has("pilar") ||
         urlParams.has("goal_id") ||
@@ -424,4 +492,17 @@ const getInitialViewMode = () => {
 
 const viewMode = ref(getInitialViewMode());
 const showEnabler = ref(false);
+
+const syncViewModeInUrl = (mode) => {
+    if (typeof window === "undefined") return;
+
+    const url = new URL(window.location.href);
+    url.searchParams.set("view", mode);
+    window.history.replaceState({}, "", url.toString());
+};
+
+const setViewMode = (mode) => {
+    viewMode.value = mode;
+    syncViewModeInUrl(mode);
+};
 </script>

@@ -30,6 +30,21 @@ const selectedOrganization = ref('');
 const selectedCompleteness = ref('');
 const showDescriptions = ref(false);
 
+const orderedStrategyColumns = computed(() => {
+    const lowCarbonColumn = (props.strategyColumns || []).find(
+        (column) => column.key === 'low_carbon',
+    );
+    const otherColumns = (props.strategyColumns || []).filter(
+        (column) => column.key !== 'low_carbon',
+    );
+
+    return lowCarbonColumn ? [...otherColumns, lowCarbonColumn] : [...(props.strategyColumns || [])];
+});
+
+const totalStrategyColumns = computed(() => orderedStrategyColumns.value.length);
+const lowCarbonColumn = computed(() => orderedStrategyColumns.value.find((column) => column.key === 'low_carbon') ?? null);
+const legacyColumns = computed(() => orderedStrategyColumns.value.filter((column) => column.key !== 'low_carbon'));
+
 const normalizedGroups = computed(() => props.groups || []);
 
 const filteredGroups = computed(() => normalizedGroups.value
@@ -39,7 +54,7 @@ const filteredGroups = computed(() => normalizedGroups.value
             const matchesOrganization = !selectedOrganization.value
                 || String(row.business_unit_id ?? '') === String(selectedOrganization.value);
             const completionCount = Number(row.completion_count ?? 0);
-            const totalColumns = props.strategyColumns.length;
+            const totalColumns = totalStrategyColumns.value;
             const matchesCompleteness = (
                 !selectedCompleteness.value
                 || (selectedCompleteness.value === 'complete' && completionCount === totalColumns)
@@ -72,25 +87,25 @@ const filteredGroups = computed(() => normalizedGroups.value
 
 const visibleRows = computed(() => filteredGroups.value.flatMap((group) => group.rows || []));
 
-const visibleStrategyCoverage = computed(() => props.strategyColumns.map((column) => ({
+const visibleStrategyCoverage = computed(() => orderedStrategyColumns.value.map((column) => ({
     ...column,
     filled_count: visibleRows.value.filter((row) => Boolean(row.values?.[column.key])).length,
 })));
 
 const visibleCompleteCount = computed(() => visibleRows.value.filter(
-    (row) => Number(row.completion_count ?? 0) === props.strategyColumns.length,
+    (row) => Number(row.completion_count ?? 0) === totalStrategyColumns.value,
 ).length);
 
 const visiblePartialCount = computed(() => visibleRows.value.filter((row) => {
     const completionCount = Number(row.completion_count ?? 0);
-    return completionCount > 0 && completionCount < props.strategyColumns.length;
+    return completionCount > 0 && completionCount < totalStrategyColumns.value;
 }).length);
 
 const visibleEmptyCount = computed(() => visibleRows.value.filter(
     (row) => Number(row.completion_count ?? 0) === 0,
 ).length);
 
-const completionLabel = (row) => `${row.completion_count ?? 0}/${props.strategyColumns.length}`;
+const completionLabel = (row) => `${row.completion_count ?? 0}/${totalStrategyColumns.value}`;
 
 const toneClass = (tone) => `strategy-tone-${tone || 'slate'}`;
 </script>
@@ -197,21 +212,38 @@ const toneClass = (tone) => `strategy-tone-${tone || 'slate'}`;
                     <table class="strategy-table">
                         <thead>
                             <tr>
-                                <th rowspan="2" class="top-head" style="width: 18%; vertical-align: middle;">
-                                    Business Unit
+                                <th rowspan="2" class="head-cell head-cell--business-unit">
+                                    <div class="strategy-head-card strategy-head-card--business-unit">
+                                        <span class="strategy-head-card__title">Business Unit</span>
+                                    </div>
                                 </th>
-                                <th colspan="3" class="top-head">
-                                    Business Strategy Direction
+                                <th
+                                    v-if="legacyColumns.length"
+                                    :colspan="legacyColumns.length"
+                                    class="head-cell"
+                                >
+                                    <div class="strategy-head-card strategy-head-card--legacy">
+                                        <span class="strategy-head-card__title">Maximize Legacy Business</span>
+                                    </div>
+                                </th>
+                                <th
+                                    v-if="lowCarbonColumn"
+                                    rowspan="2"
+                                    class="head-cell head-cell--carbon"
+                                >
+                                    <div class="strategy-head-card strategy-head-card--carbon">
+                                        <span class="strategy-head-card__title">Build Low Carbon Business</span>
+                                        <small v-if="showDescriptions">{{ lowCarbonColumn.description }}</small>
+                                    </div>
                                 </th>
                             </tr>
-                            <tr>
+                            <tr v-if="legacyColumns.length">
                                 <th
-                                    v-for="column in strategyColumns"
+                                    v-for="column in legacyColumns"
                                     :key="column.key"
-                                    class="top-head border-t-0"
-                                    :class="toneClass(column.tone)"
+                                    class="head-cell"
                                 >
-                                    <div class="top-head__content">
+                                    <div class="strategy-head-card strategy-head-card--legacy-child">
                                         <span>{{ column.label }}</span>
                                         <small v-if="showDescriptions">{{ column.description }}</small>
                                     </div>
@@ -221,35 +253,24 @@ const toneClass = (tone) => `strategy-tone-${tone || 'slate'}`;
 
                         <tbody>
                             <template v-for="group in filteredGroups" :key="group.key">
-                                <tr class="group-row">
-                                    <td colspan="4">
-                                        <div class="group-row__content">
-                                            <span>{{ group.label }}</span>
-                                            <span class="count-capsule">{{ group.count }}</span>
-                                        </div>
-                                    </td>
-                                </tr>
-
                                 <tr v-for="row in group.rows" :key="row.id">
                                     <td class="primary-cell">
                                         <div class="primary-cell__content">
                                             <div class="primary-label-wrapper">
                                                 <span class="text-xs">{{ row.business_unit }}</span>
-                                                <span class="count-capsule">{{ completionLabel(row) }}</span>
                                             </div>
                                             <span class="primary-cell__meta">{{ row.group_label }}</span>
                                         </div>
                                     </td>
 
                                     <td
-                                        v-for="column in strategyColumns"
+                                        v-for="column in orderedStrategyColumns"
                                         :key="`${row.id}-${column.key}`"
                                         class="strategy-cell"
                                     >
                                         <article
                                             class="strategy-box"
                                             :class="[
-                                                toneClass(column.tone),
                                                 { 'strategy-box--empty': !row.values?.[column.key] },
                                             ]"
                                         >
@@ -274,10 +295,7 @@ const toneClass = (tone) => `strategy-tone-${tone || 'slate'}`;
             class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-white/15 dark:bg-[#171717]"
         >
             <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                Tidak ada data business strategy untuk filter ini.
-            </p>
-            <p class="mt-2 text-xs font-medium text-slate-500 dark:text-slate-400">
-                Matrix akan tampil otomatis saat tabel <code>trs_business_strategy</code> memiliki data yang sesuai.
+                Business Strategy Not Available
             </p>
         </section>
     </div>
@@ -286,38 +304,98 @@ const toneClass = (tone) => `strategy-tone-${tone || 'slate'}`;
 <style scoped>
 .strategy-table {
     width: 100%;
-    border-collapse: collapse;
+    min-width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: auto;
     background: #ffffff;
-    min-width: 1180px;
 }
 
-.strategy-table th,
 .strategy-table td {
     border: 1px solid #c7d2de;
     vertical-align: top;
 }
 
-.top-head {
-    padding: 10px 12px;
-    background: #0f6fb7;
+.strategy-table thead th {
+    border: 0;
+    background: transparent;
+    padding: 0 4px 8px;
+    vertical-align: stretch;
+}
+
+.head-cell--business-unit {
+    width: auto;
+}
+
+.head-cell--carbon {
+    width: auto;
+}
+
+.strategy-head-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 100%;
+    height: 100%;
+    border: 1px solid #c5d6e8;
+    border-radius: 10px;
+    padding: 12px 16px;
+    text-align: center;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.strategy-head-card__title {
+    display: block;
+    line-height: 1.2;
+}
+
+.strategy-head-card small {
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.3;
+    opacity: 0.9;
+}
+
+.strategy-head-card--business-unit {
+    min-height: 102px;
+    border-color: #0f6fb7;
+    background: linear-gradient(180deg, #0f6fb7 0%, #0d5ea1 100%);
     color: #ffffff;
     font-size: 12px;
     font-weight: 800;
-    text-align: center;
     letter-spacing: 0.05em;
 }
 
-.top-head__content {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+.strategy-head-card--legacy {
+    min-height: 40px;
+    background: #e8eff8;
+    color: #1a2a3a;
+    font-size: 15px;
+    font-weight: 700;
 }
 
-.top-head__content small {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0;
-    opacity: 0.9;
+.strategy-head-card--legacy-child {
+    min-height: 34px;
+    background: #e8eff8;
+    color: #2a4a6a;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.strategy-head-card--carbon {
+    min-height: 84px;
+    border-color: #2f5596;
+    background: linear-gradient(180deg, #3b64a8 0%, #2f5596 100%);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.strategy-table tbody th,
+.strategy-table td {
+    vertical-align: top;
 }
 
 .group-row td {
@@ -337,7 +415,8 @@ const toneClass = (tone) => `strategy-tone-${tone || 'slate'}`;
 }
 
 .primary-cell {
-    min-width: 220px;
+    width: auto;
+    min-width: 0;
     background: #f8fbff;
     vertical-align: middle !important;
 }
@@ -346,7 +425,7 @@ const toneClass = (tone) => `strategy-tone-${tone || 'slate'}`;
     display: flex;
     flex-direction: column;
     gap: 6px;
-    padding: 12px;
+    padding: 10px;
     color: #1e293b;
 }
 
@@ -366,23 +445,18 @@ const toneClass = (tone) => `strategy-tone-${tone || 'slate'}`;
 }
 
 .strategy-cell {
-    padding: 10px;
-    background: #f8fafc;
-    min-width: 260px;
+    width: auto;
+    min-width: 0;
+    padding: 6px;
+    background: #ffffff;
 }
 
 .strategy-box {
-    min-height: 108px;
+    min-height: 0;
     border: 1px solid #cbd5e1;
-    border-left-width: 5px;
+    border-left-width: 1px;
     background: #ffffff;
-    padding: 12px;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.strategy-box:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    padding: 8px 10px;
 }
 
 .strategy-box__value {
@@ -391,6 +465,7 @@ const toneClass = (tone) => `strategy-tone-${tone || 'slate'}`;
     line-height: 1.45;
     color: #1f2937;
     white-space: pre-line;
+    word-break: break-word;
 }
 
 .strategy-box__empty {
@@ -516,12 +591,8 @@ const toneClass = (tone) => `strategy-tone-${tone || 'slate'}`;
     border-color: #1d4ed8 !important;
 }
 
-.strategy-box.strategy-tone-sky {
-    background: #eff6ff;
-}
-
 .legend-swatch.strategy-tone-sky,
-.top-head.strategy-tone-sky {
+.strategy-head-card.strategy-tone-sky {
     background: #1d4ed8;
 }
 
@@ -529,12 +600,8 @@ const toneClass = (tone) => `strategy-tone-${tone || 'slate'}`;
     border-color: #b45309 !important;
 }
 
-.strategy-box.strategy-tone-amber {
-    background: #fffbeb;
-}
-
 .legend-swatch.strategy-tone-amber,
-.top-head.strategy-tone-amber {
+.strategy-head-card.strategy-tone-amber {
     background: #b45309;
 }
 
@@ -542,12 +609,8 @@ const toneClass = (tone) => `strategy-tone-${tone || 'slate'}`;
     border-color: #047857 !important;
 }
 
-.strategy-box.strategy-tone-emerald {
-    background: #ecfdf5;
-}
-
 .legend-swatch.strategy-tone-emerald,
-.top-head.strategy-tone-emerald {
+.strategy-head-card.strategy-tone-emerald {
     background: #047857;
 }
 
@@ -555,13 +618,30 @@ const toneClass = (tone) => `strategy-tone-${tone || 'slate'}`;
     border-color: #475569 !important;
 }
 
-.strategy-box.strategy-tone-slate {
-    background: #f8fafc;
+.legend-swatch.strategy-tone-slate,
+.strategy-head-card.strategy-tone-slate {
+    background: #475569;
 }
 
-.legend-swatch.strategy-tone-slate,
-.top-head.strategy-tone-slate {
-    background: #475569;
+:deep(.dark) .strategy-table thead th {
+    background: transparent;
+}
+
+:deep(.dark) .strategy-head-card--business-unit {
+    border-color: #1d4ed8;
+    background: linear-gradient(180deg, #1d4ed8 0%, #1e40af 100%);
+}
+
+:deep(.dark) .strategy-head-card--legacy,
+:deep(.dark) .strategy-head-card--legacy-child {
+    background: #1e293b;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+:deep(.dark) .strategy-head-card--carbon {
+    border-color: #3b82f6;
+    background: linear-gradient(180deg, #274a87 0%, #1f3e74 100%);
 }
 
 :deep(.dark) .group-row td {
@@ -573,7 +653,7 @@ const toneClass = (tone) => `strategy-tone-${tone || 'slate'}`;
 }
 
 :deep(.dark) .strategy-cell {
-    background: rgba(15, 23, 42, 0.4);
+    background: rgba(15, 23, 42, 0.35);
 }
 
 :deep(.dark) .strategy-box {

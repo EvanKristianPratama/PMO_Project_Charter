@@ -6,6 +6,7 @@ use App\Models\Goal;
 use App\Models\InitiativeTagging;
 use App\Models\MstCoe;
 use App\Models\MstInitiative;
+use App\Services\StrategicHouse\BusinessStrategy\BusinessStrategyService;
 use App\Services\StrategicHouse\InitiativeRelation\InitiativeRelationService;
 use App\Services\StrategicHouse\InitiativeSupport\InitiativeSupportService;
 use App\Services\StrategicHouse\RoadMap\ItInitiativeRoadmapService;
@@ -159,6 +160,7 @@ class StrategicHousePageService
 
     public function __construct(
         protected ItBuildingBlockService $itBuildingBlockService,
+        protected BusinessStrategyService $businessStrategyService,
         protected InitiativeSupportService $initiativeSupportService,
         protected StrategicPillarPageService $strategicPillarPageService,
         protected InitiativeRelationService $initiativeRelationService,
@@ -197,6 +199,7 @@ class StrategicHousePageService
         $relationData = $this->initiativeRelationService->getIndexProps();
         $roadmapData  = $this->itInitiativeRoadmapService->getPageProps();
         $initiativeSupportData = $this->initiativeSupportService->getPageProps();
+        $businessStrategyData = $this->businessStrategyService->getPageProps();
 
         return [
             'filters' => $normalizedFilters,
@@ -228,6 +231,11 @@ class StrategicHousePageService
             'architectureCard' => $architectureCard,
             'tbcCard' => $tbcCard,
             'unassignedInitiatives' => $unassignedInitiatives,
+            'businessStrategyPage' => $businessStrategyData['page'],
+            'businessStrategySummary' => $businessStrategyData['summary'],
+            'businessStrategyGroups' => $businessStrategyData['groups'],
+            'businessStrategyColumns' => $businessStrategyData['strategyColumns'],
+            'businessStrategyOrganizationOptions' => $businessStrategyData['organizationOptions'],
             'coeOptions' => $this->itBuildingBlockService->getCoeOptions(),
             'statusPeriods' => $this->itBuildingBlockService->getStatusPeriods(),
             'digitalInitiativeOptions' => $this->itBuildingBlockService->getDigitalInitiativeOptions(),
