@@ -193,6 +193,20 @@ const statusLegend = computed(() => {
     })).filter(item => item.count > 0);
 });
 
+const displayStatusLegend = computed(() => {
+    if (statusLegend.value.length > 0) return statusLegend.value;
+
+    if (selectedPeriod.value && availableStatusOptions.value.length > 0) {
+        return availableStatusOptions.value.map((label) => ({
+            label,
+            class: getStatusColorClass(label),
+            count: 0,
+        }));
+    }
+
+    return [];
+});
+
 const noteOptions = computed(() => {
     const notes = new Set();
     props.groups.forEach(group => {
@@ -777,7 +791,7 @@ defineExpose({
             </div>
 
             <!-- Row 2: Status Implementation Legend -->
-            <div v-if="showStatusColors && statusLegend.length > 0"
+            <div v-if="showStatusColors && (displayStatusLegend.length > 0 || (statusPeriods && statusPeriods.length > 0))"
                 class="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1.5 border-t border-slate-100 dark:border-white/5">
                 <div class="flex items-center gap-1.5">
                     <span
@@ -792,7 +806,7 @@ defineExpose({
                     <span v-else class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider">(Latest
                         Update):</span>
                 </div>
-                <div v-for="status in statusLegend" :key="`status-legend-${status.label}`"
+                <div v-for="status in displayStatusLegend" :key="`status-legend-${status.label}`"
                     class="flex items-center gap-1.5 cursor-pointer select-none transition-opacity"
                     :class="{ 'opacity-40': selectedStatus && selectedStatus !== status.label }"
                     @click="selectedStatus = selectedStatus === status.label ? '' : status.label"
