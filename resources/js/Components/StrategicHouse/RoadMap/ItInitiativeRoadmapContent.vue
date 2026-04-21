@@ -715,7 +715,7 @@ function badgeClass(status) {
     min-width: 820px;
     table-layout: fixed;
     border-collapse: collapse;
-    --timeline-thickness: 8px;
+    --timeline-thickness: 10px;
     --group-separator: #8ca9c7;
     --group-soft: #edf4fb;
     --group-separator-width: 1px;
@@ -782,6 +782,7 @@ function badgeClass(status) {
     padding: 7px 10px;
     vertical-align: middle;
     border-right: 1px solid #e2e8f0 !important;
+    border-bottom: 1px solid #eef2f7 !important;
 }
 
 .badge {
@@ -1006,7 +1007,7 @@ function badgeClass(status) {
 .cell-gap,
 .gantt-table td.cell-bar {
     position: relative;
-    height: auto;
+    height: 22px;
     vertical-align: middle;
     background: #ffffff;
     border-bottom: 1px solid #eef2f7 !important;
@@ -1022,7 +1023,7 @@ function badgeClass(status) {
     left: 0;
     right: 0;
     top: 50%;
-    height: var(--timeline-thickness);
+    height: calc(var(--timeline-thickness) - 2px);
     transform: translateY(-50%);
     background: #1a4b8c;
     border-radius: 999px;
@@ -1046,6 +1047,7 @@ function badgeClass(status) {
 }
 
 .row-data {
+    border-bottom: 1px solid #eef2f7;
     transition: background-color 0.18s ease;
 }
 
