@@ -120,7 +120,13 @@ class ItBuildingBlockService
     public function getDigitalInitiativeOptions(): Collection
     {
         return MstInitiative::query()
-            ->with(['coe:id,name', 'organization:id,name,groub_id', 'statusImplementations', 'sourceData:id,name'])
+            ->with([
+                'coe:id,name',
+                'organization:id,name,groub_id',
+                'latestStatusImplementation:trs_status_implementation.id,trs_status_implementation.initiative_id,trs_status_implementation.review_status',
+                'statusImplementations:id,initiative_id,start,end,year,review_status',
+                'sourceData:id,name',
+            ])
             ->where('tipe_initiative', 1)
             ->orderBy('code')
             ->orderBy('name')

@@ -316,6 +316,7 @@ class StrategicHousePageService
                         'latestStatus',
                         'mappedProjects:id',
                         'latestStatusImplementation',
+                        'statusImplementations:id,initiative_id,start,end,year,review_status',
                         'sourceData:id,name',
                     ])
                     ->orderBy('code'),
@@ -622,7 +623,12 @@ class StrategicHousePageService
     {
         return MstInitiative::query()
             ->select(['id', 'code', 'name', 'status', 'source', 'description'])
-            ->with(['latestStatus', 'latestStatusImplementation', 'sourceData:id,name'])
+            ->with([
+                'latestStatus',
+                'latestStatusImplementation',
+                'statusImplementations:id,initiative_id,start,end,year,review_status',
+                'sourceData:id,name',
+            ])
             ->where('tipe_initiative', $initiativeType)
             ->whereNull('coe_id')
             ->orderBy('code')

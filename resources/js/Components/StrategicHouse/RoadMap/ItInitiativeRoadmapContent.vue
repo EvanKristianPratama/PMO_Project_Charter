@@ -9,20 +9,21 @@ const props = defineProps({
     milestoneTypeOptions: { type: Array, default: () => [] },
 });
 
-/* ── Toggle ──────────────────────────────────────────── */
-const showMode = ref("all");
-const toggleBtns = [
-    { key: "all", label: "All" },
+const roadmapLegendItems = [
     { key: "baseline", label: "Baseline" },
     { key: "approved", label: "Approved" },
 ];
-const legendItems = [
-    { label: "On Track", status: "On Track" },
-    { label: "At Risk", status: "At Risk" },
-    { label: "Done", status: "Done" },
-    { label: "Not Started", status: "Not Started" },
-    { label: "Not Signed", status: "Not Signed" },
+const statusLegendOrder = [
+    "On Track",
+    "At Risk",
+    "Delayed",
+    "Done",
+    "Not Started",
+    "Not Signed",
+    "On Review",
 ];
+const visibleRoadmapLayers = ref(["baseline", "approved"]);
+const selectedReviewStatus = ref("Total");
 const selectedPeriod = ref("");
 const monthsOrder = [
     "Januari",
@@ -66,28 +67,70 @@ function toQIdx(value) {
     return Math.max(0, Math.min(raw, totalCells.value - 1));
 }
 
+function normalizeRoadmapStatus(rawStatus) {
+    const normalized = String(rawStatus ?? "").trim().toLowerCase();
+
+    if (!normalized) return "";
+    if (normalized.includes("baseline")) return "baseline";
+    if (["approve", "approved", "aproved"].includes(normalized)) {
+        return "approved";
+    }
+    if (normalized.includes("approve")) return "approved";
+
+    return normalized;
+}
+
+function isRoadmapLayerVisible(layerKey) {
+    return visibleRoadmapLayers.value.includes(layerKey);
+}
+
+function toggleRoadmapLayer(layerKey) {
+    if (visibleRoadmapLayers.value.includes(layerKey)) {
+        if (visibleRoadmapLayers.value.length === 1) {
+            return;
+        }
+
+        visibleRoadmapLayers.value = visibleRoadmapLayers.value.filter(
+            (item) => item !== layerKey,
+        );
+        return;
+    }
+
+    visibleRoadmapLayers.value = roadmapLegendItems
+        .map((item) => item.key)
+        .filter(
+            (itemKey) =>
+                itemKey === layerKey
+                || visibleRoadmapLayers.value.includes(itemKey),
+        );
+}
+
+function isSelectedReviewStatus(status) {
+    return selectedReviewStatus.value === status;
+}
+
+function toggleReviewStatus(status) {
+    if (status === "Total" || selectedReviewStatus.value === status) {
+        selectedReviewStatus.value = "Total";
+        return;
+    }
+
+    selectedReviewStatus.value = status;
+}
+
 /* ── Compute bar range ───────────────────────────────── */
 function getRange(projects, statusFilter) {
     if (!Array.isArray(projects) || projects.length === 0) return null;
 
     let pool = projects;
-    
-    // Filter by status if specified
+
     if (statusFilter) {
-        pool = projects.filter((p) => {
-            const status = Number(p.status ?? 0);
-            
-            if (statusFilter === 'baseline') {
-                // Status 5 = Baseline
-                return status === 5;
-            }
-            
-            if (statusFilter === 'approved') {
-                // Status 4 = Approved
-                return status === 4;
-            }
-            
-            return true;
+        pool = projects.filter((project) => {
+            const statusKey = normalizeRoadmapStatus(
+                project?.status_ref?.name ?? project?.status,
+            );
+
+            return statusKey === statusFilter;
         });
     }
 
@@ -114,21 +157,15 @@ function getRange(projects, statusFilter) {
     return { start: Math.min(s, e), end: Math.max(s, e) };
 }
 
-function barRange(projects) {
-    if (showMode.value === "baseline") return getRange(projects, "baseline");
-    if (showMode.value === "approved") return getRange(projects, "approved");
-    return getRange(projects, null);
-}
-
 /* ── Build cell descriptors ──────────────────────────── */
-function buildCells(range) {
+function buildCells(range, keyPrefix = "default") {
     const total = totalCells.value;
 
     if (!range) {
         return Array.from({ length: total }, (_, i) => ({
             type: "gap",
             span: 1,
-            key: `g${i}`,
+            key: `${keyPrefix}-g${i}`,
             endsYear: (i + 1) % 4 === 0,
         }));
     }
@@ -143,7 +180,7 @@ function buildCells(range) {
         cells.push({
             type: "gap",
             span: 1,
-            key: `g${c}`,
+            key: `${keyPrefix}-g${c}`,
             endsYear: (c + 1) % 4 === 0,
         });
         c++;
@@ -152,7 +189,7 @@ function buildCells(range) {
     cells.push({
         type: "bar",
         span: safeEnd - safeStart + 1,
-        key: `bar-${safeStart}`,
+        key: `${keyPrefix}-bar-${safeStart}`,
         endsYear: (safeEnd + 1) % 4 === 0,
     });
     c = safeEnd + 1;
@@ -161,7 +198,7 @@ function buildCells(range) {
         cells.push({
             type: "gap",
             span: 1,
-            key: `g${c}`,
+            key: `${keyPrefix}-g${c}`,
             endsYear: (c + 1) % 4 === 0,
         });
         c++;
@@ -170,9 +207,42 @@ function buildCells(range) {
     return cells;
 }
 
-/* ── CoE rowspan ─────────────────────────────────────── */
-function coeRowspan(group) {
-    return (group.initiatives ?? []).length;
+function buildInitiativeTimelineRows(initiative) {
+    const initiativeId = initiative?.id ?? "initiative";
+    const projects = Array.isArray(initiative?.projects) ? initiative.projects : [];
+
+    const rows = roadmapLegendItems
+        .filter((item) => isRoadmapLayerVisible(item.key))
+        .map((item) => {
+            const range = getRange(projects, item.key);
+
+            if (!range) {
+                return null;
+            }
+
+            return {
+                key: `${initiativeId}-${item.key}`,
+                layerKey: item.key,
+                label: item.label,
+                isPlaceholder: false,
+                cells: buildCells(range, `${initiativeId}-${item.key}`),
+            };
+        })
+        .filter(Boolean);
+
+    if (rows.length > 0) {
+        return rows;
+    }
+
+    return [
+        {
+            key: `${initiativeId}-empty`,
+            layerKey: "empty",
+            label: "",
+            isPlaceholder: true,
+            cells: buildCells(null, `${initiativeId}-empty`),
+        },
+    ];
 }
 
 const allInitiatives = computed(() =>
@@ -275,23 +345,70 @@ function resolveInitiativeStatusByPeriod(initiative, periodValue) {
     };
 }
 
-const displayGroups = computed(() =>
-    (Array.isArray(props.groups) ? props.groups : []).map((group) => ({
-        ...group,
-        initiatives: (Array.isArray(group?.initiatives) ? group.initiatives : []).map((initiative) => {
+const baseDisplayGroups = computed(() =>
+    (Array.isArray(props.groups) ? props.groups : []).map((group) => {
+        const initiatives = (Array.isArray(group?.initiatives) ? group.initiatives : []).map((initiative) => {
             const periodState = resolveInitiativeStatusByPeriod(
                 initiative,
                 selectedPeriod.value,
             );
+            const timelineRows = buildInitiativeTimelineRows(initiative);
 
             return {
                 ...initiative,
                 display_status: periodState.status,
                 display_period: periodState.period,
+                timeline_rows: timelineRows,
+                timeline_rowspan: timelineRows.length,
             };
-        }),
-    })),
+        });
+
+        return {
+            ...group,
+            initiatives,
+            timeline_rowspan: initiatives.reduce(
+                (total, initiative) => total + (initiative.timeline_rowspan || 1),
+                0,
+            ),
+        };
+    }),
 );
+
+const baseDisplayInitiatives = computed(() =>
+    baseDisplayGroups.value.flatMap((group) =>
+        Array.isArray(group?.initiatives) ? group.initiatives : [],
+    ),
+);
+
+const displayGroups = computed(() =>
+    baseDisplayGroups.value
+        .map((group) => {
+            const initiatives = (Array.isArray(group?.initiatives) ? group.initiatives : [])
+                .filter((initiative) => {
+                    if (selectedReviewStatus.value === "Total") {
+                        return true;
+                    }
+
+                    return normalizeStatusLabel(initiative?.display_status) === selectedReviewStatus.value;
+                });
+
+            if (initiatives.length === 0) {
+                return null;
+            }
+
+            return {
+                ...group,
+                initiatives,
+                timeline_rowspan: initiatives.reduce(
+                    (total, initiative) => total + (initiative.timeline_rowspan || 1),
+                    0,
+                ),
+            };
+        })
+        .filter(Boolean),
+);
+
+const hasDisplayGroups = computed(() => displayGroups.value.length > 0);
 
 const selectedPeriodLabel = computed(() => {
     return (
@@ -300,25 +417,32 @@ const selectedPeriodLabel = computed(() => {
     );
 });
 
-const legendItemsWithCounts = computed(() => {
-    const initiatives = displayGroups.value.flatMap((group) =>
-        Array.isArray(group?.initiatives) ? group.initiatives : [],
-    );
+const reviewStatusLegendItems = computed(() => {
+    const counts = baseDisplayInitiatives.value.reduce((carry, initiative) => {
+        const status = normalizeStatusLabel(initiative?.display_status);
 
-    const statusItems = legendItems.map((item) => ({
-        ...item,
-        count: initiatives.filter((initiative) => {
-            return normalizeStatusLabel(initiative?.display_status) === item.status;
-        }).length,
-    }));
+        if (!status) {
+            return carry;
+        }
+
+        carry.set(status, (carry.get(status) ?? 0) + 1);
+
+        return carry;
+    }, new Map());
 
     return [
-        ...statusItems,
         {
             label: "Total",
             status: "Total",
-            count: initiatives.length,
+            count: baseDisplayInitiatives.value.length,
         },
+        ...statusLegendOrder
+            .map((status) => ({
+                label: status,
+                status,
+                count: counts.get(status) ?? 0,
+            }))
+            .filter((item) => item.count > 0),
     ];
 });
 
@@ -356,31 +480,11 @@ function badgeClass(status) {
 
 <template>
     <div class="space-y-3">
-        <!-- ── Header + Toggle ─────────────────────────── -->
+        <!-- ── Header ─────────────────────────────────── -->
         <div
             class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
         >
-            <!-- Toggle -->
             <div class="flex flex-wrap items-center gap-2 shrink-0">
-                <div
-                    class="inline-flex rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 shadow-sm"
-                >
-                    <button
-                        v-for="btn in toggleBtns"
-                        :key="btn.key"
-                        type="button"
-                        class="px-3 py-1.5 text-[11px] font-semibold transition-colors"
-                        :class="
-                            showMode === btn.key
-                                ? 'bg-[#1a4b8c] text-white'
-                                : 'bg-white dark:bg-[#1c1c1c] text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5'
-                        "
-                        @click="showMode = btn.key"
-                    >
-                        {{ btn.label }}
-                    </button>
-                </div>
-
                 <label class="period-filter">
                     <span class="period-filter__label">Status Review Implementation Period</span>
                     <select v-model="selectedPeriod" class="period-filter__select">
@@ -408,25 +512,65 @@ function badgeClass(status) {
             class="legend-panel"
         >
             <div class="legend-panel__header">
-                <div class="legend-panel__title">Legend Status</div>
+                <div class="legend-panel__title">Legend</div>
                 <div class="legend-panel__period">{{ selectedPeriodLabel }}</div>
             </div>
-            <div class="legend-list">
-                <div
-                    v-for="item in legendItemsWithCounts"
-                    :key="`legend-${item.status}`"
-                    class="legend-item"
-                >
-                    <span
-                        v-if="item.status !== 'Total'"
+
+            <div class="legend-panel__section">
+                <div class="legend-panel__subtitle">Roadmap</div>
+                <div class="legend-list">
+                    <button
+                        v-for="item in roadmapLegendItems"
+                        :key="`roadmap-legend-${item.key}`"
+                        type="button"
+                        :aria-pressed="isRoadmapLayerVisible(item.key)"
                         :class="[
-                            'legend-swatch',
-                            badgeClass(item.status),
+                            'legend-item',
+                            'legend-item--button',
+                            !isRoadmapLayerVisible(item.key) ? 'legend-item--muted' : '',
                         ]"
-                    />
-                    <span class="legend-label">
-                        {{ item.label }} <span class="legend-count">({{ item.count }})</span>
-                    </span>
+                        @click="toggleRoadmapLayer(item.key)"
+                    >
+                        <span
+                            :class="[
+                                'legend-swatch',
+                                `timeline-swatch--${item.key}`,
+                            ]"
+                        />
+                        <span class="legend-label">{{ item.label }}</span>
+                        <span class="legend-toggle">
+                            {{ isRoadmapLayerVisible(item.key) ? "Shown" : "Hidden" }}
+                        </span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="legend-panel__section">
+                <div class="legend-panel__subtitle">Status Review</div>
+                <div class="legend-list">
+                    <button
+                        v-for="item in reviewStatusLegendItems"
+                        :key="`legend-${item.status}`"
+                        type="button"
+                        :aria-pressed="isSelectedReviewStatus(item.status)"
+                        :class="[
+                            'legend-item',
+                            'legend-item--button',
+                            isSelectedReviewStatus(item.status) ? 'legend-item--active' : '',
+                        ]"
+                        @click="toggleReviewStatus(item.status)"
+                    >
+                        <span
+                            v-if="item.status !== 'Total'"
+                            :class="[
+                                'legend-swatch',
+                                badgeClass(item.status),
+                            ]"
+                        />
+                        <span class="legend-label">
+                            {{ item.label }} <span class="legend-count">({{ item.count }})</span>
+                        </span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -438,6 +582,15 @@ function badgeClass(status) {
         >
             <p class="text-sm text-slate-500 dark:text-slate-400">
                 Belum ada data roadmap IT Strategic Initiative.
+            </p>
+        </div>
+
+        <div
+            v-else-if="!hasDisplayGroups"
+            class="rounded-xl border border-dashed border-slate-200 dark:border-white/10 bg-white dark:bg-[#171717] p-10 text-center"
+        >
+            <p class="text-sm text-slate-500 dark:text-slate-400">
+                Tidak ada initiative yang cocok dengan filter status review yang dipilih.
             </p>
         </div>
 
@@ -491,54 +644,62 @@ function badgeClass(status) {
                         v-for="group in displayGroups"
                         :key="`group-${group.coe_name}`"
                     >
-                        <tr
+                        <template
                             v-for="(initiative, idx) in group.initiatives"
-                            :key="`ini-${initiative.id}`"
-                            class="row-data"
+                            :key="`initiative-${initiative.id}`"
                         >
-                            <!-- CoE cell -->
-                            <td
-                                v-if="idx === 0"
-                                :rowspan="coeRowspan(group)"
-                                class="cell-coe"
+                            <tr
+                                v-for="(timelineRow, rowIdx) in initiative.timeline_rows"
+                                :key="`ini-${initiative.id}-${timelineRow.key}`"
+                                class="row-data"
                             >
-                                {{ group.coe_name }}
-                            </td>
+                                <!-- CoE cell -->
+                                <td
+                                    v-if="idx === 0 && rowIdx === 0"
+                                    :rowspan="group.timeline_rowspan"
+                                    class="cell-coe"
+                                >
+                                    {{ group.coe_name }}
+                                </td>
 
-                            <!-- Initiative name -->
-                            <td class="cell-initiative">
-                                <div class="flex items-center gap-1.5">
-                    <span
-                        :class="[
-                            'badge',
-                            badgeClass(initiative.display_status),
-                        ]"
-                    >
-                        {{ initiative.no }}
-                    </span>
-                                    <span
-                                        class="ini-name text-slate-700 dark:text-slate-200"
-                                    >
-                                        {{ initiative.name }}
-                                    </span>
-                                </div>
-                            </td>
+                                <!-- Initiative name -->
+                                <td
+                                    v-if="rowIdx === 0"
+                                    :rowspan="initiative.timeline_rowspan"
+                                    class="cell-initiative"
+                                >
+                                    <div class="flex items-center gap-1.5">
+                                        <span
+                                            :class="[
+                                                'badge',
+                                                badgeClass(initiative.display_status),
+                                            ]"
+                                        >
+                                            {{ initiative.no }}
+                                        </span>
+                                        <span
+                                            class="ini-name text-slate-700 dark:text-slate-200"
+                                        >
+                                            {{ initiative.name }}
+                                        </span>
+                                    </div>
+                                </td>
 
-                            <!-- Timeline cells -->
-                            <td
-                                v-for="cell in buildCells(
-                                    barRange(initiative.projects),
-                                )"
-                                :key="cell.key"
-                                :colspan="cell.span"
-                                :class="[
-                                    cell.type === 'bar'
-                                        ? 'cell-bar'
-                                        : 'cell-gap',
-                                    cell.endsYear ? 'year-sep' : '',
-                                ]"
-                            />
-                        </tr>
+                                <!-- Timeline cells -->
+                                <td
+                                    v-for="cell in timelineRow.cells"
+                                    :key="cell.key"
+                                    :colspan="cell.span"
+                                    :title="cell.type === 'bar' ? timelineRow.label : ''"
+                                    :class="[
+                                        cell.type === 'bar' ? 'cell-bar' : 'cell-gap',
+                                        cell.type === 'bar' ? `cell-bar--${timelineRow.layerKey}` : '',
+                                        timelineRow.isPlaceholder ? 'cell-gap--placeholder' : '',
+                                        cell.endsYear ? 'year-sep' : '',
+                                    ]"
+                                />
+                            </tr>
+                        </template>
                     </template>
                 </tbody>
             </table>
@@ -557,6 +718,7 @@ function badgeClass(status) {
     --timeline-thickness: 8px;
     --group-separator: #8ca9c7;
     --group-soft: #edf4fb;
+    --group-separator-width: 1px;
 }
 
 .gantt-table th,
@@ -612,7 +774,7 @@ function badgeClass(status) {
     word-break: break-word;
     color: #334155;
     background: linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%);
-    border-bottom: 3px solid var(--group-separator) !important;
+    border-bottom: var(--group-separator-width) solid var(--group-separator) !important;
 }
 
 /* ── Initiative cell ─────────────────────────────────── */
@@ -702,6 +864,20 @@ function badgeClass(status) {
     color: #5b728d;
 }
 
+.legend-panel__section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.legend-panel__subtitle {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #64809f;
+}
+
 .legend-list {
     display: flex;
     flex-wrap: wrap;
@@ -714,6 +890,38 @@ function badgeClass(status) {
     gap: 8px;
 }
 
+.legend-item--button {
+    border: 1px solid #d9e4ef;
+    border-radius: 999px;
+    padding: 6px 10px;
+    background: #ffffff;
+    cursor: pointer;
+    transition:
+        opacity 0.18s ease,
+        border-color 0.18s ease,
+        background-color 0.18s ease,
+        transform 0.18s ease;
+}
+
+.legend-item--button:hover {
+    border-color: #8ca9c7;
+    background: #f8fbff;
+}
+
+.legend-item--button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(93, 140, 192, 0.18);
+}
+
+.legend-item--active {
+    border-color: #5d8cc0;
+    background: #eef6ff;
+}
+
+.legend-item--muted {
+    opacity: 0.5;
+}
+
 .legend-swatch {
     display: inline-flex;
     width: 12px;
@@ -722,10 +930,24 @@ function badgeClass(status) {
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
 }
 
+.timeline-swatch--baseline {
+    background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.timeline-swatch--approved {
+    background: linear-gradient(90deg, #34d399 0%, #16a34a 100%);
+}
+
 .legend-label {
     font-size: 11px;
     font-weight: 600;
     color: #475569;
+}
+
+.legend-toggle {
+    font-size: 10px;
+    font-weight: 700;
+    color: #6b7280;
 }
 
 .legend-count {
@@ -806,6 +1028,18 @@ function badgeClass(status) {
     border-radius: 999px;
 }
 
+.gantt-table td.cell-bar--baseline::after {
+    background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.gantt-table td.cell-bar--approved::after {
+    background: linear-gradient(90deg, #34d399 0%, #16a34a 100%);
+}
+
+.cell-gap--placeholder {
+    background: #fafcff;
+}
+
 /* Year boundary — subtle dashed separator */
 .year-sep {
     border-right: 1px dashed #cbd5e0 !important;
@@ -858,6 +1092,10 @@ function badgeClass(status) {
     }
     .legend-panel {
         padding: 12px 14px;
+    }
+    .legend-item--button {
+        width: 100%;
+        justify-content: space-between;
     }
     .legend-label {
         font-size: 10px;
