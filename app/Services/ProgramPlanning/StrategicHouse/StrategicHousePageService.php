@@ -443,7 +443,7 @@ class StrategicHousePageService
                                     ->select(['id', 'code', 'name', 'coe_id', 'business_unit', 'source', 'description'])
                                     ->with([
                                         'coe:id,name',
-                                        'organization:id,name',
+                                        'organization:id,name,groub_id',
                                         'latestStatusImplementation',
                                     ]),
                             ]),
@@ -472,7 +472,7 @@ class StrategicHousePageService
                     ->select(['id', 'code', 'name', 'coe_id', 'business_unit', 'source', 'description'])
                     ->with([
                         'coe:id,name',
-                        'organization:id,name',
+                        'organization:id,name,groub_id',
                         'latestStatusImplementation',
                     ]),
             ])
@@ -542,6 +542,7 @@ class StrategicHousePageService
             'coe_name' => $initiative->coe?->name,
             'label' => trim(collect([$initiative->code, $initiative->name])->filter()->implode(' - ')),
             'business_unit' => $initiative->organization?->name,
+            'groub_id' => $initiative->organization?->groub_id,
             'implementation_status' => $initiative->latestStatusImplementation?->review_status,
             'source' => !is_null($initiative->source) ? (int) $initiative->source : null,
         ];

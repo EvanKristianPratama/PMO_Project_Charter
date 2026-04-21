@@ -262,6 +262,7 @@ const normalizeInitiative = (initiative, fallbackKey) => {
         label: label !== '' ? label : '-',
         coe_name: coeName,
         business_unit: initiative?.business_unit,
+        groub_id: initiative?.groub_id,
         implementation_status: implementationStatus,
         source: initiative?.source,
         source_name: initiative?.source_name,
@@ -356,7 +357,14 @@ const displayGoals = computed(() => {
                     `${fallbackGoal.code}-direct-${initiativeIndex + 1}`,
                 ))
                 .filter((ini) => {
-                    const matchesOrg = !selectedOrganization.value || ini.business_unit === selectedOrganization.value;
+                    let matchesOrg = true;
+                    if (selectedOrganization.value === 'all_holding') {
+                        matchesOrg = ini.groub_id !== 2;
+                    } else if (selectedOrganization.value === 'all_subholding') {
+                        matchesOrg = ini.groub_id === 2;
+                    } else if (selectedOrganization.value !== '') {
+                        matchesOrg = ini.business_unit === selectedOrganization.value;
+                    }
                     const matchesCoe = !selectedCoe.value || ini.coe_name === selectedCoe.value;
                     const implStatus = normalizeStatusLabel(ini.implementation_status);
                     const matchesStatus = !selectedStatus.value || implStatus === selectedStatus.value;

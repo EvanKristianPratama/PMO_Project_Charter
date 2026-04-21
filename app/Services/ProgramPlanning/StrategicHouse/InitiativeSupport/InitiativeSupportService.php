@@ -23,12 +23,14 @@ class InitiativeSupportService
     {
         $mappings = TrsInitiativeSupport::query()
             ->with([
-                'digitalInitiative:id,name,code,description,coe_id,business_unit',
+                'digitalInitiative:id,name,code,description,coe_id,business_unit,source',
                 'digitalInitiative.coe',
                 'digitalInitiative.organization',
-                'itInitiative:id,name,code,description,coe_id,business_unit',
+                'digitalInitiative.sourceData',
+                'itInitiative:id,name,code,description,coe_id,business_unit,source',
                 'itInitiative.coe',
                 'itInitiative.organization',
+                'itInitiative.sourceData',
             ])
             ->whereHas('digitalInitiative', fn (Builder $query) => $query->where('tipe_initiative', 1))
             ->whereHas('itInitiative', fn (Builder $query) => $query->where('tipe_initiative', 2))
@@ -129,8 +131,8 @@ class InitiativeSupportService
     private function getInitiativeOptions(int $initiativeType): Collection
     {
         return MstInitiative::query()
-            ->select(['id', 'name', 'code', 'description', 'coe_id', 'business_unit'])
-            ->with(['coe', 'organization'])
+            ->select(['id', 'name', 'code', 'description', 'coe_id', 'business_unit', 'source'])
+            ->with(['coe', 'organization', 'sourceData'])
             ->where('tipe_initiative', $initiativeType)
             ->orderBy('id')
             ->get()
@@ -226,6 +228,8 @@ class InitiativeSupportService
             'coe_name' => trim((string) ($initiative->coe?->name ?? 'No CoE')),
             'business_unit' => trim((string) ($initiative->organization?->name ?? $initiative->business_unit ?? '')),
             'groub_id' => $initiative->organization?->groub_id,
+            'source' => $initiative->source,
+            'source_name' => $initiative->sourceData?->name,
         ];
     }
 
