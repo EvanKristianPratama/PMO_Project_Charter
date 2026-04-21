@@ -1,4 +1,5 @@
 <script setup>
+import { Link } from "@inertiajs/vue3";
 import { computed, ref, watch } from "vue";
 
 const props = defineProps({
@@ -595,7 +596,14 @@ const reviewStatusLegendItems = computed(() => {
                                         <span :class="['badge', badgeClass(initiative.display_status)]">
                                             {{ initiative.no }}
                                         </span>
-                                        <span class="ini-name dark:text-slate-200">
+                                        <Link
+                                            v-if="initiative.projects?.[0]?.project_id"
+                                            :href="route('it-initiatives.show', { project: initiative.projects[0].project_id, tab: 'detail' })"
+                                            class="ini-name dark:text-slate-200 hover:text-blue-600 hover:underline transition-colors duration-200"
+                                        >
+                                            {{ initiative.name }}
+                                        </Link>
+                                        <span v-else class="ini-name dark:text-slate-200">
                                             {{ initiative.name }}
                                         </span>
                                     </div>
