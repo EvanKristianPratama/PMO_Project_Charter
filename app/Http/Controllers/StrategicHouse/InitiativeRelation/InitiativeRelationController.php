@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\ProgramPlanning\InitiativeRelation;
+namespace App\Http\Controllers\StrategicHouse\InitiativeRelation;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProgramPlanning\InitiativeRelation\StoreInitiativeRelationRequest;
 use App\Http\Requests\ProgramPlanning\InitiativeRelation\UpdateInitiativeRelationRequest;
 use App\Models\MstInitiativeRelation;
-use App\Services\ProgramPlanning\InitiativeRelation\InitiativeRelationService;
+use App\Services\StrategicHouse\InitiativeRelation\InitiativeRelationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -21,7 +21,7 @@ class InitiativeRelationController extends Controller
     public function index(): Response
     {
         return Inertia::render(
-            'ProgramPlanning/StrategicHouse/InitiativeRelation/Index',
+            'StrategicHouse/InitiativeRelation/Index',
             $this->initiativeRelationService->getIndexProps()
         );
     }
@@ -29,7 +29,7 @@ class InitiativeRelationController extends Controller
     public function create(): Response
     {
         return Inertia::render(
-            'ProgramPlanning/StrategicHouse/InitiativeRelation/Create',
+            'StrategicHouse/InitiativeRelation/Create',
             $this->initiativeRelationService->getCreateProps()
         );
     }
@@ -53,7 +53,7 @@ class InitiativeRelationController extends Controller
     public function edit(MstInitiativeRelation $initiativeRelation): Response
     {
         return Inertia::render(
-            'ProgramPlanning/StrategicHouse/InitiativeRelation/Edit',
+            'StrategicHouse/InitiativeRelation/Edit',
             $this->initiativeRelationService->getEditProps($initiativeRelation)
         );
     }

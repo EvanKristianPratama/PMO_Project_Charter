@@ -1,16 +1,15 @@
 <?php
 
-namespace App\Services\ProgramPlanning\StrategicHouse;
+namespace App\Services\StrategicHouse;
 
 use App\Models\Goal;
 use App\Models\InitiativeTagging;
 use App\Models\MstCoe;
 use App\Models\MstInitiative;
-use App\Services\ProgramPlanning\ItBuildingBlockService;
-use App\Services\ProgramPlanning\StrategicHouse\InitiativeSupport\InitiativeSupportService;
-use App\Services\ProgramPlanning\StrategicHouse\RoadMap\ItInitiativeRoadmapService;
-use App\Services\ProgramPlanning\StrategicPillars\StrategicPillarPageService;
-use App\Services\ProgramPlanning\InitiativeRelation\InitiativeRelationService;
+use App\Services\StrategicHouse\InitiativeRelation\InitiativeRelationService;
+use App\Services\StrategicHouse\InitiativeSupport\InitiativeSupportService;
+use App\Services\StrategicHouse\RoadMap\ItInitiativeRoadmapService;
+use App\Services\StrategicHouse\StrategicPillars\StrategicPillarPageService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 

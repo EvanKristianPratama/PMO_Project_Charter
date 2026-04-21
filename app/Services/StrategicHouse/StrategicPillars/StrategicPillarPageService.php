@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\ProgramPlanning\StrategicPillars;
+namespace App\Services\StrategicHouse\StrategicPillars;
 
 use App\Models\Goal;
 use App\Models\InitiativeTagging;

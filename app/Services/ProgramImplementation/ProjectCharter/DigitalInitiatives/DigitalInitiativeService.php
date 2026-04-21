@@ -149,7 +149,7 @@ class DigitalInitiativeService
             'initiative_id' => $initiative->id,
             'review_status' => trim((string) $payload['review_status']),
             'start' => $this->databaseMonthLabel($payload['start_month']),
-            'end' => $this->databaseMonthLabel($payload['end_month']),
+            'end' => $this->databaseMonthLabel($payload['end_month'] ?? null),
             'year' => (string) $payload['year'],
             'status_updated' => trim((string) $payload['status_updated']),
         ]);
@@ -168,7 +168,7 @@ class DigitalInitiativeService
             'initiative_id' => $initiative->id,
             'review_status' => trim((string) $payload['review_status']),
             'start' => $this->databaseMonthLabel($payload['start_month']),
-            'end' => $this->databaseMonthLabel($payload['end_month']),
+            'end' => $this->databaseMonthLabel($payload['end_month'] ?? null),
             'year' => (string) $payload['year'],
             'status_updated' => trim((string) $payload['status_updated']),
         ]);

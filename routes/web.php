@@ -16,7 +16,8 @@ use App\Http\Controllers\MasterData\ScopeCharter\ScopeCharterController;
 use App\Http\Controllers\ProgramEvaluation\ReviewTimelineController;
 use App\Http\Controllers\ProgramEvaluation\TrsReviewPCController;
 use App\Http\Controllers\ProgramImplementation\DashboardController;
-use App\Http\Controllers\ProgramPlanning\ItBuildingBlockController;
+use App\Http\Controllers\StrategicHouse\BusinessStrategy\IndexController as StrategicHouseBusinessStrategyController;
+use App\Http\Controllers\StrategicHouse\ItBuildingBlock\IndexController as StrategicHouseItBuildingBlockController;
 use App\Http\Controllers\ProgramImplementation\ProgramImplementationController;
 use App\Http\Controllers\ProgramImplementation\ResourceManagementController;
 use App\Http\Controllers\ProgramImplementation\ProjectCharter\DigitalInitiatives\DigitalInitiativeController;
@@ -26,7 +27,6 @@ use App\Http\Controllers\ProgramImplementation\ProjectCharter\ITInitiatives\Mile
 use App\Http\Controllers\ProgramImplementation\ProjectCharter\ITInitiatives\VersionAnalysisController;
 use App\Http\Controllers\ProgramImplementation\Roadmap\RoadmapController;
 use App\Http\Controllers\ProgramPlanning\DashboardController as PlanningDashboardController;
-use App\Http\Controllers\ProgramPlanning\InitiativeRelation\InitiativeRelationController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Appendix\CreateController as ProgramDefinitionDigitalInitiativesAppendixCreateController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Appendix\EditController as ProgramDefinitionDigitalInitiativesAppendixEditController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Appendix\IndexController as ProgramDefinitionDigitalInitiativesAppendixIndexController;
@@ -50,13 +50,14 @@ use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Up
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\IndexController as ProgramDefinitionController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\ITInitiatives\IndexController as ProgramDefinitionITInitiativesController;
 use App\Http\Controllers\ProgramPlanning\ProgramPlanningController;
-use App\Http\Controllers\ProgramPlanning\StrategicHouse\IndexController as ProgramPlanningStrategicHouseIndexController;
-use App\Http\Controllers\ProgramPlanning\StrategicHouse\InitiativeSupport\IndexController as StrategicHouseInitiativeSupportIndexController;
-use App\Http\Controllers\ProgramPlanning\StrategicHouse\RoadMap\IndexController as StrategicHouseRoadmapIndexController;
-use App\Http\Controllers\ProgramPlanning\StrategicPillars\GoalController as ProgramPlanningStrategicPillarGoalController;
-use App\Http\Controllers\ProgramPlanning\StrategicPillars\IndexController as ProgramPlanningStrategicPillarsIndexController;
-use App\Http\Controllers\ProgramPlanning\StrategicPillars\InitiativeTaggingController;
-use App\Http\Controllers\ProgramPlanning\StrategicPillars\ThemeController as ProgramPlanningStrategicPillarThemeController;
+use App\Http\Controllers\StrategicHouse\IndexController as StrategicHouseController;
+use App\Http\Controllers\StrategicHouse\InitiativeRelation\InitiativeRelationController as StrategicHouseInitiativeRelationController;
+use App\Http\Controllers\StrategicHouse\InitiativeSupport\IndexController as StrategicHouseInitiativeSupportIndexController;
+use App\Http\Controllers\StrategicHouse\RoadMap\IndexController as StrategicHouseRoadmapIndexController;
+use App\Http\Controllers\StrategicHouse\StrategicPillars\GoalController as StrategicHouseStrategicPillarGoalController;
+use App\Http\Controllers\StrategicHouse\StrategicPillars\IndexController as StrategicHouseStrategicPillarsIndexController;
+use App\Http\Controllers\StrategicHouse\StrategicPillars\InitiativeTaggingController as StrategicHouseInitiativeTaggingController;
+use App\Http\Controllers\StrategicHouse\StrategicPillars\ThemeController as StrategicHouseStrategicPillarThemeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -174,33 +175,53 @@ Route::middleware(['auth', 'approved'])->group(function () {
     });
 
     Route::get('/program-planning/program-definition/it-initiatives', ProgramDefinitionITInitiativesController::class)->name('program-planning.program-definition.it-initiatives');
-    Route::redirect('/program-planning/initiative', '/program-planning/initiative-relation');
-    Route::prefix('/program-planning/initiative-relation')->name('initiative-relations.')->group(function () {
-        Route::get('/', [InitiativeRelationController::class, 'index'])->name('index');
-        Route::get('/create', [InitiativeRelationController::class, 'create'])->name('create');
-        Route::post('/', [InitiativeRelationController::class, 'store'])->name('store');
-        Route::get('/{initiativeRelation}/edit', [InitiativeRelationController::class, 'edit'])->name('edit');
-        Route::put('/{initiativeRelation}', [InitiativeRelationController::class, 'update'])->name('update');
-        Route::delete('/{initiativeRelation}', [InitiativeRelationController::class, 'destroy'])->name('destroy');
+    Route::redirect('/program-planning/initiative', '/strategic-house/initiative-relation');
+    Route::prefix('/strategic-house/initiative-relation')->name('initiative-relations.')->group(function () {
+        Route::get('/', [StrategicHouseInitiativeRelationController::class, 'index'])->name('index');
+        Route::get('/create', [StrategicHouseInitiativeRelationController::class, 'create'])->name('create');
+        Route::post('/', [StrategicHouseInitiativeRelationController::class, 'store'])->name('store');
+        Route::get('/{initiativeRelation}/edit', [StrategicHouseInitiativeRelationController::class, 'edit'])
+            ->whereNumber('initiativeRelation')
+            ->name('edit');
+        Route::get('/{initiativeRelation}', [StrategicHouseInitiativeRelationController::class, 'show'])
+            ->whereNumber('initiativeRelation')
+            ->name('show');
+        Route::put('/{initiativeRelation}', [StrategicHouseInitiativeRelationController::class, 'update'])
+            ->whereNumber('initiativeRelation')
+            ->name('update');
+        Route::delete('/{initiativeRelation}', [StrategicHouseInitiativeRelationController::class, 'destroy'])
+            ->whereNumber('initiativeRelation')
+            ->name('destroy');
     });
-    Route::redirect('/program-implementation/initiative-relation', '/program-planning/initiative-relation');
-    Route::redirect('/program-implementation/initiative-relation/create', '/program-planning/initiative-relation/create');
+    Route::get('/program-planning/initiative-relation', static fn () => redirect('/strategic-house/initiative-relation'));
+    Route::get('/program-planning/initiative-relation/create', static fn () => redirect('/strategic-house/initiative-relation/create'));
+    Route::get('/program-planning/initiative-relation/{initiativeRelation}/edit', [StrategicHouseInitiativeRelationController::class, 'edit'])
+        ->whereNumber('initiativeRelation');
+    Route::get('/program-planning/initiative-relation/{initiativeRelation}', [StrategicHouseInitiativeRelationController::class, 'show'])
+        ->whereNumber('initiativeRelation');
+    Route::post('/program-planning/initiative-relation', [StrategicHouseInitiativeRelationController::class, 'store']);
+    Route::put('/program-planning/initiative-relation/{initiativeRelation}', [StrategicHouseInitiativeRelationController::class, 'update'])
+        ->whereNumber('initiativeRelation');
+    Route::delete('/program-planning/initiative-relation/{initiativeRelation}', [StrategicHouseInitiativeRelationController::class, 'destroy'])
+        ->whereNumber('initiativeRelation');
+    Route::redirect('/program-implementation/initiative-relation', '/strategic-house/initiative-relation');
+    Route::redirect('/program-implementation/initiative-relation/create', '/strategic-house/initiative-relation/create');
     Route::get('/program-implementation/initiative-relation/{initiativeRelation}/edit', static function (string $initiativeRelation) {
-        return redirect("/program-planning/initiative-relation/{$initiativeRelation}/edit");
+        return redirect("/strategic-house/initiative-relation/{$initiativeRelation}/edit");
     });
     Route::get('/program-implementation', ProgramImplementationController::class)->name('program-implementation.index');
 
     // IT Building Blocks (moved to Program Planning)
-    Route::get('/program-planning/it-building-blocks', ItBuildingBlockController::class)->name('program-planning.it-building-blocks.index');
-    Route::post('/program-planning/it-building-blocks', [ItBuildingBlockController::class, 'store'])->name('program-planning.it-building-blocks.store');
-    Route::delete('/program-planning/it-building-blocks/primary/{primary}', [ItBuildingBlockController::class, 'destroyPrimary'])->name('program-planning.it-building-blocks.primary.destroy');
-    Route::delete('/program-planning/it-building-blocks/primary/{primary}/secondary/{secondary}', [ItBuildingBlockController::class, 'destroySecondary'])->name('program-planning.it-building-blocks.secondary.destroy');
-    Route::delete('/program-planning/it-building-blocks/primary/{primary}/secondary/{secondary}/initiative/{initiative}', [ItBuildingBlockController::class, 'destroyInitiative'])->name('program-planning.it-building-blocks.initiative.destroy');
-    Route::post('/program-planning/it-building-blocks/initiatives/bulk-delete', [ItBuildingBlockController::class, 'destroyInitiatives'])->name('program-planning.it-building-blocks.initiative.bulk-destroy');
+    Route::get('/program-planning/it-building-blocks', StrategicHouseItBuildingBlockController::class)->name('program-planning.it-building-blocks.index');
+    Route::post('/program-planning/it-building-blocks', [StrategicHouseItBuildingBlockController::class, 'store'])->name('program-planning.it-building-blocks.store');
+    Route::delete('/program-planning/it-building-blocks/primary/{primary}', [StrategicHouseItBuildingBlockController::class, 'destroyPrimary'])->name('program-planning.it-building-blocks.primary.destroy');
+    Route::delete('/program-planning/it-building-blocks/primary/{primary}/secondary/{secondary}', [StrategicHouseItBuildingBlockController::class, 'destroySecondary'])->name('program-planning.it-building-blocks.secondary.destroy');
+    Route::delete('/program-planning/it-building-blocks/primary/{primary}/secondary/{secondary}/initiative/{initiative}', [StrategicHouseItBuildingBlockController::class, 'destroyInitiative'])->name('program-planning.it-building-blocks.initiative.destroy');
+    Route::post('/program-planning/it-building-blocks/initiatives/bulk-delete', [StrategicHouseItBuildingBlockController::class, 'destroyInitiatives'])->name('program-planning.it-building-blocks.initiative.bulk-destroy');
 
     // Redirects untuk backward-compatibility: URL lama → URL baru
     Route::redirect('/program-implementation/it-building-blocks', '/program-planning/it-building-blocks');
-    Route::post('/program-implementation/it-building-blocks', [ItBuildingBlockController::class, 'store']);
+    Route::post('/program-implementation/it-building-blocks', [StrategicHouseItBuildingBlockController::class, 'store']);
     Route::redirect('/program-implementation/it-building-blocks/primary/{primary}', '/program-planning/it-building-blocks');
     Route::redirect('/program-implementation/it-building-blocks/primary/{primary}/secondary/{secondary}', '/program-planning/it-building-blocks');
 
@@ -229,25 +250,42 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::post('/program-evalution/review-timeline/{project}/review-status-implementation', [ReviewTimelineController::class, 'storeReviewStatusImplementation'])->name('program-evaluation.review-timeline.review-status.store');
     Route::put('/program-evalution/review-timeline/review-status-implementation/{statusId}', [ReviewTimelineController::class, 'updateReviewStatusImplementation'])->name('program-evaluation.review-timeline.review-status.update');
 
-    // Strategic Pillars
-    Route::get('/strategic-house', ProgramPlanningStrategicHouseIndexController::class)->name('strategic-house.index');
-    Route::get('/program-planning/strategic-house/initiative-support', StrategicHouseInitiativeSupportIndexController::class)
-        ->name('program-planning.strategic-house.initiative-support.index');
-    Route::post('/program-planning/strategic-house/initiative-support', [StrategicHouseInitiativeSupportIndexController::class, 'store'])
-        ->name('program-planning.strategic-house.initiative-support.store');
-    Route::post('/program-planning/strategic-house/initiative-support/mappings/delete', [StrategicHouseInitiativeSupportIndexController::class, 'destroyMappings'])
-        ->name('program-planning.strategic-house.initiative-support.mappings.destroy');
-    Route::get('/program-planning/strategic-house/roadmap', StrategicHouseRoadmapIndexController::class)
-        ->name('program-planning.strategic-house.roadmap.index');
-    Route::get('/strategic-pillars/{goal?}', ProgramPlanningStrategicPillarsIndexController::class)->name('strategic-pillars.index');
-    Route::post('/strategic-pillars/goals', [ProgramPlanningStrategicPillarGoalController::class, 'store'])->name('strategic-pillars.goals.store');
-    Route::put('/strategic-pillars/goals/{goal}', [ProgramPlanningStrategicPillarGoalController::class, 'update'])->name('strategic-pillars.goals.update');
-    Route::delete('/strategic-pillars/goals/{goal}', [ProgramPlanningStrategicPillarGoalController::class, 'destroy'])->name('strategic-pillars.goals.destroy');
-    Route::post('/strategic-pillars/themes', [ProgramPlanningStrategicPillarThemeController::class, 'store'])->name('strategic-pillars.themes.store');
-    Route::put('/strategic-pillars/themes/{theme}', [ProgramPlanningStrategicPillarThemeController::class, 'update'])->name('strategic-pillars.themes.update');
-    Route::delete('/strategic-pillars/themes/{theme}', [ProgramPlanningStrategicPillarThemeController::class, 'destroy'])->name('strategic-pillars.themes.destroy');
-    Route::post('/strategic-pillars/tagging', [InitiativeTaggingController::class, 'store'])->name('strategic-pillars.tagging.store');
-    Route::delete('/strategic-pillars/tagging/{tagging}', [InitiativeTaggingController::class, 'destroy'])->name('strategic-pillars.tagging.destroy');
+    // Strategic House
+    Route::prefix('/strategic-house')->name('strategic-house.')->group(function () {
+        Route::get('/', StrategicHouseController::class)->name('index');
+        Route::get('/business-strategy', StrategicHouseBusinessStrategyController::class)->name('business-strategy.index');
+        Route::prefix('/initiative-support')->name('initiative-support.')->group(function () {
+            Route::get('/', StrategicHouseInitiativeSupportIndexController::class)->name('index');
+            Route::post('/', [StrategicHouseInitiativeSupportIndexController::class, 'store'])->name('store');
+            Route::post('/mappings/delete', [StrategicHouseInitiativeSupportIndexController::class, 'destroyMappings'])->name('mappings.destroy');
+        });
+        Route::get('/roadmap', StrategicHouseRoadmapIndexController::class)->name('roadmap.index');
+    });
+    Route::get('/strategic-house/strategic-pillars/{goal?}', StrategicHouseStrategicPillarsIndexController::class)->name('strategic-pillars.index');
+    Route::post('/strategic-house/strategic-pillars/goals', [StrategicHouseStrategicPillarGoalController::class, 'store'])->name('strategic-pillars.goals.store');
+    Route::put('/strategic-house/strategic-pillars/goals/{goal}', [StrategicHouseStrategicPillarGoalController::class, 'update'])->name('strategic-pillars.goals.update');
+    Route::delete('/strategic-house/strategic-pillars/goals/{goal}', [StrategicHouseStrategicPillarGoalController::class, 'destroy'])->name('strategic-pillars.goals.destroy');
+    Route::post('/strategic-house/strategic-pillars/themes', [StrategicHouseStrategicPillarThemeController::class, 'store'])->name('strategic-pillars.themes.store');
+    Route::put('/strategic-house/strategic-pillars/themes/{theme}', [StrategicHouseStrategicPillarThemeController::class, 'update'])->name('strategic-pillars.themes.update');
+    Route::delete('/strategic-house/strategic-pillars/themes/{theme}', [StrategicHouseStrategicPillarThemeController::class, 'destroy'])->name('strategic-pillars.themes.destroy');
+    Route::post('/strategic-house/strategic-pillars/tagging', [StrategicHouseInitiativeTaggingController::class, 'store'])->name('strategic-pillars.tagging.store');
+    Route::delete('/strategic-house/strategic-pillars/tagging/{tagging}', [StrategicHouseInitiativeTaggingController::class, 'destroy'])->name('strategic-pillars.tagging.destroy');
+
+    Route::redirect('/program-planning/strategic-house', '/strategic-house');
+    Route::redirect('/program-planning/strategic-house/business-strategy', '/strategic-house/business-strategy');
+    Route::get('/program-planning/strategic-house/initiative-support', static fn () => redirect('/strategic-house/initiative-support'));
+    Route::post('/program-planning/strategic-house/initiative-support', [StrategicHouseInitiativeSupportIndexController::class, 'store']);
+    Route::post('/program-planning/strategic-house/initiative-support/mappings/delete', [StrategicHouseInitiativeSupportIndexController::class, 'destroyMappings']);
+    Route::redirect('/program-planning/strategic-house/roadmap', '/strategic-house/roadmap');
+    Route::get('/strategic-pillars/{goal?}', StrategicHouseStrategicPillarsIndexController::class);
+    Route::post('/strategic-pillars/goals', [StrategicHouseStrategicPillarGoalController::class, 'store']);
+    Route::put('/strategic-pillars/goals/{goal}', [StrategicHouseStrategicPillarGoalController::class, 'update']);
+    Route::delete('/strategic-pillars/goals/{goal}', [StrategicHouseStrategicPillarGoalController::class, 'destroy']);
+    Route::post('/strategic-pillars/themes', [StrategicHouseStrategicPillarThemeController::class, 'store']);
+    Route::put('/strategic-pillars/themes/{theme}', [StrategicHouseStrategicPillarThemeController::class, 'update']);
+    Route::delete('/strategic-pillars/themes/{theme}', [StrategicHouseStrategicPillarThemeController::class, 'destroy']);
+    Route::post('/strategic-pillars/tagging', [StrategicHouseInitiativeTaggingController::class, 'store']);
+    Route::delete('/strategic-pillars/tagging/{tagging}', [StrategicHouseInitiativeTaggingController::class, 'destroy']);
 
     // Digital Initiatives
     Route::post('/digital-initiatives/implementation-status', [DigitalInitiativeController::class, 'storeImplementationStatus'])

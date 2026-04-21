@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\ProgramPlanning\StrategicHouse\InitiativeSupport;
+namespace App\Http\Controllers\StrategicHouse\InitiativeSupport;
 
 use App\Http\Controllers\Controller;
-use App\Services\ProgramPlanning\StrategicHouse\InitiativeSupport\InitiativeSupportService;
+use App\Services\StrategicHouse\InitiativeSupport\InitiativeSupportService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -22,9 +22,8 @@ class IndexController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        // Return data with original database order from the service
         return Inertia::render(
-            'ProgramPlanning/StrategicHouse/InitiativeSupport/Index',
+            'StrategicHouse/InitiativeSupport/Index',
             $this->initiativeSupportService->getPageProps()
         );
     }

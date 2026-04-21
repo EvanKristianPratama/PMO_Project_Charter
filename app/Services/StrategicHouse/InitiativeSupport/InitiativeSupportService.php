@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Services\ProgramPlanning\StrategicHouse\InitiativeSupport;
+namespace App\Services\StrategicHouse\InitiativeSupport;
 
 use App\Models\MstInitiative;
 use App\Models\TrsInitiativeSupport;
-use App\Services\ProgramPlanning\ItBuildingBlockService;
+use App\Services\StrategicHouse\ItBuildingBlockService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;

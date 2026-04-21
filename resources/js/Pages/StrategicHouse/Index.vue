@@ -281,10 +281,10 @@ import DualGrowth from "@/Components/StrategicHouse/DualGrowth.vue";
 import DualGrowthFull from "@/Components/StrategicHouse/DualGrowthFull.vue";
 import DigitalBuildingBlock from "@/Components/ItBuildingBlocks/DigitalBuildingBlock.vue";
 import ItBuildingBlocks from "@/Components/ItBuildingBlocks/ItBuildingBlock.vue";
-import StrategicHouseInitiativeSupportPage from "@/Pages/ProgramPlanning/StrategicHouse/InitiativeSupport/Index.vue";
-import StrategicHouseItBuildingBlocksPage from "@/Pages/ProgramPlanning/StrategicHouse/ItBuildingBlocks/Index.vue";
-import StrategicHouseInitiativeRelationPage from "@/Pages/ProgramPlanning/StrategicHouse/InitiativeRelation/Index.vue";
-import StrategicHouseStrategicPillarPage from "@/Pages/ProgramPlanning/StrategicHouse/StrategicPillar/Index.vue";
+import StrategicHouseInitiativeSupportPage from "@/Pages/StrategicHouse/InitiativeSupport/Index.vue";
+import StrategicHouseItBuildingBlocksPage from "@/Pages/StrategicHouse/ItBuildingBlocks/Index.vue";
+import StrategicHouseInitiativeRelationPage from "@/Pages/StrategicHouse/InitiativeRelation/Index.vue";
+import StrategicHouseStrategicPillarPage from "@/Pages/StrategicHouse/StrategicPillar/Index.vue";
 import StretegicHouse from "@/Components/StrategicHouse/StretegicHouse.vue";
 import UserLayout from "@/Layouts/UserLayout.vue";
 

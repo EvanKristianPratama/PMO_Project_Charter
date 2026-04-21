@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\ProgramPlanning\StrategicPillars;
+namespace App\Http\Controllers\StrategicHouse\StrategicPillars;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProgramPlanning\StrategicPillars\StoreThemeRequest;
 use App\Http\Requests\ProgramPlanning\StrategicPillars\UpdateThemeRequest;
 use App\Models\Theme;
-use App\Services\ProgramPlanning\StrategicPillars\StrategicPillarStructureService;
+use App\Services\StrategicHouse\StrategicPillars\StrategicPillarStructureService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

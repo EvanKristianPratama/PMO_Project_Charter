@@ -47,7 +47,7 @@
                         v-model="form.review_status"
                         list="digital-review-status-options"
                         type="text"
-                        maxlength="10"
+                        maxlength="11"
                         placeholder="Contoh: ITSBP"
                         class="field-input"
                     />
@@ -59,7 +59,7 @@
                         />
                     </datalist>
                     <p class="text-[10px] text-slate-400 dark:text-slate-500">
-                        Maksimal 10 karakter.
+                        Maksimal 11 karakter.
                     </p>
                     <p
                         v-if="form.errors.review_status"
@@ -111,6 +111,9 @@
                             {{ month.label }}
                         </option>
                     </select>
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500">
+                        Opsional, boleh dikosongkan.
+                    </p>
                     <p
                         v-if="form.errors.end_month"
                         class="text-xs text-rose-600 dark:text-rose-400"
@@ -284,7 +287,7 @@ const applyFormDefaults = () => {
     form.initiative_id = normalizeStringValue(props.defaultInitiativeId);
     form.review_status = '';
     form.start_month = normalizeStringValue(props.defaultMonth);
-    form.end_month = normalizeStringValue(props.defaultMonth);
+    form.end_month = '';
     form.year = normalizeStringValue(props.defaultYear) || String(currentYear);
     form.status_updated = '';
     form.clearErrors();
@@ -304,6 +307,13 @@ const submit = () => {
         return;
     }
 
+    const submissionForm = form.transform((data) => ({
+        ...data,
+        review_status: normalizeStringValue(data.review_status),
+        end_month: normalizeStringValue(data.end_month) || null,
+        status_updated: normalizeStringValue(data.status_updated),
+    }));
+
     const requestOptions = {
         preserveScroll: true,
         onSuccess: () => {
@@ -321,7 +331,7 @@ const submit = () => {
     };
 
     if (isEditing.value) {
-        form.put(
+        submissionForm.put(
             route('digital-initiatives.implementation-status.update', props.statusData.id),
             requestOptions,
         );
@@ -329,7 +339,7 @@ const submit = () => {
         return;
     }
 
-    form.post(route('digital-initiatives.implementation-status.store'), requestOptions);
+    submissionForm.post(route('digital-initiatives.implementation-status.store'), requestOptions);
 };
 
 watch(

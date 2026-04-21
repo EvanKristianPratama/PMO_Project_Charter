@@ -39,4 +39,9 @@ class TrsOrganization extends Model
         )->using(TrsBuCollaboration::class)
             ->withTimestamps();
     }
+
+    public function businessStrategies(): HasMany
+    {
+        return $this->hasMany(TrsBusinessStrategy::class, 'business_unit');
+    }
 }

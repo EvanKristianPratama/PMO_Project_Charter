@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\ProgramPlanning\StrategicHouse\RoadMap;
+namespace App\Http\Controllers\StrategicHouse\RoadMap;
 
 use App\Http\Controllers\Controller;
-use App\Services\ProgramPlanning\StrategicHouse\RoadMap\ItInitiativeRoadmapService;
+use App\Services\StrategicHouse\RoadMap\ItInitiativeRoadmapService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -21,7 +21,7 @@ class IndexController extends Controller
         }
 
         return Inertia::render(
-            'ProgramPlanning/StrategicHouse/RoadMap/Index',
+            'StrategicHouse/RoadMap/Index',
             $this->service->getPageProps()
         );
     }

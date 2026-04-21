@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Services\ProgramPlanning;
+namespace App\Services\StrategicHouse;
 
 use App\Models\MstCoe;
 use App\Models\MstInitiative;
 use App\Models\TrsMapItBuilding;
+use App\Models\TrsStatusImplementation;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 
@@ -25,10 +26,12 @@ class ItBuildingBlockService
     {
         return MstInitiative::query()
             ->with([
-                'coe:id,name', 
-                'organization:id,name,groub_id', 
+                'coe:id,name',
+                'organization:id,name,groub_id',
                 'sourceData:id,name',
-                'mappedProjects.pcStatusImplementations' => fn($q) => $query = $q->orderBy('year', 'desc')->orderByRaw("CASE 
+                'mappedProjects.pcStatusImplementations' => fn ($query) => $query
+                    ->orderBy('year', 'desc')
+                    ->orderByRaw("CASE
                     WHEN month = 'Desember' THEN 12
                     WHEN month = 'November' THEN 11
                     WHEN month = 'Oktober' THEN 10
@@ -41,17 +44,19 @@ class ItBuildingBlockService
                     WHEN month = 'Maret' THEN 3
                     WHEN month = 'Februari' THEN 2
                     WHEN month = 'Januari' THEN 1
-                    ELSE 0 END DESC")->orderBy('id', 'desc')
+                    ELSE 0 END DESC")
+                    ->orderBy('id', 'desc'),
             ])
             ->where('tipe_initiative', 2)
             ->orderBy('code')
             ->orderBy('name')
             ->get(['id', 'code', 'name', 'description', 'coe_id', 'business_unit', 'tipe_initiative', 'source'])
             ->map(function (MstInitiative $initiative): array {
-                // Ambil status terbaru dari semua proyek yang dimapping
                 $latestStatus = $initiative->mappedProjects
-                    ->flatMap(fn($project) => $project->pcStatusImplementations)
-                    ->sortByDesc(fn($status) => $status->year . str_pad($this->monthToNumber($status->month), 2, '0', STR_PAD_LEFT) . str_pad($status->id, 10, '0', STR_PAD_LEFT))
+                    ->flatMap(fn ($project) => $project->pcStatusImplementations)
+                    ->sortByDesc(fn ($status) => $status->year
+                        . str_pad($this->monthToNumber($status->month), 2, '0', STR_PAD_LEFT)
+                        . str_pad($status->id, 10, '0', STR_PAD_LEFT))
                     ->first();
 
                 return [
@@ -65,12 +70,14 @@ class ItBuildingBlockService
                     'groub_id' => $initiative->organization?->groub_id,
                     'implementation_status' => $latestStatus?->status ?: null,
                     'statuses' => $initiative->mappedProjects
-                        ->flatMap(fn($project) => $project->pcStatusImplementations)
-                        ->map(fn($s) => [
-                            'month' => $s->month,
-                            'year' => $s->year,
-                            'status' => $s->status,
-                        ])->values()->all(),
+                        ->flatMap(fn ($project) => $project->pcStatusImplementations)
+                        ->map(fn ($status) => [
+                            'month' => $status->month,
+                            'year' => $status->year,
+                            'status' => $status->status,
+                        ])
+                        ->values()
+                        ->all(),
                     'tipe_initiative' => (int) $initiative->tipe_initiative,
                     'source' => $initiative->source,
                     'source_name' => $initiative->sourceData?->name,
@@ -79,23 +86,13 @@ class ItBuildingBlockService
             });
     }
 
-    private function monthToNumber(?string $month): int
-    {
-        return match (trim((string)$month)) {
-            'Januari' => 1, 'Februari' => 2, 'Maret' => 3, 'April' => 4,
-            'Mei' => 5, 'Juni' => 6, 'Juli' => 7, 'Agustus' => 8,
-            'September' => 9, 'Oktober' => 10, 'November' => 11, 'Desember' => 12,
-            default => 0,
-        };
-    }
-
     public function getStatusPeriods(): Collection
     {
-        return \App\Models\TrsStatusImplementation::query()
+        return TrsStatusImplementation::query()
             ->select(['start', 'end', 'year'])
             ->distinct()
             ->orderBy('year', 'desc')
-            ->orderByRaw("CASE 
+            ->orderByRaw("CASE
                 WHEN start = 'Desember' THEN 12
                 WHEN start = 'November' THEN 11
                 WHEN start = 'Oktober' THEN 10
@@ -143,11 +140,11 @@ class ItBuildingBlockService
                 'business_unit' => $initiative->organization?->name ?: '-',
                 'groub_id' => $initiative->organization?->groub_id,
                 'implementation_status' => $initiative->latestStatusImplementation?->review_status ?: null,
-                'statuses' => $initiative->statusImplementations->map(fn($s) => [
-                    'start' => $s->start,
-                    'end' => $s->end,
-                    'year' => (int) $s->year,
-                    'status' => $s->review_status,
+                'statuses' => $initiative->statusImplementations->map(fn ($status) => [
+                    'start' => $status->start,
+                    'end' => $status->end,
+                    'year' => (int) $status->year,
+                    'status' => $status->review_status,
                 ])->values()->all(),
                 'tipe_initiative' => (int) $initiative->tipe_initiative,
                 'source' => $initiative->source,
@@ -308,5 +305,24 @@ class ItBuildingBlockService
                     ->where('initiative_id', $item['initiative_id'])
                     ->delete();
             });
+    }
+
+    private function monthToNumber(?string $month): int
+    {
+        return match (trim((string) $month)) {
+            'Januari' => 1,
+            'Februari' => 2,
+            'Maret' => 3,
+            'April' => 4,
+            'Mei' => 5,
+            'Juni' => 6,
+            'Juli' => 7,
+            'Agustus' => 8,
+            'September' => 9,
+            'Oktober' => 10,
+            'November' => 11,
+            'Desember' => 12,
+            default => 0,
+        };
     }
 }

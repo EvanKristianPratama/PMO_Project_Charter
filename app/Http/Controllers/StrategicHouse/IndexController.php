@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\ProgramPlanning\StrategicHouse;
+namespace App\Http\Controllers\StrategicHouse;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProgramPlanning\StrategicHouse\IndexRequest;
-use App\Services\ProgramPlanning\StrategicHouse\StrategicHousePageService;
+use App\Services\StrategicHouse\StrategicHousePageService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -22,7 +22,7 @@ class IndexController extends Controller
         }
 
         return Inertia::render(
-            'ProgramPlanning/StrategicHouse/Index',
+            'StrategicHouse/Index',
             $this->strategicHousePageService->getPageProps($request->filters())
         );
     }

@@ -183,8 +183,10 @@
 import { computed, ref, toRef, watch } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import InitiativeDetailsWithRelations from './InitiativeDetailsWithRelations.vue';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 
-const initiativeRelationIndexPath = '/program-planning/initiative-relation';
+const route = useRouteHelper();
+const initiativeRelationIndexPath = route('initiative-relations.index');
 
 const props = defineProps({
     form: {

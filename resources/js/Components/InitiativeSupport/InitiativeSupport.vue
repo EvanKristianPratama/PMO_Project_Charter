@@ -689,7 +689,7 @@ const submitSupport = () => {
     modalError.value = '';
     saveProcessing.value = true;
 
-    router.post(route('program-planning.strategic-house.initiative-support.store'), {
+    router.post(route('strategic-house.initiative-support.store'), {
         digital_ids: addForm.digital_ids.map((value) => Number(value)),
         it_ids: addForm.it_ids.map((value) => Number(value)),
         notes: String(addForm.notes ?? '').trim() || null,
@@ -722,7 +722,7 @@ const confirmDeleteGroup = () => {
     modalError.value = '';
     deleteProcessing.value = true;
 
-    router.post(route('program-planning.strategic-house.initiative-support.mappings.destroy'), {
+    router.post(route('strategic-house.initiative-support.mappings.destroy'), {
         mapping_ids: deleteTarget.mappingIds,
     }, {
         preserveScroll: true,

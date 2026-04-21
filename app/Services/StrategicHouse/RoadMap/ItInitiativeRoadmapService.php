@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\ProgramPlanning\StrategicHouse\RoadMap;
+namespace App\Services\StrategicHouse\RoadMap;
 
 use App\Models\Milestone;
 use App\Models\MstInitiative;

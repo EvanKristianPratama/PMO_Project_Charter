@@ -1,19 +1,17 @@
 <?php
 
-namespace App\Http\Controllers\ProgramPlanning;
+namespace App\Http\Controllers\StrategicHouse\ItBuildingBlock;
 
 use App\Http\Controllers\Controller;
 use App\Models\MstCoe;
 use App\Models\MstInitiative;
-use App\Models\TrsMapItBuilding;
-use App\Services\ProgramPlanning\ItBuildingBlockService;
+use App\Services\StrategicHouse\ItBuildingBlockService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class ItBuildingBlockController extends Controller
+class IndexController extends Controller
 {
     public function __construct(
         protected ItBuildingBlockService $itBuildingBlockService
@@ -21,7 +19,7 @@ class ItBuildingBlockController extends Controller
 
     public function __invoke(): Response
     {
-        return Inertia::render('ProgramPlanning/ItBuildingBlocks/Index', [
+        return Inertia::render('StrategicHouse/ItBuildingBlocks/Index', [
             'groups' => $this->itBuildingBlockService->getGroupedMappings(),
             'coeOptions' => $this->itBuildingBlockService->getCoeOptions(),
             'initiativeOptions' => $this->itBuildingBlockService->getItInitiativeOptions(),
@@ -79,5 +77,4 @@ class ItBuildingBlockController extends Controller
 
         return back()->with('success', 'Penghapusan initiative berhasil disimpan.');
     }
-
 }

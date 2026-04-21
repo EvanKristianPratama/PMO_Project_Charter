@@ -45,11 +45,13 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { Link, router, useForm } from '@inertiajs/vue3';
-import UserLayout from '@/Layouts/UserLayout.vue';
 import InitiativeRelationFormCard from '@/Components/InitiativeRelation/InitiativeRelationFormCard.vue';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
+import UserLayout from '@/Layouts/UserLayout.vue';
 
-const initiativeRelationIndexPath = '/program-planning/initiative-relation';
-const initiativeRelationEditPath = (initiativeRelationId) => `${initiativeRelationIndexPath}/${initiativeRelationId}/edit`;
+const route = useRouteHelper();
+const initiativeRelationIndexPath = route('initiative-relations.index');
+const initiativeRelationEditPath = (initiativeRelationId) => route('initiative-relations.edit', initiativeRelationId);
 
 const props = defineProps({
     initiativeRelation: {
@@ -145,6 +147,6 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.put(`${initiativeRelationIndexPath}/${props.initiativeRelation.id}`);
+    form.put(route('initiative-relations.update', props.initiativeRelation.id));
 };
 </script>

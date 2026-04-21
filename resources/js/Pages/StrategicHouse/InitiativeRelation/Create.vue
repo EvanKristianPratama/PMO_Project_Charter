@@ -26,10 +26,12 @@
 
 <script setup>
 import { Link, useForm } from '@inertiajs/vue3';
-import UserLayout from '@/Layouts/UserLayout.vue';
 import InitiativeRelationFormCard from '@/Components/InitiativeRelation/InitiativeRelationFormCard.vue';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
+import UserLayout from '@/Layouts/UserLayout.vue';
 
-const initiativeRelationIndexPath = '/program-planning/initiative-relation';
+const route = useRouteHelper();
+const initiativeRelationIndexPath = route('initiative-relations.index');
 
 const props = defineProps({
     initiativeOptions: {
@@ -59,6 +61,6 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(initiativeRelationIndexPath);
+    form.post(route('initiative-relations.store'));
 };
 </script>

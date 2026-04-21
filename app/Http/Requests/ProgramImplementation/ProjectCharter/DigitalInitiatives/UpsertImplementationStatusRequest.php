@@ -22,9 +22,9 @@ class UpsertImplementationStatusRequest extends FormRequest
                     static fn ($query) => $query->where('tipe_initiative', 1)
                 ),
             ],
-            'review_status' => ['required', 'string', 'max:10'],
+            'review_status' => ['required', 'string', 'max:11'],
             'start_month' => ['required', 'integer', 'between:1,12'],
-            'end_month' => ['required', 'integer', 'between:1,12'],
+            'end_month' => ['nullable', 'integer', 'between:1,12'],
             'year' => ['required', 'digits:4'],
             'status_updated' => ['required', 'string'],
         ];
