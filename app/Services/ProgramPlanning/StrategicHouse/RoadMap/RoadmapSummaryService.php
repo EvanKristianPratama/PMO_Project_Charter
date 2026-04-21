@@ -3,7 +3,6 @@
 namespace App\Services\ProgramPlanning\StrategicHouse\RoadMap;
 
 use App\Models\MstInitiative;
-use App\Models\TrsMasterMilestone;
 
 class RoadmapSummaryService
 {
@@ -45,69 +44,87 @@ class RoadmapSummaryService
 
     private function buildDigitalSummaryGroups(): array
     {
-        $milestones = TrsMasterMilestone::query()
+        $initiatives = MstInitiative::query()
+            ->where('tipe_initiative', 1)
             ->with([
-                'initiative:id,code,name,coe_id,business_unit',
-                'initiative.coe:id,name',
-                'initiative.organization:id,name',
+                'coe:id,name',
+                'organization:id,name,groub_id',
+                'organization.groub:id,name',
+                'masterMilestones:id,initiative_id,startYear,startQ,endYear,endQ',
             ])
-            ->get();
+            ->get([
+                'id',
+                'coe_id',
+                'business_unit',
+            ]);
 
-        // Group by organization → coe
+        $byGroub = [
+            1 => [
+                'section_order' => 0,
+                'section_label' => 'Holding',
+                'rows'          => [],
+            ],
+            2 => [
+                'section_order' => 1,
+                'section_label' => 'Sub Holding',
+                'rows'          => [],
+            ],
+        ];
+
         $grouped = [];
 
-        foreach ($milestones as $milestone) {
-            $initiative       = $milestone->initiative;
-            $organizationName = trim((string) ($initiative?->organization?->name ?? ''));
-            $coeName          = trim((string) ($initiative?->coe?->name ?? ''));
+        foreach ($initiatives as $initiative) {
+            $groub     = $initiative->organization?->groub;
+            $groubId   = (int) ($groub?->id ?? $initiative->organization?->groub_id ?? 0);
+            $groubName = trim((string) ($groub?->name ?? ''));
+            $coeName   = trim((string) ($initiative->coe?->name ?? ''));
 
-            if ($organizationName === '' || $coeName === '') {
+            if ($groubId <= 0 || $coeName === '') {
                 continue;
             }
 
-            $key = $organizationName . '||' . $coeName;
+            $key = $groubId . '||' . $coeName;
 
             if (! isset($grouped[$key])) {
                 $grouped[$key] = [
-                    'organization_name' => $organizationName,
-                    'coe_name'          => $coeName,
-                    'initiative_ids'    => [],
-                    'start_years'       => [],
-                    'start_quarters'    => [],
-                    'end_years'         => [],
-                    'end_quarters'      => [],
+                    'groub_id'        => $groubId,
+                    'groub_name'      => $groubName,
+                    'coe_name'        => $coeName,
+                    'initiative_ids'  => [],
+                    'start_years'     => [],
+                    'start_quarters'  => [],
+                    'end_years'       => [],
+                    'end_quarters'    => [],
                 ];
             }
 
-            $initiativeId = (int) ($initiative?->id ?? 0);
-            if ($initiativeId > 0) {
-                $grouped[$key]['initiative_ids'][$initiativeId] = true;
-            }
+            $grouped[$key]['initiative_ids'][(int) $initiative->id] = true;
 
-            $startYear = (int) $milestone->startYear;
-            $endYear   = (int) $milestone->endYear;
-            $startQ    = $this->parseQuarter($milestone->startQ);
-            $endQ      = $this->parseQuarter($milestone->endQ);
+            foreach ($initiative->masterMilestones as $milestone) {
+                $startYear = (int) $milestone->startYear;
+                $endYear   = (int) $milestone->endYear;
+                $startQ    = $this->parseQuarter($milestone->startQ);
+                $endQ      = $this->parseQuarter($milestone->endQ);
 
-            if ($startYear > 0 && $startQ > 0) {
-                $grouped[$key]['start_years'][]    = $startYear;
-                $grouped[$key]['start_quarters'][] = $startQ;
-            }
-            if ($endYear > 0 && $endQ > 0) {
-                $grouped[$key]['end_years'][]    = $endYear;
-                $grouped[$key]['end_quarters'][] = $endQ;
+                if ($startYear > 0 && $startQ > 0) {
+                    $grouped[$key]['start_years'][]    = $startYear;
+                    $grouped[$key]['start_quarters'][] = $startQ;
+                }
+
+                if ($endYear > 0 && $endQ > 0) {
+                    $grouped[$key]['end_years'][]    = $endYear;
+                    $grouped[$key]['end_quarters'][] = $endQ;
+                }
             }
         }
 
-        // Build final structure grouped by organization
-        $byOrganization = [];
-
         foreach ($grouped as $data) {
-            $orgName = $data['organization_name'];
+            $groubId = (int) $data['groub_id'];
 
-            if (! isset($byOrganization[$orgName])) {
-                $byOrganization[$orgName] = [
-                    'section_label' => $orgName,
+            if (! isset($byGroub[$groubId])) {
+                $byGroub[$groubId] = [
+                    'section_order' => $this->resolveDigitalGroupOrder($groubId, $data['groub_name']),
+                    'section_label' => $data['groub_name'] !== '' ? $data['groub_name'] : 'Other',
                     'rows'          => [],
                 ];
             }
@@ -122,27 +139,47 @@ class RoadmapSummaryService
                 $data['end_quarters'],
             );
 
-            if ($minYear === null || $maxYear === null) {
-                continue;
-            }
-
-            $byOrganization[$orgName]['rows'][] = [
-                'label'        => $data['coe_name'],
-                'count'        => count($data['initiative_ids']),
-                'start_year'   => $minYear,
-                'start_quarter' => $minQ,
-                'end_year'     => $maxYear,
-                'end_quarter'  => $maxQ,
+            $byGroub[$groubId]['rows'][] = [
+                'label'          => $data['coe_name'],
+                'count'          => count($data['initiative_ids']),
+                'has_timeline'   => $minYear !== null && $maxYear !== null,
+                'start_year'     => $minYear,
+                'start_quarter'  => $minQ,
+                'end_year'       => $maxYear,
+                'end_quarter'    => $maxQ,
             ];
         }
 
-        // Sort rows within each organization by count descending
-        foreach ($byOrganization as &$group) {
-            usort($group['rows'], fn (array $a, array $b) => $b['count'] <=> $a['count']);
+        foreach ($byGroub as &$group) {
+            usort($group['rows'], function (array $left, array $right): int {
+                $orderCompare = $this->resolveCoeSortOrder((string) $left['label'])
+                    <=> $this->resolveCoeSortOrder((string) $right['label']);
+
+                if ($orderCompare !== 0) {
+                    return $orderCompare;
+                }
+
+                $countCompare = $right['count'] <=> $left['count'];
+
+                if ($countCompare !== 0) {
+                    return $countCompare;
+                }
+
+                return strcasecmp((string) $left['label'], (string) $right['label']);
+            });
         }
         unset($group);
 
-        return array_values($byOrganization);
+        uasort($byGroub, fn (array $left, array $right) => $left['section_order'] <=> $right['section_order']);
+
+        return array_values(array_filter(
+            array_map(static function (array $group): array {
+                unset($group['section_order']);
+
+                return $group;
+            }, $byGroub),
+            static fn (array $group): bool => ! empty($group['rows']),
+        ));
     }
 
     /* ── IT Initiative Summary ──────────────────────────────────── */
@@ -319,5 +356,33 @@ class RoadmapSummaryService
         }
 
         return $labels;
+    }
+
+    private function resolveDigitalGroupOrder(int $groubId, string $groubName): int
+    {
+        $normalizedName = strtolower(trim($groubName));
+
+        if ($groubId === 1 || $normalizedName === 'holding') {
+            return 0;
+        }
+
+        if ($groubId === 2 || str_contains($normalizedName, 'sub')) {
+            return 1;
+        }
+
+        return 99;
+    }
+
+    private function resolveCoeSortOrder(string $coeName): int
+    {
+        return match (strtolower(trim($coeName))) {
+            'ai/analytics' => 0,
+            'iot' => 1,
+            'cloud & advanced computing' => 2,
+            'cloud & adv. computing' => 2,
+            'rpa' => 3,
+            'robotics' => 4,
+            default => 99,
+        };
     }
 }

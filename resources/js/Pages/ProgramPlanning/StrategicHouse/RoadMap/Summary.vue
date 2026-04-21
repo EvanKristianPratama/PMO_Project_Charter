@@ -30,6 +30,7 @@ function normalizeRows(rows) {
     return (Array.isArray(rows) ? rows : []).map((r) => ({
         label: r.label ?? "-",
         count: r.count ?? 0,
+        hasTimeline: r.has_timeline !== false,
         startYear: r.start_year ?? props.startYear,
         startQuarter: r.start_quarter ?? 1,
         endYear: r.end_year ?? props.endYear,
@@ -44,7 +45,7 @@ const SECTION_COLORS = {
         section: "#b7cd26",
     },
     it: {
-        bar: "#1d4ed8",
+        bar: "#dc2626",
         section: "#b7cd26",
     },
 };
@@ -76,7 +77,7 @@ function yearLabel(year) {
 
 <template>
     <UserLayout title="Program Initiative Roadmap Summary">
-        <div class="space-y-5">
+        <div class="summary-page">
             <!-- Back link -->
             <section
                 class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#171717]"
@@ -91,8 +92,13 @@ function yearLabel(year) {
 
             <!-- Title -->
             <section class="summary-header">
-                <h1 class="summary-header__title">Program Initiative Roadmap Summary</h1>
-                <p class="summary-header__subtitle">Review Dokumen Rencana Strategis TI (RSTI)</p>
+                <div class="summary-header__accent" aria-hidden="true">
+                    <span class="summary-header__accent-red" />
+                    <span class="summary-header__accent-green" />
+                </div>
+                <div class="summary-header__copy">
+                    <h1 class="summary-header__title">Program Initiative Roadmap Summary</h1>
+                </div>
             </section>
 
             <!-- Empty state -->
@@ -138,21 +144,50 @@ function yearLabel(year) {
 
                     <!-- Year label banner row -->
                     <tbody class="year-banner-body">
-                        <tr class="year-banner-row">
+                        <tr class="year-banner-row year-banner-row--years">
                             <td colspan="2" class="year-banner-cell year-banner-cell--empty" />
                             <td
-                                v-for="year in years"
-                                :key="`banner-year-${year}`"
+                                v-for="(year, yearIdx) in years"
+                                :key="`banner-year-top-${year}`"
                                 colspan="4"
                                 class="year-banner-cell"
                             >
-                                <div class="year-banner-cell__year">{{ year }}</div>
-                                <div class="year-banner-cell__label">{{ yearLabel(year) }}</div>
+                                <div
+                                    :class="[
+                                        'year-banner-chevron',
+                                        yearIdx === 0 ? 'year-banner-chevron--green' : 'year-banner-chevron--blue',
+                                        yearIdx === 0 ? 'year-banner-chevron--first' : '',
+                                        yearIdx === years.length - 1 ? 'year-banner-chevron--last' : '',
+                                    ]"
+                                >
+                                    <div class="year-banner-cell__year">{{ year }}</div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="year-banner-row year-banner-row--labels">
+                            <td colspan="2" class="year-banner-cell year-banner-cell--empty" />
+                            <td
+                                v-for="(year, yearIdx) in years"
+                                :key="`banner-year-bottom-${year}`"
+                                colspan="4"
+                                class="year-banner-cell"
+                            >
+                                <div
+                                    :class="[
+                                        'year-banner-chevron',
+                                        yearIdx === 0 ? 'year-banner-chevron--green' : 'year-banner-chevron--blue',
+                                        yearIdx === 0 ? 'year-banner-chevron--first' : '',
+                                        yearIdx === years.length - 1 ? 'year-banner-chevron--last' : '',
+                                        'year-banner-chevron--label',
+                                    ]"
+                                >
+                                    <div class="year-banner-cell__label">{{ yearLabel(year) }}</div>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
 
-                    <!-- IT initiatives (blue bars) -->
+                    <!-- IT initiatives (red bars) -->
                     <tbody
                         v-for="group in normalizedItGroups"
                         :key="`it-${group.sectionLabel}`"
@@ -174,31 +209,74 @@ function yearLabel(year) {
 
 <style scoped>
 /* ── Summary header ─────────────────────────────────── */
+.summary-page {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
 .summary-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
     padding: 0 4px;
 }
 
+.summary-header__accent {
+    position: relative;
+    flex: 0 0 54px;
+    width: 54px;
+    height: 92px;
+}
+
+.summary-header__accent-red,
+.summary-header__accent-green {
+    position: absolute;
+    inset: 0;
+    display: block;
+}
+
+.summary-header__accent-red {
+    width: 54px;
+    height: 30px;
+    background: #e53935;
+    clip-path: polygon(0 0, 100% 0, 74% 100%, 0 100%);
+}
+
+.summary-header__accent-green {
+    top: 6px;
+    left: 0;
+    width: 54px;
+    height: 92px;
+    background: #c4d61e;
+    clip-path: polygon(28% 0, 100% 0, 42% 100%, 0 100%, 0 28%);
+}
+
+.summary-header__copy {
+    min-width: 0;
+}
+
 .summary-header__title {
-    font-size: 26px;
+    font-size: 32px;
     font-weight: 900;
-    color: #0f172a;
-    letter-spacing: -0.01em;
-    line-height: 1.2;
+    color: #111111;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
 }
 
 .summary-header__subtitle {
-    margin-top: 4px;
-    font-size: 13px;
+    margin-top: 8px;
+    font-size: 15px;
     font-weight: 500;
-    color: #64748b;
+    color: #171717;
 }
 
 /* ── Gantt wrapper ──────────────────────────────────── */
 .summary-gantt-wrap {
     overflow-x: auto;
-    border: 2px solid #1c75bc;
-    border-radius: 6px;
-    background: #ffffff;
+    border: none;
+    border-radius: 0;
+    background: transparent;
     min-width: 0;
 }
 
@@ -206,7 +284,8 @@ function yearLabel(year) {
     width: 100%;
     min-width: 900px;
     table-layout: fixed;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
 }
 
 .summary-gantt th,
@@ -218,52 +297,85 @@ function yearLabel(year) {
 
 /* ── Column widths ──────────────────────────────────── */
 .col-section {
-    width: 40px;
+    width: 44px;
 }
 
 .col-label {
-    width: 200px;
+    width: 56px;
 }
 
 .col-quarter {
-    width: calc((100% - 240px) / var(--qcount));
+    width: calc((100% - 100px) / var(--qcount));
 }
 
 /* ── Year banner row ────────────────────────────────── */
 .year-banner-body {
-    border-top: 2px solid #8ca9c7;
-    border-bottom: 2px solid #8ca9c7;
+    background: transparent;
 }
 
 .year-banner-row {
-    background: linear-gradient(180deg, #c5d830 0%, #a8ba1c 100%);
+    background: transparent;
 }
 
 .year-banner-cell {
-    padding: 8px 4px;
+    padding: 0 0 4px;
     text-align: center;
     vertical-align: middle;
-    border-left: 2px solid #8ca9c7;
+    border-left: none;
+    background: transparent;
 }
 
 .year-banner-cell--empty {
-    background: linear-gradient(180deg, #c5d830 0%, #a8ba1c 100%);
-    border-left: none;
+    background: transparent;
+    border-right: 8px solid transparent;
+}
+
+.year-banner-chevron {
+    position: relative;
+    display: flex;
+    min-height: 40px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 22px 4px 28px;
+    clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%, 18px 50%);
+    border: 2px solid #ffffff;
+}
+
+.year-banner-chevron--green {
+    background: linear-gradient(180deg, #c7db22 0%, #bfd11d 100%);
+}
+
+.year-banner-chevron--blue {
+    background: linear-gradient(180deg, #1871b8 0%, #1468ac 100%);
+}
+
+.year-banner-chevron--first {
+    padding-left: 18px;
+    clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%);
+}
+
+.year-banner-chevron--last {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 18px 50%);
+}
+
+.year-banner-chevron--label {
+    min-height: 34px;
 }
 
 .year-banner-cell__year {
-    font-size: 16px;
-    font-weight: 800;
-    color: #1a2e44;
-    line-height: 1.2;
+    font-size: 15px;
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1.1;
 }
 
 .year-banner-cell__label {
-    font-size: 10px;
-    font-weight: 700;
-    color: #3d5a1e;
-    letter-spacing: 0.02em;
+    font-size: 11px;
+    font-weight: 800;
     font-style: italic;
+    color: #ffffff;
+    letter-spacing: 0.01em;
 }
 
 /* ── Empty state ────────────────────────────────────── */
@@ -283,29 +395,38 @@ function yearLabel(year) {
 
 /* ── Responsive ─────────────────────────────────────── */
 @media (max-width: 1280px) {
-    .col-label {
-        width: 170px;
-    }
     .summary-header__title {
-        font-size: 22px;
+        font-size: 28px;
     }
 }
 
 @media (max-width: 900px) {
-    .col-label {
-        width: 140px;
+    .summary-header {
+        gap: 10px;
+    }
+    .summary-header__accent {
+        flex-basis: 38px;
+        width: 38px;
+        height: 76px;
     }
     .col-section {
         width: 32px;
     }
     .col-quarter {
-        width: calc((100% - 172px) / var(--qcount));
+        width: calc((100% - 88px) / var(--qcount));
     }
     .summary-header__title {
-        font-size: 18px;
+        font-size: 22px;
+    }
+    .year-banner-chevron {
+        min-height: 34px;
+        padding: 6px 14px 6px 18px;
     }
     .year-banner-cell__year {
         font-size: 13px;
+    }
+    .year-banner-cell__label {
+        font-size: 10px;
     }
 }
 </style>

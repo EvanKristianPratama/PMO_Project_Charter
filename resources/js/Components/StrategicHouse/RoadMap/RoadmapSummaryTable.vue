@@ -36,6 +36,18 @@ function toCellIndex(year, quarter) {
  */
 function buildCells(row) {
     const total = totalCells.value;
+
+    if (row.hasTimeline === false) {
+        return [
+            {
+                type: "track",
+                span: total,
+                key: "track-full",
+                endsYear: false,
+            },
+        ];
+    }
+
     const startIdx = toCellIndex(row.startYear, row.startQuarter);
     const endIdx = toCellIndex(row.endYear, row.endQuarter);
     const safeStart = Math.min(startIdx, endIdx);
@@ -95,16 +107,16 @@ const normalizedRows = computed(() =>
                 v-if="rowIdx === 0"
                 :rowspan="normalizedRows.length"
                 class="cell-section"
-                :style="{ backgroundColor: sectionColor }"
             >
-                <span class="cell-section__text">{{ sectionLabel }}</span>
+                <div class="cell-section-inner" :style="{ backgroundColor: sectionColor }">
+                    <span class="cell-section__text">{{ sectionLabel }}</span>
+                </div>
             </td>
 
             <!-- Count badge -->
             <td class="cell-label">
                 <div class="label-wrap">
                     <span class="count-badge">{{ row.count }}</span>
-                    <span class="label-text">{{ row.label }}</span>
                 </div>
             </td>
 
@@ -125,6 +137,12 @@ const normalizedRows = computed(() =>
                 >
                     <span class="bar-label">{{ row.label }}</span>
                 </div>
+                <div
+                    v-else-if="cell.type === 'track'"
+                    class="track-fill"
+                >
+                    <span class="track-label">{{ row.label }}</span>
+                </div>
             </td>
         </tr>
     </template>
@@ -132,31 +150,43 @@ const normalizedRows = computed(() =>
 
 <style scoped>
 .summary-row {
-    border-bottom: 1px solid #d9e4ef;
-}
-
-.summary-row:last-child {
-    border-bottom: 2px solid #8ca9c7;
+    border-bottom: 2px solid white;
 }
 
 /* ── Section label (vertical text, merged cell) ────── */
 .cell-section {
-    width: 40px;
-    min-width: 40px;
+    position: relative;
+    width: 44px;
+    min-width: 44px;
     max-width: 50px;
-    padding: 8px 4px;
-    text-align: center;
+    padding: 0;
     vertical-align: middle;
-    border-right: 2px solid #8ca9c7;
-    border-bottom: 2px solid #8ca9c7;
+    border-right: 6px solid white;
+    border-bottom: 2px solid white;
+    background: transparent;
+}
+
+.cell-section-inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px 0 0 6px;
+    border: 2px solid #ed3d2f;
+    box-sizing: border-box;
 }
 
 .cell-section__text {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
     writing-mode: vertical-rl;
     text-orientation: mixed;
     transform: rotate(180deg);
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 800;
     letter-spacing: 0.04em;
     color: #1a2e44;
@@ -165,17 +195,20 @@ const normalizedRows = computed(() =>
 
 /* ── Label + badge cell ────────────────────────────── */
 .cell-label {
-    padding: 6px 10px;
+    padding: 0;
     vertical-align: middle;
-    border-right: 1px solid #d9e4ef;
-    background: #ffffff;
-    min-width: 180px;
+    border-right: 8px solid white;
+    background: transparent;
+    width: 56px;
+    min-width: 56px;
 }
 
 .label-wrap {
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    min-height: 40px;
+    padding: 6px 8px;
 }
 
 .count-badge {
@@ -183,82 +216,94 @@ const normalizedRows = computed(() =>
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    width: 24px;
-    height: 24px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
-    background: #2563eb;
+    background: linear-gradient(180deg, #67a6ff 0%, #327cf5 100%);
     color: #ffffff;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 800;
     line-height: 1;
-}
-
-.label-text {
-    font-size: 11px;
-    font-weight: 600;
-    color: #1e293b;
-    line-height: 1.3;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 6px rgba(20, 71, 158, 0.18);
 }
 
 /* ── Timeline gap / bar ─────────────────────────────── */
 .cell-gap {
-    height: 36px;
+    height: 34px;
     padding: 0;
-    background: #ffffff;
-    border-bottom: 1px solid #eef2f7;
+    background: #f0f0f0;
+    border-bottom: 5px solid white;
 }
 
 .cell-bar {
-    height: 36px;
-    padding: 3px 0;
-    background: transparent;
-    border-bottom: 1px solid #eef2f7;
+    height: 34px;
+    padding: 0;
+    background: #f0f0f0;
+    border-bottom: 5px solid white;
 }
 
 .bar-fill {
     width: 100%;
     height: 100%;
-    border-radius: 4px;
+    min-height: 34px;
     display: flex;
     align-items: center;
-    padding: 0 10px;
-    min-height: 28px;
+    justify-content: center;
+    padding: 0 14px;
+    clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%);
+}
+
+.track-fill {
+    width: 100%;
+    height: 100%;
+    min-height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 14px;
+    background: linear-gradient(180deg, #fafafa 0%, #f1f1f1 100%);
+    clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%);
+}
+
+.track-label {
+    font-size: 10px;
+    font-weight: 800;
+    font-style: italic;
+    color: #111827;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
 }
 
 .bar-label {
-    font-size: 10px;
-    font-weight: 700;
+    font-size: 11px;
+    font-weight: 800;
+    font-style: italic;
     color: #ffffff;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-align: center;
 }
 
 .year-sep {
-    border-right: 1px dashed #cbd5e0;
+    border-right: 4px solid white;
 }
 
 /* ── Responsive ─────────────────────────────────────── */
 @media (max-width: 1280px) {
-    .cell-label {
-        min-width: 150px;
-    }
-    .label-text {
-        font-size: 10px;
-    }
     .count-badge {
-        width: 20px;
-        height: 20px;
-        font-size: 9px;
+        width: 24px;
+        height: 24px;
+        font-size: 10px;
     }
 }
 
 @media (max-width: 900px) {
-    .cell-label {
-        min-width: 120px;
-    }
     .cell-section__text {
-        font-size: 10px;
+        font-size: 11px;
     }
 }
 </style>
