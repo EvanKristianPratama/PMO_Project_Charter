@@ -36,6 +36,7 @@
                 :editable="isEditMode"
                 :digital-options="digitalInitiativeOptions"
                 :it-options="itInitiativeOptions"
+                :status-periods="statusPeriods"
                 @cancel-add-support="isEditMode = false"
             />
         </div>
@@ -61,6 +62,10 @@ const props = defineProps({
         default: () => [],
     },
     itInitiativeOptions: {
+        type: Array,
+        default: () => [],
+    },
+    statusPeriods: {
         type: Array,
         default: () => [],
     },

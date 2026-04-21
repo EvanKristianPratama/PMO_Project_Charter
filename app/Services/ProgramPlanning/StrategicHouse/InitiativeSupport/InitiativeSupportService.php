@@ -4,18 +4,23 @@ namespace App\Services\ProgramPlanning\StrategicHouse\InitiativeSupport;
 
 use App\Models\MstInitiative;
 use App\Models\TrsInitiativeSupport;
+use App\Services\ProgramPlanning\ItBuildingBlockService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 
 class InitiativeSupportService
 {
+    public function __construct(
+        private readonly ItBuildingBlockService $itBuildingBlockService
+    ) {}
     public function getPageProps(): array
     {
         return [
             'groups' => $this->getGroupedMappings(),
             'digitalInitiativeOptions' => $this->getInitiativeOptions(1)->all(),
             'itInitiativeOptions' => $this->getInitiativeOptions(2)->all(),
+            'statusPeriods' => $this->itBuildingBlockService->getStatusPeriods()->all(),
         ];
     }
 
@@ -27,10 +32,14 @@ class InitiativeSupportService
                 'digitalInitiative.coe',
                 'digitalInitiative.organization',
                 'digitalInitiative.sourceData',
+                'digitalInitiative.latestStatusImplementation',
+                'digitalInitiative.statusImplementations:id,initiative_id,start,end,year,review_status',
                 'itInitiative:id,name,code,description,coe_id,business_unit,source',
                 'itInitiative.coe',
                 'itInitiative.organization',
                 'itInitiative.sourceData',
+                'itInitiative.latestStatusImplementation',
+                'itInitiative.statusImplementations:id,initiative_id,start,end,year,review_status',
             ])
             ->whereHas('digitalInitiative', fn (Builder $query) => $query->where('tipe_initiative', 1))
             ->whereHas('itInitiative', fn (Builder $query) => $query->where('tipe_initiative', 2))
@@ -132,7 +141,7 @@ class InitiativeSupportService
     {
         return MstInitiative::query()
             ->select(['id', 'name', 'code', 'description', 'coe_id', 'business_unit', 'source'])
-            ->with(['coe', 'organization', 'sourceData'])
+            ->with(['coe', 'organization', 'sourceData', 'latestStatusImplementation', 'statusImplementations:id,initiative_id,start,end,year,review_status'])
             ->where('tipe_initiative', $initiativeType)
             ->orderBy('id')
             ->get()
@@ -230,6 +239,13 @@ class InitiativeSupportService
             'groub_id' => $initiative->organization?->groub_id,
             'source' => $initiative->source,
             'source_name' => $initiative->sourceData?->name,
+            'implementation_status' => $initiative->latestStatusImplementation?->review_status,
+            'statuses' => collect($initiative->statusImplementations ?? [])->map(fn($s) => [
+                'start' => $s->start,
+                'end' => $s->end,
+                'year' => (int) $s->year,
+                'status' => $s->review_status,
+            ])->values()->all(),
         ];
     }
 

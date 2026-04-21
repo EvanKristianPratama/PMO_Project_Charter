@@ -24,6 +24,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    statusPeriods: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const EMPTY_NOTE_LABEL = 'Belum ada catatan dukungan.';
@@ -49,6 +53,10 @@ const selectedNote = ref('');
 const selectedCoE = ref('');
 const selectedOrg = ref('');
 const selectedSource = ref('');
+const showStatusColors = ref(true);
+const showLastUpdatePeriod = ref(true);
+const selectedStatus = ref('');
+const selectedPeriod = ref(null);
 const showBusinessUnit = ref(resolveInitialBusinessUnitVisibility());
 const activeModal = ref('');
 const isModalVisible = ref(false);
@@ -59,6 +67,130 @@ const deleteTarget = reactive({
     mappingIds: [],
     digitalCount: 0,
     itCount: 0,
+});
+
+const normalizeStatusLabel = (rawStatus) => {
+    const s = String(rawStatus ?? '').trim();
+    if (!s) return null;
+    if (s === 'DF') return 'DF';
+    if (s === 'Done') return 'Done';
+    if (s === 'DT 2026') return 'DT 2026';
+    if (s === 'ITSBP') return 'ITSBP';
+    if (s === 'On Review') return 'On Review';
+    if (s === 'SH') return 'SH';
+    return s;
+};
+
+const getInitiativeStatus = (initiative) => {
+    if (!selectedPeriod.value) {
+        return initiative?.implementation_status;
+    }
+
+    const found = (initiative?.statuses || []).find(s =>
+        s.start === selectedPeriod.value.start &&
+        s.end === selectedPeriod.value.end &&
+        s.year === selectedPeriod.value.year
+    );
+
+    return found ? found.status : null;
+};
+
+const monthsOrder = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+];
+
+const getInitiativePeriodLabel = (initiative) => {
+    if (selectedPeriod.value) {
+        return selectedPeriod.value.label;
+    }
+
+    if (!initiative?.statuses || initiative.statuses.length === 0) return null;
+
+    const sorted = [...initiative.statuses].sort((a, b) => {
+        if (a.year !== b.year) return b.year - a.year;
+        return monthsOrder.indexOf(b.start) - monthsOrder.indexOf(a.start);
+    });
+
+    const latest = sorted[0];
+    return latest.start === latest.end
+        ? `${latest.start} ${latest.year}`
+        : `${latest.start} - ${latest.end} ${latest.year}`;
+};
+
+const getStatusColorClass = (status) => {
+    const s = normalizeStatusLabel(status);
+    if (s === 'DF') return 'status-color-df';
+    if (s === 'Done') return 'status-color-done';
+    if (s === 'DT 2026') return 'status-color-dt2026';
+    if (s === 'ITSBP') return 'status-color-itsbp';
+    if (s === 'On Review') return 'status-color-onreview';
+    if (s === 'SH') return 'status-color-sh';
+    return '';
+};
+
+const statusDesiredOrder = ['DF', 'Done', 'DT 2026', 'ITSBP', 'On Review', 'SH'];
+
+const availableStatusOptions = computed(() => {
+    const statusSet = new Set();
+    props.groups.forEach(group => {
+        const checkInitiative = (ini) => {
+            if (!ini) return;
+            const latest = normalizeStatusLabel(ini.implementation_status);
+            if (latest) statusSet.add(latest);
+            (ini.statuses ?? []).forEach(s => {
+                const label = normalizeStatusLabel(s.status);
+                if (label) statusSet.add(label);
+            });
+        };
+        (group.digital_initiatives ?? []).forEach(checkInitiative);
+        (group.it_initiatives ?? []).forEach(checkInitiative);
+    });
+
+    return Array.from(statusSet).sort((a, b) => {
+        const idxA = statusDesiredOrder.indexOf(a);
+        const idxB = statusDesiredOrder.indexOf(b);
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        return a.localeCompare(b);
+    });
+});
+
+const statusLegend = computed(() => {
+    const uniqueDigitalIds = new Set();
+    const uniqueItIds = new Set();
+    const statusCounts = {};
+    availableStatusOptions.value.forEach(l => statusCounts[l] = 0);
+
+    displayGroups.value.forEach(groupRow => {
+        groupRow.digitalRows.forEach(row => {
+            const d = row.digital;
+            if (d && !uniqueDigitalIds.has(d.id)) {
+                uniqueDigitalIds.add(d.id);
+                const label = normalizeStatusLabel(getInitiativeStatus(d));
+                if (label && statusCounts.hasOwnProperty(label)) {
+                    statusCounts[label]++;
+                }
+            }
+        });
+
+        (groupRow.group?.it_initiatives ?? []).forEach(it => {
+            if (it && !uniqueItIds.has(it.id)) {
+                uniqueItIds.add(it.id);
+                const label = normalizeStatusLabel(getInitiativeStatus(it));
+                if (label && statusCounts.hasOwnProperty(label)) {
+                    statusCounts[label]++;
+                }
+            }
+        });
+    });
+
+    return availableStatusOptions.value.map((label) => ({
+        label,
+        class: getStatusColorClass(label),
+        count: statusCounts[label],
+    })).filter(item => item.count > 0);
 });
 
 const noteOptions = computed(() => {
@@ -142,7 +274,7 @@ const sourceOptions = computed(() => {
     });
 
     const desiredOrder = ['Baseline RSTI 2025-2029', 'New Initiatives 2026'];
-    
+
     return Array.from(sourceMap.entries())
         .map(([id, name]) => ({ value: id, label: name }))
         .sort((a, b) => {
@@ -168,7 +300,7 @@ const firstErrorMessage = (errors = {}) => {
 
 const normalizeTechCapability = (value) => {
     if (value === null || value === undefined) return 'CoE Not Available';
-    
+
     const name = String(value).trim();
     const upper = name.toUpperCase();
 
@@ -236,7 +368,7 @@ const displayGroups = computed(() => {
     let groups = props.groups;
 
     if (selectedNote.value !== '') {
-        groups = groups.filter(group => 
+        groups = groups.filter(group =>
             (group.note ?? '').trim() === selectedNote.value
         );
     }
@@ -245,7 +377,11 @@ const displayGroups = computed(() => {
         .map((group, groupIndex) => {
             const noteCategory = getCategoryByNote(group.note);
             let digitalRows = (group?.digital_initiatives ?? [])
-                .filter((digital) => Boolean(digital?.id))
+                .filter((digital) => {
+                    if (!Boolean(digital?.id)) return false;
+                    if (selectedPeriod.value && getInitiativeStatus(digital) === null) return false;
+                    return true;
+                })
                 .map((digital, digitalIndex) => {
                     const coe = normalizeTechCapability(digital?.coe_name);
                     const finalCategory = coe === 'CoE Not Available' ? coe : (noteCategory || coe);
@@ -274,13 +410,31 @@ const displayGroups = computed(() => {
                 digitalRows = digitalRows.filter(row => row.digital.source == selectedSource.value);
             }
 
+            if (selectedStatus.value !== '') {
+                digitalRows = digitalRows.filter(row => {
+                    const status = normalizeStatusLabel(getInitiativeStatus(row.digital));
+                    return status === selectedStatus.value;
+                });
+            }
+
+            let groupItInitiatives = group?.it_initiatives ?? [];
+            if (selectedPeriod.value) {
+                groupItInitiatives = groupItInitiatives.filter(it => getInitiativeStatus(it) !== null);
+            }
+            if (selectedStatus.value !== '') {
+                groupItInitiatives = groupItInitiatives.filter(it => {
+                    const status = normalizeStatusLabel(getInitiativeStatus(it));
+                    return status === selectedStatus.value;
+                });
+            }
+
             return {
                 key: group?.group_key ?? `support-group-${groupIndex}`,
-                group,
+                group: { ...group, it_initiatives: groupItInitiatives },
                 digitalRows,
             };
         })
-        .filter((group) => group.digitalRows.length > 0)
+        .filter((group) => group.digitalRows.length > 0 || group.group.it_initiatives.length > 0)
         .sort((a, b) => {
             const aHasNotAvailable = a.digitalRows.some(row => row.techCapability === 'CoE Not Available');
             const bHasNotAvailable = b.digitalRows.some(row => row.techCapability === 'CoE Not Available');
@@ -313,7 +467,7 @@ const coeSpanMap = computed(() => {
         const startRow = allDigitalRows[i];
         const uniqueDigitalIds = new Set();
         let j = i;
-        
+
         while (
             j < allDigitalRows.length &&
             allDigitalRows[j].techCapability === startRow.techCapability
@@ -340,9 +494,9 @@ const hasGroups = computed(() => displayGroups.value.length > 0);
 
 const totalDigitalCount = computed(() => {
     return new Set(
-        displayGroups.value.flatMap((item) => {
-            return (item.group?.digital_initiatives ?? [])
-                .map((initiative) => Number(initiative?.id))
+        displayGroups.value.flatMap((groupRow) => {
+            return groupRow.digitalRows
+                .map((row) => Number(row.digital?.id))
                 .filter((id) => Number.isInteger(id) && id > 0);
         }),
     ).size;
@@ -612,59 +766,123 @@ defineExpose({
 
 <template>
     <div class="space-y-5">
-        <section class="flex flex-wrap items-center justify-between gap-3">
-            <div class="flex flex-wrap items-center gap-2">
-                <div class="flex items-center gap-1.5 border-r border-slate-200 pr-3 dark:border-white/10">
-                    <span class="support-metric shrink-0">{{ displayGroups.length }} Tech Capability</span>
-                    <span class="support-metric shrink-0">{{ totalDigitalCount }} Digital Initiatives</span>
-                    <span class="support-metric shrink-0">{{ totalItCount }} IT Initiatives</span>
+        <section class="space-y-4">
+            <!-- Row 1: Metrics -->
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <span class="support-metric">{{ displayGroups.length }} Tech Capability</span>
+                    <span class="support-metric">{{ totalDigitalCount }} Digital Initiatives</span>
+                    <span class="support-metric">{{ totalItCount }} IT Initiatives</span>
                 </div>
-
-                <button type="button" class="bu-toggle-btn shrink-0" :class="{ 'bu-toggle-btn--active': showBusinessUnit }"
-                    :title="businessUnitToggleLabel" @click="toggleBusinessUnit">
-                    <svg v-if="showBusinessUnit" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    <svg v-else class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                            d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
-                    </svg>
-                    <span class="hidden xl:inline">{{ businessUnitToggleLabel }}</span>
-                </button>
             </div>
 
-            <div class="flex flex-wrap items-center gap-2">
-                <select v-model="selectedSource" class="initiative-view-select min-w-[130px] max-w-[160px]">
-                    <option value="">All Initiatives</option>
-                    <option v-for="source in sourceOptions" :key="source.value" :value="source.value">
-                        {{ source.label }}
-                    </option>
-                </select>
+            <!-- Row 2: Status Implementation Legend -->
+            <div v-if="showStatusColors && statusLegend.length > 0"
+                class="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1.5 border-t border-slate-100 dark:border-white/5">
+                <div class="flex items-center gap-1.5">
+                    <span
+                        class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider uppercase">Implementation Status:</span>
+                    <select v-if="statusPeriods && statusPeriods.length > 0" v-model="selectedPeriod"
+                        class="text-[10px] font-bold bg-slate-50 dark:bg-slate-800/50 border-none rounded focus:ring-0 cursor-pointer text-blue-600 dark:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors py-0.5 px-1.5 h-auto leading-none">
+                        <option :value="null">All (Latest)</option>
+                        <option v-for="period in statusPeriods" :key="period.label" :value="period">
+                            {{ period.label }}
+                        </option>
+                    </select>
+                    <span v-else class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider">(Latest
+                        Update):</span>
+                </div>
+                <div v-for="status in statusLegend" :key="`status-legend-${status.label}`"
+                    class="flex items-center gap-1.5 cursor-pointer select-none transition-opacity"
+                    :class="{ 'opacity-40': selectedStatus && selectedStatus !== status.label }"
+                    @click="selectedStatus = selectedStatus === status.label ? '' : status.label"
+                    :title="`Filter: ${status.label}`">
+                    <span class="h-3 w-3 rounded-sm shadow-sm legend-swatch" :class="status.class"></span>
+                    <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                        {{ status.label }} <span class="text-slate-400 dark:text-slate-500 font-medium">({{
+                            status.count }})</span>
+                    </span>
+                </div>
+            </div>
 
-                <select v-model="selectedCoE" class="initiative-view-select min-w-[130px] max-w-[160px]">
-                    <option value="">All CoE</option>
-                    <option v-for="coe in coeOptions" :key="`coe-opt-${coe}`" :value="coe">
-                        {{ coe }}
-                    </option>
-                </select>
+            <!-- Row 3: Filters & Toggles -->
+            <div
+                class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-white/5">
+                <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" class="bu-toggle-btn shrink-0"
+                        :class="{ 'bu-toggle-btn--active': showBusinessUnit }" :title="businessUnitToggleLabel"
+                        @click="toggleBusinessUnit">
+                        <svg v-if="showBusinessUnit" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <svg v-else class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                        </svg>
+                        <span>{{ businessUnitToggleLabel }}</span>
+                    </button>
 
-                <select v-model="selectedOrg" class="initiative-view-select min-w-[130px] max-w-[160px]">
-                    <option value="">All Organizations</option>
-                    <option v-for="org in orgOptions" :key="`org-opt-${org.value}`" :value="org.value">
-                        {{ org.label }}
-                    </option>
-                </select>
+                    <button type="button" class="bu-toggle-btn shrink-0"
+                        :class="{ 'bu-toggle-btn--active': showStatusColors }"
+                        title="Tampilkan/Sembunyikan Warna Status Implementasi"
+                        @click="showStatusColors = !showStatusColors">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                        </svg>
+                        <span>Status Impl.</span>
+                    </button>
 
-                <select v-model="selectedNote" class="initiative-view-select min-w-[130px] max-w-[200px]">
-                    <option value="">All Notes</option>
-                    <option v-for="note in noteOptions" :key="`note-opt-${note}`" :value="note">
-                        {{ note.length > 35 ? note.substring(0, 35) + '...' : note }}
-                    </option>
-                </select>
+                    <button type="button" class="bu-toggle-btn shrink-0"
+                        :class="{ 'bu-toggle-btn--active': showLastUpdatePeriod }"
+                        title="Tampilkan/Sembunyikan Periode Update"
+                        @click="showLastUpdatePeriod = !showLastUpdatePeriod">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span>Periode</span>
+                    </button>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <select v-model="selectedSource" class="initiative-view-select min-w-[130px] max-w-[160px]">
+                        <option value="">All Initiatives</option>
+                        <option v-for="source in sourceOptions" :key="source.value" :value="source.value">
+                            {{ source.label }}
+                        </option>
+                    </select>
+
+                    <select v-model="selectedCoE" class="initiative-view-select min-w-[130px] max-w-[160px]">
+                        <option value="">All CoE</option>
+                        <option v-for="coe in coeOptions" :key="`coe-opt-${coe}`" :value="coe">
+                            {{ coe }}
+                        </option>
+                    </select>
+
+                    <select v-model="selectedOrg" class="initiative-view-select min-w-[130px] max-w-[160px]">
+                        <option value="">All Organizations</option>
+                        <option v-for="org in orgOptions" :key="`org-opt-${org.value}`" :value="org.value">
+                            {{ org.label }}
+                        </option>
+                    </select>
+
+                    <select v-model="selectedStatus" class="initiative-view-select min-w-[130px] max-w-[160px]">
+                        <option value="">All Status</option>
+                        <option v-for="st in availableStatusOptions" :key="st" :value="st">{{ st }}</option>
+                    </select>
+
+                    <select v-model="selectedNote" class="initiative-view-select min-w-[130px] max-w-[200px]">
+                        <option value="">All Notes</option>
+                        <option v-for="note in noteOptions" :key="`note-opt-${note}`" :value="note">
+                            {{ note.length > 35 ? note.substring(0, 35) + '...' : note }}
+                        </option>
+                    </select>
+                </div>
             </div>
         </section>
 
@@ -689,12 +907,9 @@ defineExpose({
                     <tbody>
                         <template v-for="groupRow in displayGroups" :key="groupRow.key">
                             <tr v-for="row in groupRow.digitalRows" :key="row.key" class="support-table__row">
-                                <td
-                                    v-if="coeSpanMap.has(row.key)"
-                                    :rowspan="coeSpanMap.get(row.key).span"
+                                <td v-if="coeSpanMap.has(row.key)" :rowspan="coeSpanMap.get(row.key).span"
                                     class="support-table__cell support-table__cell--tech"
-                                    :class="{ 'support-table__cell--last-group': coeSpanMap.get(row.key).isLastRow }"
-                                >
+                                    :class="{ 'support-table__cell--last-group': coeSpanMap.get(row.key).isLastRow }">
                                     <div class="tech-capability">
                                         <span class="tech-capability__label">{{ row.techCapability }}</span>
                                         <span class="tech-capability__counter">
@@ -705,12 +920,16 @@ defineExpose({
 
                                 <td class="support-table__cell support-table__cell--digital">
                                     <div class="digital-initiative">
-                                        <span v-if="initiativeDisplayCode(row.digital)" class="support-code-badge">
+                                        <span v-if="initiativeDisplayCode(row.digital)" class="support-code-badge"
+                                            :class="showStatusColors ? getStatusColorClass(getInitiativeStatus(row.digital)) : ''">
                                             {{ initiativeDisplayCode(row.digital) }}
                                         </span>
                                         <div class="flex flex-col min-w-0">
                                             <span class="leading-snug text-slate-800 dark:text-slate-100">
                                                 {{ initiativeDisplayName(row.digital) }}
+                                            </span>
+                                            <span v-if="showLastUpdatePeriod && getInitiativePeriodLabel(row.digital)" class="support-period-label">
+                                                {{ getInitiativePeriodLabel(row.digital) }}
                                             </span>
                                             <span v-if="showBusinessUnit" class="support-bu-label">
                                                 {{ initiativeBusinessUnitLabel(row.digital) }}
@@ -742,12 +961,16 @@ defineExpose({
                                                 :key="`it-${groupRow.group?.group_key}-${initiative.id}`"
                                                 class="support-list__item">
                                                 <span v-if="initiativeDisplayCode(initiative)"
-                                                    class="support-code-badge support-code-badge--it">
+                                                    class="support-code-badge support-code-badge--it"
+                                                    :class="showStatusColors ? getStatusColorClass(getInitiativeStatus(initiative)) : ''">
                                                     {{ initiativeDisplayCode(initiative) }}
                                                 </span>
                                                 <div class="flex flex-col min-w-0">
                                                     <span class="leading-snug text-slate-800 dark:text-slate-100">
                                                         {{ initiativeDisplayName(initiative) }}
+                                                    </span>
+                                                    <span v-if="showLastUpdatePeriod && getInitiativePeriodLabel(initiative)" class="support-period-label">
+                                                        {{ getInitiativePeriodLabel(initiative) }}
                                                     </span>
                                                 </div>
                                             </li>
@@ -1074,6 +1297,17 @@ defineExpose({
     text-overflow: ellipsis;
 }
 
+.support-period-label {
+    display: block;
+    width: 100%;
+    margin-top: 1px;
+    font-size: 8px;
+    font-weight: 700;
+    font-style: italic;
+    color: #64748b;
+    white-space: nowrap;
+}
+
 .initiative-view-select {
     appearance: none;
     border: 1px solid #cbd5e1;
@@ -1151,6 +1385,52 @@ defineExpose({
     font-weight: 700;
     color: #1e3a8a;
     cursor: pointer;
+}
+
+.status-color-df {
+    background-color: #0d9488 !important;
+    color: #ffffff !important;
+    border-color: #0f766e !important;
+}
+
+.status-color-done {
+    background-color: #65a30d !important;
+    color: #ffffff !important;
+    border-color: #4d7c0f !important;
+}
+
+.status-color-dt2026 {
+    background-color: #ea580c !important;
+    color: #ffffff !important;
+    border-color: #c2410c !important;
+}
+
+.status-color-itsbp {
+    background-color: #06b6d4 !important;
+    color: #ffffff !important;
+    border-color: #0891b2 !important;
+}
+
+.status-color-onreview {
+    background-color: #ca8a04 !important;
+    color: #ffffff !important;
+    border-color: #a16207 !important;
+}
+
+.status-color-sh {
+    background-color: #ef4444 !important;
+    color: #ffffff !important;
+    border-color: #dc2626 !important;
+}
+
+.legend-swatch {
+    display: block;
+    width: 12px;
+    height: 12px;
+    min-width: 12px;
+    min-height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
 }
 
 :deep(.dark) .support-metric {
