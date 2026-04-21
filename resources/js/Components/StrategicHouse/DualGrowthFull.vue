@@ -52,11 +52,6 @@ const route = useRouteHelper();
 
 const selectedPeriod = ref(null);
 
-// Initialize selectedPeriod with the first period if available
-if (props.statusPeriods && props.statusPeriods.length > 0) {
-    selectedPeriod.value = props.statusPeriods[0];
-}
-
 const getInitiativeStatus = (initiative) => {
     if (!selectedPeriod.value) {
         return initiative.implementation_status;
@@ -395,10 +390,15 @@ const displayGoals = computed(() => {
                                 matchesOrg = ini.business_unit === selectedOrganization.value;
                             }
                             const matchesCoe = !selectedCoe.value || ini.coe_name === selectedCoe.value;
-                            const implStatus = normalizeStatusLabel(getInitiativeStatus(ini));
+                            const periodStatus = getInitiativeStatus(ini);
+                            const implStatus = normalizeStatusLabel(periodStatus);
                             const matchesStatus = !selectedStatus.value || implStatus === selectedStatus.value;
                             const matchesSource = !selectedSource.value || ini.source == selectedSource.value;
-                            return matchesOrg && matchesCoe && matchesStatus && matchesSource;
+                            
+                            // Filter Periode (Hanya tampilkan jika ada status di periode terpilih)
+                            const matchesPeriod = !selectedPeriod.value || periodStatus !== null;
+
+                            return matchesOrg && matchesCoe && matchesStatus && matchesSource && matchesPeriod;
                         })
                     : [];
 
@@ -428,10 +428,15 @@ const displayGoals = computed(() => {
                         matchesOrg = ini.business_unit === selectedOrganization.value;
                     }
                     const matchesCoe = !selectedCoe.value || ini.coe_name === selectedCoe.value;
-                    const implStatus = normalizeStatusLabel(getInitiativeStatus(ini));
+                    const periodStatus = getInitiativeStatus(ini);
+                    const implStatus = normalizeStatusLabel(periodStatus);
                     const matchesStatus = !selectedStatus.value || implStatus === selectedStatus.value;
                     const matchesSource = !selectedSource.value || ini.source == selectedSource.value;
-                    return matchesOrg && matchesCoe && matchesStatus && matchesSource;
+                    
+                    // Filter Periode (Hanya tampilkan jika ada status di periode terpilih)
+                    const matchesPeriod = !selectedPeriod.value || periodStatus !== null;
+
+                    return matchesOrg && matchesCoe && matchesStatus && matchesSource && matchesPeriod;
                 })
             : [];
 
@@ -700,6 +705,7 @@ const initiativeOptionLabel = (initiative) => {
                         <span>Periode</span>
                     </button>
 
+                    <span class="initiative-view-switch__label ml-2">Tampilan kolom:</span>
                     <select
                         v-model="initiativeColumnCount"
                         class="initiative-view-select"

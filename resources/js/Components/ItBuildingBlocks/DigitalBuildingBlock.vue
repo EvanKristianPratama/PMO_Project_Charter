@@ -22,11 +22,6 @@ const route = useRouteHelper();
 
 const selectedPeriod = ref(null);
 
-// Initialize selectedPeriod with the first period if available
-if (props.statusPeriods && props.statusPeriods.length > 0) {
-    selectedPeriod.value = props.statusPeriods[0];
-}
-
 const getInitiativeStatus = (initiative) => {
     if (!selectedPeriod.value) {
         return initiative.implementation_status;
@@ -198,13 +193,17 @@ const displayGroups = computed(() => {
         const matchesCoe = !selectedCoe.value || coeName === selectedCoe.value;
         
         // 3. Filter Implementation Status (Warna)
-        const implStatus = normalizeStatusLabel(getInitiativeStatus(initiative));
+        const periodStatus = getInitiativeStatus(initiative);
+        const implStatus = normalizeStatusLabel(periodStatus);
         const matchesStatus = !selectedStatus.value || implStatus === selectedStatus.value;
 
         // 4. Filter Source (Berdasarkan ID source)
         const matchesSource = !selectedSource.value || initiative.source == selectedSource.value;
 
-        if (isDigitalInitiative && matchesOrg && matchesStatus && matchesCoe && matchesSource) {
+        // 5. Filter Periode (Hanya tampilkan jika ada status di periode terpilih)
+        const matchesPeriod = !selectedPeriod.value || periodStatus !== null;
+
+        if (isDigitalInitiative && matchesOrg && matchesStatus && matchesCoe && matchesSource && matchesPeriod) {
             if (!coeMap.has(coeName)) {
                 coeMap.set(coeName, []);
             }

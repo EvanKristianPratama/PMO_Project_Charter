@@ -58,11 +58,6 @@ const props = defineProps({
 
 const selectedPeriod = ref(null);
 
-// Initialize selectedPeriod with the first period if available
-if (props.statusPeriods && props.statusPeriods.length > 0) {
-    selectedPeriod.value = props.statusPeriods[0];
-}
-
 const monthsOrder = [
     'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
@@ -154,10 +149,9 @@ const normalizeCoeName = (rawName) => {
     return name;
 };
 
-const displayGroups = computed(() => {
+const filteredBase = computed(() => {
     return props.groups
         .map((group) => {
-            let totalInitiativesCount = 0;
             const secondaryGroups = (group?.secondary_groups ?? [])
                 .map((secondaryGroup) => {
                     const initiatives = (secondaryGroup?.initiatives ?? []).filter((initiative) => {
@@ -174,15 +168,66 @@ const displayGroups = computed(() => {
                             matchesOrg = initiative.business_unit === selectedOrganization.value;
                         }
                         
-                        // Gunakan normalisasi terpusat
                         const coeName = normalizeCoeName(initiative.coe_name);
                         const matchesCoe = !selectedCoe.value || coeName === selectedCoe.value;
 
-                        const implStatus = normalizeStatusLabel(getInitiativeStatus(initiative));
-                        const matchesStatus = !selectedStatus.value || implStatus === selectedStatus.value;
                         const matchesSource = !selectedSource.value || initiative.source == selectedSource.value;
                         
-                        return isNotRemoved && matchesOrg && matchesCoe && matchesStatus && matchesSource;
+                        const periodStatus = getInitiativeStatus(initiative);
+                        const matchesPeriod = !selectedPeriod.value || periodStatus !== null;
+
+                        return isNotRemoved && matchesOrg && matchesCoe && matchesSource && matchesPeriod;
+                    });
+
+                    return {
+                        ...secondaryGroup,
+                        initiatives,
+                    };
+                })
+                .filter((secondaryGroup) => secondaryGroup.initiatives.length > 0);
+
+            return {
+                ...group,
+                secondary_groups: secondaryGroups,
+            };
+        })
+        .filter((group) => group.secondary_groups.length > 0);
+});
+
+const statusLegend = computed(() => {
+    const stats = {};
+    statusDesiredOrder.forEach(label => {
+        stats[label] = 0;
+    });
+
+    filteredBase.value.forEach((group) => {
+        group.secondary_groups.forEach((secondaryGroup) => {
+            secondaryGroup.initiatives.forEach((initiative) => {
+                const label = normalizeStatusLabel(getInitiativeStatus(initiative));
+                if (label && stats.hasOwnProperty(label)) {
+                    stats[label]++;
+                }
+            });
+        });
+    });
+
+    return statusDesiredOrder.map((label) => ({
+        label,
+        class: getStatusColorClass(label),
+        count: stats[label],
+    }));
+});
+
+const displayGroups = computed(() => {
+    return filteredBase.value
+        .map((group) => {
+            let totalInitiativesCount = 0;
+            const secondaryGroups = (group?.secondary_groups ?? [])
+                .map((secondaryGroup) => {
+                    const initiatives = secondaryGroup.initiatives.filter((initiative) => {
+                        const periodStatus = getInitiativeStatus(initiative);
+                        const implStatus = normalizeStatusLabel(periodStatus);
+                        return !selectedStatus.value || implStatus === selectedStatus.value;
                     });
 
                     totalInitiativesCount += initiatives.length;
@@ -916,30 +961,6 @@ const statusDesiredOrder = [
     'SH',
 ];
 
-const statusLegend = computed(() => {
-    const stats = {};
-    statusDesiredOrder.forEach(label => {
-        stats[label] = 0;
-    });
-
-    displayGroups.value.forEach((group) => {
-        group.secondary_groups.forEach((secondaryGroup) => {
-            secondaryGroup.initiatives.forEach((initiative) => {
-                const label = normalizeStatusLabel(getInitiativeStatus(initiative));
-                if (label && stats.hasOwnProperty(label)) {
-                    stats[label]++;
-                }
-            });
-        });
-    });
-
-    return statusDesiredOrder.map((label) => ({
-        label,
-        class: getStatusColorClass(label),
-        count: stats[label],
-    }));
-});
-
 defineExpose({
     openAddMappingModal,
 });
@@ -979,10 +1000,7 @@ defineExpose({
             </div>
         </div>
 
-        <div
-            v-if="hasGroups"
-            class="space-y-4"
-        >
+        <div class="space-y-4">
             <!-- Row 1: Legend & Overall Total -->
             <div class="space-y-2.5">
                 <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -1161,6 +1179,7 @@ defineExpose({
                         <span>Periode</span>
                     </button>
 
+                    <span class="initiative-view-switch__label ml-2">Tampilan kolom:</span>
                     <select
                         v-model="initiativeColumnCount"
                         class="initiative-view-select"
@@ -1347,10 +1366,7 @@ defineExpose({
             class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm dark:border-white/15 dark:bg-[#171717]"
         >
             <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                Belum ada data IT Building Block.
-            </p>
-            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                {{ editable ? 'Klik tombol Tambah Mapping untuk menambahkan mapping pertama melalui modal.' : 'Masuk ke mode edit lalu gunakan tombol Tambah Mapping untuk mulai menambahkan data.' }}
+                Initiative Not Available
             </p>
         </section>
 
