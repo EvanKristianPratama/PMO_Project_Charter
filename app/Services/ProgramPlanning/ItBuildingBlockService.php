@@ -74,6 +74,7 @@ class ItBuildingBlockService
                     'tipe_initiative' => (int) $initiative->tipe_initiative,
                     'source' => $initiative->source,
                     'source_name' => $initiative->sourceData?->name,
+                    'mapped_project_id' => (int) ($initiative->mappedProjects?->first()?->id ?? 0) ?: null,
                 ];
             });
     }
@@ -126,6 +127,7 @@ class ItBuildingBlockService
                 'latestStatusImplementation:trs_status_implementation.id,trs_status_implementation.initiative_id,trs_status_implementation.review_status',
                 'statusImplementations:id,initiative_id,start,end,year,review_status',
                 'sourceData:id,name',
+                'mappedProjects:id',
             ])
             ->where('tipe_initiative', 1)
             ->orderBy('code')
@@ -150,6 +152,7 @@ class ItBuildingBlockService
                 'tipe_initiative' => (int) $initiative->tipe_initiative,
                 'source' => $initiative->source,
                 'source_name' => $initiative->sourceData?->name,
+                'mapped_project_id' => (int) ($initiative->mappedProjects?->first()?->id ?? 0) ?: null,
             ]);
     }
 
@@ -164,6 +167,7 @@ class ItBuildingBlockService
                 'initiative.organization:id,name,groub_id',
                 'initiative.latestStatusImplementation',
                 'initiative.sourceData:id,name',
+                'initiative.mappedProjects:id',
             ])
             ->get(['primary', 'secondary', 'initiative_id'])
             ->filter(fn (TrsMapItBuilding $item) => filled($item->initiative?->name))
@@ -191,6 +195,7 @@ class ItBuildingBlockService
                                             (string) ($item->secondary ?? 'na'),
                                             (string) ($item->initiative_id ?? 'na'),
                                         ]),
+                                        'id' => (int) ($item->initiative_id ?? 0),
                                         'initiative_id' => (int) ($item->initiative_id ?? 0),
                                         'code' => $item->initiative?->code,
                                         'name' => $item->initiative?->name,
@@ -202,6 +207,7 @@ class ItBuildingBlockService
                                         'implementation_status' => $item->initiative?->latestStatusImplementation?->review_status ?: null,
                                         'source' => !is_null($item->initiative?->source) ? (int) $item->initiative->source : null,
                                         'source_name' => $item->initiative?->sourceData?->name,
+                                        'mapped_project_id' => (int) ($item->initiative?->mappedProjects?->first()?->id ?? 0) ?: null,
                                     ])
                                     ->unique('map_key')
                                     ->sortBy('name')

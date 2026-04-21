@@ -16,13 +16,6 @@ const props = defineProps({
 
 const route = useRouteHelper();
 
-const initiativeSummaryHref = (initiative) => {
-    const initiativeId = Number(initiative?.id ?? 0);
-    return initiativeId > 0
-        ? route('program-planning.program-definition.digital-initiatives.summary.index', initiativeId)
-        : null;
-};
-
 const initiativeProjectCharterHref = (initiative) => {
     const mappedProjectId = Number(initiative?.mapped_project_id ?? 0);
     return mappedProjectId > 0
@@ -31,15 +24,13 @@ const initiativeProjectCharterHref = (initiative) => {
 };
 
 const initiativeLinkHref = (initiative) => {
-    return initiativeProjectCharterHref(initiative) || initiativeSummaryHref(initiative);
+    return initiativeProjectCharterHref(initiative);
 };
 
 const initiativeLinkTitle = (initiative) => {
+    if (!initiativeLinkHref(initiative)) return null;
     const label = String(initiative?.label ?? initiative?.name ?? initiative?.code ?? 'initiative').trim();
-    if (initiativeProjectCharterHref(initiative)) {
-        return `Lihat project charter IT untuk ${label}`;
-    }
-    return `Lihat capsule summary untuk ${label}`;
+    return `Lihat project charter IT untuk ${label}`;
 };
 
 
