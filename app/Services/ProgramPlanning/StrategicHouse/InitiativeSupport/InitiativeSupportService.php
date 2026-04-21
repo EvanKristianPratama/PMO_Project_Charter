@@ -225,6 +225,7 @@ class InitiativeSupportService
             'label' => $this->buildInitiativeLabel($code, $name),
             'coe_name' => trim((string) ($initiative->coe?->name ?? 'No CoE')),
             'business_unit' => trim((string) ($initiative->organization?->name ?? $initiative->business_unit ?? '')),
+            'groub_id' => $initiative->organization?->groub_id,
         ];
     }
 

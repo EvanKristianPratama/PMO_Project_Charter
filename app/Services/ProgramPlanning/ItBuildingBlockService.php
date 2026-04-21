@@ -120,7 +120,7 @@ class ItBuildingBlockService
                 'secondaryCoe:id,name',
                 'initiative:id,code,name,description,coe_id,business_unit,source',
                 'initiative.coe:id,name',
-                'initiative.organization:id,name',
+                'initiative.organization:id,name,groub_id',
                 'initiative.latestStatusImplementation',
                 'initiative.sourceData:id,name',
             ])
@@ -157,6 +157,7 @@ class ItBuildingBlockService
                                         'coe_id' => (int) ($item->initiative?->coe_id ?? 0),
                                         'coe_name' => $item->initiative?->coe?->name ?: 'No COE',
                                         'business_unit' => $item->initiative?->organization?->name ?: '-',
+                                        'groub_id' => $item->initiative?->organization?->groub_id,
                                         'implementation_status' => $item->initiative?->latestStatusImplementation?->review_status ?: null,
                                         'source' => !is_null($item->initiative?->source) ? (int) $item->initiative->source : null,
                                         'source_name' => $item->initiative?->sourceData?->name,

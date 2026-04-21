@@ -117,7 +117,14 @@ const displayGroups = computed(() => {
                             createRemovalKey(group?.primary_id, secondaryGroup?.secondary_id, initiative?.initiative_id),
                         );
                         
-                        const matchesOrg = !selectedOrganization.value || initiative.business_unit === selectedOrganization.value;
+                        let matchesOrg = true;
+                        if (selectedOrganization.value === 'all_holding') {
+                            matchesOrg = initiative.groub_id !== 2;
+                        } else if (selectedOrganization.value === 'all_subholding') {
+                            matchesOrg = initiative.groub_id === 2;
+                        } else if (selectedOrganization.value !== '') {
+                            matchesOrg = initiative.business_unit === selectedOrganization.value;
+                        }
                         
                         // Gunakan normalisasi terpusat
                         const coeName = normalizeCoeName(initiative.coe_name);
@@ -300,17 +307,33 @@ const selectedStatus = ref('');
 const selectedSource = ref('');
 
 const organizationOptions = computed(() => {
-    const orgs = new Set();
+    const orgMap = new Map();
     props.groups.forEach(group => {
         (group.secondary_groups ?? []).forEach(sec => {
             (sec.initiatives ?? []).forEach(ini => {
-                if (ini.business_unit && ini.business_unit !== '-') {
-                    orgs.add(ini.business_unit);
+                const org = ini.business_unit;
+                if (org && org !== '-') {
+                    const groupLabel = ini.groub_id === 2 ? 'Sub Holding' : 'Holding';
+                    if (!orgMap.has(org)) {
+                        orgMap.set(org, groupLabel);
+                    }
                 }
             });
         });
     });
-    return Array.from(orgs).sort();
+
+    const individualOptions = Array.from(orgMap.entries())
+        .map(([name, group]) => ({
+            value: name,
+            label: `${group} - ${name}`
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label));
+
+    return [
+        { value: 'all_holding', label: 'All Holding' },
+        { value: 'all_subholding', label: 'All Sub Holding' },
+        ...individualOptions
+    ];
 });
 
 const sourceOptions = computed(() => {
@@ -819,11 +842,6 @@ const normalizeStatusLabel = (rawStatus) => {
     if (normalized === 'itsbp') return 'ITSBP';
     if (normalized === 'on review') return 'On Review';
     if (normalized === 'sh') return 'SH';
-    if (normalized === 'on track') return 'On Track';
-    if (normalized === 'at risk') return 'At Risk';
-    if (normalized === 'delayed') return 'Delayed';
-    if (normalized === 'not started') return 'Not Started';
-    if (normalized === 'not signed') return 'Not Signed';
 
     return s;
 };
@@ -831,11 +849,6 @@ const normalizeStatusLabel = (rawStatus) => {
 const getStatusColorClass = (status) => {
     const s = normalizeStatusLabel(status);
     if (!s) return '';
-    if (s === 'On Track') return 'status-color-ontrack';
-    if (s === 'At Risk') return 'status-color-atrisk';
-    if (s === 'Delayed') return 'status-color-delayed';
-    if (s === 'Not Started') return 'status-color-notstarted';
-    if (s === 'Not Signed') return 'status-color-notsigned';
     if (s === 'DF') return 'status-color-df';
     if (s === 'Done') return 'status-color-done';
     if (s === 'DT 2026') return 'status-color-dt2026';
@@ -846,11 +859,6 @@ const getStatusColorClass = (status) => {
 };
 
 const statusDesiredOrder = [
-    'On Track',
-    'Delayed',
-    'At Risk',
-    'Not Started',
-    'Not Signed',
     'Done',
     'DF',
     'DT 2026',
@@ -983,13 +991,13 @@ defineExpose({
                         v-model="selectedOrganization"
                         class="initiative-view-select mr-2"
                     >
-                        <option value="">Semua Organisasi</option>
+                        <option value="">All Organizations</option>
                         <option
                             v-for="org in organizationOptions"
-                            :key="`org-opt-${org}`"
-                            :value="org"
+                            :key="org.value"
+                            :value="org.value"
                         >
-                            {{ org }}
+                            {{ org.label }}
                         </option>
                     </select>
 
@@ -997,7 +1005,7 @@ defineExpose({
                         v-model="selectedCoe"
                         class="initiative-view-select mr-2"
                     >
-                        <option value="">Semua CoE</option>
+                        <option value="">All CoE</option>
                         <option
                             v-for="coe in coeLegend"
                             :key="`coe-opt-${coe.id}`"
@@ -1011,7 +1019,7 @@ defineExpose({
                         v-model="selectedStatus"
                         class="initiative-view-select mr-2"
                     >
-                        <option value="">Semua Status</option>
+                        <option value="">All Status</option>
                         <option
                             v-for="status in statusLegend"
                             :key="`status-opt-${status.label}`"
@@ -1078,7 +1086,7 @@ defineExpose({
                         <span>Code</span>
                     </button>
 
-                    <span class="initiative-view-switch__label ml-2">Tampilan kolom:</span>
+                    <span class="initiative-view-switch__label ml-2"></span>
                     <select
                         v-model="initiativeColumnCount"
                         class="initiative-view-select"

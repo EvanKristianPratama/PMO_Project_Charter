@@ -77,8 +77,29 @@ const showBusinessUnit = ref(false);
 const showStatusColors = ref(true);
 const showInitiativeCode = ref(true);
 const showLastUpdatePeriod = ref(true);
+const selectedOrganization = ref('');
 const selectedStatus = ref('');
 const selectedPeriod = ref('latest');
+
+const organizationOptions = computed(() => {
+    const orgMap = new Map();
+    props.items.forEach(ini => {
+        const org = ini.business_unit;
+        if (org && org !== '-') {
+            const groupLabel = ini.groub_id === 2 ? 'Sub Holding' : 'Holding';
+            if (!orgMap.has(org)) {
+                orgMap.set(org, groupLabel);
+            }
+        }
+    });
+
+    return Array.from(orgMap.entries())
+        .map(([name, group]) => ({
+            value: name,
+            label: `${group} - ${name}`
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label));
+});
 
 const monthsOrder = [
     'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -213,7 +234,9 @@ const displayGroups = computed(() => {
         const statusLabel = String(currentStatus ?? '').trim();
         const matchesStatus = !selectedStatus.value || statusLabel.toLowerCase() === selectedStatus.value.toLowerCase();
 
-        if (isItInitiative && matchesStatus) {
+        const matchesOrg = !selectedOrganization.value || initiative.business_unit === selectedOrganization.value;
+
+        if (isItInitiative && matchesStatus && matchesOrg) {
             const coeName = normalizeCoeName(initiative.coe_name || initiative.coe?.name);
             if (!coeMap.has(coeName)) {
                 coeMap.set(coeName, []);
@@ -319,13 +342,20 @@ const getCoeColorClass = (coeName) => {
             <!-- Toolbar (Always Visible) -->
             <div class="flex items-center justify-start">
                 <div class="initiative-view-switch">
+                    <select v-model="selectedOrganization" class="initiative-view-select mr-2">
+                        <option value="">All Organizations</option>
+                        <option v-for="org in organizationOptions" :key="org.value" :value="org.value">
+                            {{ org.label }}
+                        </option>
+                    </select>
+
                     <select v-model="selectedPeriod" class="initiative-view-select mr-2">
                         <option value="" disabled>Pilih Periode</option>
                         <option v-for="period in availablePeriods" :key="period.value" :value="period.value">{{ period.label }}</option>
                     </select>
 
                     <select v-model="selectedStatus" class="initiative-view-select mr-2">
-                        <option value="">Semua Status</option>
+                        <option value="">All Status</option>
                         <option v-for="st in statusDesiredOrder" :key="st" :value="st">{{ st }}</option>
                     </select>
 
@@ -459,7 +489,7 @@ const getCoeColorClass = (coeName) => {
             </template>
 
             <section v-else class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-white/15 dark:bg-[#171717]">
-                <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Tidak ada data inisiatif untuk kriteria ini.</p>
+                <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Initiative Not Available</p>
             </section>
         </div>
     </div>

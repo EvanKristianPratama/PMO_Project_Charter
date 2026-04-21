@@ -48,6 +48,7 @@ const deleteProcessing = ref(false);
 const selectedNote = ref('');
 const selectedCoE = ref('');
 const selectedOrg = ref('');
+const selectedSource = ref('');
 const showBusinessUnit = ref(resolveInitialBusinessUnitVisibility());
 const activeModal = ref('');
 const isModalVisible = ref(false);
@@ -93,14 +94,65 @@ const coeOptions = computed(() => {
 });
 
 const orgOptions = computed(() => {
-    const orgs = new Set();
+    const orgMap = new Map();
     props.groups.forEach(group => {
         (group.digital_initiatives ?? []).forEach(digital => {
             const org = initiativeBusinessUnitLabel(digital);
-            if (org !== '-') orgs.add(org);
+            if (org !== '-') {
+                const groupLabel = digital.groub_id === 2 ? 'Sub Holding' : 'Holding';
+                if (!orgMap.has(org)) {
+                    orgMap.set(org, groupLabel);
+                }
+            }
         });
     });
-    return Array.from(orgs).sort();
+
+    const individualOptions = Array.from(orgMap.entries())
+        .map(([name, group]) => ({
+            value: name,
+            label: `${group} - ${name}`
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label));
+
+    return [
+        { value: 'all_holding', label: 'All Holding' },
+        { value: 'all_subholding', label: 'All Sub Holding' },
+        ...individualOptions
+    ];
+});
+
+const sourceOptions = computed(() => {
+    const sourceMap = new Map();
+    props.groups.forEach(group => {
+        (group.digital_initiatives ?? []).forEach(digital => {
+            const id = digital.source;
+            let name = digital.source_name;
+
+            if (!name) {
+                if (id == 3) name = 'Baseline RSTI 2025-2029';
+                else if (id == 4) name = 'New Initiatives 2026';
+            }
+
+            if (id !== undefined && id !== null && name) {
+                if (!sourceMap.has(id)) {
+                    sourceMap.set(id, name);
+                }
+            }
+        });
+    });
+
+    const desiredOrder = ['Baseline RSTI 2025-2029', 'New Initiatives 2026'];
+    
+    return Array.from(sourceMap.entries())
+        .map(([id, name]) => ({ value: id, label: name }))
+        .sort((a, b) => {
+            const indexA = desiredOrder.indexOf(a.label);
+            const indexB = desiredOrder.indexOf(b.label);
+            if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+            if (indexA !== -1) return -1;
+            if (indexB !== -1) return 1;
+            return a.label.localeCompare(b.label);
+        });
 });
 
 const createMappingKey = (digitalId, itId) => {
@@ -210,8 +262,16 @@ const displayGroups = computed(() => {
                 digitalRows = digitalRows.filter(row => row.techCapability === selectedCoE.value);
             }
 
-            if (selectedOrg.value !== '') {
+            if (selectedOrg.value === 'all_holding') {
+                digitalRows = digitalRows.filter(row => row.digital.groub_id !== 2);
+            } else if (selectedOrg.value === 'all_subholding') {
+                digitalRows = digitalRows.filter(row => row.digital.groub_id === 2);
+            } else if (selectedOrg.value !== '') {
                 digitalRows = digitalRows.filter(row => row.org === selectedOrg.value);
+            }
+
+            if (selectedSource.value !== '') {
+                digitalRows = digitalRows.filter(row => row.digital.source == selectedSource.value);
             }
 
             return {
@@ -552,15 +612,15 @@ defineExpose({
 
 <template>
     <div class="space-y-5">
-        <section class="flex flex-wrap items-center justify-between gap-4">
-            <div class="flex flex-wrap gap-2">
-                <span class="support-metric">{{ displayGroups.length }} Tech Capability</span>
-                <span class="support-metric">{{ totalDigitalCount }} Digital Initiatives</span>
-                <span class="support-metric">{{ totalItCount }} IT Initiatives</span>
-            </div>
+        <section class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-2">
+                <div class="flex items-center gap-1.5 border-r border-slate-200 pr-3 dark:border-white/10">
+                    <span class="support-metric shrink-0">{{ displayGroups.length }} Tech Capability</span>
+                    <span class="support-metric shrink-0">{{ totalDigitalCount }} Digital Initiatives</span>
+                    <span class="support-metric shrink-0">{{ totalItCount }} IT Initiatives</span>
+                </div>
 
-            <div class="flex items-center gap-2">
-                <button type="button" class="bu-toggle-btn" :class="{ 'bu-toggle-btn--active': showBusinessUnit }"
+                <button type="button" class="bu-toggle-btn shrink-0" :class="{ 'bu-toggle-btn--active': showBusinessUnit }"
                     :title="businessUnitToggleLabel" @click="toggleBusinessUnit">
                     <svg v-if="showBusinessUnit" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -573,27 +633,36 @@ defineExpose({
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                             d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
                     </svg>
-                    <span>{{ businessUnitToggleLabel }}</span>
+                    <span class="hidden xl:inline">{{ businessUnitToggleLabel }}</span>
                 </button>
+            </div>
 
-                <select v-model="selectedCoE" class="initiative-view-select">
-                    <option value="">Semua CoE</option>
+            <div class="flex flex-wrap items-center gap-2">
+                <select v-model="selectedSource" class="initiative-view-select min-w-[130px] max-w-[160px]">
+                    <option value="">All Initiatives</option>
+                    <option v-for="source in sourceOptions" :key="source.value" :value="source.value">
+                        {{ source.label }}
+                    </option>
+                </select>
+
+                <select v-model="selectedCoE" class="initiative-view-select min-w-[130px] max-w-[160px]">
+                    <option value="">All CoE</option>
                     <option v-for="coe in coeOptions" :key="`coe-opt-${coe}`" :value="coe">
                         {{ coe }}
                     </option>
                 </select>
 
-                <select v-model="selectedOrg" class="initiative-view-select">
-                    <option value="">Semua Organisasi</option>
-                    <option v-for="org in orgOptions" :key="`org-opt-${org}`" :value="org">
-                        {{ org }}
+                <select v-model="selectedOrg" class="initiative-view-select min-w-[130px] max-w-[160px]">
+                    <option value="">All Organizations</option>
+                    <option v-for="org in orgOptions" :key="`org-opt-${org.value}`" :value="org.value">
+                        {{ org.label }}
                     </option>
                 </select>
 
-                <select v-model="selectedNote" class="initiative-view-select">
-                    <option value="">Semua Catatan</option>
+                <select v-model="selectedNote" class="initiative-view-select min-w-[130px] max-w-[200px]">
+                    <option value="">All Notes</option>
                     <option v-for="note in noteOptions" :key="`note-opt-${note}`" :value="note">
-                        {{ note.length > 50 ? note.substring(0, 50) + '...' : note }}
+                        {{ note.length > 35 ? note.substring(0, 35) + '...' : note }}
                     </option>
                 </select>
             </div>
@@ -601,10 +670,10 @@ defineExpose({
 
         <section v-if="hasGroups"
             class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#111827]">
+            <h1 class="text-center text-l font-bold mt-6 mb-2 px-4">
+                Analisis Konsolidasi Kapabilitas Technology /CoE seiring dengan arahan restrukturisasi bisnis hilir
+            </h1>
             <div class="overflow-x-auto">
-                <h1 class="text-center text-l font-bold mt-4 mb-4 ">
-                    Analisis Konsolidasi Kapabilitas Technology /CoE seiring dengan arahan restrukturisasi bisnis hilir
-                </h1>
                 <table class="support-table">
                     <thead>
                         <tr>
@@ -695,10 +764,7 @@ defineExpose({
         <section v-else
             class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center dark:border-white/10 dark:bg-white/[0.03]">
             <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                Belum ada data initiative support.
-            </p>
-            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                {{ editable ? 'Klik tombol Tambah Support untuk menambahkan mapping pertama.' : 'Masuk ke mode edit lalu gunakan tombol Tambah Support untuk mulai menambahkan data.' }}
+                Initiative Not Available
             </p>
         </section>
 

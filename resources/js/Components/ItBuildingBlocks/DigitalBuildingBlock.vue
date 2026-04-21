@@ -68,13 +68,29 @@ const selectedStatus = ref('');
 const selectedSource = ref('');
 
 const organizationOptions = computed(() => {
-    const orgs = new Set();
+    const orgMap = new Map();
     props.items.forEach(ini => {
-        if (ini.business_unit && ini.business_unit !== '-') {
-            orgs.add(ini.business_unit);
+        const org = ini.business_unit;
+        if (org && org !== '-') {
+            const groupLabel = ini.groub_id === 2 ? 'Sub Holding' : 'Holding';
+            if (!orgMap.has(org)) {
+                orgMap.set(org, groupLabel);
+            }
         }
     });
-    return Array.from(orgs).sort();
+
+    const individualOptions = Array.from(orgMap.entries())
+        .map(([name, group]) => ({
+            value: name,
+            label: `${group} - ${name}`
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label));
+
+    return [
+        { value: 'all_holding', label: 'All Holding' },
+        { value: 'all_subholding', label: 'All Sub Holding' },
+        ...individualOptions
+    ];
 });
 
 const sourceOptions = computed(() => {
@@ -119,7 +135,14 @@ const displayGroups = computed(() => {
         const isDigitalInitiative = Number(initiative.tipe_initiative) === 1;
         
         // 1. Filter Organisasi
-        const matchesOrg = !selectedOrganization.value || initiative.business_unit === selectedOrganization.value;
+        let matchesOrg = true;
+        if (selectedOrganization.value === 'all_holding') {
+            matchesOrg = initiative.groub_id !== 2;
+        } else if (selectedOrganization.value === 'all_subholding') {
+            matchesOrg = initiative.groub_id === 2;
+        } else if (selectedOrganization.value !== '') {
+            matchesOrg = initiative.business_unit === selectedOrganization.value;
+        }
         
         // 2. Filter CoE
         const coeName = normalizeCoeName(initiative.coe_name || initiative.coe?.name);
@@ -325,8 +348,10 @@ const statusLegend = computed(() => {
             <div class="flex items-center justify-start">
                 <div class="initiative-view-switch">
                     <select v-model="selectedOrganization" class="initiative-view-select mr-2">
-                        <option value="">Semua Organisasi</option>
-                        <option v-for="org in organizationOptions" :key="org" :value="org">{{ org }}</option>
+                        <option value="">All Organizations</option>
+                        <option v-for="org in organizationOptions" :key="org.value" :value="org.value">
+                            {{ org.label }}
+                        </option>
                     </select>
 
                     <select v-model="selectedSource" class="initiative-view-select mr-2">
@@ -335,14 +360,14 @@ const statusLegend = computed(() => {
                     </select>
 
                     <select v-model="selectedCoe" class="initiative-view-select mr-2">
-                        <option value="">Semua CoE</option>
+                        <option value="">All CoE</option>
                         <option
                             v-for="coe in ['IoT', 'Advance Cloud', 'RPA', 'Robotics', 'AI / Adv. Analytics', 'CoE Not Identified']"
                             :key="coe" :value="coe">{{ coe }}</option>
                     </select>
 
                     <select v-model="selectedStatus" class="initiative-view-select mr-2">
-                        <option value="">Semua Status</option>
+                        <option value="">All Status</option>
                         <option v-for="st in ['DF', 'Done', 'DT 2026', 'ITSBP', 'On Review', 'SH']" :key="st"
                             :value="st">{{ st }}</option>
                     </select>

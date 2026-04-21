@@ -74,7 +74,7 @@ const getStatusColorClass = (status) => {
 };
 
 const organizationOptions = computed(() => {
-    const orgs = new Set();
+    const orgMap = new Map();
     const allInitiatives = [];
 
     (props.goals || []).forEach((goal) => {
@@ -85,11 +85,27 @@ const organizationOptions = computed(() => {
     });
 
     allInitiatives.forEach((ini) => {
-        if (ini.business_unit && ini.business_unit !== '-') {
-            orgs.add(ini.business_unit);
+        const org = ini.business_unit;
+        if (org && org !== '-') {
+            const groupLabel = ini.groub_id === 2 ? 'Sub Holding' : 'Holding';
+            if (!orgMap.has(org)) {
+                orgMap.set(org, groupLabel);
+            }
         }
     });
-    return Array.from(orgs).sort();
+
+    const individualOptions = Array.from(orgMap.entries())
+        .map(([name, group]) => ({
+            value: name,
+            label: `${group} - ${name}`
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label));
+
+    return [
+        { value: 'all_holding', label: 'All Holding' },
+        { value: 'all_subholding', label: 'All Sub Holding' },
+        ...individualOptions
+    ];
 });
 
 const sourceOptions = computed(() => {
@@ -307,7 +323,14 @@ const displayGoals = computed(() => {
                             `${fallbackGoal.code}-theme-${index + 1}-initiative-${initiativeIndex + 1}`,
                         ))
                         .filter((ini) => {
-                            const matchesOrg = !selectedOrganization.value || ini.business_unit === selectedOrganization.value;
+                            let matchesOrg = true;
+                            if (selectedOrganization.value === 'all_holding') {
+                                matchesOrg = ini.groub_id !== 2;
+                            } else if (selectedOrganization.value === 'all_subholding') {
+                                matchesOrg = ini.groub_id === 2;
+                            } else if (selectedOrganization.value !== '') {
+                                matchesOrg = ini.business_unit === selectedOrganization.value;
+                            }
                             const matchesCoe = !selectedCoe.value || ini.coe_name === selectedCoe.value;
                             const implStatus = normalizeStatusLabel(ini.implementation_status);
                             const matchesStatus = !selectedStatus.value || implStatus === selectedStatus.value;
@@ -486,13 +509,13 @@ const initiativeOptionLabel = (initiative) => {
                         v-model="selectedOrganization"
                         class="initiative-view-select mr-2"
                     >
-                        <option value="">Semua Organisasi</option>
+                        <option value="">All Organizations</option>
                         <option
                             v-for="org in organizationOptions"
-                            :key="`org-opt-${org}`"
-                            :value="org"
+                            :key="org.value"
+                            :value="org.value"
                         >
-                            {{ org }}
+                            {{ org.label }}
                         </option>
                     </select>
 
@@ -500,7 +523,7 @@ const initiativeOptionLabel = (initiative) => {
                         v-model="selectedCoe"
                         class="initiative-view-select mr-2"
                     >
-                        <option value="">Semua CoE</option>
+                        <option value="">All CoE</option>
                         <option
                             v-for="coe in coeLegend"
                             :key="`coe-opt-${coe.id}`"
@@ -514,7 +537,7 @@ const initiativeOptionLabel = (initiative) => {
                         v-model="selectedStatus"
                         class="initiative-view-select mr-2"
                     >
-                        <option value="">Semua Status</option>
+                        <option value="">All Status</option>
                         <option
                             v-for="status in statusLegend"
                             :key="`status-opt-${status.label}`"
