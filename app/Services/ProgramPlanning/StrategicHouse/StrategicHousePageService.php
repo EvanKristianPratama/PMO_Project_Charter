@@ -230,6 +230,7 @@ class StrategicHousePageService
             'tbcCard' => $tbcCard,
             'unassignedInitiatives' => $unassignedInitiatives,
             'coeOptions' => $this->itBuildingBlockService->getCoeOptions(),
+            'statusPeriods' => $this->itBuildingBlockService->getStatusPeriods(),
             'digitalInitiativeOptions' => $this->itBuildingBlockService->getDigitalInitiativeOptions(),
             'itBuildingBlockMatrix' => $this->itBuildingBlockService->getGroupedMappings(),
             'itInitiativeOptions' => $this->itBuildingBlockService->getItInitiativeOptions(),
@@ -372,6 +373,12 @@ class StrategicHousePageService
                     'status' => $status,
                     'status_label' => $this->statusLabel($status),
                     'implementation_status' => $initiative->latestStatusImplementation?->review_status,
+                    'statuses' => collect($initiative->statusImplementations ?? [])->map(fn($s) => [
+                        'start' => $s->start,
+                        'end' => $s->end,
+                        'year' => (int) $s->year,
+                        'status' => $s->review_status,
+                    ])->values()->all(),
                     'source' => !is_null($initiative->source) ? (int) $initiative->source : null,
                     'source_name' => $initiative->sourceData?->name,
                 ];
@@ -445,6 +452,7 @@ class StrategicHousePageService
                                         'coe:id,name',
                                         'organization:id,name,groub_id',
                                         'latestStatusImplementation',
+                                        'statusImplementations',
                                     ]),
                             ]),
                     ])
@@ -474,6 +482,7 @@ class StrategicHousePageService
                         'coe:id,name',
                         'organization:id,name,groub_id',
                         'latestStatusImplementation',
+                        'statusImplementations',
                     ]),
             ])
             ->where('pilar', 2)
@@ -544,6 +553,12 @@ class StrategicHousePageService
             'business_unit' => $initiative->organization?->name,
             'groub_id' => $initiative->organization?->groub_id,
             'implementation_status' => $initiative->latestStatusImplementation?->review_status,
+            'statuses' => collect($initiative->statusImplementations ?? [])->map(fn($s) => [
+                'start' => $s->start,
+                'end' => $s->end,
+                'year' => (int) $s->year,
+                'status' => $s->review_status,
+            ])->values()->all(),
             'source' => !is_null($initiative->source) ? (int) $initiative->source : null,
         ];
     }
@@ -624,6 +639,12 @@ class StrategicHousePageService
                     'status' => $status,
                     'status_label' => $this->statusLabel($status),
                     'implementation_status' => $initiative->latestStatusImplementation?->review_status,
+                    'statuses' => collect($initiative->statusImplementations ?? [])->map(fn($s) => [
+                        'start' => $s->start,
+                        'end' => $s->end,
+                        'year' => (int) $s->year,
+                        'status' => $s->review_status,
+                    ])->values()->all(),
                     'source' => !is_null($initiative->source) ? (int) $initiative->source : null,
                     'source_name' => $initiative->sourceData?->name,
                 ];

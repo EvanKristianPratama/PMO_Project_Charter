@@ -88,10 +88,39 @@ class ItBuildingBlockService
         };
     }
 
+    public function getStatusPeriods(): Collection
+    {
+        return \App\Models\TrsStatusImplementation::query()
+            ->select(['start', 'end', 'year'])
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->orderByRaw("CASE 
+                WHEN start = 'Desember' THEN 12
+                WHEN start = 'November' THEN 11
+                WHEN start = 'Oktober' THEN 10
+                WHEN start = 'September' THEN 9
+                WHEN start = 'Agustus' THEN 8
+                WHEN start = 'Juli' THEN 7
+                WHEN start = 'Juni' THEN 6
+                WHEN start = 'Mei' THEN 5
+                WHEN start = 'April' THEN 4
+                WHEN start = 'Maret' THEN 3
+                WHEN start = 'Februari' THEN 2
+                WHEN start = 'Januari' THEN 1
+                ELSE 0 END DESC")
+            ->get()
+            ->map(fn ($period): array => [
+                'start' => $period->start,
+                'end' => $period->end,
+                'year' => (int) $period->year,
+                'label' => "{$period->start} - {$period->end} {$period->year}",
+            ]);
+    }
+
     public function getDigitalInitiativeOptions(): Collection
     {
         return MstInitiative::query()
-            ->with(['coe:id,name', 'organization:id,name,groub_id', 'latestStatusImplementation', 'sourceData:id,name'])
+            ->with(['coe:id,name', 'organization:id,name,groub_id', 'statusImplementations', 'sourceData:id,name'])
             ->where('tipe_initiative', 1)
             ->orderBy('code')
             ->orderBy('name')
@@ -106,6 +135,12 @@ class ItBuildingBlockService
                 'business_unit' => $initiative->organization?->name ?: '-',
                 'groub_id' => $initiative->organization?->groub_id,
                 'implementation_status' => $initiative->latestStatusImplementation?->review_status ?: null,
+                'statuses' => $initiative->statusImplementations->map(fn($s) => [
+                    'start' => $s->start,
+                    'end' => $s->end,
+                    'year' => (int) $s->year,
+                    'status' => $s->review_status,
+                ])->values()->all(),
                 'tipe_initiative' => (int) $initiative->tipe_initiative,
                 'source' => $initiative->source,
                 'source_name' => $initiative->sourceData?->name,

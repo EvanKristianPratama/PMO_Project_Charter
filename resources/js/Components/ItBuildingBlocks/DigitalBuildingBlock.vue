@@ -12,9 +12,34 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    statusPeriods: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const route = useRouteHelper();
+
+const selectedPeriod = ref(null);
+
+// Initialize selectedPeriod with the first period if available
+if (props.statusPeriods && props.statusPeriods.length > 0) {
+    selectedPeriod.value = props.statusPeriods[0];
+}
+
+const getInitiativeStatus = (initiative) => {
+    if (!selectedPeriod.value) {
+        return initiative.implementation_status;
+    }
+
+    const found = (initiative.statuses || []).find(s => 
+        s.start === selectedPeriod.value.start && 
+        s.end === selectedPeriod.value.end && 
+        s.year === selectedPeriod.value.year
+    );
+
+    return found ? found.status : null;
+};
 
 const initiativeSummaryHref = (initiative) => {
     const initiativeId = Number(initiative?.id ?? 0);
@@ -62,10 +87,34 @@ const initiativeColumnCount = ref(DEFAULT_INITIATIVE_COLUMN_COUNT);
 const showBusinessUnit = ref(false);
 const showStatusColors = ref(true);
 const showInitiativeCode = ref(true);
+const showLastUpdatePeriod = ref(true);
 const selectedOrganization = ref('');
 const selectedCoe = ref('');
 const selectedStatus = ref('');
 const selectedSource = ref('');
+
+const monthsOrder = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+];
+
+const getInitiativePeriodLabel = (initiative) => {
+    if (selectedPeriod.value) {
+        return selectedPeriod.value.label;
+    }
+
+    if (!initiative.statuses || initiative.statuses.length === 0) return null;
+
+    const sorted = [...initiative.statuses].sort((a, b) => {
+        if (a.year !== b.year) return b.year - a.year;
+        return monthsOrder.indexOf(b.start) - monthsOrder.indexOf(a.start);
+    });
+
+    const latest = sorted[0];
+    return latest.start === latest.end
+        ? `${latest.start} ${latest.year}`
+        : `${latest.start} - ${latest.end} ${latest.year}`;
+};
 
 const organizationOptions = computed(() => {
     const orgMap = new Map();
@@ -149,7 +198,7 @@ const displayGroups = computed(() => {
         const matchesCoe = !selectedCoe.value || coeName === selectedCoe.value;
         
         // 3. Filter Implementation Status (Warna)
-        const implStatus = normalizeStatusLabel(initiative.implementation_status);
+        const implStatus = normalizeStatusLabel(getInitiativeStatus(initiative));
         const matchesStatus = !selectedStatus.value || implStatus === selectedStatus.value;
 
         // 4. Filter Source (Berdasarkan ID source)
@@ -217,7 +266,13 @@ const buildInitiativeColumns = (initiatives = [], columnCount = initiativeColumn
 };
 
 
-const coeLegend = computed(() => {
+const availableCoeOptions = computed(() => {
+    const coeSet = new Set();
+    props.items.forEach(ini => {
+        const name = normalizeCoeName(ini.coe_name || ini.coe?.name);
+        if (name) coeSet.add(name);
+    });
+    
     const desiredOrder = [
         'IoT',
         'Advance Cloud',
@@ -227,8 +282,40 @@ const coeLegend = computed(() => {
         'CoE Not Identified',
     ];
 
+    return Array.from(coeSet).sort((a, b) => {
+        const idxA = desiredOrder.indexOf(a);
+        const idxB = desiredOrder.indexOf(b);
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        return a.localeCompare(b);
+    });
+});
+
+const availableStatusOptions = computed(() => {
+    const statusSet = new Set();
+    props.items.forEach(ini => {
+        (ini.statuses || []).forEach(s => {
+            const label = normalizeStatusLabel(s.status);
+            if (label) statusSet.add(label);
+        });
+        const latest = normalizeStatusLabel(ini.implementation_status);
+        if (latest) statusSet.add(latest);
+    });
+
+    return Array.from(statusSet).sort((a, b) => {
+        const idxA = statusDesiredOrder.indexOf(a);
+        const idxB = statusDesiredOrder.indexOf(b);
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        return a.localeCompare(b);
+    });
+});
+
+const coeLegend = computed(() => {
     const stats = {};
-    desiredOrder.forEach(name => {
+    availableCoeOptions.value.forEach(name => {
         stats[name] = 0;
     });
 
@@ -236,16 +323,16 @@ const coeLegend = computed(() => {
         const name = group.name;
         if (stats.hasOwnProperty(name)) {
             stats[name] += group.total;
-        } else {
+        } else if (stats.hasOwnProperty('CoE Not Identified')) {
             stats['CoE Not Identified'] += group.total;
         }
     });
 
-    return desiredOrder.map((name, index) => ({
+    return availableCoeOptions.value.map((name, index) => ({
         id: index + 1,
         name: name,
         count: stats[name],
-    }));
+    })).filter(item => item.count > 0);
 });
 
 const totalOverallInitiatives = computed(() => {
@@ -280,24 +367,24 @@ const statusDesiredOrder = ['DF', 'Done', 'DT 2026', 'ITSBP', 'On Review', 'SH']
 
 const statusLegend = computed(() => {
     const stats = {};
-    statusDesiredOrder.forEach(label => {
+    availableStatusOptions.value.forEach(label => {
         stats[label] = 0;
     });
 
     displayGroups.value.forEach((group) => {
         group.initiatives.forEach((initiative) => {
-            const label = normalizeStatusLabel(initiative.implementation_status);
+            const label = normalizeStatusLabel(getInitiativeStatus(initiative));
             if (label && stats.hasOwnProperty(label)) {
                 stats[label]++;
             }
         });
     });
 
-    return statusDesiredOrder.map((label) => ({
+    return availableStatusOptions.value.map((label) => ({
         label,
         class: getStatusColorClass(label),
         count: stats[label],
-    }));
+    })).filter(item => item.count > 0);
 });
 </script>
 
@@ -328,8 +415,20 @@ const statusLegend = computed(() => {
                 <!-- Status Implementation Legend -->
                 <div v-if="showStatusColors"
                     class="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 border-t border-slate-100 dark:border-white/5">
-                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider">Implementation
-                        Status (November - Desember 2025):</span>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider uppercase">Implementation Status:</span>
+                        <select 
+                            v-if="statusPeriods && statusPeriods.length > 0" 
+                            v-model="selectedPeriod" 
+                            class="text-[10px] font-bold bg-slate-50 dark:bg-slate-800/50 border-none rounded focus:ring-0 cursor-pointer text-blue-600 dark:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors py-0.5 px-1.5 h-auto leading-none"
+                        >
+                            <option :value="null">All (Latest)</option>
+                            <option v-for="period in statusPeriods" :key="period.label" :value="period">
+                                {{ period.label }}
+                            </option>
+                        </select>
+                        <span v-else class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider">(November - Desember 2025):</span>
+                    </div>
                     <div v-for="status in statusLegend" :key="`status-legend-${status.label}`"
                         class="flex items-center gap-1.5 cursor-pointer select-none transition-opacity"
                         :class="{ 'opacity-40': selectedStatus && selectedStatus !== status.label }"
@@ -347,28 +446,28 @@ const statusLegend = computed(() => {
             <!-- Toolbar -->
             <div class="flex items-center justify-start">
                 <div class="initiative-view-switch">
-                    <select v-model="selectedOrganization" class="initiative-view-select mr-2">
+                    <select v-model="selectedOrganization" class="initiative-view-select">
                         <option value="">All Organizations</option>
                         <option v-for="org in organizationOptions" :key="org.value" :value="org.value">
                             {{ org.label }}
                         </option>
                     </select>
 
-                    <select v-model="selectedSource" class="initiative-view-select mr-2">
+                    <select v-model="selectedSource" class="initiative-view-select">
                         <option value="">All Initiatives</option>
                         <option v-for="source in sourceOptions" :key="source.value" :value="source.value">{{ source.label }}</option>
                     </select>
 
-                    <select v-model="selectedCoe" class="initiative-view-select mr-2">
+                    <select v-model="selectedCoe" class="initiative-view-select">
                         <option value="">All CoE</option>
                         <option
-                            v-for="coe in ['IoT', 'Advance Cloud', 'RPA', 'Robotics', 'AI / Adv. Analytics', 'CoE Not Identified']"
+                            v-for="coe in availableCoeOptions"
                             :key="coe" :value="coe">{{ coe }}</option>
                     </select>
 
-                    <select v-model="selectedStatus" class="initiative-view-select mr-2">
+                    <select v-model="selectedStatus" class="initiative-view-select">
                         <option value="">All Status</option>
-                        <option v-for="st in ['DF', 'Done', 'DT 2026', 'ITSBP', 'On Review', 'SH']" :key="st"
+                        <option v-for="st in availableStatusOptions" :key="st"
                             :value="st">{{ st }}</option>
                     </select>
 
@@ -405,6 +504,15 @@ const statusLegend = computed(() => {
                                 d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
                         </svg>
                         <span>Code</span>
+                    </button>
+
+                    <button type="button" class="bu-toggle-btn" :class="{ 'bu-toggle-btn--active': showLastUpdatePeriod }"
+                        title="Tampilkan/Sembunyikan Periode Update" @click="showLastUpdatePeriod = !showLastUpdatePeriod">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span>Periode</span>
                     </button>
 
                     <select v-model="initiativeColumnCount" class="initiative-view-select">
@@ -468,12 +576,15 @@ const statusLegend = computed(() => {
                                             </div>
                                             <span v-if="showInitiativeCode && initiative.code"
                                                 class="initiative-box__code"
-                                                :class="showStatusColors ? getStatusColorClass(initiative.implementation_status) : ''">
+                                                :class="showStatusColors ? getStatusColorClass(getInitiativeStatus(initiative)) : ''">
                                                 {{ initiative.code }}
                                             </span>
                                             <span class="initiative-box__name"
                                                 :class="{ 'initiative-box__name--full': !showInitiativeCode || !initiative.code }">
                                                 <span class="initiative-box__label-text">{{ initiative.name }}</span>
+                                                <span v-if="showLastUpdatePeriod && getInitiativePeriodLabel(initiative)" class="initiative-box__period">
+                                                    {{ getInitiativePeriodLabel(initiative) }}
+                                                </span>
                                                 <span v-if="showBusinessUnit" class="initiative-box__bu">{{
                                                     initiative.business_unit }}</span>
                                             </span>
@@ -502,12 +613,15 @@ const statusLegend = computed(() => {
                                             </div>
                                             <span v-if="showInitiativeCode && initiative.code"
                                                 class="initiative-box__code"
-                                                :class="showStatusColors ? getStatusColorClass(initiative.implementation_status) : ''">
+                                                :class="showStatusColors ? getStatusColorClass(getInitiativeStatus(initiative)) : ''">
                                                 {{ initiative.code }}
                                             </span>
                                             <span class="initiative-box__name"
                                                 :class="{ 'initiative-box__name--full': !showInitiativeCode || !initiative.code }">
                                                 <span class="initiative-box__label-text">{{ initiative.name }}</span>
+                                                <span v-if="showLastUpdatePeriod && getInitiativePeriodLabel(initiative)" class="initiative-box__period">
+                                                    {{ getInitiativePeriodLabel(initiative) }}
+                                                </span>
                                                 <span v-if="showBusinessUnit" class="initiative-box__bu">{{
                                                     initiative.business_unit }}</span>
                                             </span>
@@ -675,6 +789,14 @@ a.initiative-box {
     justify-content: center;
 }
 
+.initiative-box__period {
+    font-size: 7.5px;
+    font-weight: 700;
+    font-style: italic;
+    color: #64748b;
+    margin-top: 1px;
+}
+
 .initiative-box__bu {
     font-size: 7.5px;
     font-weight: 700;
@@ -689,13 +811,20 @@ a.initiative-box {
 
 
 .initiative-view-switch {
-    display: inline-flex;
-    flex-wrap: wrap;
+    display: flex;
+    flex-wrap: nowrap;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     border-radius: 12px;
     background: transparent;
     padding: 2px;
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none; /* Hide scrollbar for cleaner look */
+}
+
+.initiative-view-switch::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for Chrome/Safari/Edge */
 }
 
 .initiative-view-select {

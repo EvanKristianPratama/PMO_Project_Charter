@@ -165,8 +165,13 @@
                         <DualGrowthFull
                             v-if="showEnabler"
                             :goals="dualGrowthGoals"
+                            :status-periods="statusPeriods"
                         />
-                        <DualGrowth v-else :goals="dualGrowthGoals" />
+                        <DualGrowth
+                            v-else
+                            :goals="dualGrowthGoals"
+                            :status-periods="statusPeriods"
+                        />
                     </div>
 
                     <div
@@ -178,6 +183,7 @@
                         <DigitalBuildingBlock
                             :items="digitalInitiativeOptions"
                             :coe-options="coeOptions"
+                            :status-periods="statusPeriods"
                         />
                     </div>
 
@@ -204,6 +210,7 @@
                             :groups="itBuildingBlockMatrix"
                             :coe-options="coeOptions"
                             :initiative-options="itInitiativeOptions"
+                            :status-periods="statusPeriods"
                         />
                     </div>
 
@@ -354,6 +361,10 @@ const props = defineProps({
         default: () => [],
     },
     initiativeSupportItOptions: {
+        type: Array,
+        default: () => [],
+    },
+    statusPeriods: {
         type: Array,
         default: () => [],
     },

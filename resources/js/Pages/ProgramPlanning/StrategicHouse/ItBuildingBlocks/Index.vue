@@ -37,8 +37,10 @@
                     :editable="isEditMode"
                     :coe-options="coeOptions"
                     :initiative-options="initiativeOptions"
+                    :status-periods="statusPeriods"
                     @cancel-add-mapping="isEditMode = false"
                 />
+
             </div>
         </div>
     </component>
@@ -77,6 +79,10 @@ const props = defineProps({
         default: () => [],
     },
     initiativeOptions: {
+        type: Array,
+        default: () => [],
+    },
+    statusPeriods: {
         type: Array,
         default: () => [],
     },

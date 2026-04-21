@@ -50,7 +50,55 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    statusPeriods: {
+        type: Array,
+        default: () => [],
+    },
 });
+
+const selectedPeriod = ref(null);
+
+// Initialize selectedPeriod with the first period if available
+if (props.statusPeriods && props.statusPeriods.length > 0) {
+    selectedPeriod.value = props.statusPeriods[0];
+}
+
+const monthsOrder = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+];
+
+const getInitiativeStatus = (initiative) => {
+    if (!selectedPeriod.value) {
+        return initiative.implementation_status;
+    }
+
+    const found = (initiative.statuses || []).find(s => 
+        s.start === selectedPeriod.value.start && 
+        s.end === selectedPeriod.value.end && 
+        s.year === selectedPeriod.value.year
+    );
+
+    return found ? found.status : null;
+};
+
+const getInitiativePeriodLabel = (initiative) => {
+    if (selectedPeriod.value) {
+        return selectedPeriod.value.label;
+    }
+
+    if (!initiative.statuses || initiative.statuses.length === 0) return null;
+
+    const sorted = [...initiative.statuses].sort((a, b) => {
+        if (a.year !== b.year) return b.year - a.year;
+        return monthsOrder.indexOf(b.start) - monthsOrder.indexOf(a.start);
+    });
+
+    const latest = sorted[0];
+    return latest.start === latest.end
+        ? `${latest.start} ${latest.year}`
+        : `${latest.start} - ${latest.end} ${latest.year}`;
+};
 
 const mappingForm = reactive({
     primary: '',
@@ -130,7 +178,7 @@ const displayGroups = computed(() => {
                         const coeName = normalizeCoeName(initiative.coe_name);
                         const matchesCoe = !selectedCoe.value || coeName === selectedCoe.value;
 
-                        const implStatus = normalizeStatusLabel(initiative.implementation_status);
+                        const implStatus = normalizeStatusLabel(getInitiativeStatus(initiative));
                         const matchesStatus = !selectedStatus.value || implStatus === selectedStatus.value;
                         const matchesSource = !selectedSource.value || initiative.source == selectedSource.value;
                         
@@ -301,6 +349,7 @@ const initiativeColumnCount = ref(DEFAULT_INITIATIVE_COLUMN_COUNT);
 const showBusinessUnit = ref(false);
 const showStatusColors = ref(true);
 const showInitiativeCode = ref(true);
+const showLastUpdatePeriod = ref(true);
 const selectedOrganization = ref('');
 const selectedCoe = ref('');
 const selectedStatus = ref('');
@@ -876,7 +925,7 @@ const statusLegend = computed(() => {
     displayGroups.value.forEach((group) => {
         group.secondary_groups.forEach((secondaryGroup) => {
             secondaryGroup.initiatives.forEach((initiative) => {
-                const label = normalizeStatusLabel(initiative.implementation_status);
+                const label = normalizeStatusLabel(getInitiativeStatus(initiative));
                 if (label && stats.hasOwnProperty(label)) {
                     stats[label]++;
                 }
@@ -964,7 +1013,20 @@ defineExpose({
                     v-if="showStatusColors"
                     class="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 border-t border-slate-100 dark:border-white/5"
                 >
-                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider">Implementation Status (November - Desember 2025):</span>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider uppercase">Implementation Status:</span>
+                        <select 
+                            v-if="statusPeriods && statusPeriods.length > 0" 
+                            v-model="selectedPeriod" 
+                            class="text-[10px] font-bold bg-slate-50 dark:bg-slate-800/50 border-none rounded focus:ring-0 cursor-pointer text-blue-600 dark:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors py-0.5 px-1.5 h-auto leading-none"
+                        >
+                            <option :value="null">All (Latest)</option>
+                            <option v-for="period in statusPeriods" :key="period.label" :value="period">
+                                {{ period.label }}
+                            </option>
+                        </select>
+                        <span v-else class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider">(November - Desember 2025):</span>
+                    </div>
                     <div
                         v-for="status in statusLegend"
                         :key="`status-legend-${status.label}`"
@@ -989,7 +1051,7 @@ defineExpose({
                 <div class="initiative-view-switch">
                     <select
                         v-model="selectedOrganization"
-                        class="initiative-view-select mr-2"
+                        class="initiative-view-select"
                     >
                         <option value="">All Organizations</option>
                         <option
@@ -1003,7 +1065,7 @@ defineExpose({
 
                     <select
                         v-model="selectedCoe"
-                        class="initiative-view-select mr-2"
+                        class="initiative-view-select"
                     >
                         <option value="">All CoE</option>
                         <option
@@ -1017,7 +1079,7 @@ defineExpose({
 
                     <select
                         v-model="selectedStatus"
-                        class="initiative-view-select mr-2"
+                        class="initiative-view-select"
                     >
                         <option value="">All Status</option>
                         <option
@@ -1031,7 +1093,7 @@ defineExpose({
 
                     <select
                         v-model="selectedSource"
-                        class="initiative-view-select mr-2"
+                        class="initiative-view-select"
                     >
                         <option value="">All Initiatives</option>
                         <option
@@ -1086,7 +1148,19 @@ defineExpose({
                         <span>Code</span>
                     </button>
 
-                    <span class="initiative-view-switch__label ml-2"></span>
+                    <button
+                        type="button"
+                        class="bu-toggle-btn"
+                        :class="{ 'bu-toggle-btn--active': showLastUpdatePeriod }"
+                        title="Tampilkan/Sembunyikan Periode Update"
+                        @click="showLastUpdatePeriod = !showLastUpdatePeriod"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span>Periode</span>
+                    </button>
+
                     <select
                         v-model="initiativeColumnCount"
                         class="initiative-view-select"
@@ -1241,6 +1315,9 @@ defineExpose({
                                                     :class="{ 'initiative-box__name--full': !showInitiativeCode || !initiativeDisplayCode(initiative) }"
                                                 >
                                                     <span class="initiative-box__label-text">{{ initiativeDisplayName(initiative) }}</span>
+                                                    <span v-if="showLastUpdatePeriod && getInitiativePeriodLabel(initiative)" class="initiative-box__period">
+                                                        {{ getInitiativePeriodLabel(initiative) }}
+                                                    </span>
                                                     <span v-if="showBusinessUnit" class="initiative-box__bu">
                                                         {{ initiative.business_unit }}
                                                     </span>
@@ -1423,12 +1500,20 @@ defineExpose({
 }
 
 .initiative-view-switch {
-    display: inline-flex;
+    display: flex;
+    flex-wrap: nowrap;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     border-radius: 12px;
     background: transparent;
     padding: 2px;
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none; /* Hide scrollbar for cleaner look */
+}
+
+.initiative-view-switch::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for Chrome/Safari/Edge */
 }
 
 .initiative-view-switch__label {
@@ -1755,6 +1840,14 @@ a.initiative-box {
     max-width: none;
     padding: 2px 16px 2px 5px;
     word-break: break-word;
+}
+
+.initiative-box__period {
+    font-size: 7.5px;
+    font-weight: 700;
+    font-style: italic;
+    color: #64748b;
+    margin-top: 1px;
 }
 
 .initiative-box__label-text {
