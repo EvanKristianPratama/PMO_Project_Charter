@@ -173,6 +173,18 @@
                     >
                         Digital Initiative
                     </button>
+                    <button
+                        type="button"
+                        class="rounded-lg px-3 py-1.5 text-[10px] font-bold tracking-wider transition-all"
+                        :class="
+                            roadmapMode === 'all'
+                                ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
+                                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                        "
+                        @click="setRoadmapMode('all')"
+                    >
+                        All
+                    </button>
                 </div>
 
                 <Link
@@ -318,7 +330,7 @@
                             "
                         />
                         <ItInitiativeRoadmapContent
-                            v-else
+                            v-else-if="roadmapMode === 'digital'"
                             :groups="digitalRoadmapGroups"
                             :start-year="digitalRoadmapStartYear"
                             :end-year="digitalRoadmapEndYear"
@@ -326,6 +338,16 @@
                             group-header-label="COE"
                             initiative-header-label="Digital Initiatives"
                             empty-text="Belum ada data roadmap Digital Initiative."
+                        />
+                        <AllInitiativeRoadmapContent
+                            v-else
+                            :it-groups="itRoadmapGroups"
+                            :digital-groups="digitalRoadmapGroups"
+                            :start-year="allRoadmapStartYear"
+                            :end-year="allRoadmapEndYear"
+                            :it-total-count="itRoadmapTotalCount"
+                            :digital-total-count="digitalRoadmapGroups.length"
+                            :milestone-type-options="itRoadmapMilestoneTypeOptions"
                         />
                     </div>
 
@@ -354,9 +376,10 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { Link } from "@inertiajs/vue3";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/vue/24/outline";
+import AllInitiativeRoadmapContent from "@/Components/StrategicHouse/RoadMap/AllInitiativeRoadmapContent.vue";
 import ItInitiativeRoadmapContent from "@/Components/StrategicHouse/RoadMap/ItInitiativeRoadmapContent.vue";
 import DualGrowth from "@/Components/StrategicHouse/DualGrowth.vue";
 import DualGrowthFull from "@/Components/StrategicHouse/DualGrowthFull.vue";
@@ -548,7 +571,21 @@ const getInitialViewMode = () => {
 
 const viewMode = ref(getInitialViewMode());
 const showEnabler = ref(false);
-const roadmapModes = new Set(["it", "digital"]);
+const roadmapModes = new Set(["it", "digital", "all"]);
+
+const allRoadmapStartYear = computed(() =>
+    Math.min(
+        Number(props.itRoadmapStartYear) || 2025,
+        Number(props.digitalRoadmapStartYear) || 2024,
+    ),
+);
+
+const allRoadmapEndYear = computed(() =>
+    Math.max(
+        Number(props.itRoadmapEndYear) || 2029,
+        Number(props.digitalRoadmapEndYear) || 2029,
+    ),
+);
 
 const getInitialRoadmapMode = () => {
     if (typeof window === "undefined") return "it";

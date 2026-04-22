@@ -6,7 +6,6 @@ use App\Models\Goal;
 use App\Models\InitiativeTagging;
 use App\Models\MstCoe;
 use App\Models\MstInitiative;
-use App\Models\TrsStatusImplementation;
 use App\Services\StrategicHouse\BusinessStrategy\BusinessStrategyService;
 use App\Services\StrategicHouse\InitiativeRelation\InitiativeRelationService;
 use App\Services\StrategicHouse\InitiativeSupport\InitiativeSupportService;
@@ -301,40 +300,19 @@ class StrategicHousePageService
                 return $item;
             });
 
-        $initiativeIds = $normalizedItems
-            ->pluck('initiative_id')
-            ->map(fn (mixed $id): int => (int) $id)
-            ->filter(fn (int $id): bool => $id > 0)
-            ->unique()
-            ->values();
-
-        $latestStatusByInitiative = TrsStatusImplementation::query()
-            ->whereIn('initiative_id', $initiativeIds)
-            ->orderByDesc('updated_at')
-            ->orderByDesc('id')
-            ->get()
-            ->groupBy('initiative_id')
-            ->map(function (Collection $rows): ?string {
-                $latest = $rows->first();
-
-                return $this->normalizeImplementationStatus(
-                    (string) ($latest?->review_status ?? ''),
-                );
-            });
-
         $byCoe = $normalizedItems->groupBy(
             fn (array $item): string => (string) ($item['coe_name'] ?? 'CoE Not Identified'),
         );
 
         return collect($coeOrder)
             ->values()
-            ->map(function (string $coeName, int $index) use (&$globalNumber, $byCoe, $latestStatusByInitiative): array {
+            ->map(function (string $coeName, int $index) use (&$globalNumber, $byCoe): array {
                 $items = collect($byCoe->get($coeName, collect()));
                 $initiatives = $items
                     ->groupBy(fn (array $item): int => (int) ($item['initiative_id'] ?? 0))
                     ->sortKeys()
                     ->values()
-                    ->map(function (Collection $initiativeItems) use (&$globalNumber, $latestStatusByInitiative): array {
+                    ->map(function (Collection $initiativeItems) use (&$globalNumber): array {
                         $firstItem = $initiativeItems->first() ?? [];
                         $initiativeId = (int) ($firstItem['initiative_id'] ?? 0);
 
@@ -374,6 +352,10 @@ class StrategicHousePageService
                             ->values()
                             ->all();
 
+                        $implementationStatus = $this->normalizeImplementationStatus(
+                            (string) ($firstItem['implementation_status'] ?? ''),
+                        );
+
                         return [
                             'no' => $badgeLabel,
                             'id' => $initiativeId,
@@ -390,7 +372,7 @@ class StrategicHousePageService
                                     'end_date' => $endDate,
                                 ]],
                             ]],
-                            'implementation_status' => $latestStatusByInitiative->get($initiativeId),
+                            'implementation_status' => $implementationStatus,
                             'review_statuses' => [],
                         ];
                     })

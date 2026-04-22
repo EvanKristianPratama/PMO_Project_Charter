@@ -10,6 +10,9 @@ const props = defineProps({
     milestoneTypeOptions: { type: Array, default: () => [] },
     groupHeaderLabel: { type: String, default: "IT Building Blocks" },
     initiativeHeaderLabel: { type: String, default: "IT Initiatives" },
+    showControls: { type: Boolean, default: true },
+    showLegend: { type: Boolean, default: true },
+    showTableHeader: { type: Boolean, default: true },
     emptyText: {
         type: String,
         default: "Belum ada data roadmap IT Strategic Initiative.",
@@ -429,7 +432,7 @@ const reviewStatusLegendItems = computed(() => {
 <template>
     <div class="space-y-3">
         <!-- ── Header ─────────────────────────────────── -->
-        <div class="content-header">
+        <div v-if="showControls" class="content-header">
             <div class="flex flex-wrap items-center gap-2 shrink-0">
                 <label class="period-filter">
                     <span class="period-filter__label">Status Review Implementation Period</span>
@@ -450,7 +453,7 @@ const reviewStatusLegendItems = computed(() => {
         </div>
 
         <!-- ── Legend panel ──────────────────────────── -->
-        <div v-if="groups && groups.length" class="legend-panel">
+        <div v-if="showLegend && groups && groups.length" class="legend-panel">
             <div class="legend-panel__header">
                 <div class="legend-panel__title">Legend</div>
                 <div class="legend-panel__period">{{ selectedPeriodLabel }}</div>
@@ -547,7 +550,7 @@ const reviewStatusLegendItems = computed(() => {
                 </colgroup>
 
                 <!-- Year header -->
-                <thead>
+                <thead v-if="showTableHeader">
                     <tr class="gantt-header-row">
                         <th class="th-cell th-header border-r border-white/30">
                             {{ groupHeaderLabel }}

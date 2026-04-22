@@ -75,6 +75,12 @@ class MasterMilestonePageService
                 'initiative:id,code,name,business_unit,coe_id',
                 'initiative.organization:id,name',
                 'initiative.coe:id,name',
+                'initiative.latestStatusImplementation' => fn ($query) => $query
+                    ->select([
+                        'trs_status_implementation.id',
+                        'trs_status_implementation.initiative_id',
+                        'trs_status_implementation.review_status',
+                    ]),
             ])
             ->orderBy('id')
             ->get()
@@ -144,6 +150,7 @@ class MasterMilestonePageService
         $initiativeName = trim((string) ($initiative?->name ?? ''));
         $organizationName = trim((string) ($initiative?->organization?->name ?? ''));
         $coeName = trim((string) ($initiative?->coe?->name ?? ''));
+        $implementationStatus = trim((string) ($initiative?->latestStatusImplementation?->review_status ?? ''));
 
         return [
             'id' => (int) $milestone->id,
@@ -152,6 +159,7 @@ class MasterMilestonePageService
             'initiative_name' => $initiativeName !== '' ? $initiativeName : sprintf('Initiative #%d', $milestone->initiative_id),
             'coe_name' => $coeName !== '' ? $coeName : '-',
             'organization_name' => $organizationName !== '' ? $organizationName : '-',
+            'implementation_status' => $implementationStatus !== '' ? $implementationStatus : null,
             'activity' => $milestone->activity,
             'startYear' => (int) $milestone->startYear,
             'startQ' => $this->normalizeQuarterLabel($milestone->startQ),
