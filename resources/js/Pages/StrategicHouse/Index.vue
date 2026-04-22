@@ -153,13 +153,13 @@
                         type="button"
                         class="rounded-lg px-3 py-1.5 text-[10px] font-bold tracking-wider transition-all"
                         :class="
-                            roadmapMode === 'it'
+                            roadmapMode === 'all'
                                 ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                                 : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                         "
-                        @click="setRoadmapMode('it')"
+                        @click="setRoadmapMode('all')"
                     >
-                        IT Initiative
+                        All
                     </button>
                     <button
                         type="button"
@@ -177,13 +177,13 @@
                         type="button"
                         class="rounded-lg px-3 py-1.5 text-[10px] font-bold tracking-wider transition-all"
                         :class="
-                            roadmapMode === 'all'
+                            roadmapMode === 'it'
                                 ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                                 : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                         "
-                        @click="setRoadmapMode('all')"
+                        @click="setRoadmapMode('it')"
                     >
-                        All
+                        IT Initiative
                     </button>
                 </div>
 
