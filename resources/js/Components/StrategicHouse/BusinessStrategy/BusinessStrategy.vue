@@ -452,11 +452,7 @@ watch(filterOrganizationOptions, (options) => {
                 <table class="strategy-table">
                     <thead>
                         <tr>
-                            <th rowspan="2" class="head-cell head-cell--business-unit">
-                                <div class="strategy-head-card strategy-head-card--business-unit">
-                                    <span class="strategy-head-card__title">Core Business</span>
-                                </div>
-                            </th>
+                            <th rowspan="2" class="head-cell head-cell--business-unit"></th>
                             <th
                                 v-if="isEditMode"
                                 rowspan="2"
@@ -995,6 +991,7 @@ watch(filterOrganizationOptions, (options) => {
 }
 
 :deep(.dark) .initiative-view-select,
+:deep(.dark) .initiative-view-toggle,
 :deep(.dark) .edit-select,
 :deep(.dark) .edit-textarea {
     border-color: rgba(255, 255, 255, 0.1);

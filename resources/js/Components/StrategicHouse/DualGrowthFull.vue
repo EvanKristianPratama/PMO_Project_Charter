@@ -759,15 +759,6 @@ const initiativeOptionLabel = (initiative) => {
                             Digital Initiatives
                         </th>
                     </tr>
-                    <tr>
-                        <th class="sub-head sub-head-goal">
-                            Goal
-                        </th>
-                        <th class="sub-head sub-head-theme">
-                            Theme
-                        </th>
-                        <th class="sub-head sub-head-initiative"></th>
-                    </tr>
                 </thead>
                 <tbody>
                     <template v-for="goal in displayGoals" :key="goal.id ?? goal.code">

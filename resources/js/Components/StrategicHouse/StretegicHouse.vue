@@ -64,11 +64,22 @@ const selectedSource = ref('all');
 const showDetails = ref(true);
 const showStrategyDetails = ref(true);
 const showBusinessStrategy = ref(false);
+const selectedBusinessUnit = ref('');
+
+const matchesSelectedBusinessUnit = (initiative) => {
+    if (!selectedBusinessUnit.value) return true;
+
+    return String(initiative?.business_unit_id ?? '') === String(selectedBusinessUnit.value);
+};
 
 const filterDtiInitiatives = (initiatives) => {
     if (!initiatives) return [];
-    if (selectedSource.value === 'all') return initiatives;
-    return initiatives.filter(ini => ini.source == selectedSource.value);
+
+    return initiatives.filter((ini) => {
+        const matchesSource = selectedSource.value === 'all' || ini.source == selectedSource.value;
+
+        return matchesSource && matchesSelectedBusinessUnit(ini);
+    });
 };
 
 const processedCards = (cards, initiativeFilter = (initiatives) => initiatives || []) => {
@@ -198,12 +209,57 @@ const businessStrategyRows = computed(() => {
         }));
     });
 });
+
+const businessStrategyOptions = computed(() => {
+    const seen = new Set();
+
+    return businessStrategyRows.value
+        .filter((row) => {
+            const value = String(row.business_unit_id ?? '');
+
+            if (!value || seen.has(value)) {
+                return false;
+            }
+
+            seen.add(value);
+            return true;
+        })
+        .map((row) => ({
+            value: String(row.business_unit_id),
+            label: row.group_label ? `${row.group_label} - ${row.business_unit}` : row.business_unit,
+        }))
+        .sort((left, right) => left.label.localeCompare(right.label));
+});
+
+const filteredBusinessStrategyRows = computed(() => {
+    if (!selectedBusinessUnit.value) {
+        return businessStrategyRows.value;
+    }
+
+    return businessStrategyRows.value.filter(
+        (row) => String(row.business_unit_id ?? '') === String(selectedBusinessUnit.value),
+    );
+});
 </script>
 
 <template>
     <section class="sh-mockup">
         <div class="mockup-content">
             <div class="top-actions">
+                <select
+                    v-if="showBusinessStrategy"
+                    v-model="selectedBusinessUnit"
+                    class="business-strategy-filter"
+                >
+                    <option value="">All Business Unit</option>
+                    <option
+                        v-for="option in businessStrategyOptions"
+                        :key="option.value"
+                        :value="option.value"
+                    >
+                        {{ option.label }}
+                    </option>
+                </select>
                 <button
                     @click="showBusinessStrategy = !showBusinessStrategy"
                     class="dti-toggle"
@@ -240,8 +296,13 @@ const businessStrategyRows = computed(() => {
                 <div v-if="showBusinessStrategy" class="business-strategy-table-wrap">
                     <div class="business-strategy-table-scroll">
                         <table class="business-strategy-table">
+                            <colgroup>
+                                <col class="business-strategy-col business-strategy-col--legacy" />
+                                <col class="business-strategy-col business-strategy-col--legacy" />
+                                <col class="business-strategy-col business-strategy-col--carbon" />
+                            </colgroup>
                             <tbody>
-                                <tr v-for="row in businessStrategyRows" :key="row.id">
+                                <tr v-for="row in filteredBusinessStrategyRows" :key="row.id">
                                     <td
                                         v-for="column in orderedBusinessStrategyColumns"
                                         :key="`${row.id}-${column.key}`"
@@ -251,7 +312,7 @@ const businessStrategyRows = computed(() => {
                                         <span v-else class="business-strategy-table__empty">-</span>
                                     </td>
                                 </tr>
-                                <tr v-if="!businessStrategyRows.length">
+                                <tr v-if="!filteredBusinessStrategyRows.length">
                                     <td
                                         :colspan="orderedBusinessStrategyColumns.length + 2"
                                         class="business-strategy-table__blank"
@@ -516,10 +577,38 @@ const businessStrategyRows = computed(() => {
 .top-actions {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
     margin-bottom: 8px;
 }
 
+.business-strategy-filter {
+    min-width: 220px;
+    max-width: 320px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 28px 6px 10px;
+    appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 12px;
+}
+
+.business-strategy-filter:focus {
+    outline: none;
+    border-color: #0f6fb7;
+    box-shadow: 0 0 0 3px rgba(15, 111, 183, 0.1);
+}
+
 .business-strategy-panel {
+    width: 80%;
+    margin: 0 auto;
     border-radius: 12px;
 }
 
@@ -540,6 +629,14 @@ const businessStrategyRows = computed(() => {
     min-width: 920px;
     border-collapse: collapse;
     table-layout: fixed;
+}
+
+.business-strategy-col--legacy {
+    width: calc((100% - 260px) / 2);
+}
+
+.business-strategy-col--carbon {
+    width: 260px;
 }
 
 .business-strategy-table th,
@@ -1263,8 +1360,30 @@ const businessStrategyRows = computed(() => {
         align-self: center;
     }
 
+    .top-actions {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .business-strategy-filter {
+        width: 100%;
+        max-width: none;
+    }
+
     .business-strategy-table {
         min-width: 760px;
+    }
+
+    .business-strategy-col--legacy {
+        width: calc((100% - 220px) / 2);
+    }
+
+    .business-strategy-col--carbon {
+        width: 220px;
+    }
+
+    .business-strategy-panel {
+        width: 90%;
     }
 
     .dti-cards {
@@ -1317,6 +1436,12 @@ const businessStrategyRows = computed(() => {
 :deep(.dark) .business-strategy-panel {
     border-color: rgba(148, 163, 184, 0.16);
     background: linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(17, 24, 39, 0.98) 100%);
+}
+
+:deep(.dark) .business-strategy-filter {
+    border-color: rgba(148, 163, 184, 0.24);
+    background-color: rgba(15, 23, 42, 0.8);
+    color: #cbd5e1;
 }
 
 

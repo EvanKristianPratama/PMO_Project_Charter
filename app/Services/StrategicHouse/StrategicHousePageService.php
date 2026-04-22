@@ -317,7 +317,7 @@ class StrategicHousePageService
             ->select(['id', 'name'])
             ->with([
                 'initiatives' => fn ($query) => $query
-                    ->select(['id', 'coe_id', 'code', 'name', 'status', 'source', 'description'])
+                    ->select(['id', 'coe_id', 'business_unit', 'code', 'name', 'status', 'source', 'description'])
                     ->where('tipe_initiative', $initiativeType)
                     ->with([
                         'latestStatus',
@@ -377,6 +377,7 @@ class StrategicHousePageService
                     'name' => $initiative->name,
                     'description' => $initiative->description,
                     'label' => trim(collect([$initiative->code, $initiative->name])->filter()->implode(' - ')),
+                    'business_unit_id' => ! is_null($initiative->business_unit) ? (int) $initiative->business_unit : null,
                     'mapped_project_id' => $mappedProjectId > 0 ? $mappedProjectId : null,
                     'status' => $status,
                     'status_label' => $this->statusLabel($status),
@@ -629,7 +630,7 @@ class StrategicHousePageService
     private function getUnassignedInitiatives(int $initiativeType): array
     {
         return MstInitiative::query()
-            ->select(['id', 'code', 'name', 'status', 'source', 'description'])
+            ->select(['id', 'business_unit', 'code', 'name', 'status', 'source', 'description'])
             ->with([
                 'latestStatus',
                 'latestStatusImplementation',
@@ -649,6 +650,7 @@ class StrategicHousePageService
                     'name' => $initiative->name,
                     'description' => $initiative->description,
                     'label' => trim(collect([$initiative->code, $initiative->name])->filter()->implode(' - ')),
+                    'business_unit_id' => ! is_null($initiative->business_unit) ? (int) $initiative->business_unit : null,
                     'status' => $status,
                     'status_label' => $this->statusLabel($status),
                     'implementation_status' => $initiative->latestStatusImplementation?->review_status,
