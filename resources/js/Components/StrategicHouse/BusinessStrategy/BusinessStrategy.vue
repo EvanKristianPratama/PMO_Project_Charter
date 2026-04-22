@@ -34,6 +34,8 @@ const pageContext = usePage();
 const flash = computed(() => pageContext.props.flash ?? {});
 const selectedOrganization = ref('');
 const isEditMode = ref(false);
+const showInitiatives = ref(true);
+const showLastUpdatePeriod = ref(true);
 
 const strategyForm = reactive({
     business_unit: '',
@@ -78,7 +80,7 @@ const mergeRowsByBusinessUnit = (rows) => {
             mergedRows.push({
                 ...row,
                 show_business_unit: index === 0,
-                business_unit_rowspan: index === 0 ? currentChunk.length + 1 : 0,
+                business_unit_row_count: currentChunk.length,
                 is_last_business_unit_row: index === currentChunk.length - 1,
             });
         });
@@ -191,6 +193,11 @@ const initiativeBoxesGridStyle = (initiatives = []) => ({
     '--row-count': Math.max(1, Math.ceil((initiatives || []).length / 6)),
 });
 
+const getBusinessUnitRowspan = (row) => {
+    const rowCount = Number(row?.business_unit_row_count ?? 1);
+    return showInitiatives.value ? rowCount + 1 : rowCount;
+};
+
 const normalizedGroups = computed(() => props.groups || []);
 const filterOrganizationOptions = computed(() => {
     const optionMap = new Map(
@@ -238,6 +245,56 @@ const filteredGroups = computed(() => normalizedGroups.value
         };
     })
     .filter((group) => group.rows.length > 0));
+
+const statusDesiredOrder = ['DF', 'Done', 'DT 2026', 'ITSBP', 'On Progress', 'On Review', 'SH'];
+
+const filteredInitiatives = computed(() => filteredGroups.value.flatMap((group) => (
+    (group.rows || []).flatMap((row) => row.initiatives || [])
+)));
+
+const availableStatusOptions = computed(() => {
+    const statusSet = new Set();
+
+    filteredInitiatives.value.forEach((initiative) => {
+        const label = normalizeStatusLabel(initiative?.implementation_status);
+        if (label) {
+            statusSet.add(label);
+        }
+    });
+
+    return Array.from(statusSet).sort((left, right) => {
+        const leftIndex = statusDesiredOrder.indexOf(left);
+        const rightIndex = statusDesiredOrder.indexOf(right);
+
+        if (leftIndex !== -1 && rightIndex !== -1) return leftIndex - rightIndex;
+        if (leftIndex !== -1) return -1;
+        if (rightIndex !== -1) return 1;
+
+        return left.localeCompare(right);
+    });
+});
+
+const statusLegend = computed(() => {
+    const stats = {};
+    availableStatusOptions.value.forEach((label) => {
+        stats[label] = 0;
+    });
+
+    filteredInitiatives.value.forEach((initiative) => {
+        const label = normalizeStatusLabel(initiative?.implementation_status);
+        if (label && Object.prototype.hasOwnProperty.call(stats, label)) {
+            stats[label] += 1;
+        }
+    });
+
+    return availableStatusOptions.value.map((label) => ({
+        label,
+        class: getStatusColorClass(label),
+        count: stats[label],
+    })).filter((item) => item.count > 0);
+});
+
+const totalFilteredInitiatives = computed(() => filteredInitiatives.value.length);
 
 const modalTitle = computed(() => 'Add Strategy');
 const modalMessage = computed(() => 'Pilih business unit lalu isi arah strategy yang ingin ditambahkan.');
@@ -479,68 +536,75 @@ watch(filterOrganizationOptions, (options) => {
 
 <template>
     <div class="space-y-4">
-        <div
-            v-if="flash.error"
-            class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300"
-        >
-            {{ flash.error }}
-        </div>
-
         <div class="strategy-toolbar">
             <div class="strategy-toolbar__actions">
-                <button
-                    v-if="!isEditMode"
-                    type="button"
+                <button v-if="!isEditMode" type="button"
                     class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 dark:bg-white dark:text-slate-900"
-                    @click="openAddStrategy"
-                >
+                    @click="openAddStrategy">
                     Add Strategy
                 </button>
-                <button
-                    v-if="!isEditMode"
-                    type="button"
+                <button v-if="!isEditMode" type="button"
                     class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2 dark:border-white/10 dark:bg-transparent dark:text-slate-200 dark:hover:bg-white/5"
-                    @click="startEditMode"
-                >
+                    @click="startEditMode">
                     Edit Strategy
                 </button>
                 <template v-else>
-                    <button
-                        type="button"
+                    <button type="button"
                         class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2 dark:border-white/10 dark:bg-transparent dark:text-slate-200 dark:hover:bg-white/5"
-                        @click="cancelEditMode"
-                    >
+                        @click="cancelEditMode">
                         Batal
                     </button>
-                    <button
-                        type="button"
-                        :disabled="strategyProcessing"
+                    <button type="button" :disabled="strategyProcessing"
                         class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-slate-900"
-                        @click="saveEditMode"
-                    >
+                        @click="saveEditMode">
                         {{ strategyProcessing ? 'Menyimpan...' : 'Simpan Perubahan' }}
                     </button>
                 </template>
             </div>
 
+            <div v-if="filteredGroups.length > 0 && statusLegend.length > 0" class="strategy-legend">
+                <div class="flex items-center gap-1.5">
+                    <span class="status-legend__title">Implementation Status:</span>
+                </div>
+                <div v-for="status in statusLegend" :key="`status-legend-${status.label}`"
+                    class="flex items-center gap-1.5">
+                    <span class="legend-swatch" :class="status.class"></span>
+                    <span class="status-legend__label">
+                        {{ status.label }}
+                        <span class="status-legend__count">({{ status.count }})</span>
+                    </span>
+                </div>
+                <div class="status-legend__total">
+                    Total Digital Initiatives
+                    <span class="status-legend__count">({{ totalFilteredInitiatives }})</span>
+                </div>
+            </div>
+
+
             <div class="initiative-view-switch">
                 <select v-model="selectedOrganization" class="initiative-view-select">
                     <option value="">All Business Unit</option>
-                    <option
-                        v-for="organization in filterOrganizationOptions"
-                        :key="organization.value"
-                        :value="organization.value"
-                    >
+                    <option v-for="organization in filterOrganizationOptions" :key="organization.value"
+                        :value="organization.value">
                         {{ organization.label }}
                     </option>
                 </select>
+
+                <button type="button" class="view-toggle-btn" :class="{ 'view-toggle-btn--active': showInitiatives }"
+                    @click="showInitiatives = !showInitiatives">
+                    {{ showInitiatives ? 'Hide Initiative' : 'Show Initiative' }}
+                </button>
+
+                <button type="button" class="view-toggle-btn"
+                    :class="{ 'view-toggle-btn--active': showLastUpdatePeriod }"
+                    @click="showLastUpdatePeriod = !showLastUpdatePeriod">
+                    {{ showLastUpdatePeriod ? 'Hide Periode' : 'Show Periode' }}
+                </button>
             </div>
         </div>
 
-        <section
-            v-if="filteredGroups.length > 0"
-            class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]"
-        >
+        <section v-if="filteredGroups.length > 0"
+            class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
             <div class="overflow-x-auto">
                 <h1 class="mb-4 mt-4 text-center text-lg font-bold">
                     Dual Growth Business Strategy 2025 -2029
@@ -550,40 +614,24 @@ watch(filterOrganizationOptions, (options) => {
                     <thead>
                         <tr>
                             <th rowspan="2" class="head-cell head-cell--business-unit"></th>
-                            <th
-                                v-if="isEditMode"
-                                rowspan="2"
-                                class="head-cell head-cell--action"
-                            >
+                            <th v-if="isEditMode" rowspan="2" class="head-cell head-cell--action">
                                 <div class="strategy-head-card strategy-head-card--action">
                                     <span class="strategy-head-card__title">Action</span>
                                 </div>
                             </th>
-                            <th
-                                v-if="legacyColumns.length"
-                                :colspan="legacyColumns.length"
-                                class="head-cell"
-                            >
+                            <th v-if="legacyColumns.length" :colspan="legacyColumns.length" class="head-cell">
                                 <div class="strategy-head-card strategy-head-card--legacy">
                                     <span class="strategy-head-card__title">Maximize Legacy Business</span>
                                 </div>
                             </th>
-                            <th
-                                v-if="lowCarbonColumn"
-                                rowspan="2"
-                                class="head-cell head-cell--carbon"
-                            >
+                            <th v-if="lowCarbonColumn" rowspan="2" class="head-cell head-cell--carbon">
                                 <div class="strategy-head-card strategy-head-card--carbon">
                                     <span class="strategy-head-card__title">Build Low Carbon Business</span>
                                 </div>
                             </th>
                         </tr>
                         <tr v-if="legacyColumns.length">
-                            <th
-                                v-for="column in legacyColumns"
-                                :key="column.key"
-                                class="head-cell"
-                            >
+                            <th v-for="column in legacyColumns" :key="column.key" class="head-cell">
                                 <div class="strategy-head-card strategy-head-card--legacy-child">
                                     <span>{{ column.label }}</span>
                                 </div>
@@ -595,11 +643,8 @@ watch(filterOrganizationOptions, (options) => {
                         <template v-for="group in filteredGroups" :key="group.key">
                             <template v-for="row in group.rows" :key="row.id">
                                 <tr>
-                                    <td
-                                        v-if="row.show_business_unit"
-                                        :rowspan="row.business_unit_rowspan"
-                                        class="primary-cell"
-                                    >
+                                    <td v-if="row.show_business_unit" :rowspan="getBusinessUnitRowspan(row)"
+                                        class="primary-cell">
                                         <div class="primary-cell__content">
                                             <div class="primary-label-wrapper">
                                                 <span class="text-xs">{{ row.business_unit }}</span>
@@ -607,107 +652,62 @@ watch(filterOrganizationOptions, (options) => {
                                         </div>
                                     </td>
 
-                                    <td
-                                        v-if="isEditMode"
-                                        class="action-cell"
-                                    >
-                                        <button
-                                            type="button"
-                                            class="primary-cell__delete"
-                                            :disabled="strategyProcessing"
-                                            title="Hapus business strategy"
-                                            @click="deleteStrategy(row)"
-                                        >
+                                    <td v-if="isEditMode" class="action-cell">
+                                        <button type="button" class="primary-cell__delete"
+                                            :disabled="strategyProcessing" title="Hapus business strategy"
+                                            @click="deleteStrategy(row)">
                                             Hapus
                                         </button>
                                     </td>
 
-                                    <td
-                                        v-for="column in orderedStrategyColumns"
-                                        :key="`${row.id}-${column.key}`"
-                                        class="strategy-cell"
-                                        :class="{ 'strategy-cell--editing': isEditMode }"
-                                    >
-                                        <textarea
-                                            v-if="isEditMode"
-                                            v-model="editableRows[row.id][column.key]"
-                                            rows="1"
+                                    <td v-for="column in orderedStrategyColumns" :key="`${row.id}-${column.key}`"
+                                        class="strategy-cell" :class="{ 'strategy-cell--editing': isEditMode }">
+                                        <textarea v-if="isEditMode" v-model="editableRows[row.id][column.key]" rows="1"
                                             class="strategy-cell__textarea"
-                                            :placeholder="`Isi ${column.label.toLowerCase()}...`"
-                                        />
-                                        <p
-                                            v-else-if="row.values?.[column.key]"
-                                            class="strategy-cell__value"
-                                        >
+                                            :placeholder="`Isi ${column.label.toLowerCase()}...`" />
+                                        <p v-else-if="row.values?.[column.key]" class="strategy-cell__value">
                                             {{ row.values[column.key] }}
                                         </p>
-                                        <p
-                                            v-else
-                                            class="strategy-cell__empty"
-                                        >
+                                        <p v-else class="strategy-cell__empty">
                                             Not Available
                                         </p>
                                     </td>
                                 </tr>
 
-                                <tr
-                                    v-if="row.is_last_business_unit_row"
-                                    class="initiative-row"
-                                >
-                                    <td
-                                        v-if="isEditMode"
-                                        class="initiative-row__action-spacer"
-                                    ></td>
-                                    <td
-                                        :colspan="orderedStrategyColumns.length"
-                                        class="initiative-row__cell"
-                                    >
+                                <tr v-if="showInitiatives && row.is_last_business_unit_row" class="initiative-row">
+                                    <td v-if="isEditMode" class="initiative-row__action-spacer"></td>
+                                    <td :colspan="orderedStrategyColumns.length" class="initiative-row__cell">
                                         <div class="initiative-row__content">
-                                            <div
-                                                v-if="row.initiatives?.length"
-                                                class="initiative-row__boxes"
-                                                :style="initiativeBoxesGridStyle(row.initiatives)"
-                                            >
-                                                <component
-                                                    :is="initiativeSummaryHref(initiative) ? Link : 'div'"
+                                            <div v-if="row.initiatives?.length" class="initiative-row__boxes"
+                                                :style="initiativeBoxesGridStyle(row.initiatives)">
+                                                <component :is="initiativeSummaryHref(initiative) ? Link : 'div'"
                                                     v-for="initiative in row.initiatives"
                                                     :key="`initiative-${row.id}-${initiative.id}`"
                                                     :href="initiativeSummaryHref(initiative)"
-                                                    :title="initiativeSummaryTitle(initiative)"
-                                                    class="initiative-box"
+                                                    :title="initiativeSummaryTitle(initiative)" class="initiative-box"
                                                     :class="[
                                                         { 'initiative-box--no-code': !initiative.code },
                                                         { 'initiative-box--clickable': initiativeSummaryHref(initiative) },
-                                                    ]"
-                                                >
-                                                    <span
-                                                        v-if="initiative.code"
-                                                        class="initiative-box__code"
-                                                        :class="getStatusColorClass(initiative.implementation_status)"
-                                                    >
+                                                    ]">
+                                                    <span v-if="initiative.code" class="initiative-box__code"
+                                                        :class="getStatusColorClass(initiative.implementation_status)">
                                                         {{ initiative.code }}
                                                     </span>
-                                                    <span
-                                                        class="initiative-box__name"
-                                                        :class="{ 'initiative-box__name--full': !initiative.code }"
-                                                    >
+                                                    <span class="initiative-box__name"
+                                                        :class="{ 'initiative-box__name--full': !initiative.code }">
                                                         <span class="initiative-box__label-text">
                                                             {{ initiative.name }}
                                                         </span>
                                                         <span
-                                                            v-if="getInitiativePeriodLabel(initiative)"
-                                                            class="initiative-box__period"
-                                                        >
+                                                            v-if="showLastUpdatePeriod && getInitiativePeriodLabel(initiative)"
+                                                            class="initiative-box__period">
                                                             {{ getInitiativePeriodLabel(initiative) }}
                                                         </span>
                                                     </span>
                                                 </component>
                                             </div>
 
-                                            <p
-                                                v-else
-                                                class="initiative-row__empty"
-                                            >
+                                            <p v-else class="initiative-row__empty">
                                                 Digital initiatives not available.
                                             </p>
                                         </div>
@@ -720,72 +720,41 @@ watch(filterOrganizationOptions, (options) => {
             </div>
         </section>
 
-        <section
-            v-else
-            class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-white/15 dark:bg-[#171717]"
-        >
+        <section v-else
+            class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-white/15 dark:bg-[#171717]">
             <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">
                 Business Strategy Not Available
             </p>
         </section>
 
-        <ConfirmationModal
-            :show="isModalVisible"
-            :title="modalTitle"
-            :message="modalMessage"
-            type="info"
-            :loading="strategyProcessing"
-            :confirm-text="modalConfirmText"
-            cancel-text="Batal"
-            max-width="2xl"
-            @close="closeModal"
-            @confirm="submitStrategy"
-            @after-leave="handleModalAfterLeave"
-        >
+        <ConfirmationModal :show="isModalVisible" :title="modalTitle" :message="modalMessage" type="info"
+            :loading="strategyProcessing" :confirm-text="modalConfirmText" cancel-text="Batal" max-width="2xl"
+            @close="closeModal" @confirm="submitStrategy" @after-leave="handleModalAfterLeave">
             <div class="space-y-4">
                 <div class="space-y-1.5">
                     <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Business Unit</label>
-                    <select
-                        v-model="strategyForm.business_unit"
-                        class="edit-select"
-                    >
+                    <select v-model="strategyForm.business_unit" class="edit-select">
                         <option value="">- Pilih Business Unit -</option>
-                        <option
-                            v-for="organization in organizationOptions"
-                            :key="`strategy-business-unit-${organization.value}`"
-                            :value="organization.value"
-                        >
+                        <option v-for="organization in organizationOptions"
+                            :key="`strategy-business-unit-${organization.value}`" :value="organization.value">
                             {{ organization.label }}
                         </option>
                     </select>
                 </div>
 
-                <div
-                    v-for="field in strategyFormFields"
-                    :key="`strategy-field-${field.key}`"
-                    class="space-y-1.5"
-                >
+                <div v-for="field in strategyFormFields" :key="`strategy-field-${field.key}`" class="space-y-1.5">
                     <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300">
                         {{ field.label }}
                     </label>
-                    <p
-                        v-if="field.description"
-                        class="text-[11px] text-slate-500 dark:text-slate-400"
-                    >
+                    <p v-if="field.description" class="text-[11px] text-slate-500 dark:text-slate-400">
                         {{ field.description }}
                     </p>
-                    <textarea
-                        v-model="strategyForm[field.key]"
-                        class="edit-textarea"
-                        rows="4"
-                        :placeholder="`Isi ${field.label.toLowerCase()}...`"
-                    />
+                    <textarea v-model="strategyForm[field.key]" class="edit-textarea" rows="4"
+                        :placeholder="`Isi ${field.label.toLowerCase()}...`" />
                 </div>
 
-                <p
-                    v-if="modalError"
-                    class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700"
-                >
+                <p v-if="modalError"
+                    class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700">
                     {{ modalError }}
                 </p>
             </div>
@@ -1161,6 +1130,14 @@ a.initiative-box {
     gap: 8px;
 }
 
+.strategy-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    padding: 12px 16px;
+}
+
 .initiative-view-switch {
     display: flex;
     width: 100%;
@@ -1203,6 +1180,41 @@ a.initiative-box {
     flex-shrink: 0;
 }
 
+.view-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #ffffff;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+    cursor: pointer;
+}
+
+.view-toggle-btn:hover {
+    border-color: #0f6fb7;
+    background: #f8fafc;
+    color: #0f6fb7;
+}
+
+.view-toggle-btn--active {
+    border-color: #0f6fb7;
+    background: #0f6fb7;
+    color: #ffffff;
+}
+
+.view-toggle-btn--active:hover {
+    background: #0d5ea1;
+    border-color: #0d5ea1;
+    color: #ffffff;
+}
+
 .edit-select {
     width: 100%;
 }
@@ -1230,6 +1242,45 @@ a.initiative-box {
     outline: none;
     border-color: #0f6fb7;
     box-shadow: 0 0 0 3px rgba(15, 111, 183, 0.1);
+}
+
+.status-legend__title {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #94a3b8;
+}
+
+.status-legend__label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.status-legend__count {
+    font-weight: 500;
+    color: #94a3b8;
+}
+
+.status-legend__total {
+    margin-left: 4px;
+    padding-left: 16px;
+    border-left: 1px solid #cbd5e1;
+    font-size: 11px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.legend-swatch {
+    display: block;
+    width: 12px;
+    height: 12px;
+    min-width: 12px;
+    min-height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
 }
 
 :deep(.dark) .strategy-table thead th {
@@ -1273,6 +1324,11 @@ a.initiative-box {
 
 :deep(.dark) .action-cell {
     background: rgba(15, 23, 42, 0.55);
+}
+
+:deep(.dark) .strategy-legend {
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(23, 23, 23, 0.9);
 }
 
 :deep(.dark) .initiative-row__action-spacer,
@@ -1328,11 +1384,30 @@ a.initiative-box {
 
 :deep(.dark) .initiative-view-select,
 :deep(.dark) .initiative-view-toggle,
+:deep(.dark) .view-toggle-btn,
 :deep(.dark) .edit-select,
 :deep(.dark) .edit-textarea {
     border-color: rgba(255, 255, 255, 0.1);
     background: rgba(15, 23, 42, 0.55);
     color: #cbd5e1;
+}
+
+:deep(.dark) .view-toggle-btn:hover {
+    border-color: rgba(96, 165, 250, 0.4);
+    background: rgba(30, 41, 59, 0.85);
+    color: #93c5fd;
+}
+
+:deep(.dark) .view-toggle-btn--active {
+    border-color: #2563eb;
+    background: #1d4ed8;
+    color: #ffffff;
+}
+
+:deep(.dark) .view-toggle-btn--active:hover {
+    border-color: #2563eb;
+    background: #2563eb;
+    color: #ffffff;
 }
 
 :deep(.dark) .strategy-cell__textarea {
@@ -1348,6 +1423,23 @@ a.initiative-box {
 :deep(.dark) .strategy-cell__textarea:focus {
     border-color: #60a5fa;
     box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.12);
+}
+
+:deep(.dark) .status-legend__title {
+    color: #64748b;
+}
+
+:deep(.dark) .status-legend__label {
+    color: #cbd5e1;
+}
+
+:deep(.dark) .status-legend__count {
+    color: #94a3b8;
+}
+
+:deep(.dark) .status-legend__total {
+    border-left-color: rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
 }
 
 .status-color-df {
