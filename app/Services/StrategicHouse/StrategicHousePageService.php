@@ -360,6 +360,7 @@ class StrategicHousePageService
                             'no' => $badgeLabel,
                             'id' => $initiativeId,
                             'name' => trim((string) ($firstItem['initiative_name'] ?? '')) ?: sprintf('Initiative #%d', $initiativeId),
+                            'organization_name' => trim((string) ($firstItem['organization_name'] ?? '')),
                             'projects' => [[
                                 'id' => (int) ($firstItem['id'] ?? 0),
                                 'project_id' => null,
@@ -383,6 +384,7 @@ class StrategicHousePageService
                         'no' => '-',
                         'id' => -1000 - $index,
                         'name' => '-',
+                        'organization_name' => '',
                         'projects' => [],
                         'implementation_status' => null,
                         'review_statuses' => [],
