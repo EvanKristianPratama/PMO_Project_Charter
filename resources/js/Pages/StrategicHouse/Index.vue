@@ -2,9 +2,7 @@
     <UserLayout :title="page.title">
         <div class="strategic-house animate-fade-in">
             <!-- View Mode Switcher -->
-            <div
-                class="inline-flex items-center gap-1 rounded-xl bg-slate-200/50 p-1 dark:bg-white/5 w-fit mb-5"
-            >
+            <div class="inline-flex items-center gap-1 rounded-xl bg-slate-200/50 p-1 dark:bg-white/5 w-fit mb-5">
                 <button
                     type="button"
                     class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
@@ -148,8 +146,35 @@
             <!-- Roadmap Summary Button in Roadmap Tab -->
             <div
                 v-if="viewMode === 'roadmap'"
-                class="mb-5 flex justify-end"
+                class="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"
             >
+                <div class="inline-flex w-fit items-center gap-1 rounded-xl bg-slate-200/50 p-1 dark:bg-white/5">
+                    <button
+                        type="button"
+                        class="rounded-lg px-3 py-1.5 text-[10px] font-bold tracking-wider transition-all"
+                        :class="
+                            roadmapMode === 'it'
+                                ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
+                                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                        "
+                        @click="setRoadmapMode('it')"
+                    >
+                        IT Initiative
+                    </button>
+                    <button
+                        type="button"
+                        class="rounded-lg px-3 py-1.5 text-[10px] font-bold tracking-wider transition-all"
+                        :class="
+                            roadmapMode === 'digital'
+                                ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
+                                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                        "
+                        @click="setRoadmapMode('digital')"
+                    >
+                        Digital Initiative
+                    </button>
+                </div>
+
                 <Link
                     :href="route('strategic-house.roadmap-summary.index')"
                     class="inline-flex items-center gap-1.5 rounded-lg border border-[#0B2A8A] bg-white px-3 py-1.5 text-[10px] font-bold tracking-wider text-[#0B2A8A] transition-all hover:bg-[#0B2A8A] hover:text-white dark:border-[#53BDE6] dark:bg-transparent dark:text-[#53BDE6] dark:hover:bg-[#53BDE6] dark:hover:text-[#171717]"
@@ -159,7 +184,7 @@
             </div>
 
             <!-- Conditional View Rendering -->
-            <div class="relative min-h-[400px]">
+            <div class="relative min-h-100">
                 <Transition
                     enter-active-class="transition duration-300 ease-out"
                     enter-from-class="transform opacity-0 translate-y-4"
@@ -283,6 +308,7 @@
 
                     <div v-else-if="viewMode === 'roadmap'" key="roadmap">
                         <ItInitiativeRoadmapContent
+                            v-if="roadmapMode === 'it'"
                             :groups="itRoadmapGroups"
                             :start-year="itRoadmapStartYear"
                             :end-year="itRoadmapEndYear"
@@ -290,6 +316,16 @@
                             :milestone-type-options="
                                 itRoadmapMilestoneTypeOptions
                             "
+                        />
+                        <ItInitiativeRoadmapContent
+                            v-else
+                            :groups="digitalRoadmapGroups"
+                            :start-year="digitalRoadmapStartYear"
+                            :end-year="digitalRoadmapEndYear"
+                            :total-count="digitalRoadmapGroups.length"
+                            group-header-label="COE"
+                            initiative-header-label="Digital Initiatives"
+                            empty-text="Belum ada data roadmap Digital Initiative."
                         />
                     </div>
 
@@ -441,6 +477,9 @@ const props = defineProps({
     itRoadmapEndYear: { type: Number, default: 2029 },
     itRoadmapTotalCount: { type: Number, default: 0 },
     itRoadmapMilestoneTypeOptions: { type: Array, default: () => [] },
+    digitalRoadmapGroups: { type: Array, default: () => [] },
+    digitalRoadmapStartYear: { type: Number, default: 2024 },
+    digitalRoadmapEndYear: { type: Number, default: 2029 },
 
     // Strategic Pillar props
     strategicPillars: { type: Array, default: () => [] },
@@ -509,6 +548,20 @@ const getInitialViewMode = () => {
 
 const viewMode = ref(getInitialViewMode());
 const showEnabler = ref(false);
+const roadmapModes = new Set(["it", "digital"]);
+
+const getInitialRoadmapMode = () => {
+    if (typeof window === "undefined") return "it";
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const requestedMode = urlParams.get("roadmap");
+
+    return requestedMode && roadmapModes.has(requestedMode)
+        ? requestedMode
+        : "it";
+};
+
+const roadmapMode = ref(getInitialRoadmapMode());
 
 const syncViewModeInUrl = (mode) => {
     if (typeof window === "undefined") return;
@@ -518,8 +571,21 @@ const syncViewModeInUrl = (mode) => {
     window.history.replaceState({}, "", url.toString());
 };
 
+const syncRoadmapModeInUrl = (mode) => {
+    if (typeof window === "undefined") return;
+
+    const url = new URL(window.location.href);
+    url.searchParams.set("roadmap", mode);
+    window.history.replaceState({}, "", url.toString());
+};
+
 const setViewMode = (mode) => {
     viewMode.value = mode;
     syncViewModeInUrl(mode);
+};
+
+const setRoadmapMode = (mode) => {
+    roadmapMode.value = mode;
+    syncRoadmapModeInUrl(mode);
 };
 </script>
