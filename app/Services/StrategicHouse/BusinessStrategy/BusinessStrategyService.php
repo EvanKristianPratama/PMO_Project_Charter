@@ -2,6 +2,7 @@
 
 namespace App\Services\StrategicHouse\BusinessStrategy;
 
+use App\Models\MstInitiative;
 use App\Models\TrsOrganization;
 use App\Models\TrsBusinessStrategy;
 use Illuminate\Support\Facades\DB;
@@ -32,6 +33,8 @@ class BusinessStrategyService
 
     public function getPageProps(): array
     {
+        $initiativesByBusinessUnit = $this->getInitiativesByBusinessUnit();
+
         $rows = TrsBusinessStrategy::query()
             ->select([
                 'id',
@@ -46,7 +49,7 @@ class BusinessStrategyService
             ])
             ->orderBy('id')
             ->get()
-            ->map(fn (TrsBusinessStrategy $strategy): array => $this->mapRow($strategy))
+            ->map(fn (TrsBusinessStrategy $strategy): array => $this->mapRow($strategy, $initiativesByBusinessUnit))
             ->values();
 
         return [
@@ -101,14 +104,16 @@ class BusinessStrategyService
         $strategy->delete();
     }
 
-    private function mapRow(TrsBusinessStrategy $strategy): array
+    private function mapRow(TrsBusinessStrategy $strategy, Collection $initiativesByBusinessUnit): array
     {
         $groupMeta = $this->resolveGroupMeta($strategy->businessUnit?->groub_id);
+        $businessUnitId = (int) ($strategy->business_unit ?? 0);
         $values = collect(self::STRATEGY_COLUMNS)
             ->mapWithKeys(fn (array $column): array => [
                 $column['key'] => $this->normalizeValue($strategy->{$column['key']} ?? null),
             ])
             ->all();
+        $initiatives = $initiativesByBusinessUnit->get($businessUnitId, []);
 
         $completionCount = collect($values)
             ->filter(fn (?string $value): bool => filled($value))
@@ -116,15 +121,83 @@ class BusinessStrategyService
 
         return [
             'id' => (int) $strategy->id,
-            'business_unit_id' => (int) ($strategy->business_unit ?? 0),
+            'business_unit_id' => $businessUnitId,
             'business_unit' => trim((string) ($strategy->businessUnit?->name ?? 'Business Unit tidak ditemukan')),
             'group_key' => $groupMeta['key'],
             'group_label' => $groupMeta['label'],
             'group_order' => $groupMeta['order'],
             'values' => $values,
+            'initiatives' => $initiatives,
+            'initiatives_count' => count($initiatives),
             'completion_count' => $completionCount,
             'is_complete' => $completionCount === count(self::STRATEGY_COLUMNS),
             'updated_at' => $strategy->updated_at?->toDateTimeString(),
+        ];
+    }
+
+    private function getInitiativesByBusinessUnit(): Collection
+    {
+        return MstInitiative::query()
+            ->select([
+                'id',
+                'business_unit',
+                'code',
+                'name',
+                'description',
+                'tipe_initiative',
+            ])
+            ->with([
+                'latestStatusImplementation' => fn ($query) => $query->select([
+                    'trs_status_implementation.id',
+                    'trs_status_implementation.initiative_id',
+                    'trs_status_implementation.review_status',
+                ]),
+                'statusImplementations' => fn ($query) => $query->select([
+                    'trs_status_implementation.id',
+                    'trs_status_implementation.initiative_id',
+                    'trs_status_implementation.start',
+                    'trs_status_implementation.end',
+                    'trs_status_implementation.year',
+                    'trs_status_implementation.review_status',
+                ]),
+            ])
+            ->whereNotNull('business_unit')
+            ->get()
+            ->groupBy(fn (MstInitiative $initiative): int => (int) ($initiative->business_unit ?? 0))
+            ->map(function (Collection $initiatives): array {
+                return $initiatives
+                    ->sortBy(
+                        fn (MstInitiative $initiative): string => trim(sprintf(
+                            '%s %s',
+                            (string) ($initiative->code ?? 'ZZZ'),
+                            (string) ($initiative->name ?? '')
+                        )),
+                        SORT_NATURAL | SORT_FLAG_CASE
+                    )
+                    ->values()
+                    ->map(fn (MstInitiative $initiative): array => $this->mapInitiative($initiative))
+                    ->all();
+            });
+    }
+
+    private function mapInitiative(MstInitiative $initiative): array
+    {
+        return [
+            'id' => (int) $initiative->id,
+            'code' => $this->normalizeValue($initiative->code),
+            'name' => trim((string) ($initiative->name ?? '')),
+            'description' => $this->normalizeValue($initiative->description),
+            'tipe_initiative' => (int) ($initiative->tipe_initiative ?? 0),
+            'implementation_status' => $initiative->latestStatusImplementation?->review_status,
+            'statuses' => collect($initiative->statusImplementations ?? [])
+                ->map(fn ($status): array => [
+                    'start' => $status->start,
+                    'end' => $status->end,
+                    'year' => (int) $status->year,
+                    'status' => $status->review_status,
+                ])
+                ->values()
+                ->all(),
         ];
     }
 

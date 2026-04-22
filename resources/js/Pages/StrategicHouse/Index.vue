@@ -220,6 +220,7 @@
                             :business-strategy-page="businessStrategyPage"
                             :business-strategy-groups="businessStrategyGroups"
                             :business-strategy-columns="businessStrategyColumns"
+                            :business-strategy-organization-options="businessStrategyOrganizationOptions"
                         />
                     </section>
 

@@ -546,6 +546,7 @@ class StrategicHousePageService
                     ->with([
                         'latestStatus',
                         'mappedProjects:id',
+                        'organization:id,name',
                         'latestStatusImplementation',
                         'statusImplementations:id,initiative_id,start,end,year,review_status',
                         'sourceData:id,name',
@@ -602,6 +603,7 @@ class StrategicHousePageService
                     'description' => $initiative->description,
                     'label' => trim(collect([$initiative->code, $initiative->name])->filter()->implode(' - ')),
                     'business_unit_id' => ! is_null($initiative->business_unit) ? (int) $initiative->business_unit : null,
+                    'business_unit_name' => trim((string) ($initiative->organization?->name ?? '')),
                     'mapped_project_id' => $mappedProjectId > 0 ? $mappedProjectId : null,
                     'status' => $status,
                     'status_label' => $this->statusLabel($status),
@@ -857,6 +859,7 @@ class StrategicHousePageService
             ->select(['id', 'business_unit', 'code', 'name', 'status', 'source', 'description'])
             ->with([
                 'latestStatus',
+                'organization:id,name',
                 'latestStatusImplementation',
                 'statusImplementations:id,initiative_id,start,end,year,review_status',
                 'sourceData:id,name',
@@ -875,6 +878,7 @@ class StrategicHousePageService
                     'description' => $initiative->description,
                     'label' => trim(collect([$initiative->code, $initiative->name])->filter()->implode(' - ')),
                     'business_unit_id' => ! is_null($initiative->business_unit) ? (int) $initiative->business_unit : null,
+                    'business_unit_name' => trim((string) ($initiative->organization?->name ?? '')),
                     'status' => $status,
                     'status_label' => $this->statusLabel($status),
                     'implementation_status' => $initiative->latestStatusImplementation?->review_status,

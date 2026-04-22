@@ -1,6 +1,6 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue';
-import { router, usePage } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
@@ -65,34 +65,131 @@ const strategyFormFields = computed(() => orderedStrategyColumns.value);
 const allRows = computed(() => normalizedGroups.value.flatMap((group) => group.rows || []));
 
 const mergeRowsByBusinessUnit = (rows) => {
-    let previousBusinessUnitKey = null;
-    let previousMergedRow = null;
+    const mergedRows = [];
+    let currentBusinessUnitKey = null;
+    let currentChunk = [];
 
-    return (rows || []).map((row) => {
-        const businessUnitKey = `${row.group_key || 'unknown'}::${row.business_unit_id || row.business_unit || row.id}`;
-
-        if (businessUnitKey === previousBusinessUnitKey && previousMergedRow) {
-            previousMergedRow.business_unit_rowspan += 1;
-
-            return {
-                ...row,
-                show_business_unit: false,
-                business_unit_rowspan: 0,
-            };
+    const flushChunk = () => {
+        if (!currentChunk.length) {
+            return;
         }
 
-        const mergedRow = {
-            ...row,
-            show_business_unit: true,
-            business_unit_rowspan: 1,
-        };
+        currentChunk.forEach((row, index) => {
+            mergedRows.push({
+                ...row,
+                show_business_unit: index === 0,
+                business_unit_rowspan: index === 0 ? currentChunk.length + 1 : 0,
+                is_last_business_unit_row: index === currentChunk.length - 1,
+            });
+        });
 
-        previousBusinessUnitKey = businessUnitKey;
-        previousMergedRow = mergedRow;
+        currentChunk = [];
+    };
 
-        return mergedRow;
+    (rows || []).forEach((row) => {
+        const businessUnitKey = `${row.group_key || 'unknown'}::${row.business_unit_id || row.business_unit || row.id}`;
+
+        if (currentBusinessUnitKey !== null && businessUnitKey !== currentBusinessUnitKey) {
+            flushChunk();
+        }
+
+        currentBusinessUnitKey = businessUnitKey;
+        currentChunk.push(row);
     });
+
+    flushChunk();
+
+    return mergedRows;
 };
+
+const normalizeStatusLabel = (rawStatus) => {
+    const value = String(rawStatus ?? '').trim();
+
+    if (!value) {
+        return null;
+    }
+
+    if (value === 'DF') return 'DF';
+    if (value === 'Done') return 'Done';
+    if (value === 'DT 2026') return 'DT 2026';
+    if (value === 'ITSBP') return 'ITSBP';
+    if (value === 'On Progress' || value === 'On Progres') return 'On Progress';
+    if (value === 'On Review') return 'On Review';
+    if (value === 'SH') return 'SH';
+
+    return value;
+};
+
+const getStatusColorClass = (status) => {
+    const normalizedStatus = normalizeStatusLabel(status);
+
+    if (normalizedStatus === 'DF') return 'status-color-df';
+    if (normalizedStatus === 'Done') return 'status-color-done';
+    if (normalizedStatus === 'DT 2026') return 'status-color-dt2026';
+    if (normalizedStatus === 'ITSBP') return 'status-color-itsbp';
+    if (normalizedStatus === 'On Review') return 'status-color-onreview';
+    if (normalizedStatus === 'On Progress') return 'status-color-onprogress';
+    if (normalizedStatus === 'SH') return 'status-color-sh';
+
+    return '';
+};
+
+const monthsOrder = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+];
+
+const formatPeriodLabel = (period) => {
+    const start = String(period?.start ?? '').trim();
+    const end = String(period?.end ?? '').trim();
+    const year = String(period?.year ?? '').trim();
+
+    if (start && end && year) {
+        return start === end ? `${start} ${year}` : `${start} - ${end} ${year}`;
+    }
+
+    if (start && year) {
+        return `${start} ${year}`;
+    }
+
+    return year || null;
+};
+
+const getInitiativePeriodLabel = (initiative) => {
+    if (!initiative?.statuses?.length) {
+        return null;
+    }
+
+    const latestStatus = [...initiative.statuses].sort((left, right) => {
+        if (left.year !== right.year) {
+            return Number(right.year ?? 0) - Number(left.year ?? 0);
+        }
+
+        return monthsOrder.indexOf(String(right.start ?? ''))
+            - monthsOrder.indexOf(String(left.start ?? ''));
+    })[0];
+
+    return formatPeriodLabel(latestStatus);
+};
+
+const initiativeSummaryHref = (initiative) => {
+    const initiativeId = Number(initiative?.id ?? 0);
+    const initiativeType = Number(initiative?.tipe_initiative ?? 0);
+
+    return initiativeId > 0 && initiativeType === 1
+        ? route('program-planning.program-definition.digital-initiatives.summary.index', initiativeId)
+        : null;
+};
+
+const initiativeSummaryTitle = (initiative) => {
+    const label = String(initiative?.code ?? initiative?.name ?? 'initiative').trim();
+    return `Lihat capsule summary untuk ${label}`;
+};
+
+const initiativeBoxesGridStyle = (initiatives = []) => ({
+    '--initiative-column-count': 6,
+    '--row-count': Math.max(1, Math.ceil((initiatives || []).length / 6)),
+});
 
 const normalizedGroups = computed(() => props.groups || []);
 const filterOrganizationOptions = computed(() => {
@@ -142,9 +239,9 @@ const filteredGroups = computed(() => normalizedGroups.value
     })
     .filter((group) => group.rows.length > 0));
 
-const modalTitle = computed(() => 'Tambah Strategy');
+const modalTitle = computed(() => 'Add Strategy');
 const modalMessage = computed(() => 'Pilih business unit lalu isi arah strategy yang ingin ditambahkan.');
-const modalConfirmText = computed(() => 'Tambah Strategy');
+const modalConfirmText = computed(() => 'Add Strategy');
 
 const showSuccessAlert = (message) => {
     Swal.fire({
@@ -397,7 +494,7 @@ watch(filterOrganizationOptions, (options) => {
                     class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 dark:bg-white dark:text-slate-900"
                     @click="openAddStrategy"
                 >
-                    Tambah Strategy
+                    Add Strategy
                 </button>
                 <button
                     v-if="!isEditMode"
@@ -496,61 +593,127 @@ watch(filterOrganizationOptions, (options) => {
 
                     <tbody>
                         <template v-for="group in filteredGroups" :key="group.key">
-                            <tr v-for="row in group.rows" :key="row.id">
-                                <td
-                                    v-if="row.show_business_unit"
-                                    :rowspan="row.business_unit_rowspan"
-                                    class="primary-cell"
-                                >
-                                    <div class="primary-cell__content">
-                                        <div class="primary-label-wrapper">
-                                            <span class="text-xs">{{ row.business_unit }}</span>
+                            <template v-for="row in group.rows" :key="row.id">
+                                <tr>
+                                    <td
+                                        v-if="row.show_business_unit"
+                                        :rowspan="row.business_unit_rowspan"
+                                        class="primary-cell"
+                                    >
+                                        <div class="primary-cell__content">
+                                            <div class="primary-label-wrapper">
+                                                <span class="text-xs">{{ row.business_unit }}</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                </td>
+                                    </td>
 
-                                <td
-                                    v-if="isEditMode"
-                                    class="action-cell"
-                                >
-                                    <button
-                                        type="button"
-                                        class="primary-cell__delete"
-                                        :disabled="strategyProcessing"
-                                        title="Hapus business strategy"
-                                        @click="deleteStrategy(row)"
-                                    >
-                                        Hapus
-                                    </button>
-                                </td>
-
-                                <td
-                                    v-for="column in orderedStrategyColumns"
-                                    :key="`${row.id}-${column.key}`"
-                                    class="strategy-cell"
-                                    :class="{ 'strategy-cell--editing': isEditMode }"
-                                >
-                                    <textarea
+                                    <td
                                         v-if="isEditMode"
-                                        v-model="editableRows[row.id][column.key]"
-                                        rows="1"
-                                        class="strategy-cell__textarea"
-                                        :placeholder="`Isi ${column.label.toLowerCase()}...`"
-                                    />
-                                    <p
-                                        v-else-if="row.values?.[column.key]"
-                                        class="strategy-cell__value"
+                                        class="action-cell"
                                     >
-                                        {{ row.values[column.key] }}
-                                    </p>
-                                    <p
-                                        v-else
-                                        class="strategy-cell__empty"
+                                        <button
+                                            type="button"
+                                            class="primary-cell__delete"
+                                            :disabled="strategyProcessing"
+                                            title="Hapus business strategy"
+                                            @click="deleteStrategy(row)"
+                                        >
+                                            Hapus
+                                        </button>
+                                    </td>
+
+                                    <td
+                                        v-for="column in orderedStrategyColumns"
+                                        :key="`${row.id}-${column.key}`"
+                                        class="strategy-cell"
+                                        :class="{ 'strategy-cell--editing': isEditMode }"
                                     >
-                                        Not Available
-                                    </p>
-                                </td>
-                            </tr>
+                                        <textarea
+                                            v-if="isEditMode"
+                                            v-model="editableRows[row.id][column.key]"
+                                            rows="1"
+                                            class="strategy-cell__textarea"
+                                            :placeholder="`Isi ${column.label.toLowerCase()}...`"
+                                        />
+                                        <p
+                                            v-else-if="row.values?.[column.key]"
+                                            class="strategy-cell__value"
+                                        >
+                                            {{ row.values[column.key] }}
+                                        </p>
+                                        <p
+                                            v-else
+                                            class="strategy-cell__empty"
+                                        >
+                                            Not Available
+                                        </p>
+                                    </td>
+                                </tr>
+
+                                <tr
+                                    v-if="row.is_last_business_unit_row"
+                                    class="initiative-row"
+                                >
+                                    <td
+                                        v-if="isEditMode"
+                                        class="initiative-row__action-spacer"
+                                    ></td>
+                                    <td
+                                        :colspan="orderedStrategyColumns.length"
+                                        class="initiative-row__cell"
+                                    >
+                                        <div class="initiative-row__content">
+                                            <div
+                                                v-if="row.initiatives?.length"
+                                                class="initiative-row__boxes"
+                                                :style="initiativeBoxesGridStyle(row.initiatives)"
+                                            >
+                                                <component
+                                                    :is="initiativeSummaryHref(initiative) ? Link : 'div'"
+                                                    v-for="initiative in row.initiatives"
+                                                    :key="`initiative-${row.id}-${initiative.id}`"
+                                                    :href="initiativeSummaryHref(initiative)"
+                                                    :title="initiativeSummaryTitle(initiative)"
+                                                    class="initiative-box"
+                                                    :class="[
+                                                        { 'initiative-box--no-code': !initiative.code },
+                                                        { 'initiative-box--clickable': initiativeSummaryHref(initiative) },
+                                                    ]"
+                                                >
+                                                    <span
+                                                        v-if="initiative.code"
+                                                        class="initiative-box__code"
+                                                        :class="getStatusColorClass(initiative.implementation_status)"
+                                                    >
+                                                        {{ initiative.code }}
+                                                    </span>
+                                                    <span
+                                                        class="initiative-box__name"
+                                                        :class="{ 'initiative-box__name--full': !initiative.code }"
+                                                    >
+                                                        <span class="initiative-box__label-text">
+                                                            {{ initiative.name }}
+                                                        </span>
+                                                        <span
+                                                            v-if="getInitiativePeriodLabel(initiative)"
+                                                            class="initiative-box__period"
+                                                        >
+                                                            {{ getInitiativePeriodLabel(initiative) }}
+                                                        </span>
+                                                    </span>
+                                                </component>
+                                            </div>
+
+                                            <p
+                                                v-else
+                                                class="initiative-row__empty"
+                                            >
+                                                Digital initiatives not available.
+                                            </p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
                         </template>
                     </tbody>
                 </table>
@@ -799,6 +962,146 @@ watch(filterOrganizationOptions, (options) => {
     vertical-align: middle !important;
 }
 
+.initiative-row__action-spacer {
+    width: 92px;
+    padding: 0;
+    background: #f8fbff;
+}
+
+.initiative-row__cell {
+    padding: 8px;
+    background: linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%);
+}
+
+.initiative-row__content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.initiative-row__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.initiative-row__title {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #475569;
+}
+
+.initiative-row__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: rgba(15, 111, 183, 0.08);
+    border: 1px solid rgba(15, 111, 183, 0.18);
+    font-size: 10px;
+    font-weight: 800;
+    color: #0f6fb7;
+}
+
+.initiative-row__boxes {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(var(--initiative-column-count, 6), minmax(0, 1fr));
+    grid-auto-flow: column;
+    grid-template-rows: repeat(var(--row-count, 1), minmax(min-content, 1fr));
+    gap: 8px;
+    align-items: stretch;
+}
+
+.initiative-row__empty {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 700;
+    color: #94a3b8;
+    font-style: italic;
+}
+
+.initiative-box {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    min-height: 24px;
+    width: 100%;
+    align-items: stretch;
+    border: 1px solid #374151;
+    background: #ffffff;
+    color: #1f2937;
+    font-size: 9px;
+    font-weight: 500;
+    line-height: 1.1;
+}
+
+.initiative-box--clickable {
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.initiative-box--clickable:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    z-index: 10;
+}
+
+a.initiative-box {
+    text-decoration: none;
+    color: inherit;
+}
+
+.initiative-box--no-code {
+    grid-template-columns: 1fr;
+}
+
+.initiative-box__code {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 4px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    min-width: 28px;
+    width: 28px;
+    flex-shrink: 0;
+    background: #e2e8f0;
+    border-right: 1px solid rgba(55, 65, 81, 0.16);
+}
+
+.initiative-box__name {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    max-width: none;
+    padding: 2px 16px 2px 5px;
+    word-break: break-word;
+}
+
+.initiative-box__name--full {
+    grid-column: 1 / -1;
+    padding-left: 5px;
+}
+
+.initiative-box__label-text {
+    line-height: 1.15;
+}
+
+.initiative-box__period {
+    margin-top: 1px;
+    font-size: 7.5px;
+    font-weight: 700;
+    font-style: italic;
+    color: #64748b;
+}
+
 .strategy-cell__value {
     font-size: 12px;
     font-weight: 700;
@@ -972,6 +1275,39 @@ watch(filterOrganizationOptions, (options) => {
     background: rgba(15, 23, 42, 0.55);
 }
 
+:deep(.dark) .initiative-row__action-spacer,
+:deep(.dark) .initiative-row__cell {
+    background: rgba(15, 23, 42, 0.55);
+}
+
+:deep(.dark) .initiative-row__title {
+    color: #cbd5e1;
+}
+
+:deep(.dark) .initiative-row__count {
+    background: rgba(96, 165, 250, 0.12);
+    border-color: rgba(96, 165, 250, 0.28);
+    color: #93c5fd;
+}
+
+:deep(.dark) .initiative-row__empty {
+    color: #94a3b8;
+}
+
+:deep(.dark) .initiative-box {
+    background: rgba(15, 23, 42, 0.82);
+    color: #e2e8f0;
+}
+
+:deep(.dark) .initiative-box__code {
+    background: rgba(255, 255, 255, 0.08);
+    border-right-color: rgba(255, 255, 255, 0.08);
+}
+
+:deep(.dark) .initiative-box__period {
+    color: #94a3b8;
+}
+
 :deep(.dark) .strategy-cell__value {
     color: #e2e8f0;
 }
@@ -1012,5 +1348,47 @@ watch(filterOrganizationOptions, (options) => {
 :deep(.dark) .strategy-cell__textarea:focus {
     border-color: #60a5fa;
     box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.12);
+}
+
+.status-color-df {
+    background-color: #0d9488 !important;
+    color: #ffffff !important;
+    border-color: #0f766e !important;
+}
+
+.status-color-done {
+    background-color: #65a30d !important;
+    color: #ffffff !important;
+    border-color: #4d7c0f !important;
+}
+
+.status-color-dt2026 {
+    background-color: #ea580c !important;
+    color: #ffffff !important;
+    border-color: #c2410c !important;
+}
+
+.status-color-itsbp {
+    background-color: #06b6d4 !important;
+    color: #ffffff !important;
+    border-color: #0891b2 !important;
+}
+
+.status-color-onreview {
+    background-color: #ca8a04 !important;
+    color: #ffffff !important;
+    border-color: #a16207 !important;
+}
+
+.status-color-onprogress {
+    background-color: #2563eb !important;
+    color: #ffffff !important;
+    border-color: #1d4ed8 !important;
+}
+
+.status-color-sh {
+    background-color: #ef4444 !important;
+    color: #ffffff !important;
+    border-color: #dc2626 !important;
 }
 </style>
