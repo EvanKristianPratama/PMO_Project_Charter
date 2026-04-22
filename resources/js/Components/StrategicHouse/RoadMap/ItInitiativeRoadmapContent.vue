@@ -8,6 +8,15 @@ const props = defineProps({
     endYear: { type: Number, default: 2029 },
     totalCount: { type: Number, default: 0 },
     milestoneTypeOptions: { type: Array, default: () => [] },
+    groupHeaderLabel: { type: String, default: "IT Building Blocks" },
+    initiativeHeaderLabel: { type: String, default: "IT Initiatives" },
+    showControls: { type: Boolean, default: true },
+    showLegend: { type: Boolean, default: true },
+    showTableHeader: { type: Boolean, default: true },
+    emptyText: {
+        type: String,
+        default: "Belum ada data roadmap IT Strategic Initiative.",
+    },
 });
 
 /* ── Constants ───────────────────────────────────────── */
@@ -17,6 +26,7 @@ const roadmapLegendItems = [
 ];
 
 const statusLegendOrder = [
+    "On Progress",
     "On Track",
     "At Risk",
     "Delayed",
@@ -37,6 +47,8 @@ const monthsOrder = [
  * Keyed by the lowercase version of the raw status string.
  */
 const STATUS_MAP = {
+    "on progress": { label: "On Progress", badge: "badge--on-progress" },
+    "in progress": { label: "On Progress", badge: "badge--on-progress" },
     "on track":    { label: "On Track",    badge: "badge--on-track"    },
     "at risk":     { label: "At Risk",     badge: "badge--at-risk"     },
     "delayed":     { label: "Delayed",     badge: "badge--delayed"     },
@@ -420,7 +432,7 @@ const reviewStatusLegendItems = computed(() => {
 <template>
     <div class="space-y-3">
         <!-- ── Header ─────────────────────────────────── -->
-        <div class="content-header">
+        <div v-if="showControls" class="content-header">
             <div class="flex flex-wrap items-center gap-2 shrink-0">
                 <label class="period-filter">
                     <span class="period-filter__label">Status Review Implementation Period</span>
@@ -441,7 +453,7 @@ const reviewStatusLegendItems = computed(() => {
         </div>
 
         <!-- ── Legend panel ──────────────────────────── -->
-        <div v-if="groups && groups.length" class="legend-panel">
+        <div v-if="showLegend && groups && groups.length" class="legend-panel">
             <div class="legend-panel__header">
                 <div class="legend-panel__title">Legend</div>
                 <div class="legend-panel__period">{{ selectedPeriodLabel }}</div>
@@ -505,7 +517,7 @@ const reviewStatusLegendItems = computed(() => {
             class="empty-state rounded-xl border-dashed dark:border-white/10 dark:bg-[#171717]"
         >
             <p class="empty-state__text dark:text-slate-400">
-                Belum ada data roadmap IT Strategic Initiative.
+                {{ emptyText }}
             </p>
         </div>
 
@@ -538,13 +550,13 @@ const reviewStatusLegendItems = computed(() => {
                 </colgroup>
 
                 <!-- Year header -->
-                <thead>
+                <thead v-if="showTableHeader">
                     <tr class="gantt-header-row">
                         <th class="th-cell th-header border-r border-white/30">
-                            IT Building Blocks
+                            {{ groupHeaderLabel }}
                         </th>
                         <th class="th-cell th-left th-header border-r border-white/30">
-                            IT Initiatives
+                            {{ initiativeHeaderLabel }}
                         </th>
                         <th
                             v-for="year in years"
@@ -802,6 +814,7 @@ const reviewStatusLegendItems = computed(() => {
 }
 
 .badge--default     { background: #2d8fe2; }
+.badge--on-progress { background: #2d8fe2; }
 .badge--on-track    { background: #8fcfff; color: #214f87; }
 .badge--at-risk     { background: #ffea00; color: #7b5d00; }
 .badge--delayed     { background: #f97316; }
