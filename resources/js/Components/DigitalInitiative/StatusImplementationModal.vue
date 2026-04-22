@@ -6,13 +6,13 @@
         confirm-text="Simpan"
         cancel-text="Batal"
         type="info"
-        max-width="2xl"
+        max-width="4xl"
         :loading="form.processing"
         @close="closeModal"
         @confirm="submit"
         @after-leave="resetModalState"
     >
-        <div class="space-y-4">
+        <div class="space-y-5">
             <div class="space-y-1.5">
                 <label class="block text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
                     Initiative
@@ -38,7 +38,7 @@
                 </p>
             </div>
 
-            <div class="grid gap-4 md:grid-cols-[120px_150px_150px_100px]">
+            <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
                 <div class="space-y-1.5">
                     <label class="block text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
                         Review Status
@@ -66,6 +66,25 @@
                         class="text-xs text-rose-600 dark:text-rose-400"
                     >
                         {{ form.errors.review_status }}
+                    </p>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="block text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
+                        PIC
+                    </label>
+                    <input
+                        v-model="form.pic"
+                        type="text"
+                        maxlength="255"
+                        placeholder="Nama PIC"
+                        class="field-input"
+                    />
+                    <p
+                        v-if="form.errors.pic"
+                        class="text-xs text-rose-600 dark:text-rose-400"
+                    >
+                        {{ form.errors.pic }}
                     </p>
                 </div>
 
@@ -121,7 +140,7 @@
                         {{ form.errors.end_month }}
                     </p>
                 </div>
-                <div class="space-y-1.5">
+                <div class="space-y-1.5 sm:col-span-2 xl:col-span-1">
                     <label class="block text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
                         Year
                     </label>
@@ -205,6 +224,7 @@ const currentYear = new Date().getFullYear();
 const form = useForm({
     initiative_id: '',
     review_status: '',
+    pic: '',
     start_month: '',
     end_month: '',
     year: String(currentYear),
@@ -275,6 +295,7 @@ const applyFormDefaults = () => {
     if (isEditing.value) {
         form.initiative_id = normalizeStringValue(props.statusData?.initiative_id);
         form.review_status = normalizeStringValue(props.statusData?.review_status);
+        form.pic = normalizeStringValue(props.statusData?.pic);
         form.start_month = normalizeStringValue(props.statusData?.period_start_month);
         form.end_month = normalizeStringValue(props.statusData?.period_end_month);
         form.year = normalizeStringValue(props.statusData?.period_year) || String(currentYear);
@@ -286,6 +307,7 @@ const applyFormDefaults = () => {
 
     form.initiative_id = normalizeStringValue(props.defaultInitiativeId);
     form.review_status = '';
+    form.pic = '';
     form.start_month = normalizeStringValue(props.defaultMonth);
     form.end_month = '';
     form.year = normalizeStringValue(props.defaultYear) || String(currentYear);
@@ -310,6 +332,7 @@ const submit = () => {
     const submissionForm = form.transform((data) => ({
         ...data,
         review_status: normalizeStringValue(data.review_status),
+        pic: normalizeStringValue(data.pic),
         end_month: normalizeStringValue(data.end_month) || null,
         status_updated: normalizeStringValue(data.status_updated),
     }));

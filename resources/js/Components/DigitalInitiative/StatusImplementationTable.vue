@@ -94,6 +94,10 @@
                             Review Status
                         </th>
                         <th
+                            class="min-w-[140px] px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            PIC
+                        </th>
+                        <th
                             class="min-w-[220px] px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                             Periode Status
                         </th>
@@ -115,10 +119,18 @@
                             class="border-r border-slate-100 bg-slate-50/50 px-4 py-4 text-center align-middle text-slate-700 dark:border-white/5 dark:bg-white/[0.02] dark:text-slate-200">
                             {{ item.business_unit || '-' }}
                         </td>
-                        <td class="px-4 py-4 text-slate-700 dark:text-slate-200">
+                        <td
+                            v-if="item.showInitiativeGroup"
+                            :rowspan="item.initiativeRowspan"
+                            class="px-4 py-4 text-slate-700 dark:text-slate-200"
+                        >
                             {{ item.code || '-' }}
                         </td>
-                        <td class="whitespace-normal break-words px-4 py-4 text-slate-700 dark:text-slate-200">
+                        <td
+                            v-if="item.showInitiativeGroup"
+                            :rowspan="item.initiativeRowspan"
+                            class="whitespace-normal break-words px-4 py-4 text-slate-700 dark:text-slate-200"
+                        >
                             {{ item.initiative || '-' }}
                         </td>
                         <td class="px-4 py-4">
@@ -126,6 +138,9 @@
                                 :class="reviewStatusClass(item.review_status)">
                                 {{ item.review_status || '-' }}
                             </span>
+                        </td>
+                        <td class="whitespace-normal break-words px-4 py-4 text-slate-700 dark:text-slate-200">
+                            {{ item.pic || '-' }}
                         </td>
                         <td class="px-4 py-4 text-slate-700 dark:text-slate-200">
                             {{ item.periode_status || '-' }}
@@ -150,7 +165,7 @@
                     </tr>
 
                     <tr v-if="displayItems.length === 0">
-                        <td colspan="7" class="px-4 py-12 text-center text-xs text-slate-500 dark:text-slate-400">
+                        <td colspan="8" class="px-4 py-12 text-center text-xs text-slate-500 dark:text-slate-400">
                             {{ emptyStateText }}
                         </td>
                     </tr>
@@ -504,6 +519,20 @@ const organizationDisplayOrder = computed(() => {
     return displayOrderMap;
 });
 
+const initiativeGroupKey = (item) => {
+    const businessUnitKey = normalizeText(item?.business_unit);
+    const initiativeKey = String(item?.initiative_id_key ?? '').trim();
+
+    if (businessUnitKey !== '' || initiativeKey !== '') {
+        return `initiative:${businessUnitKey}:${initiativeKey}`;
+    }
+
+    const codeKey = normalizeText(item?.code);
+    const initiativeNameKey = normalizeText(item?.initiative);
+
+    return `initiative-fallback:${codeKey}:${initiativeNameKey}`;
+};
+
 const sortedItems = computed(() => {
     return [...filteredItems.value].sort((left, right) => {
         const leftGroupKey = businessUnitGroupKey(left);
@@ -532,11 +561,49 @@ const displayItems = computed(() => {
         const showBusinessUnit = !canMergeBusinessUnit || businessUnitKey !== previousBusinessUnitKey;
 
         if (!showBusinessUnit) {
+            const currentInitiativeKey = initiativeGroupKey(item);
+            const previousInitiativeKey = index > 0
+                ? initiativeGroupKey(items[index - 1])
+                : '';
+            const showInitiativeGroup = currentInitiativeKey !== previousInitiativeKey;
+
+            let initiativeRowspan = 1;
+
+            if (showInitiativeGroup) {
+                for (let nextIndex = index + 1; nextIndex < items.length; nextIndex += 1) {
+                    if (initiativeGroupKey(items[nextIndex]) !== currentInitiativeKey) {
+                        break;
+                    }
+
+                    initiativeRowspan += 1;
+                }
+            }
+
             return {
                 ...item,
                 showBusinessUnit: false,
                 businessUnitRowspan: 0,
+                showInitiativeGroup,
+                initiativeRowspan,
             };
+        }
+
+        const currentInitiativeKey = initiativeGroupKey(item);
+        const previousInitiativeKey = index > 0
+            ? initiativeGroupKey(items[index - 1])
+            : '';
+        const showInitiativeGroup = currentInitiativeKey !== previousInitiativeKey;
+
+        let initiativeRowspan = 1;
+
+        if (showInitiativeGroup) {
+            for (let nextIndex = index + 1; nextIndex < items.length; nextIndex += 1) {
+                if (initiativeGroupKey(items[nextIndex]) !== currentInitiativeKey) {
+                    break;
+                }
+
+                initiativeRowspan += 1;
+            }
         }
 
         let businessUnitRowspan = 1;
@@ -555,6 +622,8 @@ const displayItems = computed(() => {
             ...item,
             showBusinessUnit: true,
             businessUnitRowspan,
+            showInitiativeGroup,
+            initiativeRowspan,
         };
     });
 });

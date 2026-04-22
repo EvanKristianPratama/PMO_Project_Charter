@@ -148,6 +148,7 @@ class DigitalInitiativeService
         TrsStatusImplementation::query()->create([
             'initiative_id' => $initiative->id,
             'review_status' => trim((string) $payload['review_status']),
+            'pic' => filled($payload['pic'] ?? null) ? trim((string) $payload['pic']) : null,
             'start' => $this->databaseMonthLabel($payload['start_month']),
             'end' => $this->databaseMonthLabel($payload['end_month'] ?? null),
             'year' => (string) $payload['year'],
@@ -167,6 +168,7 @@ class DigitalInitiativeService
         $implementationStatus->update([
             'initiative_id' => $initiative->id,
             'review_status' => trim((string) $payload['review_status']),
+            'pic' => filled($payload['pic'] ?? null) ? trim((string) $payload['pic']) : null,
             'start' => $this->databaseMonthLabel($payload['start_month']),
             'end' => $this->databaseMonthLabel($payload['end_month'] ?? null),
             'year' => (string) $payload['year'],
@@ -279,6 +281,7 @@ class DigitalInitiativeService
                     'code' => $this->normalizeNullableString($initiative?->code),
                     'initiative' => $this->normalizeNullableString($initiative?->name),
                     'review_status' => $this->normalizeNullableString($status->review_status),
+                    'pic' => $this->normalizeNullableString($status->pic),
                     'period_start_month' => $this->normalizeMonthNumber($status->start),
                     'period_end_month' => $this->normalizeMonthNumber($status->end),
                     'period_year' => $this->normalizeNullableString($status->year),

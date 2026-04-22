@@ -31,7 +31,7 @@ const props = defineProps({
     maxWidth: {
         type: String,
         default: 'md',
-        validator: (value) => ['sm', 'md', 'lg', 'xl', '2xl'].includes(value)
+        validator: (value) => ['sm', 'md', 'lg', 'xl', '2xl', '3xl', '4xl', '5xl'].includes(value)
     }
 });
 
@@ -66,6 +66,9 @@ const widths = {
     lg: 'max-w-lg',
     xl: 'max-w-xl',
     '2xl': 'max-w-2xl',
+    '3xl': 'max-w-3xl',
+    '4xl': 'max-w-4xl',
+    '5xl': 'max-w-5xl',
 };
 </script>
 
@@ -96,7 +99,7 @@ const widths = {
                         leave-to="opacity-0 scale-95"
                     >
                         <DialogPanel
-                            class="w-full transform overflow-hidden rounded-2xl bg-white dark:bg-[#1a1a1a] p-6 text-left align-middle shadow-xl transition-all border border-gray-200/80 dark:border-white/5"
+                            class="w-full max-h-[90vh] transform overflow-y-auto rounded-2xl bg-white dark:bg-[#1a1a1a] p-6 text-left align-middle shadow-xl transition-all border border-gray-200/80 dark:border-white/5"
                             :class="widths[maxWidth]"
                         >
                             <div class="flex items-start space-x-4">

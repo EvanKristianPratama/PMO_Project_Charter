@@ -23,6 +23,7 @@ class UpsertImplementationStatusRequest extends FormRequest
                 ),
             ],
             'review_status' => ['required', 'string', 'max:11'],
+            'pic' => ['nullable', 'string', 'max:255'],
             'start_month' => ['required', 'integer', 'between:1,12'],
             'end_month' => ['nullable', 'integer', 'between:1,12'],
             'year' => ['required', 'digits:4'],
