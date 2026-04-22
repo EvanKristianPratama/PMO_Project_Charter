@@ -259,6 +259,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
         Route::post('/business-strategy', [StrategicHouseBusinessStrategyManageController::class, 'store'])->name('business-strategy.store');
         Route::put('/business-strategy/bulk-update', [StrategicHouseBusinessStrategyManageController::class, 'bulkUpdate'])->name('business-strategy.bulk-update');
         Route::put('/business-strategy/{businessStrategy}', [StrategicHouseBusinessStrategyManageController::class, 'update'])->name('business-strategy.update');
+        Route::delete('/business-strategy/{businessStrategy}', [StrategicHouseBusinessStrategyManageController::class, 'destroy'])->name('business-strategy.destroy');
         Route::prefix('/initiative-support')->name('initiative-support.')->group(function () {
             Route::get('/', StrategicHouseInitiativeSupportIndexController::class)->name('index');
             Route::post('/', [StrategicHouseInitiativeSupportIndexController::class, 'store'])->name('store');
@@ -282,6 +283,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::post('/program-planning/strategic-house/business-strategy', [StrategicHouseBusinessStrategyManageController::class, 'store']);
     Route::put('/program-planning/strategic-house/business-strategy/bulk-update', [StrategicHouseBusinessStrategyManageController::class, 'bulkUpdate']);
     Route::put('/program-planning/strategic-house/business-strategy/{businessStrategy}', [StrategicHouseBusinessStrategyManageController::class, 'update']);
+    Route::delete('/program-planning/strategic-house/business-strategy/{businessStrategy}', [StrategicHouseBusinessStrategyManageController::class, 'destroy']);
     Route::get('/program-planning/strategic-house/initiative-support', static fn () => redirect('/strategic-house/initiative-support'));
     Route::post('/program-planning/strategic-house/initiative-support', [StrategicHouseInitiativeSupportIndexController::class, 'store']);
     Route::post('/program-planning/strategic-house/initiative-support/mappings/delete', [StrategicHouseInitiativeSupportIndexController::class, 'destroyMappings']);

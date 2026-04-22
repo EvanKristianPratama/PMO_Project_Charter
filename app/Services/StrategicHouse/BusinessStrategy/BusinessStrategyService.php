@@ -96,6 +96,11 @@ class BusinessStrategyService
         });
     }
 
+    public function deleteStrategy(TrsBusinessStrategy $strategy): void
+    {
+        $strategy->delete();
+    }
+
     private function mapRow(TrsBusinessStrategy $strategy): array
     {
         $groupMeta = $this->resolveGroupMeta($strategy->businessUnit?->groub_id);

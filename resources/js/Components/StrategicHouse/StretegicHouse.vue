@@ -13,6 +13,18 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
+    businessStrategyPage: {
+        type: Object,
+        default: () => ({}),
+    },
+    businessStrategyGroups: {
+        type: Array,
+        default: () => [],
+    },
+    businessStrategyColumns: {
+        type: Array,
+        default: () => [],
+    },
     roofSection: {
         type: Object,
         default: () => ({
@@ -51,16 +63,17 @@ const route = useRouteHelper();
 const selectedSource = ref('all');
 const showDetails = ref(true);
 const showStrategyDetails = ref(true);
+const showBusinessStrategy = ref(false);
 
-const filterInitiatives = (initiatives) => {
+const filterDtiInitiatives = (initiatives) => {
     if (!initiatives) return [];
     if (selectedSource.value === 'all') return initiatives;
     return initiatives.filter(ini => ini.source == selectedSource.value);
 };
 
-const processedCards = (cards) => {
+const processedCards = (cards, initiativeFilter = (initiatives) => initiatives || []) => {
     return cards.map(card => {
-        const filteredInis = filterInitiatives(card.initiatives || []);
+        const filteredInis = initiativeFilter(card.initiatives || []);
         const previewInis = filteredInis.slice(0, 3);
         return {
             ...card,
@@ -73,14 +86,14 @@ const processedCards = (cards) => {
     });
 };
 
-const filteredTechnologyCards = computed(() => processedCards(props.technologyCards));
+const filteredTechnologyCards = computed(() => processedCards(props.technologyCards, filterDtiInitiatives));
 const filteredStrategyCards = computed(() => processedCards(props.strategyCards));
-const filteredUnassignedInitiatives = computed(() => filterInitiatives(props.unassignedInitiatives || []));
+const filteredUnassignedInitiatives = computed(() => filterDtiInitiatives(props.unassignedInitiatives || []));
 
 const filteredFoundationCard = computed(() => {
     if (!props.foundationCard) return null;
     const card = props.foundationCard;
-    const filteredInis = filterInitiatives(card.initiatives || []);
+    const filteredInis = card.initiatives || [];
     return {
         ...card,
         initiatives: filteredInis,
@@ -91,7 +104,7 @@ const filteredFoundationCard = computed(() => {
 const filteredArchitectureCard = computed(() => {
     if (!props.architectureCard) return null;
     const card = props.architectureCard;
-    const filteredInis = filterInitiatives(card.initiatives || []);
+    const filteredInis = card.initiatives || [];
     return {
         ...card,
         initiatives: filteredInis,
@@ -167,11 +180,39 @@ const initiativeProjectCharterTitle = (initiative) => {
     const label = String(initiative?.label ?? initiative?.name ?? initiative?.code ?? 'initiative').trim();
     return `Lihat project charter IT untuk ${label}`;
 };
+
+const orderedBusinessStrategyColumns = computed(() => {
+    const preferredOrder = ['maximazing_value', 'expand', 'low_carbon'];
+    const columnMap = new Map((props.businessStrategyColumns || []).map((column) => [column.key, column]));
+
+    return preferredOrder
+        .map((key) => columnMap.get(key))
+        .filter(Boolean);
+});
+
+const businessStrategyRows = computed(() => {
+    return (props.businessStrategyGroups || []).flatMap((group) => {
+        return (group.rows || []).map((row) => ({
+            ...row,
+            group_label: row.group_label || group.label || '',
+        }));
+    });
+});
 </script>
 
 <template>
     <section class="sh-mockup">
         <div class="mockup-content">
+            <div class="top-actions">
+                <button
+                    @click="showBusinessStrategy = !showBusinessStrategy"
+                    class="dti-toggle"
+                    :title="showBusinessStrategy ? 'Hide Business Strategy' : 'Show Business Strategy'"
+                >
+                    <EyeIcon v-if="showBusinessStrategy" class="dti-toggle-icon" />
+                    <EyeSlashIcon v-else class="dti-toggle-icon" />
+                </button>
+            </div>
 
             <!-- ═══ ROOF: Focus Bands (Maximize Legacy Business + Build Low Carbon) ═══ -->
             <div class="roof-section">
@@ -195,6 +236,35 @@ const initiativeProjectCharterTitle = (initiative) => {
             </div>
 
             <!-- ═══ CONNECTOR: small decorative chain ═══ -->
+            <div class="business-strategy-panel">
+                <div v-if="showBusinessStrategy" class="business-strategy-table-wrap">
+                    <div class="business-strategy-table-scroll">
+                        <table class="business-strategy-table">
+                            <tbody>
+                                <tr v-for="row in businessStrategyRows" :key="row.id">
+                                    <td
+                                        v-for="column in orderedBusinessStrategyColumns"
+                                        :key="`${row.id}-${column.key}`"
+                                        class="business-strategy-table__cell"
+                                    >
+                                        <span v-if="row.values?.[column.key]">{{ row.values[column.key] }}</span>
+                                        <span v-else class="business-strategy-table__empty">-</span>
+                                    </td>
+                                </tr>
+                                <tr v-if="!businessStrategyRows.length">
+                                    <td
+                                        :colspan="orderedBusinessStrategyColumns.length + 2"
+                                        class="business-strategy-table__blank"
+                                    >
+                                        Belum ada data business strategy.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <div class="connector-chain">
                 <img src="/chain-strategic-house.png" alt="Chain" class="w-7 h-auto" />
             </div>
@@ -441,6 +511,86 @@ const initiativeProjectCharterTitle = (initiative) => {
 
 .mockup-content {
     padding: 24px;
+}
+
+.top-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+}
+
+.business-strategy-panel {
+    border-radius: 12px;
+}
+
+
+.business-strategy-table-wrap {
+    margin-top: 14px;
+}
+
+.business-strategy-table-scroll {
+    overflow-x: auto;
+    border: 1px solid #d8e3ef;
+    border-radius: 10px;
+    background: #fff;
+}
+
+.business-strategy-table {
+    width: 100%;
+    min-width: 920px;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.business-strategy-table th,
+.business-strategy-table td {
+    border-bottom: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+    padding: 10px 12px;
+    vertical-align: top;
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+.business-strategy-table th:last-child,
+.business-strategy-table td:last-child {
+    border-right: none;
+}
+
+.business-strategy-table thead th {
+    background: #e8eff8;
+    color: #163b63;
+    font-size: 11px;
+    font-weight: 800;
+    text-align: center;
+}
+
+.business-strategy-table__group {
+    width: 120px;
+}
+
+.business-strategy-table__unit {
+    width: 190px;
+}
+
+.business-strategy-table__direction {
+    width: calc((100% - 310px) / 3);
+}
+
+.business-strategy-table__cell {
+    white-space: pre-line;
+    color: #294766;
+}
+
+.business-strategy-table__empty,
+.business-strategy-table__blank {
+    color: #7a8da3;
+    font-style: italic;
+}
+
+.business-strategy-table__blank {
+    text-align: center;
+    padding: 18px 12px;
 }
 
 /* ─── ROOF SECTION ─── */
@@ -1098,7 +1248,8 @@ const initiativeProjectCharterTitle = (initiative) => {
     }
 
     .dti-header,
-    .gits-header {
+    .gits-header,
+    .business-strategy-panel__header {
         flex-direction: column;
         align-items: stretch;
     }
@@ -1110,6 +1261,10 @@ const initiativeProjectCharterTitle = (initiative) => {
 
     .dti-toggle {
         align-self: center;
+    }
+
+    .business-strategy-table {
+        min-width: 760px;
     }
 
     .dti-cards {
@@ -1157,6 +1312,40 @@ const initiativeProjectCharterTitle = (initiative) => {
 :deep(.dark) .mockup-header {
     border-bottom-color: rgba(148, 163, 184, 0.14);
     background: #111827;
+}
+
+:deep(.dark) .business-strategy-panel {
+    border-color: rgba(148, 163, 184, 0.16);
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(17, 24, 39, 0.98) 100%);
+}
+
+
+:deep(.dark) .business-strategy-panel__subtitle {
+    color: #94a3b8;
+}
+
+:deep(.dark) .business-strategy-table-scroll {
+    border-color: rgba(148, 163, 184, 0.16);
+    background: #0f172a;
+}
+
+:deep(.dark) .business-strategy-table thead th {
+    background: #1e293b;
+    color: #e2e8f0;
+}
+
+:deep(.dark) .business-strategy-table th,
+:deep(.dark) .business-strategy-table td {
+    border-color: rgba(148, 163, 184, 0.12);
+}
+
+:deep(.dark) .business-strategy-table__cell {
+    color: #cbd5e1;
+}
+
+:deep(.dark) .business-strategy-table__empty,
+:deep(.dark) .business-strategy-table__blank {
+    color: #94a3b8;
 }
 
 :deep(.dark) .roof-main-label,

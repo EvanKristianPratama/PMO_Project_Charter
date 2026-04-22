@@ -36,17 +36,7 @@ export function useNavigation() {
 
     const navItems = computed(() => {
         const strategicHouseChildren = [
-            // {
-            //     label: "Business Strategy",
-            //     href: safeRoute("strategic-house.index", {
-            //         view: "business-strategy",
-            //     }),
-            //     icon: TableCellsIcon,
-            //     active: (url) =>
-            //         (url.startsWith("/strategic-house") &&
-            //             url.includes("view=business-strategy")) ||
-            //         url.startsWith("/strategic-house/business-strategy"),
-            // },
+    
         ];
 
         const programPlanningChildren = [

@@ -1254,7 +1254,7 @@ a.initiative-box {
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     border-radius: 12px;
     background: transparent;
     padding: 2px;
@@ -1269,6 +1269,7 @@ a.initiative-box {
 
 .initiative-view-select {
     appearance: none;
+    flex-shrink: 0;
     border: 1px solid #cbd5e1;
     border-radius: 8px;
     background: #ffffff;
@@ -1299,6 +1300,7 @@ a.initiative-box {
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    flex-shrink: 0;
     border: 1px solid #cbd5e1;
     border-radius: 8px;
     background: #ffffff;
@@ -1306,8 +1308,13 @@ a.initiative-box {
     font-size: 11px;
     font-weight: 700;
     color: #475569;
+    white-space: nowrap;
     transition: all 0.15s ease;
     cursor: pointer;
+}
+
+.bu-toggle-btn span {
+    white-space: nowrap;
 }
 
 .bu-toggle-btn:hover {
@@ -1385,6 +1392,12 @@ a.initiative-box {
 @media (max-width: 768px) {
     .dual-growth-legend {
         padding: 10px 18px;
+    }
+
+    .initiative-view-switch {
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        width: 100%;
     }
 
     .dg-table {

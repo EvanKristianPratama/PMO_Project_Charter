@@ -180,6 +180,9 @@
                             :architecture-card="architectureCard"
                             :tbc-card="tbcCard"
                             :unassigned-initiatives="unassignedInitiatives"
+                            :business-strategy-page="businessStrategyPage"
+                            :business-strategy-groups="businessStrategyGroups"
+                            :business-strategy-columns="businessStrategyColumns"
                         />
                     </section>
 

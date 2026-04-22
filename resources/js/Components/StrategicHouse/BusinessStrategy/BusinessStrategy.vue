@@ -268,6 +268,42 @@ const saveEditMode = () => {
     });
 };
 
+const deleteStrategy = (row) => {
+    if (!row?.id || strategyProcessing.value) {
+        return;
+    }
+
+    Swal.fire({
+        icon: 'warning',
+        title: 'Hapus Strategy?',
+        text: `Business strategy untuk ${row.business_unit ?? 'business unit ini'} akan dihapus.`,
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Hapus',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#64748b',
+    }).then((result) => {
+        if (!result.isConfirmed) {
+            return;
+        }
+
+        strategyProcessing.value = true;
+
+        router.delete(route('strategic-house.business-strategy.destroy', row.id), {
+            preserveScroll: true,
+            preserveState: true,
+            onFinish: () => {
+                strategyProcessing.value = false;
+            },
+            onSuccess: (page) => {
+                showSuccessAlert(
+                    page?.props?.flash?.success ?? 'Business strategy berhasil dihapus.',
+                );
+            },
+        });
+    });
+};
+
 const firstErrorMessage = (errors = {}) => {
     return Object.values(errors)
         .flat()
@@ -422,6 +458,15 @@ watch(filterOrganizationOptions, (options) => {
                                 </div>
                             </th>
                             <th
+                                v-if="isEditMode"
+                                rowspan="2"
+                                class="head-cell head-cell--action"
+                            >
+                                <div class="strategy-head-card strategy-head-card--action">
+                                    <span class="strategy-head-card__title">Action</span>
+                                </div>
+                            </th>
+                            <th
                                 v-if="legacyColumns.length"
                                 :colspan="legacyColumns.length"
                                 class="head-cell"
@@ -470,6 +515,21 @@ watch(filterOrganizationOptions, (options) => {
                                 </td>
 
                                 <td
+                                    v-if="isEditMode"
+                                    class="action-cell"
+                                >
+                                    <button
+                                        type="button"
+                                        class="primary-cell__delete"
+                                        :disabled="strategyProcessing"
+                                        title="Hapus business strategy"
+                                        @click="deleteStrategy(row)"
+                                    >
+                                        Hapus
+                                    </button>
+                                </td>
+
+                                <td
                                     v-for="column in orderedStrategyColumns"
                                     :key="`${row.id}-${column.key}`"
                                     class="strategy-cell"
@@ -492,7 +552,7 @@ watch(filterOrganizationOptions, (options) => {
                                         v-else
                                         class="strategy-cell__empty"
                                     >
-                                        Belum diisi
+                                        Not Available
                                     </p>
                                 </td>
                             </tr>
@@ -605,6 +665,10 @@ watch(filterOrganizationOptions, (options) => {
     width: auto;
 }
 
+.head-cell--action {
+    width: 92px;
+}
+
 .strategy-head-card {
     display: flex;
     flex-direction: column;
@@ -660,6 +724,16 @@ watch(filterOrganizationOptions, (options) => {
     font-weight: 700;
 }
 
+.strategy-head-card--action {
+    min-height: 102px;
+    border-color: #cbd5e1;
+    background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+    color: #334155;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+}
+
 .strategy-table tbody th,
 .strategy-table td {
     vertical-align: top;
@@ -697,6 +771,27 @@ watch(filterOrganizationOptions, (options) => {
     text-transform: uppercase;
 }
 
+.primary-cell__delete {
+    border: 1px solid #fecaca;
+    border-radius: 999px;
+    background: #fff1f2;
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #b91c1c;
+    transition: all 0.15s ease;
+}
+
+.primary-cell__delete:hover {
+    border-color: #fca5a5;
+    background: #ffe4e6;
+}
+
+.primary-cell__delete:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
 .strategy-cell {
     width: auto;
     min-width: 0;
@@ -707,6 +802,14 @@ watch(filterOrganizationOptions, (options) => {
 .strategy-cell--editing {
     padding: 6px;
     background: #f8fbff;
+}
+
+.action-cell {
+    width: 92px;
+    padding: 8px;
+    background: #f8fbff;
+    text-align: center;
+    vertical-align: middle !important;
 }
 
 .strategy-cell__value {
@@ -860,6 +963,12 @@ watch(filterOrganizationOptions, (options) => {
     background: linear-gradient(180deg, #274a87 0%, #1f3e74 100%);
 }
 
+:deep(.dark) .strategy-head-card--action {
+    border-color: #334155;
+    background: #1e293b;
+    color: #e2e8f0;
+}
+
 :deep(.dark) .primary-cell {
     background: rgba(15, 23, 42, 0.55);
 }
@@ -869,6 +978,10 @@ watch(filterOrganizationOptions, (options) => {
 }
 
 :deep(.dark) .strategy-cell--editing {
+    background: rgba(15, 23, 42, 0.55);
+}
+
+:deep(.dark) .action-cell {
     background: rgba(15, 23, 42, 0.55);
 }
 
@@ -882,6 +995,12 @@ watch(filterOrganizationOptions, (options) => {
 
 :deep(.dark) .primary-cell__hint {
     color: #93c5fd;
+}
+
+:deep(.dark) .primary-cell__delete {
+    border-color: rgba(248, 113, 113, 0.35);
+    background: rgba(127, 29, 29, 0.25);
+    color: #fecaca;
 }
 
 :deep(.dark) .initiative-view-select,

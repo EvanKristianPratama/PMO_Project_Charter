@@ -36,4 +36,11 @@ class BusinessStrategyController extends Controller
 
         return back()->with('success', 'Perubahan business strategy berhasil disimpan.');
     }
+
+    public function destroy(TrsBusinessStrategy $businessStrategy): RedirectResponse
+    {
+        $this->businessStrategyService->deleteStrategy($businessStrategy);
+
+        return back()->with('success', 'Business strategy berhasil dihapus.');
+    }
 }

@@ -1574,7 +1574,7 @@ defineExpose({
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     border-radius: 12px;
     background: transparent;
     padding: 2px;
@@ -1592,6 +1592,7 @@ defineExpose({
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    flex-shrink: 0;
     border: 1px solid #cbd5e1;
     border-radius: 8px;
     background: #ffffff;
@@ -1599,8 +1600,13 @@ defineExpose({
     font-size: 11px;
     font-weight: 700;
     color: #475569;
+    white-space: nowrap;
     transition: all 0.15s ease;
     cursor: pointer;
+}
+
+.bu-toggle-btn span {
+    white-space: nowrap;
 }
 
 .bu-toggle-btn:hover {
@@ -1621,6 +1627,7 @@ defineExpose({
 
 .initiative-view-select {
     appearance: none;
+    flex-shrink: 0;
     border: 1px solid #cbd5e1;
     border-radius: 8px;
     background: #ffffff;
@@ -2084,7 +2091,7 @@ a.initiative-box {
     }
 
     .initiative-view-switch {
-        justify-content: space-between;
+        justify-content: flex-start;
     }
 
     .itb-toolbar + .overflow-x-auto {
@@ -2131,20 +2138,9 @@ a.initiative-box {
 
 @media (max-width: 768px) {
     .initiative-view-switch {
-        flex-wrap: wrap;
-        justify-content: center;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
         width: 100%;
-    }
-
-    .initiative-view-switch__label {
-        width: 100%;
-        text-align: center;
-    }
-
-    .initiative-view-switch__options {
-        width: 100%;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        grid-auto-flow: row;
     }
 
     .initiatives-grid {

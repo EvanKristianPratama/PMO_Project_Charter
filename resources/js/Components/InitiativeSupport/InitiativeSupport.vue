@@ -100,9 +100,32 @@ const monthsOrder = [
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
 ];
 
+const formatPeriodLabel = (period) => {
+    const start = String(period?.start ?? '').trim();
+    const end = String(period?.end ?? '').trim();
+    const year = String(period?.year ?? '').trim();
+    const fallbackLabel = String(period?.label ?? '').trim();
+
+    if (start && end && year) {
+        return start === end
+            ? `${start} ${year}`
+            : `${start} - ${end} ${year}`;
+    }
+
+    if (start && year) {
+        return `${start} ${year}`;
+    }
+
+    if (year) {
+        return year;
+    }
+
+    return fallbackLabel || null;
+};
+
 const getInitiativePeriodLabel = (initiative) => {
     if (selectedPeriod.value) {
-        return selectedPeriod.value.label;
+        return formatPeriodLabel(selectedPeriod.value);
     }
 
     if (!initiative?.statuses || initiative.statuses.length === 0) return null;
@@ -113,9 +136,7 @@ const getInitiativePeriodLabel = (initiative) => {
     });
 
     const latest = sorted[0];
-    return latest.start === latest.end
-        ? `${latest.start} ${latest.year}`
-        : `${latest.start} - ${latest.end} ${latest.year}`;
+    return formatPeriodLabel(latest);
 };
 
 const getStatusColorClass = (status) => {
