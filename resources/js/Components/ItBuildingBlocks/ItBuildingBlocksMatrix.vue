@@ -63,36 +63,89 @@ const monthsOrder = [
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
 ];
 
+const normalizePeriodMonth = (value) => String(value ?? '').trim();
+const normalizePeriodYear = (value) => String(value ?? '').trim();
+
+const resolvePeriodStart = (period) => normalizePeriodMonth(period?.start ?? period?.month);
+const resolvePeriodEnd = (period) => normalizePeriodMonth(period?.end);
+
+const formatPeriodLabel = (period) => {
+    const start = resolvePeriodStart(period);
+    const end = resolvePeriodEnd(period);
+    const year = normalizePeriodYear(period?.year);
+    const fallbackLabel = String(
+        period?.label
+        ?? period?.latest_period_label
+        ?? period?.period_label
+        ?? '',
+    ).trim();
+
+    if (start && end && year) {
+        return start === end
+            ? `${start} ${year}`
+            : `${start} - ${end} ${year}`;
+    }
+
+    if (start && year) {
+        return `${start} ${year}`;
+    }
+
+    if (year) {
+        return year;
+    }
+
+    return fallbackLabel || null;
+};
+
+const getInitiativeStatuses = (initiative) => {
+    return Array.isArray(initiative?.statuses) ? initiative.statuses : [];
+};
+
+const periodMatchesSelection = (period, selectedPeriod) => {
+    return resolvePeriodStart(period) === resolvePeriodStart(selectedPeriod)
+        && resolvePeriodEnd(period) === resolvePeriodEnd(selectedPeriod)
+        && normalizePeriodYear(period?.year) === normalizePeriodYear(selectedPeriod?.year);
+};
+
 const getInitiativeStatus = (initiative) => {
     if (!selectedPeriod.value) {
         return initiative.implementation_status;
     }
 
-    const found = (initiative.statuses || []).find(s => 
-        s.start === selectedPeriod.value.start && 
-        s.end === selectedPeriod.value.end && 
-        s.year === selectedPeriod.value.year
-    );
+    const found = getInitiativeStatuses(initiative).find((status) => periodMatchesSelection(status, selectedPeriod.value));
 
     return found ? found.status : null;
 };
 
 const getInitiativePeriodLabel = (initiative) => {
     if (selectedPeriod.value) {
-        return selectedPeriod.value.label;
+        return formatPeriodLabel(selectedPeriod.value);
     }
 
-    if (!initiative.statuses || initiative.statuses.length === 0) return null;
+    const latestPeriodLabel = String(
+        initiative?.latest_period_label
+        ?? initiative?.period_label
+        ?? '',
+    ).trim();
 
-    const sorted = [...initiative.statuses].sort((a, b) => {
-        if (a.year !== b.year) return b.year - a.year;
-        return monthsOrder.indexOf(b.start) - monthsOrder.indexOf(a.start);
+    if (latestPeriodLabel) {
+        return latestPeriodLabel;
+    }
+
+    const statuses = getInitiativeStatuses(initiative);
+
+    if (statuses.length === 0) return null;
+
+    const sorted = [...statuses].sort((a, b) => {
+        const yearDiff = Number(b?.year ?? 0) - Number(a?.year ?? 0);
+
+        if (yearDiff !== 0) return yearDiff;
+
+        return monthsOrder.indexOf(resolvePeriodStart(b)) - monthsOrder.indexOf(resolvePeriodStart(a));
     });
 
     const latest = sorted[0];
-    return latest.start === latest.end
-        ? `${latest.start} ${latest.year}`
-        : `${latest.start} - ${latest.end} ${latest.year}`;
+    return formatPeriodLabel(latest);
 };
 
 const mappingForm = reactive({
@@ -932,6 +985,7 @@ const normalizeStatusLabel = (rawStatus) => {
 
     if (normalized === 'df') return 'DF';
     if (normalized === 'done' || normalized === 'completed') return 'Done';
+    if (normalized === 'on progress' || normalized === 'on progres') return 'On Progress';
     if (normalized === 'dt 2026') return 'DT 2026';
     if (normalized === 'itsbp') return 'ITSBP';
     if (normalized === 'on review') return 'On Review';
@@ -948,6 +1002,7 @@ const getStatusColorClass = (status) => {
     if (s === 'DT 2026') return 'status-color-dt2026';
     if (s === 'ITSBP') return 'status-color-itsbp';
     if (s === 'On Review') return 'status-color-onreview';
+    if (s === 'On Progress' || s === 'On Progres') return 'status-color-onprogress';
     if (s === 'SH') return 'status-color-sh';
     return '';
 };
@@ -957,6 +1012,7 @@ const statusDesiredOrder = [
     'DF',
     'DT 2026',
     'ITSBP',
+    'On Progress',
     'On Review',
     'SH',
 ];
@@ -1820,6 +1876,7 @@ a.initiative-box {
 .status-color-dt2026 { background-color: #ea580c !important; color: #ffffff !important; border-color: #c2410c !important; }
 .status-color-itsbp { background-color: #06b6d4 !important; color: #ffffff !important; border-color: #0891b2 !important; }
 .status-color-onreview { background-color: #ca8a04 !important; color: #ffffff !important; border-color: #a16207 !important; }
+.status-color-onprogress { background-color: #2563eb !important; color: #ffffff !important; border-color: #1d4ed8 !important; }
 .status-color-sh { background-color: #ef4444 !important; color: #ffffff !important; border-color: #dc2626 !important; }
 
 .initiative-box--placeholder {

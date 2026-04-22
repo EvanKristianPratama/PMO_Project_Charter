@@ -89,6 +89,41 @@ class ItBuildingBlockService
         };
     }
 
+    private function buildLatestPeriodLabel($statuses): ?string
+    {
+        $latestStatus = collect($statuses ?? [])
+            ->sort(function ($left, $right): int {
+                $yearComparison = (int) ($right->year ?? 0) <=> (int) ($left->year ?? 0);
+
+                if ($yearComparison !== 0) {
+                    return $yearComparison;
+                }
+
+                return $this->monthToNumber($right->start ?? null) <=> $this->monthToNumber($left->start ?? null);
+            })
+            ->first();
+
+        if (!$latestStatus) {
+            return null;
+        }
+
+        $start = trim((string) ($latestStatus->start ?? ''));
+        $end = trim((string) ($latestStatus->end ?? ''));
+        $year = trim((string) ($latestStatus->year ?? ''));
+
+        if ($start !== '' && $end !== '' && $year !== '') {
+            return $start === $end
+                ? "{$start} {$year}"
+                : "{$start} - {$end} {$year}";
+        }
+
+        if ($start !== '' && $year !== '') {
+            return "{$start} {$year}";
+        }
+
+        return $year !== '' ? $year : null;
+    }
+
     public function getStatusPeriods(): Collection
     {
         return \App\Models\TrsStatusImplementation::query()
@@ -166,6 +201,7 @@ class ItBuildingBlockService
                 'initiative.coe:id,name',
                 'initiative.organization:id,name,groub_id',
                 'initiative.latestStatusImplementation',
+                'initiative.statusImplementations:id,initiative_id,start,end,year,review_status',
                 'initiative.sourceData:id,name',
                 'initiative.mappedProjects:id',
             ])
@@ -190,6 +226,7 @@ class ItBuildingBlockService
                                 'secondary' => $secondaryName,
                                 'initiatives' => $secondaryRows
                                     ->map(fn (TrsMapItBuilding $item): array => [
+                                        'latest_period_label' => $this->buildLatestPeriodLabel($item->initiative?->statusImplementations),
                                         'map_key' => implode('-', [
                                             (string) ($item->primary ?? 'na'),
                                             (string) ($item->secondary ?? 'na'),
@@ -205,6 +242,15 @@ class ItBuildingBlockService
                                         'business_unit' => $item->initiative?->organization?->name ?: '-',
                                         'groub_id' => $item->initiative?->organization?->groub_id,
                                         'implementation_status' => $item->initiative?->latestStatusImplementation?->review_status ?: null,
+                                        'statuses' => $item->initiative?->statusImplementations
+                                            ?->map(fn ($status) => [
+                                                'start' => $status->start,
+                                                'end' => $status->end,
+                                                'year' => (int) $status->year,
+                                                'status' => $status->review_status,
+                                            ])
+                                            ->values()
+                                            ->all() ?? [],
                                         'source' => !is_null($item->initiative?->source) ? (int) $item->initiative->source : null,
                                         'source_name' => $item->initiative?->sourceData?->name,
                                         'mapped_project_id' => (int) ($item->initiative?->mappedProjects?->first()?->id ?? 0) ?: null,

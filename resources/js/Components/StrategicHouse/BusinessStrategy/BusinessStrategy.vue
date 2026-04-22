@@ -95,6 +95,37 @@ const mergeRowsByBusinessUnit = (rows) => {
 };
 
 const normalizedGroups = computed(() => props.groups || []);
+const filterOrganizationOptions = computed(() => {
+    const optionMap = new Map(
+        (props.organizationOptions || []).map((organization) => [
+            String(organization.value),
+            organization,
+        ]),
+    );
+
+    return allRows.value
+        .reduce((carry, row) => {
+            const value = String(row.business_unit_id ?? '');
+
+            if (!value || carry.some((item) => item.value === value)) {
+                return carry;
+            }
+
+            const fallbackLabel = row.group_label
+                ? `${row.group_label} - ${row.business_unit}`
+                : row.business_unit;
+
+            carry.push(
+                optionMap.get(value) ?? {
+                    value,
+                    label: fallbackLabel,
+                },
+            );
+
+            return carry;
+        }, [])
+        .sort((left, right) => String(left.label ?? '').localeCompare(String(right.label ?? '')));
+});
 
 const filteredGroups = computed(() => normalizedGroups.value
     .map((group) => {
@@ -297,6 +328,20 @@ watch(
     },
     { deep: true, immediate: true },
 );
+
+watch(filterOrganizationOptions, (options) => {
+    if (!selectedOrganization.value) {
+        return;
+    }
+
+    const selectedExists = options.some(
+        (organization) => String(organization.value) === String(selectedOrganization.value),
+    );
+
+    if (!selectedExists) {
+        selectedOrganization.value = '';
+    }
+}, { immediate: true });
 </script>
 
 <template>
@@ -349,7 +394,7 @@ watch(
                 <select v-model="selectedOrganization" class="initiative-view-select">
                     <option value="">All Business Unit</option>
                     <option
-                        v-for="organization in organizationOptions"
+                        v-for="organization in filterOrganizationOptions"
                         :key="organization.value"
                         :value="organization.value"
                     >
@@ -421,12 +466,6 @@ watch(
                                             <span class="text-xs">{{ row.business_unit }}</span>
                                         </div>
                                         <span class="primary-cell__meta">{{ row.group_label }}</span>
-                                        <span
-                                            v-if="isEditMode && rowHasChanged(row.id)"
-                                            class="primary-cell__hint"
-                                        >
-                                            Ada perubahan
-                                        </span>
                                     </div>
                                 </td>
 
@@ -656,13 +695,6 @@ watch(
     color: #64748b;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-}
-
-.primary-cell__hint {
-    font-size: 10px;
-    font-weight: 700;
-    color: #0f6fb7;
-    letter-spacing: 0.02em;
 }
 
 .strategy-cell {

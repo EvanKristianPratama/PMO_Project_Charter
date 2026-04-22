@@ -23,6 +23,7 @@ class IndexController extends Controller
             'groups' => $this->itBuildingBlockService->getGroupedMappings(),
             'coeOptions' => $this->itBuildingBlockService->getCoeOptions(),
             'initiativeOptions' => $this->itBuildingBlockService->getItInitiativeOptions(),
+            'statusPeriods' => $this->itBuildingBlockService->getStatusPeriods(),
         ]);
     }
 

@@ -71,6 +71,7 @@ const normalizeStatusLabel = (rawStatus) => {
     if (s === 'Done') return 'Done';
     if (s === 'DT 2026') return 'DT 2026';
     if (s === 'ITSBP') return 'ITSBP';
+    if (s === 'On Progress' || s === 'On Progres') return 'On Progress';
     if (s === 'On Review') return 'On Review';
     if (s === 'SH') return 'SH';
     return s;
@@ -93,9 +94,32 @@ const monthsOrder = [
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
 ];
 
+const formatPeriodLabel = (period) => {
+    const start = String(period?.start ?? '').trim();
+    const end = String(period?.end ?? '').trim();
+    const year = String(period?.year ?? '').trim();
+    const fallbackLabel = String(period?.label ?? '').trim();
+
+    if (start && end && year) {
+        return start === end
+            ? `${start} ${year}`
+            : `${start} - ${end} ${year}`;
+    }
+
+    if (start && year) {
+        return `${start} ${year}`;
+    }
+
+    if (year) {
+        return year;
+    }
+
+    return fallbackLabel || null;
+};
+
 const getInitiativePeriodLabel = (initiative) => {
     if (selectedPeriod.value) {
-        return selectedPeriod.value.label;
+        return formatPeriodLabel(selectedPeriod.value);
     }
 
     if (!initiative.statuses || initiative.statuses.length === 0) return null;
@@ -106,9 +130,7 @@ const getInitiativePeriodLabel = (initiative) => {
     });
 
     const latest = sorted[0];
-    return latest.start === latest.end
-        ? `${latest.start} ${latest.year}`
-        : `${latest.start} - ${latest.end} ${latest.year}`;
+    return formatPeriodLabel(latest);
 };
 
 const organizationOptions = computed(() => {
@@ -366,11 +388,12 @@ const getStatusColorClass = (status) => {
     if (s === 'DT 2026') return 'status-color-dt2026';
     if (s === 'ITSBP') return 'status-color-itsbp';
     if (s === 'On Review') return 'status-color-onreview';
+    if (s === 'On Progress' || s === 'On Progres') return 'status-color-onprogress';
     if (s === 'SH') return 'status-color-sh';
     return '';
 };
 
-const statusDesiredOrder = ['DF', 'Done', 'DT 2026', 'ITSBP', 'On Review', 'SH'];
+const statusDesiredOrder = ['DF', 'Done', 'DT 2026', 'ITSBP', 'On Progress', 'On Review', 'SH'];
 
 const statusLegend = computed(() => {
     const stats = {};
@@ -946,6 +969,12 @@ a.initiative-box {
     background-color: #ca8a04 !important;
     color: #ffffff !important;
     border-color: #a16207 !important;
+}
+
+.status-color-onprogress {
+    background-color: #2563eb !important;
+    color: #ffffff !important;
+    border-color: #1d4ed8 !important;
 }
 
 .status-color-sh {
