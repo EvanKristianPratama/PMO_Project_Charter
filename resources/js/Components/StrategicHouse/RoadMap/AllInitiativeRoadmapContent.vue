@@ -26,7 +26,6 @@ const quarterCount = computed(() => Math.max(years.value.length * 4, 1));
 <template>
     <div class="all-roadmap space-y-4">
         <section class="all-roadmap__section">
-            <div class="all-roadmap__label">Digital Initiative</div>
             <ItInitiativeRoadmapContent
                 :groups="digitalGroups"
                 :start-year="startYear"
@@ -34,9 +33,13 @@ const quarterCount = computed(() => Math.max(years.value.length * 4, 1));
                 :total-count="digitalTotalCount"
                 group-header-label="COE"
                 initiative-header-label="Digital Initiatives"
-                :show-controls="false"
-                :show-legend="false"
+                filter-mode="organization"
+                :show-controls="true"
+                controls-placement="bottom"
+                :show-legend="true"
+                :show-roadmap-legend="false"
                 :show-table-header="false"
+                section-title="Digital Initiative"
                 empty-text="Belum ada data roadmap Digital Initiative."
             />
         </section>
@@ -69,15 +72,17 @@ const quarterCount = computed(() => Math.max(years.value.length * 4, 1));
         </div>
 
         <section class="all-roadmap__section">
-            <div class="all-roadmap__label">IT Initiative</div>
             <ItInitiativeRoadmapContent
                 :groups="itGroups"
                 :start-year="startYear"
                 :end-year="endYear"
                 :total-count="itTotalCount"
                 :milestone-type-options="milestoneTypeOptions"
-                :show-controls="false"
-                :show-legend="false"
+                section-title="IT Initiative"
+                :show-controls="true"
+                controls-placement="top"
+                :show-legend="true"
+                :show-roadmap-legend="false"
                 :show-table-header="false"
                 empty-text="Belum ada data roadmap IT Strategic Initiative."
             />
@@ -86,22 +91,6 @@ const quarterCount = computed(() => Math.max(years.value.length * 4, 1));
 </template>
 
 <style scoped>
-.all-roadmap__section {
-    border: 1px solid #d9e4ef;
-    border-radius: 12px;
-    background: #ffffff;
-    padding: 12px;
-}
-
-.all-roadmap__label {
-    margin-bottom: 8px;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    color: #1e3a5f;
-    text-transform: uppercase;
-}
-
 .middle-timeline {
     border: 1px solid #c9d2dd;
     border-radius: 12px;
