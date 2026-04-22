@@ -454,7 +454,7 @@ watch(filterOrganizationOptions, (options) => {
                         <tr>
                             <th rowspan="2" class="head-cell head-cell--business-unit">
                                 <div class="strategy-head-card strategy-head-card--business-unit">
-                                    <span class="strategy-head-card__title">Business Unit</span>
+                                    <span class="strategy-head-card__title">Core Business</span>
                                 </div>
                             </th>
                             <th
@@ -510,7 +510,6 @@ watch(filterOrganizationOptions, (options) => {
                                         <div class="primary-label-wrapper">
                                             <span class="text-xs">{{ row.business_unit }}</span>
                                         </div>
-                                        <span class="primary-cell__meta">{{ row.group_label }}</span>
                                     </div>
                                 </td>
 
@@ -761,14 +760,6 @@ watch(filterOrganizationOptions, (options) => {
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-}
-
-.primary-cell__meta {
-    font-size: 10px;
-    font-weight: 700;
-    color: #64748b;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
 }
 
 .primary-cell__delete {

@@ -44,9 +44,9 @@ class BusinessStrategyService
             ->with([
                 'businessUnit' => fn ($query) => $query->select(['id', 'name', 'groub_id']),
             ])
+            ->orderBy('id')
             ->get()
             ->map(fn (TrsBusinessStrategy $strategy): array => $this->mapRow($strategy))
-            ->sort(fn (array $left, array $right): int => $this->compareRows($left, $right))
             ->values();
 
         return [
@@ -244,26 +244,6 @@ class BusinessStrategyService
             'label' => 'Other Organization',
             'order' => 3,
         ];
-    }
-
-    private function compareRows(array $left, array $right): int
-    {
-        $groupComparison = ($left['group_order'] ?? 99) <=> ($right['group_order'] ?? 99);
-
-        if ($groupComparison !== 0) {
-            return $groupComparison;
-        }
-
-        $nameComparison = strcasecmp(
-            (string) ($left['business_unit'] ?? ''),
-            (string) ($right['business_unit'] ?? ''),
-        );
-
-        if ($nameComparison !== 0) {
-            return $nameComparison;
-        }
-
-        return (int) ($left['id'] ?? 0) <=> (int) ($right['id'] ?? 0);
     }
 
     private function normalizeValue(?string $value): ?string
