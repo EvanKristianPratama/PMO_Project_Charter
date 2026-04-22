@@ -66,10 +66,27 @@ const showStrategyDetails = ref(true);
 const showBusinessStrategy = ref(false);
 const selectedBusinessUnit = ref('');
 
-const matchesSelectedBusinessUnit = (initiative) => {
-    if (!selectedBusinessUnit.value) return true;
+const selectedBusinessUnitIds = computed(() => {
+    if (!selectedBusinessUnit.value) return null;
 
-    return String(initiative?.business_unit_id ?? '') === String(selectedBusinessUnit.value);
+    if (String(selectedBusinessUnit.value).startsWith('group:')) {
+        const groupKey = String(selectedBusinessUnit.value).replace('group:', '');
+
+        return new Set(
+            businessStrategyRows.value
+                .filter((row) => row.group_key === groupKey)
+                .map((row) => String(row.business_unit_id ?? ''))
+                .filter(Boolean),
+        );
+    }
+
+    return new Set([String(selectedBusinessUnit.value)]);
+});
+
+const matchesSelectedBusinessUnit = (initiative) => {
+    if (!selectedBusinessUnitIds.value) return true;
+
+    return selectedBusinessUnitIds.value.has(String(initiative?.business_unit_id ?? ''));
 };
 
 const filterDtiInitiatives = (initiatives) => {
@@ -213,7 +230,7 @@ const businessStrategyRows = computed(() => {
 const businessStrategyOptions = computed(() => {
     const seen = new Set();
 
-    return businessStrategyRows.value
+    const rowOptions = businessStrategyRows.value
         .filter((row) => {
             const value = String(row.business_unit_id ?? '');
 
@@ -227,17 +244,25 @@ const businessStrategyOptions = computed(() => {
         .map((row) => ({
             value: String(row.business_unit_id),
             label: row.group_label ? `${row.group_label} - ${row.business_unit}` : row.business_unit,
-        }))
-        .sort((left, right) => left.label.localeCompare(right.label));
+        }));
+
+    const hasHolding = businessStrategyRows.value.some((row) => row.group_key === 'holding');
+    const hasSubholding = businessStrategyRows.value.some((row) => row.group_key === 'subholding');
+
+    return [
+        ...(hasHolding ? [{ value: 'group:holding', label: 'All Holding' }] : []),
+        ...(hasSubholding ? [{ value: 'group:subholding', label: 'All Sub Holding' }] : []),
+        ...rowOptions,
+    ];
 });
 
 const filteredBusinessStrategyRows = computed(() => {
-    if (!selectedBusinessUnit.value) {
+    if (!selectedBusinessUnitIds.value) {
         return businessStrategyRows.value;
     }
 
     return businessStrategyRows.value.filter(
-        (row) => String(row.business_unit_id ?? '') === String(selectedBusinessUnit.value),
+        (row) => selectedBusinessUnitIds.value.has(String(row.business_unit_id ?? '')),
     );
 });
 </script>
