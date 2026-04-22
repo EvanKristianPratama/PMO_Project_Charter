@@ -1179,7 +1179,6 @@ defineExpose({
                         <span>Periode</span>
                     </button>
 
-                    <span class="initiative-view-switch__label ml-2">Tampilan kolom:</span>
                     <select
                         v-model="initiativeColumnCount"
                         class="initiative-view-select"
@@ -1532,12 +1531,6 @@ defineExpose({
     display: none; /* Hide scrollbar for Chrome/Safari/Edge */
 }
 
-.initiative-view-switch__label {
-    font-size: 11px;
-    font-weight: 700;
-    color: #475569;
-    white-space: nowrap;
-}
 
 .bu-toggle-btn {
     display: inline-flex;

@@ -693,7 +693,6 @@ const initiativeOptionLabel = (initiative) => {
                         <span>Periode</span>
                     </button>
 
-                    <span class="initiative-view-switch__label ml-2">Tampilan kolom:</span>
                     <select
                         v-model="initiativeColumnCount"
                         class="initiative-view-select"

@@ -17,6 +17,7 @@ use App\Http\Controllers\ProgramEvaluation\ReviewTimelineController;
 use App\Http\Controllers\ProgramEvaluation\TrsReviewPCController;
 use App\Http\Controllers\ProgramImplementation\DashboardController;
 use App\Http\Controllers\StrategicHouse\BusinessStrategy\IndexController as StrategicHouseBusinessStrategyController;
+use App\Http\Controllers\StrategicHouse\BusinessStrategy\BusinessStrategyController as StrategicHouseBusinessStrategyManageController;
 use App\Http\Controllers\StrategicHouse\ItBuildingBlock\IndexController as StrategicHouseItBuildingBlockController;
 use App\Http\Controllers\ProgramImplementation\ProgramImplementationController;
 use App\Http\Controllers\ProgramImplementation\ResourceManagementController;
@@ -254,6 +255,9 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::prefix('/strategic-house')->name('strategic-house.')->group(function () {
         Route::get('/', StrategicHouseController::class)->name('index');
         Route::get('/business-strategy', StrategicHouseBusinessStrategyController::class)->name('business-strategy.index');
+        Route::post('/business-strategy', [StrategicHouseBusinessStrategyManageController::class, 'store'])->name('business-strategy.store');
+        Route::put('/business-strategy/bulk-update', [StrategicHouseBusinessStrategyManageController::class, 'bulkUpdate'])->name('business-strategy.bulk-update');
+        Route::put('/business-strategy/{businessStrategy}', [StrategicHouseBusinessStrategyManageController::class, 'update'])->name('business-strategy.update');
         Route::prefix('/initiative-support')->name('initiative-support.')->group(function () {
             Route::get('/', StrategicHouseInitiativeSupportIndexController::class)->name('index');
             Route::post('/', [StrategicHouseInitiativeSupportIndexController::class, 'store'])->name('store');
@@ -273,6 +277,9 @@ Route::middleware(['auth', 'approved'])->group(function () {
 
     Route::redirect('/program-planning/strategic-house', '/strategic-house');
     Route::redirect('/program-planning/strategic-house/business-strategy', '/strategic-house/business-strategy');
+    Route::post('/program-planning/strategic-house/business-strategy', [StrategicHouseBusinessStrategyManageController::class, 'store']);
+    Route::put('/program-planning/strategic-house/business-strategy/bulk-update', [StrategicHouseBusinessStrategyManageController::class, 'bulkUpdate']);
+    Route::put('/program-planning/strategic-house/business-strategy/{businessStrategy}', [StrategicHouseBusinessStrategyManageController::class, 'update']);
     Route::get('/program-planning/strategic-house/initiative-support', static fn () => redirect('/strategic-house/initiative-support'));
     Route::post('/program-planning/strategic-house/initiative-support', [StrategicHouseInitiativeSupportIndexController::class, 'store']);
     Route::post('/program-planning/strategic-house/initiative-support/mappings/delete', [StrategicHouseInitiativeSupportIndexController::class, 'destroyMappings']);

@@ -1,5 +1,9 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
+import { router, usePage } from '@inertiajs/vue3';
+import Swal from 'sweetalert2';
+import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 
 const props = defineProps({
     page: {
@@ -24,11 +28,25 @@ const props = defineProps({
     },
 });
 
-const search = ref('');
-const selectedGroup = ref('');
+const route = useRouteHelper();
+const pageContext = usePage();
+
+const flash = computed(() => pageContext.props.flash ?? {});
 const selectedOrganization = ref('');
-const selectedCompleteness = ref('');
-const showDescriptions = ref(false);
+const isEditMode = ref(false);
+
+const strategyForm = reactive({
+    business_unit: '',
+    maximazing_value: '',
+    expand: '',
+    low_carbon: '',
+});
+
+const strategyProcessing = ref(false);
+const isModalVisible = ref(false);
+const modalError = ref('');
+const editableRows = ref({});
+const editableSnapshot = ref({});
 
 const orderedStrategyColumns = computed(() => {
     const lowCarbonColumn = (props.strategyColumns || []).find(
@@ -41,254 +59,409 @@ const orderedStrategyColumns = computed(() => {
     return lowCarbonColumn ? [...otherColumns, lowCarbonColumn] : [...(props.strategyColumns || [])];
 });
 
-const totalStrategyColumns = computed(() => orderedStrategyColumns.value.length);
 const lowCarbonColumn = computed(() => orderedStrategyColumns.value.find((column) => column.key === 'low_carbon') ?? null);
 const legacyColumns = computed(() => orderedStrategyColumns.value.filter((column) => column.key !== 'low_carbon'));
+const strategyFormFields = computed(() => orderedStrategyColumns.value);
+const allRows = computed(() => normalizedGroups.value.flatMap((group) => group.rows || []));
+
+const mergeRowsByBusinessUnit = (rows) => {
+    let previousBusinessUnitKey = null;
+    let previousMergedRow = null;
+
+    return (rows || []).map((row) => {
+        const businessUnitKey = `${row.group_key || 'unknown'}::${row.business_unit_id || row.business_unit || row.id}`;
+
+        if (businessUnitKey === previousBusinessUnitKey && previousMergedRow) {
+            previousMergedRow.business_unit_rowspan += 1;
+
+            return {
+                ...row,
+                show_business_unit: false,
+                business_unit_rowspan: 0,
+            };
+        }
+
+        const mergedRow = {
+            ...row,
+            show_business_unit: true,
+            business_unit_rowspan: 1,
+        };
+
+        previousBusinessUnitKey = businessUnitKey;
+        previousMergedRow = mergedRow;
+
+        return mergedRow;
+    });
+};
 
 const normalizedGroups = computed(() => props.groups || []);
 
 const filteredGroups = computed(() => normalizedGroups.value
     .map((group) => {
         const rows = (group.rows || []).filter((row) => {
-            const matchesGroup = !selectedGroup.value || row.group_key === selectedGroup.value;
-            const matchesOrganization = !selectedOrganization.value
+            return !selectedOrganization.value
                 || String(row.business_unit_id ?? '') === String(selectedOrganization.value);
-            const completionCount = Number(row.completion_count ?? 0);
-            const totalColumns = totalStrategyColumns.value;
-            const matchesCompleteness = (
-                !selectedCompleteness.value
-                || (selectedCompleteness.value === 'complete' && completionCount === totalColumns)
-                || (selectedCompleteness.value === 'partial' && completionCount > 0 && completionCount < totalColumns)
-                || (selectedCompleteness.value === 'empty' && completionCount === 0)
-            );
-
-            const keyword = String(search.value ?? '').trim().toLowerCase();
-            const haystack = [
-                row.business_unit,
-                row.group_label,
-                ...Object.values(row.values || {}),
-            ]
-                .filter(Boolean)
-                .join(' ')
-                .toLowerCase();
-
-            const matchesSearch = keyword === '' || haystack.includes(keyword);
-
-            return matchesGroup && matchesOrganization && matchesCompleteness && matchesSearch;
         });
 
         return {
             ...group,
             count: rows.length,
-            rows,
+            rows: mergeRowsByBusinessUnit(rows),
         };
     })
     .filter((group) => group.rows.length > 0));
 
-const visibleRows = computed(() => filteredGroups.value.flatMap((group) => group.rows || []));
+const modalTitle = computed(() => 'Tambah Strategy');
+const modalMessage = computed(() => 'Pilih business unit lalu isi arah strategy yang ingin ditambahkan.');
+const modalConfirmText = computed(() => 'Tambah Strategy');
 
-const visibleStrategyCoverage = computed(() => orderedStrategyColumns.value.map((column) => ({
-    ...column,
-    filled_count: visibleRows.value.filter((row) => Boolean(row.values?.[column.key])).length,
-})));
+const showSuccessAlert = (message) => {
+    Swal.fire({
+        icon: 'success',
+        title: 'Berhasil',
+        text: message,
+        confirmButtonColor: '#0f6fb7',
+    });
+};
 
-const visibleCompleteCount = computed(() => visibleRows.value.filter(
-    (row) => Number(row.completion_count ?? 0) === totalStrategyColumns.value,
-).length);
+const buildEditableRowsState = () => {
+    return allRows.value.reduce((carry, row) => {
+        carry[row.id] = {
+            id: Number(row.id),
+            business_unit: Number(row.business_unit_id ?? 0),
+            maximazing_value: String(row.values?.maximazing_value ?? ''),
+            expand: String(row.values?.expand ?? ''),
+            low_carbon: String(row.values?.low_carbon ?? ''),
+        };
 
-const visiblePartialCount = computed(() => visibleRows.value.filter((row) => {
-    const completionCount = Number(row.completion_count ?? 0);
-    return completionCount > 0 && completionCount < totalStrategyColumns.value;
-}).length);
+        return carry;
+    }, {});
+};
 
-const visibleEmptyCount = computed(() => visibleRows.value.filter(
-    (row) => Number(row.completion_count ?? 0) === 0,
-).length);
+const cloneEditableRowsState = (state) => JSON.parse(JSON.stringify(state));
 
-const completionLabel = (row) => `${row.completion_count ?? 0}/${totalStrategyColumns.value}`;
+const resetEditableRows = () => {
+    const nextState = buildEditableRowsState();
+    editableRows.value = cloneEditableRowsState(nextState);
+    editableSnapshot.value = cloneEditableRowsState(nextState);
+};
 
-const toneClass = (tone) => `strategy-tone-${tone || 'slate'}`;
+const rowHasChanged = (rowId) => {
+    const current = editableRows.value[rowId];
+    const original = editableSnapshot.value[rowId];
+
+    if (!current || !original) {
+        return false;
+    }
+
+    return ['business_unit', 'maximazing_value', 'expand', 'low_carbon']
+        .some((field) => String(current[field] ?? '') !== String(original[field] ?? ''));
+};
+
+const changedEditableRows = computed(() => {
+    return Object.values(editableRows.value).filter((row) => rowHasChanged(row.id));
+});
+
+const hasEditableChanges = computed(() => changedEditableRows.value.length > 0);
+
+const resetStrategyForm = (nextValues = {}) => {
+    strategyForm.business_unit = nextValues.business_unit != null ? String(nextValues.business_unit) : '';
+    strategyForm.maximazing_value = String(nextValues.maximazing_value ?? '');
+    strategyForm.expand = String(nextValues.expand ?? '');
+    strategyForm.low_carbon = String(nextValues.low_carbon ?? '');
+};
+
+const closeModal = (force = false) => {
+    if (strategyProcessing.value && !force) {
+        return;
+    }
+
+    isModalVisible.value = false;
+};
+
+const handleModalAfterLeave = () => {
+    modalError.value = '';
+    resetStrategyForm();
+};
+
+const openAddStrategyModal = () => {
+    modalError.value = '';
+    resetStrategyForm({
+        business_unit: selectedOrganization.value || '',
+    });
+    isModalVisible.value = true;
+};
+
+const openAddStrategy = () => {
+    openAddStrategyModal();
+};
+
+const startEditMode = () => {
+    resetEditableRows();
+    isEditMode.value = true;
+};
+
+const cancelEditMode = () => {
+    resetEditableRows();
+    isEditMode.value = false;
+};
+
+const saveEditMode = () => {
+    if (!hasEditableChanges.value) {
+        isEditMode.value = false;
+        return;
+    }
+
+    strategyProcessing.value = true;
+
+    router.put(route('strategic-house.business-strategy.bulk-update'), {
+        rows: changedEditableRows.value.map((row) => ({
+            id: Number(row.id),
+            business_unit: Number(row.business_unit),
+            maximazing_value: row.maximazing_value,
+            expand: row.expand,
+            low_carbon: row.low_carbon,
+        })),
+    }, {
+        preserveScroll: true,
+        preserveState: true,
+        onFinish: () => {
+            strategyProcessing.value = false;
+        },
+        onSuccess: (page) => {
+            isEditMode.value = false;
+            showSuccessAlert(
+                page?.props?.flash?.success ?? 'Perubahan business strategy berhasil disimpan.',
+            );
+        },
+    });
+};
+
+const firstErrorMessage = (errors = {}) => {
+    return Object.values(errors)
+        .flat()
+        .map((value) => String(value ?? '').trim())
+        .find((value) => value !== '');
+};
+
+const buildPayload = () => ({
+    business_unit: Number(strategyForm.business_unit),
+    maximazing_value: strategyForm.maximazing_value,
+    expand: strategyForm.expand,
+    low_carbon: strategyForm.low_carbon,
+});
+
+const submitStrategy = () => {
+    if (!strategyForm.business_unit) {
+        modalError.value = 'Pilih business unit terlebih dahulu.';
+        return;
+    }
+
+    modalError.value = '';
+    strategyProcessing.value = true;
+
+    const requestOptions = {
+        preserveScroll: true,
+        preserveState: true,
+        onError: (errors) => {
+            const message = firstErrorMessage(errors);
+
+            if (message) {
+                modalError.value = message;
+            }
+        },
+        onSuccess: (page) => {
+            closeModal(true);
+            showSuccessAlert(
+                page?.props?.flash?.success ?? 'Business strategy berhasil ditambahkan.',
+            );
+        },
+        onFinish: () => {
+            strategyProcessing.value = false;
+        },
+    };
+
+    router.post(
+        route('strategic-house.business-strategy.store'),
+        buildPayload(),
+        requestOptions,
+    );
+};
+
+watch(
+    () => props.groups,
+    () => {
+        if (!isEditMode.value) {
+            resetEditableRows();
+        }
+    },
+    { deep: true, immediate: true },
+);
 </script>
 
 <template>
     <div class="space-y-4">
-        <div v-if="filteredGroups.length > 0" class="space-y-4">
-            <div class="space-y-2.5">
-                <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
-                    <div
-                        v-for="strategy in visibleStrategyCoverage"
-                        :key="`strategy-legend-${strategy.key}`"
-                        class="flex items-center gap-1.5"
-                    >
-                        <span class="legend-swatch" :class="toneClass(strategy.tone)"></span>
-                        <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">
-                            {{ strategy.label }}
-                            <span class="font-medium text-slate-400 dark:text-slate-500">
-                                ({{ strategy.filled_count }})
-                            </span>
-                        </span>
-                    </div>
+        <div
+            v-if="flash.error"
+            class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300"
+        >
+            {{ flash.error }}
+        </div>
 
-                    <div class="ml-1 flex items-center gap-1.5 border-l border-slate-300 pl-4 dark:border-white/10">
-                        <span class="text-[11px] font-bold text-slate-800 dark:text-slate-200">
-                            Visible Business Unit
-                            <span class="font-medium text-slate-500 dark:text-slate-400">
-                                ({{ visibleRows.length }})
-                            </span>
-                        </span>
-                    </div>
-                </div>
-
-                <div class="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-slate-100 pt-1 dark:border-white/5">
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                        Coverage
-                    </span>
-                    <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
-                        Complete ({{ visibleCompleteCount }})
-                    </span>
-                    <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
-                        Partial ({{ visiblePartialCount }})
-                    </span>
-                    <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
-                        Empty ({{ visibleEmptyCount }})
-                    </span>
-                    <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-500">
-                        Total data: {{ summary.total_business_units ?? visibleRows.length }}
-                    </span>
-                </div>
-            </div>
-
-            <div class="flex items-center justify-start">
-                <div class="initiative-view-switch">
-                    <input
-                        v-model="search"
-                        type="text"
-                        class="initiative-view-input"
-                        placeholder="Cari business unit atau isi strategi"
-                    >
-
-                    <select v-model="selectedGroup" class="initiative-view-select">
-                        <option value="">All Scope</option>
-                        <option value="holding">Holding</option>
-                        <option value="subholding">Sub Holding</option>
-                        <option value="other">Other Organization</option>
-                    </select>
-
-                    <select v-model="selectedOrganization" class="initiative-view-select">
-                        <option value="">All Business Unit</option>
-                        <option
-                            v-for="organization in organizationOptions"
-                            :key="organization.value"
-                            :value="organization.value"
-                        >
-                            {{ organization.label }}
-                        </option>
-                    </select>
-
-                    <select v-model="selectedCompleteness" class="initiative-view-select">
-                        <option value="">All Coverage</option>
-                        <option value="complete">Complete</option>
-                        <option value="partial">Partial</option>
-                        <option value="empty">Empty</option>
-                    </select>
-
+        <div class="strategy-toolbar">
+            <div class="strategy-toolbar__actions">
+                <button
+                    v-if="!isEditMode"
+                    type="button"
+                    class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 dark:bg-white dark:text-slate-900"
+                    @click="openAddStrategy"
+                >
+                    Tambah Strategy
+                </button>
+                <button
+                    v-if="!isEditMode"
+                    type="button"
+                    class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2 dark:border-white/10 dark:bg-transparent dark:text-slate-200 dark:hover:bg-white/5"
+                    @click="startEditMode"
+                >
+                    Edit Strategy
+                </button>
+                <template v-else>
                     <button
                         type="button"
-                        class="bu-toggle-btn"
-                        :class="{ 'bu-toggle-btn--active': showDescriptions }"
-                        @click="showDescriptions = !showDescriptions"
+                        class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2 dark:border-white/10 dark:bg-transparent dark:text-slate-200 dark:hover:bg-white/5"
+                        @click="cancelEditMode"
                     >
-                        <span>Column Notes</span>
+                        Batal
                     </button>
-                </div>
+                    <button
+                        type="button"
+                        :disabled="strategyProcessing"
+                        class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-slate-900"
+                        @click="saveEditMode"
+                    >
+                        {{ strategyProcessing ? 'Menyimpan...' : 'Simpan Perubahan' }}
+                    </button>
+                </template>
             </div>
 
-            <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                <div class="overflow-x-auto">
-                    <h1 class="mb-1 mt-4 mb-4 text-center text-lg font-bold">
-                        Dual Growth Business Strategy 2025 -2029
-                    </h1>
-
-                    <table class="strategy-table">
-                        <thead>
-                            <tr>
-                                <th rowspan="2" class="head-cell head-cell--business-unit">
-                                    <div class="strategy-head-card strategy-head-card--business-unit">
-                                        <span class="strategy-head-card__title">Business Unit</span>
-                                    </div>
-                                </th>
-                                <th
-                                    v-if="legacyColumns.length"
-                                    :colspan="legacyColumns.length"
-                                    class="head-cell"
-                                >
-                                    <div class="strategy-head-card strategy-head-card--legacy">
-                                        <span class="strategy-head-card__title">Maximize Legacy Business</span>
-                                    </div>
-                                </th>
-                                <th
-                                    v-if="lowCarbonColumn"
-                                    rowspan="2"
-                                    class="head-cell head-cell--carbon"
-                                >
-                                    <div class="strategy-head-card strategy-head-card--carbon">
-                                        <span class="strategy-head-card__title">Build Low Carbon Business</span>
-                                        <small v-if="showDescriptions">{{ lowCarbonColumn.description }}</small>
-                                    </div>
-                                </th>
-                            </tr>
-                            <tr v-if="legacyColumns.length">
-                                <th
-                                    v-for="column in legacyColumns"
-                                    :key="column.key"
-                                    class="head-cell"
-                                >
-                                    <div class="strategy-head-card strategy-head-card--legacy-child">
-                                        <span>{{ column.label }}</span>
-                                        <small v-if="showDescriptions">{{ column.description }}</small>
-                                    </div>
-                                </th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            <template v-for="group in filteredGroups" :key="group.key">
-                                <tr v-for="row in group.rows" :key="row.id">
-                                    <td class="primary-cell">
-                                        <div class="primary-cell__content">
-                                            <div class="primary-label-wrapper">
-                                                <span class="text-xs">{{ row.business_unit }}</span>
-                                            </div>
-                                            <span class="primary-cell__meta">{{ row.group_label }}</span>
-                                        </div>
-                                    </td>
-
-                                    <td
-                                        v-for="column in orderedStrategyColumns"
-                                        :key="`${row.id}-${column.key}`"
-                                        class="strategy-cell"
-                                    >
-                                        <article
-                                            class="strategy-box"
-                                            :class="[
-                                                { 'strategy-box--empty': !row.values?.[column.key] },
-                                            ]"
-                                        >
-                                            <p v-if="row.values?.[column.key]" class="strategy-box__value">
-                                                {{ row.values[column.key] }}
-                                            </p>
-                                            <p v-else class="strategy-box__empty">
-                                                Belum diisi
-                                            </p>
-                                        </article>
-                                    </td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+            <div class="initiative-view-switch">
+                <select v-model="selectedOrganization" class="initiative-view-select">
+                    <option value="">All Business Unit</option>
+                    <option
+                        v-for="organization in organizationOptions"
+                        :key="organization.value"
+                        :value="organization.value"
+                    >
+                        {{ organization.label }}
+                    </option>
+                </select>
+            </div>
         </div>
+
+        <section
+            v-if="filteredGroups.length > 0"
+            class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]"
+        >
+            <div class="overflow-x-auto">
+                <h1 class="mb-4 mt-4 text-center text-lg font-bold">
+                    Dual Growth Business Strategy 2025 -2029
+                </h1>
+
+                <table class="strategy-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" class="head-cell head-cell--business-unit">
+                                <div class="strategy-head-card strategy-head-card--business-unit">
+                                    <span class="strategy-head-card__title">Business Unit</span>
+                                </div>
+                            </th>
+                            <th
+                                v-if="legacyColumns.length"
+                                :colspan="legacyColumns.length"
+                                class="head-cell"
+                            >
+                                <div class="strategy-head-card strategy-head-card--legacy">
+                                    <span class="strategy-head-card__title">Maximize Legacy Business</span>
+                                </div>
+                            </th>
+                            <th
+                                v-if="lowCarbonColumn"
+                                rowspan="2"
+                                class="head-cell head-cell--carbon"
+                            >
+                                <div class="strategy-head-card strategy-head-card--carbon">
+                                    <span class="strategy-head-card__title">Build Low Carbon Business</span>
+                                </div>
+                            </th>
+                        </tr>
+                        <tr v-if="legacyColumns.length">
+                            <th
+                                v-for="column in legacyColumns"
+                                :key="column.key"
+                                class="head-cell"
+                            >
+                                <div class="strategy-head-card strategy-head-card--legacy-child">
+                                    <span>{{ column.label }}</span>
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <template v-for="group in filteredGroups" :key="group.key">
+                            <tr v-for="row in group.rows" :key="row.id">
+                                <td
+                                    v-if="row.show_business_unit"
+                                    :rowspan="row.business_unit_rowspan"
+                                    class="primary-cell"
+                                >
+                                    <div class="primary-cell__content">
+                                        <div class="primary-label-wrapper">
+                                            <span class="text-xs">{{ row.business_unit }}</span>
+                                        </div>
+                                        <span class="primary-cell__meta">{{ row.group_label }}</span>
+                                        <span
+                                            v-if="isEditMode && rowHasChanged(row.id)"
+                                            class="primary-cell__hint"
+                                        >
+                                            Ada perubahan
+                                        </span>
+                                    </div>
+                                </td>
+
+                                <td
+                                    v-for="column in orderedStrategyColumns"
+                                    :key="`${row.id}-${column.key}`"
+                                    class="strategy-cell"
+                                    :class="{ 'strategy-cell--editing': isEditMode }"
+                                >
+                                    <textarea
+                                        v-if="isEditMode"
+                                        v-model="editableRows[row.id][column.key]"
+                                        rows="1"
+                                        class="strategy-cell__textarea"
+                                        :placeholder="`Isi ${column.label.toLowerCase()}...`"
+                                    />
+                                    <p
+                                        v-else-if="row.values?.[column.key]"
+                                        class="strategy-cell__value"
+                                    >
+                                        {{ row.values[column.key] }}
+                                    </p>
+                                    <p
+                                        v-else
+                                        class="strategy-cell__empty"
+                                    >
+                                        Belum diisi
+                                    </p>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
         <section
             v-else
@@ -298,6 +471,68 @@ const toneClass = (tone) => `strategy-tone-${tone || 'slate'}`;
                 Business Strategy Not Available
             </p>
         </section>
+
+        <ConfirmationModal
+            :show="isModalVisible"
+            :title="modalTitle"
+            :message="modalMessage"
+            type="info"
+            :loading="strategyProcessing"
+            :confirm-text="modalConfirmText"
+            cancel-text="Batal"
+            max-width="2xl"
+            @close="closeModal"
+            @confirm="submitStrategy"
+            @after-leave="handleModalAfterLeave"
+        >
+            <div class="space-y-4">
+                <div class="space-y-1.5">
+                    <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Business Unit</label>
+                    <select
+                        v-model="strategyForm.business_unit"
+                        class="edit-select"
+                    >
+                        <option value="">- Pilih Business Unit -</option>
+                        <option
+                            v-for="organization in organizationOptions"
+                            :key="`strategy-business-unit-${organization.value}`"
+                            :value="organization.value"
+                        >
+                            {{ organization.label }}
+                        </option>
+                    </select>
+                </div>
+
+                <div
+                    v-for="field in strategyFormFields"
+                    :key="`strategy-field-${field.key}`"
+                    class="space-y-1.5"
+                >
+                    <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+                        {{ field.label }}
+                    </label>
+                    <p
+                        v-if="field.description"
+                        class="text-[11px] text-slate-500 dark:text-slate-400"
+                    >
+                        {{ field.description }}
+                    </p>
+                    <textarea
+                        v-model="strategyForm[field.key]"
+                        class="edit-textarea"
+                        rows="4"
+                        :placeholder="`Isi ${field.label.toLowerCase()}...`"
+                    />
+                </div>
+
+                <p
+                    v-if="modalError"
+                    class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700"
+                >
+                    {{ modalError }}
+                </p>
+            </div>
+        </ConfirmationModal>
     </div>
 </template>
 
@@ -351,13 +586,6 @@ const toneClass = (tone) => `strategy-tone-${tone || 'slate'}`;
     line-height: 1.2;
 }
 
-.strategy-head-card small {
-    font-size: 10px;
-    font-weight: 600;
-    line-height: 1.3;
-    opacity: 0.9;
-}
-
 .strategy-head-card--business-unit {
     min-height: 102px;
     border-color: #0f6fb7;
@@ -398,22 +626,6 @@ const toneClass = (tone) => `strategy-tone-${tone || 'slate'}`;
     vertical-align: top;
 }
 
-.group-row td {
-    background: #e8f2fb;
-    padding: 8px 12px;
-}
-
-.group-row__content {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: #0f4c81;
-}
-
 .primary-cell {
     width: auto;
     min-width: 0;
@@ -424,8 +636,10 @@ const toneClass = (tone) => `strategy-tone-${tone || 'slate'}`;
 .primary-cell__content {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
     padding: 10px;
+    height: 100%;
+    justify-content: center;
     color: #1e293b;
 }
 
@@ -444,54 +658,82 @@ const toneClass = (tone) => `strategy-tone-${tone || 'slate'}`;
     text-transform: uppercase;
 }
 
+.primary-cell__hint {
+    font-size: 10px;
+    font-weight: 700;
+    color: #0f6fb7;
+    letter-spacing: 0.02em;
+}
+
 .strategy-cell {
     width: auto;
     min-width: 0;
-    padding: 6px;
-    background: #ffffff;
-}
-
-.strategy-box {
-    min-height: 0;
-    border: 1px solid #cbd5e1;
-    border-left-width: 1px;
-    background: #ffffff;
     padding: 8px 10px;
+    background: #ffffff;
 }
 
-.strategy-box__value {
+.strategy-cell--editing {
+    padding: 6px;
+    background: #f8fbff;
+}
+
+.strategy-cell__value {
     font-size: 12px;
     font-weight: 700;
     line-height: 1.45;
     color: #1f2937;
-    white-space: pre-line;
+    white-space: pre-wrap;
     word-break: break-word;
+    margin: 0;
 }
 
-.strategy-box__empty {
+.strategy-cell__empty {
     font-size: 11px;
     font-weight: 700;
     color: #94a3b8;
     font-style: italic;
+    margin: 0;
 }
 
-.strategy-box--empty {
+.strategy-cell__textarea {
+    width: 100%;
+    min-height: 34px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
     background: #ffffff;
-    border-style: dashed;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.5;
+    color: #1f2937;
+    white-space: pre-wrap;
+    resize: vertical;
+    transition: all 0.15s ease;
 }
 
-.count-capsule {
-    display: inline-flex;
-    min-width: 18px;
-    height: 18px;
+.strategy-cell__textarea:hover {
+    border-color: #0f6fb7;
+}
+
+.strategy-cell__textarea:focus {
+    outline: none;
+    border-color: #0f6fb7;
+    box-shadow: 0 0 0 3px rgba(15, 111, 183, 0.1);
+}
+
+.strategy-toolbar {
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
-    border-radius: 999px;
-    padding: 0 5px;
-    background: rgba(15, 23, 42, 0.08);
-    font-size: 9px;
-    font-weight: 800;
-    color: inherit;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.strategy-toolbar__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
 }
 
 .initiative-view-switch {
@@ -510,117 +752,59 @@ const toneClass = (tone) => `strategy-tone-${tone || 'slate'}`;
 }
 
 .initiative-view-select,
-.initiative-view-input {
+.edit-select,
+.edit-textarea {
     border: 1px solid #cbd5e1;
     border-radius: 8px;
     background: #ffffff;
-    padding: 4px 10px;
     font-size: 11px;
     font-weight: 700;
     color: #475569;
     transition: all 0.15s ease;
 }
 
-.initiative-view-select {
+.initiative-view-select,
+.edit-select {
     appearance: none;
     cursor: pointer;
-    padding-right: 24px;
+    padding: 4px 24px 4px 10px;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 6px center;
     background-size: 12px;
 }
 
-.initiative-view-input {
-    min-width: 260px;
+.initiative-view-select {
+    flex-shrink: 0;
+}
+
+.edit-select {
+    width: 100%;
+}
+
+.edit-textarea {
+    width: 100%;
+    min-height: 92px;
+    padding: 10px 12px;
+    font-weight: 600;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    resize: vertical;
 }
 
 .initiative-view-select:hover,
-.initiative-view-input:hover {
+.edit-select:hover,
+.edit-textarea:hover {
     border-color: #0f6fb7;
     color: #0f6fb7;
 }
 
 .initiative-view-select:focus,
-.initiative-view-input:focus {
+.edit-select:focus,
+.edit-textarea:focus {
     outline: none;
     border-color: #0f6fb7;
     box-shadow: 0 0 0 3px rgba(15, 111, 183, 0.1);
-}
-
-.bu-toggle-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    background: #ffffff;
-    padding: 4px 10px;
-    font-size: 11px;
-    font-weight: 700;
-    color: #475569;
-    transition: all 0.15s ease;
-    cursor: pointer;
-}
-
-.bu-toggle-btn:hover {
-    border-color: #0f6fb7;
-    background: #f8fafc;
-}
-
-.bu-toggle-btn--active {
-    background: #0f6fb7;
-    border-color: #0f6fb7;
-    color: #ffffff;
-}
-
-.bu-toggle-btn--active:hover {
-    background: #0d5ea1;
-    border-color: #0d5ea1;
-}
-
-.legend-swatch {
-    display: block;
-    width: 12px;
-    min-width: 12px;
-    height: 12px;
-    border-radius: 2px;
-}
-
-.strategy-tone-sky {
-    border-color: #1d4ed8 !important;
-}
-
-.legend-swatch.strategy-tone-sky,
-.strategy-head-card.strategy-tone-sky {
-    background: #1d4ed8;
-}
-
-.strategy-tone-amber {
-    border-color: #b45309 !important;
-}
-
-.legend-swatch.strategy-tone-amber,
-.strategy-head-card.strategy-tone-amber {
-    background: #b45309;
-}
-
-.strategy-tone-emerald {
-    border-color: #047857 !important;
-}
-
-.legend-swatch.strategy-tone-emerald,
-.strategy-head-card.strategy-tone-emerald {
-    background: #047857;
-}
-
-.strategy-tone-slate {
-    border-color: #475569 !important;
-}
-
-.legend-swatch.strategy-tone-slate,
-.strategy-head-card.strategy-tone-slate {
-    background: #475569;
 }
 
 :deep(.dark) .strategy-table thead th {
@@ -644,10 +828,6 @@ const toneClass = (tone) => `strategy-tone-${tone || 'slate'}`;
     background: linear-gradient(180deg, #274a87 0%, #1f3e74 100%);
 }
 
-:deep(.dark) .group-row td {
-    background: rgba(15, 111, 183, 0.16);
-}
-
 :deep(.dark) .primary-cell {
     background: rgba(15, 23, 42, 0.55);
 }
@@ -656,23 +836,42 @@ const toneClass = (tone) => `strategy-tone-${tone || 'slate'}`;
     background: rgba(15, 23, 42, 0.35);
 }
 
-:deep(.dark) .strategy-box {
+:deep(.dark) .strategy-cell--editing {
+    background: rgba(15, 23, 42, 0.55);
+}
+
+:deep(.dark) .strategy-cell__value {
     color: #e2e8f0;
 }
 
-:deep(.dark) .strategy-box__value {
-    color: #e2e8f0;
+:deep(.dark) .strategy-cell__empty {
+    color: #94a3b8;
 }
 
-:deep(.dark) .strategy-box--empty {
-    background: rgba(15, 23, 42, 0.45);
+:deep(.dark) .primary-cell__hint {
+    color: #93c5fd;
 }
 
 :deep(.dark) .initiative-view-select,
-:deep(.dark) .initiative-view-input,
-:deep(.dark) .bu-toggle-btn {
+:deep(.dark) .edit-select,
+:deep(.dark) .edit-textarea {
     border-color: rgba(255, 255, 255, 0.1);
     background: rgba(15, 23, 42, 0.55);
     color: #cbd5e1;
+}
+
+:deep(.dark) .strategy-cell__textarea {
+    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(15, 23, 42, 0.8);
+    color: #e2e8f0;
+}
+
+:deep(.dark) .strategy-cell__textarea:hover {
+    border-color: rgba(96, 165, 250, 0.4);
+}
+
+:deep(.dark) .strategy-cell__textarea:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.12);
 }
 </style>

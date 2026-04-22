@@ -229,11 +229,19 @@ const coeGroups = foundCoeNames.map(name => {
     const holdingInitiatives = initiatives.filter(i => i.groub_id !== 2).sort(sortByCode);
     const subHoldingInitiatives = initiatives.filter(i => i.groub_id === 2).sort(sortByCode);
 
+    // Synchronize row count between Holding and Sub Holding to maintain consistent box height
+    const holdingCols = Math.max(1, Math.floor(initiativeColumnCount.value / 2));
+    const subHoldingCols = Math.max(1, Math.ceil(initiativeColumnCount.value / 2));
+    const holdingRows = Math.ceil(holdingInitiatives.length / holdingCols);
+    const subHoldingRows = Math.ceil(subHoldingInitiatives.length / subHoldingCols);
+    const maxRows = Math.max(holdingRows, subHoldingRows, 1);
+
     return {
         name,
         initiatives: initiatives.sort(sortByCode),
         holdingInitiatives,
         subHoldingInitiatives,
+        maxRows,
         total: initiatives.length
     };
 });
@@ -452,10 +460,7 @@ const statusLegend = computed(() => {
                         </option>
                     </select>
 
-                    <select v-model="selectedSource" class="initiative-view-select">
-                        <option value="">All Initiatives</option>
-                        <option v-for="source in sourceOptions" :key="source.value" :value="source.value">{{ source.label }}</option>
-                    </select>
+                    
 
                     <select v-model="selectedCoe" class="initiative-view-select">
                         <option value="">All CoE</option>
@@ -468,6 +473,11 @@ const statusLegend = computed(() => {
                         <option value="">All Status</option>
                         <option v-for="st in availableStatusOptions" :key="st"
                             :value="st">{{ st }}</option>
+                    </select>
+
+                    <select v-model="selectedSource" class="initiative-view-select">
+                        <option value="">All Initiatives</option>
+                        <option v-for="source in sourceOptions" :key="source.value" :value="source.value">{{ source.label }}</option>
                     </select>
 
                     <button type="button" class="bu-toggle-btn" :class="{ 'bu-toggle-btn--active': showBusinessUnit }"
@@ -761,11 +771,13 @@ a.initiative-box {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-right: 1px solid #374151;
     padding: 2px 4px;
     font-weight: 700;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
     min-width: 28px;
-    background: rgba(0, 0, 0, 0.03);
+    width: 28px;
+    flex-shrink: 0;
 }
 
 /* Mendukung min-width pada tampilan kolom yang lebih sedikit agar tidak terlalu sempit */
@@ -783,9 +795,11 @@ a.initiative-box {
 .initiative-box__name {
     display: flex;
     flex-direction: column;
-    padding: 2px 5px;
-    word-break: break-word;
+    align-items: flex-start;
     justify-content: center;
+    max-width: none;
+    padding: 2px 16px 2px 5px;
+    word-break: break-word;
 }
 
 .initiative-box__period {
@@ -796,15 +810,27 @@ a.initiative-box {
     margin-top: 1px;
 }
 
+.initiative-box__label-text {
+    line-height: 1.1;
+}
+
 .initiative-box__bu {
+    display: block;
+    width: 100%;
+    margin-top: 1px;
     font-size: 7.5px;
     font-weight: 700;
     font-style: italic;
+    color: inherit;
     opacity: 0.7;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .initiative-box__name--full {
     grid-column: 1 / -1;
+    padding-left: 5px;
 }
 
 
@@ -816,7 +842,7 @@ a.initiative-box {
     gap: 8px;
     border-radius: 12px;
     background: transparent;
-    padding: 2px;
+    padding: 2px 10px 2px 2px;
     width: 100%;
     overflow-x: auto;
     scrollbar-width: none; /* Hide scrollbar for cleaner look */
@@ -841,6 +867,7 @@ a.initiative-box {
     background-position: right 6px center;
     background-size: 12px;
     transition: all 0.15s ease;
+    flex-shrink: 0;
 }
 
 .initiative-view-select:hover {
@@ -865,8 +892,14 @@ a.initiative-box {
     font-size: 11px;
     font-weight: 700;
     color: #475569;
+    white-space: nowrap;
     transition: all 0.15s ease;
     cursor: pointer;
+    flex-shrink: 0;
+}
+
+.bu-toggle-btn span {
+    white-space: nowrap;
 }
 
 .bu-toggle-btn:hover {
@@ -921,41 +954,21 @@ a.initiative-box {
     border-color: #dc2626 !important;
 }
 
-/* COE Color Classes - High Contrast & Deep Colors */
-.coe-color-blue {
-    background-color: #eff6ff;
-    border-color: #1d4ed8 !important;
-}
+/* COE Color Classes - aligned with ItBuildingBlocksMatrix */
+.coe-color-blue { background-color: #eff6ff; border-color: #1d4ed8 !important; }
+.coe-color-emerald { background-color: #ecfdf5; border-color: #047857 !important; }
+.coe-color-amber { background-color: #fffbeb; border-color: #b45309 !important; }
+.coe-color-purple { background-color: #faf5ff; border-color: #6d28d9 !important; }
+.coe-color-rose { background-color: #fff1f2; border-color: #be123c !important; }
+.coe-color-indigo { background-color: #eef2ff; border-color: #4338ca !important; }
+.coe-color-none { background-color: #ffffff; border-color: #374151 !important; }
 
-.coe-color-emerald {
-    background-color: #ecfdf5;
-    border-color: #047857 !important;
-}
-
-.coe-color-amber {
-    background-color: #fffbeb;
-    border-color: #b45309 !important;
-}
-
-.coe-color-purple {
-    background-color: #faf5ff;
-    border-color: #6d28d9 !important;
-}
-
-.coe-color-rose {
-    background-color: #fff1f2;
-    border-color: #be123c !important;
-}
-
-.coe-color-indigo {
-    background-color: #eef2ff;
-    border-color: #4338ca !important;
-}
-
-.coe-color-none {
-    background-color: #ffffff;
-    border-color: #374151 !important;
-}
+.coe-color-blue .initiative-box__code { background-color: rgba(29, 78, 216, 0.1); }
+.coe-color-emerald .initiative-box__code { background-color: rgba(4, 120, 87, 0.1); }
+.coe-color-amber .initiative-box__code { background-color: rgba(180, 83, 9, 0.1); }
+.coe-color-purple .initiative-box__code { background-color: rgba(109, 40, 217, 0.1); }
+.coe-color-rose .initiative-box__code { background-color: rgba(190, 18, 60, 0.1); }
+.coe-color-indigo .initiative-box__code { background-color: rgba(67, 56, 202, 0.1); }
 
 /* Legend Swatches - Solid Deep Colors */
 .legend-swatch.coe-color-blue {

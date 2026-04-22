@@ -2,7 +2,9 @@
 
 namespace App\Services\StrategicHouse\BusinessStrategy;
 
+use App\Models\TrsOrganization;
 use App\Models\TrsBusinessStrategy;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 
 class BusinessStrategyService
@@ -56,8 +58,42 @@ class BusinessStrategyService
             'summary' => $this->buildSummary($rows),
             'strategyColumns' => $this->getStrategyColumns(),
             'groups' => $this->buildGroups($rows)->all(),
-            'organizationOptions' => $this->buildOrganizationOptions($rows),
+            'organizationOptions' => $this->buildOrganizationOptions(),
         ];
+    }
+
+    public function createStrategy(array $payload): TrsBusinessStrategy
+    {
+        $strategy = TrsBusinessStrategy::query()->create($this->normalizePayload($payload));
+
+        return $strategy->fresh(['businessUnit']);
+    }
+
+    public function updateStrategy(TrsBusinessStrategy $strategy, array $payload): TrsBusinessStrategy
+    {
+        $strategy->update($this->normalizePayload($payload));
+
+        return $strategy->fresh(['businessUnit']);
+    }
+
+    public function bulkUpdateStrategies(array $rows): void
+    {
+        DB::transaction(function () use ($rows): void {
+            $strategies = TrsBusinessStrategy::query()
+                ->whereIn('id', collect($rows)->pluck('id')->filter()->all())
+                ->get()
+                ->keyBy('id');
+
+            foreach ($rows as $row) {
+                $strategy = $strategies->get((int) ($row['id'] ?? 0));
+
+                if (!$strategy) {
+                    continue;
+                }
+
+                $strategy->update($this->normalizePayload($row));
+            }
+        });
     }
 
     private function mapRow(TrsBusinessStrategy $strategy): array
@@ -112,15 +148,20 @@ class BusinessStrategyService
             ->values();
     }
 
-    private function buildOrganizationOptions(Collection $rows): array
+    private function buildOrganizationOptions(): array
     {
-        return $rows
-            ->filter(fn (array $row): bool => ($row['business_unit_id'] ?? 0) > 0)
-            ->unique('business_unit_id')
-            ->map(fn (array $row): array => [
-                'value' => (string) $row['business_unit_id'],
-                'label' => "{$row['group_label']} - {$row['business_unit']}",
-            ])
+        return TrsOrganization::query()
+            ->select(['id', 'name', 'groub_id'])
+            ->orderBy('name')
+            ->get()
+            ->map(function (TrsOrganization $organization): array {
+                $groupMeta = $this->resolveGroupMeta($organization->groub_id);
+
+                return [
+                    'value' => (string) $organization->id,
+                    'label' => "{$groupMeta['label']} - {$organization->name}",
+                ];
+            })
             ->sortBy(fn (array $item) => $item['label'], SORT_NATURAL | SORT_FLAG_CASE)
             ->values()
             ->all();
@@ -222,8 +263,27 @@ class BusinessStrategyService
 
     private function normalizeValue(?string $value): ?string
     {
-        $normalized = trim(preg_replace('/\s+/', ' ', (string) $value) ?? '');
+        $rawValue = str_replace(["\r\n", "\r"], "\n", (string) $value);
+        $lines = collect(explode("\n", $rawValue))
+            ->map(function (string $line): string {
+                $line = preg_replace('/[ \t]+/', ' ', $line) ?? '';
+
+                return trim($line);
+            })
+            ->all();
+
+        $normalized = trim(implode("\n", $lines));
 
         return $normalized !== '' ? $normalized : null;
+    }
+
+    private function normalizePayload(array $payload): array
+    {
+        return [
+            'business_unit' => (int) ($payload['business_unit'] ?? 0),
+            'maximazing_value' => $this->normalizeValue($payload['maximazing_value'] ?? null),
+            'expand' => $this->normalizeValue($payload['expand'] ?? null),
+            'low_carbon' => $this->normalizeValue($payload['low_carbon'] ?? null),
+        ];
     }
 }

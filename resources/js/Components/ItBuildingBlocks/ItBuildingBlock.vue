@@ -406,7 +406,6 @@ const getCoeColorClass = (coeName) => {
                         <span>Periode</span>
                     </button>
 
-                    <span class="initiative-view-switch__label ml-2">Tampilan kolom:</span>
                     <select v-model="initiativeColumnCount" class="initiative-view-select">
                         <option v-for="option in initiativeColumnOptions" :key="option" :value="option">{{ option }} Kolom</option>
                     </select>
@@ -561,7 +560,6 @@ a.initiative-box {
 }
 
 .initiative-view-switch { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 10px; border-radius: 12px; background: transparent; padding: 2px; }
-.initiative-view-switch__label { font-size: 11px; font-weight: 700; color: #475569; white-space: nowrap; }
 .initiative-view-select { appearance: none; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff; padding: 4px 24px 4px 10px; font-size: 11px; font-weight: 700; color: #475569; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 6px center; background-size: 12px; transition: all 0.15s ease; }
 .initiative-view-select:hover { border-color: #0f6fb7; color: #0f6fb7; }
 .initiative-view-select:focus { outline: none; border-color: #0f6fb7; box-shadow: 0 0 0 3px rgba(15, 111, 183, 0.1); }
