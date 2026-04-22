@@ -69,13 +69,6 @@ const showDetails = ref(true);
 const showStrategyDetails = ref(true);
 const showBusinessStrategy = ref(false);
 const selectedBusinessUnit = ref('');
-const hoveredInitiativeTooltip = ref({
-    visible: false,
-    text: '',
-    italic: false,
-    left: 0,
-    top: 0,
-});
 
 const normalizeBusinessStrategyGroupKey = (value) => {
     const normalizedValue = String(value ?? '').trim().toLowerCase();
@@ -233,16 +226,6 @@ const initiativeProjectCharterHref = (initiative) => {
         : null;
 };
 
-const initiativeSummaryTitle = (initiative) => {
-    const label = String(initiative?.label ?? initiative?.name ?? initiative?.code ?? 'initiative').trim();
-    return `Lihat capsule summary untuk ${label}`;
-};
-
-const initiativeProjectCharterTitle = (initiative) => {
-    const label = String(initiative?.label ?? initiative?.name ?? initiative?.code ?? 'initiative').trim();
-    return `Lihat project charter IT untuk ${label}`;
-};
-
 const initiativeHoverTitle = (initiative) => {
     const description = String(initiative?.description ?? '').trim();
     const businessUnitName = String(initiative?.business_unit_name ?? '').trim();
@@ -257,32 +240,6 @@ const initiativeHoverTitle = (initiative) => {
     const fallbackLabel = [code, name].filter(Boolean).join(' - ') || String(initiative?.label ?? 'initiative').trim();
 
     return businessUnitName ? `(${businessUnitName}) ${fallbackLabel}` : fallbackLabel;
-};
-
-const initiativeHasDescription = (initiative) => String(initiative?.description ?? '').trim() !== '';
-
-const showInitiativeTooltip = (event, initiative) => {
-    const target = event?.currentTarget;
-
-    if (!target) return;
-
-    const rect = target.getBoundingClientRect();
-    const tooltipWidth = 250;
-    const viewportPadding = 12;
-    const preferredLeft = rect.left;
-    const maxLeft = Math.max(viewportPadding, window.innerWidth - tooltipWidth - viewportPadding);
-
-    hoveredInitiativeTooltip.value = {
-        visible: true,
-        text: initiativeHoverTitle(initiative),
-        italic: initiativeHasDescription(initiative),
-        left: Math.min(Math.max(preferredLeft, viewportPadding), maxLeft),
-        top: rect.bottom + 10,
-    };
-};
-
-const hideInitiativeTooltip = () => {
-    hoveredInitiativeTooltip.value.visible = false;
 };
 
 const orderedBusinessStrategyColumns = computed(() => {
@@ -474,25 +431,11 @@ const filteredBusinessStrategyRows = computed(() => {
                                             v-if="initiativeSummaryHref(ini)"
                                             :href="initiativeSummaryHref(ini)"
                                             class="initiative-link initiative-link--dti"
-                                            :title="initiativeSummaryTitle(ini)"
+                                            :title="initiativeHoverTitle(ini)"
                                         >
-                                            <span
-                                                class="initiative-hover-target"
-                                                @mouseenter="showInitiativeTooltip($event, ini)"
-                                                @mouseleave="hideInitiativeTooltip"
-                                                @focus="showInitiativeTooltip($event, ini)"
-                                                @blur="hideInitiativeTooltip"
-                                            >{{ ini.label }}</span>
+                                            <span :title="initiativeHoverTitle(ini)">{{ ini.label }}</span>
                                         </Link>
-                                        <span
-                                            v-else
-                                            class="initiative-hover-target"
-                                            tabindex="0"
-                                            @mouseenter="showInitiativeTooltip($event, ini)"
-                                            @mouseleave="hideInitiativeTooltip"
-                                            @focus="showInitiativeTooltip($event, ini)"
-                                            @blur="hideInitiativeTooltip"
-                                        >{{ ini.label }}</span>
+                                        <span v-else :title="initiativeHoverTitle(ini)">{{ ini.label }}</span>
                                     </li>
                                 </ul>
                                 <div v-else class="dti-card-list-empty">
@@ -516,25 +459,11 @@ const filteredBusinessStrategyRows = computed(() => {
                                             v-if="initiativeSummaryHref(ini)"
                                             :href="initiativeSummaryHref(ini)"
                                             class="initiative-link initiative-link--dti"
-                                            :title="initiativeSummaryTitle(ini)"
+                                            :title="initiativeHoverTitle(ini)"
                                         >
-                                            <span
-                                                class="initiative-hover-target"
-                                                @mouseenter="showInitiativeTooltip($event, ini)"
-                                                @mouseleave="hideInitiativeTooltip"
-                                                @focus="showInitiativeTooltip($event, ini)"
-                                                @blur="hideInitiativeTooltip"
-                                            >{{ ini.label }}</span>
+                                            <span :title="initiativeHoverTitle(ini)">{{ ini.label }}</span>
                                         </Link>
-                                        <span
-                                            v-else
-                                            class="initiative-hover-target"
-                                            tabindex="0"
-                                            @mouseenter="showInitiativeTooltip($event, ini)"
-                                            @mouseleave="hideInitiativeTooltip"
-                                            @focus="showInitiativeTooltip($event, ini)"
-                                            @blur="hideInitiativeTooltip"
-                                        >{{ ini.label }}</span>
+                                        <span v-else :title="initiativeHoverTitle(ini)">{{ ini.label }}</span>
                                     </li>
                                 </ul>
                                 <div v-else class="dti-card-list-empty">
@@ -590,25 +519,11 @@ const filteredBusinessStrategyRows = computed(() => {
                                         v-if="initiativeProjectCharterHref(ini)"
                                         :href="initiativeProjectCharterHref(ini)"
                                         class="initiative-link initiative-link--gits"
-                                        :title="initiativeProjectCharterTitle(ini)"
+                                        :title="initiativeHoverTitle(ini)"
                                     >
-                                        <span
-                                            class="initiative-hover-target"
-                                            @mouseenter="showInitiativeTooltip($event, ini)"
-                                            @mouseleave="hideInitiativeTooltip"
-                                            @focus="showInitiativeTooltip($event, ini)"
-                                            @blur="hideInitiativeTooltip"
-                                        >{{ ini.label }}</span>
+                                        <span :title="initiativeHoverTitle(ini)">{{ ini.label }}</span>
                                     </Link>
-                                    <span
-                                        v-else
-                                        class="initiative-hover-target"
-                                        tabindex="0"
-                                        @mouseenter="showInitiativeTooltip($event, ini)"
-                                        @mouseleave="hideInitiativeTooltip"
-                                        @focus="showInitiativeTooltip($event, ini)"
-                                        @blur="hideInitiativeTooltip"
-                                    >{{ ini.label }}</span>
+                                    <span v-else :title="initiativeHoverTitle(ini)">{{ ini.label }}</span>
                                 </li>
                             </ul>
                             <div v-else class="gits-pillar-list-empty">
@@ -637,25 +552,11 @@ const filteredBusinessStrategyRows = computed(() => {
                                     v-if="initiativeProjectCharterHref(ini)"
                                     :href="initiativeProjectCharterHref(ini)"
                                     class="initiative-link initiative-link--gits"
-                                    :title="initiativeProjectCharterTitle(ini)"
+                                    :title="initiativeHoverTitle(ini)"
                                 >
-                                    <span
-                                        class="initiative-hover-target"
-                                        @mouseenter="showInitiativeTooltip($event, ini)"
-                                        @mouseleave="hideInitiativeTooltip"
-                                        @focus="showInitiativeTooltip($event, ini)"
-                                        @blur="hideInitiativeTooltip"
-                                    >{{ ini.label }}</span>
+                                    <span :title="initiativeHoverTitle(ini)">{{ ini.label }}</span>
                                 </Link>
-                                <span
-                                    v-else
-                                    class="initiative-hover-target"
-                                    tabindex="0"
-                                    @mouseenter="showInitiativeTooltip($event, ini)"
-                                    @mouseleave="hideInitiativeTooltip"
-                                    @focus="showInitiativeTooltip($event, ini)"
-                                    @blur="hideInitiativeTooltip"
-                                >{{ ini.label }}</span>
+                                <span v-else :title="initiativeHoverTitle(ini)">{{ ini.label }}</span>
                             </li>
                         </ul>
                         <div v-else class="gits-pillar-list-empty">
@@ -680,25 +581,11 @@ const filteredBusinessStrategyRows = computed(() => {
                                     v-if="initiativeProjectCharterHref(ini)"
                                     :href="initiativeProjectCharterHref(ini)"
                                     class="initiative-link initiative-link--gits"
-                                    :title="initiativeProjectCharterTitle(ini)"
+                                    :title="initiativeHoverTitle(ini)"
                                 >
-                                    <span
-                                        class="initiative-hover-target"
-                                        @mouseenter="showInitiativeTooltip($event, ini)"
-                                        @mouseleave="hideInitiativeTooltip"
-                                        @focus="showInitiativeTooltip($event, ini)"
-                                        @blur="hideInitiativeTooltip"
-                                    >{{ ini.label }}</span>
+                                    <span :title="initiativeHoverTitle(ini)">{{ ini.label }}</span>
                                 </Link>
-                                <span
-                                    v-else
-                                    class="initiative-hover-target"
-                                    tabindex="0"
-                                    @mouseenter="showInitiativeTooltip($event, ini)"
-                                    @mouseleave="hideInitiativeTooltip"
-                                    @focus="showInitiativeTooltip($event, ini)"
-                                    @blur="hideInitiativeTooltip"
-                                >{{ ini.label }}</span>
+                                <span v-else :title="initiativeHoverTitle(ini)">{{ ini.label }}</span>
                             </li>
                         </ul>
                         <div v-else class="gits-pillar-list-empty">
@@ -707,18 +594,6 @@ const filteredBusinessStrategyRows = computed(() => {
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div
-            v-if="hoveredInitiativeTooltip.visible"
-            class="initiative-floating-tooltip"
-            :class="{ 'initiative-floating-tooltip--italic': hoveredInitiativeTooltip.italic }"
-            :style="{
-                left: `${hoveredInitiativeTooltip.left}px`,
-                top: `${hoveredInitiativeTooltip.top}px`,
-            }"
-        >
-            {{ hoveredInitiativeTooltip.text }}
         </div>
     </section>
 </template>
@@ -1206,49 +1081,6 @@ const filteredBusinessStrategyRows = computed(() => {
 
 .initiative-link--dti:hover {
     opacity: 0.8;
-}
-
-.initiative-hover-target {
-    position: relative;
-    display: inline-block;
-    max-width: 100%;
-}
-
-.initiative-hover-target:focus-visible {
-    outline: 2px solid currentColor;
-    outline-offset: 2px;
-    border-radius: 3px;
-}
-
-.initiative-floating-tooltip {
-    position: fixed;
-    min-width: 170px;
-    max-width: 250px;
-    padding: 7px 9px;
-    border-radius: 8px;
-    background: rgba(15, 23, 42, 0.96);
-    color: #f8fafc;
-    font-size: 8px;
-    line-height: 1.3;
-    white-space: normal;
-    text-align: left;
-    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.22);
-    pointer-events: none;
-    z-index: 9999;
-}
-
-.initiative-floating-tooltip::before {
-    content: '';
-    position: absolute;
-    left: 14px;
-    bottom: 100%;
-    border-width: 5px;
-    border-style: solid;
-    border-color: transparent transparent rgba(15, 23, 42, 0.96) transparent;
-}
-
-.initiative-floating-tooltip--italic {
-    font-style: italic;
 }
 
 .dti-card-list-empty {
