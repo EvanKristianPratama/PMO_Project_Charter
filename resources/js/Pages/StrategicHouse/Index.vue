@@ -145,6 +145,19 @@
                 </button>
             </div>
 
+            <!-- Roadmap Summary Button in Roadmap Tab -->
+            <div
+                v-if="viewMode === 'roadmap'"
+                class="mb-5 flex justify-end"
+            >
+                <Link
+                    :href="route('strategic-house.roadmap-summary.index')"
+                    class="inline-flex items-center gap-1.5 rounded-lg border border-[#0B2A8A] bg-white px-3 py-1.5 text-[10px] font-bold tracking-wider text-[#0B2A8A] transition-all hover:bg-[#0B2A8A] hover:text-white dark:border-[#53BDE6] dark:bg-transparent dark:text-[#53BDE6] dark:hover:bg-[#53BDE6] dark:hover:text-[#171717]"
+                >
+                    📊 Roadmap Summary
+                </Link>
+            </div>
+
             <!-- Conditional View Rendering -->
             <div class="relative min-h-[400px]">
                 <Transition
@@ -303,6 +316,7 @@
 
 <script setup>
 import { ref } from "vue";
+import { Link } from "@inertiajs/vue3";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/vue/24/outline";
 import ItInitiativeRoadmapContent from "@/Components/StrategicHouse/RoadMap/ItInitiativeRoadmapContent.vue";
 import DualGrowth from "@/Components/StrategicHouse/DualGrowth.vue";

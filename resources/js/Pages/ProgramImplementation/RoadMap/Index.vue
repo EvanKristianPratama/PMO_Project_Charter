@@ -62,6 +62,12 @@
                         >
                             Add Roadmap
                         </Link>
+                        <Link
+                            :href="route('strategic-house.roadmap-summary.index')"
+                            class="inline-flex items-center gap-1.5 rounded-lg border border-[#0B2A8A] bg-white px-3 py-2 text-xs font-semibold text-[#0B2A8A] transition hover:bg-[#0B2A8A] hover:text-white"
+                        >
+                            📊 Roadmap Summary
+                        </Link>
                     </div>
                 </div>
             </section>

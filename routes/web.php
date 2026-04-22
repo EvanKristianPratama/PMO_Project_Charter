@@ -55,6 +55,7 @@ use App\Http\Controllers\StrategicHouse\IndexController as StrategicHouseControl
 use App\Http\Controllers\StrategicHouse\InitiativeRelation\InitiativeRelationController as StrategicHouseInitiativeRelationController;
 use App\Http\Controllers\StrategicHouse\InitiativeSupport\IndexController as StrategicHouseInitiativeSupportIndexController;
 use App\Http\Controllers\StrategicHouse\RoadMap\IndexController as StrategicHouseRoadmapIndexController;
+use App\Http\Controllers\StrategicHouse\RoadMap\SummaryController as StrategicHouseRoadmapSummaryController;
 use App\Http\Controllers\StrategicHouse\StrategicPillars\GoalController as StrategicHouseStrategicPillarGoalController;
 use App\Http\Controllers\StrategicHouse\StrategicPillars\IndexController as StrategicHouseStrategicPillarsIndexController;
 use App\Http\Controllers\StrategicHouse\StrategicPillars\InitiativeTaggingController as StrategicHouseInitiativeTaggingController;
@@ -264,6 +265,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
             Route::post('/mappings/delete', [StrategicHouseInitiativeSupportIndexController::class, 'destroyMappings'])->name('mappings.destroy');
         });
         Route::get('/roadmap', StrategicHouseRoadmapIndexController::class)->name('roadmap.index');
+        Route::get('/roadmap-summary', StrategicHouseRoadmapSummaryController::class)->name('roadmap-summary.index');
     });
     Route::get('/strategic-house/strategic-pillars/{goal?}', StrategicHouseStrategicPillarsIndexController::class)->name('strategic-pillars.index');
     Route::post('/strategic-house/strategic-pillars/goals', [StrategicHouseStrategicPillarGoalController::class, 'store'])->name('strategic-pillars.goals.store');
@@ -284,6 +286,8 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::post('/program-planning/strategic-house/initiative-support', [StrategicHouseInitiativeSupportIndexController::class, 'store']);
     Route::post('/program-planning/strategic-house/initiative-support/mappings/delete', [StrategicHouseInitiativeSupportIndexController::class, 'destroyMappings']);
     Route::redirect('/program-planning/strategic-house/roadmap', '/strategic-house/roadmap');
+    Route::get('/program-planning/strategic-house/roadmap-summary', StrategicHouseRoadmapSummaryController::class)
+        ->name('program-planning.strategic-house.roadmap-summary.index');
     Route::get('/strategic-pillars/{goal?}', StrategicHouseStrategicPillarsIndexController::class);
     Route::post('/strategic-pillars/goals', [StrategicHouseStrategicPillarGoalController::class, 'store']);
     Route::put('/strategic-pillars/goals/{goal}', [StrategicHouseStrategicPillarGoalController::class, 'update']);
