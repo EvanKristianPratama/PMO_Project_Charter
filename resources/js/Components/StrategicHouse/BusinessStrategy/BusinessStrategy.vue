@@ -48,8 +48,10 @@ const selectedOrganization = ref('');
 const selectedPeriod = ref(null);
 const isEditMode = ref(false);
 const showInitiatives = ref(true);
-const showEnablers = ref(false);
+const showEnablers = ref(true);
 const showLastUpdatePeriod = ref(true);
+const showStrategyData = ref(true);
+const selectedSource = ref('');
 
 const strategyForm = reactive({
     business_unit: '',
@@ -75,12 +77,18 @@ const orderedStrategyColumns = computed(() => {
     return lowCarbonColumn ? [...otherColumns, lowCarbonColumn] : [...(props.strategyColumns || [])];
 });
 
+const bulletIndentedStrategyColumns = new Set(['maximazing_value', 'expand', 'low_carbon']);
 const lowCarbonColumn = computed(() => orderedStrategyColumns.value.find((column) => column.key === 'low_carbon') ?? null);
 const legacyColumns = computed(() => orderedStrategyColumns.value.filter((column) => column.key !== 'low_carbon'));
+const visibleEnablerGoals = computed(() => (showEnablers.value ? [...(props.enablerGoals || [])] : []));
 const strategyFormFields = computed(() => orderedStrategyColumns.value);
 const allRows = computed(() => normalizedGroups.value.flatMap((group) => group.rows || []));
 const legacyGoalTitle = computed(() => String(props.headerGoals?.legacy?.title ?? 'Maximize Legacy Business'));
 const lowCarbonGoalTitle = computed(() => String(props.headerGoals?.low_carbon?.title ?? 'Build Low Carbon Business'));
+
+const shouldIndentStrategyColumn = (columnKey) => bulletIndentedStrategyColumns.has(String(columnKey ?? ''));
+const isBulletLine = (line) => String(line ?? '').trimStart().startsWith('\u2022');
+const splitStrategyValueLines = (value) => String(value ?? '').split(/\r?\n/);
 
 const mergeRowsByBusinessUnit = (rows) => {
     const mergedRows = [];
@@ -232,6 +240,9 @@ const initiativeBoxesGridStyle = (initiatives = []) => ({
 });
 
 const getBusinessUnitRowspan = (row) => {
+    if (!showStrategyData.value && !isEditMode.value) {
+        return showInitiatives.value ? 1 : 0;
+    }
     const rowCount = Number(row?.business_unit_row_count ?? 1);
     return showInitiatives.value ? rowCount + 1 : rowCount;
 };
@@ -284,15 +295,49 @@ const filteredGroups = computed(() => normalizedGroups.value
     })
     .filter((group) => group.rows.length > 0));
 
-const filteredBusinessUnitRows = computed(() => filteredGroups.value.flatMap((group) => (
-    (group.rows || []).filter((row) => row.show_business_unit)
-)));
-
 const statusDesiredOrder = ['DF', 'Done', 'DT 2026', 'ITSBP', 'On Progress', 'On Review', 'SH'];
+
+const sourceOptions = computed(() => {
+    const sourceMap = new Map();
+    const initiatives = allRows.value.flatMap((row) => {
+        const strat = Object.values(row.initiatives_by_key || {}).flatMap(items => items || []);
+        const enabler = Object.values(row.enabler_initiatives_by_key || {}).flatMap(items => items || []);
+        return [...strat, ...enabler];
+    });
+
+    initiatives.forEach(ini => {
+        const id = ini.source;
+        let name = ini.source_name;
+        if (!name) {
+            if (id == 3) name = 'Baseline RSTI 2025-2029';
+            else if (id == 4) name = 'New Initiatives 2026';
+        }
+        if (id !== undefined && id !== null && name) {
+            if (!sourceMap.has(id)) {
+                sourceMap.set(id, name);
+            }
+        }
+    });
+
+    const desiredOrder = ['Baseline RSTI 2025-2029', 'New Initiatives 2026'];
+    
+    return Array.from(sourceMap.entries())
+        .map(([id, name]) => ({ value: id, label: name }))
+        .sort((a, b) => {
+            const indexA = desiredOrder.indexOf(a.label);
+            const indexB = desiredOrder.indexOf(b.label);
+            if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+            if (indexA !== -1) return -1;
+            if (indexB !== -1) return 1;
+            return a.label.localeCompare(b.label);
+        });
+});
 
 const getVisibleInitiatives = (initiatives = []) => {
     return (initiatives || []).filter((initiative) => {
-        return !selectedPeriod.value || getInitiativeStatus(initiative) !== null;
+        const matchesPeriod = !selectedPeriod.value || getInitiativeStatus(initiative) !== null;
+        const matchesSource = !selectedSource.value || initiative.source == selectedSource.value;
+        return matchesPeriod && matchesSource;
     });
 };
 
@@ -658,6 +703,19 @@ watch(filterOrganizationOptions, (options) => {
                             </option>
                         </select>
 
+                        <select v-model="selectedSource" class="initiative-view-select">
+                            <option value="">All Initiatives</option>
+                            <option v-for="source in sourceOptions" :key="source.value" :value="source.value">
+                                {{ source.label }}
+                            </option>
+                        </select>
+
+                        <button type="button" class="view-toggle-btn"
+                            :class="{ 'view-toggle-btn--active': showStrategyData }"
+                            @click="showStrategyData = !showStrategyData">
+                            {{ showStrategyData ? 'Hide Strategy Data' : 'Show Strategy Data' }}
+                        </button>
+
                         <button type="button" class="view-toggle-btn"
                             :class="{ 'view-toggle-btn--active': showInitiatives }"
                             @click="showInitiatives = !showInitiatives">
@@ -707,6 +765,16 @@ watch(filterOrganizationOptions, (options) => {
                                         <span class="strategy-head-card__title">{{ lowCarbonGoalTitle }}</span>
                                     </div>
                                 </th>
+                                <th
+                                    v-for="enabler in visibleEnablerGoals"
+                                    :key="`enabler-head-${enabler.key}`"
+                                    rowspan="2"
+                                    class="head-cell head-cell--enabler"
+                                >
+                                    <div class="strategy-head-card strategy-head-card--enabler">
+                                        <span class="strategy-head-card__title">{{ enabler.title }}</span>
+                                    </div>
+                                </th>
                             </tr>
                             <tr v-if="legacyColumns.length">
                                 <th v-for="column in legacyColumns" :key="column.key" class="head-cell">
@@ -720,7 +788,7 @@ watch(filterOrganizationOptions, (options) => {
                         <tbody>
                             <template v-for="group in filteredGroups" :key="group.key">
                                 <template v-for="row in group.rows" :key="row.id">
-                                    <tr>
+                                    <tr v-if="showStrategyData || isEditMode">
                                         <td v-if="row.show_business_unit" :rowspan="getBusinessUnitRowspan(row)"
                                             class="primary-cell">
                                             <div class="primary-cell__content">
@@ -744,19 +812,86 @@ watch(filterOrganizationOptions, (options) => {
 
                                         <td v-for="column in orderedStrategyColumns" :key="`${row.id}-${column.key}`"
                                             class="strategy-cell" :class="{ 'strategy-cell--editing': isEditMode }">
-                                            <textarea v-if="isEditMode" v-model="editableRows[row.id][column.key]" rows="1"
-                                                class="strategy-cell__textarea"
-                                                :placeholder="`Isi ${column.label.toLowerCase()}...`" />
-                                            <p v-else-if="row.values?.[column.key]" class="strategy-cell__value">
-                                                {{ row.values[column.key] }}
-                                            </p>
-                                            <p v-else class="strategy-cell__empty">
-                                                Not Available
-                                            </p>
+                                            <template v-if="showStrategyData || isEditMode">
+                                                <textarea v-if="isEditMode" v-model="editableRows[row.id][column.key]" rows="1"
+                                                    class="strategy-cell__textarea"
+                                                    :placeholder="`Isi ${column.label.toLowerCase()}...`" />
+                                                <p v-else-if="row.values?.[column.key]" class="strategy-cell__value">
+                                                    <span
+                                                        v-for="(line, lineIndex) in splitStrategyValueLines(row.values[column.key])"
+                                                        :key="`${row.id}-${column.key}-line-${lineIndex}`"
+                                                        class="strategy-cell__line"
+                                                        :class="{
+                                                            'strategy-cell__line--bullet': shouldIndentStrategyColumn(column.key) && isBulletLine(line),
+                                                        }"
+                                                    >
+                                                        {{ line }}
+                                                    </span>
+                                                </p>
+                                                <p v-else class="strategy-cell__empty">
+                                                    Not Available
+                                                </p>
+                                            </template>
+                                        </td>
+
+                                        <td
+                                            v-for="enabler in row.show_business_unit ? visibleEnablerGoals : []"
+                                            :key="`enabler-${row.id}-${enabler.key}`"
+                                            :rowspan="getBusinessUnitRowspan(row)"
+                                            class="initiative-row__cell enabler-cell"
+                                        >
+                                            <div class="initiative-row__content">
+                                                <div
+                                                    v-if="getVisibleInitiatives((row.enabler_initiatives_by_key || {})[enabler.key] || []).length"
+                                                    class="initiative-row__boxes initiative-row__boxes--vertical"
+                                                >
+                                                    <component :is="initiativeSummaryHref(initiative) ? Link : 'div'"
+                                                        v-for="initiative in getVisibleInitiatives((row.enabler_initiatives_by_key || {})[enabler.key] || [])"
+                                                        :key="`enabler-initiative-${row.id}-${enabler.key}-${initiative.id}`"
+                                                        :href="initiativeSummaryHref(initiative)"
+                                                        :title="initiativeSummaryTitle(initiative)" class="initiative-box"
+                                                        :class="[
+                                                            { 'initiative-box--no-code': !initiative.code },
+                                                            { 'initiative-box--clickable': initiativeSummaryHref(initiative) },
+                                                        ]">
+                                                        <span v-if="initiative.code" class="initiative-box__code"
+                                                            :class="getStatusColorClass(getInitiativeStatus(initiative))">
+                                                            {{ initiative.code }}
+                                                        </span>
+                                                        <span class="initiative-box__name"
+                                                            :class="{ 'initiative-box__name--full': !initiative.code }">
+                                                            <span class="initiative-box__label-text">
+                                                                {{ initiative.name }}
+                                                            </span>
+                                                            <span v-if="showLastUpdatePeriod && getInitiativePeriodLabel(initiative)"
+                                                                class="initiative-box__period">
+                                                                {{ getInitiativePeriodLabel(initiative) }}
+                                                            </span>
+                                                        </span>
+                                                    </component>
+                                                </div>
+
+                                                <p v-else class="initiative-row__empty">
+                                                    -
+                                                </p>
+                                            </div>
                                         </td>
                                     </tr>
 
                                     <tr v-if="showInitiatives && row.is_last_business_unit_row" class="initiative-row">
+                                        <td v-if="!(showStrategyData || isEditMode)" :rowspan="1"
+                                            class="primary-cell">
+                                            <div class="primary-cell__content">
+                                                <div class="primary-logo-wrapper" v-if="row.business_unit_logo">
+                                                    <img :src="row.business_unit_logo" :alt="`${row.business_unit} logo`"
+                                                        class="primary-business-unit-logo">
+                                                </div>
+                                                <div class="primary-label-wrapper">
+                                                    <span class="primary-business-unit-name">{{ row.business_unit }}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+
                                         <td v-if="isEditMode" class="initiative-row__action-spacer"></td>
                                         <td v-for="column in orderedStrategyColumns" :key="`initiative-${row.id}-${column.key}`"
                                             class="initiative-row__cell">
@@ -796,80 +931,53 @@ watch(filterOrganizationOptions, (options) => {
                                                 </p>
                                             </div>
                                         </td>
+                                        
+                                        <td
+                                            v-if="!(showStrategyData || isEditMode)"
+                                            v-for="enabler in visibleEnablerGoals"
+                                            :key="`enabler-hidden-${row.id}-${enabler.key}`"
+                                            :rowspan="1"
+                                            class="initiative-row__cell enabler-cell"
+                                        >
+                                            <div class="initiative-row__content">
+                                                <div
+                                                    v-if="getVisibleInitiatives((row.enabler_initiatives_by_key || {})[enabler.key] || []).length"
+                                                    class="initiative-row__boxes initiative-row__boxes--vertical"
+                                                >
+                                                    <component :is="initiativeSummaryHref(initiative) ? Link : 'div'"
+                                                        v-for="initiative in getVisibleInitiatives((row.enabler_initiatives_by_key || {})[enabler.key] || [])"
+                                                        :key="`enabler-initiative-hidden-${row.id}-${enabler.key}-${initiative.id}`"
+                                                        :href="initiativeSummaryHref(initiative)"
+                                                        :title="initiativeSummaryTitle(initiative)" class="initiative-box"
+                                                        :class="[
+                                                            { 'initiative-box--no-code': !initiative.code },
+                                                            { 'initiative-box--clickable': initiativeSummaryHref(initiative) },
+                                                        ]">
+                                                        <span v-if="initiative.code" class="initiative-box__code"
+                                                            :class="getStatusColorClass(getInitiativeStatus(initiative))">
+                                                            {{ initiative.code }}
+                                                        </span>
+                                                        <span class="initiative-box__name"
+                                                            :class="{ 'initiative-box__name--full': !initiative.code }">
+                                                            <span class="initiative-box__label-text">
+                                                                {{ initiative.name }}
+                                                            </span>
+                                                            <span v-if="showLastUpdatePeriod && getInitiativePeriodLabel(initiative)"
+                                                                class="initiative-box__period">
+                                                                {{ getInitiativePeriodLabel(initiative) }}
+                                                            </span>
+                                                        </span>
+                                                    </component>
+                                                </div>
+
+                                                <p v-else class="initiative-row__empty">
+                                                    -
+                                                </p>
+                                            </div>
+                                        </td>
                                     </tr>
                                 </template>
                             </template>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section v-if="showEnablers && enablerGoals.length > 0"
-                class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                <div class="overflow-x-auto">
-                    <table class="strategy-table strategy-table--enabler">
-                        <thead>
-                            <tr>
-                                <th class="head-cell head-cell--business-unit"></th>
-                                <th v-for="enabler in enablerGoals" :key="`enabler-head-${enabler.key}`" class="head-cell">
-                                    <div class="strategy-head-card strategy-head-card--enabler">
-                                        <span class="strategy-head-card__title">{{ enabler.title }}</span>
-                                    </div>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="row in filteredBusinessUnitRows" :key="`enabler-row-${row.id}`">
-                                <td class="primary-cell">
-                                    <div class="primary-cell__content">
-                                        <div class="primary-logo-wrapper" v-if="row.business_unit_logo">
-                                            <img :src="row.business_unit_logo" :alt="`${row.business_unit} logo`"
-                                                class="primary-business-unit-logo">
-                                        </div>
-                                        <div class="primary-label-wrapper">
-                                            <span class="primary-business-unit-name">{{ row.business_unit }}</span>
-                                        </div>
-                                    </div>
-                                </td>
-
-                                <td v-for="enabler in enablerGoals" :key="`enabler-${row.id}-${enabler.key}`"
-                                    class="initiative-row__cell">
-                                    <div class="initiative-row__content">
-                                        <div v-if="getVisibleInitiatives((row.enabler_initiatives_by_key || {})[enabler.key] || []).length"
-                                            class="initiative-row__boxes"
-                                            :style="initiativeBoxesGridStyle(getVisibleInitiatives((row.enabler_initiatives_by_key || {})[enabler.key] || []))">
-                                            <component :is="initiativeSummaryHref(initiative) ? Link : 'div'"
-                                                v-for="initiative in getVisibleInitiatives((row.enabler_initiatives_by_key || {})[enabler.key] || [])"
-                                                :key="`enabler-initiative-${row.id}-${enabler.key}-${initiative.id}`"
-                                                :href="initiativeSummaryHref(initiative)"
-                                                :title="initiativeSummaryTitle(initiative)" class="initiative-box"
-                                                :class="[
-                                                    { 'initiative-box--no-code': !initiative.code },
-                                                    { 'initiative-box--clickable': initiativeSummaryHref(initiative) },
-                                                ]">
-                                                <span v-if="initiative.code" class="initiative-box__code"
-                                                    :class="getStatusColorClass(getInitiativeStatus(initiative))">
-                                                    {{ initiative.code }}
-                                                </span>
-                                                <span class="initiative-box__name"
-                                                    :class="{ 'initiative-box__name--full': !initiative.code }">
-                                                    <span class="initiative-box__label-text">
-                                                        {{ initiative.name }}
-                                                    </span>
-                                                    <span v-if="showLastUpdatePeriod && getInitiativePeriodLabel(initiative)"
-                                                        class="initiative-box__period">
-                                                        {{ getInitiativePeriodLabel(initiative) }}
-                                                    </span>
-                                                </span>
-                                            </component>
-                                        </div>
-
-                                        <p v-else class="initiative-row__empty">
-                                            -
-                                        </p>
-                                    </div>
-                                </td>
-                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -946,6 +1054,10 @@ watch(filterOrganizationOptions, (options) => {
 
 .head-cell--carbon {
     width: auto;
+}
+
+.head-cell--enabler {
+    width: 120px;
 }
 
 .head-cell--action {
@@ -1132,6 +1244,10 @@ watch(filterOrganizationOptions, (options) => {
     background: linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%);
 }
 
+.enabler-cell {
+    min-width: 120px;
+}
+
 .initiative-row__content {
     display: flex;
     flex-direction: column;
@@ -1174,6 +1290,10 @@ watch(filterOrganizationOptions, (options) => {
     grid-auto-flow: row;
     gap: 8px;
     align-items: stretch;
+}
+
+.initiative-row__boxes--vertical {
+    grid-template-columns: 1fr;
 }
 
 .initiative-row__empty {
@@ -1264,10 +1384,19 @@ a.initiative-box {
     font-weight: 400;
     line-height: 1.45;
     color: #1f2937;
-    white-space: break-spaces;
-    word-break: break-word;
     margin: 0;
+    word-break: break-word;
+}
+
+.strategy-cell__line {
+    display: block;
+    white-space: break-spaces;
     tab-size: 4;
+}
+
+.strategy-cell__line--bullet {
+    padding-left: 14px;
+    text-indent: -14px;
 }
 
 .strategy-cell__empty {

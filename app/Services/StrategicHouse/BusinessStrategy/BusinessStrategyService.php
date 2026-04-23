@@ -229,8 +229,10 @@ class BusinessStrategyService
                 'name',
                 'description',
                 'tipe_initiative',
+                'source',
             ])
             ->with([
+                'sourceData:id,name',
                 'latestStatusImplementation' => fn ($query) => $query->select([
                     'trs_status_implementation.id',
                     'trs_status_implementation.initiative_id',
@@ -298,6 +300,8 @@ class BusinessStrategyService
                 ])
                 ->values()
                 ->all(),
+            'source' => !is_null($initiative->source) ? (int) $initiative->source : null,
+            'source_name' => $initiative->sourceData?->name,
         ];
     }
 
