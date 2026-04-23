@@ -12,6 +12,7 @@ use App\Services\StrategicHouse\InitiativeSupport\InitiativeSupportService;
 use App\Services\StrategicHouse\RoadMap\ItInitiativeRoadmapService;
 use App\Services\StrategicHouse\StrategicPillars\StrategicPillarPageService;
 use App\Services\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Roadmap\MasterMilestonePageService;
+use App\Services\StrategicHouse\MapTechnology\MapTechnologyService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
@@ -166,7 +167,8 @@ class StrategicHousePageService
         protected StrategicPillarPageService $strategicPillarPageService,
         protected InitiativeRelationService $initiativeRelationService,
         protected ItInitiativeRoadmapService $itInitiativeRoadmapService,
-        protected MasterMilestonePageService $digitalRoadmapPageService
+        protected MasterMilestonePageService $digitalRoadmapPageService,
+        protected MapTechnologyService $mapTechnologyService
     ) {}
 
     public function getPageProps(array $filters = []): array
@@ -204,6 +206,7 @@ class StrategicHousePageService
         $digitalRoadmapGroups = $this->buildDigitalRoadmapGroups($digitalRoadmapData['roadmapItems'] ?? []);
         $initiativeSupportData = $this->initiativeSupportService->getPageProps();
         $businessStrategyData = $this->businessStrategyService->getPageProps();
+        $mapTechnologyData = $this->mapTechnologyService->getPageProps();
 
         return [
             'filters' => $normalizedFilters,
@@ -250,6 +253,11 @@ class StrategicHousePageService
             'initiativeSupportGroups' => $initiativeSupportData['groups'],
             'initiativeSupportDigitalOptions' => $initiativeSupportData['digitalInitiativeOptions'],
             'initiativeSupportItOptions' => $initiativeSupportData['itInitiativeOptions'],
+
+            // Map Technology props
+            'mapTechnologies' => $mapTechnologyData['mapTechnologies'],
+            'mapTechnologyCoeOptions' => $mapTechnologyData['coeOptions'],
+            'mapTechnologyInitiativeOptions' => $mapTechnologyData['initiativeOptions'],
 
             // Merge Strategic Pillar props
             'strategicPillars' => $pillarData['strategicPillars'] instanceof \Closure ? $pillarData['strategicPillars']() : $pillarData['strategicPillars'],

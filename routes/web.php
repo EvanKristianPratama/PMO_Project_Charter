@@ -54,6 +54,7 @@ use App\Http\Controllers\ProgramPlanning\ProgramPlanningController;
 use App\Http\Controllers\StrategicHouse\IndexController as StrategicHouseController;
 use App\Http\Controllers\StrategicHouse\InitiativeRelation\InitiativeRelationController as StrategicHouseInitiativeRelationController;
 use App\Http\Controllers\StrategicHouse\InitiativeSupport\IndexController as StrategicHouseInitiativeSupportIndexController;
+use App\Http\Controllers\StrategicHouse\MapTechnology\MapTechnologyController;
 use App\Http\Controllers\StrategicHouse\RoadMap\IndexController as StrategicHouseRoadmapIndexController;
 use App\Http\Controllers\StrategicHouse\RoadMap\SummaryController as StrategicHouseRoadmapSummaryController;
 use App\Http\Controllers\StrategicHouse\StrategicPillars\GoalController as StrategicHouseStrategicPillarGoalController;
@@ -267,6 +268,12 @@ Route::middleware(['auth', 'approved'])->group(function () {
         });
         Route::get('/roadmap', StrategicHouseRoadmapIndexController::class)->name('roadmap.index');
         Route::get('/roadmap-summary', StrategicHouseRoadmapSummaryController::class)->name('roadmap-summary.index');
+
+        // Map Technology management
+        Route::prefix('/map-technology')->name('map-technology.')->group(function () {
+            Route::post('/', [MapTechnologyController::class, 'store'])->name('store');
+            Route::post('/bulk-destroy', [MapTechnologyController::class, 'bulkDestroy'])->name('bulk-destroy');
+        });
     });
     Route::get('/strategic-house/strategic-pillars/{goal?}', StrategicHouseStrategicPillarsIndexController::class)->name('strategic-pillars.index');
     Route::post('/strategic-house/strategic-pillars/goals', [StrategicHouseStrategicPillarGoalController::class, 'store'])->name('strategic-pillars.goals.store');

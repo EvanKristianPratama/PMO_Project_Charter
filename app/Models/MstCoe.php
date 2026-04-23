@@ -20,4 +20,9 @@ class MstCoe extends Model
     {
         return $this->hasMany(MstInitiative::class, 'coe_id');
     }
+
+    public function mapTechnologies(): HasMany
+    {
+        return $this->hasMany(TrsMapTechnology::class, 'coe_id');
+    }
 }

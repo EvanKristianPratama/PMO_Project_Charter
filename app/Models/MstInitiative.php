@@ -206,4 +206,9 @@ class MstInitiative extends Model
     {
         return $this->hasOne(TrsStatusImplementation::class, 'initiative_id')->latestOfMany();
     }
+
+    public function mapTechnologies(): HasMany
+    {
+        return $this->hasMany(TrsMapTechnology::class, 'initiative_id');
+    }
 }

@@ -79,6 +79,18 @@
                     type="button"
                     class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
                     :class="
+                        viewMode === 'map-technology'
+                            ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
+                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                    "
+                    @click="setViewMode('map-technology')"
+                >
+                    Map Technology
+                </button>
+                <button
+                    type="button"
+                    class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
+                    :class="
                         viewMode === 'initiative-relation'
                             ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                             : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
@@ -312,6 +324,19 @@
                     </div>
 
                     <div
+                        v-else-if="viewMode === 'map-technology'"
+                        key="map-technology"
+                    >
+                        <StrategicHouseMapTechnologyPage
+                            :embedded="true"
+                            :map-technologies="mapTechnologies"
+                            :coe-options="mapTechnologyCoeOptions"
+                            :initiative-options="mapTechnologyInitiativeOptions"
+                            :status-periods="statusPeriods"
+                        />
+                    </div>
+
+                    <div
                         v-else-if="viewMode === 'initiative-relation'"
                         key="initiative-relation"
                     >
@@ -395,6 +420,7 @@ import ItBuildingBlocks from "@/Components/ItBuildingBlocks/ItBuildingBlock.vue"
 import StrategicHouseBusinessStrategyPage from "@/Pages/StrategicHouse/BusinessStrategy/Index.vue";
 import StrategicHouseInitiativeSupportPage from "@/Pages/StrategicHouse/InitiativeSupport/Index.vue";
 import StrategicHouseItBuildingBlocksPage from "@/Pages/StrategicHouse/ItBuildingBlocks/Index.vue";
+import StrategicHouseMapTechnologyPage from "@/Pages/StrategicHouse/MapTechnology/Index.vue";
 import StrategicHouseInitiativeRelationPage from "@/Pages/StrategicHouse/InitiativeRelation/Index.vue";
 import StrategicHouseStrategicPillarPage from "@/Pages/StrategicHouse/StrategicPillar/Index.vue";
 import StretegicHouse from "@/Components/StrategicHouse/StretegicHouse.vue";
@@ -505,6 +531,18 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    mapTechnologies: {
+        type: [Array, Object],
+        default: () => ({}),
+    },
+    mapTechnologyCoeOptions: {
+        type: Array,
+        default: () => [],
+    },
+    mapTechnologyInitiativeOptions: {
+        type: Array,
+        default: () => [],
+    },
     statusPeriods: {
         type: Array,
         default: () => [],
@@ -556,6 +594,7 @@ const availableViewModes = new Set([
     "digital-transformation-initiatives",
     "it-building-blocs",
     "it-initiatives",
+    "map-technology",
     "initiative-relation",
     "initiative-support",
     "roadmap",
