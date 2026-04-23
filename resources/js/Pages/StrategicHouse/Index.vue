@@ -232,11 +232,14 @@
                             :embedded="true"
                             :page="businessStrategyPage"
                             :summary="businessStrategySummary"
+                            :header-goals="businessStrategyHeaderGoals"
+                            :enabler-goals="businessStrategyEnablerGoals"
                             :groups="businessStrategyGroups"
                             :strategy-columns="businessStrategyColumns"
                             :organization-options="
                                 businessStrategyOrganizationOptions
                             "
+                            :status-periods="statusPeriods"
                         />
                     </div>
 
@@ -410,6 +413,14 @@ const props = defineProps({
     businessStrategySummary: {
         type: Object,
         default: () => ({}),
+    },
+    businessStrategyHeaderGoals: {
+        type: Object,
+        default: () => ({}),
+    },
+    businessStrategyEnablerGoals: {
+        type: Array,
+        default: () => [],
     },
     businessStrategyGroups: {
         type: Array,

@@ -14,6 +14,14 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
+    headerGoals: {
+        type: Object,
+        default: () => ({}),
+    },
+    enablerGoals: {
+        type: Array,
+        default: () => [],
+    },
     groups: {
         type: Array,
         default: () => [],
@@ -26,6 +34,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    statusPeriods: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const route = useRouteHelper();
@@ -33,8 +45,10 @@ const pageContext = usePage();
 
 const flash = computed(() => pageContext.props.flash ?? {});
 const selectedOrganization = ref('');
+const selectedPeriod = ref(null);
 const isEditMode = ref(false);
 const showInitiatives = ref(true);
+const showEnablers = ref(false);
 const showLastUpdatePeriod = ref(true);
 
 const strategyForm = reactive({
@@ -65,6 +79,8 @@ const lowCarbonColumn = computed(() => orderedStrategyColumns.value.find((column
 const legacyColumns = computed(() => orderedStrategyColumns.value.filter((column) => column.key !== 'low_carbon'));
 const strategyFormFields = computed(() => orderedStrategyColumns.value);
 const allRows = computed(() => normalizedGroups.value.flatMap((group) => group.rows || []));
+const legacyGoalTitle = computed(() => String(props.headerGoals?.legacy?.title ?? 'Maximize Legacy Business'));
+const lowCarbonGoalTitle = computed(() => String(props.headerGoals?.low_carbon?.title ?? 'Build Low Carbon Business'));
 
 const mergeRowsByBusinessUnit = (rows) => {
     const mergedRows = [];
@@ -145,6 +161,7 @@ const formatPeriodLabel = (period) => {
     const start = String(period?.start ?? '').trim();
     const end = String(period?.end ?? '').trim();
     const year = String(period?.year ?? '').trim();
+    const fallbackLabel = String(period?.label ?? '').trim();
 
     if (start && end && year) {
         return start === end ? `${start} ${year}` : `${start} - ${end} ${year}`;
@@ -154,10 +171,32 @@ const formatPeriodLabel = (period) => {
         return `${start} ${year}`;
     }
 
-    return year || null;
+    if (year) {
+        return year;
+    }
+
+    return fallbackLabel || null;
+};
+
+const getInitiativeStatus = (initiative) => {
+    if (!selectedPeriod.value) {
+        return initiative?.implementation_status ?? null;
+    }
+
+    const found = (initiative?.statuses || []).find((status) => (
+        status.start === selectedPeriod.value.start
+        && status.end === selectedPeriod.value.end
+        && status.year === selectedPeriod.value.year
+    ));
+
+    return found ? found.status : null;
 };
 
 const getInitiativePeriodLabel = (initiative) => {
+    if (selectedPeriod.value) {
+        return formatPeriodLabel(selectedPeriod.value);
+    }
+
     if (!initiative?.statuses?.length) {
         return null;
     }
@@ -189,8 +228,7 @@ const initiativeSummaryTitle = (initiative) => {
 };
 
 const initiativeBoxesGridStyle = (initiatives = []) => ({
-    '--initiative-column-count': 6,
-    '--row-count': Math.max(1, Math.ceil((initiatives || []).length / 6)),
+    '--initiative-column-count': Math.min(Math.max((initiatives || []).length, 1), 2),
 });
 
 const getBusinessUnitRowspan = (row) => {
@@ -246,17 +284,35 @@ const filteredGroups = computed(() => normalizedGroups.value
     })
     .filter((group) => group.rows.length > 0));
 
+const filteredBusinessUnitRows = computed(() => filteredGroups.value.flatMap((group) => (
+    (group.rows || []).filter((row) => row.show_business_unit)
+)));
+
 const statusDesiredOrder = ['DF', 'Done', 'DT 2026', 'ITSBP', 'On Progress', 'On Review', 'SH'];
 
-const filteredInitiatives = computed(() => filteredGroups.value.flatMap((group) => (
-    (group.rows || []).flatMap((row) => row.initiatives || [])
-)));
+const getVisibleInitiatives = (initiatives = []) => {
+    return (initiatives || []).filter((initiative) => {
+        return !selectedPeriod.value || getInitiativeStatus(initiative) !== null;
+    });
+};
+
+const filteredInitiatives = computed(() => {
+    const initiatives = filteredGroups.value.flatMap((group) => (
+        (group.rows || []).flatMap((row) => (
+            Object.values(row.initiatives_by_key || {}).flatMap((items) => getVisibleInitiatives(items || []))
+        ))
+    ));
+
+    return Array.from(
+        new Map(initiatives.map((initiative) => [initiative.id, initiative])).values()
+    );
+});
 
 const availableStatusOptions = computed(() => {
     const statusSet = new Set();
 
     filteredInitiatives.value.forEach((initiative) => {
-        const label = normalizeStatusLabel(initiative?.implementation_status);
+        const label = normalizeStatusLabel(getInitiativeStatus(initiative));
         if (label) {
             statusSet.add(label);
         }
@@ -281,7 +337,7 @@ const statusLegend = computed(() => {
     });
 
     filteredInitiatives.value.forEach((initiative) => {
-        const label = normalizeStatusLabel(initiative?.implementation_status);
+        const label = normalizeStatusLabel(getInitiativeStatus(initiative));
         if (label && Object.prototype.hasOwnProperty.call(stats, label)) {
             stats[label] += 1;
         }
@@ -562,163 +618,263 @@ watch(filterOrganizationOptions, (options) => {
                 </template>
             </div>
 
-            <div v-if="filteredGroups.length > 0 && statusLegend.length > 0" class="strategy-legend">
-                <div class="flex items-center gap-1.5">
-                    <span class="status-legend__title">Implementation Status:</span>
+            <div v-if="filteredGroups.length > 0" class="space-y-2.5">
+                <div v-if="statusLegend.length > 0 || (statusPeriods && statusPeriods.length > 0)" class="strategy-legend">
+                    <div class="flex items-center gap-1.5">
+                        <span class="status-legend__title">Implementation Status:</span>
+                        <select
+                            v-if="statusPeriods && statusPeriods.length > 0"
+                            v-model="selectedPeriod"
+                            class="status-period-select"
+                        >
+                            <option :value="null">All (Latest)</option>
+                            <option v-for="period in statusPeriods" :key="period.label" :value="period">
+                                {{ period.label }}
+                            </option>
+                        </select>
+                        <span v-else class="status-legend__title">(Latest):</span>
+                    </div>
+                    <div v-for="status in statusLegend" :key="`status-legend-${status.label}`"
+                        class="flex items-center gap-1.5">
+                        <span class="legend-swatch" :class="status.class"></span>
+                        <span class="status-legend__label">
+                            {{ status.label }}
+                            <span class="status-legend__count">({{ status.count }})</span>
+                        </span>
+                    </div>
+                    <div class="status-legend__total">
+                        Total Digital Initiatives
+                        <span class="status-legend__count">({{ totalFilteredInitiatives }})</span>
+                    </div>
                 </div>
-                <div v-for="status in statusLegend" :key="`status-legend-${status.label}`"
-                    class="flex items-center gap-1.5">
-                    <span class="legend-swatch" :class="status.class"></span>
-                    <span class="status-legend__label">
-                        {{ status.label }}
-                        <span class="status-legend__count">({{ status.count }})</span>
-                    </span>
+
+                <div class="flex items-center justify-start">
+                    <div class="initiative-view-switch">
+                        <select v-model="selectedOrganization" class="initiative-view-select">
+                            <option value="">All Business Unit</option>
+                            <option v-for="organization in filterOrganizationOptions" :key="organization.value"
+                                :value="organization.value">
+                                {{ organization.label }}
+                            </option>
+                        </select>
+
+                        <button type="button" class="view-toggle-btn"
+                            :class="{ 'view-toggle-btn--active': showInitiatives }"
+                            @click="showInitiatives = !showInitiatives">
+                            {{ showInitiatives ? 'Hide Initiative' : 'Show Initiative' }}
+                        </button>
+
+                        <button v-if="enablerGoals.length > 0" type="button" class="view-toggle-btn"
+                            :class="{ 'view-toggle-btn--active': showEnablers }"
+                            @click="showEnablers = !showEnablers">
+                            {{ showEnablers ? 'Hide Enabler' : 'Show Enabler' }}
+                        </button>
+
+                        <button type="button" class="view-toggle-btn"
+                            :class="{ 'view-toggle-btn--active': showLastUpdatePeriod }"
+                            @click="showLastUpdatePeriod = !showLastUpdatePeriod">
+                            {{ showLastUpdatePeriod ? 'Hide Periode' : 'Show Periode' }}
+                        </button>
+                    </div>
                 </div>
-                <div class="status-legend__total">
-                    Total Digital Initiatives
-                    <span class="status-legend__count">({{ totalFilteredInitiatives }})</span>
-                </div>
-            </div>
-
-
-            <div class="initiative-view-switch">
-                <select v-model="selectedOrganization" class="initiative-view-select">
-                    <option value="">All Business Unit</option>
-                    <option v-for="organization in filterOrganizationOptions" :key="organization.value"
-                        :value="organization.value">
-                        {{ organization.label }}
-                    </option>
-                </select>
-
-                <button type="button" class="view-toggle-btn" :class="{ 'view-toggle-btn--active': showInitiatives }"
-                    @click="showInitiatives = !showInitiatives">
-                    {{ showInitiatives ? 'Hide Initiative' : 'Show Initiative' }}
-                </button>
-
-                <button type="button" class="view-toggle-btn"
-                    :class="{ 'view-toggle-btn--active': showLastUpdatePeriod }"
-                    @click="showLastUpdatePeriod = !showLastUpdatePeriod">
-                    {{ showLastUpdatePeriod ? 'Hide Periode' : 'Show Periode' }}
-                </button>
             </div>
         </div>
 
-        <section v-if="filteredGroups.length > 0"
-            class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-            <div class="overflow-x-auto">
-                <h1 class="mb-4 mt-4 text-center text-lg font-bold">
-                    Dual Growth Business Strategy 2025 -2029
-                </h1>
+        <template v-if="filteredGroups.length > 0">
+            <section
+                class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                <div class="overflow-x-auto">
+                    <h1 class="mb-4 mt-4 text-center text-lg font-bold">
+                        Dual Growth Business Strategy 2025 -2029
+                    </h1>
 
-                <table class="strategy-table">
-                    <thead>
-                        <tr>
-                            <th rowspan="2" class="head-cell head-cell--business-unit"></th>
-                            <th v-if="isEditMode" rowspan="2" class="head-cell head-cell--action">
-                                <div class="strategy-head-card strategy-head-card--action">
-                                    <span class="strategy-head-card__title">Action</span>
-                                </div>
-                            </th>
-                            <th v-if="legacyColumns.length" :colspan="legacyColumns.length" class="head-cell">
-                                <div class="strategy-head-card strategy-head-card--legacy">
-                                    <span class="strategy-head-card__title">Maximize Legacy Business</span>
-                                </div>
-                            </th>
-                            <th v-if="lowCarbonColumn" rowspan="2" class="head-cell head-cell--carbon">
-                                <div class="strategy-head-card strategy-head-card--carbon">
-                                    <span class="strategy-head-card__title">Build Low Carbon Business</span>
-                                </div>
-                            </th>
-                        </tr>
-                        <tr v-if="legacyColumns.length">
-                            <th v-for="column in legacyColumns" :key="column.key" class="head-cell">
-                                <div class="strategy-head-card strategy-head-card--legacy-child">
-                                    <span>{{ column.label }}</span>
-                                </div>
-                            </th>
-                        </tr>
-                    </thead>
+                    <table class="strategy-table">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" class="head-cell head-cell--business-unit"></th>
+                                <th v-if="isEditMode" rowspan="2" class="head-cell head-cell--action">
+                                    <div class="strategy-head-card strategy-head-card--action">
+                                        <span class="strategy-head-card__title">Action</span>
+                                    </div>
+                                </th>
+                                <th v-if="legacyColumns.length" :colspan="legacyColumns.length" class="head-cell">
+                                    <div class="strategy-head-card strategy-head-card--legacy">
+                                        <span class="strategy-head-card__title">{{ legacyGoalTitle }}</span>
+                                    </div>
+                                </th>
+                                <th v-if="lowCarbonColumn" rowspan="2" class="head-cell head-cell--carbon">
+                                    <div class="strategy-head-card strategy-head-card--carbon">
+                                        <span class="strategy-head-card__title">{{ lowCarbonGoalTitle }}</span>
+                                    </div>
+                                </th>
+                            </tr>
+                            <tr v-if="legacyColumns.length">
+                                <th v-for="column in legacyColumns" :key="column.key" class="head-cell">
+                                    <div class="strategy-head-card strategy-head-card--legacy-child">
+                                        <span>{{ column.label }}</span>
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
 
-                    <tbody>
-                        <template v-for="group in filteredGroups" :key="group.key">
-                            <template v-for="row in group.rows" :key="row.id">
-                                <tr>
-                                    <td v-if="row.show_business_unit" :rowspan="getBusinessUnitRowspan(row)"
-                                        class="primary-cell">
-                                        <div class="primary-cell__content">
-                                            <div class="primary-label-wrapper">
-                                                <span class="text-xs">{{ row.business_unit }}</span>
+                        <tbody>
+                            <template v-for="group in filteredGroups" :key="group.key">
+                                <template v-for="row in group.rows" :key="row.id">
+                                    <tr>
+                                        <td v-if="row.show_business_unit" :rowspan="getBusinessUnitRowspan(row)"
+                                            class="primary-cell">
+                                            <div class="primary-cell__content">
+                                                <div class="primary-logo-wrapper" v-if="row.business_unit_logo">
+                                                    <img :src="row.business_unit_logo" :alt="`${row.business_unit} logo`"
+                                                        class="primary-business-unit-logo">
+                                                </div>
+                                                <div class="primary-label-wrapper">
+                                                    <span class="primary-business-unit-name">{{ row.business_unit }}</span>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
+                                        </td>
 
-                                    <td v-if="isEditMode" class="action-cell">
-                                        <button type="button" class="primary-cell__delete"
-                                            :disabled="strategyProcessing" title="Hapus business strategy"
-                                            @click="deleteStrategy(row)">
-                                            Hapus
-                                        </button>
-                                    </td>
+                                        <td v-if="isEditMode" class="action-cell">
+                                            <button type="button" class="primary-cell__delete"
+                                                :disabled="strategyProcessing" title="Hapus business strategy"
+                                                @click="deleteStrategy(row)">
+                                                Hapus
+                                            </button>
+                                        </td>
 
-                                    <td v-for="column in orderedStrategyColumns" :key="`${row.id}-${column.key}`"
-                                        class="strategy-cell" :class="{ 'strategy-cell--editing': isEditMode }">
-                                        <textarea v-if="isEditMode" v-model="editableRows[row.id][column.key]" rows="1"
-                                            class="strategy-cell__textarea"
-                                            :placeholder="`Isi ${column.label.toLowerCase()}...`" />
-                                        <p v-else-if="row.values?.[column.key]" class="strategy-cell__value">
-                                            {{ row.values[column.key] }}
-                                        </p>
-                                        <p v-else class="strategy-cell__empty">
-                                            Not Available
-                                        </p>
-                                    </td>
-                                </tr>
-
-                                <tr v-if="showInitiatives && row.is_last_business_unit_row" class="initiative-row">
-                                    <td v-if="isEditMode" class="initiative-row__action-spacer"></td>
-                                    <td :colspan="orderedStrategyColumns.length" class="initiative-row__cell">
-                                        <div class="initiative-row__content">
-                                            <div v-if="row.initiatives?.length" class="initiative-row__boxes"
-                                                :style="initiativeBoxesGridStyle(row.initiatives)">
-                                                <component :is="initiativeSummaryHref(initiative) ? Link : 'div'"
-                                                    v-for="initiative in row.initiatives"
-                                                    :key="`initiative-${row.id}-${initiative.id}`"
-                                                    :href="initiativeSummaryHref(initiative)"
-                                                    :title="initiativeSummaryTitle(initiative)" class="initiative-box"
-                                                    :class="[
-                                                        { 'initiative-box--no-code': !initiative.code },
-                                                        { 'initiative-box--clickable': initiativeSummaryHref(initiative) },
-                                                    ]">
-                                                    <span v-if="initiative.code" class="initiative-box__code"
-                                                        :class="getStatusColorClass(initiative.implementation_status)">
-                                                        {{ initiative.code }}
-                                                    </span>
-                                                    <span class="initiative-box__name"
-                                                        :class="{ 'initiative-box__name--full': !initiative.code }">
-                                                        <span class="initiative-box__label-text">
-                                                            {{ initiative.name }}
-                                                        </span>
-                                                        <span
-                                                            v-if="showLastUpdatePeriod && getInitiativePeriodLabel(initiative)"
-                                                            class="initiative-box__period">
-                                                            {{ getInitiativePeriodLabel(initiative) }}
-                                                        </span>
-                                                    </span>
-                                                </component>
-                                            </div>
-
-                                            <p v-else class="initiative-row__empty">
-                                                Digital initiatives not available.
+                                        <td v-for="column in orderedStrategyColumns" :key="`${row.id}-${column.key}`"
+                                            class="strategy-cell" :class="{ 'strategy-cell--editing': isEditMode }">
+                                            <textarea v-if="isEditMode" v-model="editableRows[row.id][column.key]" rows="1"
+                                                class="strategy-cell__textarea"
+                                                :placeholder="`Isi ${column.label.toLowerCase()}...`" />
+                                            <p v-else-if="row.values?.[column.key]" class="strategy-cell__value">
+                                                {{ row.values[column.key] }}
                                             </p>
-                                        </div>
-                                    </td>
-                                </tr>
+                                            <p v-else class="strategy-cell__empty">
+                                                Not Available
+                                            </p>
+                                        </td>
+                                    </tr>
+
+                                    <tr v-if="showInitiatives && row.is_last_business_unit_row" class="initiative-row">
+                                        <td v-if="isEditMode" class="initiative-row__action-spacer"></td>
+                                        <td v-for="column in orderedStrategyColumns" :key="`initiative-${row.id}-${column.key}`"
+                                            class="initiative-row__cell">
+                                            <div class="initiative-row__content">
+                                                <div v-if="getVisibleInitiatives((row.initiatives_by_key || {})[column.key] || []).length"
+                                                    class="initiative-row__boxes"
+                                                    :style="initiativeBoxesGridStyle(getVisibleInitiatives((row.initiatives_by_key || {})[column.key] || []))">
+                                                    <component :is="initiativeSummaryHref(initiative) ? Link : 'div'"
+                                                        v-for="initiative in getVisibleInitiatives((row.initiatives_by_key || {})[column.key] || [])"
+                                                        :key="`initiative-${row.id}-${column.key}-${initiative.id}`"
+                                                        :href="initiativeSummaryHref(initiative)"
+                                                        :title="initiativeSummaryTitle(initiative)" class="initiative-box"
+                                                        :class="[
+                                                            { 'initiative-box--no-code': !initiative.code },
+                                                            { 'initiative-box--clickable': initiativeSummaryHref(initiative) },
+                                                        ]">
+                                                        <span v-if="initiative.code" class="initiative-box__code"
+                                                            :class="getStatusColorClass(getInitiativeStatus(initiative))">
+                                                            {{ initiative.code }}
+                                                        </span>
+                                                        <span class="initiative-box__name"
+                                                            :class="{ 'initiative-box__name--full': !initiative.code }">
+                                                            <span class="initiative-box__label-text">
+                                                                {{ initiative.name }}
+                                                            </span>
+                                                            <span
+                                                                v-if="showLastUpdatePeriod && getInitiativePeriodLabel(initiative)"
+                                                                class="initiative-box__period">
+                                                                {{ getInitiativePeriodLabel(initiative) }}
+                                                            </span>
+                                                        </span>
+                                                    </component>
+                                                </div>
+
+                                                <p v-else class="initiative-row__empty">
+                                                    -
+                                                </p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
                             </template>
-                        </template>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section v-if="showEnablers && enablerGoals.length > 0"
+                class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                <div class="overflow-x-auto">
+                    <table class="strategy-table strategy-table--enabler">
+                        <thead>
+                            <tr>
+                                <th class="head-cell head-cell--business-unit"></th>
+                                <th v-for="enabler in enablerGoals" :key="`enabler-head-${enabler.key}`" class="head-cell">
+                                    <div class="strategy-head-card strategy-head-card--enabler">
+                                        <span class="strategy-head-card__title">{{ enabler.title }}</span>
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="row in filteredBusinessUnitRows" :key="`enabler-row-${row.id}`">
+                                <td class="primary-cell">
+                                    <div class="primary-cell__content">
+                                        <div class="primary-logo-wrapper" v-if="row.business_unit_logo">
+                                            <img :src="row.business_unit_logo" :alt="`${row.business_unit} logo`"
+                                                class="primary-business-unit-logo">
+                                        </div>
+                                        <div class="primary-label-wrapper">
+                                            <span class="primary-business-unit-name">{{ row.business_unit }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td v-for="enabler in enablerGoals" :key="`enabler-${row.id}-${enabler.key}`"
+                                    class="initiative-row__cell">
+                                    <div class="initiative-row__content">
+                                        <div v-if="getVisibleInitiatives((row.enabler_initiatives_by_key || {})[enabler.key] || []).length"
+                                            class="initiative-row__boxes"
+                                            :style="initiativeBoxesGridStyle(getVisibleInitiatives((row.enabler_initiatives_by_key || {})[enabler.key] || []))">
+                                            <component :is="initiativeSummaryHref(initiative) ? Link : 'div'"
+                                                v-for="initiative in getVisibleInitiatives((row.enabler_initiatives_by_key || {})[enabler.key] || [])"
+                                                :key="`enabler-initiative-${row.id}-${enabler.key}-${initiative.id}`"
+                                                :href="initiativeSummaryHref(initiative)"
+                                                :title="initiativeSummaryTitle(initiative)" class="initiative-box"
+                                                :class="[
+                                                    { 'initiative-box--no-code': !initiative.code },
+                                                    { 'initiative-box--clickable': initiativeSummaryHref(initiative) },
+                                                ]">
+                                                <span v-if="initiative.code" class="initiative-box__code"
+                                                    :class="getStatusColorClass(getInitiativeStatus(initiative))">
+                                                    {{ initiative.code }}
+                                                </span>
+                                                <span class="initiative-box__name"
+                                                    :class="{ 'initiative-box__name--full': !initiative.code }">
+                                                    <span class="initiative-box__label-text">
+                                                        {{ initiative.name }}
+                                                    </span>
+                                                    <span v-if="showLastUpdatePeriod && getInitiativePeriodLabel(initiative)"
+                                                        class="initiative-box__period">
+                                                        {{ getInitiativePeriodLabel(initiative) }}
+                                                    </span>
+                                                </span>
+                                            </component>
+                                        </div>
+
+                                        <p v-else class="initiative-row__empty">
+                                            -
+                                        </p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </template>
 
         <section v-else
             class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-white/15 dark:bg-[#171717]">
@@ -851,6 +1007,15 @@ watch(filterOrganizationOptions, (options) => {
     font-weight: 700;
 }
 
+.strategy-head-card--enabler {
+    min-height: 64px;
+    border-color: #b9c9dd;
+    background: linear-gradient(180deg, #edf3fb 0%, #dfe9f7 100%);
+    color: #28476b;
+    font-size: 13px;
+    font-weight: 800;
+}
+
 .strategy-head-card--action {
     min-height: 102px;
     border-color: #cbd5e1;
@@ -876,18 +1041,43 @@ watch(filterOrganizationOptions, (options) => {
 .primary-cell__content {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    align-items: center;
+    gap: 10px;
     padding: 10px;
     height: 100%;
     justify-content: center;
     color: #1e293b;
+    text-align: center;
+}
+
+.primary-logo-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.primary-business-unit-logo {
+    display: block;
+    max-width: 120px;
+    max-height: 42px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
 }
 
 .primary-label-wrapper {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     gap: 8px;
+    width: 100%;
+}
+
+.primary-business-unit-name {
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.2;
 }
 
 .primary-cell__delete {
@@ -980,9 +1170,8 @@ watch(filterOrganizationOptions, (options) => {
 .initiative-row__boxes {
     display: grid;
     width: 100%;
-    grid-template-columns: repeat(var(--initiative-column-count, 6), minmax(0, 1fr));
-    grid-auto-flow: column;
-    grid-template-rows: repeat(var(--row-count, 1), minmax(min-content, 1fr));
+    grid-template-columns: repeat(var(--initiative-column-count, 2), minmax(0, 1fr));
+    grid-auto-flow: row;
     gap: 8px;
     align-items: stretch;
 }
@@ -996,6 +1185,7 @@ watch(filterOrganizationOptions, (options) => {
 }
 
 .initiative-box {
+    position: relative;
     display: grid;
     grid-template-columns: 28px minmax(0, 1fr);
     min-height: 24px;
@@ -1003,10 +1193,10 @@ watch(filterOrganizationOptions, (options) => {
     align-items: stretch;
     border: 1px solid #374151;
     background: #ffffff;
-    color: #1f2937;
     font-size: 9px;
     font-weight: 500;
     line-height: 1.1;
+    color: #1f2937;
 }
 
 .initiative-box--clickable {
@@ -1026,7 +1216,7 @@ a.initiative-box {
 }
 
 .initiative-box--no-code {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
 }
 
 .initiative-box__code {
@@ -1040,8 +1230,6 @@ a.initiative-box {
     min-width: 28px;
     width: 28px;
     flex-shrink: 0;
-    background: #e2e8f0;
-    border-right: 1px solid rgba(55, 65, 81, 0.16);
 }
 
 .initiative-box__name {
@@ -1060,25 +1248,26 @@ a.initiative-box {
 }
 
 .initiative-box__label-text {
-    line-height: 1.15;
+    line-height: 1.1;
 }
 
 .initiative-box__period {
-    margin-top: 1px;
     font-size: 7.5px;
     font-weight: 700;
     font-style: italic;
     color: #64748b;
+    margin-top: 1px;
 }
 
 .strategy-cell__value {
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 400;
     line-height: 1.45;
     color: #1f2937;
-    white-space: pre-wrap;
+    white-space: break-spaces;
     word-break: break-word;
     margin: 0;
+    tab-size: 4;
 }
 
 .strategy-cell__empty {
@@ -1097,10 +1286,11 @@ a.initiative-box {
     background: #ffffff;
     padding: 6px 10px;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 400;
     line-height: 1.5;
     color: #1f2937;
-    white-space: pre-wrap;
+    white-space: break-spaces;
+    tab-size: 4;
     resize: vertical;
     transition: all 0.15s ease;
 }
@@ -1117,9 +1307,8 @@ a.initiative-box {
 
 .strategy-toolbar {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: flex-start;
     gap: 12px;
 }
 
@@ -1135,17 +1324,18 @@ a.initiative-box {
     flex-wrap: wrap;
     align-items: center;
     gap: 8px 16px;
-    padding: 12px 16px;
 }
 
 .initiative-view-switch {
     display: flex;
+    border-radius: 12px;
+    background: transparent;
     width: 100%;
     flex-wrap: nowrap;
     align-items: center;
     gap: 8px;
     overflow-x: auto;
-    padding: 2px;
+    padding: 2px 10px 2px 2px;
     scrollbar-width: none;
 }
 
@@ -1155,7 +1345,8 @@ a.initiative-box {
 
 .initiative-view-select,
 .edit-select,
-.edit-textarea {
+.edit-textarea,
+.status-period-select {
     border: 1px solid #cbd5e1;
     border-radius: 8px;
     background: #ffffff;
@@ -1166,7 +1357,8 @@ a.initiative-box {
 }
 
 .initiative-view-select,
-.edit-select {
+.edit-select,
+.status-period-select {
     appearance: none;
     cursor: pointer;
     padding: 4px 24px 4px 10px;
@@ -1178,6 +1370,16 @@ a.initiative-box {
 
 .initiative-view-select {
     flex-shrink: 0;
+}
+
+.status-period-select {
+    height: auto;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    font-size: 10px;
+    color: #2563eb;
+    background-color: #f8fafc;
+    background-size: 12px;
 }
 
 .view-toggle-btn {
@@ -1231,14 +1433,16 @@ a.initiative-box {
 
 .initiative-view-select:hover,
 .edit-select:hover,
-.edit-textarea:hover {
+.edit-textarea:hover,
+.status-period-select:hover {
     border-color: #0f6fb7;
     color: #0f6fb7;
 }
 
 .initiative-view-select:focus,
 .edit-select:focus,
-.edit-textarea:focus {
+.edit-textarea:focus,
+.status-period-select:focus {
     outline: none;
     border-color: #0f6fb7;
     box-shadow: 0 0 0 3px rgba(15, 111, 183, 0.1);
@@ -1302,6 +1506,12 @@ a.initiative-box {
 :deep(.dark) .strategy-head-card--carbon {
     border-color: #3b82f6;
     background: linear-gradient(180deg, #274a87 0%, #1f3e74 100%);
+}
+
+:deep(.dark) .strategy-head-card--enabler {
+    border-color: #334155;
+    background: linear-gradient(180deg, #1f2d40 0%, #182435 100%);
+    color: #dbeafe;
 }
 
 :deep(.dark) .strategy-head-card--action {
@@ -1385,6 +1595,7 @@ a.initiative-box {
 :deep(.dark) .initiative-view-select,
 :deep(.dark) .initiative-view-toggle,
 :deep(.dark) .view-toggle-btn,
+:deep(.dark) .status-period-select,
 :deep(.dark) .edit-select,
 :deep(.dark) .edit-textarea {
     border-color: rgba(255, 255, 255, 0.1);

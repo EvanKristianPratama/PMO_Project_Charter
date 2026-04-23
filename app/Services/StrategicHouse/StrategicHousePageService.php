@@ -237,6 +237,8 @@ class StrategicHousePageService
             'unassignedInitiatives' => $unassignedInitiatives,
             'businessStrategyPage' => $businessStrategyData['page'],
             'businessStrategySummary' => $businessStrategyData['summary'],
+            'businessStrategyHeaderGoals' => $businessStrategyData['headerGoals'],
+            'businessStrategyEnablerGoals' => $businessStrategyData['enablerGoals'],
             'businessStrategyGroups' => $businessStrategyData['groups'],
             'businessStrategyColumns' => $businessStrategyData['strategyColumns'],
             'businessStrategyOrganizationOptions' => $businessStrategyData['organizationOptions'],
