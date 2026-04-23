@@ -4,26 +4,29 @@ namespace App\Services\ProgramPlanning\InitiativeRelation;
 
 use App\Models\MstInitiative;
 use App\Models\MstInitiativeRelation;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 
 class InitiativeRelationService
 {
     public function getIndexProps(): array
     {
-        return [
-            'mstInitiatives' => MstInitiative::query()
-                ->with([
-                    'initiativeRelationsRow',
-                    'initiativeRelationsColumn',
-                    'coe:id,name',
-                    'latestStatusImplementation',
-                    'latestStatus',
-                ])
-                ->get(),
-            'initiativeRelations' => $this->initiativeRelations(),
-            'typeRelationOptions' => $this->typeRelationOptions(),
-            'modelRelationOptions' => $this->modelRelationOptions(),
-        ];
+        return Cache::remember('initiative_relation_index_props', 3600, function () {
+            return [
+                'mstInitiatives' => MstInitiative::query()
+                    ->with([
+                        'initiativeRelationsRow',
+                        'initiativeRelationsColumn',
+                        'coe:id,name',
+                        'latestStatusImplementation',
+                        'latestStatus',
+                    ])
+                    ->get(),
+                'initiativeRelations' => $this->initiativeRelations(),
+                'typeRelationOptions' => $this->typeRelationOptions(),
+                'modelRelationOptions' => $this->modelRelationOptions(),
+            ];
+        });
     }
 
     public function getCreateProps(): array
@@ -182,16 +185,18 @@ class InitiativeRelationService
 
     private function initiativeRelations(): array
     {
-        return MstInitiativeRelation::query()
-            ->with([
-                'initiativeRow:id,code,name',
-                'initiativeColumn:id,code,name',
-            ])
-            ->orderByDesc('id')
-            ->get()
-            ->map(fn (MstInitiativeRelation $initiativeRelation): array => $this->serializeRelation($initiativeRelation))
-            ->values()
-            ->all();
+        return Cache::remember('initiative_relations', 3600, function () {
+            return MstInitiativeRelation::query()
+                ->with([
+                    'initiativeRow:id,code,name',
+                    'initiativeColumn:id,code,name',
+                ])
+                ->orderByDesc('id')
+                ->get()
+                ->map(fn (MstInitiativeRelation $initiativeRelation): array => $this->serializeRelation($initiativeRelation))
+                ->values()
+                ->all();
+        });
     }
 
     private function typeRelationOptions(): array

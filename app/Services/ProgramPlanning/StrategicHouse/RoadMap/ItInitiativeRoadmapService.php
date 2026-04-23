@@ -4,6 +4,7 @@ namespace App\Services\ProgramPlanning\StrategicHouse\RoadMap;
 
 use App\Models\Milestone;
 use App\Models\MstInitiative;
+use Illuminate\Support\Facades\Cache;
 
 class ItInitiativeRoadmapService
 {
@@ -26,6 +27,7 @@ class ItInitiativeRoadmapService
 
     public function getPageProps(): array
     {
+        return Cache::remember('it_initiative_roadmap_page_props', 3600, function () {
         $initiatives = MstInitiative::query()
             ->where('tipe_initiative', 2)
             ->with([
@@ -100,6 +102,7 @@ class ItInitiativeRoadmapService
             'totalCount'           => $initiatives->count(),
             'milestoneTypeOptions' => Milestone::roadmapTypeOptions(),
         ];
+        });
     }
 
     private function collectInitiativeReviewStatuses(MstInitiative $initiative): array

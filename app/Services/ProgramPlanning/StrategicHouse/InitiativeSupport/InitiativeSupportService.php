@@ -7,6 +7,7 @@ use App\Models\TrsInitiativeSupport;
 use App\Services\ProgramPlanning\ItBuildingBlockService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;
 
 class InitiativeSupportService
@@ -16,47 +17,51 @@ class InitiativeSupportService
     ) {}
     public function getPageProps(): array
     {
-        return [
-            'groups' => $this->getGroupedMappings(),
-            'digitalInitiativeOptions' => $this->getInitiativeOptions(1)->all(),
-            'itInitiativeOptions' => $this->getInitiativeOptions(2)->all(),
-            'statusPeriods' => $this->itBuildingBlockService->getStatusPeriods()->all(),
-        ];
+        return Cache::remember('initiative_support_page_props', 3600, function () {
+            return [
+                'groups' => $this->getGroupedMappings(),
+                'digitalInitiativeOptions' => $this->getInitiativeOptions(1)->all(),
+                'itInitiativeOptions' => $this->getInitiativeOptions(2)->all(),
+                'statusPeriods' => $this->itBuildingBlockService->getStatusPeriods()->all(),
+            ];
+        });
     }
 
     public function getGroupedMappings(): array
     {
-        $mappings = TrsInitiativeSupport::query()
-            ->with([
-                'digitalInitiative:id,name,code,description,coe_id,business_unit,source',
-                'digitalInitiative.coe',
-                'digitalInitiative.organization',
-                'digitalInitiative.sourceData',
-                'digitalInitiative.latestStatusImplementation',
-                'digitalInitiative.statusImplementations:id,initiative_id,start,end,year,review_status',
-                'itInitiative:id,name,code,description,coe_id,business_unit,source',
-                'itInitiative.coe',
-                'itInitiative.organization',
-                'itInitiative.sourceData',
-                'itInitiative.latestStatusImplementation',
-                'itInitiative.statusImplementations:id,initiative_id,start,end,year,review_status',
-            ])
-            ->whereHas('digitalInitiative', fn (Builder $query) => $query->where('tipe_initiative', 1))
-            ->whereHas('itInitiative', fn (Builder $query) => $query->where('tipe_initiative', 2))
-            ->orderBy('id')
-            ->get();
+        return Cache::remember('initiative_support_grouped_mappings', 3600, function () {
+            $mappings = TrsInitiativeSupport::query()
+                ->with([
+                    'digitalInitiative:id,name,code,description,coe_id,business_unit,source',
+                    'digitalInitiative.coe',
+                    'digitalInitiative.organization',
+                    'digitalInitiative.sourceData',
+                    'digitalInitiative.latestStatusImplementation',
+                    'digitalInitiative.statusImplementations:id,initiative_id,start,end,year,review_status',
+                    'itInitiative:id,name,code,description,coe_id,business_unit,source',
+                    'itInitiative.coe',
+                    'itInitiative.organization',
+                    'itInitiative.sourceData',
+                    'itInitiative.latestStatusImplementation',
+                    'itInitiative.statusImplementations:id,initiative_id,start,end,year,review_status',
+                ])
+                ->whereHas('digitalInitiative', fn (Builder $query) => $query->where('tipe_initiative', 1))
+                ->whereHas('itInitiative', fn (Builder $query) => $query->where('tipe_initiative', 2))
+                ->orderBy('id')
+                ->get();
 
-        $digitalGroups = $mappings
-            ->groupBy(fn (TrsInitiativeSupport $mapping): string => $this->resolveDigitalNoteKey($mapping))
-            ->map(fn (Collection $groupMappings): array => $this->mapDigitalGroup($groupMappings))
-            ->values()
-            ->all();
+            $digitalGroups = $mappings
+                ->groupBy(fn (TrsInitiativeSupport $mapping): string => $this->resolveDigitalNoteKey($mapping))
+                ->map(fn (Collection $groupMappings): array => $this->mapDigitalGroup($groupMappings))
+                ->values()
+                ->all();
 
-        return collect($digitalGroups)
-            ->groupBy(fn (array $group): string => $this->resolveSharedSupportKey($group))
-            ->map(fn (Collection $groupedDigitals, string $groupKey): array => $this->mapSharedGroup($groupedDigitals, $groupKey))
-            ->values()
-            ->all();
+            return collect($digitalGroups)
+                ->groupBy(fn (array $group): string => $this->resolveSharedSupportKey($group))
+                ->map(fn (Collection $groupedDigitals, string $groupKey): array => $this->mapSharedGroup($groupedDigitals, $groupKey))
+                ->values()
+                ->all();
+        });
     }
 
     public function storeMappings(array $data): int
