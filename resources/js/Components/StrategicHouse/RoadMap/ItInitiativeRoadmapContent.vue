@@ -113,6 +113,16 @@ function toQIdx(value) {
     return Math.max(0, Math.min(raw, totalCells.value - 1));
 }
 
+function monthToQuarterIndex(monthName) {
+    const monthIndex = monthsOrder.indexOf(String(monthName ?? "").trim());
+
+    if (monthIndex < 0) {
+        return null;
+    }
+
+    return Math.floor(monthIndex / 3);
+}
+
 /**
  * Normalise a raw roadmap status to "baseline" | "approved" | <raw>.
  * Handles common typos (e.g. "aproved").
@@ -147,6 +157,25 @@ function badgeClass(status) {
     const value = String(status ?? "").trim();
     if (!value) return "badge--default";
     return STATUS_MAP[value.toLowerCase()]?.badge ?? "badge--default";
+}
+
+function statusMarkerColor(status) {
+    const value = String(status ?? "").trim().toLowerCase();
+
+    return (
+        {
+            "on progress": "#2d8fe2",
+            "in progress": "#2d8fe2",
+            "on track": "#8fcfff",
+            "at risk": "#ffea00",
+            "delayed": "#f97316",
+            "not started": "#2d8fe2",
+            "not signed": "#ff1d1d",
+            "done": "#1fb34a",
+            "completed": "#1fb34a",
+            "on review": "#f59e0b",
+        }[value] ?? "#0b2a8a"
+    );
 }
 
 /* ── Roadmap layer visibility ────────────────────────── */
@@ -246,6 +275,8 @@ function buildCells(range, keyPrefix = "default") {
             type: "gap",
             span: 1,
             key: `${keyPrefix}-g${i}`,
+            startIndex: i,
+            endIndex: i,
             endsYear: (i + 1) % 4 === 0,
         }));
     }
@@ -257,7 +288,7 @@ function buildCells(range, keyPrefix = "default") {
     let   c         = 0;
 
     while (c < safeStart) {
-        cells.push({ type: "gap", span: 1, key: `${keyPrefix}-g${c}`, endsYear: (c + 1) % 4 === 0 });
+        cells.push({ type: "gap", span: 1, key: `${keyPrefix}-g${c}`, startIndex: c, endIndex: c, endsYear: (c + 1) % 4 === 0 });
         c++;
     }
 
@@ -265,12 +296,14 @@ function buildCells(range, keyPrefix = "default") {
         type: "bar",
         span: safeEnd - safeStart + 1,
         key: `${keyPrefix}-bar-${safeStart}`,
+        startIndex: safeStart,
+        endIndex: safeEnd,
         endsYear: (safeEnd + 1) % 4 === 0,
     });
     c = safeEnd + 1;
 
     while (c < total) {
-        cells.push({ type: "gap", span: 1, key: `${keyPrefix}-g${c}`, endsYear: (c + 1) % 4 === 0 });
+        cells.push({ type: "gap", span: 1, key: `${keyPrefix}-g${c}`, startIndex: c, endIndex: c, endsYear: (c + 1) % 4 === 0 });
         c++;
     }
 
@@ -282,11 +315,12 @@ function buildCells(range, keyPrefix = "default") {
  * Returns one row per visible roadmap layer that has data,
  * or a single placeholder row when no layer has data.
  */
-function buildInitiativeTimelineRows(initiative) {
+ function buildInitiativeTimelineRows(initiative, reviewStatus = null) {
     const initiativeId = initiative?.id ?? "initiative";
     const projects     = Array.isArray(initiative?.projects) ? initiative.projects : [];
+    const rows         = [];
 
-    const rows = roadmapLegendItems
+    const roadmapRows = roadmapLegendItems
         .filter((item) => isRoadmapLayerVisible(item.key))
         .map((item) => {
             const range = getRange(projects, item.key);
@@ -302,10 +336,23 @@ function buildInitiativeTimelineRows(initiative) {
         })
         .filter(Boolean);
 
-    if (rows.length > 0) return rows;
+    const reviewMarker = !organizationFilterMode.value && selectedPeriodRange.value
+        ? {
+            anchorIndex: selectedPeriodRange.value.anchorIndex ?? selectedPeriodRange.value.start,
+            color: statusMarkerColor(reviewStatus),
+            label: selectedPeriodRange.value.label,
+            statusLabel: normalizeStatusLabel(reviewStatus),
+        }
+        : null;
+
+    if (reviewMarker && roadmapRows.length > 0) {
+        roadmapRows[0].reviewMarker = reviewMarker;
+    }
+
+    if (roadmapRows.length > 0) return roadmapRows;
 
     // Fallback: render a single empty row so the Gantt table stays aligned.
-    return [
+    const fallbackRows = [
         {
             key:           `${initiativeId}-empty`,
             layerKey:      "empty",
@@ -314,6 +361,12 @@ function buildInitiativeTimelineRows(initiative) {
             cells:         buildCells(null, `${initiativeId}-empty`),
         },
     ];
+
+    if (reviewMarker) {
+        fallbackRows[0].reviewMarker = reviewMarker;
+    }
+
+    return fallbackRows;
 }
 
 /* ── Derived data ────────────────────────────────────── */
@@ -428,6 +481,41 @@ const selectedFilterLabel = computed(() => {
     return availablePeriods.value.find((p) => p.value === selectedPeriod.value)?.label ?? "-";
 });
 
+const selectedPeriodMeta = computed(
+    () => availablePeriods.value.find((p) => p.value === selectedPeriod.value) ?? null,
+);
+
+const selectedPeriodRange = computed(() => {
+    const period = selectedPeriodMeta.value;
+
+    if (!period || organizationFilterMode.value) {
+        return null;
+    }
+
+    const year = Number(period.year ?? 0);
+    const startQuarter = monthToQuarterIndex(period.startMonth);
+    const endQuarter = monthToQuarterIndex(period.endMonth);
+
+    if (!Number.isFinite(year) || startQuarter === null) {
+        return null;
+    }
+
+    const safeEndQuarter = endQuarter ?? startQuarter;
+    const start = (year - props.startYear) * 4 + startQuarter;
+    const end = (year - props.startYear) * 4 + safeEndQuarter;
+    const anchorIndex = Math.max(
+        0,
+        Math.min(Math.floor((start + end) / 2), totalCells.value - 1),
+    );
+
+    return {
+        start: Math.min(start, end),
+        end: Math.max(start, end),
+        anchorIndex,
+        label: period.label,
+    };
+});
+
 const baseDisplayGroups = computed(() =>
     (Array.isArray(props.groups) ? props.groups : []).map((group) => {
         const initiatives = (
@@ -437,7 +525,7 @@ const baseDisplayGroups = computed(() =>
                 initiative?.organization_name ?? "",
             );
             const periodState  = resolveInitiativeStatusByPeriod(initiative, selectedPeriod.value);
-            const timelineRows = buildInitiativeTimelineRows(initiative);
+            const timelineRows = buildInitiativeTimelineRows(initiative, periodState.status);
 
             return {
                 ...initiative,
@@ -508,10 +596,6 @@ const displayGroups = computed(() =>
 
 const hasDisplayGroups = computed(() => displayGroups.value.length > 0);
 const controlsAtBottom = computed(() => props.controlsPlacement === "bottom");
-
-const selectedPeriodLabel = computed(
-    () => availablePeriods.value.find((p) => p.value === selectedPeriod.value)?.label ?? "-",
-);
 
 const reviewStatusLegendItems = computed(() => {
     const counts = legendInitiatives.value.reduce((carry, initiative) => {
@@ -622,7 +706,7 @@ const reviewStatusLegendItems = computed(() => {
                             >
                                 <span
                                     v-if="item.status !== 'Total'"
-                                    :class="['legend-swatch', badgeClass(item.status)]"
+                                    :class="['legend-swatch', 'legend-swatch--diamond', badgeClass(item.status)]"
                                 />
                                 <span class="legend-label">
                                     {{ item.label }}
@@ -770,7 +854,21 @@ const reviewStatusLegendItems = computed(() => {
                                         timelineRow.isPlaceholder ? 'cell-gap--placeholder' : '',
                                         cell.endsYear ? 'year-sep' : '',
                                     ]"
-                                />
+                                >
+                                    <div
+                                        v-if="timelineRow.reviewMarker && cell.startIndex <= timelineRow.reviewMarker.anchorIndex && timelineRow.reviewMarker.anchorIndex <= cell.endIndex"
+                                        class="review-marker"
+                                        :title="`${timelineRow.reviewMarker.label} · ${timelineRow.reviewMarker.statusLabel || '-'}`"
+                                    >
+                                        <span
+                                            class="review-marker__diamond"
+                                            :style="{
+                                                backgroundColor: timelineRow.reviewMarker.color,
+                                                boxShadow: `0 0 0 2px #ffffff, 0 0 0 3px ${timelineRow.reviewMarker.color}26`,
+                                            }"
+                                        />
+                                    </div>
+                                </td>
                             </tr>
                         </template>
                     </template>
@@ -868,7 +966,7 @@ const reviewStatusLegendItems = computed(() => {
                             >
                                 <span
                                     v-if="item.status !== 'Total'"
-                                    :class="['legend-swatch', badgeClass(item.status)]"
+                                    :class="['legend-swatch', 'legend-swatch--diamond', badgeClass(item.status)]"
                                 />
                                 <span class="legend-label">
                                     {{ item.label }}
@@ -1100,6 +1198,7 @@ const reviewStatusLegendItems = computed(() => {
     vertical-align: middle;
     background: #ffffff;
     border-bottom: 1px solid var(--row-border-color);
+    overflow: visible;
 }
 
 .gantt-table td.cell-bar { background: transparent; }
@@ -1125,6 +1224,24 @@ const reviewStatusLegendItems = computed(() => {
 }
 
 .gantt-table td.cell-gap--placeholder { background: #fafcff; }
+
+.review-marker {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    pointer-events: none;
+}
+
+.review-marker__diamond {
+    display: block;
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    transform: rotate(45deg);
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 3px rgba(11, 42, 138, 0.12);
+}
 
 /* Year boundary — dashed vertical separator */
 .gantt-table td.year-sep { border-right: 1px dashed #cbd5e0; }
@@ -1245,6 +1362,13 @@ const reviewStatusLegendItems = computed(() => {
 
 .timeline-swatch--approved {
     background: linear-gradient(90deg, #34d399 0%, #16a34a 100%);
+}
+
+.legend-swatch--diamond {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    transform: rotate(45deg);
 }
 
 .legend-label  { font-size: 11px; font-weight: 600; color: #475569; }
