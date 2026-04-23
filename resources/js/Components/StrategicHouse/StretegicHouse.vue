@@ -61,6 +61,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    statusPeriods: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const route = useRouteHelper();
@@ -69,6 +73,78 @@ const showDetails = ref(true);
 const showStrategyDetails = ref(true);
 const showBusinessStrategy = ref(false);
 const selectedBusinessUnit = ref('');
+const selectedPeriod = ref(null);
+const selectedStatus = ref('');
+
+const statusDesiredOrder = ['DF', 'Done', 'DT 2026', 'ITSBP', 'On Progress', 'On Review', 'SH'];
+
+const normalizeStatusLabel = (rawStatus) => {
+    const s = String(rawStatus ?? '').trim();
+    if (!s) return null;
+    const lower = s.toLowerCase();
+    if (lower === 'df') return 'DF';
+    if (lower === 'done') return 'Done';
+    if (lower === 'dt 2026') return 'DT 2026';
+    if (lower === 'itsbp') return 'ITSBP';
+    if (lower === 'on progress' || lower === 'on progres') return 'On Progress';
+    if (lower === 'on review') return 'On Review';
+    if (lower === 'sh') return 'SH';
+    return s;
+};
+
+const getStatusColorClass = (status) => {
+    const s = normalizeStatusLabel(status);
+    if (s === 'DF') return 'status-color-df';
+    if (s === 'Done') return 'status-color-done';
+    if (s === 'DT 2026') return 'status-color-dt2026';
+    if (s === 'ITSBP') return 'status-color-itsbp';
+    if (s === 'On Review') return 'status-color-onreview';
+    if (s === 'On Progress') return 'status-color-onprogress';
+    if (s === 'SH') return 'status-color-sh';
+    return '';
+};
+
+const getInitiativeStatus = (initiative) => {
+    if (!selectedPeriod.value) {
+        return initiative.implementation_status;
+    }
+
+    const found = (initiative.statuses || []).find(s => 
+        s.start === selectedPeriod.value.start && 
+        s.end === selectedPeriod.value.end && 
+        s.year === selectedPeriod.value.year
+    );
+
+    return found ? found.status : null;
+};
+
+const statusLegend = computed(() => {
+    const stats = {};
+    statusDesiredOrder.forEach((label) => {
+        stats[label] = 0;
+    });
+
+    const allInitiatives = [
+        ...props.technologyCards.flatMap(c => c.initiatives || []),
+        ...props.strategyCards.flatMap(c => c.initiatives || []),
+        ...(props.foundationCard?.initiatives || []),
+        ...(props.architectureCard?.initiatives || []),
+        ...props.unassignedInitiatives,
+    ];
+
+    allInitiatives.forEach((initiative) => {
+        const label = normalizeStatusLabel(getInitiativeStatus(initiative));
+        if (label && stats.hasOwnProperty(label)) {
+            stats[label]++;
+        }
+    });
+
+    return statusDesiredOrder.map((label) => ({
+        label,
+        class: getStatusColorClass(label),
+        count: stats[label],
+    })).filter(item => item.count > 0);
+});
 
 const normalizeBusinessStrategyGroupKey = (value) => {
     const normalizedValue = String(value ?? '').trim().toLowerCase();
@@ -121,8 +197,12 @@ const filterDtiInitiatives = (initiatives) => {
 
     return initiatives.filter((ini) => {
         const matchesSource = selectedSource.value === 'all' || ini.source == selectedSource.value;
+        const periodStatus = getInitiativeStatus(ini);
+        const implStatus = normalizeStatusLabel(periodStatus);
+        const matchesStatus = !selectedStatus.value || implStatus === selectedStatus.value;
+        const matchesPeriod = !selectedPeriod.value || periodStatus !== null;
 
-        return matchesSource && matchesSelectedBusinessUnit(ini);
+        return matchesSource && matchesSelectedBusinessUnit(ini) && matchesStatus && matchesPeriod;
     });
 };
 
@@ -142,13 +222,13 @@ const processedCards = (cards, initiativeFilter = (initiatives) => initiatives |
 };
 
 const filteredTechnologyCards = computed(() => processedCards(props.technologyCards, filterDtiInitiatives));
-const filteredStrategyCards = computed(() => processedCards(props.strategyCards));
+const filteredStrategyCards = computed(() => processedCards(props.strategyCards, filterDtiInitiatives));
 const filteredUnassignedInitiatives = computed(() => filterDtiInitiatives(props.unassignedInitiatives || []));
 
 const filteredFoundationCard = computed(() => {
     if (!props.foundationCard) return null;
     const card = props.foundationCard;
-    const filteredInis = card.initiatives || [];
+    const filteredInis = filterDtiInitiatives(card.initiatives || []);
     return {
         ...card,
         initiatives: filteredInis,
@@ -159,7 +239,7 @@ const filteredFoundationCard = computed(() => {
 const filteredArchitectureCard = computed(() => {
     if (!props.architectureCard) return null;
     const card = props.architectureCard;
-    const filteredInis = card.initiatives || [];
+    const filteredInis = filterDtiInitiatives(card.initiatives || []);
     return {
         ...card,
         initiatives: filteredInis,
@@ -397,6 +477,46 @@ const filteredBusinessStrategyRows = computed(() => {
                 <img src="/chain-strategic-house.png" alt="Chain" class="w-7 h-auto" />
             </div>
 
+            <!-- Status Implementation Legend -->
+            <div
+                class="status-legend-panel animate-fade-in-up"
+            >
+                <div class="status-legend-container">
+                    <div class="status-legend-header">
+                        <span class="status-legend-title">Implementation Status:</span>
+                        <select 
+                            v-if="statusPeriods && statusPeriods.length > 0" 
+                            v-model="selectedPeriod" 
+                            class="status-period-select"
+                        >
+                            <option :value="null">All (Latest)</option>
+                            <option v-for="period in statusPeriods" :key="period.label" :value="period">
+                                {{ period.label }}
+                            </option>
+                        </select>
+                        <span v-else class="status-period-fallback">(November - Desember 2025):</span>
+                    </div>
+                    <div class="status-legend-items">
+                        <div
+                            v-for="status in statusLegend"
+                            :key="`status-legend-${status.label}`"
+                            class="status-legend-item"
+                            :class="{ 'status-legend-item--inactive': selectedStatus && selectedStatus !== status.label }"
+                            @click="selectedStatus = selectedStatus === status.label ? '' : status.label"
+                            :title="`Filter: ${status.label}`"
+                        >
+                            <span
+                                class="status-swatch"
+                                :class="status.class"
+                            ></span>
+                            <span class="status-label">
+                                {{ status.label }} <span class="status-count">({{ status.count }})</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- ═══ DIGITAL TRANSFORMATION INITIATIVES SECTION ═══ -->
             <div class="dti-section" :class="{ 'dti-section--compact': !showDetails }">
                 <div class="dti-header">
@@ -433,9 +553,13 @@ const filteredBusinessStrategyRows = computed(() => {
                                             class="initiative-link initiative-link--dti"
                                             :title="initiativeHoverTitle(ini)"
                                         >
-                                            <span :title="initiativeHoverTitle(ini)">{{ ini.label }}</span>
+                                            <span v-if="showDetails" class="initiative-code-tag" :class="getStatusColorClass(getInitiativeStatus(ini))">{{ ini.code }}</span>
+                                            <span :title="initiativeHoverTitle(ini)">{{ ini.name || ini.label }}</span>
                                         </Link>
-                                        <span v-else :title="initiativeHoverTitle(ini)">{{ ini.label }}</span>
+                                        <template v-else>
+                                            <span v-if="showDetails" class="initiative-code-tag" :class="getStatusColorClass(getInitiativeStatus(ini))">{{ ini.code }}</span>
+                                            <span :title="initiativeHoverTitle(ini)">{{ ini.name || ini.label }}</span>
+                                        </template>
                                     </li>
                                 </ul>
                                 <div v-else class="dti-card-list-empty">
@@ -461,9 +585,13 @@ const filteredBusinessStrategyRows = computed(() => {
                                             class="initiative-link initiative-link--dti"
                                             :title="initiativeHoverTitle(ini)"
                                         >
-                                            <span :title="initiativeHoverTitle(ini)">{{ ini.label }}</span>
+                                            <span class="initiative-code-tag" :class="getStatusColorClass(getInitiativeStatus(ini))">{{ ini.code }}</span>
+                                            <span :title="initiativeHoverTitle(ini)">{{ ini.name || ini.label }}</span>
                                         </Link>
-                                        <span v-else :title="initiativeHoverTitle(ini)">{{ ini.label }}</span>
+                                        <template v-else>
+                                            <span class="initiative-code-tag" :class="getStatusColorClass(getInitiativeStatus(ini))">{{ ini.code }}</span>
+                                            <span :title="initiativeHoverTitle(ini)">{{ ini.name || ini.label }}</span>
+                                        </template>
                                     </li>
                                 </ul>
                                 <div v-else class="dti-card-list-empty">
@@ -521,9 +649,13 @@ const filteredBusinessStrategyRows = computed(() => {
                                         class="initiative-link initiative-link--gits"
                                         :title="initiativeHoverTitle(ini)"
                                     >
-                                        <span :title="initiativeHoverTitle(ini)">{{ ini.label }}</span>
+                                        <span class="initiative-code-tag" :class="getStatusColorClass(getInitiativeStatus(ini))">{{ ini.code }}</span>
+                                        <span :title="initiativeHoverTitle(ini)">{{ ini.name || ini.label }}</span>
                                     </Link>
-                                    <span v-else :title="initiativeHoverTitle(ini)">{{ ini.label }}</span>
+                                    <template v-else>
+                                        <span class="initiative-code-tag" :class="getStatusColorClass(getInitiativeStatus(ini))">{{ ini.code }}</span>
+                                        <span :title="initiativeHoverTitle(ini)">{{ ini.name || ini.label }}</span>
+                                    </template>
                                 </li>
                             </ul>
                             <div v-else class="gits-pillar-list-empty">
@@ -554,9 +686,13 @@ const filteredBusinessStrategyRows = computed(() => {
                                     class="initiative-link initiative-link--gits"
                                     :title="initiativeHoverTitle(ini)"
                                 >
-                                    <span :title="initiativeHoverTitle(ini)">{{ ini.label }}</span>
+                                    <span class="initiative-code-tag" :class="getStatusColorClass(getInitiativeStatus(ini))">{{ ini.code }}</span>
+                                    <span :title="initiativeHoverTitle(ini)">{{ ini.name || ini.label }}</span>
                                 </Link>
-                                <span v-else :title="initiativeHoverTitle(ini)">{{ ini.label }}</span>
+                                <template v-else>
+                                    <span class="initiative-code-tag" :class="getStatusColorClass(getInitiativeStatus(ini))">{{ ini.code }}</span>
+                                    <span :title="initiativeHoverTitle(ini)">{{ ini.name || ini.label }}</span>
+                                </template>
                             </li>
                         </ul>
                         <div v-else class="gits-pillar-list-empty">
@@ -583,9 +719,13 @@ const filteredBusinessStrategyRows = computed(() => {
                                     class="initiative-link initiative-link--gits"
                                     :title="initiativeHoverTitle(ini)"
                                 >
-                                    <span :title="initiativeHoverTitle(ini)">{{ ini.label }}</span>
+                                    <span class="initiative-code-tag" :class="getStatusColorClass(getInitiativeStatus(ini))">{{ ini.code }}</span>
+                                    <span :title="initiativeHoverTitle(ini)">{{ ini.name || ini.label }}</span>
                                 </Link>
-                                <span v-else :title="initiativeHoverTitle(ini)">{{ ini.label }}</span>
+                                <template v-else>
+                                    <span class="initiative-code-tag" :class="getStatusColorClass(getInitiativeStatus(ini))">{{ ini.code }}</span>
+                                    <span :title="initiativeHoverTitle(ini)">{{ ini.name || ini.label }}</span>
+                                </template>
                             </li>
                         </ul>
                         <div v-else class="gits-pillar-list-empty">
@@ -1602,4 +1742,156 @@ const filteredBusinessStrategyRows = computed(() => {
 :deep(.dark) .gits-subtitle {
     color: #94a3b8;
 }
+/* Status Legend Styles */
+.status-legend-panel {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.status-legend-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+}
+
+.status-legend-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-right: 1px solid #e2e8f0;
+    padding-right: 16px;
+}
+
+.status-legend-title {
+    font-size: 11px;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.status-period-select {
+    font-size: 11px;
+    font-weight: 700;
+    color: #2563eb;
+    background: #eff6ff;
+    border: none;
+    border-radius: 6px;
+    padding: 2px 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.status-period-select:hover {
+    background: #dbeafe;
+}
+
+.status-period-fallback {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.status-legend-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.status-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.status-legend-item:hover {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.status-legend-item--inactive {
+    opacity: 0.35;
+}
+
+.status-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+}
+
+.status-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #334155;
+}
+
+.status-count {
+    font-weight: 500;
+    color: #94a3b8;
+}
+
+/* Status Code Tag */
+.initiative-code-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 800;
+    color: #ffffff;
+    margin-right: 6px;
+    flex-shrink: 0;
+}
+
+/* Implementation Status Colors */
+.status-color-df { background-color: #0d9488 !important; border: 1px solid #0f766e; }
+.status-color-done { background-color: #65a30d !important; border: 1px solid #4d7c0f; }
+.status-color-dt2026 { background-color: #ea580c !important; border: 1px solid #c2410c; }
+.status-color-itsbp { background-color: #06b6d4 !important; border: 1px solid #0891b2; }
+.status-color-onreview { background-color: #ca8a04 !important; border: 1px solid #a16207; }
+.status-color-onprogress { background-color: #2563eb !important; border: 1px solid #1d4ed8; }
+.status-color-sh { background-color: #ef4444 !important; border: 1px solid #dc2626; }
+
+:deep(.dark) .status-legend-panel {
+    background: #0f172a;
+    border-color: rgba(148, 163, 184, 0.1);
+}
+
+:deep(.dark) .status-legend-header {
+    border-color: rgba(148, 163, 184, 0.1);
+}
+
+:deep(.dark) .status-period-select {
+    background: rgba(37, 99, 235, 0.1);
+    color: #60a5fa;
+}
+
+:deep(.dark) .status-label {
+    color: #e2e8f0;
+}
+
+:deep(.dark) .status-legend-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+@media (max-width: 768px) {
+    .status-legend-header {
+        border-right: none;
+        padding-right: 0;
+        width: 100%;
+        margin-bottom: 8px;
+    }
+}
 </style>
+

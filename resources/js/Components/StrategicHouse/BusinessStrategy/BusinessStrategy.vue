@@ -52,6 +52,7 @@ const showEnablers = ref(true);
 const showLastUpdatePeriod = ref(true);
 const showStrategyData = ref(true);
 const selectedSource = ref('');
+const selectedStatus = ref('');
 
 const strategyForm = reactive({
     business_unit: '',
@@ -100,12 +101,19 @@ const mergeRowsByBusinessUnit = (rows) => {
             return;
         }
 
+        const totalInitiatives = currentChunk.reduce((sum, r) => {
+            const s = Object.values(r.initiatives_by_key || {}).reduce((acc, inis) => acc + getVisibleInitiatives(inis).length, 0);
+            const e = Object.values(r.enabler_initiatives_by_key || {}).reduce((acc, inis) => acc + getVisibleInitiatives(inis).length, 0);
+            return sum + s + e;
+        }, 0);
+
         currentChunk.forEach((row, index) => {
             mergedRows.push({
                 ...row,
                 show_business_unit: index === 0,
                 business_unit_row_count: currentChunk.length,
                 is_last_business_unit_row: index === currentChunk.length - 1,
+                business_unit_total_initiatives: totalInitiatives,
             });
         });
 
@@ -231,8 +239,7 @@ const initiativeSummaryHref = (initiative) => {
 };
 
 const initiativeSummaryTitle = (initiative) => {
-    const label = String(initiative?.code ?? initiative?.name ?? 'initiative').trim();
-    return `Lihat capsule summary untuk ${label}`;
+    return initiative?.description || initiative?.name || initiative?.code || 'initiative';
 };
 
 const initiativeBoxesGridStyle = (initiatives = []) => ({
@@ -337,15 +344,22 @@ const getVisibleInitiatives = (initiatives = []) => {
     return (initiatives || []).filter((initiative) => {
         const matchesPeriod = !selectedPeriod.value || getInitiativeStatus(initiative) !== null;
         const matchesSource = !selectedSource.value || initiative.source == selectedSource.value;
-        return matchesPeriod && matchesSource;
+        const matchesStatus = !selectedStatus.value || normalizeStatusLabel(getInitiativeStatus(initiative)) === selectedStatus.value;
+        return matchesPeriod && matchesSource && matchesStatus;
     });
 };
 
 const filteredInitiatives = computed(() => {
     const initiatives = filteredGroups.value.flatMap((group) => (
-        (group.rows || []).flatMap((row) => (
-            Object.values(row.initiatives_by_key || {}).flatMap((items) => getVisibleInitiatives(items || []))
-        ))
+        (group.rows || []).flatMap((row) => {
+            const strat = Object.values(row.initiatives_by_key || {}).flatMap(items => items || []);
+            const enabler = Object.values(row.enabler_initiatives_by_key || {}).flatMap(items => items || []);
+            return [...strat, ...enabler].filter(initiative => {
+                const matchesPeriod = !selectedPeriod.value || getInitiativeStatus(initiative) !== null;
+                const matchesSource = !selectedSource.value || initiative.source == selectedSource.value;
+                return matchesPeriod && matchesSource;
+            });
+        })
     ));
 
     return Array.from(
@@ -396,6 +410,37 @@ const statusLegend = computed(() => {
 });
 
 const totalFilteredInitiatives = computed(() => filteredInitiatives.value.length);
+
+const columnCounts = computed(() => {
+    const counts = {
+        strategy: {},
+        enabler: {},
+    };
+
+    filteredGroups.value.forEach((group) => {
+        group.rows.forEach((row) => {
+            // Strategy initiatives (legacy + low carbon)
+            Object.entries(row.initiatives_by_key || {}).forEach(([key, inis]) => {
+                const visibleInis = getVisibleInitiatives(inis);
+                counts.strategy[key] = (counts.strategy[key] || 0) + visibleInis.length;
+            });
+
+            // Enabler initiatives
+            Object.entries(row.enabler_initiatives_by_key || {}).forEach(([key, inis]) => {
+                const visibleInis = getVisibleInitiatives(inis);
+                counts.enabler[key] = (counts.enabler[key] || 0) + visibleInis.length;
+            });
+        });
+    });
+
+    return counts;
+});
+
+const legacyTotalCount = computed(() => {
+    return legacyColumns.value.reduce((sum, column) => {
+        return sum + (columnCounts.value.strategy[column.key] || 0);
+    }, 0);
+});
 
 const modalTitle = computed(() => 'Add Strategy');
 const modalMessage = computed(() => 'Pilih business unit lalu isi arah strategy yang ingin ditambahkan.');
@@ -680,7 +725,10 @@ watch(filterOrganizationOptions, (options) => {
                         <span v-else class="status-legend__title">(Latest):</span>
                     </div>
                     <div v-for="status in statusLegend" :key="`status-legend-${status.label}`"
-                        class="flex items-center gap-1.5">
+                        class="flex items-center gap-1.5 cursor-pointer select-none transition-opacity"
+                        :class="{ 'opacity-40': selectedStatus && selectedStatus !== status.label }"
+                        @click="selectedStatus = selectedStatus === status.label ? '' : status.label"
+                        :title="`Filter: ${status.label}`">
                         <span class="legend-swatch" :class="status.class"></span>
                         <span class="status-legend__label">
                             {{ status.label }}
@@ -757,12 +805,22 @@ watch(filterOrganizationOptions, (options) => {
                                 </th>
                                 <th v-if="legacyColumns.length" :colspan="legacyColumns.length" class="head-cell">
                                     <div class="strategy-head-card strategy-head-card--legacy">
-                                        <span class="strategy-head-card__title">{{ legacyGoalTitle }}</span>
+                                        <div class="flex items-center justify-center gap-2">
+                                            <span class="strategy-head-card__title">{{ legacyGoalTitle }}</span>
+                                            <span v-if="legacyTotalCount > 0" class="strategy-column-count-capsule strategy-column-count-capsule--legacy-total">
+                                                {{ legacyTotalCount }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </th>
                                 <th v-if="lowCarbonColumn" rowspan="2" class="head-cell head-cell--carbon">
                                     <div class="strategy-head-card strategy-head-card--carbon">
-                                        <span class="strategy-head-card__title">{{ lowCarbonGoalTitle }}</span>
+                                        <div class="flex items-center justify-center gap-2">
+                                            <span class="strategy-head-card__title">{{ lowCarbonGoalTitle }}</span>
+                                            <span v-if="columnCounts.strategy['low_carbon'] > 0" class="strategy-column-count-capsule strategy-column-count-capsule--carbon">
+                                                {{ columnCounts.strategy['low_carbon'] }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </th>
                                 <th
@@ -772,14 +830,24 @@ watch(filterOrganizationOptions, (options) => {
                                     class="head-cell head-cell--enabler"
                                 >
                                     <div class="strategy-head-card strategy-head-card--enabler">
-                                        <span class="strategy-head-card__title">{{ enabler.title }}</span>
+                                        <div class="flex items-center justify-center gap-2">
+                                            <span class="strategy-head-card__title">{{ enabler.title }}</span>
+                                            <span v-if="columnCounts.enabler[enabler.key] > 0" class="strategy-column-count-capsule strategy-column-count-capsule--enabler">
+                                                {{ columnCounts.enabler[enabler.key] }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </th>
                             </tr>
                             <tr v-if="legacyColumns.length">
                                 <th v-for="column in legacyColumns" :key="column.key" class="head-cell">
                                     <div class="strategy-head-card strategy-head-card--legacy-child">
-                                        <span>{{ column.label }}</span>
+                                        <div class="flex items-center justify-center gap-2">
+                                            <span>{{ column.label }}</span>
+                                            <span v-if="columnCounts.strategy[column.key] > 0" class="strategy-column-count-capsule strategy-column-count-capsule--legacy">
+                                                {{ columnCounts.strategy[column.key] }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </th>
                             </tr>
@@ -798,6 +866,9 @@ watch(filterOrganizationOptions, (options) => {
                                                 </div>
                                                 <div class="primary-label-wrapper">
                                                     <span class="primary-business-unit-name">{{ row.business_unit }}</span>
+                                                    <span v-if="row.business_unit_total_initiatives > 0" class="bu-count-capsule">
+                                                        {{ row.business_unit_total_initiatives }}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </td>
@@ -849,11 +920,16 @@ watch(filterOrganizationOptions, (options) => {
                                                         v-for="initiative in getVisibleInitiatives((row.enabler_initiatives_by_key || {})[enabler.key] || [])"
                                                         :key="`enabler-initiative-${row.id}-${enabler.key}-${initiative.id}`"
                                                         :href="initiativeSummaryHref(initiative)"
-                                                        :title="initiativeSummaryTitle(initiative)" class="initiative-box"
+                                                        class="initiative-box group"
                                                         :class="[
                                                             { 'initiative-box--no-code': !initiative.code },
                                                             { 'initiative-box--clickable': initiativeSummaryHref(initiative) },
                                                         ]">
+                                                        <!-- Tooltip Description -->
+                                                        <div class="absolute top-full left-1/2 z-50 mt-1 hidden -translate-x-1/2 w-max max-w-[250px] sm:max-w-xs md:max-w-sm bg-white border border-slate-800 shadow-sm px-1.5 py-1 text-left text-[9px] italic text-slate-800 group-hover:block pointer-events-none whitespace-normal break-words dark:bg-slate-800 dark:border-slate-600 dark:text-slate-200">
+                                                            {{ initiative.description || initiative.name }}
+                                                        </div>
+
                                                         <span v-if="initiative.code" class="initiative-box__code"
                                                             :class="getStatusColorClass(getInitiativeStatus(initiative))">
                                                             {{ initiative.code }}
@@ -888,6 +964,9 @@ watch(filterOrganizationOptions, (options) => {
                                                 </div>
                                                 <div class="primary-label-wrapper">
                                                     <span class="primary-business-unit-name">{{ row.business_unit }}</span>
+                                                    <span v-if="row.business_unit_total_initiatives > 0" class="bu-count-capsule">
+                                                        {{ row.business_unit_total_initiatives }}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </td>
@@ -903,11 +982,16 @@ watch(filterOrganizationOptions, (options) => {
                                                         v-for="initiative in getVisibleInitiatives((row.initiatives_by_key || {})[column.key] || [])"
                                                         :key="`initiative-${row.id}-${column.key}-${initiative.id}`"
                                                         :href="initiativeSummaryHref(initiative)"
-                                                        :title="initiativeSummaryTitle(initiative)" class="initiative-box"
+                                                        class="initiative-box group"
                                                         :class="[
                                                             { 'initiative-box--no-code': !initiative.code },
                                                             { 'initiative-box--clickable': initiativeSummaryHref(initiative) },
                                                         ]">
+                                                        <!-- Tooltip Description -->
+                                                        <div class="absolute top-full left-1/2 z-50 mt-1 hidden -translate-x-1/2 w-max max-w-[250px] sm:max-w-xs md:max-w-sm bg-white border border-slate-800 shadow-sm px-1.5 py-1 text-left text-[9px] italic text-slate-800 group-hover:block pointer-events-none whitespace-normal break-words dark:bg-slate-800 dark:border-slate-600 dark:text-slate-200">
+                                                            {{ initiative.description || initiative.name }}
+                                                        </div>
+
                                                         <span v-if="initiative.code" class="initiative-box__code"
                                                             :class="getStatusColorClass(getInitiativeStatus(initiative))">
                                                             {{ initiative.code }}
@@ -948,11 +1032,16 @@ watch(filterOrganizationOptions, (options) => {
                                                         v-for="initiative in getVisibleInitiatives((row.enabler_initiatives_by_key || {})[enabler.key] || [])"
                                                         :key="`enabler-initiative-hidden-${row.id}-${enabler.key}-${initiative.id}`"
                                                         :href="initiativeSummaryHref(initiative)"
-                                                        :title="initiativeSummaryTitle(initiative)" class="initiative-box"
+                                                        class="initiative-box group"
                                                         :class="[
                                                             { 'initiative-box--no-code': !initiative.code },
                                                             { 'initiative-box--clickable': initiativeSummaryHref(initiative) },
                                                         ]">
+                                                        <!-- Tooltip Description -->
+                                                        <div class="absolute top-full left-1/2 z-50 mt-1 hidden -translate-x-1/2 w-max max-w-[250px] sm:max-w-xs md:max-w-sm bg-white border border-slate-800 shadow-sm px-1.5 py-1 text-left text-[9px] italic text-slate-800 group-hover:block pointer-events-none whitespace-normal break-words dark:bg-slate-800 dark:border-slate-600 dark:text-slate-200">
+                                                            {{ initiative.description || initiative.name }}
+                                                        </div>
+
                                                         <span v-if="initiative.code" class="initiative-box__code"
                                                             :class="getStatusColorClass(getInitiativeStatus(initiative))">
                                                             {{ initiative.code }}
@@ -1138,6 +1227,47 @@ watch(filterOrganizationOptions, (options) => {
     letter-spacing: 0.04em;
 }
 
+.strategy-column-count-capsule {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.strategy-column-count-capsule--legacy {
+    background: #ffffff;
+    color: #2a4a6a;
+    border: 1px solid #c5d6e8;
+}
+
+.strategy-column-count-capsule--legacy-total {
+    background: #2a4a6a;
+    color: #ffffff;
+    border: 1px solid #2a4a6a;
+    min-width: 20px;
+    height: 20px;
+    font-size: 11px;
+}
+
+.strategy-column-count-capsule--carbon {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.strategy-column-count-capsule--enabler {
+    background: #28476b;
+    color: #ffffff;
+    border: 1px solid #28476b;
+}
+
 .strategy-table tbody th,
 .strategy-table td {
     vertical-align: top;
@@ -1190,6 +1320,22 @@ watch(filterOrganizationOptions, (options) => {
     font-size: 12px;
     font-weight: 800;
     line-height: 1.2;
+}
+
+.bu-count-capsule {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: rgba(15, 111, 183, 0.1);
+    border: 1px solid rgba(15, 111, 183, 0.2);
+    font-size: 9px;
+    font-weight: 800;
+    color: #0f6fb7;
+    flex-shrink: 0;
 }
 
 .primary-cell__delete {

@@ -221,6 +221,7 @@
                             :business-strategy-groups="businessStrategyGroups"
                             :business-strategy-columns="businessStrategyColumns"
                             :business-strategy-organization-options="businessStrategyOrganizationOptions"
+                            :status-periods="statusPeriods"
                         />
                     </section>
 
