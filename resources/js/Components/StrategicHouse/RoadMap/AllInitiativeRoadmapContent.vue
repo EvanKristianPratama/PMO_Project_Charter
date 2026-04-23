@@ -1,5 +1,6 @@
 <script setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/vue/24/outline";
 import ItInitiativeRoadmapContent from "@/Components/StrategicHouse/RoadMap/ItInitiativeRoadmapContent.vue";
 
 const props = defineProps({
@@ -21,10 +22,24 @@ const years = computed(() => {
 });
 
 const quarterCount = computed(() => Math.max(years.value.length * 4, 1));
+const showFilters = ref(false);
 </script>
 
 <template>
     <div class="all-roadmap space-y-4">
+        <div class="flex justify-end">
+            <button
+                type="button"
+                class="inline-flex items-center gap-2 rounded-lg border border-[#0B2A8A] bg-white px-3 py-1.5 text-[10px] font-bold tracking-wider text-[#0B2A8A] transition hover:bg-[#0B2A8A] hover:text-white dark:border-[#53BDE6] dark:bg-transparent dark:text-[#53BDE6] dark:hover:bg-[#53BDE6] dark:hover:text-[#171717]"
+                :title="showFilters ? 'Hide Filters' : 'Show Filters'"
+                @click="showFilters = !showFilters"
+            >
+                <EyeIcon v-if="showFilters" class="h-3.5 w-3.5" />
+                <EyeSlashIcon v-else class="h-3.5 w-3.5" />
+                {{ showFilters ? 'Hide Filters' : 'Show Filters' }}
+            </button>
+        </div>
+
         <section class="all-roadmap__section">
             <ItInitiativeRoadmapContent
                 :groups="digitalGroups"
@@ -35,11 +50,11 @@ const quarterCount = computed(() => Math.max(years.value.length * 4, 1));
                 initiative-header-label="Digital Initiatives"
                 filter-mode="organization"
                 :show-controls="true"
+                :show-filters="showFilters"
                 controls-placement="bottom"
                 :show-legend="true"
                 :show-roadmap-legend="false"
                 :show-table-header="false"
-                section-title="Digital Initiative"
                 empty-text="Belum ada data roadmap Digital Initiative."
             />
         </section>
@@ -49,6 +64,7 @@ const quarterCount = computed(() => Math.max(years.value.length * 4, 1));
                 <colgroup>
                     <col class="col-coe" />
                     <col class="col-initiative" />
+                    <col class="col-duration" />
                     <col
                         v-for="(_, i) in Array.from({ length: quarterCount })"
                         :key="`mid-q-${i}`"
@@ -57,7 +73,7 @@ const quarterCount = computed(() => Math.max(years.value.length * 4, 1));
                 </colgroup>
                 <thead>
                     <tr>
-                        <th colspan="2" class="middle-timeline__title">ALL TIMELINE</th>
+                        <th colspan="3" class="middle-timeline__title">ALL TIMELINE</th>
                         <th
                             v-for="year in years"
                             :key="`mid-year-${year}`"
@@ -78,8 +94,8 @@ const quarterCount = computed(() => Math.max(years.value.length * 4, 1));
                 :end-year="endYear"
                 :total-count="itTotalCount"
                 :milestone-type-options="milestoneTypeOptions"
-                section-title="IT Initiative"
                 :show-controls="true"
+                :show-filters="showFilters"
                 controls-placement="top"
                 :show-legend="true"
                 :show-roadmap-legend="false"
@@ -94,12 +110,14 @@ const quarterCount = computed(() => Math.max(years.value.length * 4, 1));
 .middle-timeline {
     border: 1px solid #c9d2dd;
     border-radius: 12px;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
     background: #f8fbff;
 }
 
 .middle-timeline__table {
     width: 100%;
+    min-width: 820px;
     table-layout: fixed;
     border-collapse: collapse;
 }
@@ -131,6 +149,10 @@ const quarterCount = computed(() => Math.max(years.value.length * 4, 1));
 
 .col-initiative {
     width: 23%;
+}
+
+.col-duration {
+    width: 10%;
 }
 
 .col-quarter {

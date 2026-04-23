@@ -13,6 +13,7 @@ const props = defineProps({
     sectionTitle: { type: String, default: "" },
     filterMode: { type: String, default: "period" },
     showControls: { type: Boolean, default: true },
+    showFilters: { type: Boolean, default: true },
     controlsPlacement: { type: String, default: "top" },
     showLegend: { type: Boolean, default: true },
     showRoadmapLegend: { type: Boolean, default: true },
@@ -86,6 +87,18 @@ const quarterCells = computed(() =>
 const totalCells = computed(() => quarterCells.value.length);
 
 const organizationFilterMode = computed(() => props.filterMode === "organization");
+
+function resolveInitiativeDuration(initiative) {
+    if (!Array.isArray(initiative?.projects)) {
+        return "";
+    }
+
+    return (
+        initiative.projects
+            .map((project) => String(project?.duration ?? "").trim())
+            .find((value) => value !== "") ?? ""
+    );
+}
 
 /* ── Helpers ─────────────────────────────────────────── */
 
@@ -525,99 +538,101 @@ const reviewStatusLegendItems = computed(() => {
                 {{ sectionTitle }}
             </div>
 
-            <div class="content-header">
-                <div class="flex flex-wrap items-center gap-2 shrink-0">
-                    <label class="period-filter">
-                        <span class="period-filter__label">
-                            {{ organizationFilterMode ? 'Organization' : 'Status Review Implementation Period' }}
-                        </span>
-                        <select
-                            v-if="organizationFilterMode"
-                            v-model="selectedOrganization"
-                            class="period-filter__select"
-                        >
-                            <option value="">Semua Organisasi</option>
-                            <option
-                                v-for="organization in availableOrganizations"
-                                :key="`organization-${organization.value}`"
-                                :value="organization.value"
-                            >
-                                {{ organization.label }}
-                            </option>
-                        </select>
-                        <select v-else v-model="selectedPeriod" class="period-filter__select">
-                            <option v-if="availablePeriods.length === 0" value="" disabled>
-                                Belum ada periode
-                            </option>
-                            <option
-                                v-for="period in availablePeriods"
-                                :key="`status-period-${period.value}`"
-                                :value="period.value"
-                            >
-                                {{ period.label }}
-                            </option>
-                        </select>
-                    </label>
-                </div>
-            </div>
-
-            <div v-if="showLegend && groups && groups.length" class="legend-panel">
-                <div class="legend-panel__header">
-                    <div class="legend-panel__title">Legend</div>
-                    <div class="legend-panel__period">{{ selectedFilterLabel }}</div>
-                </div>
-
-                <div v-if="showRoadmapLegend" class="legend-panel__section">
-                    <div class="legend-panel__subtitle">Roadmap</div>
-                    <div class="legend-list">
-                        <button
-                            v-for="item in roadmapLegendItems"
-                            :key="`roadmap-legend-${item.key}`"
-                            type="button"
-                            :aria-pressed="isRoadmapLayerVisible(item.key)"
-                            :class="[
-                                'legend-item',
-                                'legend-item--button',
-                                !isRoadmapLayerVisible(item.key) ? 'legend-item--muted' : '',
-                            ]"
-                            @click="toggleRoadmapLayer(item.key)"
-                        >
-                            <span :class="['legend-swatch', `timeline-swatch--${item.key}`]" />
-                            <span class="legend-label">{{ item.label }}</span>
-                            <span class="legend-toggle">
-                                {{ isRoadmapLayerVisible(item.key) ? "Shown" : "Hidden" }}
+            <template v-if="showFilters">
+                <div class="content-header">
+                    <div class="flex flex-wrap items-center gap-2 shrink-0">
+                        <label class="period-filter">
+                            <span class="period-filter__label">
+                                {{ organizationFilterMode ? 'Organization' : 'Status Review Implementation Period' }}
                             </span>
-                        </button>
+                            <select
+                                v-if="organizationFilterMode"
+                                v-model="selectedOrganization"
+                                class="period-filter__select"
+                            >
+                                <option value="">Semua Organisasi</option>
+                                <option
+                                    v-for="organization in availableOrganizations"
+                                    :key="`organization-${organization.value}`"
+                                    :value="organization.value"
+                                >
+                                    {{ organization.label }}
+                                </option>
+                            </select>
+                            <select v-else v-model="selectedPeriod" class="period-filter__select">
+                                <option v-if="availablePeriods.length === 0" value="" disabled>
+                                    Belum ada periode
+                                </option>
+                                <option
+                                    v-for="period in availablePeriods"
+                                    :key="`status-period-${period.value}`"
+                                    :value="period.value"
+                                >
+                                    {{ period.label }}
+                                </option>
+                            </select>
+                        </label>
                     </div>
                 </div>
 
-                <div class="legend-panel__section">
-                    <div class="legend-panel__subtitle">Status Review</div>
-                    <div class="legend-list">
-                        <button
-                            v-for="item in reviewStatusLegendItems"
-                            :key="`legend-${item.status}`"
-                            type="button"
-                            :aria-pressed="isSelectedReviewStatus(item.status)"
-                            :class="[
-                                'legend-item',
-                                'legend-item--button',
-                                isSelectedReviewStatus(item.status) ? 'legend-item--active' : '',
-                            ]"
-                            @click="toggleReviewStatus(item.status)"
-                        >
-                            <span
-                                v-if="item.status !== 'Total'"
-                                :class="['legend-swatch', badgeClass(item.status)]"
-                            />
-                            <span class="legend-label">
-                                {{ item.label }}
-                                <span class="legend-count">({{ item.count }})</span>
-                            </span>
-                        </button>
+                <div v-if="showLegend && groups && groups.length" class="legend-panel">
+                    <div class="legend-panel__header">
+                        <div class="legend-panel__title">Legend</div>
+                        <div class="legend-panel__period">{{ selectedFilterLabel }}</div>
+                    </div>
+
+                    <div v-if="showRoadmapLegend" class="legend-panel__section">
+                        <div class="legend-panel__subtitle">Roadmap</div>
+                        <div class="legend-list">
+                            <button
+                                v-for="item in roadmapLegendItems"
+                                :key="`roadmap-legend-${item.key}`"
+                                type="button"
+                                :aria-pressed="isRoadmapLayerVisible(item.key)"
+                                :class="[
+                                    'legend-item',
+                                    'legend-item--button',
+                                    !isRoadmapLayerVisible(item.key) ? 'legend-item--muted' : '',
+                                ]"
+                                @click="toggleRoadmapLayer(item.key)"
+                            >
+                                <span :class="['legend-swatch', `timeline-swatch--${item.key}`]" />
+                                <span class="legend-label">{{ item.label }}</span>
+                                <span class="legend-toggle">
+                                    {{ isRoadmapLayerVisible(item.key) ? "Shown" : "Hidden" }}
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="legend-panel__section">
+                        <div class="legend-panel__subtitle">Status Review</div>
+                        <div class="legend-list">
+                            <button
+                                v-for="item in reviewStatusLegendItems"
+                                :key="`legend-${item.status}`"
+                                type="button"
+                                :aria-pressed="isSelectedReviewStatus(item.status)"
+                                :class="[
+                                    'legend-item',
+                                    'legend-item--button',
+                                    isSelectedReviewStatus(item.status) ? 'legend-item--active' : '',
+                                ]"
+                                @click="toggleReviewStatus(item.status)"
+                            >
+                                <span
+                                    v-if="item.status !== 'Total'"
+                                    :class="['legend-swatch', badgeClass(item.status)]"
+                                />
+                                <span class="legend-label">
+                                    {{ item.label }}
+                                    <span class="legend-count">({{ item.count }})</span>
+                                </span>
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </template>
         </div>
 
         <!-- ── Empty states ──────────────────────────── -->
@@ -651,6 +666,7 @@ const reviewStatusLegendItems = computed(() => {
                 <colgroup>
                     <col class="col-coe" />
                     <col class="col-initiative" />
+                    <col class="col-duration" />
                     <col
                         v-for="(_, i) in quarterCells"
                         :key="`qcol-${i}`"
@@ -666,6 +682,9 @@ const reviewStatusLegendItems = computed(() => {
                         </th>
                         <th class="th-cell th-left th-header border-r border-white/30">
                             {{ initiativeHeaderLabel }}
+                        </th>
+                        <th class="th-cell th-left th-header border-r border-white/30">
+                            Duration
                         </th>
                         <th
                             v-for="year in years"
@@ -730,6 +749,15 @@ const reviewStatusLegendItems = computed(() => {
                                     </div>
                                 </td>
 
+                                <!-- Duration column — spans all timeline rows for this initiative -->
+                                <td
+                                    v-if="rowIdx === 0"
+                                    :rowspan="initiative.timeline_rowspan"
+                                    class="cell-duration"
+                                >
+                                    {{ resolveInitiativeDuration(initiative) || '-' }}
+                                </td>
+
                                 <!-- Timeline bar / gap cells -->
                                 <td
                                     v-for="cell in timelineRow.cells"
@@ -756,99 +784,101 @@ const reviewStatusLegendItems = computed(() => {
                 {{ sectionTitle }}
             </div>
 
-            <div class="content-header">
-                <div class="flex flex-wrap items-center gap-2 shrink-0">
-                    <label class="period-filter">
-                        <span class="period-filter__label">
-                            {{ organizationFilterMode ? 'Organization' : 'Status Review Implementation Period' }}
-                        </span>
-                        <select
-                            v-if="organizationFilterMode"
-                            v-model="selectedOrganization"
-                            class="period-filter__select"
-                        >
-                            <option value="">Semua Organisasi</option>
-                            <option
-                                v-for="organization in availableOrganizations"
-                                :key="`organization-${organization.value}`"
-                                :value="organization.value"
-                            >
-                                {{ organization.label }}
-                            </option>
-                        </select>
-                        <select v-else v-model="selectedPeriod" class="period-filter__select">
-                            <option v-if="availablePeriods.length === 0" value="" disabled>
-                                Belum ada periode
-                            </option>
-                            <option
-                                v-for="period in availablePeriods"
-                                :key="`status-period-${period.value}`"
-                                :value="period.value"
-                            >
-                                {{ period.label }}
-                            </option>
-                        </select>
-                    </label>
-                </div>
-            </div>
-
-            <div v-if="showLegend && groups && groups.length" class="legend-panel">
-                <div class="legend-panel__header">
-                    <div class="legend-panel__title">Legend</div>
-                    <div class="legend-panel__period">{{ selectedFilterLabel }}</div>
-                </div>
-
-                <div v-if="showRoadmapLegend" class="legend-panel__section">
-                    <div class="legend-panel__subtitle">Roadmap</div>
-                    <div class="legend-list">
-                        <button
-                            v-for="item in roadmapLegendItems"
-                            :key="`roadmap-legend-${item.key}`"
-                            type="button"
-                            :aria-pressed="isRoadmapLayerVisible(item.key)"
-                            :class="[
-                                'legend-item',
-                                'legend-item--button',
-                                !isRoadmapLayerVisible(item.key) ? 'legend-item--muted' : '',
-                            ]"
-                            @click="toggleRoadmapLayer(item.key)"
-                        >
-                            <span :class="['legend-swatch', `timeline-swatch--${item.key}`]" />
-                            <span class="legend-label">{{ item.label }}</span>
-                            <span class="legend-toggle">
-                                {{ isRoadmapLayerVisible(item.key) ? "Shown" : "Hidden" }}
+            <template v-if="showFilters">
+                <div class="content-header">
+                    <div class="flex flex-wrap items-center gap-2 shrink-0">
+                        <label class="period-filter">
+                            <span class="period-filter__label">
+                                {{ organizationFilterMode ? 'Organization' : 'Status Review Implementation Period' }}
                             </span>
-                        </button>
+                            <select
+                                v-if="organizationFilterMode"
+                                v-model="selectedOrganization"
+                                class="period-filter__select"
+                            >
+                                <option value="">Semua Organisasi</option>
+                                <option
+                                    v-for="organization in availableOrganizations"
+                                    :key="`organization-${organization.value}`"
+                                    :value="organization.value"
+                                >
+                                    {{ organization.label }}
+                                </option>
+                            </select>
+                            <select v-else v-model="selectedPeriod" class="period-filter__select">
+                                <option v-if="availablePeriods.length === 0" value="" disabled>
+                                    Belum ada periode
+                                </option>
+                                <option
+                                    v-for="period in availablePeriods"
+                                    :key="`status-period-${period.value}`"
+                                    :value="period.value"
+                                >
+                                    {{ period.label }}
+                                </option>
+                            </select>
+                        </label>
                     </div>
                 </div>
 
-                <div class="legend-panel__section">
-                    <div class="legend-panel__subtitle">Status Review</div>
-                    <div class="legend-list">
-                        <button
-                            v-for="item in reviewStatusLegendItems"
-                            :key="`legend-${item.status}`"
-                            type="button"
-                            :aria-pressed="isSelectedReviewStatus(item.status)"
-                            :class="[
-                                'legend-item',
-                                'legend-item--button',
-                                isSelectedReviewStatus(item.status) ? 'legend-item--active' : '',
-                            ]"
-                            @click="toggleReviewStatus(item.status)"
-                        >
-                            <span
-                                v-if="item.status !== 'Total'"
-                                :class="['legend-swatch', badgeClass(item.status)]"
-                            />
-                            <span class="legend-label">
-                                {{ item.label }}
-                                <span class="legend-count">({{ item.count }})</span>
-                            </span>
-                        </button>
+                <div v-if="showLegend && groups && groups.length" class="legend-panel">
+                    <div class="legend-panel__header">
+                        <div class="legend-panel__title">Legend</div>
+                        <div class="legend-panel__period">{{ selectedFilterLabel }}</div>
+                    </div>
+
+                    <div v-if="showRoadmapLegend" class="legend-panel__section">
+                        <div class="legend-panel__subtitle">Roadmap</div>
+                        <div class="legend-list">
+                            <button
+                                v-for="item in roadmapLegendItems"
+                                :key="`roadmap-legend-${item.key}`"
+                                type="button"
+                                :aria-pressed="isRoadmapLayerVisible(item.key)"
+                                :class="[
+                                    'legend-item',
+                                    'legend-item--button',
+                                    !isRoadmapLayerVisible(item.key) ? 'legend-item--muted' : '',
+                                ]"
+                                @click="toggleRoadmapLayer(item.key)"
+                            >
+                                <span :class="['legend-swatch', `timeline-swatch--${item.key}`]" />
+                                <span class="legend-label">{{ item.label }}</span>
+                                <span class="legend-toggle">
+                                    {{ isRoadmapLayerVisible(item.key) ? "Shown" : "Hidden" }}
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="legend-panel__section">
+                        <div class="legend-panel__subtitle">Status Review</div>
+                        <div class="legend-list">
+                            <button
+                                v-for="item in reviewStatusLegendItems"
+                                :key="`legend-${item.status}`"
+                                type="button"
+                                :aria-pressed="isSelectedReviewStatus(item.status)"
+                                :class="[
+                                    'legend-item',
+                                    'legend-item--button',
+                                    isSelectedReviewStatus(item.status) ? 'legend-item--active' : '',
+                                ]"
+                                @click="toggleReviewStatus(item.status)"
+                            >
+                                <span
+                                    v-if="item.status !== 'Total'"
+                                    :class="['legend-swatch', badgeClass(item.status)]"
+                                />
+                                <span class="legend-label">
+                                    {{ item.label }}
+                                    <span class="legend-count">({{ item.count }})</span>
+                                </span>
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </template>
         </div>
     </div>
 </template>
@@ -925,13 +955,13 @@ const reviewStatusLegendItems = computed(() => {
 }
 
 /* ─────────────────────────────────────────────────────
-   Column widths
-   11% CoE + 23% Initiative + 66% timeline area.
-   col-quarter claims 40% / qcount from that pool;
-   table-layout: fixed distributes the remainder.
+    Column widths
+    CoE, initiative, and duration columns are fixed;
+    timeline columns share the remaining horizontal space.
    ───────────────────────────────────────────────────── */
 .col-coe        { width: 11%; }
 .col-initiative { width: 23%; }
+.col-duration   { width: 10%; }
 .col-quarter    { width: calc(40% / var(--qcount)); }
 
 /* ─────────────────────────────────────────────────────
@@ -1020,6 +1050,19 @@ const reviewStatusLegendItems = computed(() => {
     color: #475569;
 }
 
+.gantt-table td.cell-duration {
+    padding: 7px 10px;
+    vertical-align: middle;
+    text-align: center;
+    border-right: 1px solid var(--cell-border-color);
+    border-bottom: 1px solid var(--row-border-color);
+    color: #1d4ed8;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.35;
+    word-break: break-word;
+}
+
 /* ─────────────────────────────────────────────────────
    Badge (status dot)
    ───────────────────────────────────────────────────── */
@@ -1074,7 +1117,7 @@ const reviewStatusLegendItems = computed(() => {
 }
 
 .gantt-table td.cell-bar--baseline::after {
-    background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%);
+    background: #0b2a8a;
 }
 
 .gantt-table td.cell-bar--approved::after {
@@ -1197,7 +1240,7 @@ const reviewStatusLegendItems = computed(() => {
 }
 
 .timeline-swatch--baseline {
-    background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%);
+    background: #0b2a8a;
 }
 
 .timeline-swatch--approved {
@@ -1257,6 +1300,7 @@ const reviewStatusLegendItems = computed(() => {
 @media (max-width: 1280px) {
     .col-coe        { width: 13%; }
     .col-initiative { width: 27%; }
+    .col-duration   { width: 11%; }
     .col-quarter    { width: calc(60% / var(--qcount)); }
     .ini-name       { font-size: 10px; }
     .badge          { width: 15px; height: 15px; font-size: 8px; }
@@ -1267,6 +1311,7 @@ const reviewStatusLegendItems = computed(() => {
 @media (max-width: 900px) {
     .col-coe              { width: 15%; }
     .col-initiative       { width: 32%; }
+    .col-duration         { width: 12%; }
     .col-quarter          { width: calc(53% / var(--qcount)); }
     .legend-panel         { padding: 12px 14px; }
     .legend-item--button  { width: 100%; justify-content: space-between; }
