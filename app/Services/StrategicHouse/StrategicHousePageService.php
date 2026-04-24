@@ -73,6 +73,7 @@ class StrategicHousePageService
         $initiativeRelationProps = null;
         $itRoadmapProps = null;
         $digitalRoadmapProps = null;
+        $digitalRoadmapGroups = null;
 
         $loadMappingData = function () use (&$mappingData, $coes, $initiativeType, $normalizedFilters): array {
             return $mappingData ??= $this->getMappingData($coes, $initiativeType, $normalizedFilters['show_empty']);
@@ -108,6 +109,10 @@ class StrategicHousePageService
 
         $loadDigitalRoadmapPageProps = function () use (&$digitalRoadmapProps): array {
             return $digitalRoadmapProps ??= $this->digitalRoadmapPageService->getIndexPageProps();
+        };
+
+        $loadDigitalRoadmapGroups = function () use (&$digitalRoadmapGroups, $loadDigitalRoadmapPageProps): array {
+            return $digitalRoadmapGroups ??= $this->buildDigitalRoadmapGroups($loadDigitalRoadmapPageProps()['roadmapItems'] ?? []);
         };
 
         $baseProps = [
@@ -183,7 +188,10 @@ class StrategicHousePageService
             'itRoadmapTotalCount' => fn() => $loadItRoadmapProps()['totalCount'],
             'itRoadmapMilestoneTypeOptions' => fn() => $loadItRoadmapProps()['milestoneTypeOptions'],
 
-            'digitalRoadmapGroups' => fn() => $this->buildDigitalRoadmapGroups($loadDigitalRoadmapPageProps()['roadmapItems'] ?? []),
+            'digitalRoadmapGroups' => fn() => $loadDigitalRoadmapGroups(),
+            'digitalRoadmapTotalCount' => fn() => $this->getConsolidatedInitiatives()
+                ->where('tipe_initiative', 1)
+                ->count(),
             'digitalRoadmapStartYear' => fn() => $loadDigitalRoadmapPageProps()['startYearRange'],
             'digitalRoadmapEndYear' => fn() => $loadDigitalRoadmapPageProps()['endYearRange'],
         ];
@@ -265,23 +273,235 @@ class StrategicHousePageService
 
     private function buildDigitalRoadmapGroups(array|Collection $roadmapItems): array
     {
-        $globalNumber = 1; $coeOrder = ['AI / Adv. Analytics', 'Advance Cloud', 'IoT', 'RPA', 'CoE Not Identified'];
-        $normalizedItems = collect($roadmapItems)->filter(fn (mixed $item): bool => is_array($item))->map(function (array $item): array { $item['coe_name'] = $this->normalizeDigitalRoadmapCoeName((string) ($item['coe_name'] ?? '')); return $item; });
-        $byCoe = $normalizedItems->groupBy(fn (array $item): string => (string) ($item['coe_name'] ?? 'CoE Not Identified'));
-        return collect($coeOrder)->values()->map(function (string $coeName, int $index) use (&$globalNumber, $byCoe): array {
-            $items = collect($byCoe->get($coeName, collect()));
-            $initiatives = $items->groupBy(fn (array $item): int => (int) ($item['initiative_id'] ?? 0))->sortKeys()->values()->map(function (Collection $initiativeItems) use (&$globalNumber): array {
-                $firstItem = $initiativeItems->first() ?? []; $initiativeId = (int) ($firstItem['initiative_id'] ?? 0);
-                $minStart = $initiativeItems->map(fn (array $item): int => $this->quarterIndex((int) ($item['startYear'] ?? 0), (string) ($item['startQ'] ?? '')))->filter(fn (int $value): bool => $value > 0)->min();
-                $maxEnd = $initiativeItems->map(fn (array $item): int => $this->quarterIndex((int) ($item['endYear'] ?? 0), (string) ($item['endQ'] ?? '')))->filter(fn (int $value): bool => $value > 0)->max();
-                $startYear = $minStart ? intdiv($minStart - 1, 4) : 0; $startQuarter = $minStart ? (($minStart - 1) % 4) + 1 : 1;
-                $endYear = $maxEnd ? intdiv($maxEnd - 1, 4) : 0; $endQuarter = $maxEnd ? (($maxEnd - 1) % 4) + 1 : 1;
-                $startDate = $this->resolveQuarterDate($startYear, sprintf('Q%d', $startQuarter), false); $endDate = $this->resolveQuarterDate($endYear, sprintf('Q%d', $endQuarter), true);
-                $activityLabels = $initiativeItems->pluck('activity')->map(fn (mixed $value): string => trim((string) $value))->filter()->unique()->values()->all();
-                return ['no' => $this->resolveDigitalInitiativeBadgeLabel(trim((string) ($firstItem['initiative_code'] ?? '')), $globalNumber), 'id' => $initiativeId, 'name' => trim((string) ($firstItem['initiative_name'] ?? '')) ?: sprintf('Initiative #%d', $initiativeId), 'organization_name' => trim((string) ($firstItem['organization_name'] ?? '')), 'projects' => [['id' => (int) ($firstItem['id'] ?? 0), 'project_id' => null, 'name' => implode('; ', $activityLabels), 'status' => 'baseline', 'status_ref' => ['name' => 'Baseline'], 'milestones' => [['id' => (int) ($firstItem['id'] ?? 0), 'start_date' => $startDate, 'end_date' => $endDate]]]], 'implementation_status' => $this->normalizeImplementationStatus((string) ($firstItem['implementation_status'] ?? '')), 'review_statuses' => []];
-            })->all();
-            return ['coe_name' => $coeName, 'initiatives' => $initiatives ?: [['no' => '-', 'id' => -1000 - $index, 'name' => '-', 'organization_name' => '', 'projects' => [], 'implementation_status' => null, 'review_statuses' => []]]];
-        })->values()->all();
+        $globalNumber = 1;
+        $coeOrder = ['AI / Adv. Analytics', 'Advance Cloud', 'IoT', 'RPA', 'CoE Not Identified'];
+        $digitalInitiativeModels = $this->getConsolidatedInitiatives()
+            ->where('tipe_initiative', 1)
+            ->sortBy(fn ($initiative) => sprintf('%08s-%s', (string) $initiative->code, (string) $initiative->name))
+            ->values();
+        $initiativeModelById = $digitalInitiativeModels->keyBy(
+            fn (MstInitiative $initiative): int => (int) $initiative->id,
+        );
+
+        $normalizedItems = collect($roadmapItems)
+            ->filter(fn (mixed $item): bool => is_array($item))
+            ->map(function (array $item): array {
+                $item['coe_name'] = $this->normalizeDigitalRoadmapCoeName((string) ($item['coe_name'] ?? ''));
+
+                return $item;
+            });
+
+        $roadmapInitiatives = $normalizedItems
+            ->groupBy(fn (array $item): int => (int) ($item['initiative_id'] ?? 0))
+            ->map(function (Collection $initiativeItems) use (&$globalNumber, $initiativeModelById): array {
+                $firstItem = $initiativeItems->first() ?? [];
+                $initiativeId = (int) ($firstItem['initiative_id'] ?? 0);
+                /** @var MstInitiative|null $initiativeModel */
+                $initiativeModel = $initiativeModelById->get($initiativeId);
+
+                $minStart = $initiativeItems
+                    ->map(fn (array $item): int => $this->quarterIndex((int) ($item['startYear'] ?? 0), (string) ($item['startQ'] ?? '')))
+                    ->filter(fn (int $value): bool => $value > 0)
+                    ->min();
+                $maxEnd = $initiativeItems
+                    ->map(fn (array $item): int => $this->quarterIndex((int) ($item['endYear'] ?? 0), (string) ($item['endQ'] ?? '')))
+                    ->filter(fn (int $value): bool => $value > 0)
+                    ->max();
+
+                $startYear = $minStart ? intdiv($minStart - 1, 4) : 0;
+                $startQuarter = $minStart ? (($minStart - 1) % 4) + 1 : 1;
+                $endYear = $maxEnd ? intdiv($maxEnd - 1, 4) : 0;
+                $endQuarter = $maxEnd ? (($maxEnd - 1) % 4) + 1 : 1;
+                $startDate = $this->resolveQuarterDate($startYear, sprintf('Q%d', $startQuarter), false);
+                $endDate = $this->resolveQuarterDate($endYear, sprintf('Q%d', $endQuarter), true);
+                $activityLabels = $initiativeItems
+                    ->pluck('activity')
+                    ->map(fn (mixed $value): string => trim((string) $value))
+                    ->filter()
+                    ->unique()
+                    ->values()
+                    ->all();
+
+                return [
+                    'no' => $this->resolveDigitalInitiativeBadgeLabel(trim((string) ($firstItem['initiative_code'] ?? '')), $globalNumber),
+                    'id' => $initiativeId,
+                    'name' => trim((string) ($firstItem['initiative_name'] ?? '')) ?: sprintf('Initiative #%d', $initiativeId),
+                    'coe_name' => (string) ($firstItem['coe_name'] ?? $this->normalizeDigitalRoadmapCoeName((string) ($initiativeModel?->coe?->name ?? 'CoE Not Identified'))),
+                    'organization_name' => trim((string) ($firstItem['organization_name'] ?? $initiativeModel?->organization?->name ?? '')),
+                    'projects' => [[
+                        'id' => (int) ($firstItem['id'] ?? 0),
+                        'project_id' => null,
+                        'name' => implode('; ', $activityLabels),
+                        'status' => 'baseline',
+                        'status_ref' => ['name' => 'Baseline'],
+                        'milestones' => [[
+                            'id' => (int) ($firstItem['id'] ?? 0),
+                            'start_date' => $startDate,
+                            'end_date' => $endDate,
+                        ]],
+                    ]],
+                    'implementation_status' => $this->normalizeImplementationStatus((string) ($firstItem['implementation_status'] ?? '')),
+                    'review_statuses' => [],
+                    'implementation_statuses' => $this->mapDigitalImplementationStatuses($initiativeModel),
+                ];
+            });
+
+        $allDigitalInitiatives = $digitalInitiativeModels
+            ->map(function (MstInitiative $initiative) use (&$globalNumber, $roadmapInitiatives): array {
+                $initiativeId = (int) $initiative->id;
+
+                if ($roadmapInitiatives->has($initiativeId)) {
+                    return $roadmapInitiatives->get($initiativeId);
+                }
+
+                return [
+                    'no' => $this->resolveDigitalInitiativeBadgeLabel(trim((string) ($initiative->code ?? '')), $globalNumber),
+                    'id' => $initiativeId,
+                    'name' => trim((string) ($initiative->name ?? '')) ?: sprintf('Initiative #%d', $initiativeId),
+                    'coe_name' => $this->normalizeDigitalRoadmapCoeName((string) ($initiative->coe?->name ?? '')),
+                    'organization_name' => trim((string) ($initiative->organization?->name ?? '')),
+                    'projects' => [],
+                    'implementation_status' => $this->normalizeImplementationStatus((string) ($initiative->latestStatusImplementation?->review_status ?? '')),
+                    'review_statuses' => [],
+                    'implementation_statuses' => $this->mapDigitalImplementationStatuses($initiative),
+                ];
+            });
+
+        $byCoe = $allDigitalInitiatives
+            ->groupBy(fn (array $initiative): string => (string) ($initiative['coe_name'] ?? 'CoE Not Identified'));
+
+        return collect($coeOrder)
+            ->values()
+            ->map(function (string $coeName, int $index) use ($byCoe): array {
+                $initiatives = collect($byCoe->get($coeName, collect()))
+                    ->map(fn (array $initiative): array => collect($initiative)->except('coe_name')->all())
+                    ->values()
+                    ->all();
+
+                return [
+                    'coe_name' => $coeName,
+                    'initiatives' => $initiatives ?: [[
+                        'no' => '-',
+                        'id' => -1000 - $index,
+                        'name' => '-',
+                        'organization_name' => '',
+                        'projects' => [],
+                        'implementation_status' => null,
+                        'review_statuses' => [],
+                    ]],
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
+    private function mapDigitalImplementationStatuses(?MstInitiative $initiative): array
+    {
+        if (! $initiative) {
+            return [];
+        }
+
+        return collect($initiative->statusImplementations ?? [])
+            ->map(function ($status): ?array {
+                $start = trim((string) ($status->start ?? ''));
+                $end = trim((string) ($status->end ?? ''));
+                $year = trim((string) ($status->year ?? ''));
+                $reviewStatus = trim((string) ($status->review_status ?? ''));
+                $periodKey = $this->buildDigitalImplementationPeriodKey($start, $end, $year);
+                $periodLabel = $this->buildDigitalImplementationPeriodLabel($start, $end, $year);
+
+                if ($reviewStatus === '' || $periodKey === '' || $periodLabel === '') {
+                    return null;
+                }
+
+                return [
+                    'id' => (int) ($status->id ?? 0),
+                    'initiative_id' => (int) ($status->initiative_id ?? 0),
+                    'review_status' => $reviewStatus,
+                    'status' => $reviewStatus,
+                    'period_key' => $periodKey,
+                    'periode_label' => $periodLabel,
+                    'start' => $start,
+                    'end' => $end,
+                    'year' => $year,
+                    'created_at' => $status->created_at?->toISOString(),
+                    'updated_at' => $status->updated_at?->toISOString(),
+                ];
+            })
+            ->filter()
+            ->sort(function (array $left, array $right): int {
+                $leftYear = (int) ($left['year'] ?? 0);
+                $rightYear = (int) ($right['year'] ?? 0);
+
+                if ($leftYear !== $rightYear) {
+                    return $leftYear <=> $rightYear;
+                }
+
+                $leftStart = $this->digitalMonthOrderValue((string) ($left['start'] ?? ''));
+                $rightStart = $this->digitalMonthOrderValue((string) ($right['start'] ?? ''));
+
+                if ($leftStart !== $rightStart) {
+                    return $leftStart <=> $rightStart;
+                }
+
+                $leftEnd = $this->digitalMonthOrderValue((string) ($left['end'] ?? ''));
+                $rightEnd = $this->digitalMonthOrderValue((string) ($right['end'] ?? ''));
+
+                if ($leftEnd !== $rightEnd) {
+                    return $leftEnd <=> $rightEnd;
+                }
+
+                return (int) ($left['id'] ?? 0) <=> (int) ($right['id'] ?? 0);
+            })
+            ->values()
+            ->all();
+    }
+
+    private function buildDigitalImplementationPeriodKey(string $start, string $end, string $year): string
+    {
+        if ($start === '' || $year === '') {
+            return '';
+        }
+
+        return implode('|', [$start, $end, $year]);
+    }
+
+    private function buildDigitalImplementationPeriodLabel(string $start, string $end, string $year): string
+    {
+        if ($start !== '' && $end !== '' && $year !== '') {
+            return $start === $end
+                ? sprintf('%s %s', $start, $year)
+                : sprintf('%s - %s %s', $start, $end, $year);
+        }
+
+        if ($start !== '' && $year !== '') {
+            return sprintf('%s %s', $start, $year);
+        }
+
+        if ($end !== '' && $year !== '') {
+            return sprintf('%s %s', $end, $year);
+        }
+
+        return trim(implode(' ', array_filter([$start, $end, $year], fn (string $value): bool => $value !== '')));
+    }
+
+    private function digitalMonthOrderValue(string $month): int
+    {
+        return match (strtolower(trim($month))) {
+            'januari' => 1,
+            'februari' => 2,
+            'maret' => 3,
+            'april' => 4,
+            'mei' => 5,
+            'juni' => 6,
+            'juli' => 7,
+            'agustus' => 8,
+            'september' => 9,
+            'oktober' => 10,
+            'november' => 11,
+            'desember' => 12,
+            default => 0,
+        };
     }
 
     private function normalizeDigitalRoadmapCoeName(string $rawName): string { $name = strtolower(trim($rawName)); if ($name === '') return 'CoE Not Identified'; if (str_contains($name, 'ai') || str_contains($name, 'analytics')) return 'AI / Adv. Analytics'; if (str_contains($name, 'cloud')) return 'Advance Cloud'; if (str_contains($name, 'iot')) return 'IoT'; if (str_contains($name, 'rpa')) return 'RPA'; return 'CoE Not Identified'; }
