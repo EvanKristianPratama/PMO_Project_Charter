@@ -376,7 +376,7 @@
                             :total-count="digitalRoadmapTotalCount"
                             group-header-label="COE"
                             initiative-header-label="Digital Initiatives"
-                            filter-mode="organization"
+                            :show-organization-filter="true"
                             :show-roadmap-legend="false"
                             empty-text="Belum ada data roadmap Digital Initiative."
                         />

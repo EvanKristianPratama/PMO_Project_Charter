@@ -275,6 +275,13 @@ class StrategicHousePageService
     {
         $globalNumber = 1;
         $coeOrder = ['AI / Adv. Analytics', 'Advance Cloud', 'IoT', 'RPA', 'CoE Not Identified'];
+        $digitalInitiativeModels = $this->getConsolidatedInitiatives()
+            ->where('tipe_initiative', 1)
+            ->sortBy(fn ($initiative) => sprintf('%08s-%s', (string) $initiative->code, (string) $initiative->name))
+            ->values();
+        $initiativeModelById = $digitalInitiativeModels->keyBy(
+            fn (MstInitiative $initiative): int => (int) $initiative->id,
+        );
 
         $normalizedItems = collect($roadmapItems)
             ->filter(fn (mixed $item): bool => is_array($item))
@@ -286,9 +293,11 @@ class StrategicHousePageService
 
         $roadmapInitiatives = $normalizedItems
             ->groupBy(fn (array $item): int => (int) ($item['initiative_id'] ?? 0))
-            ->map(function (Collection $initiativeItems) use (&$globalNumber): array {
+            ->map(function (Collection $initiativeItems) use (&$globalNumber, $initiativeModelById): array {
                 $firstItem = $initiativeItems->first() ?? [];
                 $initiativeId = (int) ($firstItem['initiative_id'] ?? 0);
+                /** @var MstInitiative|null $initiativeModel */
+                $initiativeModel = $initiativeModelById->get($initiativeId);
 
                 $minStart = $initiativeItems
                     ->map(fn (array $item): int => $this->quarterIndex((int) ($item['startYear'] ?? 0), (string) ($item['startQ'] ?? '')))
@@ -317,8 +326,8 @@ class StrategicHousePageService
                     'no' => $this->resolveDigitalInitiativeBadgeLabel(trim((string) ($firstItem['initiative_code'] ?? '')), $globalNumber),
                     'id' => $initiativeId,
                     'name' => trim((string) ($firstItem['initiative_name'] ?? '')) ?: sprintf('Initiative #%d', $initiativeId),
-                    'coe_name' => (string) ($firstItem['coe_name'] ?? 'CoE Not Identified'),
-                    'organization_name' => trim((string) ($firstItem['organization_name'] ?? '')),
+                    'coe_name' => (string) ($firstItem['coe_name'] ?? $this->normalizeDigitalRoadmapCoeName((string) ($initiativeModel?->coe?->name ?? 'CoE Not Identified'))),
+                    'organization_name' => trim((string) ($firstItem['organization_name'] ?? $initiativeModel?->organization?->name ?? '')),
                     'projects' => [[
                         'id' => (int) ($firstItem['id'] ?? 0),
                         'project_id' => null,
@@ -333,13 +342,11 @@ class StrategicHousePageService
                     ]],
                     'implementation_status' => $this->normalizeImplementationStatus((string) ($firstItem['implementation_status'] ?? '')),
                     'review_statuses' => [],
+                    'implementation_statuses' => $this->mapDigitalImplementationStatuses($initiativeModel),
                 ];
             });
 
-        $allDigitalInitiatives = $this->getConsolidatedInitiatives()
-            ->where('tipe_initiative', 1)
-            ->sortBy(fn ($initiative) => sprintf('%08s-%s', (string) $initiative->code, (string) $initiative->name))
-            ->values()
+        $allDigitalInitiatives = $digitalInitiativeModels
             ->map(function (MstInitiative $initiative) use (&$globalNumber, $roadmapInitiatives): array {
                 $initiativeId = (int) $initiative->id;
 
@@ -356,6 +363,7 @@ class StrategicHousePageService
                     'projects' => [],
                     'implementation_status' => $this->normalizeImplementationStatus((string) ($initiative->latestStatusImplementation?->review_status ?? '')),
                     'review_statuses' => [],
+                    'implementation_statuses' => $this->mapDigitalImplementationStatuses($initiative),
                 ];
             });
 
@@ -385,6 +393,115 @@ class StrategicHousePageService
             })
             ->values()
             ->all();
+    }
+
+    private function mapDigitalImplementationStatuses(?MstInitiative $initiative): array
+    {
+        if (! $initiative) {
+            return [];
+        }
+
+        return collect($initiative->statusImplementations ?? [])
+            ->map(function ($status): ?array {
+                $start = trim((string) ($status->start ?? ''));
+                $end = trim((string) ($status->end ?? ''));
+                $year = trim((string) ($status->year ?? ''));
+                $reviewStatus = trim((string) ($status->review_status ?? ''));
+                $periodKey = $this->buildDigitalImplementationPeriodKey($start, $end, $year);
+                $periodLabel = $this->buildDigitalImplementationPeriodLabel($start, $end, $year);
+
+                if ($reviewStatus === '' || $periodKey === '' || $periodLabel === '') {
+                    return null;
+                }
+
+                return [
+                    'id' => (int) ($status->id ?? 0),
+                    'initiative_id' => (int) ($status->initiative_id ?? 0),
+                    'review_status' => $reviewStatus,
+                    'status' => $reviewStatus,
+                    'period_key' => $periodKey,
+                    'periode_label' => $periodLabel,
+                    'start' => $start,
+                    'end' => $end,
+                    'year' => $year,
+                    'created_at' => $status->created_at?->toISOString(),
+                    'updated_at' => $status->updated_at?->toISOString(),
+                ];
+            })
+            ->filter()
+            ->sort(function (array $left, array $right): int {
+                $leftYear = (int) ($left['year'] ?? 0);
+                $rightYear = (int) ($right['year'] ?? 0);
+
+                if ($leftYear !== $rightYear) {
+                    return $leftYear <=> $rightYear;
+                }
+
+                $leftStart = $this->digitalMonthOrderValue((string) ($left['start'] ?? ''));
+                $rightStart = $this->digitalMonthOrderValue((string) ($right['start'] ?? ''));
+
+                if ($leftStart !== $rightStart) {
+                    return $leftStart <=> $rightStart;
+                }
+
+                $leftEnd = $this->digitalMonthOrderValue((string) ($left['end'] ?? ''));
+                $rightEnd = $this->digitalMonthOrderValue((string) ($right['end'] ?? ''));
+
+                if ($leftEnd !== $rightEnd) {
+                    return $leftEnd <=> $rightEnd;
+                }
+
+                return (int) ($left['id'] ?? 0) <=> (int) ($right['id'] ?? 0);
+            })
+            ->values()
+            ->all();
+    }
+
+    private function buildDigitalImplementationPeriodKey(string $start, string $end, string $year): string
+    {
+        if ($start === '' || $year === '') {
+            return '';
+        }
+
+        return implode('|', [$start, $end, $year]);
+    }
+
+    private function buildDigitalImplementationPeriodLabel(string $start, string $end, string $year): string
+    {
+        if ($start !== '' && $end !== '' && $year !== '') {
+            return $start === $end
+                ? sprintf('%s %s', $start, $year)
+                : sprintf('%s - %s %s', $start, $end, $year);
+        }
+
+        if ($start !== '' && $year !== '') {
+            return sprintf('%s %s', $start, $year);
+        }
+
+        if ($end !== '' && $year !== '') {
+            return sprintf('%s %s', $end, $year);
+        }
+
+        return trim(implode(' ', array_filter([$start, $end, $year], fn (string $value): bool => $value !== '')));
+    }
+
+    private function digitalMonthOrderValue(string $month): int
+    {
+        return match (strtolower(trim($month))) {
+            'januari' => 1,
+            'februari' => 2,
+            'maret' => 3,
+            'april' => 4,
+            'mei' => 5,
+            'juni' => 6,
+            'juli' => 7,
+            'agustus' => 8,
+            'september' => 9,
+            'oktober' => 10,
+            'november' => 11,
+            'desember' => 12,
+            default => 0,
+        };
     }
 
     private function normalizeDigitalRoadmapCoeName(string $rawName): string { $name = strtolower(trim($rawName)); if ($name === '') return 'CoE Not Identified'; if (str_contains($name, 'ai') || str_contains($name, 'analytics')) return 'AI / Adv. Analytics'; if (str_contains($name, 'cloud')) return 'Advance Cloud'; if (str_contains($name, 'iot')) return 'IoT'; if (str_contains($name, 'rpa')) return 'RPA'; return 'CoE Not Identified'; }
