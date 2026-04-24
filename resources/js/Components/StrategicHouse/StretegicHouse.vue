@@ -494,49 +494,51 @@ const filteredBusinessStrategyRows = computed(() => {
                 <img src="/chain-strategic-house.png" alt="Chain" class="w-7 h-auto" />
             </div>
 
-            <!-- Status Implementation Legend -->
-            <div
-                v-if="showStatusImplementation"
-                class="status-legend-panel animate-fade-in-up"
-            >
-                <div class="status-legend-container">
-                    <div class="status-legend-header">
-                        <span class="status-legend-title">Implementation Status:</span>
-                        <select 
-                            v-if="statusPeriods && statusPeriods.length > 0" 
-                            v-model="selectedPeriod" 
-                            class="status-period-select"
-                        >
-                            <option :value="null">All (Latest)</option>
-                            <option v-for="period in statusPeriods" :key="period.label" :value="period">
-                                {{ period.label }}
-                            </option>
-                        </select>
-                        <span v-else class="status-period-fallback">(November - Desember 2025):</span>
-                    </div>
-                    <div class="status-legend-items">
-                        <div
-                            v-for="status in statusLegend"
-                            :key="`status-legend-${status.label}`"
-                            class="status-legend-item"
-                            :class="{ 'status-legend-item--inactive': selectedStatus && selectedStatus !== status.label }"
-                            @click="selectedStatus = selectedStatus === status.label ? '' : status.label"
-                            :title="`Filter: ${status.label}`"
-                        >
-                            <span
-                                class="status-swatch"
-                                :class="status.class"
-                            ></span>
-                            <span class="status-label">
-                                {{ status.label }} <span class="status-count">({{ status.count }})</span>
-                            </span>
+            
+            
+            <!-- ═══ DIGITAL TRANSFORMATION INITIATIVES SECTION ═══ -->
+            <div class="dti-section" :class="{ 'dti-section--compact': !showDetails }">
+                <!-- Status Implementation Legend -->
+                <div
+                    v-if="showStatusImplementation"
+                    class="animate-fade-in-up"
+                >
+                    <div class="status-legend-container">
+                        <div class="status-legend-header">
+                            <span class="status-legend-title">Implementation Status:</span>
+                            <select 
+                                v-if="statusPeriods && statusPeriods.length > 0" 
+                                v-model="selectedPeriod" 
+                                class="status-period-select"
+                            >
+                                <option :value="null">All (Latest)</option>
+                                <option v-for="period in statusPeriods" :key="period.label" :value="period">
+                                    {{ period.label }}
+                                </option>
+                            </select>
+                            <span v-else class="status-period-fallback">(November - Desember 2025):</span>
+                        </div>
+                        <div class="status-legend-items">
+                            <div
+                                v-for="status in statusLegend"
+                                :key="`status-legend-${status.label}`"
+                                class="status-legend-item"
+                                :class="{ 'status-legend-item--inactive': selectedStatus && selectedStatus !== status.label }"
+                                @click="selectedStatus = selectedStatus === status.label ? '' : status.label"
+                                :title="`Filter: ${status.label}`"
+                            >
+                                <span
+                                    class="status-swatch"
+                                    :class="status.class"
+                                ></span>
+                                <span class="status-label">
+                                    {{ status.label }} <span class="status-count">({{ status.count }})</span>
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- ═══ DIGITAL TRANSFORMATION INITIATIVES SECTION ═══ -->
-            <div class="dti-section" :class="{ 'dti-section--compact': !showDetails }">
                 <div class="dti-header">
                     <div class="dti-header-copy">
                         <p class="dti-count">{{ filteredDtiInitiativesCount }} Digital transformation
@@ -1762,15 +1764,6 @@ const filteredBusinessStrategyRows = computed(() => {
 
 :deep(.dark) .gits-subtitle {
     color: #94a3b8;
-}
-/* Status Legend Styles */
-.status-legend-panel {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 12px 16px;
-    margin-bottom: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .status-legend-container {

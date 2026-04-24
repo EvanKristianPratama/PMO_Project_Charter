@@ -57,10 +57,10 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 dark:divide-white/5">
-                        <tr v-for="ini in filteredInitiatives" :key="ini.id"
+                        <tr v-for="ini in initiativesWithRowspan" :key="ini.id"
                             class="group transition-colors hover:bg-slate-50/50 dark:hover:bg-white/5">
                             <!-- IT Architecture (Strategy Pillar / Primary CoE) -->
-                            <td class="px-6 py-4 align-top">
+                            <td v-if="ini.rowspan > 0" :rowspan="ini.rowspan" class="px-6 py-4 align-top border-r border-slate-200 dark:border-white/5">
                                 <div class="flex flex-col">
                                     <span class="text-xs font-bold text-slate-700 dark:text-slate-200">
                                         {{ ini.primary_coe?.name || '-' }}
@@ -222,6 +222,32 @@ const filteredInitiatives = computed(() => {
             tech_mappings: newTechMappings
         };
     }).filter(ini => ini.tech_mappings.size > 0);
+});
+
+const initiativesWithRowspan = computed(() => {
+    const initiatives = filteredInitiatives.value;
+    const result = [];
+
+    for (let i = 0; i < initiatives.length; i++) {
+        const currentIni = initiatives[i];
+        const currentCoeName = currentIni.primary_coe?.name || '-';
+
+        // Check if this is the start of a group
+        if (i === 0 || (initiatives[i - 1].primary_coe?.name || '-') !== currentCoeName) {
+            let rowspan = 1;
+            for (let j = i + 1; j < initiatives.length; j++) {
+                if ((initiatives[j].primary_coe?.name || '-') === currentCoeName) {
+                    rowspan++;
+                } else {
+                    break;
+                }
+            }
+            result.push({ ...currentIni, rowspan });
+        } else {
+            result.push({ ...currentIni, rowspan: 0 });
+        }
+    }
+    return result;
 });
 
 const isPrimaryMapping = (ini, techId) => {
