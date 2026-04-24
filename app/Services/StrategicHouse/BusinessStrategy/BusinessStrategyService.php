@@ -134,6 +134,79 @@ class BusinessStrategyService
         ];
     }
 
+    /**
+     * Lightweight props for the Strategic House mapping tab's business strategy panel.
+     * Returns only strategy row values (no initiatives), columns, and organization options.
+     */
+    public function getMappingProps(): array
+    {
+        $strategyMetadata = $this->getStrategyMetadata();
+        $fixedBusinessUnits = collect(self::FIXED_BUSINESS_UNITS);
+        $fixedBusinessUnitIds = $fixedBusinessUnits->pluck('id')->all();
+        $organizationMeta = TrsOrganization::query()
+            ->select(['id', 'name', 'groub_id'])
+            ->whereIn('id', $fixedBusinessUnitIds)
+            ->get()
+            ->keyBy('id');
+
+        $rows = TrsBusinessStrategy::query()
+            ->select([
+                'id',
+                'business_unit',
+                'maximazing_value',
+                'expand',
+                'low_carbon',
+            ])
+            ->with([
+                'businessUnit' => fn ($query) => $query->select(['id', 'name', 'groub_id']),
+            ])
+            ->whereIn('business_unit', $fixedBusinessUnitIds)
+            ->get()
+            ->sortBy(function (TrsBusinessStrategy $strategy) use ($fixedBusinessUnits): int {
+                return (int) ($fixedBusinessUnits
+                    ->firstWhere('id', (int) ($strategy->business_unit ?? 0))['order'] ?? PHP_INT_MAX);
+            })
+            ->map(fn (TrsBusinessStrategy $strategy): array => $this->mapRowForMapping(
+                $strategy,
+                $fixedBusinessUnits->firstWhere('id', (int) ($strategy->business_unit ?? 0)) ?? [],
+                $organizationMeta->get((int) ($strategy->business_unit ?? 0))
+            ))
+            ->values();
+
+        return [
+            'groups' => $this->buildGroups($rows)->all(),
+            'strategyColumns' => $this->getStrategyColumns($strategyMetadata['strategy_columns']),
+            'organizationOptions' => $this->buildOrganizationOptions(),
+        ];
+    }
+
+    /**
+     * Lightweight row mapping for the mapping tab — no initiative loading.
+     */
+    private function mapRowForMapping(
+        TrsBusinessStrategy $strategy,
+        array $businessUnitConfig = [],
+        ?TrsOrganization $organization = null
+    ): array
+    {
+        $groupMeta = $this->resolveGroupMeta($organization?->groub_id ?? $strategy->businessUnit?->groub_id);
+        $businessUnitId = (int) ($strategy->business_unit ?? 0);
+        $values = collect(self::STRATEGY_COLUMNS)
+            ->mapWithKeys(fn (array $column): array => [
+                $column['key'] => $this->normalizeValue($strategy->{$column['key']} ?? null),
+            ])
+            ->all();
+
+        return [
+            'id' => (int) $strategy->id,
+            'business_unit_id' => $businessUnitId,
+            'business_unit' => trim((string) ($businessUnitConfig['label'] ?? $strategy->businessUnit?->name ?? 'Business Unit tidak ditemukan')),
+            'group_key' => $groupMeta['key'],
+            'group_label' => $groupMeta['label'],
+            'values' => $values,
+        ];
+    }
+
     public function createStrategy(array $payload): TrsBusinessStrategy
     {
         $strategy = TrsBusinessStrategy::query()->create($this->normalizePayload($payload));

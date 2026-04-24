@@ -1,6 +1,6 @@
 <template>
     <component :is="pageContainer" v-bind="pageContainerProps">
-        <div class="space-y-6 animate-fade-in-up">
+        <div class="animate-fade-in-up">
             <div class="flex flex-col gap-4">
                 <!-- Action Button Row -->
                 <div class="flex items-center">

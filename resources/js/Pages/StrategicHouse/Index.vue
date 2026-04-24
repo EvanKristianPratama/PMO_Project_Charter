@@ -239,10 +239,9 @@
                             :architecture-card="architectureCard"
                             :tbc-card="tbcCard"
                             :unassigned-initiatives="unassignedInitiatives"
-                            :business-strategy-page="businessStrategyPage"
-                            :business-strategy-groups="businessStrategyGroups"
-                            :business-strategy-columns="businessStrategyColumns"
-                            :business-strategy-organization-options="businessStrategyOrganizationOptions"
+                            :mapping-business-strategy-groups="mappingBusinessStrategyGroups"
+                            :mapping-business-strategy-columns="mappingBusinessStrategyColumns"
+                            :mapping-business-strategy-organization-options="mappingBusinessStrategyOrganizationOptions"
                             :status-periods="statusPeriods"
                         />
                     </section>
@@ -471,6 +470,19 @@ const props = defineProps({
         default: () => [],
     },
     businessStrategyOrganizationOptions: {
+        type: Array,
+        default: () => [],
+    },
+    // Lightweight mapping-tab business strategy props
+    mappingBusinessStrategyGroups: {
+        type: Array,
+        default: () => [],
+    },
+    mappingBusinessStrategyColumns: {
+        type: Array,
+        default: () => [],
+    },
+    mappingBusinessStrategyOrganizationOptions: {
         type: Array,
         default: () => [],
     },
@@ -781,7 +793,7 @@ const getPropsForView = (mode) => {
     const baseProps = ["filters", "page", "roofSection", "focusBands", "coeOptions", "statusPeriods"];
     
     const viewProps = {
-        mapping: ["summary", "technologyCards", "strategyCards", "foundationCard", "architectureCard", "tbcCard", "unassignedInitiatives"],
+        mapping: ["summary", "technologyCards", "strategyCards", "foundationCard", "architectureCard", "tbcCard", "unassignedInitiatives", "mappingBusinessStrategyGroups", "mappingBusinessStrategyColumns", "mappingBusinessStrategyOrganizationOptions"],
         "business-strategy": ["businessStrategyPage", "businessStrategySummary", "businessStrategyHeaderGoals", "businessStrategyEnablerGoals", "businessStrategyGroups", "businessStrategyColumns", "businessStrategyOrganizationOptions"],
         "dual-growth": ["dualGrowthGoals"],
         "digital-transformation-initiatives": ["digitalInitiativeOptions"],

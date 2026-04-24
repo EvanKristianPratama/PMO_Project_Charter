@@ -39,6 +39,9 @@ class IndexController extends Controller
                 'architectureCard',
                 'tbcCard',
                 'unassignedInitiatives',
+                'mappingBusinessStrategyGroups',
+                'mappingBusinessStrategyColumns',
+                'mappingBusinessStrategyOrganizationOptions',
             ],
             'business-strategy' => [
                 'businessStrategyPage',
@@ -85,6 +88,9 @@ class IndexController extends Controller
                 'architectureCard',
                 'tbcCard',
                 'unassignedInitiatives',
+                'mappingBusinessStrategyGroups',
+                'mappingBusinessStrategyColumns',
+                'mappingBusinessStrategyOrganizationOptions',
             ],
         };
     }

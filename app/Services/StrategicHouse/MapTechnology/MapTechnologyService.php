@@ -21,10 +21,21 @@ class MapTechnologyService
             ->get()
             ->groupBy('coe_id');
 
-        $coeOptions = MstCoe::all()->map(fn($coe) => [
-            'id' => $coe->id,
-            'name' => $coe->name,
-        ]);
+        $mappedInitiativeIds = TrsMapTechnology::distinct()->pluck('initiative_id');
+        
+        $coeOptions = MstCoe::query()
+            ->whereIn('id', function($query) use ($mappedInitiativeIds) {
+                $query->select('coe_id')
+                    ->from('mst_initiative')
+                    ->whereIn('id', $mappedInitiativeIds)
+                    ->whereNotNull('coe_id');
+            })
+            ->orderBy('id')
+            ->get()
+            ->map(fn($coe) => [
+                'id' => $coe->id,
+                'name' => $coe->name,
+            ]);
 
         $initiativeOptions = MstInitiative::query()
             ->select(['id', 'code', 'name', 'tipe_initiative'])

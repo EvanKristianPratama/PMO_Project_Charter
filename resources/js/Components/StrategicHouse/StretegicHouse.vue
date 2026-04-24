@@ -13,19 +13,15 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
-    businessStrategyPage: {
-        type: Object,
-        default: () => ({}),
-    },
-    businessStrategyGroups: {
+    mappingBusinessStrategyGroups: {
         type: Array,
         default: () => [],
     },
-    businessStrategyColumns: {
+    mappingBusinessStrategyColumns: {
         type: Array,
         default: () => [],
     },
-    businessStrategyOrganizationOptions: {
+    mappingBusinessStrategyOrganizationOptions: {
         type: Array,
         default: () => [],
     },
@@ -161,7 +157,7 @@ const normalizeBusinessStrategyGroupKey = (value) => {
 };
 
 const businessStrategyOrganizationEntries = computed(() => {
-    return (props.businessStrategyOrganizationOptions || []).map((option) => {
+    return (props.mappingBusinessStrategyOrganizationOptions || []).map((option) => {
         const label = String(option?.label ?? '');
         const [groupLabel = ''] = label.split(' - ');
 
@@ -341,7 +337,7 @@ const initiativeHoverTitle = (initiative) => {
 
 const orderedBusinessStrategyColumns = computed(() => {
     const preferredOrder = ['maximazing_value', 'expand', 'low_carbon'];
-    const columnMap = new Map((props.businessStrategyColumns || []).map((column) => [column.key, column]));
+    const columnMap = new Map((props.mappingBusinessStrategyColumns || []).map((column) => [column.key, column]));
 
     return preferredOrder
         .map((key) => columnMap.get(key))
@@ -349,7 +345,7 @@ const orderedBusinessStrategyColumns = computed(() => {
 });
 
 const businessStrategyRows = computed(() => {
-    return (props.businessStrategyGroups || []).flatMap((group) => {
+    return (props.mappingBusinessStrategyGroups || []).flatMap((group) => {
         return (group.rows || []).map((row) => ({
             ...row,
             group_key: normalizeBusinessStrategyGroupKey(row.group_key || group.key || row.group_label || group.label),

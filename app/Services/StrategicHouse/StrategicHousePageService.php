@@ -65,6 +65,7 @@ class StrategicHousePageService
         $roofSection = Cache::remember('sh_roof_fixed', 3600, fn() => $this->getRoofSection());
 
         $mappingData = null;
+        $mappingBusinessStrategyProps = null;
         $businessStrategyProps = null;
         $initiativeSupportProps = null;
         $mapTechnologyProps = null;
@@ -75,6 +76,10 @@ class StrategicHousePageService
 
         $loadMappingData = function () use (&$mappingData, $coes, $initiativeType, $normalizedFilters): array {
             return $mappingData ??= $this->getMappingData($coes, $initiativeType, $normalizedFilters['show_empty']);
+        };
+
+        $loadMappingBusinessStrategyProps = function () use (&$mappingBusinessStrategyProps): array {
+            return $mappingBusinessStrategyProps ??= $this->businessStrategyService->getMappingProps();
         };
 
         $loadBusinessStrategyProps = function () use (&$businessStrategyProps): array {
@@ -130,6 +135,11 @@ class StrategicHousePageService
             'architectureCard' => fn() => $loadMappingData()['architectureCard'],
             'tbcCard' => fn() => $loadMappingData()['tbcCard'],
             'unassignedInitiatives' => fn() => $loadMappingData()['unassignedInitiatives'],
+
+            // Lightweight business strategy data for the mapping tab's show/hide panel
+            'mappingBusinessStrategyGroups' => fn() => $loadMappingBusinessStrategyProps()['groups'],
+            'mappingBusinessStrategyColumns' => fn() => $loadMappingBusinessStrategyProps()['strategyColumns'],
+            'mappingBusinessStrategyOrganizationOptions' => fn() => $loadMappingBusinessStrategyProps()['organizationOptions'],
 
             'businessStrategyPage' => fn() => $loadBusinessStrategyProps()['page'],
             'businessStrategySummary' => fn() => $loadBusinessStrategyProps()['summary'],
