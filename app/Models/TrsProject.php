@@ -104,7 +104,7 @@ class TrsProject extends Model
 
     public function latestPcStatusImplementation(): HasOne
     {
-        return $this->hasOne(TrsReviewPCStatusImplementation::class, 'project_id')->latestOfMany('id');
+        return $this->hasOne(TrsPcStatusImplementation::class, 'project_id')->latestOfMany('id');
     }
 
     public function mappedInitiatives(): BelongsToMany

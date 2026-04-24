@@ -42,6 +42,11 @@ class ItInitiativeRoadmapService
                         ->orderByDesc('year')
                         ->orderByDesc('updated_at')
                         ->orderByDesc('id'),
+                    'pcStatusImplementations' => fn ($pq) => $pq
+                        ->select(['id', 'project_id', 'month', 'year', 'status', 'created_at', 'updated_at'])
+                        ->orderByDesc('year')
+                        ->orderByDesc('updated_at')
+                        ->orderByDesc('id'),
                     'charters' => fn ($cq) => $cq
                         ->select(['id', 'project_id', 'version_label', 'status', 'objectives', 'duration'])
                         ->with(['statusRef:id,name', 'milestones' => fn ($mq) => $mq
@@ -68,6 +73,7 @@ class ItInitiativeRoadmapService
 
             foreach ($groupInitiatives as $initiative) {
                 $reviewStatuses = $this->collectInitiativeReviewStatuses($initiative);
+                $implementationStatuses = $this->collectInitiativeImplementationStatuses($initiative);
 
                 // Flatten all charters from all mapped projects
                 $projects = $initiative->mappedProjects
@@ -84,6 +90,7 @@ class ItInitiativeRoadmapService
                     'projects'              => $projects,
                     'implementation_status' => $this->resolveInitiativeReviewStatus($reviewStatuses, $initiative),
                     'review_statuses'       => $reviewStatuses,
+                    'implementation_statuses' => $implementationStatuses,
                 ];
             }
 
@@ -102,7 +109,7 @@ class ItInitiativeRoadmapService
         ];
     }
 
-    private function collectInitiativeReviewStatuses(MstInitiative $initiative): array
+    private function collectInitiativeReviewStatuses(mixed $initiative): array
     {
         $reviewLogs = ($initiative->mappedProjects ?? collect())
             ->flatMap(fn ($project) => $project->reviewPcStatusImplementations ?? collect())
@@ -137,7 +144,40 @@ class ItInitiativeRoadmapService
             ->all();
     }
 
-    private function resolveInitiativeReviewStatus(array $reviewStatuses, MstInitiative $initiative): ?string
+    private function collectInitiativeImplementationStatuses(mixed $initiative): array
+    {
+        $implementationLogs = ($initiative->mappedProjects ?? collect())
+            ->flatMap(fn ($project) => $project->pcStatusImplementations ?? collect())
+            ->filter();
+
+        return $implementationLogs
+            ->map(function ($log): ?array {
+                $status = trim((string) ($log?->status ?? ''));
+                $month = trim((string) ($log?->month ?? ''));
+                $year = trim((string) ($log?->year ?? ''));
+
+                if ($status === '' || $month === '' || $year === '') {
+                    return null;
+                }
+
+                return [
+                    'id' => (int) ($log?->id ?? 0),
+                    'project_id' => (int) ($log?->project_id ?? 0),
+                    'status' => $status,
+                    'month' => $month,
+                    'year' => $year,
+                    'periode_label' => trim($month . ' ' . $year),
+                    'created_at' => $log?->created_at?->toISOString(),
+                    'updated_at' => $log?->updated_at?->toISOString(),
+                ];
+            })
+            ->filter()
+            ->sort(fn (array $left, array $right) => $this->compareImplementationLogs($left, $right))
+            ->values()
+            ->all();
+    }
+
+    private function resolveInitiativeReviewStatus(array $reviewStatuses, mixed $initiative): ?string
     {
         if ($reviewStatuses !== []) {
             $latestLog = collect($reviewStatuses)->last();
@@ -174,6 +214,38 @@ class ItInitiativeRoadmapService
 
         if ($leftEndOrder !== $rightEndOrder) {
             return $leftEndOrder <=> $rightEndOrder;
+        }
+
+        $leftTimestamp = max(
+            (int) data_get($left, 'updated_at.timestamp', strtotime((string) ($left['updated_at'] ?? '')) ?: 0),
+            (int) data_get($left, 'created_at.timestamp', strtotime((string) ($left['created_at'] ?? '')) ?: 0),
+        );
+        $rightTimestamp = max(
+            (int) data_get($right, 'updated_at.timestamp', strtotime((string) ($right['updated_at'] ?? '')) ?: 0),
+            (int) data_get($right, 'created_at.timestamp', strtotime((string) ($right['created_at'] ?? '')) ?: 0),
+        );
+
+        if ($leftTimestamp !== $rightTimestamp) {
+            return $leftTimestamp <=> $rightTimestamp;
+        }
+
+        return (int) ($left['id'] ?? $left?->id ?? 0) <=> (int) ($right['id'] ?? $right?->id ?? 0);
+    }
+
+    private function compareImplementationLogs(mixed $left, mixed $right): int
+    {
+        $leftYear = (int) ($left['year'] ?? $left?->year ?? 0);
+        $rightYear = (int) ($right['year'] ?? $right?->year ?? 0);
+
+        if ($leftYear !== $rightYear) {
+            return $leftYear <=> $rightYear;
+        }
+
+        $leftMonthOrder = $this->monthOrderValue($left['month'] ?? $left?->month ?? null);
+        $rightMonthOrder = $this->monthOrderValue($right['month'] ?? $right?->month ?? null);
+
+        if ($leftMonthOrder !== $rightMonthOrder) {
+            return $leftMonthOrder <=> $rightMonthOrder;
         }
 
         $leftTimestamp = max(
