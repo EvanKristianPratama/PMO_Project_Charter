@@ -24,13 +24,18 @@ class ActivityLogService
             /** @var User|null $user */
             $user = $actor ?? Auth::user();
 
+            $key = $subject?->getKey();
+            if (is_array($key)) {
+                $key = implode('-', $key);
+            }
+
             ActivityLog::create([
                 'user_id' => $user?->id,
                 'user_name' => $user?->name,
                 'user_email' => $user?->email,
                 'event' => $event,
                 'subject_type' => $subject ? get_class($subject) : null,
-                'subject_id' => $subject?->getKey(),
+                'subject_id' => $key,
                 'subject_label' => $subject ? static::resolveSubjectLabel($subject) : null,
                 'description' => $description,
                 'properties' => $properties,
@@ -72,6 +77,11 @@ class ActivityLogService
             }
         }
 
-        return class_basename(get_class($subject)).' #'.$subject->getKey();
+        $key = $subject->getKey();
+        if (is_array($key)) {
+            $key = implode('-', $key);
+        }
+
+        return class_basename(get_class($subject)).' #'.$key;
     }
 }

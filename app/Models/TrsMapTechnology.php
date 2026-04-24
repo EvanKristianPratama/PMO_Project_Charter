@@ -26,6 +26,16 @@ class TrsMapTechnology extends Model
         return $this->primaryKey;
     }
 
+    public function getKey()
+    {
+        $keys = (array) $this->getKeyName();
+        $values = [];
+        foreach ($keys as $key) {
+            $values[] = $this->getAttribute($key);
+        }
+        return implode('-', $values);
+    }
+
     protected function setKeysForSaveQuery($query)
     {
         foreach ($this->getKeyName() as $keyName) {

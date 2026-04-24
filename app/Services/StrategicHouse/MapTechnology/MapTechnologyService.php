@@ -5,7 +5,6 @@ namespace App\Services\StrategicHouse\MapTechnology;
 use App\Models\MstInitiative;
 use App\Models\MstCoe;
 use App\Models\TrsMapTechnology;
-use Illuminate\Support\Collection;
 
 class MapTechnologyService
 {
@@ -28,7 +27,8 @@ class MapTechnologyService
         ]);
 
         $initiativeOptions = MstInitiative::query()
-            ->select(['id', 'code', 'name'])
+            ->select(['id', 'code', 'name', 'tipe_initiative'])
+            ->where('tipe_initiative', 2)
             ->orderBy('code')
             ->get();
 

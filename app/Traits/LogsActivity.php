@@ -63,7 +63,12 @@ trait LogsActivity
             }
         }
 
-        return class_basename(get_class($model)).' #'.$model->getKey();
+        $key = $model->getKey();
+        if (is_array($key)) {
+            $key = implode('-', $key);
+        }
+
+        return class_basename(get_class($model)).' #'.$key;
     }
 
     private static function filterAuditFields(self $model, array $dirty): array
