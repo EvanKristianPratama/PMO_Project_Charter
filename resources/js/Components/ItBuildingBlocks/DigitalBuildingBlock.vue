@@ -135,6 +135,9 @@ const getInitiativePeriodLabel = (initiative) => {
 
 const organizationOptions = computed(() => {
     const orgMap = new Map();
+    if (!Array.isArray(props.items)) {
+        return [];
+    }
     props.items.forEach(ini => {
         const org = ini.business_unit;
         if (org && org !== '-') {
@@ -161,6 +164,9 @@ const organizationOptions = computed(() => {
 
 const sourceOptions = computed(() => {
     const sourceMap = new Map();
+    if (!Array.isArray(props.items)) {
+        return [];
+    }
     props.items.forEach(ini => {
         const id = ini.source;
         let name = ini.source_name;
@@ -196,6 +202,10 @@ const sourceOptions = computed(() => {
 const displayGroups = computed(() => {
     const coeMap = new Map();
     const UNIDENTIFIED = 'CoE Not Identified';
+
+    if (!Array.isArray(props.items)) {
+        return [];
+    }
 
     props.items.forEach(initiative => {
         const isDigitalInitiative = Number(initiative.tipe_initiative) === 1;
@@ -297,6 +307,9 @@ const buildInitiativeColumns = (initiatives = [], columnCount = initiativeColumn
 
 const availableCoeOptions = computed(() => {
     const coeSet = new Set();
+    if (!Array.isArray(props.items)) {
+        return [];
+    }
     props.items.forEach(ini => {
         const name = normalizeCoeName(ini.coe_name || ini.coe?.name);
         if (name) coeSet.add(name);
@@ -323,6 +336,9 @@ const availableCoeOptions = computed(() => {
 
 const availableStatusOptions = computed(() => {
     const statusSet = new Set();
+    if (!Array.isArray(props.items)) {
+        return [];
+    }
     props.items.forEach(ini => {
         (ini.statuses || []).forEach(s => {
             const label = normalizeStatusLabel(s.status);
@@ -420,7 +436,7 @@ const statusLegend = computed(() => {
 
 <template>
     <div class="space-y-4">
-        <div v-if="displayGroups.length > 0" class="space-y-4">
+        <div v-show="displayGroups.length > 0" class="space-y-4">
             <!-- Legend & Overall Total -->
             <div class="space-y-2.5">
                 <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -594,8 +610,8 @@ const statusLegend = computed(() => {
                                         '--row-count': buildInitiativeColumns(group.holdingInitiatives, Math.max(1, Math.floor(initiativeColumnCount / 2))).rowCount
                                     }">
                                         <component :is="initiativeSummaryHref(initiative) ? Link : 'div'"
-                                            v-for="initiative in buildInitiativeColumns(group.holdingInitiatives, Math.max(1, Math.floor(initiativeColumnCount / 2))).items"
-                                            :key="initiative.id" 
+                                            v-for="(initiative, idx) in buildInitiativeColumns(group.holdingInitiatives, Math.max(1, Math.floor(initiativeColumnCount / 2))).items"
+                                            :key="`hold-${initiative.id}-${idx}`" 
                                             :href="initiativeSummaryHref(initiative)"
                                             :title="initiativeSummaryTitle(initiative)"
                                             class="initiative-box group" :class="[
@@ -631,8 +647,8 @@ const statusLegend = computed(() => {
                                         '--row-count': buildInitiativeColumns(group.subHoldingInitiatives, Math.max(1, Math.ceil(initiativeColumnCount / 2))).rowCount
                                     }">
                                         <component :is="initiativeSummaryHref(initiative) ? Link : 'div'"
-                                            v-for="initiative in buildInitiativeColumns(group.subHoldingInitiatives, Math.max(1, Math.ceil(initiativeColumnCount / 2))).items"
-                                            :key="initiative.id" 
+                                            v-for="(initiative, idx) in buildInitiativeColumns(group.subHoldingInitiatives, Math.max(1, Math.ceil(initiativeColumnCount / 2))).items"
+                                            :key="`sub-${initiative.id}-${idx}`" 
                                             :href="initiativeSummaryHref(initiative)"
                                             :title="initiativeSummaryTitle(initiative)"
                                             class="initiative-box group" :class="[
@@ -667,7 +683,7 @@ const statusLegend = computed(() => {
             </section>
         </div>
 
-        <section v-else
+        <section v-show="displayGroups.length === 0"
             class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-white/15 dark:bg-[#171717]">
             <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Tidak ada data inisiatif untuk kriteria
                 ini.</p>

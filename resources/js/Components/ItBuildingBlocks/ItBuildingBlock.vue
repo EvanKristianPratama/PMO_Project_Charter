@@ -74,6 +74,9 @@ const selectedPeriod = ref('latest');
 
 const organizationOptions = computed(() => {
     const orgMap = new Map();
+    if (!Array.isArray(props.items)) {
+        return [];
+    }
     props.items.forEach(ini => {
         const org = ini.business_unit;
         if (org && org !== '-') {
@@ -99,6 +102,9 @@ const monthsOrder = [
 
 const availablePeriods = computed(() => {
     const periodSet = new Set();
+    if (!Array.isArray(props.items)) {
+        return [];
+    }
     props.items.forEach(initiative => {
         if (initiative.statuses && Array.isArray(initiative.statuses)) {
             initiative.statuses.forEach(s => {
@@ -177,6 +183,11 @@ const statusLegend = computed(() => {
     });
     stats['Other'] = 0;
 
+    // Ensure props.items is an array before iterating
+    if (!Array.isArray(props.items)) {
+        return [];
+    }
+
     // Kalkulasi status berdasarkan seluruh inisiatif di periode yang dipilih (tanpa filter status)
     props.items.forEach((initiative) => {
         if (Number(initiative.tipe_initiative) !== 2) return;
@@ -216,6 +227,10 @@ const totalOverallInitiatives = computed(() => {
 const displayGroups = computed(() => {
     const coeMap = new Map();
     const UNIDENTIFIED = 'CoE Not Identified';
+
+    if (!Array.isArray(props.items)) {
+        return [];
+    }
 
     // 1. Grouping dan Filter
     props.items.forEach(initiative => {
@@ -413,8 +428,7 @@ const getCoeColorClass = (coeName) => {
             </div>
 
             <!-- Table Matrix or Empty State -->
-            <template v-if="displayGroups.length > 0">
-                <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+            <section v-show="displayGroups.length > 0" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                     <div class="overflow-x-auto">
                         <h1 class="text-center text-l font-bold mt-4 mb-4 ">IT Initiative bases on IT Building Blocks</h1>
                         <table class="itb-table min-w-full border-collapse" :class="`itb-table--${initiativeColumnCount}-cols`">
@@ -441,8 +455,8 @@ const getCoeColorClass = (coeName) => {
                                         }">
                                             <component
                                                 :is="initiativeLinkHref(initiative) ? Link : 'div'"
-                                                v-for="initiative in buildInitiativeColumns(group.initiatives).items"
-                                                :key="initiative.id"
+                                                v-for="(initiative, idx) in buildInitiativeColumns(group.initiatives).items"
+                                                :key="`ini-${initiative.id}-${idx}`"
                                                 :href="initiativeLinkHref(initiative)"
                                                 :title="initiativeLinkTitle(initiative)"
                                                 class="initiative-box group"
@@ -476,9 +490,8 @@ const getCoeColorClass = (coeName) => {
                         </table>
                     </div>
                 </section>
-            </template>
 
-            <section v-else class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-white/15 dark:bg-[#171717]">
+            <section v-show="displayGroups.length === 0" class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-white/15 dark:bg-[#171717]">
                 <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Initiative Not Available</p>
             </section>
         </div>

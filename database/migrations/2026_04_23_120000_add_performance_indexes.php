@@ -6,32 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
-    {
-        Schema::table('mst_initiative', function (Blueprint $table) {
-            $table->index('tipe_initiative');
-            $table->index('business_unit');
-            $table->index('source');
-            $table->index('coe_id');
-        });
-
-        Schema::table('initiative_tagging', function (Blueprint $table) {
-            $table->index('initiative_id');
-            $table->index('theme_id');
-        });
-
-        Schema::table('trs_initiative_support', function (Blueprint $table) {
-            $table->index('digital_initiative_id');
-            $table->index('it_initiative_id');
-        });
-
-        Schema::table('trs_map_it_building', function (Blueprint $table) {
-            $table->index('primary');
-            $table->index('secondary');
-            $table->index('initiative_id');
-        });
-    }
-
     public function down(): void
     {
         Schema::table('mst_initiative', function (Blueprint $table) {
@@ -55,6 +29,32 @@ return new class extends Migration
             $table->dropIndex(['primary']);
             $table->dropIndex(['secondary']);
             $table->dropIndex(['initiative_id']);
+        });
+    }
+
+    public function up(): void
+    {
+        Schema::table('mst_initiative', function (Blueprint $table) {
+            $table->index('tipe_initiative');
+            $table->index('business_unit');
+            $table->index('source');
+            $table->index('coe_id');
+        });
+
+        Schema::table('initiative_tagging', function (Blueprint $table) {
+            $table->index('initiative_id');
+            $table->index('theme_id');
+        });
+
+        Schema::table('trs_initiative_support', function (Blueprint $table) {
+            $table->index('digital_initiative_id');
+            $table->index('it_initiative_id');
+        });
+
+        Schema::table('trs_map_it_building', function (Blueprint $table) {
+            $table->index('primary');
+            $table->index('secondary');
+            $table->index('initiative_id');
         });
     }
 };

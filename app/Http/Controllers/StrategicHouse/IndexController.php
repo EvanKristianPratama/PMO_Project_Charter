@@ -21,9 +21,80 @@ class IndexController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        return Inertia::render(
-            'StrategicHouse/Index',
-            $this->strategicHousePageService->getPageProps($request->filters())
-        );
+        $filters = $request->filters();
+        $selectedProps = $this->getPropsForView($filters['view'] ?? 'mapping');
+        $props = $this->strategicHousePageService->getPageProps($filters, $selectedProps);
+
+        return Inertia::render('StrategicHouse/Index', $props);
+    }
+
+    private function getPropsForView(string $view): array
+    {
+        return match ($view) {
+            'mapping' => [
+                'summary',
+                'technologyCards',
+                'strategyCards',
+                'foundationCard',
+                'architectureCard',
+                'tbcCard',
+                'unassignedInitiatives',
+            ],
+            'business-strategy' => [
+                'businessStrategyPage',
+                'businessStrategySummary',
+                'businessStrategyHeaderGoals',
+                'businessStrategyEnablerGoals',
+                'businessStrategyGroups',
+                'businessStrategyColumns',
+                'businessStrategyOrganizationOptions',
+            ],
+            'dual-growth' => ['dualGrowthGoals'],
+            'digital-transformation-initiatives' => ['digitalInitiativeOptions'],
+            'it-building-blocs' => ['itBuildingBlockMatrix', 'itInitiativeOptions'],
+            'it-initiatives' => ['itInitiativeOptions'],
+            'initiative-support' => ['initiativeSupportGroups', 'initiativeSupportDigitalOptions', 'initiativeSupportItOptions'],
+            'map-technology' => ['mapTechnologies', 'mapTechnologyCoeOptions', 'mapTechnologyInitiativeOptions'],
+            'initiative-relation' => ['mstInitiatives', 'initiativeRelations', 'modelRelationOptions', 'typeRelationOptions'],
+            'roadmap' => [
+                'itRoadmapGroups',
+                'itRoadmapStartYear',
+                'itRoadmapEndYear',
+                'itRoadmapTotalCount',
+                'itRoadmapMilestoneTypeOptions',
+                'digitalRoadmapGroups',
+                'digitalRoadmapStartYear',
+                'digitalRoadmapEndYear',
+            ],
+            'strategic-pillars' => [
+                'strategicPillars',
+                'allGoals',
+                'taggings',
+                'allInitiatives',
+                'allThemes',
+                'matrixInitiatives',
+                'allOrganizations',
+                'pilarOptions',
+                'pillarFilters',
+            ],
+            default => [
+                'summary',
+                'technologyCards',
+                'strategyCards',
+                'foundationCard',
+                'architectureCard',
+                'tbcCard',
+                'unassignedInitiatives',
+            ],
+        };
+    }
+
+    private function getCacheKey(array $filters): string
+    {
+        // Sort keys to ensure deterministic key regardless of filter order
+        ksort($filters);
+        $filterString = http_build_query($filters);
+
+        return 'strategic_house_props:' . md5($filterString);
     }
 }

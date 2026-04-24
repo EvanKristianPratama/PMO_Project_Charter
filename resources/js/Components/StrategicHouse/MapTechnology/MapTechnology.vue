@@ -178,7 +178,7 @@ const processedInitiatives = computed(() => {
             if (!initiativeMap.has(ini.id)) {
                 initiativeMap.set(ini.id, {
                     id: ini.id,
-                    code: ini.code,
+                    code: String(ini.code ?? ''),
                     name: ini.name,
                     primary_coe: ini.coe,
                     primary_coe_id: ini.coe_id,
@@ -202,9 +202,9 @@ const processedInitiatives = computed(() => {
     });
 
     return Array.from(initiativeMap.values()).sort((a, b) => {
-        const coeCompare = (a.primary_coe?.name || '').localeCompare(b.primary_coe?.name || '');
+        const coeCompare = String(a.primary_coe?.name ?? '').localeCompare(String(b.primary_coe?.name ?? ''));
         if (coeCompare !== 0) return coeCompare;
-        return (a.code || '').localeCompare(b.code || '');
+        return String(a.code ?? '').localeCompare(String(b.code ?? ''));
     });
 });
 

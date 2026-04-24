@@ -408,8 +408,8 @@
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
-import { Link } from "@inertiajs/vue3";
+import { computed, ref, onMounted } from "vue";
+import { Link, useRemember } from "@inertiajs/vue3";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/vue/24/outline";
 import AllInitiativeRoadmapContent from "@/Components/StrategicHouse/RoadMap/AllInitiativeRoadmapContent.vue";
 import ItInitiativeRoadmapContent from "@/Components/StrategicHouse/RoadMap/ItInitiativeRoadmapContent.vue";
@@ -620,12 +620,62 @@ const getInitialViewMode = () => {
     if (urlParams.has("model_relasi")) {
         return "initiative-relation";
     }
-    return "mapping";
+    return null; // Let useRemember decide if no URL params
 };
 
-const viewMode = ref(getInitialViewMode());
-const showEnabler = ref(false);
 const roadmapModes = new Set(["it", "digital", "all"]);
+
+const getInitialRoadmapMode = () => {
+    if (typeof window === "undefined") return "it";
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const requestedMode = urlParams.get("roadmap");
+
+    return requestedMode && roadmapModes.has(requestedMode)
+        ? requestedMode
+        : null; // Let useRemember decide if no URL params
+};
+
+// Use Inertia's useRemember to cache state client-side
+const viewMode = useRemember(getInitialViewMode() || "mapping", "StrategicHouse/viewMode");
+const roadmapMode = useRemember(getInitialRoadmapMode() || "it", "StrategicHouse/roadmapMode");
+const showEnabler = useRemember(false, "StrategicHouse/showEnabler");
+
+// Sync URL on mount if useRemember restored a value that isn't in URL
+onMounted(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasViewParam = urlParams.has('view');
+    const hasRoadmapParam = urlParams.has('roadmap');
+
+    if (!hasViewParam && viewMode.value !== 'mapping') {
+        router.reload({
+            data: {
+                ...props.filters,
+                view: viewMode.value,
+            },
+            only: getPropsForView(viewMode.value),
+            preserveState: true,
+            preserveScroll: true,
+        });
+        return;
+    }
+
+    if (!hasRoadmapParam && roadmapMode.value !== 'it') {
+        router.reload({
+            data: {
+                ...props.filters,
+                roadmap: roadmapMode.value,
+            },
+            only: getPropsForView('roadmap'),
+            preserveState: true,
+            preserveScroll: true,
+        });
+        return;
+    }
+
+    syncViewModeInUrl(viewMode.value);
+    syncRoadmapModeInUrl(roadmapMode.value);
+});
 
 const allRoadmapStartYear = computed(() =>
     Math.min(
@@ -640,19 +690,6 @@ const allRoadmapEndYear = computed(() =>
         Number(props.digitalRoadmapEndYear) || 2029,
     ),
 );
-
-const getInitialRoadmapMode = () => {
-    if (typeof window === "undefined") return "it";
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const requestedMode = urlParams.get("roadmap");
-
-    return requestedMode && roadmapModes.has(requestedMode)
-        ? requestedMode
-        : "it";
-};
-
-const roadmapMode = ref(getInitialRoadmapMode());
 
 const syncViewModeInUrl = (mode) => {
     if (typeof window === "undefined") return;
@@ -670,9 +707,42 @@ const syncRoadmapModeInUrl = (mode) => {
     window.history.replaceState({}, "", url.toString());
 };
 
+import { router } from "@inertiajs/vue3";
+
 const setViewMode = (mode) => {
     viewMode.value = mode;
     syncViewModeInUrl(mode);
+
+    // Reliable partial reload using router.reload
+    router.reload({
+        data: { 
+            ...props.filters,
+            view: mode 
+        },
+        only: getPropsForView(mode),
+        preserveState: true,
+        preserveScroll: true,
+    });
+};
+
+const getPropsForView = (mode) => {
+    const baseProps = ["filters", "page", "roofSection", "focusBands", "coeOptions", "statusPeriods"];
+    
+    const viewProps = {
+        mapping: ["summary", "technologyCards", "strategyCards", "foundationCard", "architectureCard", "tbcCard", "unassignedInitiatives"],
+        "business-strategy": ["businessStrategyPage", "businessStrategySummary", "businessStrategyHeaderGoals", "businessStrategyEnablerGoals", "businessStrategyGroups", "businessStrategyColumns", "businessStrategyOrganizationOptions"],
+        "dual-growth": ["dualGrowthGoals"],
+        "digital-transformation-initiatives": ["digitalInitiativeOptions"],
+        "it-building-blocs": ["itBuildingBlockMatrix", "itInitiativeOptions"],
+        "it-initiatives": ["itInitiativeOptions"],
+        "initiative-support": ["initiativeSupportGroups", "initiativeSupportDigitalOptions", "initiativeSupportItOptions"],
+        "map-technology": ["mapTechnologies", "mapTechnologyCoeOptions", "mapTechnologyInitiativeOptions"],
+        "initiative-relation": ["mstInitiatives", "initiativeRelations", "modelRelationOptions"],
+        "roadmap": ["itRoadmapGroups", "itRoadmapStartYear", "itRoadmapEndYear", "itRoadmapTotalCount", "itRoadmapMilestoneTypeOptions", "digitalRoadmapGroups", "digitalRoadmapStartYear", "digitalRoadmapEndYear"],
+        "strategic-pillars": ["strategicPillars", "allGoals", "taggings", "allInitiatives", "allThemes", "matrixInitiatives", "allOrganizations", "pilarOptions", "pillarFilters"],
+    };
+
+    return [...baseProps, ...(viewProps[mode] || [])];
 };
 
 const setRoadmapMode = (mode) => {

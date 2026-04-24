@@ -24,19 +24,73 @@ class StrategicPillarPageService
         ],
     ];
 
-    public function getPageProps(?string $goalId, ?string $organizationId, ?string $pilarId, int $initiativeType = 1): array
+    public function getPageProps(?string $goalId, ?string $organizationId, ?string $pilarId, int $initiativeType = 1, ?Collection $providedInitiatives = null): array
     {
         $selectedPilar = $this->normalizePilar($pilarId);
+        $pillars = $this->getStrategicPillars($selectedPilar);
+        
+        $allInitiatives = $providedInitiatives ?? MstInitiative::query()
+            ->select('id', 'code', 'name', 'description', 'business_unit', 'tipe_initiative', 'source')
+            ->with([
+                'organization:id,name', 
+                'latestStatusImplementation:id,initiative_id,review_status', 
+                'taggings:id,initiative_id,pilar,goal,themes_id'
+            ])
+            ->orderBy('code')
+            ->get();
 
         return [
-            'strategicPillars' => fn () => $this->getStrategicPillars($selectedPilar),
+            'strategicPillars' => $pillars,
             'taggings' => fn () => $this->getTaggings($selectedPilar, $initiativeType),
             'filters' => $this->getFilters($goalId, $organizationId, $selectedPilar),
-            'allGoals' => fn () => $this->getAllGoals($selectedPilar),
+            'allGoals' => $pillars->map(fn (Goal $goal): array => [
+                'id' => $goal->id,
+                'code' => $goal->code,
+                'title' => $goal->title,
+                'pilar' => $goal->pilar,
+            ]),
             'allOrganizations' => fn () => $this->getAllOrganizations(),
-            'allInitiatives' => fn () => $this->getAllInitiatives(),
-            'allThemes' => fn () => $this->getAllThemes($selectedPilar),
-            'matrixInitiatives' => fn () => $this->getMatrixInitiatives($selectedPilar, $initiativeType),
+            'allInitiatives' => $allInitiatives->map(fn (MstInitiative $initiative): array => [
+                'id' => (int) $initiative->id,
+                'code' => $initiative->code,
+                'name' => $initiative->name,
+                'description' => $initiative->description,
+                'tipe_initiative' => (int) $initiative->tipe_initiative,
+                'source' => $initiative->source ? (int) $initiative->source : null,
+                'implementation_status' => $initiative->latestStatusImplementation?->review_status,
+                'organization' => $initiative->organization
+                    ? ['id' => $initiative->organization->id, 'name' => $initiative->organization->name]
+                    : null,
+            ])->values(),
+            'allThemes' => $pillars->flatMap(fn (Goal $goal) => collect($goal->themes)->map(fn ($theme): array => [
+                'id' => $theme->id,
+                'name' => $theme->name,
+                'theme_number' => $theme->theme_number,
+                'idGoal' => $theme->idGoal,
+                'goal' => [
+                    'id' => $goal->id,
+                    'code' => $goal->code,
+                    'title' => $goal->title,
+                    'pilar' => $goal->pilar,
+                ],
+            ])),
+            'matrixInitiatives' => $allInitiatives
+                ->where('tipe_initiative', $initiativeType)
+                ->filter(fn (MstInitiative $initiative): bool => $initiative->taggings->contains(function (InitiativeTagging $tagging) use ($selectedPilar): bool {
+                    if ($selectedPilar === self::DEFAULT_PILAR) {
+                        return (string) $tagging->pilar === self::DEFAULT_PILAR || is_null($tagging->pilar);
+                    }
+                    return (string) $tagging->pilar === $selectedPilar;
+                }))
+                ->map(fn (MstInitiative $initiative): array => [
+                    'id' => (int) $initiative->id,
+                    'code' => $initiative->code,
+                    'name' => $initiative->name,
+                    'description' => $initiative->description,
+                    'source' => $initiative->source ? (int) $initiative->source : null,
+                    'implementation_status' => $initiative->latestStatusImplementation?->review_status,
+                ])
+                ->values(),
             'pilarOptions' => $this->getPilarOptions(),
         ];
     }
@@ -81,17 +135,6 @@ class StrategicPillarPageService
         return $query->get();
     }
 
-    public function getAllGoals(string $pilarId): Collection
-    {
-        $query = Goal::query()
-            ->select('id', 'code', 'title', 'pilar')
-            ->orderBy('code');
-
-        $this->applyGoalPilarFilter($query, $pilarId);
-
-        return $query->get();
-    }
-
     public function getAllOrganizations(): Collection
     {
         return TrsOrganization::query()
@@ -99,63 +142,6 @@ class StrategicPillarPageService
             ->select('id', 'name')
             ->orderBy('name')
             ->get();
-    }
-
-    public function getAllInitiatives(): Collection
-    {
-        return MstInitiative::query()
-            ->select('id', 'code', 'name', 'description', 'business_unit', 'tipe_initiative', 'source')
-            ->with(['organization:id,name', 'latestStatusImplementation'])
-            ->orderBy('code')
-            ->get()
-            ->map(fn (MstInitiative $initiative): array => [
-                'id' => $initiative->id,
-                'code' => $initiative->code,
-                'name' => $initiative->name,
-                'description' => $initiative->description,
-                'tipe_initiative' => $initiative->tipe_initiative,
-                'source' => $initiative->source ? (int) $initiative->source : null,
-                'implementation_status' => $initiative->latestStatusImplementation?->review_status,
-                'organization' => $initiative->organization
-                    ? ['id' => $initiative->organization->id, 'name' => $initiative->organization->name]
-                    : null,
-            ])
-            ->values();
-    }
-
-    public function getAllThemes(string $pilarId): Collection
-    {
-        return Theme::query()
-            ->with('goal:id,code,title,pilar')
-            ->select('id', 'name', 'theme_number', 'idGoal')
-            ->whereHas('goal', function ($query) use ($pilarId): void {
-                $this->applyGoalPilarFilter($query, $pilarId);
-            })
-            ->orderBy('idGoal')
-            ->orderBy('theme_number')
-            ->get();
-    }
-
-    public function getMatrixInitiatives(string $pilarId, int $initiativeType = 1): Collection
-    {
-        return MstInitiative::query()
-            ->select('id', 'code', 'name', 'description', 'source')
-            ->with('latestStatusImplementation')
-            ->where('tipe_initiative', $initiativeType)
-            ->whereHas('taggings', function ($query) use ($pilarId): void {
-                $this->applyTaggingPilarFilter($query, $pilarId);
-            })
-            ->orderBy('code')
-            ->get()
-            ->map(fn (MstInitiative $initiative): array => [
-                'id' => $initiative->id,
-                'code' => $initiative->code,
-                'name' => $initiative->name,
-                'description' => $initiative->description,
-                'source' => $initiative->source ? (int) $initiative->source : null,
-                'implementation_status' => $initiative->latestStatusImplementation?->review_status,
-            ])
-            ->values();
     }
 
     public function getPilarOptions(): array

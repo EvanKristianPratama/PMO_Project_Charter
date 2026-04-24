@@ -19,6 +19,7 @@ class IndexRequest extends FormRequest
             'pilar' => ['nullable', 'string'],
             'goal_id' => ['nullable', 'integer'],
             'org_id' => ['nullable', 'integer'],
+            'view' => ['nullable', 'string', 'in:mapping,business-strategy,dual-growth,digital-transformation-initiatives,it-building-blocs,it-initiatives,map-technology,initiative-relation,initiative-support,roadmap,strategic-pillars'],
         ];
     }
 
@@ -34,6 +35,7 @@ class IndexRequest extends FormRequest
             'pilar' => $this->input('pilar'),
             'goal_id' => $this->input('goal_id'),
             'org_id' => $this->input('org_id'),
+            'view' => $this->input('view'),
         ];
     }
 }

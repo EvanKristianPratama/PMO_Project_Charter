@@ -79,10 +79,10 @@ class BusinessStrategyService
         ],
     ];
 
-    public function getPageProps(): array
+    public function getPageProps(?Collection $providedInitiatives = null): array
     {
         $strategyMetadata = $this->getStrategyMetadata();
-        $initiativesByBusinessUnit = $this->getInitiativesByBusinessUnit();
+        $initiativesByBusinessUnit = $this->getInitiativesByBusinessUnit($providedInitiatives);
         $fixedBusinessUnits = collect(self::FIXED_BUSINESS_UNITS);
         $fixedBusinessUnitIds = $fixedBusinessUnits->pluck('id')->all();
         $organizationMeta = TrsOrganization::query()
@@ -217,11 +217,11 @@ class BusinessStrategyService
         ];
     }
 
-    private function getInitiativesByBusinessUnit(): Collection
+    private function getInitiativesByBusinessUnit(?Collection $providedInitiatives = null): Collection
     {
         $fixedBusinessUnitIds = collect(self::FIXED_BUSINESS_UNITS)->pluck('id')->all();
 
-        return MstInitiative::query()
+        $initiatives = $providedInitiatives ?? MstInitiative::query()
             ->select([
                 'id',
                 'business_unit',
@@ -233,30 +233,16 @@ class BusinessStrategyService
             ])
             ->with([
                 'sourceData:id,name',
-                'latestStatusImplementation' => fn ($query) => $query->select([
-                    'trs_status_implementation.id',
-                    'trs_status_implementation.initiative_id',
-                    'trs_status_implementation.review_status',
-                ]),
-                'statusImplementations' => fn ($query) => $query->select([
-                    'trs_status_implementation.id',
-                    'trs_status_implementation.initiative_id',
-                    'trs_status_implementation.start',
-                    'trs_status_implementation.end',
-                    'trs_status_implementation.year',
-                    'trs_status_implementation.review_status',
-                ]),
-                'taggings' => fn ($query) => $query->select([
-                    'id',
-                    'initiative_id',
-                    'goal',
-                    'pilar',
-                    'themes_id',
-                ])->where('pilar', '2'),
+                'latestStatusImplementation:id,initiative_id,review_status',
+                'statusImplementations:id,initiative_id,start,end,year,review_status',
+                'taggings:id,initiative_id,goal,pilar,themes_id',
             ])
             ->whereNotNull('business_unit')
             ->whereIn('business_unit', $fixedBusinessUnitIds)
-            ->get()
+            ->get();
+
+        return $initiatives
+            ->filter(fn (MstInitiative $initiative) => in_array((int)$initiative->business_unit, $fixedBusinessUnitIds))
             ->groupBy(fn (MstInitiative $initiative): int => (int) ($initiative->business_unit ?? 0))
             ->map(function (Collection $initiatives): array {
                 return $initiatives

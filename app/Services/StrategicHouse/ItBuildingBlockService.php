@@ -22,9 +22,10 @@ class ItBuildingBlockService
             ]);
     }
 
-    public function getItInitiativeOptions(): Collection
+    public function getItInitiativeOptions(?Collection $providedInitiatives = null): Collection
     {
-        return MstInitiative::query()
+        // Always query directly to ensure fresh data
+        $initiatives = MstInitiative::query()
             ->with([
                 'coe:id,name',
                 'organization:id,name,groub_id',
@@ -50,8 +51,11 @@ class ItBuildingBlockService
             ->where('tipe_initiative', 2)
             ->orderBy('code')
             ->orderBy('name')
-            ->get(['id', 'code', 'name', 'description', 'coe_id', 'business_unit', 'tipe_initiative', 'source'])
-            ->map(function (MstInitiative $initiative): array {
+            ->get(['id', 'code', 'name', 'description', 'coe_id', 'business_unit', 'tipe_initiative', 'source']);
+
+        return $initiatives->map(function (MstInitiative $initiative): array {
+            // ... (rest of the mapping logic remains same)
+
                 $latestStatus = $initiative->mappedProjects
                     ->flatMap(fn ($project) => $project->pcStatusImplementations)
                     ->sortByDesc(fn ($status) => $status->year
@@ -115,13 +119,14 @@ class ItBuildingBlockService
             ]);
     }
 
-    public function getDigitalInitiativeOptions(): Collection
+    public function getDigitalInitiativeOptions(?Collection $providedInitiatives = null): Collection
     {
-        return MstInitiative::query()
+        // Always query directly to ensure fresh data
+        $initiatives = MstInitiative::query()
             ->with([
                 'coe:id,name',
                 'organization:id,name,groub_id',
-                'latestStatusImplementation:trs_status_implementation.id,trs_status_implementation.initiative_id,trs_status_implementation.review_status',
+                'latestStatusImplementation',
                 'statusImplementations:id,initiative_id,start,end,year,review_status',
                 'sourceData:id,name',
                 'mappedProjects:id',
@@ -129,8 +134,10 @@ class ItBuildingBlockService
             ->where('tipe_initiative', 1)
             ->orderBy('code')
             ->orderBy('name')
-            ->get(['id', 'code', 'name', 'description', 'coe_id', 'business_unit', 'tipe_initiative', 'source'])
-            ->map(fn (MstInitiative $initiative): array => [
+            ->get(['id', 'code', 'name', 'description', 'coe_id', 'business_unit', 'tipe_initiative', 'source']);
+
+        return $initiatives->map(fn (MstInitiative $initiative): array => [
+
                 'id' => (int) $initiative->id,
                 'code' => $initiative->code,
                 'name' => $initiative->name,
