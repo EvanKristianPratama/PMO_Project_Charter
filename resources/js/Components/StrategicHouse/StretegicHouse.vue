@@ -209,13 +209,13 @@ const filterGitsInitiatives = (initiatives) => {
     if (!initiatives) return [];
 
     return initiatives.filter((ini) => {
-        // Source filter is specifically ignored for GITS section
+        // Source and Business Unit filters are specifically ignored for GITS section
         const periodStatus = getInitiativeStatus(ini);
         const implStatus = normalizeStatusLabel(periodStatus);
         const matchesStatus = !selectedStatus.value || implStatus === selectedStatus.value;
         const matchesPeriod = !selectedPeriod.value || periodStatus !== null;
 
-        return matchesSelectedBusinessUnit(ini) && matchesStatus && matchesPeriod;
+        return matchesStatus && matchesPeriod;
     });
 };
 
