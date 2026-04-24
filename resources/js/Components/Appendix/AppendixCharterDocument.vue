@@ -199,7 +199,7 @@ const getLevelLabel = (type) => {
                     </div>
                 </div>
                 <div class="score-column border-r border-[#3b82f6]">
-                    <div class="bar-sub-mini text-center">Ease</div>
+                    <div class="bar-sub-mini text-center">Easy</div>
                     <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
                         <select v-if="editable" v-model="form.ease" class="score-select">
                             <option v-for="opt in scoreOptions" :key="opt.value" :value="opt.value">{{ opt.label }}
@@ -452,7 +452,7 @@ const getLevelLabel = (type) => {
         <!-- Ease of Implementation -->
         <div class="flex flex-col">
             <div class="bg-[#1e4f8f] px-3 py-1.5 text-[12px] font-bold text-white flex items-center justify-start gap-2">
-                <span>Ease of Implementation</span>
+                <span>Easy of Implementation</span>
                 <span v-if="getLevelLabel('ease')" :class="['px-2 py-0.5 rounded-full text-[10px] font-extrabold tracking-wider', getLevelColorClass(getLevelLabel('ease'))]">
                     {{ getLevelLabel('ease') }}
                 </span>

@@ -60,19 +60,6 @@ const mapSourceCreated = (source) => {
     return '-';
 };
 
-const isGoalPillarOne = (tag) => {
-    const theme = tag?.theme ?? tag?.themes ?? null;
-    const goal = theme?.goal ?? null;
-
-    return [
-        goal?.pilar,
-        goal?.id,
-        theme?.idGoal,
-        tag?.pilar,
-        tag?.goal,
-    ].some((value) => normalizeNumericValue(value) === 1);
-};
-
 const mappedInitiatives = computed(() => {
     let source = props.initiative?.mapped_initiatives ?? props.initiative?.mappedInitiatives;
     
@@ -141,57 +128,10 @@ const headerMeta = computed(() => {
         sources: joinValues(sources),
     };
 });
-
-const mappedInitiativeGoals = computed(() => {
-    let source = props.initiative?.mapped_initiatives ?? props.initiative?.mappedInitiatives;
-    
-    if (!source && props.initiative) {
-        source = [props.initiative];
-    }
-    
-    const list = Array.isArray(source) ? source : [];
-
-    return list.flatMap((mi) => {
-        const taggings = Array.isArray(mi.taggings)
-            ? mi.taggings
-            : Array.isArray(mi.initiative_taggings)
-                ? mi.initiative_taggings
-                : [];
-
-        return taggings
-            .filter((tag) => {
-                const hasTheme = !!(tag.theme ?? tag.themes ?? tag.themes_id);
-                const hasGoal = !!(tag.goal && String(tag.goal).trim() !== '');
-
-                // If only pilar is present, it's considered incomplete/not available
-                if (!hasTheme && !hasGoal) return false;
-
-                return isGoalPillarOne(tag);
-            })
-            .map((tag) => {
-                const theme = tag.theme ?? tag.themes ?? null;
-                const goal = theme?.goal ?? null;
-
-                // Reference: AppendixCharterDocument.vue rjppDisplayLabel logic
-                const goalCode = String(goal?.code ?? theme?.code ?? theme?.goal_code ?? tag.goal ?? '-').trim().replace(/#/g, '');
-                const strategicPillar = String(goal?.title ?? theme?.strategic_pillar ?? theme?.goal ?? theme?.strategic_pillar_title ?? '-').trim();
-                const themeCode = String(theme?.theme_number ?? theme?.theme_code ?? theme?.code ?? '-').trim().replace(/#/g, '');
-                const themeName = String(theme?.name ?? theme?.theme_name ?? theme?.themes ?? '-').trim();
-
-                return {
-                    initiativeCode: String(mi.code ?? '').trim().replace(/#/g, ''),
-                    goal: goalCode,
-                    strategicPillar: strategicPillar,
-                    themeCode: themeCode,
-                    themeName: themeName,
-                };
-            });
-    });
-});
 </script>
 
 <template>
-    <article class="charter-sheet mx-auto w-full max-w-[1200px] bg-white text-slate-900 shadow-sm print:shadow-none">
+    <div class="charter-header-wrap bg-white text-slate-900 border border-slate-200">
         <!-- Header -->
         <div class="border-b border-slate-200 px-5 pb-3 pt-5">
             <div class="flex flex-wrap items-start justify-between gap-4">
@@ -228,46 +168,14 @@ const mappedInitiativeGoals = computed(() => {
                 <span class="info-value">{{ headerMeta.sources }}</span>
             </div>
         </div>
-
-        <!-- Master Initiative Goal -->
-        <div class="charter-section">
-            <article class="panel border-t-0">
-                <div class="bar-sub">Master Initiative Goal</div>
-                <div class="panel-body space-y-3">
-                    <div class="table-wrap">
-                        <table class="initiative-table">
-                            <thead>
-                                <tr>
-                                    <th class="w-[45px] text-center">Goal</th>
-                                    <th class="text-center">Strategic Pillar Title</th>
-                                    <th colspan="2" class="text-center">Themes</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-if="!mappedInitiativeGoals.length">
-                                    <td colspan="4" class="empty-row text-center">Goal Not Available</td>
-                                </tr>
-                                <tr v-for="(goal, index) in mappedInitiativeGoals" :key="`goal-${index}`">
-                                    <td class="cell-center">{{ goal.goal }}</td>
-                                    <td>{{ goal.strategicPillar }}</td>
-                                    <td class="cell-center">{{ goal.themeCode }}</td>
-                                    <td>{{ goal.themeName }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </article>
-        </div>
-    </article>
+    </div>
 </template>
 
 <style scoped>
-.charter-sheet {
+.charter-header-wrap {
     font-family: "Segoe UI", Arial, sans-serif;
     font-size: 13px;
     color: #1a1a1a;
-    border: 1px solid #ccc;
 }
 
 .info-bar {
@@ -308,10 +216,6 @@ const mappedInitiativeGoals = computed(() => {
     flex-shrink: 0;
 }
 
-.info-label-dark {
-    background: #2e6ea2;
-}
-
 .info-sep {
     width: 0;
     border-right: 1px solid #aac4e0;
@@ -324,100 +228,6 @@ const mappedInitiativeGoals = computed(() => {
     align-items: center;
     flex: 1;
     min-width: 0;
-}
-
-.charter-section {
-    padding: 0;
-    border-top: 1px solid #ddd;
-}
-
-.bar-main {
-    background: #1e4f8f;
-    color: #fff;
-    padding: 7px 12px;
-    font-size: 14px;
-    font-weight: 700;
-    line-height: 1.2;
-}
-
-.bar-sub {
-    background: #2e6ea2;
-    color: #fff;
-    padding: 5px 10px;
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 1.2;
-}
-
-.panel {
-    border: 1px solid #1e4f8f;
-    border-radius: 0;
-    background: transparent;
-}
-
-.panel-body {
-    padding: 10px;
-    background: #fff;
-    font-size: 12px;
-}
-
-.table-wrap {
-    overflow-x: auto;
-    border: 1px solid #cbd5e1;
-}
-
-.initiative-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-}
-
-.initiative-table th,
-.initiative-table td {
-    border: 1px solid #cbd5e1;
-    padding: 8px 10px;
-    vertical-align: middle;
-}
-
-.initiative-table th {
-    background: #eff6ff;
-    color: #1e3a8a;
-    font-size: 11px;
-    font-weight: 700;
-    text-align: left;
-}
-
-.cell-center {
-    text-align: center;
-    white-space: nowrap;
-}
-
-.empty-row {
-    text-align: center;
-    color: #94a3b8;
-    font-style: italic;
-}
-
-@media print {
-    @page {
-        size: A4 landscape;
-        margin: 8mm;
-    }
-
-    .charter-sheet {
-        width: 100%;
-        max-width: none;
-        border: none;
-        box-shadow: none;
-    }
-
-    .panel-body {
-        background: #fff !important;
-    }
-
-    .table-wrap {
-        overflow: visible;
-    }
 }
 
 @media (max-width: 768px) {

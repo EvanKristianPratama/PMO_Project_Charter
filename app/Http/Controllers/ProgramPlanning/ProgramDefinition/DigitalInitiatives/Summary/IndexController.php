@@ -5,7 +5,7 @@ namespace App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiati
 use App\Http\Controllers\Controller;
 use App\Models\MstCoe;
 use App\Models\MstInitiative;
-use App\Models\MstScSource;
+use App\Models\DataSource;
 use App\Models\Theme;
 use App\Models\TrsMasterMilestone;
 use App\Models\TrsOrganization;
@@ -187,7 +187,7 @@ class IndexController extends Controller
 
         // 4. Options
         $coeOptions = MstCoe::orderBy('name')->get(['id', 'name'])->values();
-        $sourceOptions = MstScSource::orderBy('name')->get(['id', 'name', 'month', 'year'])->map(fn ($s) => [
+        $sourceOptions = DataSource::orderBy('name')->get(['id', 'name', 'month', 'year'])->map(fn ($s) => [
             'id' => $s->id,
             'name' => $s->name,
             'month' => $this->getMonthName($s->month),
@@ -216,7 +216,7 @@ class IndexController extends Controller
         // Options used in MasterInitiative Mapping resolving.
         $initiativeOptionsQuery = MstInitiative::where('tipe_initiative', 1)
             ->with([
-                'taggings',
+                'taggings' => fn ($q) => $q->whereNotNull('themes_id')->orWhereNotNull('goal'),
                 'coe:id,name',
                 'organization:id,name,groub_id',
                 'organization.groub:id,name',
@@ -247,6 +247,7 @@ class IndexController extends Controller
                 'organization:id,name,groub_id',
                 'organization.groub:id,name',
                 'sourceData:id,name,month,year,created_at',
+                'taggings' => fn ($q) => $q->whereNotNull('themes_id')->orWhereNotNull('goal'),
                 'taggings.theme:id,idGoal,theme_number,name',
                 'taggings.theme.goal:id,code,title',
             ]),

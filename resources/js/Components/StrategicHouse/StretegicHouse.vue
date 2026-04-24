@@ -123,12 +123,25 @@ const statusLegend = computed(() => {
         stats[label] = 0;
     });
 
+    const dtiFilter = (ini) => {
+        const matchesSource = selectedSource.value === 'all' || ini.source == selectedSource.value;
+        const periodStatus = getInitiativeStatus(ini);
+        const matchesPeriod = !selectedPeriod.value || periodStatus !== null;
+        return matchesSource && matchesSelectedBusinessUnit(ini) && matchesPeriod;
+    };
+
+    const gitsFilter = (ini) => {
+        const periodStatus = getInitiativeStatus(ini);
+        const matchesPeriod = !selectedPeriod.value || periodStatus !== null;
+        return matchesPeriod;
+    };
+
     const allInitiatives = [
-        ...props.technologyCards.flatMap(c => c.initiatives || []),
-        ...props.strategyCards.flatMap(c => c.initiatives || []),
-        ...(props.foundationCard?.initiatives || []),
-        ...(props.architectureCard?.initiatives || []),
-        ...props.unassignedInitiatives,
+        ...props.technologyCards.flatMap(c => (c.initiatives || []).filter(dtiFilter)),
+        ...props.strategyCards.flatMap(c => (c.initiatives || []).filter(gitsFilter)),
+        ...(props.foundationCard?.initiatives || []).filter(gitsFilter),
+        ...(props.architectureCard?.initiatives || []).filter(gitsFilter),
+        ...(props.unassignedInitiatives || []).filter(dtiFilter),
     ];
 
     allInitiatives.forEach((initiative) => {
