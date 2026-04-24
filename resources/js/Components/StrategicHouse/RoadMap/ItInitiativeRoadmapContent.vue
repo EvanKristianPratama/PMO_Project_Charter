@@ -70,7 +70,7 @@ const selectedReviewStatus = ref("Total");
 const selectedPeriod = ref("");
 const selectedOrganization = ref("");
 
-/* ── Year / Quarter grid ─────────────────────────────── */
+/* ── Year / Month grid ─────────────────────────────── */
 const years = computed(() =>
     Array.from(
         { length: props.endYear - props.startYear + 1 },
@@ -78,13 +78,13 @@ const years = computed(() =>
     ),
 );
 
-const quarterCells = computed(() =>
+const monthCells = computed(() =>
     years.value.flatMap((y) =>
-        [1, 2, 3, 4].map((q) => ({ year: y, quarter: q })),
+        Array.from({ length: 12 }, (_, month) => ({ year: y, month: month + 1 })),
     ),
 );
 
-const totalCells = computed(() => quarterCells.value.length);
+const totalCells = computed(() => monthCells.value.length);
 
 const organizationFilterMode = computed(() => props.filterMode === "organization");
 
@@ -102,25 +102,31 @@ function resolveInitiativeDuration(initiative) {
 
 /* ── Helpers ─────────────────────────────────────────── */
 
-/** Convert a date string (YYYY-MM-...) to a quarter index relative to startYear. */
-function toQIdx(value) {
+/** Convert a date string (YYYY-MM-...) to a month index relative to startYear. */
+function toMonthIdx(value) {
     if (!value) return null;
     const m = String(value).match(/^(\d{4})-(\d{2})/);
     if (!m) return null;
     const year  = parseInt(m[1], 10);
     const month = parseInt(m[2], 10) - 1;
-    const raw   = (year - props.startYear) * 4 + Math.floor(month / 3);
+    const raw   = (year - props.startYear) * 12 + month;
     return Math.max(0, Math.min(raw, totalCells.value - 1));
 }
 
-function monthToQuarterIndex(monthName) {
-    const monthIndex = monthsOrder.indexOf(String(monthName ?? "").trim());
+function monthToIndex(monthValue) {
+    const rawValue = String(monthValue ?? "").trim();
 
-    if (monthIndex < 0) {
-        return null;
+    if (!rawValue) {
+        return -1;
     }
 
-    return Math.floor(monthIndex / 3);
+    const numericValue = Number(rawValue);
+
+    if (Number.isInteger(numericValue) && numericValue >= 1 && numericValue <= 12) {
+        return numericValue - 1;
+    }
+
+    return monthsOrder.indexOf(rawValue);
 }
 
 /**
@@ -178,6 +184,66 @@ function statusMarkerColor(status) {
     );
 }
 
+function firstNonEmptyValue(...values) {
+    for (const value of values) {
+        const normalized = String(value ?? "").trim();
+        if (normalized !== "") {
+            return normalized;
+        }
+    }
+
+    return "";
+}
+
+function buildReviewMarkerFromLog(log) {
+    if (!log) {
+        return null;
+    }
+
+    const monthValue = firstNonEmptyValue(log.end, log.month, log.start);
+    const year = Number(log.year ?? 0);
+    const monthIndex = monthToIndex(monthValue);
+
+    if (!Number.isFinite(year) || monthIndex < 0) {
+        return null;
+    }
+
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
+
+    if (year > currentYear || (year === currentYear && monthIndex > currentMonth)) {
+        return null;
+    }
+
+    const anchorIndex = Math.max(
+        0,
+        Math.min((year - props.startYear) * 12 + monthIndex, totalCells.value - 1),
+    );
+
+    return {
+        anchorIndex,
+        color: statusMarkerColor(log.status ?? log.review_status),
+        label: log.periode_label ?? [monthValue, year].filter(Boolean).join(" "),
+        statusLabel: normalizeStatusLabel(log.status ?? log.review_status),
+    };
+}
+
+function resolveReviewMarkerOffset(reviewMarker, cell) {
+    const anchorIndex = Number(reviewMarker?.anchorIndex);
+    const cellStart = Number(cell?.startIndex);
+    const cellEnd = Number(cell?.endIndex);
+
+    if (!Number.isFinite(anchorIndex) || !Number.isFinite(cellStart) || !Number.isFinite(cellEnd)) {
+        return 50;
+    }
+
+    const span = Math.max(1, cellEnd - cellStart + 1);
+    const relativeIndex = Math.max(0, Math.min(anchorIndex - cellStart, span - 1));
+
+    return ((relativeIndex + 0.5) / span) * 100;
+}
+
 /* ── Roadmap layer visibility ────────────────────────── */
 function isRoadmapLayerVisible(layerKey) {
     return visibleRoadmapLayers.value.includes(layerKey);
@@ -228,8 +294,46 @@ const availableOrganizations = computed(() => {
 
 /* ── Range computation ───────────────────────────────── */
 
-/** Compute the quarter-index range that covers all milestones in `projects`. */
-function getRange(projects, statusFilter) {
+/**
+ * Compute the single-cell month index from the latest review_statuses entry.
+ * The bar is pinned to the `end` month (or `start` if no `end`) of the review period.
+ * All initiatives with the same end month+year will be perfectly aligned.
+ */
+function getRangeFromReviewStatuses(reviewStatuses) {
+    if (!Array.isArray(reviewStatuses) || reviewStatuses.length === 0) return null;
+
+    // Use the last (latest) review status entry
+    const latest = reviewStatuses[reviewStatuses.length - 1];
+    if (!latest) return null;
+
+    const endMonthName  = firstNonEmptyValue(latest.end, latest.start);
+    const startMonthName = firstNonEmptyValue(latest.start, latest.end);
+    const year          = parseInt(String(latest.year ?? ""), 10);
+
+    if (!Number.isFinite(year)) return null;
+
+    // Resolve end month index (0-based within year)
+    const endMonthIdx   = endMonthName   ? monthsOrder.indexOf(endMonthName)   : -1;
+    const startMonthIdx = startMonthName ? monthsOrder.indexOf(startMonthName) : -1;
+
+    const resolvedEndIdx   = endMonthIdx   >= 0 ? endMonthIdx   : (startMonthIdx >= 0 ? startMonthIdx : -1);
+    const resolvedStartIdx = startMonthIdx >= 0 ? startMonthIdx : resolvedEndIdx;
+
+    if (resolvedEndIdx < 0) return null;
+
+    const cellEnd   = Math.max(0, Math.min((year - props.startYear) * 12 + resolvedEndIdx,   totalCells.value - 1));
+    const cellStart = Math.max(0, Math.min((year - props.startYear) * 12 + resolvedStartIdx, totalCells.value - 1));
+
+    return { start: Math.min(cellStart, cellEnd), end: Math.max(cellStart, cellEnd) };
+}
+
+/**
+ * Compute the month-index range that covers all milestones in `projects`
+ * for a given roadmap status layer (baseline | approved).
+ * This is used to determine whether a Gantt row SHOULD EXIST,
+ * keeping the original chart structure intact.
+ */
+function getMilestoneRange(projects, statusFilter) {
     if (!Array.isArray(projects) || projects.length === 0) return null;
 
     const pool = statusFilter
@@ -252,8 +356,8 @@ function getRange(projects, statusFilter) {
     let maxE = null;
 
     for (const ms of milestones) {
-        const si = toQIdx(ms.start_date ?? ms.end_date);
-        const ei = toQIdx(ms.end_date ?? ms.start_date);
+        const si = toMonthIdx(ms.start_date ?? ms.end_date);
+        const ei = toMonthIdx(ms.end_date ?? ms.start_date);
         if (si !== null && (minS === null || si < minS)) minS = si;
         if (ei !== null && (maxE === null || ei > maxE)) maxE = ei;
     }
@@ -266,7 +370,7 @@ function getRange(projects, statusFilter) {
 
 /* ── Cell builder ────────────────────────────────────── */
 
-/** Build an array of cell descriptors (gap | bar) for a given quarter range. */
+/** Build an array of cell descriptors (gap | bar) for a given month range. */
 function buildCells(range, keyPrefix = "default") {
     const total = totalCells.value;
 
@@ -277,7 +381,7 @@ function buildCells(range, keyPrefix = "default") {
             key: `${keyPrefix}-g${i}`,
             startIndex: i,
             endIndex: i,
-            endsYear: (i + 1) % 4 === 0,
+            endsYear: (i + 1) % 12 === 0,
         }));
     }
 
@@ -288,7 +392,7 @@ function buildCells(range, keyPrefix = "default") {
     let   c         = 0;
 
     while (c < safeStart) {
-        cells.push({ type: "gap", span: 1, key: `${keyPrefix}-g${c}`, startIndex: c, endIndex: c, endsYear: (c + 1) % 4 === 0 });
+        cells.push({ type: "gap", span: 1, key: `${keyPrefix}-g${c}`, startIndex: c, endIndex: c, endsYear: (c + 1) % 12 === 0 });
         c++;
     }
 
@@ -298,12 +402,12 @@ function buildCells(range, keyPrefix = "default") {
         key: `${keyPrefix}-bar-${safeStart}`,
         startIndex: safeStart,
         endIndex: safeEnd,
-        endsYear: (safeEnd + 1) % 4 === 0,
+        endsYear: (safeEnd + 1) % 12 === 0,
     });
     c = safeEnd + 1;
 
     while (c < total) {
-        cells.push({ type: "gap", span: 1, key: `${keyPrefix}-g${c}`, startIndex: c, endIndex: c, endsYear: (c + 1) % 4 === 0 });
+        cells.push({ type: "gap", span: 1, key: `${keyPrefix}-g${c}`, startIndex: c, endIndex: c, endsYear: (c + 1) % 12 === 0 });
         c++;
     }
 
@@ -314,8 +418,13 @@ function buildCells(range, keyPrefix = "default") {
  * Build the set of timeline rows for a single initiative.
  * Returns one row per visible roadmap layer that has data,
  * or a single placeholder row when no layer has data.
+ *
+ * Gantt bars are positioned based on Milestone start_date/end_date (original behavior).
+ * The review marker (plot segi4) is positioned based on the `end` month
+ * of the review_statuses entry matching the selected period, so all
+ * markers align at the same column when the same period is selected.
  */
- function buildInitiativeTimelineRows(initiative, reviewStatus = null) {
+function buildInitiativeTimelineRows(initiative, selectedPeriodValue) {
     const initiativeId = initiative?.id ?? "initiative";
     const projects     = Array.isArray(initiative?.projects) ? initiative.projects : [];
     const rows         = [];
@@ -323,7 +432,7 @@ function buildCells(range, keyPrefix = "default") {
     const roadmapRows = roadmapLegendItems
         .filter((item) => isRoadmapLayerVisible(item.key))
         .map((item) => {
-            const range = getRange(projects, item.key);
+            const range = getMilestoneRange(projects, item.key);
             if (!range) return null;
 
             return {
@@ -336,14 +445,29 @@ function buildCells(range, keyPrefix = "default") {
         })
         .filter(Boolean);
 
-    const reviewMarker = !organizationFilterMode.value && selectedPeriodRange.value
-        ? {
-            anchorIndex: selectedPeriodRange.value.anchorIndex ?? selectedPeriodRange.value.start,
-            color: statusMarkerColor(reviewStatus),
-            label: selectedPeriodRange.value.label,
-            statusLabel: normalizeStatusLabel(reviewStatus),
-        }
-        : null;
+    // Find the review log matching the selected period (not just the latest)
+    const reviewLogs = Array.isArray(initiative?.review_statuses) ? initiative.review_statuses : [];
+    const implementationLogs = Array.isArray(initiative?.implementation_statuses)
+        ? initiative.implementation_statuses
+        : [];
+
+    let matchedLog = null;
+    if (selectedPeriodValue) {
+        matchedLog = reviewLogs.findLast(
+            (item) => String(item?.period_key ?? "") === String(selectedPeriodValue),
+        ) ?? null;
+    }
+
+    // Fallback: use latest implementation log or latest review log
+    if (!matchedLog) {
+        const latestImplementationLog = implementationLogs.length > 0
+            ? implementationLogs[implementationLogs.length - 1]
+            : null;
+        const latestReviewLog = reviewLogs.length > 0 ? reviewLogs[reviewLogs.length - 1] : null;
+        matchedLog = latestImplementationLog ?? latestReviewLog;
+    }
+
+    const reviewMarker = buildReviewMarkerFromLog(matchedLog);
 
     if (reviewMarker && roadmapRows.length > 0) {
         roadmapRows[0].reviewMarker = reviewMarker;
@@ -481,41 +605,6 @@ const selectedFilterLabel = computed(() => {
     return availablePeriods.value.find((p) => p.value === selectedPeriod.value)?.label ?? "-";
 });
 
-const selectedPeriodMeta = computed(
-    () => availablePeriods.value.find((p) => p.value === selectedPeriod.value) ?? null,
-);
-
-const selectedPeriodRange = computed(() => {
-    const period = selectedPeriodMeta.value;
-
-    if (!period || organizationFilterMode.value) {
-        return null;
-    }
-
-    const year = Number(period.year ?? 0);
-    const startQuarter = monthToQuarterIndex(period.startMonth);
-    const endQuarter = monthToQuarterIndex(period.endMonth);
-
-    if (!Number.isFinite(year) || startQuarter === null) {
-        return null;
-    }
-
-    const safeEndQuarter = endQuarter ?? startQuarter;
-    const start = (year - props.startYear) * 4 + startQuarter;
-    const end = (year - props.startYear) * 4 + safeEndQuarter;
-    const anchorIndex = Math.max(
-        0,
-        Math.min(Math.floor((start + end) / 2), totalCells.value - 1),
-    );
-
-    return {
-        start: Math.min(start, end),
-        end: Math.max(start, end),
-        anchorIndex,
-        label: period.label,
-    };
-});
-
 const baseDisplayGroups = computed(() =>
     (Array.isArray(props.groups) ? props.groups : []).map((group) => {
         const initiatives = (
@@ -525,7 +614,7 @@ const baseDisplayGroups = computed(() =>
                 initiative?.organization_name ?? "",
             );
             const periodState  = resolveInitiativeStatusByPeriod(initiative, selectedPeriod.value);
-            const timelineRows = buildInitiativeTimelineRows(initiative, periodState.status);
+            const timelineRows = buildInitiativeTimelineRows(initiative, selectedPeriod.value);
 
             return {
                 ...initiative,
@@ -745,16 +834,16 @@ const reviewStatusLegendItems = computed(() => {
         >
             <table
                 class="gantt-table"
-                :style="{ '--qcount': Math.max(totalCells, 1) }"
+                :style="{ '--cellcount': Math.max(totalCells, 1) }"
             >
                 <colgroup>
                     <col class="col-coe" />
                     <col class="col-initiative" />
                     <col class="col-duration" />
                     <col
-                        v-for="(_, i) in quarterCells"
+                        v-for="(_, i) in monthCells"
                         :key="`qcol-${i}`"
-                        class="col-quarter"
+                        class="col-month"
                     />
                 </colgroup>
 
@@ -773,7 +862,7 @@ const reviewStatusLegendItems = computed(() => {
                         <th
                             v-for="year in years"
                             :key="`yr-${year}`"
-                            colspan="4"
+                            colspan="12"
                             class="th-year th-header border-l border-white/30"
                         >
                             {{ year }}
@@ -865,6 +954,7 @@ const reviewStatusLegendItems = computed(() => {
                                             :style="{
                                                 backgroundColor: timelineRow.reviewMarker.color,
                                                 boxShadow: `0 0 0 2px #ffffff, 0 0 0 3px ${timelineRow.reviewMarker.color}26`,
+                                                left: `${resolveReviewMarkerOffset(timelineRow.reviewMarker, cell)}%`,
                                             }"
                                         />
                                     </div>
@@ -1060,7 +1150,7 @@ const reviewStatusLegendItems = computed(() => {
 .col-coe        { width: 11%; }
 .col-initiative { width: 23%; }
 .col-duration   { width: 10%; }
-.col-quarter    { width: calc(40% / var(--qcount)); }
+.col-month      { width: calc(40% / var(--cellcount)); }
 
 /* ─────────────────────────────────────────────────────
    Header
@@ -1227,19 +1317,18 @@ const reviewStatusLegendItems = computed(() => {
 
 .review-marker {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    inset: 0;
     z-index: 3;
     pointer-events: none;
 }
 
 .review-marker__diamond {
-    display: block;
+    position: absolute;
+    top: 50%;
     width: 12px;
     height: 12px;
     border-radius: 2px;
-    transform: rotate(45deg);
+    transform: translate(-50%, -50%) rotate(45deg);
     box-shadow: 0 0 0 2px #ffffff, 0 0 0 3px rgba(11, 42, 138, 0.12);
 }
 
@@ -1425,7 +1514,7 @@ const reviewStatusLegendItems = computed(() => {
     .col-coe        { width: 13%; }
     .col-initiative { width: 27%; }
     .col-duration   { width: 11%; }
-    .col-quarter    { width: calc(60% / var(--qcount)); }
+    .col-month      { width: calc(60% / var(--cellcount)); }
     .ini-name       { font-size: 10px; }
     .badge          { width: 15px; height: 15px; font-size: 8px; }
     .legend-list    { gap: 8px 14px; }
@@ -1436,7 +1525,7 @@ const reviewStatusLegendItems = computed(() => {
     .col-coe              { width: 15%; }
     .col-initiative       { width: 32%; }
     .col-duration         { width: 12%; }
-    .col-quarter          { width: calc(53% / var(--qcount)); }
+    .col-month            { width: calc(53% / var(--cellcount)); }
     .legend-panel         { padding: 12px 14px; }
     .legend-item--button  { width: 100%; justify-content: space-between; }
     .legend-label         { font-size: 10px; }
