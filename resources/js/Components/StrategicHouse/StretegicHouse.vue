@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
+import { EyeIcon, EyeSlashIcon, CalendarIcon } from '@heroicons/vue/24/outline';
 import { Link } from '@inertiajs/vue3';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
 
@@ -70,6 +70,7 @@ const props = defineProps({
 const route = useRouteHelper();
 const selectedSource = ref('all');
 const showDetails = ref(true);
+const showStatusImplementation = ref(false);
 const showStrategyDetails = ref(true);
 const showBusinessStrategy = ref(false);
 const selectedBusinessUnit = ref('');
@@ -93,6 +94,8 @@ const normalizeStatusLabel = (rawStatus) => {
 };
 
 const getStatusColorClass = (status) => {
+    if (!showStatusImplementation.value) return 'status-color-neutral';
+    
     const s = normalizeStatusLabel(status);
     if (s === 'DF') return 'status-color-df';
     if (s === 'Done') return 'status-color-done';
@@ -493,6 +496,7 @@ const filteredBusinessStrategyRows = computed(() => {
 
             <!-- Status Implementation Legend -->
             <div
+                v-if="showStatusImplementation"
                 class="status-legend-panel animate-fade-in-up"
             >
                 <div class="status-legend-container">
@@ -544,6 +548,9 @@ const filteredBusinessStrategyRows = computed(() => {
                             <option value="3">Baseline RSTI 2025-2029</option>
                             <option value="4">New Initiative 2026</option>
                         </select>
+                        <button @click="showStatusImplementation = !showStatusImplementation" class="dti-toggle" :class="{ 'dti-toggle--active': !showStatusImplementation }" :title="showStatusImplementation ? 'Hide Status Implementation' : 'Show Status Implementation'">
+                            <CalendarIcon class="dti-toggle-icon" />
+                        </button>
                         <button @click="showDetails = !showDetails" class="dti-toggle" :title="showDetails ? 'Hide Filters & Counts' : 'Show Filters & Counts'">
                             <EyeIcon v-if="showDetails" class="dti-toggle-icon" />
                             <EyeSlashIcon v-else class="dti-toggle-icon" />
@@ -1876,6 +1883,13 @@ const filteredBusinessStrategyRows = computed(() => {
 .status-color-onreview { background-color: #ca8a04 !important; border: 1px solid #a16207; }
 .status-color-onprogress { background-color: #2563eb !important; border: 1px solid #1d4ed8; }
 .status-color-sh { background-color: #ef4444 !important; border: 1px solid #dc2626; }
+.status-color-neutral { background-color: #94a3b8 !important; border: 1px solid #64748b; }
+
+.dti-toggle--active {
+    background: #184f96 !important;
+    color: #ffffff !important;
+    border-color: #0d2a4a !important;
+}
 
 :deep(.dark) .status-legend-panel {
     background: #0f172a;
