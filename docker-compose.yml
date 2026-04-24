@@ -3,11 +3,24 @@ services:
     build: .
     container_name: pmo_app
     restart: unless-stopped
-    ports:
-      - "8080:80"
+
     env_file:
       - ${ENV_FILE:-.env}
+
     volumes:
       - ./.env:/var/www/html/.env
       - ./storage:/var/www/html/storage
       - ./ca.pem:/var/www/html/ca.pem:ro
+
+    networks:
+      - scos_dev
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pmo-app.rule=Host(`itsps.divusi.co.id`) && PathPrefix(`/`)"
+      - "traefik.http.routers.pmo-app.middlewares=global-response-headers@file"
+      - "traefik.http.services.pmo-app.loadbalancer.server.port=80"
+
+networks:
+  scos_dev:
+    external: true
