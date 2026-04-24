@@ -218,7 +218,17 @@
                     leave-to-class="transform opacity-0 translate-y-4"
                     mode="out-in"
                 >
-                    <section v-if="viewMode === 'mapping'" key="mapping">
+                    <!-- Loading State -->
+                    <div v-if="isLoading" key="loading">
+                        <LoadData
+                            :title="loadingTitle"
+                            message="Mohon tunggu, data sedang diproses..."
+                            :finished="dataFinished"
+                            @complete="onLoadingComplete"
+                        />
+                    </div>
+
+                    <section v-else-if="viewMode === 'mapping'" key="mapping">
                         <StretegicHouse
                             :page="page"
                             :summary="summary"
@@ -409,6 +419,7 @@
 
 <script setup>
 import { computed, ref, onMounted } from "vue";
+import LoadData from "@/Components/Loading/LoadData.vue";
 import { Link, useRemember } from "@inertiajs/vue3";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/vue/24/outline";
 import AllInitiativeRoadmapContent from "@/Components/StrategicHouse/RoadMap/AllInitiativeRoadmapContent.vue";
@@ -639,6 +650,39 @@ const getInitialRoadmapMode = () => {
 // Use Inertia's useRemember to cache state client-side
 const viewMode = useRemember(getInitialViewMode() || "mapping", "StrategicHouse/viewMode");
 const roadmapMode = useRemember(getInitialRoadmapMode() || "it", "StrategicHouse/roadmapMode");
+
+// Loading state
+const isLoading = ref(true);
+const dataFinished = ref(false);
+
+const onLoadingComplete = () => {
+    isLoading.value = false;
+};
+
+const startLoading = () => {
+    isLoading.value = true;
+    dataFinished.value = false;
+};
+
+// Human-readable tab labels for loading title
+const viewModeLabels = {
+    mapping: 'Strategic House',
+    'business-strategy': 'Business Strategy',
+    'dual-growth': 'Dual Growth Strategy',
+    'digital-transformation-initiatives': 'Digital Transformation Initiatives',
+    'it-building-blocs': 'IT Building Blocks',
+    'it-initiatives': 'IT Initiatives',
+    'map-technology': 'Map Technology',
+    'initiative-relation': 'Initiative Relations',
+    'initiative-support': 'Initiative Support',
+    roadmap: 'Roadmap',
+    'strategic-pillars': 'Strategic Pillars',
+};
+
+const loadingTitle = computed(() => {
+    const label = viewModeLabels[viewMode.value] || 'Data';
+    return `Memuat ${label}`;
+});
 const showEnabler = useRemember(false, "StrategicHouse/showEnabler");
 
 // Sync URL on mount if useRemember restored a value that isn't in URL
@@ -648,6 +692,7 @@ onMounted(() => {
     const hasRoadmapParam = urlParams.has('roadmap');
 
     if (!hasViewParam && viewMode.value !== 'mapping') {
+        startLoading();
         router.reload({
             data: {
                 ...props.filters,
@@ -656,11 +701,13 @@ onMounted(() => {
             only: getPropsForView(viewMode.value),
             preserveState: true,
             preserveScroll: true,
+            onFinish: () => { dataFinished.value = true; },
         });
         return;
     }
 
     if (!hasRoadmapParam && roadmapMode.value !== 'it') {
+        startLoading();
         router.reload({
             data: {
                 ...props.filters,
@@ -669,10 +716,13 @@ onMounted(() => {
             only: getPropsForView('roadmap'),
             preserveState: true,
             preserveScroll: true,
+            onFinish: () => { dataFinished.value = true; },
         });
         return;
     }
 
+    // Data already present from initial page load
+    isLoading.value = false;
     syncViewModeInUrl(viewMode.value);
     syncRoadmapModeInUrl(roadmapMode.value);
 });
@@ -712,6 +762,7 @@ import { router } from "@inertiajs/vue3";
 const setViewMode = (mode) => {
     viewMode.value = mode;
     syncViewModeInUrl(mode);
+    startLoading();
 
     // Reliable partial reload using router.reload
     router.reload({
@@ -722,6 +773,7 @@ const setViewMode = (mode) => {
         only: getPropsForView(mode),
         preserveState: true,
         preserveScroll: true,
+        onFinish: () => { dataFinished.value = true; },
     });
 };
 

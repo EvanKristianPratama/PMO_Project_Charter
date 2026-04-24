@@ -149,6 +149,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    selectedCoeId: {
+        type: [String, Number],
+        default: '',
+    },
 });
 
 const techColumns = [
@@ -207,7 +211,14 @@ const processedInitiatives = computed(() => {
 });
 
 const filteredInitiatives = computed(() => {
-    return processedInitiatives.value.map(ini => {
+    let initiatives = processedInitiatives.value;
+
+    // Filter by CoE if selected
+    if (props.selectedCoeId) {
+        initiatives = initiatives.filter(ini => ini.primary_coe_id == props.selectedCoeId);
+    }
+
+    return initiatives.map(ini => {
         const newTechMappings = new Set(ini.tech_mappings);
 
         // Remove pending deletions
