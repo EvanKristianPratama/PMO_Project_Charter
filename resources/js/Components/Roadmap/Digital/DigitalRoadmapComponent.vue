@@ -452,6 +452,7 @@ const buildLaneCells = (initiativeKey, laneIndex, items) => {
     font-weight: 700;
     line-height: 1.3;
     vertical-align: middle;
+    text-align: center;
     white-space: normal;
     overflow: visible;
     text-overflow: clip;

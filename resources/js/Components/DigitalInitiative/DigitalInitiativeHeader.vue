@@ -62,11 +62,11 @@ const mapSourceCreated = (source) => {
 
 const mappedInitiatives = computed(() => {
     let source = props.initiative?.mapped_initiatives ?? props.initiative?.mappedInitiatives;
-    
+
     if (!source && props.initiative) {
         source = [props.initiative];
     }
-    
+
     const list = Array.isArray(source) ? source : [];
 
     return list.map((mi) => {
@@ -133,16 +133,34 @@ const getScoreLabel = (type) => {
     const source = props.initiative;
     if (!source) return '-';
 
-    // 1. Try to find direct label
-    const label = source[`${type}_label`] ?? source.appendix_data?.[`${type}_label`] ?? source.project_charter?.[`${type}_label`];
-    if (label && String(label).trim() !== '') return label;
+    // Define potential data paths based on DigitalCharterDocument and AppendixCharterDocument structures
+    const paths = [
+        source,
+        source.appendix_data,
+        source.appendixData,
+        source.project_charter,
+        source.projectCharter,
+        source.charter,
+    ];
 
-    // 2. Try to map numeric value
-    const val = source[type] ?? source.appendix_data?.[type] ?? source.project_charter?.[type];
-    const numeric = normalizeNumericValue(val);
-    if (numeric === 1) return 'High';
-    if (numeric === 2) return 'Medium';
-    if (numeric === 3) return 'Low';
+    // 1. Try to find direct label (e.g., value_label, valueLabel)
+    for (const p of paths) {
+        if (!p) continue;
+        const label = p[`${type}_label`] ?? p[`${type}Label`];
+        if (label && String(label).trim() !== '' && label !== '-') {
+            return String(label).trim();
+        }
+    }
+
+    // 2. Try to map numeric value (1=High, 2=Medium, 3=Low)
+    for (const p of paths) {
+        if (!p) continue;
+        const val = p[type];
+        const numeric = normalizeNumericValue(val);
+        if (numeric === 1) return 'High';
+        if (numeric === 2) return 'Medium';
+        if (numeric === 3) return 'Low';
+    }
 
     return '-';
 };
@@ -153,10 +171,43 @@ const headerScores = computed(() => ({
     ease: getScoreLabel('ease'),
     resource: getScoreLabel('resource'),
 }));
+
+const getLevelColorClass = (label) => {
+    if (!label) return 'hidden';
+    const l = String(label).toLowerCase();
+    if (l === 'high') return 'bg-emerald-500 text-white';
+    if (l === 'medium') return 'bg-orange-500 text-white';
+    if (l === 'low') return 'bg-rose-500 text-white';
+    return 'bg-slate-400 text-white';
+};
+
+const getLongText = (key) => {
+    const source = props.initiative;
+    if (!source) return '-';
+
+    const paths = [
+        source,
+        source.appendix_data,
+        source.appendixData,
+        source.project_charter,
+        source.projectCharter,
+        source.charter,
+    ];
+
+    for (const p of paths) {
+        if (!p) continue;
+        const val = p[key];
+        if (val && String(val).trim() !== '' && val !== '-') {
+            return String(val).trim();
+        }
+    }
+
+    return '-';
+};
 </script>
 
 <template>
-    <div class="charter-header-wrap bg-white text-slate-900 border border-slate-200">
+    <div class="charter-header-wrap bg-white text-slate-900 border border-[#3b82f6] shadow-sm">
         <!-- Header -->
         <div class="border-b border-slate-200 px-5 pb-3 pt-5">
             <div class="flex flex-wrap items-start justify-between gap-4">
@@ -177,25 +228,25 @@ const headerScores = computed(() => ({
                 <div class="score-panel">
                     <div class="score-column border-r border-[#3b82f6]">
                         <div class="bar-sub-mini text-center">Value</div>
-                        <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
+                        <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900 font-bold">
                             {{ headerScores.value }}
                         </div>
                     </div>
                     <div class="score-column border-r border-[#3b82f6]">
                         <div class="bar-sub-mini text-center">Urgency</div>
-                        <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
+                        <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900 font-bold">
                             {{ headerScores.urgency }}
                         </div>
                     </div>
                     <div class="score-column border-r border-[#3b82f6]">
                         <div class="bar-sub-mini text-center">Easy</div>
-                        <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
+                        <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900 font-bold">
                             {{ headerScores.ease }}
                         </div>
                     </div>
                     <div class="score-column">
                         <div class="bar-sub-mini text-center">Resource</div>
-                        <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
+                        <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900 font-bold">
                             {{ headerScores.resource }}
                         </div>
                     </div>
@@ -219,6 +270,51 @@ const headerScores = computed(() => ({
                 <span class="info-label">Data Source</span>
                 <span class="info-sep"></span>
                 <span class="info-value">{{ headerMeta.sources }}</span>
+            </div>
+        </div>
+
+        <!-- Additional Info: Value & Urgency Rationale -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 border-t border-[#3b82f6]">
+            <!-- Value Indication Detail -->
+            <div class="flex flex-col lg:border-r lg:border-[#3b82f6]">
+                <div class="bg-[#1e4f8f] px-3 py-1.5 text-[12px] font-bold text-white flex items-center justify-start gap-2">
+                    <span>Value Indication</span>
+                </div>
+                <div class="flex-1 flex flex-col divide-y divide-[#3b82f6] bg-white text-[11px] text-slate-600">
+                    <div class="flex flex-1">
+                        <div class="bg-[#2e6ea2] w-28 shrink-0 px-2 py-1.5 font-bold text-white border-r border-[#3b82f6] flex items-center">Rationale</div>
+                        <div class="px-2 py-1.5 flex-1">
+                            <p class="whitespace-pre-line break-words">{{ getLongText('value_rationale') }}</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-1">
+                        <div class="bg-[#2e6ea2] w-28 shrink-0 px-2 py-1.5 font-bold text-white border-r border-[#3b82f6] flex items-center">Metrics Impacted</div>
+                        <div class="px-2 py-1.5 flex-1">
+                            <p class="whitespace-pre-line break-words">{{ getLongText('value_matrics') }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Urgency Detail -->
+            <div class="flex flex-col">
+                <div class="bg-[#1e4f8f] px-3 py-1.5 text-[12px] font-bold text-white flex items-center justify-start gap-2">
+                    <span>Urgency</span>    
+                </div>
+                <div class="flex-1 flex flex-col divide-y divide-[#3b82f6] bg-white text-[11px] text-slate-600">
+                    <div class="flex flex-1">
+                        <div class="bg-[#2e6ea2] w-28 shrink-0 px-2 py-1.5 font-bold text-white border-r border-[#3b82f6] flex items-center">Rationale</div>
+                        <div class="px-2 py-1.5 flex-1">
+                            <p class="whitespace-pre-line break-words">{{ getLongText('urgency_rationale') }}</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-1">
+                        <div class="bg-[#2e6ea2] w-28 shrink-0 px-2 py-1.5 font-bold text-white border-r border-[#3b82f6] flex items-center text-[10px] leading-tight">Expected Go-Live</div>
+                        <div class="px-2 py-1.5 flex-1">
+                            <p class="whitespace-pre-line break-words">{{ getLongText('urgency_expected') }}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

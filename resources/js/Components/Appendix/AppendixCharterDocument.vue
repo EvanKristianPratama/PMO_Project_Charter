@@ -411,7 +411,7 @@ const getLevelLabel = (type) => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div> 
 
         <!-- Urgency -->
         <div class="flex flex-col border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">

@@ -54,25 +54,25 @@ const signOthers = computed(() => {
             <div class="score-panel">
                 <div class="score-column border-r border-[#3b82f6]">
                     <div class="bar-sub-mini text-center">Value</div>
-                    <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
+                    <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900 font-bold">
                         {{ initiative.value_label ?? '-' }}
                     </div>
                 </div>
                 <div class="score-column border-r border-[#3b82f6]">
                     <div class="bar-sub-mini text-center">Urgency</div>
-                    <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
+                    <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900 font-bold">
                         {{ initiative.urgency_label ?? '-' }}
                     </div>
                 </div>
                 <div class="score-column border-r border-[#3b82f6]">
                     <div class="bar-sub-mini text-center">Easy</div>
-                    <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
+                    <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900 font-bold">
                         {{ initiative.ease_label ?? '-' }}
                     </div>
                 </div>
                 <div class="score-column">
                     <div class="bar-sub-mini text-center">Resource</div>
-                    <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
+                    <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900 font-bold">
                         {{ initiative.resource_label ?? '-' }}
                     </div>
                 </div>

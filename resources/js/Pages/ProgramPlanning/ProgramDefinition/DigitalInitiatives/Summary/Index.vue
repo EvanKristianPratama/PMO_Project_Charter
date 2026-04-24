@@ -129,9 +129,8 @@
 
 
                 <!-- Digital Initiative Header -->
-                <DigitalInitiativeHeader v-if="initiativeMaster" :initiative="initiativeMaster"
+                <DigitalInitiativeHeader v-if="unifiedInitiative" :initiative="unifiedInitiative"
                     class="overflow-hidden" />
-
                 <div class="flex items-center gap-2 px-1">
                     <div class="h-6 w-1 rounded-full bg-blue-600"></div>
                     <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Status Implementation</h2>
@@ -144,8 +143,8 @@
                             <th class="px-4 py-3">Start</th>
                             <th class="px-4 py-3">End</th>
                             <th class="px-4 py-3">Year</th>
-                            <th class="px-4 py-3">Review Status</th>
                             <th class="px-4 py-3">Current PIC</th>
+                            <th class="px-4 py-3">Review Status</th>
                             <th class="px-4 py-3">Status Updated</th>
                         </tr>
                     </thead>
@@ -155,13 +154,13 @@
                             <td class="px-4 py-3">{{ impl.start || '-' }}</td>
                             <td class="px-4 py-3">{{ impl.end || '-' }}</td>
                             <td class="px-4 py-3 font-medium">{{ impl.year || '-' }}</td>
+                            <td class="px-4 py-3">{{ impl.pic || '-' }}</td>
                             <td class="px-4 py-3">
                                 <span
                                     class="inline-flex rounded-full bg-blue-100 px-2.5 py-0.5 text-[10px] font-medium text-blue-800 dark:bg-blue-500/20 dark:text-blue-300">
                                     {{ impl.review_status || '-' }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3">{{ impl.current_pic || '-' }}</td>
                             <td class="px-4 py-3">{{ impl.status_updated || '-' }}</td>
                         </tr>
                         <tr v-if="!statusImplementations || !statusImplementations.length">
@@ -171,6 +170,14 @@
                         </tr>
                     </tbody>
                 </table>
+
+                <div class="flex items-center gap-2 px-1">
+                    <div class="h-6 w-1 rounded-full bg-purple-600"></div>
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Digital Initiative Roadmap</h2>
+                </div>
+
+                <DigitalRoadmapComponent :data="roadmapItems" :start-year="roadmapStartYear"
+                        :end-year="roadmapEndYear" />
             </div>
 
             <!-- Evaluation Tab Content -->
@@ -247,6 +254,12 @@ const formatInitiativeLabel = (option) => {
 };
 
 const pageTitle = computed(() => `Capsule Summary - ${props.initiativeMaster?.code}`);
+
+const unifiedInitiative = computed(() => ({
+    ...props.initiativeMaster,
+    appendix_data: props.appendixData,
+    project_charter: props.projectCharter,
+}));
 
 const hasAnyData = computed(() => {
     return props.projectCharter || props.compendiumData || props.appendixData || (props.roadmapItems && props.roadmapItems.length > 0);
