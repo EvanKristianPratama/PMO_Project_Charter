@@ -206,6 +206,20 @@ const filterDtiInitiatives = (initiatives) => {
     });
 };
 
+const filterGitsInitiatives = (initiatives) => {
+    if (!initiatives) return [];
+
+    return initiatives.filter((ini) => {
+        // Source filter is specifically ignored for GITS section
+        const periodStatus = getInitiativeStatus(ini);
+        const implStatus = normalizeStatusLabel(periodStatus);
+        const matchesStatus = !selectedStatus.value || implStatus === selectedStatus.value;
+        const matchesPeriod = !selectedPeriod.value || periodStatus !== null;
+
+        return matchesSelectedBusinessUnit(ini) && matchesStatus && matchesPeriod;
+    });
+};
+
 const processedCards = (cards, initiativeFilter = (initiatives) => initiatives || []) => {
     return cards.map(card => {
         const filteredInis = initiativeFilter(card.initiatives || []);
@@ -222,13 +236,13 @@ const processedCards = (cards, initiativeFilter = (initiatives) => initiatives |
 };
 
 const filteredTechnologyCards = computed(() => processedCards(props.technologyCards, filterDtiInitiatives));
-const filteredStrategyCards = computed(() => processedCards(props.strategyCards, filterDtiInitiatives));
+const filteredStrategyCards = computed(() => processedCards(props.strategyCards, filterGitsInitiatives));
 const filteredUnassignedInitiatives = computed(() => filterDtiInitiatives(props.unassignedInitiatives || []));
 
 const filteredFoundationCard = computed(() => {
     if (!props.foundationCard) return null;
     const card = props.foundationCard;
-    const filteredInis = filterDtiInitiatives(card.initiatives || []);
+    const filteredInis = filterGitsInitiatives(card.initiatives || []);
     return {
         ...card,
         initiatives: filteredInis,
@@ -239,7 +253,7 @@ const filteredFoundationCard = computed(() => {
 const filteredArchitectureCard = computed(() => {
     if (!props.architectureCard) return null;
     const card = props.architectureCard;
-    const filteredInis = filterDtiInitiatives(card.initiatives || []);
+    const filteredInis = filterGitsInitiatives(card.initiatives || []);
     return {
         ...card,
         initiatives: filteredInis,
