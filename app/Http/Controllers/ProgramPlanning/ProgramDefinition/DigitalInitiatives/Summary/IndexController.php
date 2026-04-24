@@ -250,6 +250,7 @@ class IndexController extends Controller
                 'taggings' => fn ($q) => $q->whereNotNull('themes_id')->orWhereNotNull('goal'),
                 'taggings.theme:id,idGoal,theme_number,name',
                 'taggings.theme.goal:id,code,title',
+                'statusHistory' => fn ($q) => $q->latest('tanggal'),
             ]),
             'projectCharter' => $projectCharter,
             'compendiumData' => $compendiumData,

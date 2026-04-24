@@ -44,6 +44,11 @@ const headerDescription = computed(() => (
     )
 ));
 
+const statusLabel = computed(() => {
+    const source = props.initiative;
+    return displayValue(source?.statusRef?.name ?? source?.status_name ?? source?.status);
+});
+
 const mapSourceCreated = (source) => {
     if (!source) return '-';
 
@@ -218,6 +223,9 @@ const getLongText = (key) => {
                             <span class="mx-2 shrink-0 text-slate-400">|</span>
                             <span>{{ headerTitle }}</span>
                         </h1>
+                        <span class="ml-2 inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600 border border-slate-200">
+                            {{ statusLabel }}
+                        </span>
                     </div>
                     <p class="mt-1 text-[13px] text-slate-600">
                         {{ headerDescription }}

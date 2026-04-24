@@ -44,6 +44,37 @@
                         <div class="h-6 w-1 rounded-full bg-[#1e4f8f]"></div>
                         <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Planning</h2>
                     </div>
+
+                    <!-- Status History Table -->
+                    <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#1A1A1A]">
+                        <div class="bg-slate-50 px-4 py-2 border-b border-slate-200 dark:bg-white/5 dark:border-white/10">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Status History</h3>
+                        </div>
+                        <table class="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+                            <thead class="bg-slate-50/50 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:bg-white/5 dark:text-slate-400 border-b border-slate-200 dark:border-white/10">
+                                <tr>
+                                    <th class="px-4 py-2 w-40">Tanggal</th>
+                                    <th class="px-4 py-2 w-48">Status</th>
+                                    <th class="px-4 py-2">Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 dark:divide-white/10">
+                                <tr v-for="status in (initiativeMaster.status_history ?? [])" :key="status.id" class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition-colors">
+                                    <td class="px-4 py-2 whitespace-nowrap">{{ formatDate(status.tanggal) }}</td>
+                                    <td class="px-4 py-2">
+                                        <span :class="['inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-tight capitalize shadow-sm transition-all', getStatusClass(status.status)]">
+                                            {{ status.status }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-2 text-slate-500">{{ status.notes || '-' }}</td>
+                                </tr>
+                                <tr v-if="!initiativeMaster.status_history?.length">
+                                    <td colspan="3" class="px-4 py-8 text-center text-slate-500 italic">No status history available.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
                     <DigitalInitiativeCharterDocument :initiative="initiativeMaster" />
                 </div>
 
@@ -234,6 +265,17 @@ const goBack = () => {
     window.history.back();
 };
 
+const formatDate = (dateStr) => {
+    if (!dateStr) return '-';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    return new Intl.DateTimeFormat('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+    }).format(date);
+};
+
 const initiativeId = computed(() => Number(props.initiativeMaster?.id ?? 0));
 
 const selectedInitiativeId = computed({
@@ -314,4 +356,15 @@ const computedAppendixData = computed(() => {
         rjppThemes,
     };
 });
+
+const getStatusClass = (status) => {
+    const s = String(status || '').toLowerCase();
+    if (s.includes('draft')) return 'bg-slate-100 text-slate-600 ring-1 ring-slate-300';
+    if (s.includes('propose')) return 'bg-blue-100 text-blue-700 ring-1 ring-blue-300';
+    if (s.includes('review')) return 'bg-amber-100 text-amber-700 ring-1 ring-amber-300';
+    if (s.includes('baseline')) return 'bg-purple-100 text-purple-700 ring-1 ring-purple-300';
+    if (s.includes('approve')) return 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-300';
+    if (s.includes('postpone')) return 'bg-rose-100 text-rose-700 ring-1 ring-rose-300';
+    return 'bg-slate-100 text-slate-500 ring-1 ring-slate-200';
+};
 </script>
