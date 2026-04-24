@@ -42,7 +42,7 @@
                 <div v-if="initiativeMaster" class="space-y-4">
                     <div class="flex items-center gap-2 px-1">
                         <div class="h-6 w-1 rounded-full bg-[#1e4f8f]"></div>
-                        <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Scope Charter</h2>
+                        <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Planning</h2>
                     </div>
                     <DigitalInitiativeCharterDocument :initiative="initiativeMaster" />
                 </div>
@@ -123,49 +123,54 @@
             <div v-if="activeTab === 'Implementation'" class="space-y-6">
                 <div class="flex items-center gap-2 px-1">
                     <div class="h-6 w-1 rounded-full bg-blue-600"></div>
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Implementation</h2>
+                </div>
+
+
+
+                <!-- Digital Initiative Header -->
+                <DigitalInitiativeHeader v-if="initiativeMaster" :initiative="initiativeMaster"
+                    class="overflow-hidden" />
+
+                <div class="flex items-center gap-2 px-1">
+                    <div class="h-6 w-1 rounded-full bg-blue-600"></div>
                     <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Status Implementation</h2>
                 </div>
 
-
-                <div
-                    class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#1A1A1A]">
-                    <!-- Digital Initiative Header -->
-                    <DigitalInitiativeHeader v-if="initiativeMaster" :initiative="initiativeMaster"
-                        class="overflow-hidden" />
-
-                    <table class="w-full text-left text-xs text-slate-700 dark:text-slate-300">
-                        <thead
-                            class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:bg-white/5 dark:text-slate-400">
-                            <tr>
-                                <th class="px-4 py-3">Start</th>
-                                <th class="px-4 py-3">End</th>
-                                <th class="px-4 py-3">Year</th>
-                                <th class="px-4 py-3">Review Status</th>
-                                <th class="px-4 py-3">Status Updated</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-200 dark:divide-white/10">
-                            <tr v-for="impl in statusImplementations" :key="impl.id"
-                                class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition-colors">
-                                <td class="px-4 py-3">{{ impl.start || '-' }}</td>
-                                <td class="px-4 py-3">{{ impl.end || '-' }}</td>
-                                <td class="px-4 py-3 font-medium">{{ impl.year || '-' }}</td>
-                                <td class="px-4 py-3">
-                                    <span
-                                        class="inline-flex rounded-full bg-blue-100 px-2.5 py-0.5 text-[10px] font-medium text-blue-800 dark:bg-blue-500/20 dark:text-blue-300">
-                                        {{ impl.review_status || '-' }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3">{{ impl.status_updated || '-' }}</td>
-                            </tr>
-                            <tr v-if="!statusImplementations || !statusImplementations.length">
-                                <td colspan="6" class="px-4 py-12 text-center text-slate-500 italic">
-                                    Status Implementation Not Available
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <table class="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+                    <thead
+                        class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:bg-white/5 dark:text-slate-400">
+                        <tr>
+                            <th class="px-4 py-3">Start</th>
+                            <th class="px-4 py-3">End</th>
+                            <th class="px-4 py-3">Year</th>
+                            <th class="px-4 py-3">Review Status</th>
+                            <th class="px-4 py-3">Current PIC</th>
+                            <th class="px-4 py-3">Status Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 dark:divide-white/10">
+                        <tr v-for="impl in statusImplementations" :key="impl.id"
+                            class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition-colors">
+                            <td class="px-4 py-3">{{ impl.start || '-' }}</td>
+                            <td class="px-4 py-3">{{ impl.end || '-' }}</td>
+                            <td class="px-4 py-3 font-medium">{{ impl.year || '-' }}</td>
+                            <td class="px-4 py-3">
+                                <span
+                                    class="inline-flex rounded-full bg-blue-100 px-2.5 py-0.5 text-[10px] font-medium text-blue-800 dark:bg-blue-500/20 dark:text-blue-300">
+                                    {{ impl.review_status || '-' }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3">{{ impl.current_pic || '-' }}</td>
+                            <td class="px-4 py-3">{{ impl.status_updated || '-' }}</td>
+                        </tr>
+                        <tr v-if="!statusImplementations || !statusImplementations.length">
+                            <td colspan="6" class="px-4 py-12 text-center text-slate-500 italic">
+                                Status Implementation Not Available
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
             <!-- Evaluation Tab Content -->
@@ -175,15 +180,11 @@
                     <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Evaluation</h2>
                 </div>
 
-                <div class="rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-white">
-                    <DigitalInitiativeHeader v-if="initiativeMaster" :initiative="initiativeMaster"
-                        class="!border-none" />
 
-                    <!-- Digital Initiative Evaluation Details -->
-                    <DigitalInitiativeEvaluation v-if="computedAppendixData" :initiative="computedAppendixData"
-                        class="!border-none !shadow-none" />
-                </div>
-                </div>
+                <!-- Digital Initiative Evaluation Details -->
+                <DigitalInitiativeEvaluation v-if="computedAppendixData" :initiative="computedAppendixData"
+                    class="!border-none !shadow-none" />
+            </div>
         </div>
     </UserLayout>
 </template>

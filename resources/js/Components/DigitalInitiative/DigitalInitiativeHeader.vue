@@ -128,6 +128,31 @@ const headerMeta = computed(() => {
         sources: joinValues(sources),
     };
 });
+
+const getScoreLabel = (type) => {
+    const source = props.initiative;
+    if (!source) return '-';
+
+    // 1. Try to find direct label
+    const label = source[`${type}_label`] ?? source.appendix_data?.[`${type}_label`] ?? source.project_charter?.[`${type}_label`];
+    if (label && String(label).trim() !== '') return label;
+
+    // 2. Try to map numeric value
+    const val = source[type] ?? source.appendix_data?.[type] ?? source.project_charter?.[type];
+    const numeric = normalizeNumericValue(val);
+    if (numeric === 1) return 'High';
+    if (numeric === 2) return 'Medium';
+    if (numeric === 3) return 'Low';
+
+    return '-';
+};
+
+const headerScores = computed(() => ({
+    value: getScoreLabel('value'),
+    urgency: getScoreLabel('urgency'),
+    ease: getScoreLabel('ease'),
+    resource: getScoreLabel('resource'),
+}));
 </script>
 
 <template>
@@ -146,6 +171,34 @@ const headerMeta = computed(() => {
                     <p class="mt-1 text-[13px] text-slate-600">
                         {{ headerDescription }}
                     </p>
+                </div>
+
+                <!-- Score Panel -->
+                <div class="score-panel">
+                    <div class="score-column border-r border-[#3b82f6]">
+                        <div class="bar-sub-mini text-center">Value</div>
+                        <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
+                            {{ headerScores.value }}
+                        </div>
+                    </div>
+                    <div class="score-column border-r border-[#3b82f6]">
+                        <div class="bar-sub-mini text-center">Urgency</div>
+                        <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
+                            {{ headerScores.urgency }}
+                        </div>
+                    </div>
+                    <div class="score-column border-r border-[#3b82f6]">
+                        <div class="bar-sub-mini text-center">Easy</div>
+                        <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
+                            {{ headerScores.ease }}
+                        </div>
+                    </div>
+                    <div class="score-column">
+                        <div class="bar-sub-mini text-center">Resource</div>
+                        <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
+                            {{ headerScores.resource }}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -228,6 +281,35 @@ const headerMeta = computed(() => {
     align-items: center;
     flex: 1;
     min-width: 0;
+}
+
+.score-panel {
+    display: flex;
+    border: 1px solid #3b82f6;
+    min-width: 320px;
+    background: #fff;
+    align-self: flex-start;
+}
+
+.score-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.bar-sub-mini {
+    background: #2e6ea2;
+    color: #fff;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.panel-body-mini {
+    padding: 6px;
+    background: #fff;
+    min-height: 32px;
 }
 
 @media (max-width: 768px) {
