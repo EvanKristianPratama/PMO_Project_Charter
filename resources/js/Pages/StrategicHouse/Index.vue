@@ -373,7 +373,7 @@
                             :groups="digitalRoadmapGroups"
                             :start-year="digitalRoadmapStartYear"
                             :end-year="digitalRoadmapEndYear"
-                            :total-count="digitalRoadmapGroups.length"
+                            :total-count="digitalRoadmapTotalCount"
                             group-header-label="COE"
                             initiative-header-label="Digital Initiatives"
                             filter-mode="organization"
@@ -387,7 +387,7 @@
                             :start-year="allRoadmapStartYear"
                             :end-year="allRoadmapEndYear"
                             :it-total-count="itRoadmapTotalCount"
-                            :digital-total-count="digitalRoadmapGroups.length"
+                            :digital-total-count="digitalRoadmapTotalCount"
                             :milestone-type-options="itRoadmapMilestoneTypeOptions"
                         />
                     </div>
@@ -577,6 +577,7 @@ const props = defineProps({
     itRoadmapTotalCount: { type: Number, default: 0 },
     itRoadmapMilestoneTypeOptions: { type: Array, default: () => [] },
     digitalRoadmapGroups: { type: Array, default: () => [] },
+    digitalRoadmapTotalCount: { type: Number, default: 0 },
     digitalRoadmapStartYear: { type: Number, default: 2024 },
     digitalRoadmapEndYear: { type: Number, default: 2029 },
 
@@ -802,7 +803,7 @@ const getPropsForView = (mode) => {
         "initiative-support": ["initiativeSupportGroups", "initiativeSupportDigitalOptions", "initiativeSupportItOptions"],
         "map-technology": ["mapTechnologies", "mapTechnologyCoeOptions", "mapTechnologyInitiativeOptions"],
         "initiative-relation": ["mstInitiatives", "initiativeRelations", "modelRelationOptions"],
-        "roadmap": ["itRoadmapGroups", "itRoadmapStartYear", "itRoadmapEndYear", "itRoadmapTotalCount", "itRoadmapMilestoneTypeOptions", "digitalRoadmapGroups", "digitalRoadmapStartYear", "digitalRoadmapEndYear"],
+        "roadmap": ["itRoadmapGroups", "itRoadmapStartYear", "itRoadmapEndYear", "itRoadmapTotalCount", "itRoadmapMilestoneTypeOptions", "digitalRoadmapGroups", "digitalRoadmapTotalCount", "digitalRoadmapStartYear", "digitalRoadmapEndYear"],
         "strategic-pillars": ["strategicPillars", "allGoals", "taggings", "allInitiatives", "allThemes", "matrixInitiatives", "allOrganizations", "pilarOptions", "pillarFilters"],
     };
 

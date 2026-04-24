@@ -30,6 +30,9 @@ const roadmapLegendItems = [
     { key: "approved", label: "Approved" },
 ];
 
+const PERIOD_FILTER_LATEST = "__latest__";
+const PERIOD_FILTER_ALL = "__all__";
+
 const statusLegendOrder = [
     "On Progress",
     "On Track",
@@ -67,7 +70,7 @@ const STATUS_MAP = {
 /* ── Reactive state ──────────────────────────────────── */
 const visibleRoadmapLayers = ref(["baseline", "approved"]);
 const selectedReviewStatus = ref("Total");
-const selectedPeriod = ref("");
+const selectedPeriod = ref(PERIOD_FILTER_LATEST);
 const selectedOrganization = ref("");
 
 /* ── Year / Month grid ─────────────────────────────── */
@@ -242,6 +245,117 @@ function resolveReviewMarkerOffset(reviewMarker, cell) {
     const relativeIndex = Math.max(0, Math.min(anchorIndex - cellStart, span - 1));
 
     return ((relativeIndex + 0.5) / span) * 100;
+}
+
+function resolveLogMonthIndex(log) {
+    return monthToIndex(
+        firstNonEmptyValue(log?.end, log?.month, log?.start),
+    );
+}
+
+function resolveLogTimestamp(log) {
+    const updatedAt = Date.parse(String(log?.updated_at ?? ""));
+    if (Number.isFinite(updatedAt)) {
+        return updatedAt;
+    }
+
+    const createdAt = Date.parse(String(log?.created_at ?? ""));
+    return Number.isFinite(createdAt) ? createdAt : 0;
+}
+
+function compareTimelineLogs(left, right) {
+    const leftYear = Number(left?.year ?? 0);
+    const rightYear = Number(right?.year ?? 0);
+
+    if (leftYear !== rightYear) {
+        return leftYear - rightYear;
+    }
+
+    const leftMonthIndex = resolveLogMonthIndex(left);
+    const rightMonthIndex = resolveLogMonthIndex(right);
+
+    if (leftMonthIndex !== rightMonthIndex) {
+        return leftMonthIndex - rightMonthIndex;
+    }
+
+    const leftTimestamp = resolveLogTimestamp(left);
+    const rightTimestamp = resolveLogTimestamp(right);
+
+    if (leftTimestamp !== rightTimestamp) {
+        return leftTimestamp - rightTimestamp;
+    }
+
+    return Number(left?.id ?? 0) - Number(right?.id ?? 0);
+}
+
+function sortTimelineLogs(logs) {
+    return [...logs].sort(compareTimelineLogs);
+}
+
+function resolveLatestTimelineLog(reviewLogs, implementationLogs) {
+    const logs = [...reviewLogs, ...implementationLogs].filter(Boolean);
+
+    if (logs.length === 0) {
+        return null;
+    }
+
+    return sortTimelineLogs(logs).at(-1) ?? null;
+}
+
+function resolveAllTimelineLogs(reviewLogs, implementationLogs) {
+    const sourceLogs = reviewLogs.length > 0 ? reviewLogs : implementationLogs;
+    const dedupedLogs = new Map();
+
+    sortTimelineLogs(sourceLogs).forEach((log) => {
+        const key = String(
+            log?.period_key
+            ?? [log?.year ?? "", resolveLogMonthIndex(log), log?.periode_label ?? ""].join("|"),
+        ).trim();
+
+        if (!key) return;
+        dedupedLogs.set(key, log);
+    });
+
+    return Array.from(dedupedLogs.values());
+}
+
+function resolveReviewMarkersForSelection(reviewLogs, implementationLogs, selectedPeriodValue) {
+    if (selectedPeriodValue === PERIOD_FILTER_ALL) {
+        return resolveAllTimelineLogs(reviewLogs, implementationLogs)
+            .map((log) => buildReviewMarkerFromLog(log))
+            .filter(Boolean);
+    }
+
+    let matchedLog = null;
+
+    if (
+        selectedPeriodValue &&
+        selectedPeriodValue !== PERIOD_FILTER_LATEST &&
+        selectedPeriodValue !== PERIOD_FILTER_ALL
+    ) {
+        matchedLog = reviewLogs.findLast(
+            (item) => String(item?.period_key ?? "") === String(selectedPeriodValue),
+        ) ?? null;
+    }
+
+    if (!matchedLog) {
+        matchedLog = resolveLatestTimelineLog(reviewLogs, implementationLogs);
+    }
+
+    const marker = buildReviewMarkerFromLog(matchedLog);
+    return marker ? [marker] : [];
+}
+
+function resolveReviewMarkersForCell(reviewMarkers, cell) {
+    const markers = (Array.isArray(reviewMarkers) ? reviewMarkers : []).filter(
+        (marker) =>
+            cell.startIndex <= marker.anchorIndex && marker.anchorIndex <= cell.endIndex,
+    );
+
+    return markers.map((marker, index) => ({
+        ...marker,
+        topOffset: 50 + ((index - ((markers.length - 1) / 2)) * 14),
+    }));
 }
 
 /* ── Roadmap layer visibility ────────────────────────── */
@@ -451,26 +565,14 @@ function buildInitiativeTimelineRows(initiative, selectedPeriodValue) {
         ? initiative.implementation_statuses
         : [];
 
-    let matchedLog = null;
-    if (selectedPeriodValue) {
-        matchedLog = reviewLogs.findLast(
-            (item) => String(item?.period_key ?? "") === String(selectedPeriodValue),
-        ) ?? null;
-    }
+    const reviewMarkers = resolveReviewMarkersForSelection(
+        reviewLogs,
+        implementationLogs,
+        selectedPeriodValue,
+    );
 
-    // Fallback: use latest implementation log or latest review log
-    if (!matchedLog) {
-        const latestImplementationLog = implementationLogs.length > 0
-            ? implementationLogs[implementationLogs.length - 1]
-            : null;
-        const latestReviewLog = reviewLogs.length > 0 ? reviewLogs[reviewLogs.length - 1] : null;
-        matchedLog = latestImplementationLog ?? latestReviewLog;
-    }
-
-    const reviewMarker = buildReviewMarkerFromLog(matchedLog);
-
-    if (reviewMarker && roadmapRows.length > 0) {
-        roadmapRows[0].reviewMarker = reviewMarker;
+    if (reviewMarkers.length > 0 && roadmapRows.length > 0) {
+        roadmapRows[0].reviewMarkers = reviewMarkers;
     }
 
     if (roadmapRows.length > 0) return roadmapRows;
@@ -486,8 +588,8 @@ function buildInitiativeTimelineRows(initiative, selectedPeriodValue) {
         },
     ];
 
-    if (reviewMarker) {
-        fallbackRows[0].reviewMarker = reviewMarker;
+    if (reviewMarkers.length > 0) {
+        fallbackRows[0].reviewMarkers = reviewMarkers;
     }
 
     return fallbackRows;
@@ -532,16 +634,30 @@ const availablePeriods = computed(() => {
     });
 });
 
-// Auto-select the first available period; reset when the list becomes empty.
+const periodFilterOptions = computed(() => [
+    { value: PERIOD_FILTER_LATEST, label: "Latest (Terbaru)" },
+    { value: PERIOD_FILTER_ALL, label: "All (Semua Periode)" },
+    ...availablePeriods.value,
+]);
+
+// Keep special filters stable; fall back to Latest if a concrete period disappears.
 watch(
     availablePeriods,
     (periods) => {
-        if (!Array.isArray(periods) || periods.length === 0) {
-            selectedPeriod.value = "";
+        if (
+            selectedPeriod.value === PERIOD_FILTER_LATEST ||
+            selectedPeriod.value === PERIOD_FILTER_ALL
+        ) {
             return;
         }
+
+        if (!Array.isArray(periods) || periods.length === 0) {
+            selectedPeriod.value = PERIOD_FILTER_LATEST;
+            return;
+        }
+
         const stillValid = periods.some((p) => p.value === selectedPeriod.value);
-        if (!stillValid) selectedPeriod.value = periods[0].value;
+        if (!stillValid) selectedPeriod.value = PERIOD_FILTER_LATEST;
     },
     { immediate: true },
 );
@@ -574,6 +690,26 @@ function resolveInitiativeStatusByPeriod(initiative, periodValue) {
     const reviewStatuses = Array.isArray(initiative?.review_statuses)
         ? initiative.review_statuses
         : [];
+    const implementationStatuses = Array.isArray(initiative?.implementation_statuses)
+        ? initiative.implementation_statuses
+        : [];
+
+    if (
+        periodValue === PERIOD_FILTER_LATEST ||
+        periodValue === PERIOD_FILTER_ALL ||
+        !periodValue
+    ) {
+        const latestLog = resolveLatestTimelineLog(reviewStatuses, implementationStatuses);
+
+        return {
+            status:
+                latestLog?.review_status
+                ?? latestLog?.status
+                ?? initiative?.implementation_status
+                ?? null,
+            period: latestLog?.periode_label ?? null,
+        };
+    }
 
     if (reviewStatuses.length === 0) {
         return { status: initiative?.implementation_status ?? null, period: null };
@@ -600,6 +736,14 @@ const selectedFilterLabel = computed(() => {
                 (item) => item.value === selectedOrganization.value,
             )?.label ?? "-"
         );
+    }
+
+    if (selectedPeriod.value === PERIOD_FILTER_LATEST) {
+        return "Latest (Terbaru)";
+    }
+
+    if (selectedPeriod.value === PERIOD_FILTER_ALL) {
+        return "All (Semua Periode)";
     }
 
     return availablePeriods.value.find((p) => p.value === selectedPeriod.value)?.label ?? "-";
@@ -733,11 +877,8 @@ const reviewStatusLegendItems = computed(() => {
                                 </option>
                             </select>
                             <select v-else v-model="selectedPeriod" class="period-filter__select">
-                                <option v-if="availablePeriods.length === 0" value="" disabled>
-                                    Belum ada periode
-                                </option>
                                 <option
-                                    v-for="period in availablePeriods"
+                                    v-for="period in periodFilterOptions"
                                     :key="`status-period-${period.value}`"
                                     :value="period.value"
                                 >
@@ -945,16 +1086,19 @@ const reviewStatusLegendItems = computed(() => {
                                     ]"
                                 >
                                     <div
-                                        v-if="timelineRow.reviewMarker && cell.startIndex <= timelineRow.reviewMarker.anchorIndex && timelineRow.reviewMarker.anchorIndex <= cell.endIndex"
+                                        v-if="timelineRow.reviewMarkers?.length"
                                         class="review-marker"
-                                        :title="`${timelineRow.reviewMarker.label} · ${timelineRow.reviewMarker.statusLabel || '-'}`"
                                     >
                                         <span
+                                            v-for="(marker, markerIdx) in resolveReviewMarkersForCell(timelineRow.reviewMarkers, cell)"
+                                            :key="`${timelineRow.key}-marker-${marker.label}-${markerIdx}`"
                                             class="review-marker__diamond"
+                                            :title="`${marker.label} · ${marker.statusLabel || '-'}`"
                                             :style="{
-                                                backgroundColor: timelineRow.reviewMarker.color,
-                                                boxShadow: `0 0 0 2px #ffffff, 0 0 0 3px ${timelineRow.reviewMarker.color}26`,
-                                                left: `${resolveReviewMarkerOffset(timelineRow.reviewMarker, cell)}%`,
+                                                backgroundColor: marker.color,
+                                                boxShadow: `0 0 0 2px #ffffff, 0 0 0 3px ${marker.color}26`,
+                                                left: `${resolveReviewMarkerOffset(marker, cell)}%`,
+                                                top: `${marker.topOffset}%`,
                                             }"
                                         />
                                     </div>
@@ -994,11 +1138,8 @@ const reviewStatusLegendItems = computed(() => {
                                 </option>
                             </select>
                             <select v-else v-model="selectedPeriod" class="period-filter__select">
-                                <option v-if="availablePeriods.length === 0" value="" disabled>
-                                    Belum ada periode
-                                </option>
                                 <option
-                                    v-for="period in availablePeriods"
+                                    v-for="period in periodFilterOptions"
                                     :key="`status-period-${period.value}`"
                                     :value="period.value"
                                 >
@@ -1325,9 +1466,9 @@ const reviewStatusLegendItems = computed(() => {
 .review-marker__diamond {
     position: absolute;
     top: 50%;
-    width: 12px;
-    height: 12px;
-    border-radius: 2px;
+    width: 9px;
+    height: 9px;
+    border-radius: 1px;
     transform: translate(-50%, -50%) rotate(45deg);
     box-shadow: 0 0 0 2px #ffffff, 0 0 0 3px rgba(11, 42, 138, 0.12);
 }
