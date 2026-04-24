@@ -68,7 +68,8 @@ export function useNavigation() {
                 icon: ClipboardDocumentCheckIcon,
                 active: (url) =>
                     url.startsWith("/program-evalution/review") &&
-                    !url.startsWith("/program-evalution/review-timeline"),
+                    !url.startsWith("/program-evalution/review-timeline") &&
+                    !url.startsWith("/program-evalution/review-dashboard"),
             },
             {
                 label: "Review Timeline",
@@ -76,6 +77,13 @@ export function useNavigation() {
                 icon: ClipboardDocumentCheckIcon,
                 active: (url) =>
                     url.startsWith("/program-evalution/review-timeline"),
+            },
+            {
+                label: "Review Dashboard",
+                href: safeRoute("program-evaluation.review-dashboard"),
+                icon: ClipboardDocumentCheckIcon,
+                active: (url) =>
+                    url.startsWith("/program-evalution/review-dashboard"),
             },
         ];
 
