@@ -29,12 +29,12 @@ const emit = defineEmits(['close', 'confirm']);
 
 const form = reactive({
     initiative_id: '',
-    coed_ids: [],
+    coe_ids: [],
 });
 
 const resetForm = () => {
     form.initiative_id = '';
-    form.coed_ids = [];
+    form.coe_ids = [];
 };
 
 watch(() => props.show, (isVisible) => {
@@ -44,7 +44,7 @@ watch(() => props.show, (isVisible) => {
 });
 
 const canSubmit = computed(() => {
-    return form.initiative_id !== '' && form.coed_ids.length > 0;
+    return form.initiative_id !== '' && form.coe_ids.length > 0;
 });
 
 const handleConfirm = () => {
@@ -63,11 +63,11 @@ const initiativeOptionLabel = (initiative) => {
 };
 
 const toggleTech = (id) => {
-    const index = form.coed_ids.indexOf(id);
+    const index = form.coe_ids.indexOf(id);
     if (index === -1) {
-        form.coed_ids.push(id);
+        form.coe_ids.push(id);
     } else {
-        form.coed_ids.splice(index, 1);
+        form.coe_ids.splice(index, 1);
     }
 };
 </script>
@@ -108,12 +108,12 @@ const toggleTech = (id) => {
                         v-for="tech in techColumns"
                         :key="`modal-tech-${tech.id}`"
                         class="flex items-center gap-2 rounded-lg border border-slate-200 p-2 transition-colors hover:bg-slate-50 dark:border-white/10 dark:hover:bg-white/5 cursor-pointer"
-                        :class="{ 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800': form.coed_ids.includes(tech.id) }"
+                        :class="{ 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800': form.coe_ids.includes(tech.id) }"
                     >
                         <input
                             type="checkbox"
                             :value="tech.id"
-                            :checked="form.coed_ids.includes(tech.id)"
+                            :checked="form.coe_ids.includes(tech.id)"
                             @change="toggleTech(tech.id)"
                             class="rounded border-slate-300 text-[#1C75BC] focus:ring-[#1C75BC] dark:border-slate-700 dark:bg-slate-800"
                         />

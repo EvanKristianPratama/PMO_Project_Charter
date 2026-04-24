@@ -239,6 +239,7 @@ class BusinessStrategyService
             ])
             ->whereNotNull('business_unit')
             ->whereIn('business_unit', $fixedBusinessUnitIds)
+            ->orderBy('id', 'asc')
             ->get();
 
         return $initiatives
@@ -246,14 +247,6 @@ class BusinessStrategyService
             ->groupBy(fn (MstInitiative $initiative): int => (int) ($initiative->business_unit ?? 0))
             ->map(function (Collection $initiatives): array {
                 return $initiatives
-                    ->sortBy(
-                        fn (MstInitiative $initiative): string => trim(sprintf(
-                            '%s %s',
-                            (string) ($initiative->code ?? 'ZZZ'),
-                            (string) ($initiative->name ?? '')
-                        )),
-                        SORT_NATURAL | SORT_FLAG_CASE
-                    )
                     ->values()
                     ->map(fn (MstInitiative $initiative): array => $this->mapInitiative($initiative))
                     ->all();
@@ -531,14 +524,6 @@ class BusinessStrategyService
         return collect($slotInitiatives)
             ->flatMap(fn (array $initiatives): array => $initiatives)
             ->unique('id')
-            ->sortBy(
-                fn (array $initiative): string => trim(sprintf(
-                    '%s %s',
-                    (string) ($initiative['code'] ?? 'ZZZ'),
-                    (string) ($initiative['name'] ?? '')
-                )),
-                SORT_NATURAL | SORT_FLAG_CASE
-            )
             ->values()
             ->all();
     }

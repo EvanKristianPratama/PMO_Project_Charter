@@ -17,8 +17,10 @@ class MapTechnologyService
             'initiative.coe', 
             'initiative.latestStatusImplementation'
         ])
+            ->orderBy('coe_id', 'asc')
+            ->orderBy('initiative_id', 'asc')
             ->get()
-            ->groupBy('coed_id');
+            ->groupBy('coe_id');
 
         $coeOptions = MstCoe::all()->map(fn($coe) => [
             'id' => $coe->id,

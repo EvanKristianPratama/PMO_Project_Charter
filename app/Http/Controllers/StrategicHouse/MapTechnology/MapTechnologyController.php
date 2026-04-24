@@ -13,15 +13,15 @@ class MapTechnologyController extends Controller
     {
         $request->validate([
             'initiative_id' => 'required|exists:mst_initiative,id',
-            'coed_ids' => 'required|array',
-            'coed_ids.*' => 'required|exists:mst_coe,id',
+            'coe_ids' => 'required|array',
+            'coe_ids.*' => 'required|exists:mst_coe,id',
         ]);
 
         DB::transaction(function () use ($request) {
-            foreach ($request->coed_ids as $coedId) {
+            foreach ($request->coe_ids as $coeId) {
                 TrsMapTechnology::firstOrCreate([
                     'initiative_id' => $request->initiative_id,
-                    'coed_id' => $coedId,
+                    'coe_id' => $coeId,
                 ]);
             }
         });
@@ -33,11 +33,11 @@ class MapTechnologyController extends Controller
     {
         $request->validate([
             'initiative_id' => 'required|exists:mst_initiative,id',
-            'coed_id' => 'required|exists:mst_coe,id',
+            'coe_id' => 'required|exists:mst_coe,id',
         ]);
 
         TrsMapTechnology::where('initiative_id', $request->initiative_id)
-            ->where('coed_id', $request->coed_id)
+            ->where('coe_id', $request->coe_id)
             ->delete();
 
         return back()->with('success', 'Mapping teknologi berhasil dihapus.');
@@ -48,13 +48,13 @@ class MapTechnologyController extends Controller
         $request->validate([
             'removals' => 'required|array',
             'removals.*.initiative_id' => 'required|exists:mst_initiative,id',
-            'removals.*.coed_id' => 'required|exists:mst_coe,id',
+            'removals.*.coe_id' => 'required|exists:mst_coe,id',
         ]);
 
         DB::transaction(function () use ($request) {
             foreach ($request->removals as $removal) {
                 TrsMapTechnology::where('initiative_id', $removal['initiative_id'])
-                    ->where('coed_id', $removal['coed_id'])
+                    ->where('coe_id', $removal['coe_id'])
                     ->delete();
             }
         });

@@ -169,7 +169,7 @@ const processedInitiatives = computed(() => {
     const initiativeMap = new Map();
     const techIds = techColumns.map(t => t.id);
 
-    // mapTechnologies is grouped by coed_id
+    // mapTechnologies is grouped by coe_id
     Object.values(props.mapTechnologies).forEach(mappings => {
         mappings.forEach(mapping => {
             const ini = mapping.initiative;
@@ -188,8 +188,8 @@ const processedInitiatives = computed(() => {
             }
 
             // Add technology mapping from trs_map_technology
-            if (techIds.includes(mapping.coed_id)) {
-                initiativeMap.get(ini.id).tech_mappings.add(mapping.coed_id);
+            if (techIds.includes(mapping.coe_id)) {
+                initiativeMap.get(ini.id).tech_mappings.add(mapping.coe_id);
             }
         });
     });
@@ -202,9 +202,7 @@ const processedInitiatives = computed(() => {
     });
 
     return Array.from(initiativeMap.values()).sort((a, b) => {
-        const coeCompare = String(a.primary_coe?.name ?? '').localeCompare(String(b.primary_coe?.name ?? ''));
-        if (coeCompare !== 0) return coeCompare;
-        return String(a.code ?? '').localeCompare(String(b.code ?? ''));
+        return (a.id ?? 0) - (b.id ?? 0);
     });
 });
 
@@ -215,7 +213,7 @@ const filteredInitiatives = computed(() => {
         // Remove pending deletions
         pendingRemovals.value.forEach(rem => {
             if (rem.initiative_id === ini.id) {
-                newTechMappings.delete(rem.coed_id);
+                newTechMappings.delete(rem.coe_id);
             }
         });
 
@@ -230,8 +228,8 @@ const isPrimaryMapping = (ini, techId) => {
     return ini.primary_coe_id === techId;
 };
 
-const markForRemoval = (initiativeId, coedId) => {
-    pendingRemovals.value.push({ initiative_id: initiativeId, coed_id: coedId });
+const markForRemoval = (initiativeId, coeId) => {
+    pendingRemovals.value.push({ initiative_id: initiativeId, coe_id: coeId });
 };
 
 const handleStoreMapping = (data) => {
