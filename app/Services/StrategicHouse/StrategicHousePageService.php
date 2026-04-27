@@ -227,8 +227,29 @@ class StrategicHousePageService
 
     private function getConsolidatedInitiatives(): Collection
     {
-        return Cache::remember('sh_consolidated_initiatives_v7', 3600, function() {
-            return MstInitiative::query()->with(['latestStatus', 'organization', 'latestStatusImplementation', 'statusImplementations', 'sourceData', 'taggings', 'mappedProjects'])->orderBy('code')->get();
+        return Cache::remember('sh_consolidated_initiatives_v8', 3600, function() {
+            return MstInitiative::query()->with([
+                'latestStatus', 
+                'organization', 
+                'latestStatusImplementation', 
+                'statusImplementations', 
+                'sourceData', 
+                'taggings', 
+                'mappedProjects.pcStatusImplementations' => fn($q) => $q->orderBy('year', 'desc')->orderByRaw("CASE
+                    WHEN month = 'Desember' THEN 12
+                    WHEN month = 'November' THEN 11
+                    WHEN month = 'Oktober' THEN 10
+                    WHEN month = 'September' THEN 9
+                    WHEN month = 'Agustus' THEN 8
+                    WHEN month = 'Juli' THEN 7
+                    WHEN month = 'Juni' THEN 6
+                    WHEN month = 'Mei' THEN 5
+                    WHEN month = 'April' THEN 4
+                    WHEN month = 'Maret' THEN 3
+                    WHEN month = 'Februari' THEN 2
+                    WHEN month = 'Januari' THEN 1
+                    ELSE 0 END DESC")
+            ])->orderBy('code')->get();
         });
     }
 
@@ -247,6 +268,8 @@ class StrategicHousePageService
     {
         $status = $this->normalizeStatus($initiative->latestPlanningStatusValue());
         $mappedProject = $initiative->mappedProjects?->first();
+        
+        $implData = $this->resolveImplementationData($initiative);
 
         return [
             'id' => (int) $initiative->id,
@@ -258,11 +281,46 @@ class StrategicHousePageService
             'business_unit_name' => trim((string) ($initiative->organization?->name ?? '')),
             'status' => $status,
             'status_label' => $this->statusLabel($status),
-            'implementation_status' => $initiative->latestStatusImplementation?->review_status,
-            'statuses' => collect($initiative->statusImplementations ?? [])->map(fn($s) => ['start' => $s->start, 'end' => $s->end, 'year' => (int) $s->year, 'status' => $s->review_status])->values()->all(),
+            'implementation_status' => $implData['implementation_status'],
+            'statuses' => $implData['statuses'],
             'source' => !is_null($initiative->source) ? (int) $initiative->source : null,
             'source_name' => $initiative->sourceData?->name,
             'mapped_project_id' => $mappedProject?->id,
+        ];
+    }
+
+    private function resolveImplementationData(MstInitiative $initiative): array
+    {
+        if ($initiative->tipe_initiative == 2) {
+            $project = $initiative->mappedProjects?->first();
+            $latestStatus = null;
+            $history = [];
+            
+            if ($project) {
+                $history = collect($project->pcStatusImplementations ?? [])->map(fn($s) => [
+                    'start' => $s->month,
+                    'end' => $s->month,
+                    'year' => (int) $s->year,
+                    'status' => $s->status
+                ])->values()->all();
+                
+                $latestStatus = collect($history)->first()['status'] ?? null;
+            }
+
+            return [
+                'implementation_status' => $latestStatus,
+                'statuses' => $history,
+            ];
+        }
+
+        return [
+            'implementation_status' => $initiative->latestStatusImplementation?->review_status,
+            'statuses' => collect($initiative->statusImplementations ?? [])->map(fn($s) => [
+                'start' => $s->start, 
+                'end' => $s->end, 
+                'year' => (int) $s->year, 
+                'status' => $s->review_status
+            ])->values()->all(),
         ];
     }
 
@@ -309,6 +367,8 @@ class StrategicHousePageService
     private function mapDualGrowthGoal(Goal $g, array $d = []): array { $ts = collect($g->themes ?? [])->map(fn ($t) => $this->mapDualGrowthTheme($t))->values(); return ['id' => (int) $g->id, 'code' => (string) $g->code, 'title' => (string) $g->title, 'themes' => $ts->all(), 'direct_initiatives_count' => count($d), 'direct_initiatives' => $d, 'initiatives_count' => (int) $ts->sum('initiatives_count') + count($d)]; }
     private function mapDualGrowthTheme($t): array { $is = collect($t->initiativeTaggings ?? [])->map(fn ($tg) => $tg->initiative)->filter()->unique('id')->sortBy(fn ($i) => sprintf('%08s-%s', (string) $i->code, (string) $i->name))->values()->map(fn ($i) => $this->mapDualGrowthInitiative($i))->all(); return ['id' => (int) $t->id, 'theme_number' => (int) $t->theme_number, 'name' => (string) $t->name, 'label' => (string) $t->name, 'initiatives_count' => count($is), 'initiatives' => $is]; }
     private function mapDualGrowthInitiative($i): array { 
+        $implData = $this->resolveImplementationData($i);
+        
         return [
             'id' => (int) $i->id, 
             'code' => $i->code, 
@@ -319,8 +379,8 @@ class StrategicHousePageService
             'label' => trim(collect([$i->code, $i->name])->filter()->implode(' - ')), 
             'business_unit' => $i->organization?->name, 
             'groub_id' => $i->organization?->groub_id, 
-            'implementation_status' => $i->latestStatusImplementation?->review_status, 
-            'statuses' => collect($i->statusImplementations ?? [])->map(fn($s) => ['start' => $s->start, 'end' => $s->end, 'year' => (int) $s->year, 'status' => $s->review_status])->values()->all(), 
+            'implementation_status' => $implData['implementation_status'], 
+            'statuses' => $implData['statuses'], 
             'source' => !is_null($i->source) ? (int) $i->source : null,
             'mapped_project_id' => $i->mappedProjects?->first()?->id,
         ]; 
