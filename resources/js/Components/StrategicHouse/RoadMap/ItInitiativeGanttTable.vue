@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 
 const props = defineProps({
     groups: {
@@ -36,71 +36,237 @@ const quarterCells = computed(() =>
 );
 
 const totalCells = computed(() => quarterCells.value.length);
+const TYPE_DASHED = new Set([2, 4]);
 
-/* ---------- Cell builder ---------- */
-/**
- * Returns an array of cell descriptors for a single initiative row.
- * Each descriptor: { type: 'gap'|'bar', span: number, key: string|number, endsYear: boolean }
- */
-function buildCells(initiative) {
-    const total = totalCells.value;
+const selectedProjectLeader = ref("");
+const selectedProjectOwner = ref("");
 
-    // No milestone data -> render all-gap row (no bar)
-    if (
-        !initiative.startYear ||
-        !initiative.startQ ||
-        !initiative.endYear ||
-        !initiative.endQ
-    ) {
-        return Array.from({ length: total }, (_, i) => ({
-            type: "gap",
-            span: 1,
-            key: `empty-${i}`,
-            endsYear: (i + 1) % 4 === 0,
-        }));
+function normalizePersonLabel(rawValue) {
+    return String(rawValue ?? "").trim();
+}
+
+function getProjectPersonnelEntries(initiative) {
+    const projects = Array.isArray(initiative?.projects) ? initiative.projects : [];
+
+    const fromProjects = projects
+        .map((project) => ({
+            owner: normalizePersonLabel(project?.owner ?? project?.charter?.owner),
+            leader: normalizePersonLabel(project?.leader ?? project?.charter?.leader),
+        }))
+        .filter((item) => item.owner !== "" || item.leader !== "");
+
+    if (fromProjects.length > 0) {
+        return fromProjects;
     }
 
-    const sq = parseInt(String(initiative.startQ).replace(/[Qq]/, ""), 10);
-    const eq = parseInt(String(initiative.endQ).replace(/[Qq]/, ""), 10);
-    const startIdx = (initiative.startYear - props.startYear) * 4 + (sq - 1);
-    const endIdx = (initiative.endYear - props.startYear) * 4 + (eq - 1);
+    const fallbackOwner = normalizePersonLabel(
+        initiative?.owner ?? initiative?.charter?.owner,
+    );
+    const fallbackLeader = normalizePersonLabel(
+        initiative?.leader ?? initiative?.charter?.leader,
+    );
 
-    // Clamp to valid range
-    const safeStart = Math.max(0, Math.min(startIdx, total - 1));
-    const safeEnd = Math.max(safeStart, Math.min(endIdx, total - 1));
+    return fallbackOwner || fallbackLeader
+        ? [{ owner: fallbackOwner, leader: fallbackLeader }]
+        : [];
+}
 
-    const cells = [];
-    let cursor = 0;
+const allInitiatives = computed(() =>
+    (Array.isArray(props.groups) ? props.groups : []).flatMap((group) =>
+        Array.isArray(group?.initiatives) ? group.initiatives : [],
+    ),
+);
 
-    // Gap before bar
-    while (cursor < safeStart) {
-        cells.push({
-            type: "gap",
-            span: 1,
-            key: cursor,
-            endsYear: (cursor + 1) % 4 === 0,
+const availableProjectLeaders = computed(() => {
+    const leaders = new Set();
+
+    allInitiatives.value.forEach((initiative) => {
+        getProjectPersonnelEntries(initiative).forEach((entry) => {
+            if (entry.leader !== "") {
+                leaders.add(entry.leader);
+            }
         });
-        cursor++;
-    }
-
-    // Bar
-    cells.push({
-        type: "bar",
-        span: safeEnd - safeStart + 1,
-        key: `bar-${safeStart}`,
-        endsYear: (safeEnd + 1) % 4 === 0,
     });
-    cursor = safeEnd + 1;
 
-    // Gap after bar
-    while (cursor < total) {
-        cells.push({
-            type: "gap",
-            span: 1,
-            key: cursor,
-            endsYear: (cursor + 1) % 4 === 0,
+    return Array.from(leaders).sort((left, right) => left.localeCompare(right));
+});
+
+const availableProjectOwners = computed(() => {
+    const owners = new Set();
+
+    allInitiatives.value.forEach((initiative) => {
+        getProjectPersonnelEntries(initiative).forEach((entry) => {
+            if (entry.owner !== "") {
+                owners.add(entry.owner);
+            }
         });
-        cursor++;
+    });
+
+    return Array.from(owners).sort((left, right) => left.localeCompare(right));
+});
+
+watch(
+    availableProjectLeaders,
+    (leaders) => {
+        if (!Array.isArray(leaders) || leaders.length === 0) {
+            selectedProjectLeader.value = "";
+            return;
+        }
+
+        if (!leaders.includes(selectedProjectLeader.value)) {
+            selectedProjectLeader.value = "";
+        }
+    },
+    { immediate: true },
+);
+
+watch(
+    availableProjectOwners,
+    (owners) => {
+        if (!Array.isArray(owners) || owners.length === 0) {
+            selectedProjectOwner.value = "";
+            return;
+        }
+
+        if (!owners.includes(selectedProjectOwner.value)) {
+            selectedProjectOwner.value = "";
+        }
+    },
+    { immediate: true },
+);
+
+const filteredGroups = computed(() =>
+    (Array.isArray(props.groups) ? props.groups : [])
+        .map((group) => {
+            const initiatives = (Array.isArray(group?.initiatives) ? group.initiatives : []).filter((initiative) => {
+                if (!selectedProjectLeader.value && !selectedProjectOwner.value) {
+                    return true;
+                }
+
+                return getProjectPersonnelEntries(initiative).some((entry) => {
+                    const matchesLeader =
+                        !selectedProjectLeader.value ||
+                        entry.leader === selectedProjectLeader.value;
+                    const matchesOwner =
+                        !selectedProjectOwner.value ||
+                        entry.owner === selectedProjectOwner.value;
+
+                    return matchesLeader && matchesOwner;
+                });
+            });
+
+            return initiatives.length > 0
+                ? {
+                    ...group,
+                    initiatives,
+                }
+                : null;
+        })
+        .filter(Boolean),
+);
+
+function parseDateMeta(value) {
+    if (!value) return null;
+
+    const match = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (match) {
+        return {
+            year: Number(match[1]),
+            monthIndex: Number(match[2]) - 1,
+        };
+    }
+
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+        return null;
+    }
+
+    return {
+        year: parsed.getUTCFullYear(),
+        monthIndex: parsed.getUTCMonth(),
+    };
+}
+
+function toQuarterIndexFromDate(value) {
+    const meta = parseDateMeta(value);
+    if (!meta) return null;
+
+    const raw = (meta.year - props.startYear) * 4 + Math.floor(meta.monthIndex / 3);
+    return Math.max(0, Math.min(raw, totalCells.value - 1));
+}
+
+function toLegacyQuarterIndex(yearValue, quarterValue) {
+    const year = Number(yearValue);
+    const quarter = parseInt(String(quarterValue ?? "").replace(/[Qq]/, ""), 10);
+
+    if (!Number.isFinite(year) || !Number.isFinite(quarter) || quarter < 1 || quarter > 4) {
+        return null;
+    }
+
+    const raw = (year - props.startYear) * 4 + (quarter - 1);
+    return Math.max(0, Math.min(raw, totalCells.value - 1));
+}
+
+function normalizeTimelineStyle(milestoneType) {
+    return TYPE_DASHED.has(Number(milestoneType)) ? "dashed" : "block";
+}
+
+function buildTimelineCells(initiative) {
+    const cells = Array.from({ length: totalCells.value }, (_, index) => ({
+        key: `cell-${initiative?.id ?? "initiative"}-${index}`,
+        hasBlock: false,
+        hasDashed: false,
+        endsYear: (index + 1) % 4 === 0,
+    }));
+
+    const projects = Array.isArray(initiative?.projects) ? initiative.projects : [];
+    const milestones = projects.flatMap((project) =>
+        Array.isArray(project?.milestones) ? project.milestones : [],
+    );
+
+    if (milestones.length > 0) {
+        milestones.forEach((milestone) => {
+            const startIndex = toQuarterIndexFromDate(
+                milestone?.start_date ?? milestone?.end_date,
+            );
+            const endIndex = toQuarterIndexFromDate(
+                milestone?.end_date ?? milestone?.start_date,
+            );
+
+            if (startIndex === null && endIndex === null) {
+                return;
+            }
+
+            const safeStart = Math.min(startIndex ?? endIndex, endIndex ?? startIndex);
+            const safeEnd = Math.max(startIndex ?? endIndex, endIndex ?? startIndex);
+            const timelineStyle = normalizeTimelineStyle(
+                milestone?.milestone_type ?? milestone?.type,
+            );
+
+            for (let index = safeStart; index <= safeEnd; index += 1) {
+                if (timelineStyle === "dashed") {
+                    cells[index].hasDashed = true;
+                } else {
+                    cells[index].hasBlock = true;
+                }
+            }
+        });
+
+        return cells;
+    }
+
+    const legacyStart = toLegacyQuarterIndex(initiative?.startYear, initiative?.startQ);
+    const legacyEnd = toLegacyQuarterIndex(initiative?.endYear, initiative?.endQ);
+
+    if (legacyStart === null && legacyEnd === null) {
+        return cells;
+    }
+
+    const safeStart = Math.min(legacyStart ?? legacyEnd, legacyEnd ?? legacyStart);
+    const safeEnd = Math.max(legacyStart ?? legacyEnd, legacyEnd ?? legacyStart);
+
+    for (let index = safeStart; index <= safeEnd; index += 1) {
+        cells[index].hasBlock = true;
     }
 
     return cells;
@@ -109,8 +275,38 @@ function buildCells(initiative) {
 
 <template>
     <div class="gantt-wrap">
+        <div class="gantt-filters">
+            <label class="gantt-filter-field">
+                <span class="gantt-filter-label">Project Leader</span>
+                <select v-model="selectedProjectLeader" class="gantt-filter-select">
+                    <option value="">Semua Project Leader</option>
+                    <option
+                        v-for="leader in availableProjectLeaders"
+                        :key="`filter-project-leader-${leader}`"
+                        :value="leader"
+                    >
+                        {{ leader }}
+                    </option>
+                </select>
+            </label>
+
+            <label class="gantt-filter-field">
+                <span class="gantt-filter-label">Project Owner</span>
+                <select v-model="selectedProjectOwner" class="gantt-filter-select">
+                    <option value="">Semua Project Owner</option>
+                    <option
+                        v-for="owner in availableProjectOwners"
+                        :key="`filter-project-owner-${owner}`"
+                        :value="owner"
+                    >
+                        {{ owner }}
+                    </option>
+                </select>
+            </label>
+        </div>
+
         <!-- Empty state -->
-        <div v-if="!groups || groups.length === 0" class="gantt-empty">
+        <div v-if="!filteredGroups || filteredGroups.length === 0" class="gantt-empty">
             Belum ada data roadmap untuk ditampilkan.
         </div>
 
@@ -167,7 +363,7 @@ function buildCells(initiative) {
             <!-- Body -->
             <tbody>
                 <template
-                    v-for="group in groups"
+                    v-for="group in filteredGroups"
                     :key="`group-${group.coe_name}`"
                 >
                     <tr
@@ -194,16 +390,22 @@ function buildCells(initiative) {
                             </div>
                         </td>
 
-                        <!-- Quarter cells (gap / bar) -->
+                        <!-- Quarter cells -->
                         <td
-                            v-for="cell in buildCells(initiative)"
+                            v-for="cell in buildTimelineCells(initiative)"
                             :key="cell.key"
-                            :colspan="cell.span"
                             :class="[
-                                cell.type === 'bar' ? 'cell-bar' : 'cell-gap',
+                                'cell-quarter-timeline',
+                                cell.hasBlock ? 'cell-bar' : 'cell-gap',
+                                cell.hasDashed ? 'cell-dashed' : '',
                                 { 'border-r-navy': cell.endsYear },
                             ]"
-                        />
+                        >
+                            <span
+                                v-if="cell.hasDashed"
+                                class="cell-dashed-line"
+                            />
+                        </td>
                     </tr>
                 </template>
             </tbody>
@@ -235,6 +437,36 @@ function buildCells(initiative) {
 .gantt-wrap {
     width: 100%;
     overflow-x: auto;
+}
+
+.gantt-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.gantt-filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 180px;
+}
+
+.gantt-filter-label {
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.gantt-filter-select {
+    border: 1px solid var(--grid);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 12px;
+    padding: 8px 10px;
+    min-height: 34px;
 }
 
 /* --- Table skeleton --- */
@@ -373,10 +605,12 @@ function buildCells(initiative) {
 }
 
 /* --- Gap cell no bar --- */
-.cell-gap {
+.cell-gap,
+.cell-quarter-timeline {
     height: 26px;
     padding: 0;
     background: inherit;
+    position: relative;
 }
 
 /* --- Bar cell --- */
@@ -391,6 +625,20 @@ function buildCells(initiative) {
 
 .gantt-table td.cell-bar:hover {
     background: var(--bar-hover);
+}
+
+.gantt-table td.cell-dashed {
+    background: var(--bg);
+}
+
+.cell-dashed-line {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    border-top: 2px dashed var(--navy-mid);
+    transform: translateY(-50%);
+    z-index: 2;
 }
 
 /* --- Empty state --- */

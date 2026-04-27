@@ -113,6 +113,8 @@ const visibleRoadmapLayers = ref(["baseline", "approved"]);
 const selectedReviewStatus = ref("Total");
 const selectedPeriod = ref(PERIOD_FILTER_LATEST);
 const selectedOrganization = ref("");
+const selectedProjectLeader = ref("");
+const selectedProjectOwner = ref("");
 
 /* ── Year / Month grid ─────────────────────────────── */
 const years = computed(() =>
@@ -213,6 +215,36 @@ function normalizeOrganizationLabel(rawValue) {
     }
 
     return value;
+}
+
+function normalizePersonLabel(rawValue) {
+    return String(rawValue ?? "").trim();
+}
+
+function getProjectPersonnelEntries(initiative) {
+    const projects = Array.isArray(initiative?.projects) ? initiative.projects : [];
+
+    const fromProjects = projects
+        .map((project) => ({
+            owner: normalizePersonLabel(project?.owner ?? project?.charter?.owner),
+            leader: normalizePersonLabel(project?.leader ?? project?.charter?.leader),
+        }))
+        .filter((item) => item.owner !== "" || item.leader !== "");
+
+    if (fromProjects.length > 0) {
+        return fromProjects;
+    }
+
+    const fallbackOwner = normalizePersonLabel(
+        initiative?.owner ?? initiative?.charter?.owner,
+    );
+    const fallbackLeader = normalizePersonLabel(
+        initiative?.leader ?? initiative?.charter?.leader,
+    );
+
+    return fallbackOwner || fallbackLeader
+        ? [{ owner: fallbackOwner, leader: fallbackLeader }]
+        : [];
 }
 
 /** Return the BEM modifier class for a status badge. */
@@ -470,6 +502,34 @@ const availableOrganizations = computed(() => {
     return Array.from(organizations.values()).sort((left, right) =>
         left.label.localeCompare(right.label),
     );
+});
+
+const availableProjectLeaders = computed(() => {
+    const leaders = new Set();
+
+    allInitiatives.value.forEach((initiative) => {
+        getProjectPersonnelEntries(initiative).forEach((entry) => {
+            if (entry.leader !== "") {
+                leaders.add(entry.leader);
+            }
+        });
+    });
+
+    return Array.from(leaders).sort((left, right) => left.localeCompare(right));
+});
+
+const availableProjectOwners = computed(() => {
+    const owners = new Set();
+
+    allInitiatives.value.forEach((initiative) => {
+        getProjectPersonnelEntries(initiative).forEach((entry) => {
+            if (entry.owner !== "") {
+                owners.add(entry.owner);
+            }
+        });
+    });
+
+    return Array.from(owners).sort((left, right) => left.localeCompare(right));
 });
 
 /* ── Range computation ───────────────────────────────── */
@@ -766,6 +826,36 @@ watch(
     { immediate: true },
 );
 
+watch(
+    availableProjectLeaders,
+    (leaders) => {
+        if (!Array.isArray(leaders) || leaders.length === 0) {
+            selectedProjectLeader.value = "";
+            return;
+        }
+
+        if (!leaders.includes(selectedProjectLeader.value)) {
+            selectedProjectLeader.value = "";
+        }
+    },
+    { immediate: true },
+);
+
+watch(
+    availableProjectOwners,
+    (owners) => {
+        if (!Array.isArray(owners) || owners.length === 0) {
+            selectedProjectOwner.value = "";
+            return;
+        }
+
+        if (!owners.includes(selectedProjectOwner.value)) {
+            selectedProjectOwner.value = "";
+        }
+    },
+    { immediate: true },
+);
+
 /**
  * Return the implementation status and period label for an initiative
  * at a specific review period. Falls back to `implementation_status` when
@@ -818,16 +908,19 @@ function resolveInitiativeStatusByPeriod(initiative, periodValue) {
 }
 
 const selectedFilterLabel = computed(() => {
-    if (organizationFilterMode.value) {
-        if (!selectedOrganization.value) {
-            return "Semua Organisasi";
-        }
+    const leaderLabel = selectedProjectLeader.value || "Semua Project Leader";
+    const ownerLabel = selectedProjectOwner.value || "Semua Project Owner";
 
-        return (
-            availableOrganizations.value.find(
+    if (organizationFilterMode.value) {
+        const organizationLabel = !selectedOrganization.value
+            ? "Semua Organisasi"
+            : (
+                availableOrganizations.value.find(
                 (item) => item.value === selectedOrganization.value,
             )?.label ?? "-"
-        );
+            );
+
+        return [organizationLabel, leaderLabel, ownerLabel].join(" · ");
     }
 
     const selectedPeriodLabel =
@@ -846,10 +939,19 @@ const selectedFilterLabel = computed(() => {
                 )?.label ?? "-"
             );
 
-        return `${selectedPeriodLabel} · ${organizationLabel}`;
+        return [
+            selectedPeriodLabel,
+            organizationLabel,
+            leaderLabel,
+            ownerLabel,
+        ].join(" · ");
     }
 
-    return selectedPeriodLabel;
+    return [
+        selectedPeriodLabel,
+        leaderLabel,
+        ownerLabel,
+    ].join(" · ");
 });
 
 const baseDisplayGroups = computed(() =>
@@ -906,6 +1008,25 @@ const displayGroups = computed(() =>
             const initiatives = (
             Array.isArray(group?.initiatives) ? group.initiatives : []
         ).filter((initiative) => {
+                const personnelEntries = getProjectPersonnelEntries(initiative);
+                const matchesPersonnel =
+                    !selectedProjectLeader.value && !selectedProjectOwner.value
+                        ? true
+                        : personnelEntries.some((entry) => {
+                            const matchesLeader =
+                                !selectedProjectLeader.value ||
+                                entry.leader === selectedProjectLeader.value;
+                            const matchesOwner =
+                                !selectedProjectOwner.value ||
+                                entry.owner === selectedProjectOwner.value;
+
+                            return matchesLeader && matchesOwner;
+                        });
+
+                if (!matchesPersonnel) {
+                    return false;
+                }
+
                 if (hasOrganizationFilter.value && selectedOrganization.value) {
                     if ((initiative?.display_organization ?? "") !== selectedOrganization.value) {
                         return false;
@@ -991,6 +1112,44 @@ const reviewStatusLegendItems = computed(() => {
                                     :value="organization.value"
                                 >
                                     {{ organization.label }}
+                                </option>
+                            </select>
+                        </label>
+
+                        <label class="period-filter">
+                            <span class="period-filter__label">
+                                Project Leader
+                            </span>
+                            <select
+                                v-model="selectedProjectLeader"
+                                class="period-filter__select"
+                            >
+                                <option value="">Semua Project Leader</option>
+                                <option
+                                    v-for="leader in availableProjectLeaders"
+                                    :key="`project-leader-${leader}`"
+                                    :value="leader"
+                                >
+                                    {{ leader }}
+                                </option>
+                            </select>
+                        </label>
+
+                        <label class="period-filter">
+                            <span class="period-filter__label">
+                                Project Owner
+                            </span>
+                            <select
+                                v-model="selectedProjectOwner"
+                                class="period-filter__select"
+                            >
+                                <option value="">Semua Project Owner</option>
+                                <option
+                                    v-for="owner in availableProjectOwners"
+                                    :key="`project-owner-${owner}`"
+                                    :value="owner"
+                                >
+                                    {{ owner }}
                                 </option>
                             </select>
                         </label>
@@ -1257,6 +1416,44 @@ const reviewStatusLegendItems = computed(() => {
                                     :value="organization.value"
                                 >
                                     {{ organization.label }}
+                                </option>
+                            </select>
+                        </label>
+
+                        <label class="period-filter">
+                            <span class="period-filter__label">
+                                Project Leader
+                            </span>
+                            <select
+                                v-model="selectedProjectLeader"
+                                class="period-filter__select"
+                            >
+                                <option value="">Semua Project Leader</option>
+                                <option
+                                    v-for="leader in availableProjectLeaders"
+                                    :key="`project-leader-bottom-${leader}`"
+                                    :value="leader"
+                                >
+                                    {{ leader }}
+                                </option>
+                            </select>
+                        </label>
+
+                        <label class="period-filter">
+                            <span class="period-filter__label">
+                                Project Owner
+                            </span>
+                            <select
+                                v-model="selectedProjectOwner"
+                                class="period-filter__select"
+                            >
+                                <option value="">Semua Project Owner</option>
+                                <option
+                                    v-for="owner in availableProjectOwners"
+                                    :key="`project-owner-bottom-${owner}`"
+                                    :value="owner"
+                                >
+                                    {{ owner }}
                                 </option>
                             </select>
                         </label>
@@ -1724,15 +1921,15 @@ const reviewStatusLegendItems = computed(() => {
 .period-filter {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 10px;
+    gap: 6px;
+    padding: 5px 8px;
     border: 1px solid #d6e2ee;
-    border-radius: 12px;
+    border-radius: 10px;
     background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
 }
 
 .period-filter__label {
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 700;
     letter-spacing: 0.06em;
     color: #59769a;
@@ -1740,12 +1937,13 @@ const reviewStatusLegendItems = computed(() => {
 }
 
 .period-filter__select {
-    min-width: 190px;
+    min-width: 150px;
+    height: 32px;
     border: 1px solid #c8d6e4;
-    border-radius: 10px;
+    border-radius: 8px;
     background: #ffffff;
-    padding: 7px 28px 7px 10px;
-    font-size: 11px;
+    padding: 6px 26px 6px 9px;
+    font-size: 10px;
     font-weight: 600;
     color: #334155;
     appearance: none;
@@ -1772,7 +1970,7 @@ const reviewStatusLegendItems = computed(() => {
     .ini-name       { font-size: 10px; }
     .badge          { width: 15px; height: 15px; font-size: 8px; }
     .legend-list    { gap: 8px 14px; }
-    .period-filter__select { min-width: 170px; }
+    .period-filter__select { min-width: 138px; }
 }
 
 @media (max-width: 900px) {
