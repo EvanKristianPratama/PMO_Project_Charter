@@ -15,6 +15,7 @@ import {
     ChevronDownIcon,
     TableCellsIcon,
     ArrowRightOnRectangleIcon,
+    ServerIcon,
 } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
@@ -33,6 +34,8 @@ const currentUrl = computed(() => page.url || '');
 const displayName = computed(() => authUser.value?.name || authUser.value?.email || 'User');
 const userEmail = computed(() => authUser.value?.email || '-');
 const { navItems } = useNavigation();
+const currentConnection = computed(() => page.props.currentConnection || 'cloud');
+const isLocal = computed(() => currentConnection.value === 'local');
 
 const getInitials = (name) => {
     if (!name) return 'U';
@@ -47,6 +50,20 @@ const getInitials = (name) => {
 
 const logout = () => {
     router.post(route('logout'));
+};
+
+const toggleConnection = () => {
+    const newConnection = isLocal.value ? 'cloud' : 'local';
+    router.post(route('profile.updateConnection'), 
+        { connection: newConnection },
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                // Force page reload to update currentConnection
+                router.reload();
+            },
+        }
+    );
 };
 </script>
 
@@ -118,6 +135,23 @@ const logout = () => {
                                             <TableCellsIcon class="h-4 w-4" />
                                             Master Data
                                         </Link>
+                                    </MenuItem>
+                                    <MenuItem>
+                                        <button
+                                            @click="toggleConnection"
+                                            class="flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-700/50"
+                                        >
+                                            <div class="flex items-center gap-2">
+                                                <ServerIcon class="h-4 w-4" />
+                                                <span>Local DB</span>
+                                            </div>
+                                            <div :class="isLocal ? 'bg-indigo-600 dark:bg-indigo-500' : 'bg-gray-300 dark:bg-gray-600'" class="relative inline-flex h-5 w-9 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200">
+                                                <span
+                                                    :class="isLocal ? 'translate-x-4' : 'translate-x-0'"
+                                                    class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition duration-200 ease-in-out"
+                                                />
+                                            </div>
+                                        </button>
                                     </MenuItem>
                                 </div>
                                 <div class="p-1">
