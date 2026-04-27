@@ -30,7 +30,7 @@ class StrategicHousePageService
     ];
 
     private const STRATEGY_COE_CONFIG = [
-        ['name' => 'User Interface and Experience', 'label' => 'User Interface', 'tone' => 'sky', 'description_lines' => ['Memastikan', 'standarisasi UI/UX', 'pada seluruh aplikasi']],
+        ['name' => 'User Interface and Experience', 'label' => 'User Interface and Experience', 'tone' => 'sky', 'description_lines' => ['Memastikan', 'standarisasi UI/UX', 'pada seluruh aplikasi']],
         ['name' => 'Integration and Automation', 'label' => 'Integration and Automation', 'tone' => 'blue', 'description_lines' => ['Meningkatkan', 'interaksi sistem di', 'seluruh holding,', 'subholding, dan APFS']],
         ['name' => 'Business Application System', 'label' => 'Business Application System', 'tone' => 'indigo', 'description_lines' => ['Merasionalisasi dan', 'memodernisasi', 'aplikasi legacy,', 'termasuk membangun', 'groupwide ERP']],
         ['name' => 'Infrastructure', 'label' => 'Infrastructure', 'tone' => 'cyan', 'description_lines' => ['Membangun', 'infrastruktur best-in-', 'class untuk', 'mendukung', 'peningkatan', 'kompleksitas use case', 'digital']],
@@ -289,6 +289,7 @@ class StrategicHousePageService
             'business_unit_name' => trim((string) ($initiative->organization?->name ?? '')),
             'status' => $status,
             'status_label' => $this->statusLabel($status),
+            'tipe_initiative' => (int) $initiative->tipe_initiative,
             'implementation_status' => $implData['implementation_status'],
             'statuses' => $implData['statuses'],
             'source' => !is_null($initiative->source) ? (int) $initiative->source : null,
@@ -597,6 +598,7 @@ class StrategicHousePageService
             'coe_id' => $i->coe_id ? (int) $i->coe_id : null, 
             'coe_name' => $i->coe?->name, 
             'label' => trim(collect([$i->code, $i->name])->filter()->implode(' - ')), 
+            'tipe_initiative' => (int) $i->tipe_initiative,
             'business_unit' => $i->organization?->name, 
             'groub_id' => $i->organization?->groub_id, 
             'implementation_status' => $implData['implementation_status'], 

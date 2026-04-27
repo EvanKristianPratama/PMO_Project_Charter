@@ -72,9 +72,52 @@ const showStrategyDetails = ref(true);
 const showBusinessStrategy = ref(false);
 const selectedBusinessUnit = ref('');
 const selectedPeriod = ref(null);
+const selectedGitsPeriod = ref('latest');
 
 const dtiSelectedStatus = ref('');
 const gitsSelectedStatus = ref('');
+
+const monthsOrder = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+];
+
+const availableGitsPeriods = computed(() => {
+    const periodSet = new Set();
+    
+    // Gather all unique month-year periods from all IT initiatives
+    const gitsInitiatives = [
+        ...props.strategyCards.flatMap(c => (c.initiatives || [])),
+        ...(props.foundationCard?.initiatives || []),
+        ...(props.architectureCard?.initiatives || []),
+    ];
+
+    gitsInitiatives.forEach(initiative => {
+        if (initiative.statuses && Array.isArray(initiative.statuses)) {
+            initiative.statuses.forEach(s => {
+                const month = s.month || s.end || s.start;
+                if (month && s.year) {
+                    periodSet.add(`${month}-${s.year}`);
+                }
+            });
+        }
+    });
+    
+    const list = Array.from(periodSet).map(period => {
+        const [month, year] = period.split('-');
+        return { 
+            label: `${month} ${year}`, 
+            value: period, 
+            month, 
+            year: parseInt(year) 
+        };
+    }).sort((a, b) => {
+        if (a.year !== b.year) return b.year - a.year;
+        return monthsOrder.indexOf(b.month) - monthsOrder.indexOf(a.month);
+    });
+
+    return [{ label: 'Latest Status Update', value: 'latest' }, ...list];
+});
 
 const statusDesiredOrder = ['DF', 'Done', 'DT 2026', 'ITSBP', 'On Progress', 'On Review', 'SH'];
 const gitsStatusDesiredOrder = ['On Track', 'Delayed', 'At Risk', 'Completed', 'Done', 'Not Started', 'Not Signed'];
@@ -95,12 +138,12 @@ const normalizeStatusLabel = (rawStatus) => {
 
 const getGitsStatusColorClass = (status) => {
     const normalized = String(status ?? '').trim().toLowerCase();
-    if (normalized === 'on track') return 'status-color-ontrack';
+    if (normalized === 'on track') return 'status-color-itontrack';
     if (normalized === 'done' || normalized === 'completed') return 'status-color-itdone';
-    if (normalized === 'at risk') return 'status-color-atrisk';
-    if (normalized === 'delayed') return 'status-color-delayed';
-    if (normalized === 'not started') return 'status-color-notstarted';
-    if (normalized === 'not signed') return 'status-color-notsigned';
+    if (normalized === 'at risk') return 'status-color-itatrisk';
+    if (normalized === 'delayed') return 'status-color-itdelayed';
+    if (normalized === 'not started') return 'status-color-itnotstarted';
+    if (normalized === 'not signed') return 'status-color-itnotsigned';
     return '';
 };
 
@@ -108,7 +151,9 @@ const getStatusColorClass = (status, section = 'dti') => {
     const showStatus = section === 'gits' ? showGitsStatusImplementation.value : showDtiStatusImplementation.value;
     if (!showStatus) return 'status-color-neutral';
     
-    if (section === 'gits') return getGitsStatusColorClass(status);
+    if (section === 'gits') {
+        return getGitsStatusColorClass(status) || 'status-color-neutral';
+    }
 
     const s = normalizeStatusLabel(status);
     if (s === 'DF') return 'status-color-df';
@@ -118,10 +163,35 @@ const getStatusColorClass = (status, section = 'dti') => {
     if (s === 'On Review') return 'status-color-onreview';
     if (s === 'On Progress') return 'status-color-onprogress';
     if (s === 'SH') return 'status-color-sh';
-    return '';
+    return 'status-color-neutral';
 };
 
 const getInitiativeStatus = (initiative) => {
+    // If it's an IT Initiative (tipe_initiative === 2), use its own period filter
+    if (initiative.tipe_initiative === 2) {
+        if (!initiative.statuses || !Array.isArray(initiative.statuses)) {
+            return initiative.implementation_status;
+        }
+
+        if (selectedGitsPeriod.value === 'latest') {
+            const sorted = [...initiative.statuses].sort((a, b) => {
+                if (a.year !== b.year) return b.year - a.year;
+                const monthA = a.month || a.end || a.start;
+                const monthB = b.month || b.end || b.start;
+                return monthsOrder.indexOf(monthB) - monthsOrder.indexOf(monthA);
+            });
+            const latest = sorted[0];
+            return latest ? latest.status : initiative.implementation_status;
+        }
+
+        const found = initiative.statuses.find(s => {
+            const month = s.month || s.end || s.start;
+            return `${month}-${s.year}` === selectedGitsPeriod.value;
+        });
+        return found ? found.status : null;
+    }
+
+    // Default DTI logic using shared PMO period
     if (!selectedPeriod.value) {
         return initiative.implementation_status;
     }
@@ -285,7 +355,11 @@ const filterGitsInitiatives = (initiatives) => {
         }
 
         const matchesStatus = !gitsSelectedStatus.value || implStatus === gitsSelectedStatus.value;
-        const matchesPeriod = !selectedPeriod.value || periodStatus !== null;
+        
+        // Fix: In GITS section, we only filter by period if a specific status filter from the legend is active.
+        // This ensures the strategic structure (pillars) remains visible even if some initiatives 
+        // don't have a status record for the selected period.
+        const matchesPeriod = !gitsSelectedStatus.value || periodStatus !== null;
 
         return matchesStatus && matchesPeriod;
     });
@@ -712,34 +786,16 @@ const filteredBusinessStrategyRows = computed(() => {
 
             <!-- ═══ GRAND IT STRATEGY SECTION ═══ -->
             <div class="gits-section">
-                <div class="gits-header">
-                    <div class="gits-header-content">
-                        <h2 class="gits-title">{{ page.grandStrategyTitle }}</h2>
-                        <p class="gits-subtitle">{{ page.grandStrategyText }}</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button @click="showGitsStatusImplementation = !showGitsStatusImplementation" class="dti-toggle" :class="{ 'dti-toggle--active': !showGitsStatusImplementation }" :title="showGitsStatusImplementation ? 'Hide Status Implementation' : 'Show Status Implementation'">
-                            <CalendarIcon class="dti-toggle-icon" />
-                        </button>
-                        <button @click="showStrategyDetails = !showStrategyDetails" class="dti-toggle" :title="showStrategyDetails ? 'Show Initiatives' : 'Show Descriptions'">
-                            <EyeIcon v-if="!showStrategyDetails" class="dti-toggle-icon" />
-                            <EyeSlashIcon v-else class="dti-toggle-icon" />
-                        </button>
-                    </div>
-                </div>
-
                 <!-- Status Implementation Legend for GITS -->
                 <div v-if="showGitsStatusImplementation" class="mb-4 animate-fade-in-up">
                     <div class="status-legend-container">
                         <div class="status-legend-header">
-                            <span class="status-legend-title">Implementation Status (IT Initiative):</span>
+                            <span class="status-legend-title">Implementation Status (IT):</span>
                             <select 
-                                v-if="statusPeriods && statusPeriods.length > 0" 
-                                v-model="selectedPeriod" 
+                                v-model="selectedGitsPeriod" 
                                 class="status-period-select"
                             >
-                                <option :value="null">All (Latest)</option>
-                                <option v-for="period in statusPeriods" :key="period.label" :value="period">
+                                <option v-for="period in availableGitsPeriods" :key="period.value" :value="period.value">
                                     {{ period.label }}
                                 </option>
                             </select>
@@ -762,6 +818,22 @@ const filteredBusinessStrategyRows = computed(() => {
                                 </span>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <div class="gits-header">
+                    <div class="gits-header-content">
+                        <h2 class="gits-title">{{ page.grandStrategyTitle }}</h2>
+                        <p class="gits-subtitle">{{ page.grandStrategyText }}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button @click="showGitsStatusImplementation = !showGitsStatusImplementation" class="dti-toggle" :class="{ 'dti-toggle--active': !showGitsStatusImplementation }" :title="showGitsStatusImplementation ? 'Hide Status Implementation' : 'Show Status Implementation'">
+                            <CalendarIcon class="dti-toggle-icon" />
+                        </button>
+                        <button @click="showStrategyDetails = !showStrategyDetails" class="dti-toggle" :title="showStrategyDetails ? 'Show Initiatives' : 'Show Descriptions'">
+                            <EyeIcon v-if="!showStrategyDetails" class="dti-toggle-icon" />
+                            <EyeSlashIcon v-else class="dti-toggle-icon" />
+                        </button>
                     </div>
                 </div>
 
@@ -1976,7 +2048,7 @@ const filteredBusinessStrategyRows = computed(() => {
     display: flex;
     align-items: center;
     gap: 8px;
-    border-right: 1px solid #e2e8f0;
+    border-right: 1px solid #154584;
     padding-right: 16px;
 }
 
@@ -1984,7 +2056,6 @@ const filteredBusinessStrategyRows = computed(() => {
     font-size: 11px;
     font-weight: 800;
     color: #64748b;
-    text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
@@ -2076,6 +2147,14 @@ const filteredBusinessStrategyRows = computed(() => {
 .status-color-onprogress { background-color: #2563eb !important; border: 1px solid #1d4ed8; }
 .status-color-sh { background-color: #ef4444 !important; border: 1px solid #dc2626; }
 .status-color-neutral { background-color: #94a3b8 !important; border: 1px solid #64748b; }
+
+/* IT Initiative (GITS) Status Colors - Consistent with IT Building Blocks */
+.status-color-itontrack { background-color: #10b981 !important; color: #ffffff !important; border: 1px solid #059669 !important; }
+.status-color-itdone { background-color: #3b82f6 !important; color: #ffffff !important; border: 1px solid #2563eb !important; }
+.status-color-itatrisk { background-color: #f59e0b !important; color: #ffffff !important; border: 1px solid #d97706 !important; }
+.status-color-itdelayed { background-color: #f43f5e !important; color: #ffffff !important; border: 1px solid #e11d48 !important; }
+.status-color-itnotstarted { background-color: #64748b !important; color: #ffffff !important; border: 1px solid #475569 !important; }
+.status-color-itnotsigned { background-color: #94a3b8 !important; color: #ffffff !important; border: 1px solid #64748b !important; }
 
 .dti-toggle--active {
     background: #184f96 !important;
