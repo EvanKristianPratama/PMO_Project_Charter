@@ -66,14 +66,18 @@ const props = defineProps({
 const route = useRouteHelper();
 const selectedSource = ref('all');
 const showDetails = ref(false);
-const showStatusImplementation = ref(false);
+const showDtiStatusImplementation = ref(false);
+const showGitsStatusImplementation = ref(false);
 const showStrategyDetails = ref(true);
 const showBusinessStrategy = ref(false);
 const selectedBusinessUnit = ref('');
 const selectedPeriod = ref(null);
-const selectedStatus = ref('');
+
+const dtiSelectedStatus = ref('');
+const gitsSelectedStatus = ref('');
 
 const statusDesiredOrder = ['DF', 'Done', 'DT 2026', 'ITSBP', 'On Progress', 'On Review', 'SH'];
+const gitsStatusDesiredOrder = ['On Track', 'Delayed', 'At Risk', 'Completed', 'Done', 'Not Started', 'Not Signed'];
 
 const normalizeStatusLabel = (rawStatus) => {
     const s = String(rawStatus ?? '').trim();
@@ -89,9 +93,23 @@ const normalizeStatusLabel = (rawStatus) => {
     return s;
 };
 
-const getStatusColorClass = (status) => {
-    if (!showStatusImplementation.value) return 'status-color-neutral';
+const getGitsStatusColorClass = (status) => {
+    const normalized = String(status ?? '').trim().toLowerCase();
+    if (normalized === 'on track') return 'status-color-ontrack';
+    if (normalized === 'done' || normalized === 'completed') return 'status-color-itdone';
+    if (normalized === 'at risk') return 'status-color-atrisk';
+    if (normalized === 'delayed') return 'status-color-delayed';
+    if (normalized === 'not started') return 'status-color-notstarted';
+    if (normalized === 'not signed') return 'status-color-notsigned';
+    return '';
+};
+
+const getStatusColorClass = (status, section = 'dti') => {
+    const showStatus = section === 'gits' ? showGitsStatusImplementation.value : showDtiStatusImplementation.value;
+    if (!showStatus) return 'status-color-neutral';
     
+    if (section === 'gits') return getGitsStatusColorClass(status);
+
     const s = normalizeStatusLabel(status);
     if (s === 'DF') return 'status-color-df';
     if (s === 'Done') return 'status-color-done';
@@ -130,17 +148,8 @@ const statusLegend = computed(() => {
         return matchesSource && matchesSelectedBusinessUnit(ini) && matchesPeriod;
     };
 
-    const gitsFilter = (ini) => {
-        const periodStatus = getInitiativeStatus(ini);
-        const matchesPeriod = !selectedPeriod.value || periodStatus !== null;
-        return matchesPeriod;
-    };
-
     const allInitiatives = [
         ...props.technologyCards.flatMap(c => (c.initiatives || []).filter(dtiFilter)),
-        ...props.strategyCards.flatMap(c => (c.initiatives || []).filter(gitsFilter)),
-        ...(props.foundationCard?.initiatives || []).filter(gitsFilter),
-        ...(props.architectureCard?.initiatives || []).filter(gitsFilter),
         ...(props.unassignedInitiatives || []).filter(dtiFilter),
     ];
 
@@ -153,9 +162,50 @@ const statusLegend = computed(() => {
 
     return statusDesiredOrder.map((label) => ({
         label,
-        class: getStatusColorClass(label),
+        class: getStatusColorClass(label, 'dti'),
         count: stats[label],
     })).filter(item => item.count > 0);
+});
+
+const gitsStatusLegend = computed(() => {
+    const stats = {};
+    gitsStatusDesiredOrder.forEach((label) => {
+        stats[label] = 0;
+    });
+    stats['Other'] = 0;
+
+    const gitsInitiatives = [
+        ...props.strategyCards.flatMap(c => (c.initiatives || [])),
+        ...(props.foundationCard?.initiatives || []),
+        ...(props.architectureCard?.initiatives || []),
+    ];
+
+    gitsInitiatives.forEach((initiative) => {
+        const periodStatus = getInitiativeStatus(initiative);
+        if (!periodStatus) return;
+
+        const label = gitsStatusDesiredOrder.find(
+            s => s.toLowerCase() === String(periodStatus).trim().toLowerCase()
+        ) || 'Other';
+        
+        stats[label]++;
+    });
+
+    const legend = gitsStatusDesiredOrder.map((label) => ({
+        label,
+        class: getGitsStatusColorClass(label),
+        count: stats[label],
+    })).filter(item => item.count > 0);
+
+    if (stats['Other'] > 0) {
+        legend.push({
+            label: 'Other',
+            class: '',
+            count: stats['Other']
+        });
+    }
+
+    return legend;
 });
 
 const normalizeBusinessStrategyGroupKey = (value) => {
@@ -211,7 +261,7 @@ const filterDtiInitiatives = (initiatives) => {
         const matchesSource = selectedSource.value === 'all' || ini.source == selectedSource.value;
         const periodStatus = getInitiativeStatus(ini);
         const implStatus = normalizeStatusLabel(periodStatus);
-        const matchesStatus = !selectedStatus.value || implStatus === selectedStatus.value;
+        const matchesStatus = !dtiSelectedStatus.value || implStatus === dtiSelectedStatus.value;
         const matchesPeriod = !selectedPeriod.value || periodStatus !== null;
 
         return matchesSource && matchesSelectedBusinessUnit(ini) && matchesStatus && matchesPeriod;
@@ -224,8 +274,17 @@ const filterGitsInitiatives = (initiatives) => {
     return initiatives.filter((ini) => {
         // Source and Business Unit filters are specifically ignored for GITS section
         const periodStatus = getInitiativeStatus(ini);
-        const implStatus = normalizeStatusLabel(periodStatus);
-        const matchesStatus = !selectedStatus.value || implStatus === selectedStatus.value;
+        
+        const rawLabel = periodStatus ? String(periodStatus).trim() : null;
+        let implStatus = null;
+        
+        if (rawLabel) {
+            implStatus = gitsStatusDesiredOrder.find(
+                s => s.toLowerCase() === rawLabel.toLowerCase()
+            ) || 'Other';
+        }
+
+        const matchesStatus = !gitsSelectedStatus.value || implStatus === gitsSelectedStatus.value;
         const matchesPeriod = !selectedPeriod.value || periodStatus !== null;
 
         return matchesStatus && matchesPeriod;
@@ -459,12 +518,23 @@ const filteredBusinessStrategyRows = computed(() => {
                     <div class="business-strategy-table-scroll">
                         <table class="business-strategy-table">
                             <colgroup>
+                                <col class="business-strategy-col business-strategy-col--business-unit" />
                                 <col class="business-strategy-col business-strategy-col--legacy" />
                                 <col class="business-strategy-col business-strategy-col--legacy" />
                                 <col class="business-strategy-col business-strategy-col--carbon" />
                             </colgroup>
                             <tbody>
                                 <tr v-for="row in filteredBusinessStrategyRows" :key="row.id">
+                                    <td class="business-strategy-table__cell primary-cell">
+                                        <div class="primary-cell__content">
+                                            <div class="primary-logo-wrapper" v-if="row.business_unit_logo">
+                                                <img :src="row.business_unit_logo" :alt="`${row.business_unit} logo`" class="primary-business-unit-logo">
+                                            </div>
+                                            <div class="primary-label-wrapper">
+                                                <span class="primary-business-unit-name">{{ row.business_unit }}</span>
+                                            </div>
+                                        </div>
+                                    </td>
                                     <td
                                         v-for="column in orderedBusinessStrategyColumns"
                                         :key="`${row.id}-${column.key}`"
@@ -476,7 +546,7 @@ const filteredBusinessStrategyRows = computed(() => {
                                 </tr>
                                 <tr v-if="!filteredBusinessStrategyRows.length">
                                     <td
-                                        :colspan="orderedBusinessStrategyColumns.length + 2"
+                                        :colspan="orderedBusinessStrategyColumns.length + 1"
                                         class="business-strategy-table__blank"
                                     >
                                         Belum ada data business strategy.
@@ -509,12 +579,12 @@ const filteredBusinessStrategyRows = computed(() => {
             <div class="dti-section" :class="{ 'dti-section--compact': !showDetails }">
                 <!-- Status Implementation Legend -->
                 <div
-                    v-if="showStatusImplementation"
+                    v-if="showDtiStatusImplementation"
                     class="animate-fade-in-up"
                 >
                     <div class="status-legend-container">
                         <div class="status-legend-header">
-                            <span class="status-legend-title">Implementation Status:</span>
+                            <span class="status-legend-title">Implementation Status (Digital):</span>
                             <select 
                                 v-if="statusPeriods && statusPeriods.length > 0" 
                                 v-model="selectedPeriod" 
@@ -532,8 +602,8 @@ const filteredBusinessStrategyRows = computed(() => {
                                 v-for="status in statusLegend"
                                 :key="`status-legend-${status.label}`"
                                 class="status-legend-item"
-                                :class="{ 'status-legend-item--inactive': selectedStatus && selectedStatus !== status.label }"
-                                @click="selectedStatus = selectedStatus === status.label ? '' : status.label"
+                                :class="{ 'status-legend-item--inactive': dtiSelectedStatus && dtiSelectedStatus !== status.label }"
+                                @click="dtiSelectedStatus = dtiSelectedStatus === status.label ? '' : status.label"
                                 :title="`Filter: ${status.label}`"
                             >
                                 <span
@@ -559,7 +629,7 @@ const filteredBusinessStrategyRows = computed(() => {
                             <option value="3">Baseline RSTI 2025-2029</option>
                             <option value="4">New Initiative 2026</option>
                         </select>
-                        <button @click="showStatusImplementation = !showStatusImplementation" class="dti-toggle" :class="{ 'dti-toggle--active': !showStatusImplementation }" :title="showStatusImplementation ? 'Hide Status Implementation' : 'Show Status Implementation'">
+                        <button @click="showDtiStatusImplementation = !showDtiStatusImplementation" class="dti-toggle" :class="{ 'dti-toggle--active': !showDtiStatusImplementation }" :title="showDtiStatusImplementation ? 'Hide Status Implementation' : 'Show Status Implementation'">
                             <CalendarIcon class="dti-toggle-icon" />
                         </button>
                         <button @click="showDetails = !showDetails" class="dti-toggle" :title="showDetails ? 'Hide Filters & Counts' : 'Show Filters & Counts'">
@@ -647,10 +717,52 @@ const filteredBusinessStrategyRows = computed(() => {
                         <h2 class="gits-title">{{ page.grandStrategyTitle }}</h2>
                         <p class="gits-subtitle">{{ page.grandStrategyText }}</p>
                     </div>
-                    <button @click="showStrategyDetails = !showStrategyDetails" class="dti-toggle" :title="showStrategyDetails ? 'Hide Descriptions' : 'Show Descriptions'">
-                        <EyeIcon v-if="showStrategyDetails" class="dti-toggle-icon" />
-                        <EyeSlashIcon v-else class="dti-toggle-icon" />
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button @click="showGitsStatusImplementation = !showGitsStatusImplementation" class="dti-toggle" :class="{ 'dti-toggle--active': !showGitsStatusImplementation }" :title="showGitsStatusImplementation ? 'Hide Status Implementation' : 'Show Status Implementation'">
+                            <CalendarIcon class="dti-toggle-icon" />
+                        </button>
+                        <button @click="showStrategyDetails = !showStrategyDetails" class="dti-toggle" :title="showStrategyDetails ? 'Show Initiatives' : 'Show Descriptions'">
+                            <EyeIcon v-if="!showStrategyDetails" class="dti-toggle-icon" />
+                            <EyeSlashIcon v-else class="dti-toggle-icon" />
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Status Implementation Legend for GITS -->
+                <div v-if="showGitsStatusImplementation" class="mb-4 animate-fade-in-up">
+                    <div class="status-legend-container">
+                        <div class="status-legend-header">
+                            <span class="status-legend-title">Implementation Status (IT Initiative):</span>
+                            <select 
+                                v-if="statusPeriods && statusPeriods.length > 0" 
+                                v-model="selectedPeriod" 
+                                class="status-period-select"
+                            >
+                                <option :value="null">All (Latest)</option>
+                                <option v-for="period in statusPeriods" :key="period.label" :value="period">
+                                    {{ period.label }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="status-legend-items">
+                            <div
+                                v-for="status in gitsStatusLegend"
+                                :key="`gits-status-legend-${status.label}`"
+                                class="status-legend-item"
+                                :class="{ 'status-legend-item--inactive': gitsSelectedStatus && gitsSelectedStatus !== status.label }"
+                                @click="gitsSelectedStatus = gitsSelectedStatus === status.label ? '' : status.label"
+                                :title="`Filter: ${status.label}`"
+                            >
+                                <span
+                                    class="status-swatch"
+                                    :class="status.class"
+                                ></span>
+                                <span class="status-label">
+                                    {{ status.label }} <span class="status-count">({{ status.count }})</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="gits-pillars" :class="{ 'gits-pillars--hidden': !showStrategyDetails }">
@@ -695,11 +807,11 @@ const filteredBusinessStrategyRows = computed(() => {
                                         class="initiative-link initiative-link--gits"
                                         :title="initiativeHoverTitle(ini)"
                                     >
-                                        <span class="initiative-code-tag" :class="getStatusColorClass(getInitiativeStatus(ini))">{{ ini.code }}</span>
+                                        <span class="initiative-code-tag" :class="getStatusColorClass(getInitiativeStatus(ini), 'gits')">{{ ini.code }}</span>
                                         <span :title="initiativeHoverTitle(ini)">{{ ini.name || ini.label }}</span>
                                     </Link>
                                     <template v-else>
-                                        <span class="initiative-code-tag" :class="getStatusColorClass(getInitiativeStatus(ini))">{{ ini.code }}</span>
+                                        <span class="initiative-code-tag" :class="getStatusColorClass(getInitiativeStatus(ini), 'gits')">{{ ini.code }}</span>
                                         <span :title="initiativeHoverTitle(ini)">{{ ini.name || ini.label }}</span>
                                     </template>
                                 </li>
@@ -732,11 +844,11 @@ const filteredBusinessStrategyRows = computed(() => {
                                     class="initiative-link initiative-link--gits"
                                     :title="initiativeHoverTitle(ini)"
                                 >
-                                    <span class="initiative-code-tag" :class="getStatusColorClass(getInitiativeStatus(ini))">{{ ini.code }}</span>
+                                    <span class="initiative-code-tag" :class="getStatusColorClass(getInitiativeStatus(ini), 'gits')">{{ ini.code }}</span>
                                     <span :title="initiativeHoverTitle(ini)">{{ ini.name || ini.label }}</span>
                                 </Link>
                                 <template v-else>
-                                    <span class="initiative-code-tag" :class="getStatusColorClass(getInitiativeStatus(ini))">{{ ini.code }}</span>
+                                    <span class="initiative-code-tag" :class="getStatusColorClass(getInitiativeStatus(ini), 'gits')">{{ ini.code }}</span>
                                     <span :title="initiativeHoverTitle(ini)">{{ ini.name || ini.label }}</span>
                                 </template>
                             </li>
@@ -765,11 +877,11 @@ const filteredBusinessStrategyRows = computed(() => {
                                     class="initiative-link initiative-link--gits"
                                     :title="initiativeHoverTitle(ini)"
                                 >
-                                    <span class="initiative-code-tag" :class="getStatusColorClass(getInitiativeStatus(ini))">{{ ini.code }}</span>
+                                    <span class="initiative-code-tag" :class="getStatusColorClass(getInitiativeStatus(ini), 'gits')">{{ ini.code }}</span>
                                     <span :title="initiativeHoverTitle(ini)">{{ ini.name || ini.label }}</span>
                                 </Link>
                                 <template v-else>
-                                    <span class="initiative-code-tag" :class="getStatusColorClass(getInitiativeStatus(ini))">{{ ini.code }}</span>
+                                    <span class="initiative-code-tag" :class="getStatusColorClass(getInitiativeStatus(ini), 'gits')">{{ ini.code }}</span>
                                     <span :title="initiativeHoverTitle(ini)">{{ ini.name || ini.label }}</span>
                                 </template>
                             </li>
@@ -930,6 +1042,55 @@ const filteredBusinessStrategyRows = computed(() => {
 .business-strategy-table__blank {
     text-align: center;
     padding: 18px 12px;
+}
+
+.primary-cell {
+    width: auto;
+    min-width: 0;
+    background: #f8fbff;
+    vertical-align: middle !important;
+}
+
+.primary-cell__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    height: 100%;
+    justify-content: center;
+    color: #1e293b;
+    text-align: center;
+}
+
+.primary-logo-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.primary-business-unit-logo {
+    display: block;
+    max-width: 120px;
+    max-height: 42px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+.primary-label-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.primary-business-unit-name {
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.2;
 }
 
 /* ─── ROOF SECTION ─── */
@@ -1623,8 +1784,12 @@ const filteredBusinessStrategyRows = computed(() => {
         min-width: 760px;
     }
 
+    .business-strategy-col--business-unit {
+        width: 200px;
+    }
+
     .business-strategy-col--legacy {
-        width: calc((100% - 220px) / 2);
+        width: calc((100% - 420px) / 2);
     }
 
     .business-strategy-col--carbon {
@@ -1685,6 +1850,10 @@ const filteredBusinessStrategyRows = computed(() => {
 :deep(.dark) .business-strategy-panel {
     border-color: rgba(148, 163, 184, 0.16);
     background: linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(17, 24, 39, 0.98) 100%);
+}
+
+:deep(.dark) .primary-cell {
+    background: rgba(15, 23, 42, 0.55);
 }
 
 :deep(.dark) .business-strategy-filter {
