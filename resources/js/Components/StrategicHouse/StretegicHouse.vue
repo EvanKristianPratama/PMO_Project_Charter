@@ -65,7 +65,7 @@ const props = defineProps({
 
 const route = useRouteHelper();
 const selectedSource = ref('all');
-const showDetails = ref(true);
+const showDetails = ref(false);
 const showStatusImplementation = ref(false);
 const showStrategyDetails = ref(true);
 const showBusinessStrategy = ref(false);
@@ -1139,10 +1139,12 @@ const filteredBusinessStrategyRows = computed(() => {
 
 .dti-cards--hidden .dti-card {
     min-height: 0;
-    height: fit-content;
+    height: auto;
     align-self: start;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 :not(.dti-cards--hidden) .dti-card {
@@ -1157,13 +1159,13 @@ const filteredBusinessStrategyRows = computed(() => {
 
 /* When showing details, increase height to fit the list */
 :not(.dti-cards--hidden) .dti-card--compact {
-    min-height: 120px;
     align-items: flex-start;
     padding-top: 10px;
 }
 
 .dti-cards--hidden .dti-card--compact {
     display: block;
+    height: min-content;
 }
 
 .dti-card-content {
@@ -1215,6 +1217,11 @@ const filteredBusinessStrategyRows = computed(() => {
 .dti-cards--hidden .dti-card-title {
     padding-right: 0;
     margin-top: 0;
+    margin-bottom: 0;
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Removed redundant selector */
