@@ -76,6 +76,11 @@ const selectedPeriod = ref(null);
 const dtiSelectedStatus = ref('');
 const gitsSelectedStatus = ref('');
 
+const monthsOrder = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+];
+
 const statusDesiredOrder = ['DF', 'Done', 'DT 2026', 'ITSBP', 'On Progress', 'On Review', 'SH'];
 const gitsStatusDesiredOrder = ['On Track', 'Delayed', 'At Risk', 'Completed', 'Done', 'Not Started', 'Not Signed'];
 
@@ -95,12 +100,12 @@ const normalizeStatusLabel = (rawStatus) => {
 
 const getGitsStatusColorClass = (status) => {
     const normalized = String(status ?? '').trim().toLowerCase();
-    if (normalized === 'on track') return 'status-color-ontrack';
+    if (normalized === 'on track') return 'status-color-itontrack';
     if (normalized === 'done' || normalized === 'completed') return 'status-color-itdone';
-    if (normalized === 'at risk') return 'status-color-atrisk';
-    if (normalized === 'delayed') return 'status-color-delayed';
-    if (normalized === 'not started') return 'status-color-notstarted';
-    if (normalized === 'not signed') return 'status-color-notsigned';
+    if (normalized === 'at risk') return 'status-color-itatrisk';
+    if (normalized === 'delayed') return 'status-color-itdelayed';
+    if (normalized === 'not started') return 'status-color-itnotstarted';
+    if (normalized === 'not signed') return 'status-color-itnotsigned';
     return '';
 };
 
@@ -108,7 +113,9 @@ const getStatusColorClass = (status, section = 'dti') => {
     const showStatus = section === 'gits' ? showGitsStatusImplementation.value : showDtiStatusImplementation.value;
     if (!showStatus) return 'status-color-neutral';
     
-    if (section === 'gits') return getGitsStatusColorClass(status);
+    if (section === 'gits') {
+        return getGitsStatusColorClass(status) || 'status-color-neutral';
+    }
 
     const s = normalizeStatusLabel(status);
     if (s === 'DF') return 'status-color-df';
@@ -118,10 +125,35 @@ const getStatusColorClass = (status, section = 'dti') => {
     if (s === 'On Review') return 'status-color-onreview';
     if (s === 'On Progress') return 'status-color-onprogress';
     if (s === 'SH') return 'status-color-sh';
-    return '';
+    return 'status-color-neutral';
 };
 
 const getInitiativeStatus = (initiative) => {
+    // If it's an IT Initiative (tipe_initiative === 2), use logic consistent with ItBuildingBlock.vue
+    if (initiative.tipe_initiative === 2) {
+        if (!selectedPeriod.value) {
+            // Latest status from history or implementation_status
+            const sorted = (initiative.statuses || []).slice().sort((a, b) => {
+                if (a.year !== b.year) return b.year - a.year;
+                const monthA = a.end || a.start || a.month;
+                const monthB = b.end || b.start || b.month;
+                return monthsOrder.indexOf(monthB) - monthsOrder.indexOf(monthA);
+            });
+            return sorted[0] ? sorted[0].status : initiative.implementation_status;
+        }
+
+        // Specific period selected
+        const found = (initiative.statuses || []).find(s => {
+            const matchesYear = s.year === selectedPeriod.value.year;
+            const month = s.end || s.start || s.month;
+            // Match against the end of the DTI range period
+            return matchesYear && month === selectedPeriod.value.end;
+        });
+
+        return found ? found.status : null;
+    }
+
+    // Default DTI logic
     if (!selectedPeriod.value) {
         return initiative.implementation_status;
     }
@@ -285,7 +317,11 @@ const filterGitsInitiatives = (initiatives) => {
         }
 
         const matchesStatus = !gitsSelectedStatus.value || implStatus === gitsSelectedStatus.value;
-        const matchesPeriod = !selectedPeriod.value || periodStatus !== null;
+        
+        // Fix: In GITS section, we only filter by period if a specific status filter from the legend is active.
+        // This ensures the strategic structure (pillars) remains visible even if some initiatives 
+        // don't have a status record for the selected period.
+        const matchesPeriod = !gitsSelectedStatus.value || periodStatus !== null;
 
         return matchesStatus && matchesPeriod;
     });
@@ -2076,6 +2112,14 @@ const filteredBusinessStrategyRows = computed(() => {
 .status-color-onprogress { background-color: #2563eb !important; border: 1px solid #1d4ed8; }
 .status-color-sh { background-color: #ef4444 !important; border: 1px solid #dc2626; }
 .status-color-neutral { background-color: #94a3b8 !important; border: 1px solid #64748b; }
+
+/* IT Initiative (GITS) Status Colors - Consistent with IT Building Blocks */
+.status-color-itontrack { background-color: #10b981 !important; color: #ffffff !important; border: 1px solid #059669 !important; }
+.status-color-itdone { background-color: #3b82f6 !important; color: #ffffff !important; border: 1px solid #2563eb !important; }
+.status-color-itatrisk { background-color: #f59e0b !important; color: #ffffff !important; border: 1px solid #d97706 !important; }
+.status-color-itdelayed { background-color: #f43f5e !important; color: #ffffff !important; border: 1px solid #e11d48 !important; }
+.status-color-itnotstarted { background-color: #64748b !important; color: #ffffff !important; border: 1px solid #475569 !important; }
+.status-color-itnotsigned { background-color: #94a3b8 !important; color: #ffffff !important; border: 1px solid #64748b !important; }
 
 .dti-toggle--active {
     background: #184f96 !important;
