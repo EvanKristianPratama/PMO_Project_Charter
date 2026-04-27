@@ -183,7 +183,7 @@ export function useNavigation() {
             },
             {
                 label: "Program Planning",
-                href: safeRoute("program-planning.program-definition.digital-initiatives"),
+                href: safeRoute("program-planning"),
                 icon: FlagIcon,
                 active: (url) =>
                     url.startsWith("/program-planning"),

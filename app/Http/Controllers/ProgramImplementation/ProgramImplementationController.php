@@ -17,8 +17,8 @@ class ProgramImplementationController extends Controller
     public function __invoke(): Response|RedirectResponse
     {
         return Inertia::render(
-            'ProgramImplementation/Index',
-            $this->pageService->getOverviewPageProps(),
+            'ProgramImplementation/Dashboard',
+            $this->pageService->getDashboardPageProps(),
         );
     }
 }
