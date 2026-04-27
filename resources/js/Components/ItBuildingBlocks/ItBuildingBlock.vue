@@ -17,9 +17,9 @@ const props = defineProps({
 const route = useRouteHelper();
 
 const initiativeProjectCharterHref = (initiative) => {
-    const mappedProjectId = Number(initiative?.mapped_project_id ?? 0);
-    return mappedProjectId > 0
-        ? route('it-initiatives.show', { project: mappedProjectId, tab: 'charter' })
+    const projectId = Number(initiative?.mapped_project_id ?? initiative?.id ?? 0);
+    return projectId > 0
+        ? route('it-initiatives.show', { project: projectId, tab: 'charter' })
         : null;
 };
 

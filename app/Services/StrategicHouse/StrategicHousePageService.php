@@ -60,8 +60,8 @@ class StrategicHousePageService
         $pilarId = (string) ($filters['pilar'] ?? '1');
 
         // 1. Always available lightweight data
-        $coes = Cache::remember('sh_coes_fixed', 3600, fn() => MstCoe::query()->select('id', 'name')->orderBy('id')->get());
-        $dualGrowthGoals = Cache::remember('sh_dual_goals_fixed', 3600, fn() => $this->getDualGrowthGoals());
+        $coes = Cache::remember('sh_coes_fixed_v2', 3600, fn() => MstCoe::query()->select('id', 'name')->orderBy('id')->get());
+        $dualGrowthGoals = Cache::remember('sh_dual_goals_fixed_v2', 3600, fn() => $this->getDualGrowthGoals());
         $roofSection = Cache::remember('sh_roof_fixed', 3600, fn() => $this->getRoofSection());
 
         $mappingData = null;
@@ -235,7 +235,7 @@ class StrategicHousePageService
 
     private function getConsolidatedInitiatives(): Collection
     {
-        return Cache::remember('sh_consolidated_initiatives_v6', 3600, function() {
+        return Cache::remember('sh_consolidated_initiatives_v7', 3600, function() {
             return MstInitiative::query()->with(['latestStatus', 'organization', 'latestStatusImplementation', 'statusImplementations', 'sourceData', 'taggings', 'mappedProjects'])->orderBy('code')->get();
         });
     }
@@ -254,6 +254,8 @@ class StrategicHousePageService
     private function mapInitiativeForSummary(MstInitiative $initiative): array
     {
         $status = $this->normalizeStatus($initiative->latestPlanningStatusValue());
+        $mappedProject = $initiative->mappedProjects?->first();
+
         return [
             'id' => (int) $initiative->id,
             'code' => $initiative->code,
@@ -268,6 +270,7 @@ class StrategicHousePageService
             'statuses' => collect($initiative->statusImplementations ?? [])->map(fn($s) => ['start' => $s->start, 'end' => $s->end, 'year' => (int) $s->year, 'status' => $s->review_status])->values()->all(),
             'source' => !is_null($initiative->source) ? (int) $initiative->source : null,
             'source_name' => $initiative->sourceData?->name,
+            'mapped_project_id' => $mappedProject?->id,
         ];
     }
 
@@ -525,7 +528,23 @@ class StrategicHousePageService
     private function getDirectDualGrowthInitiatives(): Collection { return InitiativeTagging::query()->with(['initiative.coe', 'initiative.organization', 'initiative.latestStatusImplementation', 'initiative.statusImplementations'])->where('pilar', 2)->whereNull('themes_id')->get()->groupBy(fn ($t) => strtoupper((string) $t->goal))->map(fn ($ts) => $tappings = $ts->map(fn ($t) => $t->initiative)->filter()->unique('id')->sortBy(fn ($i) => sprintf('%08s-%s', (string) $i->code, (string) $i->name))->values()->map(fn ($i) => $this->mapDualGrowthInitiative($i))->all()); }
     private function mapDualGrowthGoal(Goal $g, array $d = []): array { $ts = collect($g->themes ?? [])->map(fn ($t) => $this->mapDualGrowthTheme($t))->values(); return ['id' => (int) $g->id, 'code' => (string) $g->code, 'title' => (string) $g->title, 'themes' => $ts->all(), 'direct_initiatives_count' => count($d), 'direct_initiatives' => $d, 'initiatives_count' => (int) $ts->sum('initiatives_count') + count($d)]; }
     private function mapDualGrowthTheme($t): array { $is = collect($t->initiativeTaggings ?? [])->map(fn ($tg) => $tg->initiative)->filter()->unique('id')->sortBy(fn ($i) => sprintf('%08s-%s', (string) $i->code, (string) $i->name))->values()->map(fn ($i) => $this->mapDualGrowthInitiative($i))->all(); return ['id' => (int) $t->id, 'theme_number' => (int) $t->theme_number, 'name' => (string) $t->name, 'label' => (string) $t->name, 'initiatives_count' => count($is), 'initiatives' => $is]; }
-    private function mapDualGrowthInitiative($i): array { return ['id' => (int) $i->id, 'code' => $i->code, 'name' => $i->name, 'description' => $i->description, 'coe_id' => $i->coe_id ? (int) $i->coe_id : null, 'coe_name' => $i->coe?->name, 'label' => trim(collect([$i->code, $i->name])->filter()->implode(' - ')), 'business_unit' => $i->organization?->name, 'groub_id' => $i->organization?->groub_id, 'implementation_status' => $i->latestStatusImplementation?->review_status, 'statuses' => collect($i->statusImplementations ?? [])->map(fn($s) => ['start' => $s->start, 'end' => $s->end, 'year' => (int) $s->year, 'status' => $s->review_status])->values()->all(), 'source' => !is_null($i->source) ? (int) $i->source : null]; }
+    private function mapDualGrowthInitiative($i): array { 
+        return [
+            'id' => (int) $i->id, 
+            'code' => $i->code, 
+            'name' => $i->name, 
+            'description' => $i->description, 
+            'coe_id' => $i->coe_id ? (int) $i->coe_id : null, 
+            'coe_name' => $i->coe?->name, 
+            'label' => trim(collect([$i->code, $i->name])->filter()->implode(' - ')), 
+            'business_unit' => $i->organization?->name, 
+            'groub_id' => $i->organization?->groub_id, 
+            'implementation_status' => $i->latestStatusImplementation?->review_status, 
+            'statuses' => collect($i->statusImplementations ?? [])->map(fn($s) => ['start' => $s->start, 'end' => $s->end, 'year' => (int) $s->year, 'status' => $s->review_status])->values()->all(), 
+            'source' => !is_null($i->source) ? (int) $i->source : null,
+            'mapped_project_id' => $i->mappedProjects?->first()?->id,
+        ]; 
+    }
     private function getFocusBands(array $gs): array { return collect($gs)->map(fn ($g) => ['id' => is_numeric($g['id']) ? 'goal-'.$g['id'] : (string) $g['id'], 'code' => $g['code'], 'title' => $g['title'], 'label' => $g['title']])->values()->all(); }
     private function getRoofSection(): array { $gs = Goal::query()->with(['themes' => fn ($q) => $q->orderBy('theme_number')])->where('pilar', '2')->whereIn('code', ['A', 'B'])->get()->keyBy('code'); $m = $gs->get('A'); $s = $gs->get('B'); return ['main_goal' => $m ? ['id' => (int) $m->id, 'code' => $m->code, 'title' => $m->title] : null, 'main_goal_themes' => collect($m?->themes ?? [])->take(2)->map(fn ($t) => ['id' => (int) $t->id, 'theme_number' => (int) $t->theme_number, 'name' => $t->name, 'label' => $t->name])->values()->all(), 'side_goal' => $s ? ['id' => (int) $s->id, 'code' => $s->code, 'title' => $s->title] : null]; }
     private function buildStatusBreakdown(Collection $is): array { return collect(['drafting', 'propose', 'review', 'approved', 'other'])->map(fn ($s) => ['key' => $s, 'label' => $this->statusLabel($s), 'count' => (int) $is->where('status', $s)->count()])->filter(fn ($i) => $i['count'] > 0)->values()->all(); }
