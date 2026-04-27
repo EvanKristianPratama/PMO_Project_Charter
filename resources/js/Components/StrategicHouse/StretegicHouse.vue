@@ -326,9 +326,9 @@ const initiativeSummaryHref = (initiative) => {
 };
 
 const initiativeProjectCharterHref = (initiative) => {
-    const mappedProjectId = Number(initiative?.mapped_project_id ?? 0);
-    return mappedProjectId > 0
-        ? route('it-initiatives.show', { project: mappedProjectId, tab: 'charter' })
+    const projectId = Number(initiative?.mapped_project_id ?? initiative?.id ?? 0);
+    return projectId > 0
+        ? route('it-initiatives.show', { project: projectId, tab: 'charter' })
         : null;
 };
 
@@ -662,11 +662,25 @@ const filteredBusinessStrategyRows = computed(() => {
                         
                         <!-- Description View -->
                         <div v-if="showStrategyDetails" class="gits-pillar-desc">
-                            <p v-for="(line, lineIndex) in (card.description_lines?.length ? card.description_lines : card.initiatives_preview.map(item => item.label))"
-                                :key="`${card.name}-${lineIndex}`">
-                                {{ line }}
-                            </p>
-                            <p v-if="!card.description_lines?.length && card.is_empty" class="gits-pillar-empty">
+                            <template v-if="card.description_lines?.length">
+                                <p v-for="(line, lineIndex) in card.description_lines" :key="`${card.name}-desc-${lineIndex}`">
+                                    {{ line }}
+                                </p>
+                            </template>
+                            <template v-else-if="card.initiatives_preview?.length">
+                                <div v-for="(ini, idx) in card.initiatives_preview" :key="`${card.name}-prev-${idx}`">
+                                    <Link
+                                        v-if="initiativeProjectCharterHref(ini)"
+                                        :href="initiativeProjectCharterHref(ini)"
+                                        class="initiative-link initiative-link--gits mb-1"
+                                        :title="initiativeHoverTitle(ini)"
+                                    >
+                                        {{ ini.label || ini.name }}
+                                    </Link>
+                                    <p v-else class="mb-1">{{ ini.label || ini.name }}</p>
+                                </div>
+                            </template>
+                            <p v-if="card.is_empty" class="gits-pillar-empty">
                                 Belum ada initiative yang terhubung ke area ini.
                             </p>
                         </div>
