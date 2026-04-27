@@ -43,7 +43,7 @@ class ItInitiativeRoadmapService
                         ->orderByDesc('updated_at')
                         ->orderByDesc('id'),
                     'charters' => fn ($cq) => $cq
-                        ->select(['id', 'project_id', 'version_label', 'status', 'objectives', 'duration'])
+                        ->select(['id', 'project_id', 'version_label', 'status', 'objectives', 'duration', 'owner', 'leader'])
                         ->with(['statusRef:id,name', 'milestones' => fn ($mq) => $mq
                             ->select(['id', 'pc_id', 'version', 'title', 'output', 'start_date', 'end_date', 'type', 'milestone_type', 'order'])
                             ->orderBy('order')
@@ -248,6 +248,8 @@ class ItInitiativeRoadmapService
             'status_ref'    => $charter->statusRef ? ['id' => $charter->statusRef->id, 'name' => $charter->statusRef->name] : null,
             'objectives'    => $charter->objectives,
             'duration'      => $charter->duration,
+            'owner'         => $charter->owner,
+            'leader'        => $charter->leader,
             'milestones'    => $milestones,
             'charter'       => [
                 'id'            => (int) $charter->id,
@@ -257,6 +259,8 @@ class ItInitiativeRoadmapService
                 'status_ref'    => $charter->statusRef ? ['id' => $charter->statusRef->id, 'name' => $charter->statusRef->name] : null,
                 'objectives'    => $charter->objectives,
                 'duration'      => $charter->duration,
+                'owner'         => $charter->owner,
+                'leader'        => $charter->leader,
             ],
         ];
     }
