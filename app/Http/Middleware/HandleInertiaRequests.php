@@ -44,6 +44,8 @@ class HandleInertiaRequests extends Middleware
                 'error' => $request->session()->get('error'),
                 'check_status' => $request->session()->get('check_status'),
             ],
+
+            'currentConnection' => session('db_connection', 'cloud'),
         ];
     }
 }

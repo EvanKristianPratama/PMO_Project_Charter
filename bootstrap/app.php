@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
 
         $middleware->web(append: [
+            \App\Http\Middleware\DatabaseConnectionSwitcher::class,
             \App\Http\Middleware\HandleInertiaRequests::class,
         ]);
 
