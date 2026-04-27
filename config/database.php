@@ -151,6 +151,42 @@ return [
             ], static fn ($value) => $value !== null && $value !== ''),
         ],
 
+        'local' => [
+            'driver' => 'mysql',
+            'host' => env('DB_LOCAL_HOST', '127.0.0.1'),
+            'port' => env('DB_LOCAL_PORT', '3306'),
+            'database' => env('DB_LOCAL_DATABASE', 'pmo-14maret'),
+            'username' => env('DB_LOCAL_USERNAME', 'root'),
+            'password' => env('DB_LOCAL_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => env('DB_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => [],
+        ],
+
+        'cloud' => [
+            'driver' => 'mysql',
+            'host' => env('DB_CLOUD_HOST', 'mysql-3fb43829-pmopc01.h.aivencloud.com'),
+            'port' => env('DB_CLOUD_PORT', '14759'),
+            'database' => env('DB_CLOUD_DATABASE', 'defaultdb'),
+            'username' => env('DB_CLOUD_USERNAME', 'avnadmin'),
+            'password' => env('DB_CLOUD_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => env('DB_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA) => $mysqlSslCa,
+            ]) : [],
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),
