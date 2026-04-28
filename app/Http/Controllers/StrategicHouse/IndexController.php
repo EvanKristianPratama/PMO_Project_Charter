@@ -22,13 +22,16 @@ class IndexController extends Controller
         }
 
         $filters = $request->filters();
-        $selectedProps = $this->getPropsForView($filters['view'] ?? 'mapping');
+        $selectedProps = $this->getPropsForView(
+            $filters['view'] ?? 'mapping',
+            $filters['roadmap'] ?? 'it',
+        );
         $props = $this->strategicHousePageService->getPageProps($filters, $selectedProps);
 
         return Inertia::render('StrategicHouse/Index', $props);
     }
 
-    private function getPropsForView(string $view): array
+    private function getPropsForView(string $view, string $roadmapMode = 'it'): array
     {
         return match ($view) {
             'mapping' => [
@@ -59,16 +62,32 @@ class IndexController extends Controller
             'initiative-support' => ['initiativeSupportGroups', 'initiativeSupportDigitalOptions', 'initiativeSupportItOptions'],
             'map-technology' => ['mapTechnologies', 'mapTechnologyCoeOptions', 'mapTechnologyInitiativeOptions'],
             'initiative-relation' => ['mstInitiatives', 'initiativeRelations', 'modelRelationOptions', 'typeRelationOptions'],
-            'roadmap' => [
-                'itRoadmapGroups',
-                'itRoadmapStartYear',
-                'itRoadmapEndYear',
-                'itRoadmapTotalCount',
-                'itRoadmapMilestoneTypeOptions',
-                'digitalRoadmapGroups',
-                'digitalRoadmapStartYear',
-                'digitalRoadmapEndYear',
-            ],
+            'roadmap' => match ($roadmapMode) {
+                'digital' => [
+                    'digitalRoadmapGroups',
+                    'digitalRoadmapTotalCount',
+                    'digitalRoadmapStartYear',
+                    'digitalRoadmapEndYear',
+                ],
+                'all' => [
+                    'itRoadmapGroups',
+                    'itRoadmapStartYear',
+                    'itRoadmapEndYear',
+                    'itRoadmapTotalCount',
+                    'itRoadmapMilestoneTypeOptions',
+                    'digitalRoadmapGroups',
+                    'digitalRoadmapTotalCount',
+                    'digitalRoadmapStartYear',
+                    'digitalRoadmapEndYear',
+                ],
+                default => [
+                    'itRoadmapGroups',
+                    'itRoadmapStartYear',
+                    'itRoadmapEndYear',
+                    'itRoadmapTotalCount',
+                    'itRoadmapMilestoneTypeOptions',
+                ],
+            },
             'strategic-pillars' => [
                 'strategicPillars',
                 'allGoals',

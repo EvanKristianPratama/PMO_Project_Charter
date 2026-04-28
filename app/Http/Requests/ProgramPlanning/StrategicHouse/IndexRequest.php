@@ -15,11 +15,12 @@ class IndexRequest extends FormRequest
     {
         return [
             'initiative_type' => ['nullable', 'integer', 'in:1,2'],
-            'show_empty' => ['nullable', 'boolean'],
+            'show_empty' => ['nullable'],
             'pilar' => ['nullable', 'string'],
             'goal_id' => ['nullable', 'integer'],
             'org_id' => ['nullable', 'integer'],
             'view' => ['nullable', 'string', 'in:mapping,business-strategy,dual-growth,digital-transformation-initiatives,it-building-blocs,it-initiatives,map-technology,initiative-relation,initiative-support,roadmap,strategic-pillars'],
+            'roadmap' => ['nullable', 'string', 'in:it,digital,all'],
         ];
     }
 
@@ -36,6 +37,7 @@ class IndexRequest extends FormRequest
             'goal_id' => $this->input('goal_id'),
             'org_id' => $this->input('org_id'),
             'view' => $this->input('view'),
+            'roadmap' => $this->input('roadmap'),
         ];
     }
 }

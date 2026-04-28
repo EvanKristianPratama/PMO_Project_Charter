@@ -33,7 +33,11 @@ class StrategicPillarPageService
             ->select('id', 'code', 'name', 'description', 'business_unit', 'tipe_initiative', 'source')
             ->with([
                 'organization:id,name', 
-                'latestStatusImplementation:id,initiative_id,review_status', 
+                'latestStatusImplementation' => fn ($query) => $query->select([
+                    'trs_status_implementation.id',
+                    'trs_status_implementation.initiative_id',
+                    'trs_status_implementation.review_status',
+                ]), 
                 'taggings:id,initiative_id,pilar,goal,themes_id'
             ])
             ->orderBy('code')

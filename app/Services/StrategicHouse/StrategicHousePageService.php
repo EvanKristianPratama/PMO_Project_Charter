@@ -41,6 +41,23 @@ class StrategicHousePageService
     private const FOUNDATION_COE_CONFIG = ['name' => 'People, Process and Technology', 'label' => 'People, Process and Technology', 'tone' => 'foundation'];
     private const ARCHITECTURE_COE_CONFIG = ['name' => 'Overall Architecture', 'label' => 'Overall Architecture', 'tone' => 'architecture'];
     private const TBC_COE_CONFIG = ['name' => 'TBC', 'label' => 'TBC', 'tone' => 'support'];
+    private const INITIATIVE_BASE_SELECT = [
+        'id',
+        'coe_id',
+        'tipe_initiative',
+        'business_unit',
+        'code',
+        'name',
+        'description',
+        'status',
+        'source',
+    ];
+    private const CONSOLIDATED_PROFILE_MAPPING = 'mapping';
+    private const CONSOLIDATED_PROFILE_BUSINESS_STRATEGY = 'business_strategy';
+    private const CONSOLIDATED_PROFILE_DIGITAL_OPTIONS = 'digital_options';
+    private const CONSOLIDATED_PROFILE_IT_OPTIONS = 'it_options';
+    private const CONSOLIDATED_PROFILE_STRATEGIC_PILLARS = 'strategic_pillars';
+    private const CONSOLIDATED_PROFILE_DIGITAL_ROADMAP = 'digital_roadmap';
 
     public function __construct(
         protected ItBuildingBlockService $itBuildingBlockService,
@@ -61,9 +78,10 @@ class StrategicHousePageService
 
         // 1. Always available lightweight data
         $coes = Cache::remember('sh_coes_fixed_v2', 3600, fn() => MstCoe::query()->select('id', 'name')->orderBy('id')->get());
-        $dualGrowthGoals = Cache::remember('sh_dual_goals_fixed_v2', 3600, fn() => $this->getDualGrowthGoals());
+        $focusBandGoals = Cache::remember('sh_focus_band_goals_v1', 3600, fn() => $this->getFocusBandGoals());
         $roofSection = Cache::remember('sh_roof_fixed', 3600, fn() => $this->getRoofSection());
 
+        $dualGrowthGoals = null;
         $mappingData = null;
         $mappingBusinessStrategyProps = null;
         $businessStrategyProps = null;
@@ -74,17 +92,51 @@ class StrategicHousePageService
         $itRoadmapProps = null;
         $digitalRoadmapProps = null;
         $digitalRoadmapGroups = null;
+        $mappingInitiatives = null;
+        $businessStrategyInitiatives = null;
+        $digitalInitiativeOptionModels = null;
+        $itInitiativeOptionModels = null;
+        $strategicPillarInitiatives = null;
+        $digitalRoadmapInitiatives = null;
 
-        $loadMappingData = function () use (&$mappingData, $coes, $initiativeType, $normalizedFilters): array {
-            return $mappingData ??= $this->getMappingData($coes, $initiativeType, $normalizedFilters['show_empty']);
+        $loadDualGrowthGoals = function () use (&$dualGrowthGoals): array {
+            return $dualGrowthGoals ??= Cache::remember('sh_dual_goals_fixed_v3', 3600, fn() => $this->getDualGrowthGoals());
+        };
+
+        $loadMappingInitiatives = function () use (&$mappingInitiatives): Collection {
+            return $mappingInitiatives ??= $this->getConsolidatedInitiatives(self::CONSOLIDATED_PROFILE_MAPPING);
+        };
+
+        $loadBusinessStrategyInitiatives = function () use (&$businessStrategyInitiatives): Collection {
+            return $businessStrategyInitiatives ??= $this->getConsolidatedInitiatives(self::CONSOLIDATED_PROFILE_BUSINESS_STRATEGY);
+        };
+
+        $loadDigitalInitiativeOptionModels = function () use (&$digitalInitiativeOptionModels): Collection {
+            return $digitalInitiativeOptionModels ??= $this->getConsolidatedInitiatives(self::CONSOLIDATED_PROFILE_DIGITAL_OPTIONS);
+        };
+
+        $loadItInitiativeOptionModels = function () use (&$itInitiativeOptionModels): Collection {
+            return $itInitiativeOptionModels ??= $this->getConsolidatedInitiatives(self::CONSOLIDATED_PROFILE_IT_OPTIONS);
+        };
+
+        $loadStrategicPillarInitiatives = function () use (&$strategicPillarInitiatives): Collection {
+            return $strategicPillarInitiatives ??= $this->getConsolidatedInitiatives(self::CONSOLIDATED_PROFILE_STRATEGIC_PILLARS);
+        };
+
+        $loadDigitalRoadmapInitiatives = function () use (&$digitalRoadmapInitiatives): Collection {
+            return $digitalRoadmapInitiatives ??= $this->getConsolidatedInitiatives(self::CONSOLIDATED_PROFILE_DIGITAL_ROADMAP);
+        };
+
+        $loadMappingData = function () use (&$mappingData, $coes, $initiativeType, $normalizedFilters, $loadMappingInitiatives): array {
+            return $mappingData ??= $this->getMappingData($coes, $loadMappingInitiatives(), $initiativeType, $normalizedFilters['show_empty']);
         };
 
         $loadMappingBusinessStrategyProps = function () use (&$mappingBusinessStrategyProps): array {
             return $mappingBusinessStrategyProps ??= $this->businessStrategyService->getMappingProps();
         };
 
-        $loadBusinessStrategyProps = function () use (&$businessStrategyProps): array {
-            return $businessStrategyProps ??= $this->businessStrategyService->getPageProps($this->getConsolidatedInitiatives());
+        $loadBusinessStrategyProps = function () use (&$businessStrategyProps, $loadBusinessStrategyInitiatives): array {
+            return $businessStrategyProps ??= $this->businessStrategyService->getPageProps($loadBusinessStrategyInitiatives());
         };
 
         $loadInitiativeSupportProps = function () use (&$initiativeSupportProps): array {
@@ -95,8 +147,8 @@ class StrategicHousePageService
             return $mapTechnologyProps ??= $this->mapTechnologyService->getPageProps();
         };
 
-        $loadStrategicPillarProps = function () use (&$strategicPillarProps, $filters, $pilarId, $initiativeType): array {
-            return $strategicPillarProps ??= $this->strategicPillarPageService->getPageProps($filters['goal_id'] ?? null, $filters['org_id'] ?? null, $pilarId, $initiativeType, $this->getConsolidatedInitiatives());
+        $loadStrategicPillarProps = function () use (&$strategicPillarProps, $filters, $pilarId, $initiativeType, $loadStrategicPillarInitiatives): array {
+            return $strategicPillarProps ??= $this->strategicPillarPageService->getPageProps($filters['goal_id'] ?? null, $filters['org_id'] ?? null, $pilarId, $initiativeType, $loadStrategicPillarInitiatives());
         };
 
         $loadInitiativeRelationProps = function () use (&$initiativeRelationProps): array {
@@ -111,8 +163,11 @@ class StrategicHousePageService
             return $digitalRoadmapProps ??= $this->digitalRoadmapPageService->getIndexPageProps();
         };
 
-        $loadDigitalRoadmapGroups = function () use (&$digitalRoadmapGroups, $loadDigitalRoadmapPageProps): array {
-            return $digitalRoadmapGroups ??= $this->buildDigitalRoadmapGroups($loadDigitalRoadmapPageProps()['roadmapItems'] ?? []);
+        $loadDigitalRoadmapGroups = function () use (&$digitalRoadmapGroups, $loadDigitalRoadmapPageProps, $loadDigitalRoadmapInitiatives): array {
+            return $digitalRoadmapGroups ??= $this->buildDigitalRoadmapGroups(
+                $loadDigitalRoadmapPageProps()['roadmapItems'] ?? [],
+                $loadDigitalRoadmapInitiatives(),
+            );
         };
 
         $baseProps = [
@@ -127,7 +182,7 @@ class StrategicHousePageService
                 'grandStrategyText' => 'Single source of truth for groupwide IT reference architecture',
             ],
             'roofSection' => $roofSection,
-            'focusBands' => $this->getFocusBands($dualGrowthGoals),
+            'focusBands' => $this->getFocusBands($focusBandGoals),
             'coeOptions' => $coes->map(fn($coe) => ['id' => (int)$coe->id, 'name' => $coe->name])->sortBy('name')->values(),
             'statusPeriods' => Cache::remember('sh_periods', 3600, fn() => $this->itBuildingBlockService->getStatusPeriods()),
         ];
@@ -154,10 +209,10 @@ class StrategicHousePageService
             'businessStrategyColumns' => fn() => $loadBusinessStrategyProps()['strategyColumns'],
             'businessStrategyOrganizationOptions' => fn() => $loadBusinessStrategyProps()['organizationOptions'],
 
-            'dualGrowthGoals' => fn() => $dualGrowthGoals,
-            'digitalInitiativeOptions' => fn() => $this->itBuildingBlockService->getDigitalInitiativeOptions($this->getConsolidatedInitiatives()),
+            'dualGrowthGoals' => fn() => $loadDualGrowthGoals(),
+            'digitalInitiativeOptions' => fn() => $this->itBuildingBlockService->getDigitalInitiativeOptions($loadDigitalInitiativeOptionModels()),
             'itBuildingBlockMatrix' => fn() => $this->itBuildingBlockService->getGroupedMappings(),
-            'itInitiativeOptions' => fn() => $this->itBuildingBlockService->getItInitiativeOptions($this->getConsolidatedInitiatives()),
+            'itInitiativeOptions' => fn() => $this->itBuildingBlockService->getItInitiativeOptions($loadItInitiativeOptionModels()),
 
             'initiativeSupportGroups' => fn() => $loadInitiativeSupportProps()['groups'],
             'initiativeSupportDigitalOptions' => fn() => $loadInitiativeSupportProps()['digitalInitiativeOptions'],
@@ -189,7 +244,7 @@ class StrategicHousePageService
             'itRoadmapMilestoneTypeOptions' => fn() => $loadItRoadmapProps()['milestoneTypeOptions'],
 
             'digitalRoadmapGroups' => fn() => $loadDigitalRoadmapGroups(),
-            'digitalRoadmapTotalCount' => fn() => $this->getConsolidatedInitiatives()
+            'digitalRoadmapTotalCount' => fn() => $loadDigitalRoadmapInitiatives()
                 ->where('tipe_initiative', 1)
                 ->count(),
             'digitalRoadmapStartYear' => fn() => $loadDigitalRoadmapPageProps()['startYearRange'],
@@ -205,9 +260,8 @@ class StrategicHousePageService
         return array_merge($baseProps, $selectedHeavyProps);
     }
 
-    private function getMappingData(Collection $coes, int $initiativeType, bool $showEmpty): array
+    private function getMappingData(Collection $coes, Collection $allInitiatives, int $initiativeType, bool $showEmpty): array
     {
-        $allInitiatives = $this->getConsolidatedInitiatives();
         $clonedCoes = $coes->map(fn($c) => clone $c);
         foreach ($clonedCoes as $coe) {
             $coe->setRelation('initiatives', $allInitiatives->where('coe_id', $coe->id)->values());
@@ -233,31 +287,16 @@ class StrategicHousePageService
         ];
     }
 
-    private function getConsolidatedInitiatives(): Collection
+    private function getConsolidatedInitiatives(string $profile = self::CONSOLIDATED_PROFILE_MAPPING): Collection
     {
-        return Cache::remember('sh_consolidated_initiatives_v8', 3600, function() {
-            return MstInitiative::query()->with([
-                'latestStatus', 
-                'organization', 
-                'latestStatusImplementation', 
-                'statusImplementations', 
-                'sourceData', 
-                'taggings', 
-                'mappedProjects.pcStatusImplementations' => fn($q) => $q->orderBy('year', 'desc')->orderByRaw("CASE
-                    WHEN month = 'Desember' THEN 12
-                    WHEN month = 'November' THEN 11
-                    WHEN month = 'Oktober' THEN 10
-                    WHEN month = 'September' THEN 9
-                    WHEN month = 'Agustus' THEN 8
-                    WHEN month = 'Juli' THEN 7
-                    WHEN month = 'Juni' THEN 6
-                    WHEN month = 'Mei' THEN 5
-                    WHEN month = 'April' THEN 4
-                    WHEN month = 'Maret' THEN 3
-                    WHEN month = 'Februari' THEN 2
-                    WHEN month = 'Januari' THEN 1
-                    ELSE 0 END DESC")
-            ])->orderBy('code')->get();
+        $cacheKey = sprintf('sh_consolidated_initiatives_%s_v10', $profile);
+
+        return Cache::remember($cacheKey, 3600, function () use ($profile) {
+            return MstInitiative::query()
+                ->select(self::INITIATIVE_BASE_SELECT)
+                ->with($this->getConsolidatedInitiativeRelations($profile))
+                ->orderBy('code')
+                ->get();
         });
     }
 
@@ -269,15 +308,18 @@ class StrategicHousePageService
             'show_empty' => (bool) ($filters['show_empty'] ?? true),
             'pilar' => $filters['pilar'] ?? null,
             'view' => $filters['view'] ?? 'mapping',
+            'roadmap' => in_array($filters['roadmap'] ?? 'it', ['it', 'digital', 'all'], true)
+                ? $filters['roadmap']
+                : 'it',
         ];
     }
 
-    private function mapInitiativeForSummary(MstInitiative $initiative): array
+    private function mapInitiativeForSummary(MstInitiative $initiative, bool $includeFullHistory = false): array
     {
         $status = $this->normalizeStatus($initiative->latestPlanningStatusValue());
         $mappedProject = $initiative->mappedProjects?->first();
         
-        $implData = $this->resolveImplementationData($initiative);
+        $implData = $this->resolveImplementationData($initiative, $includeFullHistory);
 
         return [
             'id' => (int) $initiative->id,
@@ -298,7 +340,7 @@ class StrategicHousePageService
         ];
     }
 
-    private function resolveImplementationData(MstInitiative $initiative): array
+    private function resolveImplementationData(MstInitiative $initiative, bool $includeFullHistory = false): array
     {
         if ($initiative->tipe_initiative == 2) {
             $project = $initiative->mappedProjects?->first();
@@ -311,9 +353,15 @@ class StrategicHousePageService
                     'end' => $s->month,
                     'year' => (int) $s->year,
                     'status' => $s->status
-                ])->values()->all();
+                ])->values();
                 
-                $latestStatus = collect($history)->first()['status'] ?? null;
+                $latestStatus = $history->first()['status'] ?? null;
+                
+                if (!$includeFullHistory) {
+                    $history = $history->take(6);
+                }
+                
+                $history = $history->all();
             }
 
             return [
@@ -322,22 +370,32 @@ class StrategicHousePageService
             ];
         }
 
+        $latestStatus = $initiative->latestStatusImplementation?->review_status;
+        $history = collect($initiative->statusImplementations ?? [])->map(fn($s) => [
+            'id' => (int) $s->id,
+            'initiative_id' => (int) $s->initiative_id,
+            'status' => $s->review_status,
+            'review_status' => $s->review_status,
+            'start' => $s->start,
+            'end' => $s->end,
+            'year' => (int) $s->year,
+        ])->values();
+
+        if (!$includeFullHistory) {
+            $history = $history->take(6);
+        }
+
         return [
-            'implementation_status' => $initiative->latestStatusImplementation?->review_status,
-            'statuses' => collect($initiative->statusImplementations ?? [])->map(fn($s) => [
-                'start' => $s->start, 
-                'end' => $s->end, 
-                'year' => (int) $s->year, 
-                'status' => $s->review_status
-            ])->values()->all(),
+            'implementation_status' => $latestStatus,
+            'statuses' => $history->all(),
         ];
     }
 
-    private function buildDigitalRoadmapGroups(array|Collection $roadmapItems): array
+    private function buildDigitalRoadmapGroups(array|Collection $roadmapItems, Collection $digitalInitiativeModels): array
     {
         $globalNumber = 1;
         $coeOrder = ['AI / Adv. Analytics', 'Advance Cloud', 'IoT', 'RPA', 'CoE Not Identified'];
-        $digitalInitiativeModels = $this->getConsolidatedInitiatives()
+        $digitalInitiativeModels = $digitalInitiativeModels
             ->where('tipe_initiative', 1)
             ->sortBy(fn ($initiative) => sprintf('%08s-%s', (string) $initiative->code, (string) $initiative->name))
             ->values();
@@ -566,6 +624,99 @@ class StrategicHousePageService
         };
     }
 
+    private function getConsolidatedInitiativeRelations(string $profile): array
+    {
+        return match ($profile) {
+            self::CONSOLIDATED_PROFILE_BUSINESS_STRATEGY => [
+                'sourceData:id,name',
+                'latestStatusImplementation' => fn ($query) => $this->selectLatestImplementationStatus($query),
+                'statusImplementations:id,initiative_id,start,end,year,review_status',
+                'taggings:id,initiative_id,goal,pilar,themes_id',
+            ],
+            self::CONSOLIDATED_PROFILE_DIGITAL_OPTIONS => [
+                'coe:id,name',
+                'organization:id,name,groub_id',
+                'latestStatusImplementation' => fn ($query) => $this->selectLatestImplementationStatus($query),
+                'statusImplementations:id,initiative_id,start,end,year,review_status',
+                'sourceData:id,name',
+                'mappedProjects:id',
+            ],
+            self::CONSOLIDATED_PROFILE_IT_OPTIONS => [
+                'coe:id,name',
+                'organization:id,name,groub_id',
+                'sourceData:id,name',
+                'mappedProjects:id',
+                'mappedProjects.pcStatusImplementations' => fn ($query) => $this->orderProjectStatusHistoryQuery($query),
+            ],
+            self::CONSOLIDATED_PROFILE_STRATEGIC_PILLARS => [
+                'organization:id,name',
+                'latestStatusImplementation' => fn ($query) => $this->selectLatestImplementationStatus($query),
+                'taggings:id,initiative_id,pilar,goal,themes_id',
+            ],
+            self::CONSOLIDATED_PROFILE_DIGITAL_ROADMAP => [
+                'coe:id,name',
+                'organization:id,name',
+                'latestStatusImplementation' => fn ($query) => $this->selectLatestImplementationStatus($query),
+                'statusImplementations:id,initiative_id,start,end,year,review_status,created_at,updated_at',
+            ],
+            default => [
+                'latestStatus' => fn ($query) => $this->selectLatestPlanningStatus($query),
+                'organization:id,name',
+                'latestStatusImplementation' => fn ($query) => $this->selectLatestImplementationStatus($query),
+                'statusImplementations:id,initiative_id,start,end,year,review_status',
+                'sourceData:id,name',
+                'mappedProjects:id',
+                'mappedProjects.pcStatusImplementations' => fn ($query) => $this->orderProjectStatusHistoryQuery($query),
+            ],
+        };
+    }
+
+    private function selectLatestPlanningStatus($query)
+    {
+        return $query->select([
+            'trs_status_mstinitiative.id',
+            'trs_status_mstinitiative.initiative_id',
+            'trs_status_mstinitiative.status',
+        ]);
+    }
+
+    private function selectLatestImplementationStatus($query)
+    {
+        return $query->select([
+            'trs_status_implementation.id',
+            'trs_status_implementation.initiative_id',
+            'trs_status_implementation.review_status',
+        ]);
+    }
+
+    private function orderProjectStatusHistoryQuery($query)
+    {
+        return $query
+            ->select([
+                'trs_pc_status_implementation.id',
+                'trs_pc_status_implementation.project_id',
+                'trs_pc_status_implementation.month',
+                'trs_pc_status_implementation.year',
+                'trs_pc_status_implementation.status'
+            ])
+            ->orderBy('trs_pc_status_implementation.year', 'desc')
+            ->orderByRaw("CASE
+                WHEN trs_pc_status_implementation.month = 'Desember' THEN 12
+                WHEN trs_pc_status_implementation.month = 'November' THEN 11
+                WHEN trs_pc_status_implementation.month = 'Oktober' THEN 10
+                WHEN trs_pc_status_implementation.month = 'September' THEN 9
+                WHEN trs_pc_status_implementation.month = 'Agustus' THEN 8
+                WHEN trs_pc_status_implementation.month = 'Juli' THEN 7
+                WHEN trs_pc_status_implementation.month = 'Juni' THEN 6
+                WHEN trs_pc_status_implementation.month = 'Mei' THEN 5
+                WHEN trs_pc_status_implementation.month = 'April' THEN 4
+                WHEN trs_pc_status_implementation.month = 'Maret' THEN 3
+                WHEN trs_pc_status_implementation.month = 'Februari' THEN 2
+                WHEN trs_pc_status_implementation.month = 'Januari' THEN 1
+                ELSE 0 END DESC")
+            ->orderBy('trs_pc_status_implementation.id', 'desc');
+    }
+
     private function normalizeDigitalRoadmapCoeName(string $rawName): string { $name = strtolower(trim($rawName)); if ($name === '') return 'CoE Not Identified'; if (str_contains($name, 'ai') || str_contains($name, 'analytics')) return 'AI / Adv. Analytics'; if (str_contains($name, 'cloud')) return 'Advance Cloud'; if (str_contains($name, 'iot')) return 'IoT'; if (str_contains($name, 'rpa')) return 'RPA'; return 'CoE Not Identified'; }
     private function normalizeImplementationStatus(string $rawStatus): ?string { $status = strtolower(trim($rawStatus)); if ($status === '') return null; if (str_contains($status, 'done') || str_contains($status, 'complete')) return 'Done'; if (str_contains($status, 'review')) return 'On Review'; if (str_contains($status, 'progress')) return 'On Progress'; return ucwords($status); }
     private function resolveDigitalInitiativeBadgeLabel(string $initiativeCode, int &$fallbackNumber): string { if ($initiativeCode !== '') { if (preg_match('/(\d+)/', $initiativeCode, $matches) === 1) return (string) ((int) $matches[1]); return $initiativeCode; } return (string) $fallbackNumber++; }
@@ -583,12 +734,12 @@ class StrategicHousePageService
     private function buildSingleCard(Collection $coeCatalog, array $config): ?array { $baseCard = $coeCatalog->get(Str::lower($config['name'])); if ($baseCard === null) return null; return [...$baseCard, 'display_name' => $config['label'] ?? $baseCard['display_name'], 'tone' => $config['tone'] ?? $baseCard['tone'], 'description_lines' => $config['description_lines'] ?? []]; }
     private function mapCoeCard(MstCoe $coe): array { $initiatives = ($coe->initiatives ?? collect())->map(fn($i) => $this->mapInitiativeForSummary($i))->values(); $previewInitiatives = $initiatives->take(3)->values(); return ['id' => (int) $coe->id, 'name' => $coe->name, 'display_name' => $coe->name, 'tone' => 'default', 'initiatives_count' => $initiatives->count(), 'is_empty' => $initiatives->isEmpty(), 'initiatives' => $initiatives->all(), 'initiatives_preview' => $previewInitiatives->all(), 'remaining_initiatives_count' => max(0, $initiatives->count() - $previewInitiatives->count()), 'status_breakdown' => $this->buildStatusBreakdown($initiatives)]; }
     private function buildSummary(array $t, array $s, ?array $f, ?array $a, ?array $tb, array $u): array { $all = collect([...$t, ...$s, ...array_filter([$f, $a, $tb])]); return ['total_initiatives' => (int) $all->sum('initiatives_count') + count($u), 'mapped_initiatives' => (int) $all->sum('initiatives_count'), 'technology_initiatives' => (int) collect($t)->sum('initiatives_count'), 'active_coe_count' => (int) $all->filter(fn ($c) => ($c['initiatives_count'] ?? 0) > 0)->count(), 'unassigned_count' => count($u), 'top_coe_name' => $all->sortByDesc('initiatives_count')->first()['display_name'] ?? '-', 'top_coe_count' => (int) ($all->sortByDesc('initiatives_count')->first()['initiatives_count'] ?? 0)]; }
-    private function getDualGrowthGoals(): array { $direct = $this->getDirectDualGrowthInitiatives(); $goals = Goal::query()->with(['themes.initiativeTaggings.initiative.coe', 'themes.initiativeTaggings.initiative.organization', 'themes.initiativeTaggings.initiative.latestStatusImplementation', 'themes.initiativeTaggings.initiative.statusImplementations'])->where('pilar', 2)->orderByRaw("case code when 'A' then 1 when 'B' then 2 else 99 end")->orderBy('code')->get(); return $goals->map(fn ($g) => $this->mapDualGrowthGoal($g, $direct->get(strtoupper((string) $g->code), [])))->values()->all(); }
-    private function getDirectDualGrowthInitiatives(): Collection { return InitiativeTagging::query()->with(['initiative.coe', 'initiative.organization', 'initiative.latestStatusImplementation', 'initiative.statusImplementations'])->where('pilar', 2)->whereNull('themes_id')->get()->groupBy(fn ($t) => strtoupper((string) $t->goal))->map(fn ($ts) => $tappings = $ts->map(fn ($t) => $t->initiative)->filter()->unique('id')->sortBy(fn ($i) => sprintf('%08s-%s', (string) $i->code, (string) $i->name))->values()->map(fn ($i) => $this->mapDualGrowthInitiative($i))->all()); }
+    private function getDualGrowthGoals(): array { $direct = $this->getDirectDualGrowthInitiatives(); $goals = Goal::query()->with(['themes' => fn ($query) => $query->orderBy('theme_number'), 'themes.initiativeTaggings.initiative' => fn ($query) => $query->select(self::INITIATIVE_BASE_SELECT), 'themes.initiativeTaggings.initiative.coe:id,name', 'themes.initiativeTaggings.initiative.organization:id,name,groub_id', 'themes.initiativeTaggings.initiative.latestStatusImplementation' => fn ($query) => $this->selectLatestImplementationStatus($query), 'themes.initiativeTaggings.initiative.statusImplementations:id,initiative_id,start,end,year,review_status', 'themes.initiativeTaggings.initiative.mappedProjects:id'])->where('pilar', 2)->orderByRaw("case code when 'A' then 1 when 'B' then 2 else 99 end")->orderBy('code')->get(); return $goals->map(fn ($g) => $this->mapDualGrowthGoal($g, $direct->get(strtoupper((string) $g->code), [])))->values()->all(); }
+    private function getDirectDualGrowthInitiatives(): Collection { return InitiativeTagging::query()->with(['initiative' => fn ($query) => $query->select(self::INITIATIVE_BASE_SELECT), 'initiative.coe:id,name', 'initiative.organization:id,name,groub_id', 'initiative.latestStatusImplementation' => fn ($query) => $this->selectLatestImplementationStatus($query), 'initiative.statusImplementations:id,initiative_id,start,end,year,review_status', 'initiative.mappedProjects:id'])->where('pilar', 2)->whereNull('themes_id')->get()->groupBy(fn ($t) => strtoupper((string) $t->goal))->map(fn ($ts) => $tappings = $ts->map(fn ($t) => $t->initiative)->filter()->unique('id')->sortBy(fn ($i) => sprintf('%08s-%s', (string) $i->code, (string) $i->name))->values()->map(fn ($i) => $this->mapDualGrowthInitiative($i))->all()); }
     private function mapDualGrowthGoal(Goal $g, array $d = []): array { $ts = collect($g->themes ?? [])->map(fn ($t) => $this->mapDualGrowthTheme($t))->values(); return ['id' => (int) $g->id, 'code' => (string) $g->code, 'title' => (string) $g->title, 'themes' => $ts->all(), 'direct_initiatives_count' => count($d), 'direct_initiatives' => $d, 'initiatives_count' => (int) $ts->sum('initiatives_count') + count($d)]; }
     private function mapDualGrowthTheme($t): array { $is = collect($t->initiativeTaggings ?? [])->map(fn ($tg) => $tg->initiative)->filter()->unique('id')->sortBy(fn ($i) => sprintf('%08s-%s', (string) $i->code, (string) $i->name))->values()->map(fn ($i) => $this->mapDualGrowthInitiative($i))->all(); return ['id' => (int) $t->id, 'theme_number' => (int) $t->theme_number, 'name' => (string) $t->name, 'label' => (string) $t->name, 'initiatives_count' => count($is), 'initiatives' => $is]; }
-    private function mapDualGrowthInitiative($i): array { 
-        $implData = $this->resolveImplementationData($i);
+    private function mapDualGrowthInitiative($i, bool $includeFullHistory = false): array { 
+        $implData = $this->resolveImplementationData($i, $includeFullHistory);
         
         return [
             'id' => (int) $i->id, 
@@ -607,6 +758,7 @@ class StrategicHousePageService
             'mapped_project_id' => $i->mappedProjects?->first()?->id,
         ]; 
     }
+    private function getFocusBandGoals(): array { return Goal::query()->select(['id', 'code', 'title'])->where('pilar', 2)->orderByRaw("case code when 'A' then 1 when 'B' then 2 else 99 end")->orderBy('code')->get()->map(fn (Goal $goal): array => ['id' => (int) $goal->id, 'code' => (string) $goal->code, 'title' => (string) $goal->title])->values()->all(); }
     private function getFocusBands(array $gs): array { return collect($gs)->map(fn ($g) => ['id' => is_numeric($g['id']) ? 'goal-'.$g['id'] : (string) $g['id'], 'code' => $g['code'], 'title' => $g['title'], 'label' => $g['title']])->values()->all(); }
     private function getRoofSection(): array { $gs = Goal::query()->with(['themes' => fn ($q) => $q->orderBy('theme_number')])->where('pilar', '2')->whereIn('code', ['A', 'B'])->get()->keyBy('code'); $m = $gs->get('A'); $s = $gs->get('B'); return ['main_goal' => $m ? ['id' => (int) $m->id, 'code' => $m->code, 'title' => $m->title] : null, 'main_goal_themes' => collect($m?->themes ?? [])->take(2)->map(fn ($t) => ['id' => (int) $t->id, 'theme_number' => (int) $t->theme_number, 'name' => $t->name, 'label' => $t->name])->values()->all(), 'side_goal' => $s ? ['id' => (int) $s->id, 'code' => $s->code, 'title' => $s->title] : null]; }
     private function buildStatusBreakdown(Collection $is): array { return collect(['drafting', 'propose', 'review', 'approved', 'other'])->map(fn ($s) => ['key' => $s, 'label' => $this->statusLabel($s), 'count' => (int) $is->where('status', $s)->count()])->filter(fn ($i) => $i['count'] > 0)->values()->all(); }

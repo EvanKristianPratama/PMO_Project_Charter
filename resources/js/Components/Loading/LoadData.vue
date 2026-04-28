@@ -68,9 +68,11 @@ const displayProgress = ref(0);
 let rafId = null;
 let startTime = null;
 
-// Easing: fast at first, slows approaching 85 %
+// Easing: fast at first, then slowly creeps upward while waiting for real data
 const simulateTarget = 85;
+const simulateCeiling = 95;
 const simulateDuration = 4000; // ms to reach ~85 %
+const simulateCreepDuration = 9000; // ms to creep from 85 -> ~95 if request is still pending
 
 function easeOutCubic(t) {
     return 1 - Math.pow(1 - t, 3);
@@ -79,10 +81,21 @@ function easeOutCubic(t) {
 function tickSimulate(now) {
     if (!startTime) startTime = now;
     const elapsed = now - startTime;
-    const t = Math.min(elapsed / simulateDuration, 1);
-    displayProgress.value = Math.round(easeOutCubic(t) * simulateTarget);
+    const initialT = Math.min(elapsed / simulateDuration, 1);
 
-    if (t < 1) {
+    if (initialT < 1) {
+        displayProgress.value = Math.round(easeOutCubic(initialT) * simulateTarget);
+        rafId = requestAnimationFrame(tickSimulate);
+        return;
+    }
+
+    const creepElapsed = elapsed - simulateDuration;
+    const creepT = Math.min(creepElapsed / simulateCreepDuration, 1);
+    displayProgress.value = Math.round(
+        simulateTarget + (simulateCeiling - simulateTarget) * easeOutCubic(creepT)
+    );
+
+    if (displayProgress.value < simulateCeiling) {
         rafId = requestAnimationFrame(tickSimulate);
     }
 }

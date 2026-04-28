@@ -8,6 +8,7 @@ use App\Models\MstInitiative;
 use App\Models\TrsOrganization;
 use App\Models\TrsBusinessStrategy;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Collection;
 
 class BusinessStrategyService
@@ -99,9 +100,6 @@ class BusinessStrategyService
                 'expand',
                 'low_carbon',
                 'updated_at',
-            ])
-            ->with([
-                'businessUnit' => fn ($query) => $query->select(['id', 'name', 'groub_id']),
             ])
             ->whereIn('business_unit', $fixedBusinessUnitIds)
             ->get()
@@ -292,38 +290,59 @@ class BusinessStrategyService
 
     private function getInitiativesByBusinessUnit(?Collection $providedInitiatives = null): Collection
     {
+        // If initiatives are provided from parent service (cached), use them
+        if ($providedInitiatives !== null) {
+            $fixedBusinessUnitIds = collect(self::FIXED_BUSINESS_UNITS)->pluck('id')->all();
+            return $providedInitiatives
+                ->filter(fn (MstInitiative $initiative) => in_array((int)$initiative->business_unit, $fixedBusinessUnitIds))
+                ->groupBy(fn (MstInitiative $initiative): int => (int) ($initiative->business_unit ?? 0))
+                ->map(function (Collection $initiatives): array {
+                    return $initiatives
+                        ->values()
+                        ->map(fn (MstInitiative $initiative): array => $this->mapInitiative($initiative))
+                        ->all();
+                });
+        }
+
+        // Use cache for initiatives to avoid repeated heavy queries
+        $cacheKey = 'business_strategy_initiatives_v2';
         $fixedBusinessUnitIds = collect(self::FIXED_BUSINESS_UNITS)->pluck('id')->all();
 
-        $initiatives = $providedInitiatives ?? MstInitiative::query()
-            ->select([
-                'id',
-                'business_unit',
-                'code',
-                'name',
-                'description',
-                'tipe_initiative',
-                'source',
-            ])
-            ->with([
-                'sourceData:id,name',
-                'latestStatusImplementation:id,initiative_id,review_status',
-                'statusImplementations:id,initiative_id,start,end,year,review_status',
-                'taggings:id,initiative_id,goal,pilar,themes_id',
-            ])
-            ->whereNotNull('business_unit')
-            ->whereIn('business_unit', $fixedBusinessUnitIds)
-            ->orderBy('id', 'asc')
-            ->get();
+        return Cache::remember($cacheKey, 3600, function () use ($fixedBusinessUnitIds): Collection {
+            $initiatives = MstInitiative::query()
+                ->select([
+                    'id',
+                    'business_unit',
+                    'code',
+                    'name',
+                    'description',
+                    'tipe_initiative',
+                    'source',
+                ])
+                ->with([
+                    'sourceData:id,name',
+                    'latestStatusImplementation' => fn ($query) => $query->select([
+                        'trs_status_implementation.id',
+                        'trs_status_implementation.initiative_id',
+                        'trs_status_implementation.review_status',
+                    ]),
+                    'statusImplementations:id,initiative_id,start,end,year,review_status',
+                    'taggings:id,initiative_id,goal,pilar,themes_id',
+                ])
+                ->whereNotNull('business_unit')
+                ->whereIn('business_unit', $fixedBusinessUnitIds)
+                ->orderBy('id', 'asc')
+                ->get();
 
-        return $initiatives
-            ->filter(fn (MstInitiative $initiative) => in_array((int)$initiative->business_unit, $fixedBusinessUnitIds))
-            ->groupBy(fn (MstInitiative $initiative): int => (int) ($initiative->business_unit ?? 0))
-            ->map(function (Collection $initiatives): array {
-                return $initiatives
-                    ->values()
-                    ->map(fn (MstInitiative $initiative): array => $this->mapInitiative($initiative))
-                    ->all();
-            });
+            return $initiatives
+                ->groupBy(fn (MstInitiative $initiative): int => (int) ($initiative->business_unit ?? 0))
+                ->map(function (Collection $initiatives): array {
+                    return $initiatives
+                        ->values()
+                        ->map(fn (MstInitiative $initiative): array => $this->mapInitiative($initiative))
+                        ->all();
+                });
+        });
     }
 
     private function mapInitiative(MstInitiative $initiative): array
@@ -456,88 +475,90 @@ class BusinessStrategyService
 
     private function getStrategyMetadata(): array
     {
-        $goalIds = collect(self::STRATEGY_GOAL_CONFIG)
-            ->pluck('goal_id')
-            ->merge(collect(self::STRATEGY_COLUMNS)->pluck('goal_id')->filter())
-            ->merge(collect(self::ENABLER_CONFIG)->pluck('goal_id')->filter())
-            ->unique()
-            ->values()
-            ->all();
+        return Cache::remember('business_strategy_metadata_v2', 3600, function () {
+            $goalIds = collect(self::STRATEGY_GOAL_CONFIG)
+                ->pluck('goal_id')
+                ->merge(collect(self::STRATEGY_COLUMNS)->pluck('goal_id')->filter())
+                ->merge(collect(self::ENABLER_CONFIG)->pluck('goal_id')->filter())
+                ->unique()
+                ->values()
+                ->all();
 
-        $themeIds = collect(self::STRATEGY_COLUMNS)
-            ->pluck('theme_id')
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
+            $themeIds = collect(self::STRATEGY_COLUMNS)
+                ->pluck('theme_id')
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
 
-        $goals = Goal::query()
-            ->select(['id', 'code', 'title', 'pilar'])
-            ->whereIn('id', $goalIds)
-            ->get()
-            ->keyBy('id');
+            $goals = Goal::query()
+                ->select(['id', 'code', 'title', 'pilar'])
+                ->whereIn('id', $goalIds)
+                ->get()
+                ->keyBy('id');
 
-        $themes = Theme::query()
-            ->select(['id', 'idGoal', 'theme_number', 'name'])
-            ->whereIn('id', $themeIds)
-            ->get()
-            ->keyBy('id');
+            $themes = Theme::query()
+                ->select(['id', 'idGoal', 'theme_number', 'name'])
+                ->whereIn('id', $themeIds)
+                ->get()
+                ->keyBy('id');
 
-        $headerGoals = [
-            'legacy' => $this->resolveGoalMetadata(
-                $goals->get(self::STRATEGY_GOAL_CONFIG['legacy']['goal_id']),
-                self::STRATEGY_GOAL_CONFIG['legacy']['default_title']
-            ),
-            'low_carbon' => $this->resolveGoalMetadata(
-                $goals->get(self::STRATEGY_GOAL_CONFIG['low_carbon']['goal_id']),
-                self::STRATEGY_GOAL_CONFIG['low_carbon']['default_title']
-            ),
-        ];
+            $headerGoals = [
+                'legacy' => $this->resolveGoalMetadata(
+                    $goals->get(self::STRATEGY_GOAL_CONFIG['legacy']['goal_id']),
+                    self::STRATEGY_GOAL_CONFIG['legacy']['default_title']
+                ),
+                'low_carbon' => $this->resolveGoalMetadata(
+                    $goals->get(self::STRATEGY_GOAL_CONFIG['low_carbon']['goal_id']),
+                    self::STRATEGY_GOAL_CONFIG['low_carbon']['default_title']
+                ),
+            ];
 
-        $strategyColumns = collect(self::STRATEGY_COLUMNS)
-            ->map(function (array $column) use ($goals, $themes): array {
-                $theme = !empty($column['theme_id']) ? $themes->get((int) $column['theme_id']) : null;
-                $goalId = $theme ? (int) ($theme->idGoal ?? 0) : (int) ($column['goal_id'] ?? 0);
-                $goal = $goalId > 0 ? $goals->get($goalId) : null;
+            $strategyColumns = collect(self::STRATEGY_COLUMNS)
+                ->map(function (array $column) use ($goals, $themes): array {
+                    $theme = !empty($column['theme_id']) ? $themes->get((int) $column['theme_id']) : null;
+                    $goalId = $theme ? (int) ($theme->idGoal ?? 0) : (int) ($column['goal_id'] ?? 0);
+                    $goal = $goalId > 0 ? $goals->get($goalId) : null;
 
-                return [
-                    'key' => $column['key'],
-                    'label' => trim((string) ($theme?->name ?? $goal?->title ?? $column['default_label'])),
-                    'description' => $column['description'],
-                    'tone' => $column['tone'],
-                    'group' => $column['group'] ?? null,
-                    'theme_id' => $theme ? (int) $theme->id : null,
-                    'goal_id' => $goal ? (int) $goal->id : ($goalId ?: null),
-                    'goal_code' => strtoupper(trim((string) ($goal?->code ?? $column['default_goal_code'] ?? ''))),
-                    'direct_goal_tagging' => (bool) ($column['direct_goal_tagging'] ?? false),
-                ];
+                    return [
+                        'key' => $column['key'],
+                        'label' => trim((string) ($theme?->name ?? $goal?->title ?? $column['default_label'])),
+                        'description' => $column['description'],
+                        'tone' => $column['tone'],
+                        'group' => $column['group'] ?? null,
+                        'theme_id' => $theme ? (int) $theme->id : null,
+                        'goal_id' => $goal ? (int) $goal->id : ($goalId ?: null),
+                        'goal_code' => strtoupper(trim((string) ($goal?->code ?? $column['default_goal_code'] ?? ''))),
+                        'direct_goal_tagging' => (bool) ($column['direct_goal_tagging'] ?? false),
+                    ];
+                })
+                ->values()
+                ->all();
+
+            $enablerGoals = collect(self::ENABLER_CONFIG)
+                ->map(function (array $enabler) use ($goals): array {
+                    $goal = $goals->get((int) $enabler['goal_id']);
+                    $goalCode = strtoupper(trim((string) ($goal?->code ?? $enabler['default_goal_code'])));
+
+                    return [
+                        'key' => $enabler['key'],
+                        'id' => $goal ? (int) $goal->id : (int) $enabler['goal_id'],
+                        'code' => $goalCode,
+                        'goal_code' => $goalCode,
+                        'title' => trim((string) ($goal?->title ?? $enabler['default_title'])),
+                        'tone' => $enabler['tone'],
+                        'direct_goal_tagging' => true,
+                    ];
             })
             ->values()
             ->all();
 
-        $enablerGoals = collect(self::ENABLER_CONFIG)
-            ->map(function (array $enabler) use ($goals): array {
-                $goal = $goals->get((int) $enabler['goal_id']);
-                $goalCode = strtoupper(trim((string) ($goal?->code ?? $enabler['default_goal_code'])));
-
-                return [
-                    'key' => $enabler['key'],
-                    'id' => $goal ? (int) $goal->id : (int) $enabler['goal_id'],
-                    'code' => $goalCode,
-                    'goal_code' => $goalCode,
-                    'title' => trim((string) ($goal?->title ?? $enabler['default_title'])),
-                    'tone' => $enabler['tone'],
-                    'direct_goal_tagging' => true,
-                ];
-            })
-            ->values()
-            ->all();
-
-        return [
-            'header_goals' => $headerGoals,
-            'strategy_columns' => $strategyColumns,
-            'enabler_goals' => $enablerGoals,
-        ];
+            return [
+                'header_goals' => $headerGoals,
+                'strategy_columns' => $strategyColumns,
+                'enabler_goals' => $enablerGoals,
+            ];
+        });
     }
 
     private function resolveGoalMetadata(?Goal $goal, string $defaultTitle): array

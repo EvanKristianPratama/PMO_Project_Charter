@@ -2,12 +2,12 @@
     <UserLayout :title="page.title">
         <div class="strategic-house animate-fade-in">
             <!-- View Mode Switcher -->
-            <div class="inline-flex items-center gap-1 rounded-xl bg-slate-200/50 p-1 dark:bg-white/5 w-fit mb-5">
+            <div class="inline-flex items-center gap-1 rounded-xl bg-slate-200/50 p-1 dark:bg-white/5 w-fit mb-2">
                 <button
                     type="button"
                     class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
                     :class="
-                        viewMode === 'mapping'
+                        activeViewMode === 'mapping'
                             ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                             : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                     "
@@ -19,7 +19,7 @@
                     type="button"
                     class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
                     :class="
-                        viewMode === 'business-strategy'
+                        activeViewMode === 'business-strategy'
                             ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                             : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                     "
@@ -31,7 +31,7 @@
                     type="button"
                     class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
                     :class="
-                        viewMode === 'dual-growth'
+                        activeViewMode === 'dual-growth'
                             ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                             : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                     "
@@ -43,7 +43,7 @@
                     type="button"
                     class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
                     :class="
-                        viewMode === 'digital-transformation-initiatives'
+                        activeViewMode === 'digital-transformation-initiatives'
                             ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                             : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                     "
@@ -55,7 +55,7 @@
                     type="button"
                     class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
                     :class="
-                        viewMode === 'it-building-blocs'
+                        activeViewMode === 'it-building-blocs'
                             ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                             : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                     "
@@ -67,7 +67,7 @@
                     type="button"
                     class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
                     :class="
-                        viewMode === 'it-initiatives'
+                        activeViewMode === 'it-initiatives'
                             ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                             : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                     "
@@ -79,7 +79,7 @@
                     type="button"
                     class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
                     :class="
-                        viewMode === 'map-technology'
+                        activeViewMode === 'map-technology'
                             ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                             : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                     "
@@ -91,7 +91,7 @@
                     type="button"
                     class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
                     :class="
-                        viewMode === 'initiative-relation'
+                        activeViewMode === 'initiative-relation'
                             ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                             : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                     "
@@ -103,7 +103,7 @@
                     type="button"
                     class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
                     :class="
-                        viewMode === 'initiative-support'
+                        activeViewMode === 'initiative-support'
                             ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                             : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                     "
@@ -115,7 +115,7 @@
                     type="button"
                     class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
                     :class="
-                        viewMode === 'roadmap'
+                        activeViewMode === 'roadmap'
                             ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                             : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                     "
@@ -127,7 +127,7 @@
                     type="button"
                     class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
                     :class="
-                        viewMode === 'strategic-pillars'
+                        activeViewMode === 'strategic-pillars'
                             ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                             : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                     "
@@ -136,6 +136,59 @@
                     Strategic Pillars
                 </button>
             </div>
+
+            <!-- Minimalist Centered Progress (0-100 Instrument) -->
+            <Transition
+                enter-active-class="transition-opacity duration-300"
+                enter-from-class="opacity-0"
+                enter-to-class="opacity-100"
+                leave-active-class="transition-opacity duration-500"
+                leave-from-class="opacity-100"
+                leave-to-class="opacity-0"
+            >
+                <div v-if="isReloading" class="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none">
+                    <div class="flex flex-col items-center gap-2 px-6 py-4 rounded-3xl bg-white/40 dark:bg-slate-900/40 backdrop-blur-md border border-white/20 dark:border-white/5 shadow-2xl">
+                        <div class="relative flex items-center justify-center">
+                            <!-- Subtle Ring -->
+                            <svg class="w-16 h-16 transform -rotate-90">
+                                <circle
+                                    cx="32"
+                                    cy="32"
+                                    r="28"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    class="text-slate-200 dark:text-slate-800"
+                                />
+                                <circle
+                                    cx="32"
+                                    cy="32"
+                                    r="28"
+                                    fill="none"
+                                    stroke="url(#progress-gradient)"
+                                    stroke-width="3"
+                                    stroke-linecap="round"
+                                    class="transition-all duration-300 ease-out"
+                                    :stroke-dasharray="175.9"
+                                    :stroke-dashoffset="175.9 - (175.9 * loadingProgress) / 100"
+                                />
+                                <defs>
+                                    <linearGradient id="progress-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#1C75BC" />
+                                        <stop offset="100%" stop-color="#53BDE6" />
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                            <span class="absolute text-sm font-black text-[#1C75BC] dark:text-[#53BDE6] tabular-nums">
+                                {{ Math.round(loadingProgress) }}%
+                            </span>
+                        </div>
+                        <span class="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] animate-pulse">
+                            Processing {{ pendingViewLabel }}
+                        </span>
+                    </div>
+                </div>
+            </Transition>
 
             <!-- Dual Growth Enabler Toggle -->
             <div
@@ -165,7 +218,7 @@
                         type="button"
                         class="rounded-lg px-3 py-1.5 text-[10px] font-bold tracking-wider transition-all"
                         :class="
-                            roadmapMode === 'all'
+                            activeRoadmapMode === 'all'
                                 ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                                 : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                         "
@@ -177,7 +230,7 @@
                         type="button"
                         class="rounded-lg px-3 py-1.5 text-[10px] font-bold tracking-wider transition-all"
                         :class="
-                            roadmapMode === 'digital'
+                            activeRoadmapMode === 'digital'
                                 ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                                 : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                         "
@@ -189,7 +242,7 @@
                         type="button"
                         class="rounded-lg px-3 py-1.5 text-[10px] font-bold tracking-wider transition-all"
                         :class="
-                            roadmapMode === 'it'
+                            activeRoadmapMode === 'it'
                                 ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                                 : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                         "
@@ -218,9 +271,11 @@
                     leave-to-class="transform opacity-0 translate-y-4"
                     mode="out-in"
                 >
-                    <!-- Loading State -->
-                    <div v-if="isLoading" key="loading">
+                    <!-- Loading / Skeleton State -->
+                    <div v-if="isLoading || (isReloading && !hasLoadedView(viewMode))" key="loading">
+                        <StrategicHouseSkeleton v-if="isReloading" />
                         <LoadData
+                            v-else
                             :title="loadingTitle"
                             message="Mohon tunggu, data sedang diproses..."
                             :finished="dataFinished"
@@ -417,26 +472,73 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from "vue";
+import { computed, ref, onMounted, defineAsyncComponent } from "vue";
 import LoadData from "@/Components/Loading/LoadData.vue";
-import { Link, useRemember } from "@inertiajs/vue3";
+import StrategicHouseSkeleton from "@/Components/Loading/StrategicHouseSkeleton.vue";
+import { Link, router, useRemember } from "@inertiajs/vue3";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/vue/24/outline";
-import AllInitiativeRoadmapContent from "@/Components/StrategicHouse/RoadMap/AllInitiativeRoadmapContent.vue";
-import ItInitiativeRoadmapContent from "@/Components/StrategicHouse/RoadMap/ItInitiativeRoadmapContent.vue";
-import DualGrowth from "@/Components/StrategicHouse/DualGrowth.vue";
-import DualGrowthFull from "@/Components/StrategicHouse/DualGrowthFull.vue";
-import DigitalBuildingBlock from "@/Components/ItBuildingBlocks/DigitalBuildingBlock.vue";
-import ItBuildingBlocks from "@/Components/ItBuildingBlocks/ItBuildingBlock.vue";
-import StrategicHouseBusinessStrategyPage from "@/Pages/StrategicHouse/BusinessStrategy/Index.vue";
-import StrategicHouseInitiativeSupportPage from "@/Pages/StrategicHouse/InitiativeSupport/Index.vue";
-import StrategicHouseItBuildingBlocksPage from "@/Pages/StrategicHouse/ItBuildingBlocks/Index.vue";
-import StrategicHouseMapTechnologyPage from "@/Pages/StrategicHouse/MapTechnology/Index.vue";
-import StrategicHouseInitiativeRelationPage from "@/Pages/StrategicHouse/InitiativeRelation/Index.vue";
-import StrategicHouseStrategicPillarPage from "@/Pages/StrategicHouse/StrategicPillar/Index.vue";
-import StretegicHouse from "@/Components/StrategicHouse/StretegicHouse.vue";
 import UserLayout from "@/Layouts/UserLayout.vue";
 
+const loadMappingView = () => import("@/Components/StrategicHouse/StretegicHouse.vue");
+const loadBusinessStrategyView = () => import("@/Pages/StrategicHouse/BusinessStrategy/Index.vue");
+const loadDualGrowthView = () => import("@/Components/StrategicHouse/DualGrowth.vue");
+const loadDualGrowthFullView = () => import("@/Components/StrategicHouse/DualGrowthFull.vue");
+const loadDigitalBuildingBlockView = () => import("@/Components/ItBuildingBlocks/DigitalBuildingBlock.vue");
+const loadItBuildingBlocksView = () => import("@/Components/ItBuildingBlocks/ItBuildingBlock.vue");
+const loadInitiativeSupportView = () => import("@/Pages/StrategicHouse/InitiativeSupport/Index.vue");
+const loadItBuildingBlocksManageView = () => import("@/Pages/StrategicHouse/ItBuildingBlocks/Index.vue");
+const loadMapTechnologyView = () => import("@/Pages/StrategicHouse/MapTechnology/Index.vue");
+const loadInitiativeRelationView = () => import("@/Pages/StrategicHouse/InitiativeRelation/Index.vue");
+const loadItRoadmapContentView = () => import("@/Components/StrategicHouse/RoadMap/ItInitiativeRoadmapContent.vue");
+const loadAllRoadmapContentView = () => import("@/Components/StrategicHouse/RoadMap/AllInitiativeRoadmapContent.vue");
+const loadStrategicPillarView = () => import("@/Pages/StrategicHouse/StrategicPillar/Index.vue");
+
+const StretegicHouse = defineAsyncComponent(loadMappingView);
+const StrategicHouseBusinessStrategyPage = defineAsyncComponent(loadBusinessStrategyView);
+const DualGrowth = defineAsyncComponent(loadDualGrowthView);
+const DualGrowthFull = defineAsyncComponent(loadDualGrowthFullView);
+const DigitalBuildingBlock = defineAsyncComponent(loadDigitalBuildingBlockView);
+const ItBuildingBlocks = defineAsyncComponent(loadItBuildingBlocksView);
+const StrategicHouseInitiativeSupportPage = defineAsyncComponent(loadInitiativeSupportView);
+const StrategicHouseItBuildingBlocksPage = defineAsyncComponent(loadItBuildingBlocksManageView);
+const StrategicHouseMapTechnologyPage = defineAsyncComponent(loadMapTechnologyView);
+const StrategicHouseInitiativeRelationPage = defineAsyncComponent(loadInitiativeRelationView);
+const ItInitiativeRoadmapContent = defineAsyncComponent(loadItRoadmapContentView);
+const AllInitiativeRoadmapContent = defineAsyncComponent(loadAllRoadmapContentView);
+const StrategicHouseStrategicPillarPage = defineAsyncComponent(loadStrategicPillarView);
+
+const loadingProgress = ref(0);
+let progressInterval = null;
+
+function startProgress() {
+    loadingProgress.value = 0;
+    if (progressInterval) clearInterval(progressInterval);
+    
+    // Fast to 30%, then slower to 90%
+    progressInterval = setInterval(() => {
+        if (loadingProgress.value < 30) {
+            loadingProgress.value += Math.random() * 15;
+        } else if (loadingProgress.value < 70) {
+            loadingProgress.value += Math.random() * 5;
+        } else if (loadingProgress.value < 95) {
+            loadingProgress.value += Math.random() * 1.5;
+        }
+    }, 200);
+}
+
+function finishProgress() {
+    if (progressInterval) clearInterval(progressInterval);
+    loadingProgress.value = 100;
+    setTimeout(() => {
+        if (!isReloading.value) loadingProgress.value = 0;
+    }, 500);
+}
+
 const props = defineProps({
+    filters: {
+        type: Object,
+        default: () => ({}),
+    },
     page: {
         type: Object,
         default: () => ({}),
@@ -570,7 +672,7 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
-    // IT Roadmap props (pre-loaded, no HTTP request saat switch tab)
+    // Roadmap props
     itRoadmapGroups: { type: Array, default: () => [] },
     itRoadmapStartYear: { type: Number, default: 2025 },
     itRoadmapEndYear: { type: Number, default: 2029 },
@@ -648,6 +750,21 @@ const getInitialViewMode = () => {
 };
 
 const roadmapModes = new Set(["it", "digital", "all"]);
+const VIEW_CACHE_TTL_MS = 5 * 60 * 1000;
+const viewAssetLoaders = {
+    mapping: [loadMappingView],
+    "business-strategy": [loadBusinessStrategyView],
+    "dual-growth": [loadDualGrowthView, loadDualGrowthFullView],
+    "digital-transformation-initiatives": [loadDigitalBuildingBlockView],
+    "it-building-blocs": [loadItBuildingBlocksManageView],
+    "it-initiatives": [loadItBuildingBlocksView],
+    "initiative-support": [loadInitiativeSupportView],
+    "map-technology": [loadMapTechnologyView],
+    "initiative-relation": [loadInitiativeRelationView],
+    roadmap: [loadItRoadmapContentView, loadAllRoadmapContentView],
+    "strategic-pillars": [loadStrategicPillarView],
+};
+const viewAssetPromises = new Map();
 
 const getInitialRoadmapMode = () => {
     if (typeof window === "undefined") return "it";
@@ -660,13 +777,60 @@ const getInitialRoadmapMode = () => {
         : null; // Let useRemember decide if no URL params
 };
 
+function getInitialServerView() {
+    return props.filters?.view || "mapping";
+}
+
+function getInitialServerRoadmapMode() {
+    return props.filters?.roadmap || "it";
+}
+
+function preloadViewAssets(mode) {
+    const loaders = viewAssetLoaders[mode] || [];
+
+    if (loaders.length === 0) {
+        return Promise.resolve();
+    }
+
+    if (viewAssetPromises.has(mode)) {
+        return viewAssetPromises.get(mode);
+    }
+
+    const promise = Promise.all(loaders.map((loader) => loader())).catch((error) => {
+        viewAssetPromises.delete(mode);
+        throw error;
+    });
+
+    viewAssetPromises.set(mode, promise);
+
+    return promise;
+}
+
 // Use Inertia's useRemember to cache state client-side
 const viewMode = useRemember(getInitialViewMode() || "mapping", "StrategicHouse/viewMode");
 const roadmapMode = useRemember(getInitialRoadmapMode() || "it", "StrategicHouse/roadmapMode");
 
+function getViewCacheKey(mode, selectedRoadmapMode = roadmapMode.value) {
+    if (mode === "roadmap") {
+        return `roadmap:${selectedRoadmapMode || "it"}`;
+    }
+
+    return mode;
+}
+
+const initialCacheKey = getViewCacheKey(
+    getInitialServerView(),
+    getInitialServerRoadmapMode(),
+);
+const loadedViews = new Set([initialCacheKey]);
+const viewFetchedAt = new Map([[initialCacheKey, Date.now()]]);
+
 // Loading state
 const isLoading = ref(true);
 const dataFinished = ref(false);
+const isReloading = ref(false);
+const pendingViewMode = ref(null);
+const pendingRoadmapMode = ref(null);
 
 const onLoadingComplete = () => {
     isLoading.value = false;
@@ -679,65 +843,171 @@ const startLoading = () => {
 
 // Human-readable tab labels for loading title
 const viewModeLabels = {
-    mapping: 'Strategic House',
-    'business-strategy': 'Business Strategy',
-    'dual-growth': 'Dual Growth Strategy',
-    'digital-transformation-initiatives': 'Digital Transformation Initiatives',
-    'it-building-blocs': 'IT Building Blocks',
-    'it-initiatives': 'IT Initiatives',
-    'map-technology': 'Map Technology',
-    'initiative-relation': 'Initiative Relations',
-    'initiative-support': 'Initiative Support',
-    roadmap: 'Roadmap',
-    'strategic-pillars': 'Strategic Pillars',
+    mapping: "Strategic House",
+    "business-strategy": "Business Strategy",
+    "dual-growth": "Dual Growth Strategy",
+    "digital-transformation-initiatives": "Digital Transformation Initiatives",
+    "it-building-blocs": "IT Building Blocks",
+    "it-initiatives": "IT Initiatives",
+    "map-technology": "Map Technology",
+    "initiative-relation": "Initiative Relations",
+    "initiative-support": "Initiative Support",
+    roadmap: "Roadmap",
+    "strategic-pillars": "Strategic Pillars",
+};
+const roadmapModeLabels = {
+    all: "All",
+    digital: "Digital Initiative",
+    it: "IT Initiative",
 };
 
 const loadingTitle = computed(() => {
-    const label = viewModeLabels[viewMode.value] || 'Data';
+    const activeMode = pendingViewMode.value ?? viewMode.value;
+
+    if (activeMode === "roadmap") {
+        const roadmapLabel = roadmapModeLabels[pendingRoadmapMode.value ?? roadmapMode.value];
+
+        if (roadmapLabel) {
+            return `Memuat Roadmap ${roadmapLabel}`;
+        }
+    }
+
+    const label = viewModeLabels[activeMode] || "Data";
+
     return `Memuat ${label}`;
+});
+const activeViewMode = computed(() => pendingViewMode.value ?? viewMode.value);
+const activeRoadmapMode = computed(
+    () => pendingRoadmapMode.value ?? roadmapMode.value,
+);
+const pendingViewLabel = computed(() => {
+    if (pendingViewMode.value) {
+        return viewModeLabels[pendingViewMode.value] || "Data";
+    }
+
+    if (pendingRoadmapMode.value) {
+        return `Roadmap ${roadmapModeLabels[pendingRoadmapMode.value] || ""}`.trim();
+    }
+
+    return "Data";
 });
 const showEnabler = useRemember(false, "StrategicHouse/showEnabler");
 
+function markViewLoaded(mode, selectedRoadmapMode = roadmapMode.value) {
+    const cacheKey = getViewCacheKey(mode, selectedRoadmapMode);
+
+    loadedViews.add(cacheKey);
+    viewFetchedAt.set(cacheKey, Date.now());
+}
+
+function hasLoadedView(mode, selectedRoadmapMode = roadmapMode.value) {
+    return loadedViews.has(getViewCacheKey(mode, selectedRoadmapMode));
+}
+
+function isViewStale(mode, selectedRoadmapMode = roadmapMode.value) {
+    const fetchedAt = viewFetchedAt.get(getViewCacheKey(mode, selectedRoadmapMode));
+
+    if (!fetchedAt) {
+        return true;
+    }
+
+    return (Date.now() - fetchedAt) > VIEW_CACHE_TTL_MS;
+}
+
+function reloadViewData(mode, selectedRoadmapMode = roadmapMode.value, callbacks = {}) {
+    const requestData = {
+        ...props.filters,
+        view: mode,
+        // Sanitize: JS boolean `true` serializes to string "true" in URL,
+        // which fails Laravel's boolean validation. Use 1/0 instead.
+        show_empty: props.filters.show_empty ? 1 : 0,
+    };
+
+    if (mode === "roadmap") {
+        requestData.roadmap = selectedRoadmapMode;
+    } else {
+        delete requestData.roadmap;
+    }
+
+    return new Promise((resolve) => {
+        router.get(route("strategic-house.index"), requestData, {
+            only: getPropsForView(mode, selectedRoadmapMode),
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+            onSuccess: () => {
+                markViewLoaded(mode, selectedRoadmapMode);
+                callbacks.onSuccess?.();
+            },
+            onError: () => {
+                callbacks.onError?.();
+            },
+            onFinish: () => {
+                callbacks.onFinish?.();
+                resolve();
+            },
+        });
+    });
+}
+
+function reloadRoadmapData(mode, callbacks = {}) {
+    return reloadViewData("roadmap", mode, callbacks);
+}
+
 // Sync URL on mount if useRemember restored a value that isn't in URL
-onMounted(() => {
+onMounted(async () => {
     const urlParams = new URLSearchParams(window.location.search);
-    const hasViewParam = urlParams.has('view');
-    const hasRoadmapParam = urlParams.has('roadmap');
+    const hasViewParam = urlParams.has("view");
+    const hasRoadmapParam = urlParams.has("roadmap");
+    const initialView = getInitialServerView();
+    const initialRoadmapMode = getInitialServerRoadmapMode();
 
-    if (!hasViewParam && viewMode.value !== 'mapping') {
+    if (!hasViewParam && viewMode.value !== "mapping") {
         startLoading();
-        router.reload({
-            data: {
-                ...props.filters,
-                view: viewMode.value,
-            },
-            only: getPropsForView(viewMode.value),
-            preserveState: true,
-            preserveScroll: true,
-            onFinish: () => { dataFinished.value = true; },
-        });
+        pendingViewMode.value = viewMode.value;
+        pendingRoadmapMode.value = viewMode.value === "roadmap" ? roadmapMode.value : null;
+
+        await Promise.all([
+            preloadViewAssets(viewMode.value),
+            reloadViewData(
+                viewMode.value,
+                viewMode.value === "roadmap" ? roadmapMode.value : undefined,
+            ),
+        ]);
+
+        pendingRoadmapMode.value = null;
+        pendingViewMode.value = null;
+        dataFinished.value = true;
         return;
     }
 
-    if (!hasRoadmapParam && roadmapMode.value !== 'it') {
+    if (
+        viewMode.value === "roadmap"
+        && !hasRoadmapParam
+        && roadmapMode.value !== initialRoadmapMode
+    ) {
         startLoading();
-        router.reload({
-            data: {
-                ...props.filters,
-                roadmap: roadmapMode.value,
-            },
-            only: getPropsForView('roadmap'),
-            preserveState: true,
-            preserveScroll: true,
-            onFinish: () => { dataFinished.value = true; },
-        });
+        pendingViewMode.value = "roadmap";
+        pendingRoadmapMode.value = roadmapMode.value;
+
+        await Promise.all([
+            preloadViewAssets("roadmap"),
+            reloadRoadmapData(roadmapMode.value),
+        ]);
+
+        pendingRoadmapMode.value = null;
+        pendingViewMode.value = null;
+        dataFinished.value = true;
         return;
     }
 
-    // Data already present from initial page load
+    await preloadViewAssets(initialView);
+    markViewLoaded(initialView, initialRoadmapMode);
     isLoading.value = false;
     syncViewModeInUrl(viewMode.value);
-    syncRoadmapModeInUrl(roadmapMode.value);
+    if (viewMode.value === "roadmap") {
+        syncRoadmapModeInUrl(roadmapMode.value);
+    }
 });
 
 const allRoadmapStartYear = computed(() =>
@@ -759,6 +1029,11 @@ const syncViewModeInUrl = (mode) => {
 
     const url = new URL(window.location.href);
     url.searchParams.set("view", mode);
+
+    if (mode !== "roadmap") {
+        url.searchParams.delete("roadmap");
+    }
+
     window.history.replaceState({}, "", url.toString());
 };
 
@@ -770,29 +1045,74 @@ const syncRoadmapModeInUrl = (mode) => {
     window.history.replaceState({}, "", url.toString());
 };
 
-import { router } from "@inertiajs/vue3";
+const setViewMode = async (mode) => {
+    if (mode === viewMode.value && !pendingViewMode.value) {
+        return;
+    }
 
-const setViewMode = (mode) => {
-    viewMode.value = mode;
-    syncViewModeInUrl(mode);
-    startLoading();
+    const selectedRoadmapMode = mode === "roadmap" ? roadmapMode.value : undefined;
+    const loaded = hasLoadedView(mode, selectedRoadmapMode);
+    const stale = loaded && isViewStale(mode, selectedRoadmapMode);
 
-    // Reliable partial reload using router.reload
-    router.reload({
-        data: { 
-            ...props.filters,
-            view: mode 
-        },
-        only: getPropsForView(mode),
-        preserveState: true,
-        preserveScroll: true,
-        onFinish: () => { dataFinished.value = true; },
-    });
+    if (loaded && !stale) {
+        viewMode.value = mode;
+        syncViewModeInUrl(mode);
+        if (mode === "roadmap") {
+            syncRoadmapModeInUrl(roadmapMode.value);
+        }
+        return;
+    }
+
+    pendingViewMode.value = mode;
+    pendingRoadmapMode.value = mode === "roadmap" ? roadmapMode.value : null;
+    isReloading.value = true;
+    startProgress();
+
+    if (loaded) {
+        viewMode.value = mode;
+        syncViewModeInUrl(mode);
+        if (mode === "roadmap") {
+            syncRoadmapModeInUrl(roadmapMode.value);
+        }
+    }
+
+    try {
+        await Promise.all([
+            preloadViewAssets(mode),
+            reloadViewData(mode, selectedRoadmapMode, {
+                onSuccess: () => {
+                    if (!loaded) {
+                        viewMode.value = mode;
+                        syncViewModeInUrl(mode);
+                        if (mode === "roadmap") {
+                            syncRoadmapModeInUrl(roadmapMode.value);
+                        }
+                    }
+                },
+            }),
+        ]);
+        finishProgress();
+    } catch (error) {
+        console.error("Navigation error:", error);
+        if (progressInterval) clearInterval(progressInterval);
+        loadingProgress.value = 0;
+    } finally {
+        setTimeout(() => {
+            isReloading.value = false;
+            pendingRoadmapMode.value = null;
+            pendingViewMode.value = null;
+        }, 300);
+    }
 };
 
-const getPropsForView = (mode) => {
+const getPropsForView = (mode, selectedRoadmapMode = roadmapMode.value) => {
     const baseProps = ["filters", "page", "roofSection", "focusBands", "coeOptions", "statusPeriods"];
-    
+    const roadmapProps = {
+        all: ["itRoadmapGroups", "itRoadmapStartYear", "itRoadmapEndYear", "itRoadmapTotalCount", "itRoadmapMilestoneTypeOptions", "digitalRoadmapGroups", "digitalRoadmapTotalCount", "digitalRoadmapStartYear", "digitalRoadmapEndYear"],
+        digital: ["digitalRoadmapGroups", "digitalRoadmapTotalCount", "digitalRoadmapStartYear", "digitalRoadmapEndYear"],
+        it: ["itRoadmapGroups", "itRoadmapStartYear", "itRoadmapEndYear", "itRoadmapTotalCount", "itRoadmapMilestoneTypeOptions"],
+    };
+
     const viewProps = {
         mapping: ["summary", "technologyCards", "strategyCards", "foundationCard", "architectureCard", "tbcCard", "unassignedInitiatives", "mappingBusinessStrategyGroups", "mappingBusinessStrategyColumns", "mappingBusinessStrategyOrganizationOptions"],
         "business-strategy": ["businessStrategyPage", "businessStrategySummary", "businessStrategyHeaderGoals", "businessStrategyEnablerGoals", "businessStrategyGroups", "businessStrategyColumns", "businessStrategyOrganizationOptions"],
@@ -802,16 +1122,51 @@ const getPropsForView = (mode) => {
         "it-initiatives": ["itInitiativeOptions"],
         "initiative-support": ["initiativeSupportGroups", "initiativeSupportDigitalOptions", "initiativeSupportItOptions"],
         "map-technology": ["mapTechnologies", "mapTechnologyCoeOptions", "mapTechnologyInitiativeOptions"],
-        "initiative-relation": ["mstInitiatives", "initiativeRelations", "modelRelationOptions"],
-        "roadmap": ["itRoadmapGroups", "itRoadmapStartYear", "itRoadmapEndYear", "itRoadmapTotalCount", "itRoadmapMilestoneTypeOptions", "digitalRoadmapGroups", "digitalRoadmapTotalCount", "digitalRoadmapStartYear", "digitalRoadmapEndYear"],
+        "initiative-relation": ["mstInitiatives", "initiativeRelations", "modelRelationOptions", "typeRelationOptions"],
+        roadmap: roadmapProps[selectedRoadmapMode] || roadmapProps.it,
         "strategic-pillars": ["strategicPillars", "allGoals", "taggings", "allInitiatives", "allThemes", "matrixInitiatives", "allOrganizations", "pilarOptions", "pillarFilters"],
     };
 
     return [...baseProps, ...(viewProps[mode] || [])];
 };
 
-const setRoadmapMode = (mode) => {
-    roadmapMode.value = mode;
-    syncRoadmapModeInUrl(mode);
+const setRoadmapMode = async (mode) => {
+    if (mode === roadmapMode.value && !pendingRoadmapMode.value) {
+        return;
+    }
+
+    const loaded = hasLoadedView("roadmap", mode);
+    const stale = loaded && isViewStale("roadmap", mode);
+
+    if (loaded && !stale) {
+        roadmapMode.value = mode;
+        syncRoadmapModeInUrl(mode);
+        return;
+    }
+
+    pendingRoadmapMode.value = mode;
+    isReloading.value = true;
+
+    if (loaded) {
+        roadmapMode.value = mode;
+        syncRoadmapModeInUrl(mode);
+    }
+
+    try {
+        await Promise.all([
+            preloadViewAssets("roadmap"),
+            reloadRoadmapData(mode, {
+                onSuccess: () => {
+                    if (!loaded) {
+                        roadmapMode.value = mode;
+                        syncRoadmapModeInUrl(mode);
+                    }
+                },
+            }),
+        ]);
+    } finally {
+        isReloading.value = false;
+        pendingRoadmapMode.value = null;
+    }
 };
 </script>

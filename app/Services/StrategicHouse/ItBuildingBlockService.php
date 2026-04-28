@@ -24,34 +24,37 @@ class ItBuildingBlockService
 
     public function getItInitiativeOptions(?Collection $providedInitiatives = null): Collection
     {
-        // Always query directly to ensure fresh data
-        $initiatives = MstInitiative::query()
-            ->with([
-                'coe:id,name',
-                'organization:id,name,groub_id',
-                'sourceData:id,name',
-                'mappedProjects.pcStatusImplementations' => fn ($query) => $query
-                    ->orderBy('year', 'desc')
-                    ->orderByRaw("CASE
-                    WHEN month = 'Desember' THEN 12
-                    WHEN month = 'November' THEN 11
-                    WHEN month = 'Oktober' THEN 10
-                    WHEN month = 'September' THEN 9
-                    WHEN month = 'Agustus' THEN 8
-                    WHEN month = 'Juli' THEN 7
-                    WHEN month = 'Juni' THEN 6
-                    WHEN month = 'Mei' THEN 5
-                    WHEN month = 'April' THEN 4
-                    WHEN month = 'Maret' THEN 3
-                    WHEN month = 'Februari' THEN 2
-                    WHEN month = 'Januari' THEN 1
-                    ELSE 0 END DESC")
-                    ->orderBy('id', 'desc'),
-            ])
-            ->where('tipe_initiative', 2)
-            ->orderBy('code')
-            ->orderBy('name')
-            ->get(['id', 'code', 'name', 'description', 'coe_id', 'business_unit', 'tipe_initiative', 'source']);
+        $initiatives = $providedInitiatives
+            ? $this->filterProvidedInitiatives($providedInitiatives, 2)
+            : MstInitiative::query()
+                ->with([
+                    'coe:id,name',
+                    'organization:id,name,groub_id',
+                    'sourceData:id,name',
+                    'mappedProjects:id',
+                    'mappedProjects.pcStatusImplementations' => fn ($query) => $query
+                        ->select(['id', 'project_id', 'month', 'year', 'status'])
+                        ->orderBy('year', 'desc')
+                        ->orderByRaw("CASE
+                        WHEN month = 'Desember' THEN 12
+                        WHEN month = 'November' THEN 11
+                        WHEN month = 'Oktober' THEN 10
+                        WHEN month = 'September' THEN 9
+                        WHEN month = 'Agustus' THEN 8
+                        WHEN month = 'Juli' THEN 7
+                        WHEN month = 'Juni' THEN 6
+                        WHEN month = 'Mei' THEN 5
+                        WHEN month = 'April' THEN 4
+                        WHEN month = 'Maret' THEN 3
+                        WHEN month = 'Februari' THEN 2
+                        WHEN month = 'Januari' THEN 1
+                        ELSE 0 END DESC")
+                        ->orderBy('id', 'desc'),
+                ])
+                ->where('tipe_initiative', 2)
+                ->orderBy('code')
+                ->orderBy('name')
+                ->get(['id', 'code', 'name', 'description', 'coe_id', 'business_unit', 'tipe_initiative', 'source']);
 
         return $initiatives->map(function (MstInitiative $initiative): array {
             // ... (rest of the mapping logic remains same)
@@ -121,20 +124,25 @@ class ItBuildingBlockService
 
     public function getDigitalInitiativeOptions(?Collection $providedInitiatives = null): Collection
     {
-        // Always query directly to ensure fresh data
-        $initiatives = MstInitiative::query()
-            ->with([
-                'coe:id,name',
-                'organization:id,name,groub_id',
-                'latestStatusImplementation',
-                'statusImplementations:id,initiative_id,start,end,year,review_status',
-                'sourceData:id,name',
-                'mappedProjects:id',
-            ])
-            ->where('tipe_initiative', 1)
-            ->orderBy('code')
-            ->orderBy('name')
-            ->get(['id', 'code', 'name', 'description', 'coe_id', 'business_unit', 'tipe_initiative', 'source']);
+        $initiatives = $providedInitiatives
+            ? $this->filterProvidedInitiatives($providedInitiatives, 1)
+            : MstInitiative::query()
+                ->with([
+                    'coe:id,name',
+                    'organization:id,name,groub_id',
+                    'latestStatusImplementation' => fn ($query) => $query->select([
+                        'trs_status_implementation.id',
+                        'trs_status_implementation.initiative_id',
+                        'trs_status_implementation.review_status',
+                    ]),
+                    'statusImplementations:id,initiative_id,start,end,year,review_status',
+                    'sourceData:id,name',
+                    'mappedProjects:id',
+                ])
+                ->where('tipe_initiative', 1)
+                ->orderBy('code')
+                ->orderBy('name')
+                ->get(['id', 'code', 'name', 'description', 'coe_id', 'business_unit', 'tipe_initiative', 'source']);
 
         return $initiatives->map(fn (MstInitiative $initiative): array => [
 
@@ -323,6 +331,14 @@ class ItBuildingBlockService
                     ->where('initiative_id', $item['initiative_id'])
                     ->delete();
             });
+    }
+
+    private function filterProvidedInitiatives(Collection $providedInitiatives, int $initiativeType): Collection
+    {
+        return $providedInitiatives
+            ->filter(fn (MstInitiative $initiative): bool => (int) ($initiative->tipe_initiative ?? 0) === $initiativeType)
+            ->sortBy(fn (MstInitiative $initiative): string => sprintf('%08s-%s', (string) ($initiative->code ?? ''), (string) ($initiative->name ?? '')))
+            ->values();
     }
 
     private function monthToNumber(?string $month): int

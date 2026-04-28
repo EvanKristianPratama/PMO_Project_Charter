@@ -90,7 +90,8 @@ class MstInitiative extends Model
      */
     public function latestStatus(): HasOne
     {
-        return $this->hasOne(StatusMstInitiative::class, 'initiative_id')->latestOfMany();
+        return $this->hasOne(StatusMstInitiative::class, 'initiative_id')
+            ->orderByDesc('id');
     }
 
     public function mappedProjects(): BelongsToMany
@@ -204,7 +205,8 @@ class MstInitiative extends Model
 
     public function latestStatusImplementation(): HasOne
     {
-        return $this->hasOne(TrsStatusImplementation::class, 'initiative_id')->latestOfMany();
+        return $this->hasOne(TrsStatusImplementation::class, 'initiative_id')
+            ->orderByDesc('id');
     }
 
     public function mapTechnologies(): HasMany
