@@ -66,10 +66,31 @@ const cardTitle = computed(() => {
     border-radius: 0.25rem;
     background: var(--initiative-status-bg, #eff6ff);
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+    cursor: pointer;
+    user-select: none;
+    transition: box-shadow 0.15s ease;
+}
+
+.initiative-status-card:hover {
+    box-shadow: 0 3px 8px rgba(15, 23, 42, 0.12);
+    outline: 2px solid var(--initiative-status-border, #2563eb);
+    outline-offset: 2px;
+}
+
+.initiative-status-card:active {
+    cursor: pointer;
 }
 
 .initiative-status-card--focus {
-    box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.14), 0 8px 16px rgba(15, 23, 42, 0.12);
+    outline: 3px solid var(--initiative-status-border, #2563eb);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--initiative-status-border, #2563eb) 20%, transparent),
+                0 8px 20px rgba(15, 23, 42, 0.18);
+    cursor: grab;
+}
+
+.initiative-status-card--focus:active {
+    cursor: grabbing;
 }
 
 .initiative-status-card__code {

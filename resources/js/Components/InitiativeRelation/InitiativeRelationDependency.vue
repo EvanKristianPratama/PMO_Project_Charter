@@ -1,69 +1,86 @@
 <template>
     <section
         class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-        <div
-            class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4 dark:border-white/10">
+        <div class="flex items-center justify-end border-b border-slate-200 px-5 py-2 dark:border-white/10">
+            <button
+                type="button"
+                class="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[11px] font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200"
+                @click="showFilters = !showFilters"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
+                </svg>
+                {{ showFilters ? 'Sembunyikan Filter' : 'Tampilkan Filter' }}
+            </button>
+        </div>
+
+        <div v-show="showFilters">
             <div
-                class="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                <div class="flex items-center gap-2">
-                    <label for="initiative-type-filter" class="text-[11px]">Filter Type</label>
-                    <select id="initiative-type-filter" v-model="selectedType"
-                        class="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm transition focus:border-slate-300 focus:outline-none dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200">
-                        <option value="all">All</option>
-                        <option value="digital">Digital</option>
-                        <option value="it">IT</option>
-                    </select>
-                </div>
+                class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4 dark:border-white/10">
+                <div
+                    class="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    <div class="flex items-center gap-2">
+                        <label for="initiative-type-filter" class="text-[11px]">Filter Type</label>
+                        <select id="initiative-type-filter" v-model="selectedType"
+                            class="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm transition focus:border-slate-300 focus:outline-none dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200">
+                            <option value="all">All</option>
+                            <option value="digital">Digital</option>
+                            <option value="it">IT</option>
+                        </select>
+                    </div>
 
-                <div class="flex items-center gap-2">
-                    <label for="model-relasi-filter" class="text-[11px]">Model Relasi</label>
-                    <select id="model-relasi-filter" v-model="selectedModelRelasi"
-                        class="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm transition focus:border-slate-300 focus:outline-none dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200">
-                        <option value="all">All</option>
-                        <option v-for="option in modelRelasiOptions" :key="option" :value="option">
-                            {{ option }}
-                        </option>
-                    </select>
-                </div>
+                    <div class="flex items-center gap-2">
+                        <label for="model-relasi-filter" class="text-[11px]">Model Relasi</label>
+                        <select id="model-relasi-filter" v-model="selectedModelRelasi"
+                            class="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm transition focus:border-slate-300 focus:outline-none dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200">
+                            <option value="all">All</option>
+                            <option v-for="option in modelRelasiOptions" :key="option" :value="option">
+                                {{ option }}
+                            </option>
+                        </select>
+                    </div>
 
-                <div class="flex items-center gap-2">
-                    <label for="initiative-filter" class="text-[11px]">Initiative</label>
-                    <select id="initiative-filter" v-model="selectedInitiative"
-                        :disabled="displayMode === 'all'"
-                        class="w-48 max-w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm transition focus:border-slate-300 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200">
-                        <option value="all">All</option>
-                        <option v-for="option in filteredInitiativeOptions" :key="option.id" :value="option.id">
-                            {{ option.label }}
-                        </option>
-                    </select>
-                </div>
+                    <div class="flex items-center gap-2">
+                        <label for="initiative-filter" class="text-[11px]">Initiative</label>
+                        <select id="initiative-filter" v-model="selectedInitiative"
+                            :disabled="displayMode === 'all'"
+                            class="w-48 max-w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm transition focus:border-slate-300 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200">
+                            <option value="all">All</option>
+                            <option v-for="option in filteredInitiativeOptions" :key="option.id" :value="option.id">
+                                {{ option.label }}
+                            </option>
+                        </select>
+                    </div>
 
-                <div class="flex items-center gap-2">
-                    <label for="relation-view-mode" class="text-[11px]">Mode</label>
-                    <select id="relation-view-mode" v-model="displayMode"
-                        class="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm transition focus:border-slate-300 focus:outline-none dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200">
-                        <option value="per-code">Per Code</option>
-                        <option value="all">All</option>
-                    </select>
+                    <div class="flex items-center gap-2">
+                        <label for="relation-view-mode" class="text-[11px]">Mode</label>
+                        <select id="relation-view-mode" v-model="displayMode"
+                            class="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm transition focus:border-slate-300 focus:outline-none dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200">
+                            <option value="per-code">Per Code</option>
+                            <option value="all">All</option>
+                        </select>
+                    </div>
                 </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 border-b border-slate-200 px-5 py-3 text-[11px] font-semibold text-slate-600 dark:border-white/10 dark:text-slate-300">
+                <span class="uppercase tracking-wider text-slate-500 dark:text-slate-400">Legend Status</span>
+                <span
+                    v-for="legend in statusLegend"
+                    :key="legend.key"
+                    class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 shadow-sm dark:border-white/10 dark:bg-[#1f1f1f]"
+                >
+                    <span
+                        class="h-2.5 w-2.5 rounded-sm border"
+                        :style="legend.swatchStyle"
+                    ></span>
+                    <span>{{ legend.label }}</span>
+                    <span class="text-slate-400 dark:text-slate-500">({{ legend.count }})</span>
+                </span>
             </div>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2 border-b border-slate-200 px-5 py-3 text-[11px] font-semibold text-slate-600 dark:border-white/10 dark:text-slate-300">
-            <span class="uppercase tracking-wider text-slate-500 dark:text-slate-400">Legend Status</span>
-            <span
-                v-for="legend in statusLegend"
-                :key="legend.key"
-                class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 shadow-sm dark:border-white/10 dark:bg-[#1f1f1f]"
-            >
-                <span
-                    class="h-2.5 w-2.5 rounded-sm border"
-                    :style="legend.swatchStyle"
-                ></span>
-                <span>{{ legend.label }}</span>
-                <span class="text-slate-400 dark:text-slate-500">({{ legend.count }})</span>
-            </span>
-        </div>
+
 
         <div class="overflow-x-auto">
             <table class="w-full border-collapse text-sm">
@@ -218,9 +235,9 @@
                                                     :nodes="relationGraphByInitiative(initiative).nodes"
                                                     :edges="relationGraphByInitiative(initiative).edges"
                                                     :fit-view-on-init="true"
-                                                    :nodes-draggable="false"
+                                                    :nodes-draggable="true"
                                                     :nodes-connectable="false"
-                                                    :elements-selectable="false"
+                                                    :elements-selectable="true"
                                                     :zoom-on-double-click="false"
                                                     :min-zoom="0.35"
                                                     :max-zoom="1.5"
@@ -287,16 +304,19 @@
                                                 :style="{ width: `${allRelationGraph.width}px`, height: `${allRelationGraph.height}px` }"
                                             >
                                                 <VueFlow
+                                                    :id="ALL_FLOW_ID"
                                                     class="initiative-relation-flow"
                                                     :nodes="allRelationGraph.nodes"
                                                     :edges="allRelationGraph.edges"
                                                     :fit-view-on-init="true"
                                                     :nodes-draggable="false"
                                                     :nodes-connectable="false"
-                                                    :elements-selectable="false"
+                                                    :elements-selectable="true"
                                                     :zoom-on-double-click="false"
                                                     :min-zoom="0.25"
                                                     :max-zoom="1.5"
+                                                    @node-click="handleAllNodeClick"
+                                                    @pane-click="handleAllPaneClick"
                                                 >
                                                     <template #node-initiative-status-card="nodeProps">
                                                         <InitiativeRelationFlowNode :data="nodeProps.data" :selected="nodeProps.selected" />
@@ -400,10 +420,35 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue';
-import { MarkerType, Position, VueFlow } from '@vue-flow/core';
+import { MarkerType, Position, VueFlow, useVueFlow } from '@vue-flow/core';
 import '@vue-flow/core/dist/style.css';
 import '@vue-flow/core/dist/theme-default.css';
 import InitiativeRelationFlowNode from '@/Components/InitiativeRelation/InitiativeRelationFlowNode.vue';
+
+const ALL_FLOW_ID = 'initiative-relation-all-flow';
+const { updateNode: updateAllFlowNode } = useVueFlow(ALL_FLOW_ID);
+const allSelectedNodeId = ref(null);
+
+const handleAllNodeClick = ({ node }) => {
+    const prevId = allSelectedNodeId.value;
+    if (prevId && prevId !== node.id) {
+        updateAllFlowNode(prevId, { draggable: false });
+    }
+    if (prevId === node.id) {
+        updateAllFlowNode(node.id, { draggable: false });
+        allSelectedNodeId.value = null;
+    } else {
+        updateAllFlowNode(node.id, { draggable: true });
+        allSelectedNodeId.value = node.id;
+    }
+};
+
+const handleAllPaneClick = () => {
+    if (allSelectedNodeId.value) {
+        updateAllFlowNode(allSelectedNodeId.value, { draggable: false });
+        allSelectedNodeId.value = null;
+    }
+};
 
 const props = defineProps({
     mstInitiatives: {
@@ -418,10 +463,11 @@ const props = defineProps({
 
 const emit = defineEmits(['edit-relation']);
 
+const showFilters = ref(false);
 const selectedType = ref('all');
 const selectedModelRelasi = ref('all');
 const selectedInitiative = ref('all');
-const displayMode = ref('per-code');
+const displayMode = ref('all');
 
 watch(displayMode, (mode) => {
     if (mode === 'all') {
@@ -1099,7 +1145,7 @@ const buildGraphForAllRelations = (relations) => {
             sourcePosition: Position.Right,
             targetPosition: Position.Left,
             draggable: false,
-            selectable: false,
+            selectable: true,
             style: resolveInitiativeNodeStyle(linkedInitiative),
         };
     });
@@ -1323,6 +1369,16 @@ const allRelationGraph = computed(() => buildGraphForAllRelations(allRelationRow
     width: 240px;
     white-space: normal;
     text-align: center;
+    cursor: pointer;
+}
+
+:deep(.initiative-relation-flow .vue-flow__node.selected) {
+    cursor: grab;
+}
+
+:deep(.initiative-relation-flow .vue-flow__node.selected.dragging),
+:deep(.initiative-relation-flow .vue-flow__node.selected:active) {
+    cursor: grabbing;
 }
 
 :deep(.initiative-relation-flow .vue-flow__node.initiative-node-block) {
