@@ -69,7 +69,7 @@ const showDetails = ref(false);
 const showDtiStatusImplementation = ref(false);
 const showGitsStatusImplementation = ref(false);
 const showStrategyDetails = ref(true);
-const showBusinessStrategy = ref(false);
+const showBusinessStrategy = ref(true);
 const selectedBusinessUnit = ref('');
 const selectedPeriod = ref(null);
 const selectedGitsPeriod = ref('latest');
@@ -213,9 +213,7 @@ const statusLegend = computed(() => {
 
     const dtiFilter = (ini) => {
         const matchesSource = selectedSource.value === 'all' || ini.source == selectedSource.value;
-        const periodStatus = getInitiativeStatus(ini);
-        const matchesPeriod = !selectedPeriod.value || periodStatus !== null;
-        return matchesSource && matchesSelectedBusinessUnit(ini) && matchesPeriod;
+        return matchesSource && matchesSelectedBusinessUnit(ini);
     };
 
     const allInitiatives = [
@@ -332,7 +330,11 @@ const filterDtiInitiatives = (initiatives) => {
         const periodStatus = getInitiativeStatus(ini);
         const implStatus = normalizeStatusLabel(periodStatus);
         const matchesStatus = !dtiSelectedStatus.value || implStatus === dtiSelectedStatus.value;
-        const matchesPeriod = !selectedPeriod.value || periodStatus !== null;
+        
+        // Fix: In DTI section, we only filter by period if a specific status filter from the legend is active.
+        // This ensures the total initiative count remains correct even if some initiatives 
+        // don't have a status record for the selected period.
+        const matchesPeriod = !dtiSelectedStatus.value || periodStatus !== null;
 
         return matchesSource && matchesSelectedBusinessUnit(ini) && matchesStatus && matchesPeriod;
     });
@@ -535,6 +537,71 @@ const filteredBusinessStrategyRows = computed(() => {
         (row) => selectedBusinessUnitIds.value.has(String(row.business_unit_id ?? '')),
     );
 });
+
+const bulletIndentedStrategyColumns = new Set(['maximazing_value', 'expand', 'low_carbon']);
+const shouldIndentStrategyColumn = (columnKey) => bulletIndentedStrategyColumns.has(String(columnKey ?? ''));
+const isBulletLine = (line) => String(line ?? '').trimStart().startsWith('\u2022');
+const splitStrategyValueLines = (value) => String(value ?? '').split(/\r?\n/);
+
+const getBusinessUnitLogo = (row) => {
+    if (row.business_unit_logo) return row.business_unit_logo;
+    
+    // Mapping manual berdasarkan nama BU jika logo tidak dikirim dari backend
+    const buName = String(row.business_unit || '').trim();
+    if (buName.includes('Upstream')) return '/icon/Upstream.png';
+    if (buName.includes('Gas')) return '/icon/Gas.png';
+    if (buName.includes('C&T') || buName.includes('Commercial')) return '/icon/C&T.png';
+    if (buName.includes('R&P') || buName.includes('Refining')) return '/icon/R&P.png';
+    if (buName.includes('PNRE')) return '/icon/PNRE.png';
+    if (buName.includes('IML') || buName.includes('Logistics')) return '/icon/IML.png';
+    if (buName.includes('APFS') || buName.includes('Financial')) return '/icon/APFS.png';
+    
+    return null;
+};
+
+const dtiInitiativeCountByBu = computed(() => {
+    const counts = {};
+    const seenInitiativesByBu = {};
+
+    // Collect all DTI initiatives
+    const allDti = [
+        ...props.technologyCards.flatMap(c => c.initiatives || []),
+        ...(props.unassignedInitiatives || [])
+    ];
+
+    allDti.forEach((ini) => {
+        // Use same filtering logic as in filterDtiInitiatives (Source, Status, Period)
+        // But exclude the global BU filter since we want counts for each BU row
+        const matchesSource = selectedSource.value === 'all' || ini.source == selectedSource.value;
+        const periodStatus = getInitiativeStatus(ini);
+        const implStatus = normalizeStatusLabel(periodStatus);
+        const matchesStatus = !dtiSelectedStatus.value || implStatus === dtiSelectedStatus.value;
+        const matchesPeriod = !dtiSelectedStatus.value || periodStatus !== null;
+
+        if (matchesSource && matchesStatus && matchesPeriod) {
+            const buId = String(ini.business_unit_id ?? '');
+            const iniKey = String(ini.id ?? [ini.code, ini.name].filter(Boolean).join('::'));
+            
+            if (buId && iniKey) {
+                if (!seenInitiativesByBu[buId]) {
+                    seenInitiativesByBu[buId] = new Set();
+                }
+                
+                if (!seenInitiativesByBu[buId].has(iniKey)) {
+                    seenInitiativesByBu[buId].add(iniKey);
+                    counts[buId] = (counts[buId] || 0) + 1;
+                }
+            }
+        }
+    });
+
+    return counts;
+});
+
+const getBusinessUnitInitiativeCount = (row) => {
+    const buId = String(row.business_unit_id ?? '');
+    return dtiInitiativeCountByBu.value[buId] || 0;
+};
 </script>
 
 <template>
@@ -542,7 +609,6 @@ const filteredBusinessStrategyRows = computed(() => {
         <div class="mockup-content">
             <div class="top-actions">
                 <select
-                    v-if="showBusinessStrategy"
                     v-model="selectedBusinessUnit"
                     class="business-strategy-filter"
                 >
@@ -568,54 +634,81 @@ const filteredBusinessStrategyRows = computed(() => {
             <!-- ═══ ROOF: Focus Bands (Maximize Legacy Business + Build Low Carbon) ═══ -->
             <div class="roof-section">
                 <div class="roof-headline">{{ page.headline }}</div>
-
-                <div class="roof-top">
-                    <div class="roof-main">
-                        <div class="roof-main-label">{{ roofSection.main_goal?.title ?? page.headline }}
-                        </div>
-                        <div v-if="roofSection.main_goal_themes?.length" class="roof-sub-items">
-                            <div v-for="theme in roofSection.main_goal_themes" :key="theme.id" class="roof-sub-item">
-                                {{ theme.label }}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div v-if="roofSection.side_goal" class="roof-side">
-                        <div class="roof-side-label">{{ roofSection.side_goal.title }}</div>
-                    </div>
-                </div>
             </div>
 
             <!-- ═══ CONNECTOR: small decorative chain ═══ -->
             <div class="business-strategy-panel">
-                <div v-if="showBusinessStrategy" class="business-strategy-table-wrap">
+                <div class="business-strategy-table-wrap">
                     <div class="business-strategy-table-scroll">
-                        <table class="business-strategy-table">
+                        <table class="strategy-table">
                             <colgroup>
                                 <col class="business-strategy-col business-strategy-col--business-unit" />
-                                <col class="business-strategy-col business-strategy-col--legacy" />
-                                <col class="business-strategy-col business-strategy-col--legacy" />
+                                <col v-if="orderedBusinessStrategyColumns.length > 1" :span="orderedBusinessStrategyColumns.length - 1" class="business-strategy-col business-strategy-col--legacy" />
                                 <col class="business-strategy-col business-strategy-col--carbon" />
                             </colgroup>
-                            <tbody>
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" class="head-cell head-cell--business-unit"></th>
+                                    <th v-if="orderedBusinessStrategyColumns.length > 1" :colspan="orderedBusinessStrategyColumns.length - 1" class="head-cell">
+                                        <div class="strategy-head-card strategy-head-card--legacy">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <span class="strategy-head-card__title">{{ roofSection.main_goal?.title ?? page.headline }}</span>
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <th v-if="roofSection.side_goal" rowspan="2" class="head-cell head-cell--carbon">
+                                        <div class="strategy-head-card strategy-head-card--carbon">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <span class="strategy-head-card__title">{{ roofSection.side_goal.title }}</span>
+                                            </div>
+                                        </div>
+                                    </th>
+                                </tr>
+                                <tr v-if="orderedBusinessStrategyColumns.length > 1">
+                                    <th v-for="column in orderedBusinessStrategyColumns.filter(c => c.key !== 'low_carbon')" :key="column.key" class="head-cell">
+                                        <div class="strategy-head-card strategy-head-card--legacy-child">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <span>{{ column.label }}</span>
+                                            </div>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody v-if="showBusinessStrategy">
                                 <tr v-for="row in filteredBusinessStrategyRows" :key="row.id">
-                                    <td class="business-strategy-table__cell primary-cell">
+                                    <td class="strategy-table__cell primary-cell">
                                         <div class="primary-cell__content">
-                                            <div class="primary-logo-wrapper" v-if="row.business_unit_logo">
-                                                <img :src="row.business_unit_logo" :alt="`${row.business_unit} logo`" class="primary-business-unit-logo">
+                                            <div class="primary-logo-wrapper" v-if="getBusinessUnitLogo(row)">
+                                                <img :src="getBusinessUnitLogo(row)" :alt="`${row.business_unit} logo`" class="primary-business-unit-logo">
                                             </div>
                                             <div class="primary-label-wrapper">
                                                 <span class="primary-business-unit-name">{{ row.business_unit }}</span>
+                                                <span v-if="getBusinessUnitInitiativeCount(row) > 0" class="bu-count-capsule">
+                                                    {{ getBusinessUnitInitiativeCount(row) }}
+                                                </span>
                                             </div>
                                         </div>
                                     </td>
                                     <td
                                         v-for="column in orderedBusinessStrategyColumns"
                                         :key="`${row.id}-${column.key}`"
-                                        class="business-strategy-table__cell"
+                                        class="strategy-cell"
                                     >
-                                        <span v-if="row.values?.[column.key]">{{ row.values[column.key] }}</span>
-                                        <span v-else class="business-strategy-table__empty">-</span>
+                                        <p v-if="row.values?.[column.key]" class="strategy-cell__value">
+                                            <span
+                                                v-for="(line, lineIndex) in splitStrategyValueLines(row.values[column.key])"
+                                                :key="`${row.id}-${column.key}-line-${lineIndex}`"
+                                                class="strategy-cell__line"
+                                                :class="{
+                                                    'strategy-cell__line--bullet': shouldIndentStrategyColumn(column.key) && isBulletLine(line),
+                                                }"
+                                            >
+                                                {{ line }}
+                                            </span>
+                                        </p>
+                                        <p v-else class="strategy-cell__empty">
+                                            -
+                                        </p>
                                     </td>
                                 </tr>
                                 <tr v-if="!filteredBusinessStrategyRows.length">
@@ -1033,8 +1126,9 @@ const filteredBusinessStrategyRows = computed(() => {
 }
 
 .business-strategy-panel {
-    width: 80%;
-    margin: 0 auto;
+    width: 90%;
+    margin-left: 0;
+    margin-right: auto;
     border-radius: 12px;
 }
 
@@ -1045,16 +1139,104 @@ const filteredBusinessStrategyRows = computed(() => {
 
 .business-strategy-table-scroll {
     overflow-x: auto;
-    border: 1px solid #d8e3ef;
-    border-radius: 10px;
     background: #fff;
 }
 
-.business-strategy-table {
+.strategy-table {
     width: 100%;
     min-width: 920px;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     table-layout: fixed;
+    background: #ffffff;
+}
+
+.strategy-table td {
+    border: 1px solid #c7d2de;
+    vertical-align: top;
+}
+
+.strategy-table thead th {
+    border: 0;
+    background: transparent;
+    padding: 0 4px 8px;
+    vertical-align: stretch;
+}
+
+.business-strategy-col--business-unit {
+    width: 11.11%;
+}
+
+.business-strategy-col--legacy {
+    width: calc((88.89% - 260px) / 2);
+}
+
+.business-strategy-col--carbon {
+    width: 260px;
+}
+
+.head-cell--business-unit {
+    width: 11.11%;
+}
+
+.head-cell--carbon {
+    width: 260px;
+}
+
+.strategy-head-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 100%;
+    height: 100%;
+    border: 1px solid #c5d6e8;
+    border-radius: 10px;
+    padding: 12px 16px;
+    text-align: center;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.strategy-head-card__title {
+    display: block;
+    line-height: 1.2;
+}
+
+.strategy-head-card--legacy {
+    min-height: 40px;
+    background: #e8eff8;
+    color: #1a2a3a;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.strategy-head-card--legacy-child {
+    min-height: 34px;
+    background: #e8eff8;
+    color: #2a4a6a;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.strategy-head-card--carbon {
+    min-height: 84px;
+    border-color: #2f5596;
+    background: linear-gradient(180deg, #3b64a8 0%, #2f5596 100%);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.strategy-table tbody th,
+.strategy-table td {
+    vertical-align: top;
+}
+
+.strategy-table__cell {
+    padding: 10px 12px;
+    font-size: 11px;
+    line-height: 1.45;
 }
 
 .business-strategy-col--legacy {
@@ -1065,44 +1247,42 @@ const filteredBusinessStrategyRows = computed(() => {
     width: 260px;
 }
 
-.business-strategy-table th,
-.business-strategy-table td {
-    border-bottom: 1px solid #e2e8f0;
-    border-right: 1px solid #e2e8f0;
-    padding: 10px 12px;
-    vertical-align: top;
+.strategy-cell {
+    width: auto;
+    min-width: 0;
+    padding: 8px 10px;
+    background: #ffffff;
+    border: 1px solid #c7d2de;
+}
+
+.strategy-cell__value {
     font-size: 11px;
+    font-weight: 400;
     line-height: 1.45;
+    color: #1f2937;
+    margin: 0;
+    word-break: break-word;
+    text-align: left;
 }
 
-.business-strategy-table th:last-child,
-.business-strategy-table td:last-child {
-    border-right: none;
+.strategy-cell__line {
+    display: block;
+    white-space: break-spaces;
+    tab-size: 4;
 }
 
-.business-strategy-table thead th {
-    background: #e8eff8;
-    color: #163b63;
-    font-size: 11px;
-    font-weight: 800;
-    text-align: center;
+.strategy-cell__line--bullet {
+    padding-left: 14px;
+    text-indent: -14px;
 }
 
-.business-strategy-table__group {
-    width: 120px;
-}
-
-.business-strategy-table__unit {
-    width: 190px;
-}
-
-.business-strategy-table__direction {
-    width: calc((100% - 310px) / 3);
-}
-
-.business-strategy-table__cell {
-    white-space: pre-line;
-    color: #294766;
+.strategy-cell__empty {
+    font-size: 10px;
+    font-weight: 700;
+    color: #94a3b8;
+    font-style: italic;
+    margin: 0;
+    text-align: left;
 }
 
 .business-strategy-table__empty,
@@ -1127,7 +1307,7 @@ const filteredBusinessStrategyRows = computed(() => {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     padding: 10px;
     height: 100%;
     justify-content: center;
@@ -1140,6 +1320,7 @@ const filteredBusinessStrategyRows = computed(() => {
     align-items: center;
     justify-content: center;
     width: 100%;
+    min-height: 40px;
 }
 
 .primary-business-unit-logo {
@@ -1157,12 +1338,29 @@ const filteredBusinessStrategyRows = computed(() => {
     justify-content: center;
     gap: 8px;
     width: 100%;
+    flex-wrap: wrap;
 }
 
 .primary-business-unit-name {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 800;
     line-height: 1.2;
+}
+
+.bu-count-capsule {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: rgba(15, 111, 183, 0.1);
+    border: 1px solid rgba(15, 111, 183, 0.2);
+    font-size: 9px;
+    font-weight: 800;
+    color: #0f6fb7;
+    flex-shrink: 0;
 }
 
 /* ─── ROOF SECTION ─── */
@@ -1940,22 +2138,45 @@ const filteredBusinessStrategyRows = computed(() => {
 }
 
 :deep(.dark) .business-strategy-table-scroll {
-    border-color: rgba(148, 163, 184, 0.16);
     background: #0f172a;
 }
 
-:deep(.dark) .business-strategy-table thead th {
+:deep(.dark) .strategy-table thead th {
+    background: transparent;
+}
+
+:deep(.dark) .strategy-head-card--legacy,
+:deep(.dark) .strategy-head-card--legacy-child {
     background: #1e293b;
+    border-color: #334155;
     color: #e2e8f0;
 }
 
-:deep(.dark) .business-strategy-table th,
-:deep(.dark) .business-strategy-table td {
+:deep(.dark) .strategy-head-card--carbon {
+    border-color: #3b82f6;
+    background: linear-gradient(180deg, #274a87 0%, #1f3e74 100%);
+}
+
+:deep(.dark) .strategy-table th,
+:deep(.dark) .strategy-table td {
     border-color: rgba(148, 163, 184, 0.12);
 }
 
-:deep(.dark) .business-strategy-table__cell {
+:deep(.dark) .strategy-table__cell {
     color: #cbd5e1;
+}
+
+:deep(.dark) .strategy-cell {
+    background: rgba(15, 23, 42, 0.35);
+    border-color: rgba(148, 163, 184, 0.12);
+}
+
+:deep(.dark) .strategy-cell__value {
+    color: #e2e8f0;
+}
+
+:deep(.dark) .strategy-cell__empty {
+    color: #94a3b8;
 }
 
 :deep(.dark) .business-strategy-table__empty,
