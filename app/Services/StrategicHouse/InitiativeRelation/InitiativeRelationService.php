@@ -4,22 +4,22 @@ namespace App\Services\StrategicHouse\InitiativeRelation;
 
 use App\Models\MstInitiative;
 use App\Models\MstInitiativeRelation;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Cache;
 
 class InitiativeRelationService
 {
     public function getIndexProps(): array
     {
         return [
-            'mstInitiatives' => MstInitiative::query()
+            'mstInitiatives' => Cache::remember('sh_relation_initiatives_v1', 3600, fn () => MstInitiative::query()
+                ->select(['id', 'code', 'name', 'coe_id', 'tipe_initiative', 'business_unit'])
                 ->with([
-                    'initiativeRelationsRow',
-                    'initiativeRelationsColumn',
+                    'initiativeRelationsRow:id,initiative_code_row,initiative_code_column,type_relation,model_relasi',
+                    'initiativeRelationsColumn:id,initiative_code_row,initiative_code_column,type_relation,model_relasi',
                     'coe:id,name',
-                    'latestStatusImplementation',
-                    'latestStatus',
+                    'latestStatusImplementation:id,initiative_id,review_status',
                 ])
-                ->get(),
+                ->get()),
             'initiativeRelations' => $this->initiativeRelations(),
             'typeRelationOptions' => $this->typeRelationOptions(),
             'modelRelationOptions' => $this->modelRelationOptions(),
@@ -97,22 +97,15 @@ class InitiativeRelationService
     private function buildRelationPayload(array $payload): array
     {
         $justifikasi = $payload['justifikasi'] ?? $payload['description'] ?? null;
-        $relationPayload = [
+
+        return [
             'model_relasi' => $payload['model_relasi'],
             'initiative_code_row' => (int) $payload['initiative_code_row'],
             'initiative_code_column' => (int) $payload['initiative_code_column'],
             'type_relation' => $payload['type_relation'],
+            'justifikasi' => $justifikasi,
+            'description' => $justifikasi,
         ];
-
-        if (Schema::hasColumn('mst_initiative_relation', 'justifikasi')) {
-            $relationPayload['justifikasi'] = $justifikasi;
-        }
-
-        if (Schema::hasColumn('mst_initiative_relation', 'description')) {
-            $relationPayload['description'] = $justifikasi;
-        }
-
-        return $relationPayload;
     }
 
     private function serializeRelation(MstInitiativeRelation $initiativeRelation): array
@@ -182,7 +175,7 @@ class InitiativeRelationService
 
     private function initiativeRelations(): array
     {
-        return MstInitiativeRelation::query()
+        return Cache::remember('sh_initiative_relations_v1', 3600, fn () => MstInitiativeRelation::query()
             ->with([
                 'initiativeRow:id,code,name',
                 'initiativeColumn:id,code,name',
@@ -191,7 +184,7 @@ class InitiativeRelationService
             ->get()
             ->map(fn (MstInitiativeRelation $initiativeRelation): array => $this->serializeRelation($initiativeRelation))
             ->values()
-            ->all();
+            ->all());
     }
 
     private function typeRelationOptions(): array
@@ -204,7 +197,7 @@ class InitiativeRelationService
 
     private function modelRelationOptions(): array
     {
-        return MstInitiativeRelation::query()
+        return Cache::remember('sh_model_relation_options_v1', 3600, fn () => MstInitiativeRelation::query()
             ->whereNotNull('model_relasi')
             ->where('model_relasi', '!=', '')
             ->select('model_relasi')
@@ -212,6 +205,6 @@ class InitiativeRelationService
             ->orderBy('model_relasi')
             ->pluck('model_relasi')
             ->values()
-            ->all();
+            ->all());
     }
 }

@@ -8,6 +8,7 @@ use App\Models\MstInitiative;
 use App\Models\Theme;
 use App\Models\TrsOrganization;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class StrategicPillarPageService
 {
@@ -121,22 +122,26 @@ class StrategicPillarPageService
 
     public function getTaggings(string $pilarId, int $initiativeType = 1): Collection
     {
-        $query = InitiativeTagging::query()
-            ->with([
-                'initiative:id,name,code,status,business_unit,tipe_initiative,source,description',
-                'initiative.latestStatus',
-                'initiative.organization:id,name',
-                'initiative.mapSc:id,sc_id,initiative_id',
-                'initiative.mappedProjects:id',
-                'initiative.latestStatusImplementation',
-                'theme:id,name,idGoal',
-            ])
-            ->whereHas('initiative', fn ($query) => $query->where('tipe_initiative', $initiativeType))
-            ->orderByDesc('created_at');
+        $cacheKey = sprintf('sh_taggings_%s_%d_v1', $pilarId, $initiativeType);
 
-        $this->applyTaggingPilarFilter($query, $pilarId);
+        return Cache::remember($cacheKey, 3600, function () use ($pilarId, $initiativeType): Collection {
+            $query = InitiativeTagging::query()
+                ->with([
+                    'initiative:id,name,code,status,business_unit,tipe_initiative,source,description',
+                    'initiative.latestStatus:id,initiative_id,status',
+                    'initiative.organization:id,name',
+                    'initiative.mapSc:id,sc_id,initiative_id',
+                    'initiative.mappedProjects:id',
+                    'initiative.latestStatusImplementation:id,initiative_id,review_status',
+                    'theme:id,name,idGoal',
+                ])
+                ->whereHas('initiative', fn ($query) => $query->where('tipe_initiative', $initiativeType))
+                ->orderByDesc('created_at');
 
-        return $query->get();
+            $this->applyTaggingPilarFilter($query, $pilarId);
+
+            return $query->get();
+        });
     }
 
     public function getAllOrganizations(): Collection

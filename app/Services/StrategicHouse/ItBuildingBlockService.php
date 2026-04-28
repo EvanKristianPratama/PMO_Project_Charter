@@ -318,19 +318,28 @@ class ItBuildingBlockService
 
     public function deleteMultipleMappings(array $removals): void
     {
-        collect($removals)
+        $uniqueRemovals = collect($removals)
             ->unique(fn (array $item): string => implode(':', [
                 $item['primary'],
                 $item['secondary'],
                 $item['initiative_id'],
             ]))
-            ->each(function (array $item): void {
-                TrsMapItBuilding::query()
-                    ->where('primary', $item['primary'])
-                    ->where('secondary', $item['secondary'])
-                    ->where('initiative_id', $item['initiative_id'])
-                    ->delete();
-            });
+            ->values();
+
+        if ($uniqueRemovals->isEmpty()) {
+            return;
+        }
+
+        TrsMapItBuilding::query()
+            ->where(function ($query) use ($uniqueRemovals): void {
+                foreach ($uniqueRemovals as $item) {
+                    $query->orWhere(fn ($sub) => $sub
+                        ->where('primary', $item['primary'])
+                        ->where('secondary', $item['secondary'])
+                        ->where('initiative_id', $item['initiative_id']));
+                }
+            })
+            ->delete();
     }
 
     private function filterProvidedInitiatives(Collection $providedInitiatives, int $initiativeType): Collection

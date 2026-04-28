@@ -5,8 +5,8 @@ namespace App\Services\StrategicHouse\InitiativeSupport;
 use App\Models\MstInitiative;
 use App\Models\TrsInitiativeSupport;
 use App\Services\StrategicHouse\ItBuildingBlockService;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;
 
 class InitiativeSupportService
@@ -16,35 +16,35 @@ class InitiativeSupportService
     ) {}
     public function getPageProps(): array
     {
-        return [
+        return Cache::remember('sh_initiative_support_props_v1', 3600, fn () => [
             'groups' => $this->getGroupedMappings(),
             'digitalInitiativeOptions' => $this->getInitiativeOptions(1)->all(),
             'itInitiativeOptions' => $this->getInitiativeOptions(2)->all(),
             'statusPeriods' => $this->itBuildingBlockService->getStatusPeriods()->all(),
-        ];
+        ]);
     }
 
     public function getGroupedMappings(): array
     {
         $mappings = TrsInitiativeSupport::query()
             ->with([
-                'digitalInitiative:id,name,code,description,coe_id,business_unit,source',
-                'digitalInitiative.coe',
-                'digitalInitiative.organization',
-                'digitalInitiative.sourceData',
-                'digitalInitiative.latestStatusImplementation',
+                'digitalInitiative:id,name,code,description,coe_id,business_unit,source,tipe_initiative',
+                'digitalInitiative.coe:id,name',
+                'digitalInitiative.organization:id,name,groub_id',
+                'digitalInitiative.sourceData:id,name',
+                'digitalInitiative.latestStatusImplementation:id,initiative_id,review_status',
                 'digitalInitiative.statusImplementations:id,initiative_id,start,end,year,review_status',
-                'itInitiative:id,name,code,description,coe_id,business_unit,source',
-                'itInitiative.coe',
-                'itInitiative.organization',
-                'itInitiative.sourceData',
-                'itInitiative.latestStatusImplementation',
+                'itInitiative:id,name,code,description,coe_id,business_unit,source,tipe_initiative',
+                'itInitiative.coe:id,name',
+                'itInitiative.organization:id,name,groub_id',
+                'itInitiative.sourceData:id,name',
+                'itInitiative.latestStatusImplementation:id,initiative_id,review_status',
                 'itInitiative.statusImplementations:id,initiative_id,start,end,year,review_status',
             ])
-            ->whereHas('digitalInitiative', fn (Builder $query) => $query->where('tipe_initiative', 1))
-            ->whereHas('itInitiative', fn (Builder $query) => $query->where('tipe_initiative', 2))
             ->orderBy('id')
-            ->get();
+            ->get()
+            ->filter(fn (TrsInitiativeSupport $m) => $m->digitalInitiative?->tipe_initiative == 1
+                && $m->itInitiative?->tipe_initiative == 2);
 
         $digitalGroups = $mappings
             ->groupBy(fn (TrsInitiativeSupport $mapping): string => $this->resolveDigitalNoteKey($mapping))

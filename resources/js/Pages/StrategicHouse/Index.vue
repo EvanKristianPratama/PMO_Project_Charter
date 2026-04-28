@@ -4,136 +4,18 @@
             <!-- View Mode Switcher -->
             <div class="inline-flex items-center gap-1 rounded-xl bg-slate-200/50 p-1 dark:bg-white/5 w-fit mb-2">
                 <button
+                    v-for="mode in viewModeEntries"
+                    :key="mode.key"
                     type="button"
                     class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
                     :class="
-                        activeViewMode === 'mapping'
+                        activeViewMode === mode.key
                             ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                             : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                     "
-                    @click="setViewMode('mapping')"
+                    @click="setViewMode(mode.key)"
                 >
-                    Strategic House
-                </button>
-                <button
-                    type="button"
-                    class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
-                    :class="
-                        activeViewMode === 'business-strategy'
-                            ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
-                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-                    "
-                    @click="setViewMode('business-strategy')"
-                >
-                    Business Strategy
-                </button>
-                <button
-                    type="button"
-                    class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
-                    :class="
-                        activeViewMode === 'dual-growth'
-                            ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
-                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-                    "
-                    @click="setViewMode('dual-growth')"
-                >
-                    Dual Growth Strategy
-                </button>
-                <button
-                    type="button"
-                    class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
-                    :class="
-                        activeViewMode === 'digital-transformation-initiatives'
-                            ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
-                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-                    "
-                    @click="setViewMode('digital-transformation-initiatives')"
-                >
-                    Digital Transformation Initiatives
-                </button>
-                <button
-                    type="button"
-                    class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
-                    :class="
-                        activeViewMode === 'it-building-blocs'
-                            ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
-                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-                    "
-                    @click="setViewMode('it-building-blocs')"
-                >
-                    IT Building Blocks
-                </button>
-                <button
-                    type="button"
-                    class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
-                    :class="
-                        activeViewMode === 'it-initiatives'
-                            ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
-                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-                    "
-                    @click="setViewMode('it-initiatives')"
-                >
-                    IT Initiatives
-                </button>
-                <button
-                    type="button"
-                    class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
-                    :class="
-                        activeViewMode === 'map-technology'
-                            ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
-                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-                    "
-                    @click="setViewMode('map-technology')"
-                >
-                    Map Technology
-                </button>
-                <button
-                    type="button"
-                    class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
-                    :class="
-                        activeViewMode === 'initiative-relation'
-                            ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
-                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-                    "
-                    @click="setViewMode('initiative-relation')"
-                >
-                    Initiative Relations
-                </button>
-                <button
-                    type="button"
-                    class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
-                    :class="
-                        activeViewMode === 'initiative-support'
-                            ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
-                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-                    "
-                    @click="setViewMode('initiative-support')"
-                >
-                    Initiative Support
-                </button>
-                <button
-                    type="button"
-                    class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
-                    :class="
-                        activeViewMode === 'roadmap'
-                            ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
-                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-                    "
-                    @click="setViewMode('roadmap')"
-                >
-                    Roadmap
-                </button>
-                <button
-                    type="button"
-                    class="px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
-                    :class="
-                        activeViewMode === 'strategic-pillars'
-                            ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
-                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-                    "
-                    @click="setViewMode('strategic-pillars')"
-                >
-                    Strategic Pillars
+                    {{ mode.label }}
                 </button>
             </div>
 
@@ -472,7 +354,7 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted, defineAsyncComponent } from "vue";
+import { computed, ref, onMounted, onBeforeUnmount, defineAsyncComponent } from "vue";
 import LoadData from "@/Components/Loading/LoadData.vue";
 import StrategicHouseSkeleton from "@/Components/Loading/StrategicHouseSkeleton.vue";
 import { Link, router, useRemember } from "@inertiajs/vue3";
@@ -525,6 +407,27 @@ function startProgress() {
         }
     }, 200);
 }
+
+onBeforeUnmount(() => {
+    if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+    }
+});
+
+const viewModeEntries = [
+    { key: 'mapping', label: 'Strategic House' },
+    { key: 'business-strategy', label: 'Business Strategy' },
+    { key: 'dual-growth', label: 'Dual Growth Strategy' },
+    { key: 'digital-transformation-initiatives', label: 'Digital Transformation Initiatives' },
+    { key: 'it-building-blocs', label: 'IT Building Blocks' },
+    { key: 'it-initiatives', label: 'IT Initiatives' },
+    { key: 'map-technology', label: 'Map Technology' },
+    { key: 'initiative-relation', label: 'Initiative Relations' },
+    { key: 'initiative-support', label: 'Initiative Support' },
+    { key: 'roadmap', label: 'Roadmap' },
+    { key: 'strategic-pillars', label: 'Strategic Pillars' },
+];
 
 function finishProgress() {
     if (progressInterval) clearInterval(progressInterval);
@@ -1146,6 +1049,7 @@ const setRoadmapMode = async (mode) => {
 
     pendingRoadmapMode.value = mode;
     isReloading.value = true;
+    startProgress();
 
     if (loaded) {
         roadmapMode.value = mode;
@@ -1164,9 +1068,16 @@ const setRoadmapMode = async (mode) => {
                 },
             }),
         ]);
+        finishProgress();
+    } catch (error) {
+        console.error("Roadmap navigation error:", error);
+        if (progressInterval) clearInterval(progressInterval);
+        loadingProgress.value = 0;
     } finally {
-        isReloading.value = false;
-        pendingRoadmapMode.value = null;
+        setTimeout(() => {
+            isReloading.value = false;
+            pendingRoadmapMode.value = null;
+        }, 300);
     }
 };
 </script>
