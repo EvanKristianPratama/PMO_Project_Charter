@@ -7,6 +7,7 @@ use App\Models\MstInitiative;
 use App\Models\TrsMapItBuilding;
 use App\Models\TrsStatusImplementation;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;
 
 class ItBuildingBlockService
@@ -169,6 +170,11 @@ class ItBuildingBlockService
     }
 
     public function getGroupedMappings(): array
+    {
+        return Cache::remember('sh_it_building_block_matrix_v1', 3600, fn () => $this->buildGroupedMappings());
+    }
+
+    private function buildGroupedMappings(): array
     {
         return TrsMapItBuilding::query()
             ->with([

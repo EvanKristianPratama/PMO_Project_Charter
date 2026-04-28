@@ -139,13 +139,15 @@ class InitiativeSupportService
 
     private function getInitiativeOptions(int $initiativeType): Collection
     {
-        return MstInitiative::query()
-            ->select(['id', 'name', 'code', 'description', 'coe_id', 'business_unit', 'source'])
-            ->with(['coe', 'organization', 'sourceData', 'latestStatusImplementation', 'statusImplementations:id,initiative_id,start,end,year,review_status'])
-            ->where('tipe_initiative', $initiativeType)
-            ->orderBy('id')
-            ->get()
-            ->map(fn (MstInitiative $initiative): array => $this->mapInitiative($initiative));
+        return Cache::remember("sh_support_initiative_opts_{$initiativeType}_v1", 3600, fn () =>
+            MstInitiative::query()
+                ->select(['id', 'name', 'code', 'description', 'coe_id', 'business_unit', 'source'])
+                ->with(['coe:id,name', 'organization:id,name,groub_id', 'sourceData:id,name', 'latestStatusImplementation:id,initiative_id,review_status', 'statusImplementations:id,initiative_id,start,end,year,review_status'])
+                ->where('tipe_initiative', $initiativeType)
+                ->orderBy('id')
+                ->get()
+                ->map(fn (MstInitiative $initiative): array => $this->mapInitiative($initiative))
+        );
     }
 
     private function mapDigitalGroup(Collection $mappings): array

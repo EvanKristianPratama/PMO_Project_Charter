@@ -19,58 +19,12 @@
                 </button>
             </div>
 
-            <!-- Minimalist Centered Progress (0-100 Instrument) -->
-            <Transition
-                enter-active-class="transition-opacity duration-300"
-                enter-from-class="opacity-0"
-                enter-to-class="opacity-100"
-                leave-active-class="transition-opacity duration-500"
-                leave-from-class="opacity-100"
-                leave-to-class="opacity-0"
-            >
-                <div v-if="isReloading" class="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none">
-                    <div class="flex flex-col items-center gap-2 px-6 py-4 rounded-3xl bg-white/40 dark:bg-slate-900/40 backdrop-blur-md border border-white/20 dark:border-white/5 shadow-2xl">
-                        <div class="relative flex items-center justify-center">
-                            <!-- Subtle Ring -->
-                            <svg class="w-16 h-16 transform -rotate-90">
-                                <circle
-                                    cx="32"
-                                    cy="32"
-                                    r="28"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    class="text-slate-200 dark:text-slate-800"
-                                />
-                                <circle
-                                    cx="32"
-                                    cy="32"
-                                    r="28"
-                                    fill="none"
-                                    stroke="url(#progress-gradient)"
-                                    stroke-width="3"
-                                    stroke-linecap="round"
-                                    class="transition-all duration-300 ease-out"
-                                    :stroke-dasharray="175.9"
-                                    :stroke-dashoffset="175.9 - (175.9 * loadingProgress) / 100"
-                                />
-                                <defs>
-                                    <linearGradient id="progress-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                        <stop offset="0%" stop-color="#1C75BC" />
-                                        <stop offset="100%" stop-color="#53BDE6" />
-                                    </linearGradient>
-                                </defs>
-                            </svg>
-                            <span class="absolute text-sm font-black text-[#1C75BC] dark:text-[#53BDE6] tabular-nums">
-                                {{ Math.round(loadingProgress) }}%
-                            </span>
-                        </div>
-                        <span class="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] animate-pulse">
-                            Processing {{ pendingViewLabel }}
-                        </span>
-                    </div>
-                </div>
-            </Transition>
+            <!-- Progress Bar (0-100%) -->
+            <ProgressBar
+                :progress="loadingProgress"
+                :visible="isReloading"
+                :label="`Processing ${pendingViewLabel}`"
+            />
 
             <!-- Dual Growth Enabler Toggle -->
             <div
@@ -134,12 +88,24 @@
                     </button>
                 </div>
 
-                <Link
-                    :href="route('strategic-house.roadmap-summary.index')"
-                    class="inline-flex items-center gap-1.5 rounded-lg border border-[#0B2A8A] bg-white px-3 py-1.5 text-[10px] font-bold tracking-wider text-[#0B2A8A] transition-all hover:bg-[#0B2A8A] hover:text-white dark:border-[#53BDE6] dark:bg-transparent dark:text-[#53BDE6] dark:hover:bg-[#53BDE6] dark:hover:text-[#171717]"
-                >
-                    📊 Roadmap Summary
-                </Link>
+                <div class="flex items-center gap-3">
+                    <button
+                        v-if="roadmapMode !== 'all'"
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg border border-[#0B2A8A] bg-white px-3 py-1.5 text-[10px] font-bold tracking-wider text-[#0B2A8A] transition hover:bg-[#0B2A8A] hover:text-white dark:border-[#53BDE6] dark:bg-transparent dark:text-[#53BDE6] dark:hover:bg-[#53BDE6] dark:hover:text-[#171717]"
+                        :title="showRoadmapFilters ? 'Hide Filters' : 'Show Filters'"
+                        @click="showRoadmapFilters = !showRoadmapFilters"
+                    >
+                        <component :is="showRoadmapFilters ? EyeIcon : EyeSlashIcon" class="h-3.5 w-3.5" />
+                        {{ showRoadmapFilters ? 'Hide Filters' : 'Show Filters' }}
+                    </button>
+                    <Link
+                        :href="route('strategic-house.roadmap-summary.index')"
+                        class="inline-flex items-center gap-1.5 rounded-lg border border-[#0B2A8A] bg-white px-3 py-1.5 text-[10px] font-bold tracking-wider text-[#0B2A8A] transition-all hover:bg-[#0B2A8A] hover:text-white dark:border-[#53BDE6] dark:bg-transparent dark:text-[#53BDE6] dark:hover:bg-[#53BDE6] dark:hover:text-[#171717]"
+                    >
+                        📊 Roadmap Summary
+                    </Link>
+                </div>
             </div>
 
             <!-- Conditional View Rendering -->
@@ -155,14 +121,7 @@
                 >
                     <!-- Loading / Skeleton State -->
                     <div v-if="isLoading || (isReloading && !hasLoadedView(viewMode))" key="loading">
-                        <StrategicHouseSkeleton v-if="isReloading" />
-                        <LoadData
-                            v-else
-                            :title="loadingTitle"
-                            message="Mohon tunggu, data sedang diproses..."
-                            :finished="dataFinished"
-                            @complete="onLoadingComplete"
-                        />
+                        <StrategicHouseSkeleton />
                     </div>
 
                     <section v-else-if="viewMode === 'mapping'" key="mapping">
@@ -297,6 +256,7 @@
                     <div v-else-if="viewMode === 'roadmap'" key="roadmap">
                         <ItInitiativeRoadmapContent
                             v-if="roadmapMode === 'it'"
+                            :show-filters="showRoadmapFilters"
                             :groups="itRoadmapGroups"
                             :start-year="itRoadmapStartYear"
                             :end-year="itRoadmapEndYear"
@@ -307,6 +267,7 @@
                         />
                         <ItInitiativeRoadmapContent
                             v-else-if="roadmapMode === 'digital'"
+                            :show-filters="showRoadmapFilters"
                             :groups="digitalRoadmapGroups"
                             :start-year="digitalRoadmapStartYear"
                             :end-year="digitalRoadmapEndYear"
@@ -355,7 +316,7 @@
 
 <script setup>
 import { computed, ref, onMounted, onBeforeUnmount, defineAsyncComponent } from "vue";
-import LoadData from "@/Components/Loading/LoadData.vue";
+import ProgressBar from "@/Components/Loading/ProgressBar.vue";
 import StrategicHouseSkeleton from "@/Components/Loading/StrategicHouseSkeleton.vue";
 import { Link, router, useRemember } from "@inertiajs/vue3";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/vue/24/outline";
@@ -730,19 +691,9 @@ const viewFetchedAt = new Map([[initialCacheKey, Date.now()]]);
 
 // Loading state
 const isLoading = ref(true);
-const dataFinished = ref(false);
 const isReloading = ref(false);
 const pendingViewMode = ref(null);
 const pendingRoadmapMode = ref(null);
-
-const onLoadingComplete = () => {
-    isLoading.value = false;
-};
-
-const startLoading = () => {
-    isLoading.value = true;
-    dataFinished.value = false;
-};
 
 // Human-readable tab labels for loading title
 const viewModeLabels = {
@@ -764,21 +715,7 @@ const roadmapModeLabels = {
     it: "IT Initiative",
 };
 
-const loadingTitle = computed(() => {
-    const activeMode = pendingViewMode.value ?? viewMode.value;
 
-    if (activeMode === "roadmap") {
-        const roadmapLabel = roadmapModeLabels[pendingRoadmapMode.value ?? roadmapMode.value];
-
-        if (roadmapLabel) {
-            return `Memuat Roadmap ${roadmapLabel}`;
-        }
-    }
-
-    const label = viewModeLabels[activeMode] || "Data";
-
-    return `Memuat ${label}`;
-});
 const activeViewMode = computed(() => pendingViewMode.value ?? viewMode.value);
 const activeRoadmapMode = computed(
     () => pendingRoadmapMode.value ?? roadmapMode.value,
@@ -795,6 +732,7 @@ const pendingViewLabel = computed(() => {
     return "Data";
 });
 const showEnabler = useRemember(false, "StrategicHouse/showEnabler");
+const showRoadmapFilters = useRemember(false, "StrategicHouse/showRoadmapFilters");
 
 function markViewLoaded(mode, selectedRoadmapMode = roadmapMode.value) {
     const cacheKey = getViewCacheKey(mode, selectedRoadmapMode);
@@ -866,7 +804,9 @@ onMounted(async () => {
     const initialRoadmapMode = getInitialServerRoadmapMode();
 
     if (!hasViewParam && viewMode.value !== "mapping") {
-        startLoading();
+        isLoading.value = true;
+        isReloading.value = true;
+        startProgress();
         pendingViewMode.value = viewMode.value;
         pendingRoadmapMode.value = viewMode.value === "roadmap" ? roadmapMode.value : null;
 
@@ -880,7 +820,9 @@ onMounted(async () => {
 
         pendingRoadmapMode.value = null;
         pendingViewMode.value = null;
-        dataFinished.value = true;
+        finishProgress();
+        isLoading.value = false;
+        isReloading.value = false;
         return;
     }
 
@@ -889,7 +831,9 @@ onMounted(async () => {
         && !hasRoadmapParam
         && roadmapMode.value !== initialRoadmapMode
     ) {
-        startLoading();
+        isLoading.value = true;
+        isReloading.value = true;
+        startProgress();
         pendingViewMode.value = "roadmap";
         pendingRoadmapMode.value = roadmapMode.value;
 
@@ -900,7 +844,9 @@ onMounted(async () => {
 
         pendingRoadmapMode.value = null;
         pendingViewMode.value = null;
-        dataFinished.value = true;
+        finishProgress();
+        isLoading.value = false;
+        isReloading.value = false;
         return;
     }
 

@@ -17,6 +17,9 @@ class IndexController extends Controller
 
     public function __invoke(IndexRequest $request): Response|RedirectResponse
     {
+        // Allow more time for cold-cache initial load from remote cloud DB
+        set_time_limit(120);
+
         if ($request->user()?->isAdminUser()) {
             return redirect()->route('admin.dashboard');
         }

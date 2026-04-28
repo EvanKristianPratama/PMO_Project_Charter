@@ -49,8 +49,8 @@ const selectedPeriod = ref(null);
 const isEditMode = ref(false);
 const showInitiatives = ref(false);
 const showEnablers = ref(false);
-const showLastUpdatePeriod = ref(true);
-const showStrategyData = ref(true);
+const showLastUpdatePeriod = ref(false);
+const showStrategyData = ref(false);
 const selectedSource = ref('');
 const selectedStatus = ref('');
 

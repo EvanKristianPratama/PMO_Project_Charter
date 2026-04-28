@@ -135,12 +135,15 @@ class StrategicPillarPageService
                     'initiative.latestStatusImplementation:id,initiative_id,review_status',
                     'theme:id,name,idGoal',
                 ])
-                ->whereHas('initiative', fn ($query) => $query->where('tipe_initiative', $initiativeType))
                 ->orderByDesc('created_at');
 
             $this->applyTaggingPilarFilter($query, $pilarId);
 
-            return $query->get();
+            return $query->get()
+                ->filter(fn (InitiativeTagging $tagging) =>
+                    $tagging->initiative && (int) $tagging->initiative->tipe_initiative === $initiativeType
+                )
+                ->values();
         });
     }
 
