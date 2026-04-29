@@ -260,8 +260,12 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/program-evalution/review/{trsReviewPC}', [TrsReviewPCController::class, 'show'])->name('program-evaluation.show');
     Route::get('/program-evalution/review-timeline', [ReviewTimelineController::class, 'index'])->name('program-evaluation.review-timeline');
     Route::get('/program-evalution/review-dashboard', [ReviewDashboardController::class, 'index'])->name('program-evaluation.review-dashboard');
-    Route::post('/program-evalution/review-timeline/{project}/review-status-implementation', [ReviewTimelineController::class, 'storeReviewStatusImplementation'])->name('program-evaluation.review-timeline.review-status.store');
-    Route::put('/program-evalution/review-timeline/review-status-implementation/{statusId}', [ReviewTimelineController::class, 'updateReviewStatusImplementation'])->name('program-evaluation.review-timeline.review-status.update');
+    Route::post('/program-evalution/review-timeline/review-status-implementation/{statusId}', [ReviewTimelineController::class, 'updateReviewStatusImplementation'])->name('program-evaluation.review-timeline.review-status.update');
+
+    // Summary Review Notes (TrsReviewSc)
+    Route::post('/program-evaluation/summary-review/notes', [\App\Http\Controllers\ProgramEvaluation\TrsReviewScController::class, 'store'])->name('program-evaluation.summary-review.notes.store');
+    Route::put('/program-evaluation/summary-review/notes/{trsReviewSc}', [\App\Http\Controllers\ProgramEvaluation\TrsReviewScController::class, 'update'])->name('program-evaluation.summary-review.notes.update');
+    Route::delete('/program-evaluation/summary-review/notes/{trsReviewSc}', [\App\Http\Controllers\ProgramEvaluation\TrsReviewScController::class, 'destroy'])->name('program-evaluation.summary-review.notes.destroy');
 
     // Strategic House
     Route::prefix('/strategic-house')->name('strategic-house.')->group(function () {

@@ -35,7 +35,9 @@ const headerTitle = computed(() => (
         props.initiative?.project_charter?.name,
         props.initiative?.projectCharter?.name,
         props.initiative?.useCase,
-        props.initiative?.usecase
+        props.initiative?.usecase,
+        props.initiative?.appendix_data?.usecase,
+        props.initiative?.appendixData?.usecase
     )
 ));
 
@@ -44,7 +46,9 @@ const headerDescription = computed(() => (
         props.initiative?.description,
         props.initiative?.project_charter?.description,
         props.initiative?.projectCharter?.description,
-        props.initiative?.detail_useCase_description
+        props.initiative?.detail_useCase_description,
+        props.initiative?.appendix_data?.description,
+        props.initiative?.appendixData?.description
     )
 ));
 
@@ -87,14 +91,14 @@ const mappedInitiatives = computed(() => {
             code: String(mi.code ?? '').trim().replace(/#/g, ''),
             name: displayValue(mi.name),
             projectOwner: displayValue(
-                mi.owner ?? mi.project_owner ?? mi.owner_name ?? mi.projectOwner
+                mi.appendix_data?.owner ?? mi.appendixData?.owner ?? mi.owner ?? mi.project_owner ?? mi.owner_name ?? mi.projectOwner
             ),
             pic: displayValue(
-                mi.pic ?? mi.organization_name
+                mi.appendix_data?.organization ?? mi.appendixData?.organization ?? mi.pic ?? mi.organization_name
             ),
             group: displayValue(organization?.groub?.name ?? mi.group ?? mi.business_unit),
             description: displayValue(mi.description),
-            coe: displayValue(mi.coe?.name ?? mi.coe_name ?? mi.coe),
+            coe: displayValue(mi.appendix_data?.coe ?? mi.appendixData?.coe ?? mi.coe?.name ?? mi.coe_name ?? mi.coe),
             dataSource: displayValue(
                 sourceData?.name ?? mi.data_source_name ?? mi.data_source ?? mi.source_name ?? (typeof mi.source === 'object' ? mi.source?.name : null)
             ),
@@ -145,11 +149,13 @@ const getScoreLabel = (type) => {
     // Define potential data paths based on DigitalCharterDocument and AppendixCharterDocument structures
     const paths = [
         source,
-        source.appendix_data,
-        source.appendixData,
         source.project_charter,
         source.projectCharter,
         source.charter,
+        source.project_charter?.charter,
+        source.projectCharter?.charter,
+        source.appendix_data,
+        source.appendixData,
     ];
 
     // 1. Try to find direct label (e.g., value_label, valueLabel)
@@ -187,6 +193,8 @@ const getLongText = (key) => {
 
     const paths = [
         source,
+        source.appendix_data,
+        source.appendixData,
         source.project_charter,
         source.projectCharter,
         source.charter,

@@ -18,7 +18,7 @@ const props = defineProps({
 
 const roadmapYears = computed(() => {
     const start = props.startYear || 2024;
-    const end = props.endYear || 2029;
+    const end = props.endYear || 2029;  
     const list = [];
     for (let y = start; y <= end; y++) {
         list.push(y);
@@ -69,14 +69,18 @@ const isActivityActive = (row, qIdx) => {
     <div class="roadmap-summary-wrap overflow-x-auto">
         <table class="roadmap-table-evaluation w-full text-[10px] border-collapse" :style="{ '--qcount': Math.max(quarterCells.length, 1) }">
             <colgroup>
-                <!-- Set first column to 50% to align with the split in the Project Duration row -->
-                <col style="width: 50%;">
-                <col v-for="(_, i) in quarterCells" :key="`col-q-${i}`" :style="{ width: `calc(50% / ${quarterCells.length})` }">
+                <!-- Leave 100px for the end, split remaining 50/50 -->
+                <col :style="{ width: 'calc((100% - 100px) / 2)' }">
+                <col v-for="(_, i) in quarterCells" :key="`col-q-${i}`" 
+                     :style="{ width: `calc((100% - 100px) / 2 / ${quarterCells.length})` }">
+                <!-- Status Updated column placeholder -->
+                <col style="width: 100px;">
             </colgroup>
             <thead>
                 <tr>
                     <th rowspan="2" class="th-eval"></th>
                     <th v-for="year in roadmapYears" :key="`ey-${year}`" colspan="4" class="th-eval th-year-eval">{{ year }}</th>
+                    <th rowspan="2" class="th-eval bg-slate-50 border-l-[#3b82f6]"></th>
                 </tr>
                 <tr>
                     <th v-for="(cell, i) in quarterCells" :key="`eqh-${i}`" 
@@ -93,6 +97,7 @@ const isActivityActive = (row, qIdx) => {
                             class="cell-section-gap-eval"
                             :class="{ 'border-r-blue-eval': cell.quarter === 4 }"
                         ></td>
+                        <td class="bg-slate-50/50 border-l border-[#b9d1e8]"></td>
                     </tr>
                     <!-- Activities -->
                     <tr v-for="(row, ri) in section.rows" :key="`erow-${si}-${ri}`" class="row-data-eval">
@@ -104,10 +109,11 @@ const isActivityActive = (row, qIdx) => {
                                 'border-r-blue-eval': cell.quarter === 4 
                             }"
                         ></td>
+                        <td class="bg-slate-50/30 border-l border-[#b9d1e8]"></td>
                     </tr>
                 </template>
                 <tr v-if="!roadmapSections.length">
-                    <td :colspan="quarterCells.length + 1" class="px-4 py-8 text-center text-slate-500 italic">No roadmap activities found.</td>
+                    <td :colspan="quarterCells.length + 2" class="px-4 py-8 text-center text-slate-500 italic">No roadmap activities found.</td>
                 </tr>
             </tbody>
         </table>

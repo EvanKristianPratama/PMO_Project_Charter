@@ -18,6 +18,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 use App\Models\TrsStatusImplementation;
+use App\Models\TrsReviewSc;
 
 class IndexController extends Controller
 {
@@ -31,6 +32,13 @@ class IndexController extends Controller
         $statusImplementations = TrsStatusImplementation::query()
             ->where('initiative_id', $initiative->id)
             ->latest()
+            ->get();
+
+        // 0.1 Summary Review Notes
+        $summaryReviewNotes = TrsReviewSc::query()
+            ->where('initiative_id', $initiative->id)
+            ->orderByDesc('year')
+            ->orderByDesc('month')
             ->get();
 
         // 1. Project Charter (DigitalInitiativeDocument)
@@ -267,6 +275,7 @@ class IndexController extends Controller
             'organizationOptions' => $organizationOptions,
             'initiativeOptions' => $initiativeOptions,
             'statusImplementations' => $statusImplementations,
+            'summaryReviewNotes' => $summaryReviewNotes,
         ]);
     }
 

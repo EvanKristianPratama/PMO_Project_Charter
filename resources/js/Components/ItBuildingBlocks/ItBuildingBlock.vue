@@ -69,6 +69,7 @@ const showStatusColors = ref(false);
 const showInitiativeCode = ref(false);
 const showLastUpdatePeriod = ref(false);
 const selectedOrganization = ref('');
+const selectedCoe = ref('');
 const selectedStatus = ref('');
 const selectedPeriod = ref('latest');
 
@@ -224,6 +225,62 @@ const totalOverallInitiatives = computed(() => {
     return statusLegend.value.reduce((sum, item) => sum + item.count, 0);
 });
 
+const availableCoeOptions = computed(() => {
+    if (!Array.isArray(props.items)) {
+        return [];
+    }
+
+    const coeSet = new Set();
+
+    props.items.forEach((initiative) => {
+        if (Number(initiative.tipe_initiative) !== 2) return;
+
+        const matchesOrg = !selectedOrganization.value || initiative.business_unit === selectedOrganization.value;
+        if (!matchesOrg) return;
+
+        const periodData = getInitiativeStatusByPeriod(initiative, selectedPeriod.value);
+        const statusLabel = String(periodData.status ?? '').trim();
+        const matchesStatus = !selectedStatus.value || statusLabel.toLowerCase() === selectedStatus.value.toLowerCase();
+        if (!matchesStatus) return;
+
+        coeSet.add(normalizeCoeName(initiative.coe_name || initiative.coe?.name));
+    });
+
+    const preferredOrder = [
+        'IoT',
+        'Advance Cloud',
+        'RPA',
+        'Robotics',
+        'AI / Adv. Analytics',
+        'CoE Not Identified',
+    ];
+
+    return Array.from(coeSet).sort((left, right) => {
+        const leftIndex = preferredOrder.indexOf(left);
+        const rightIndex = preferredOrder.indexOf(right);
+
+        if (leftIndex !== -1 && rightIndex !== -1) {
+            return leftIndex - rightIndex;
+        }
+
+        if (leftIndex !== -1) {
+            return -1;
+        }
+
+        if (rightIndex !== -1) {
+            return 1;
+        }
+
+        return left.localeCompare(right, undefined, { sensitivity: 'base' });
+    });
+});
+
+watch(availableCoeOptions, (options) => {
+    if (selectedCoe.value && !options.includes(selectedCoe.value)) {
+        selectedCoe.value = '';
+    }
+});
+
 const displayGroups = computed(() => {
     const coeMap = new Map();
     const UNIDENTIFIED = 'CoE Not Identified';
@@ -241,9 +298,10 @@ const displayGroups = computed(() => {
         const matchesStatus = !selectedStatus.value || statusLabel.toLowerCase() === selectedStatus.value.toLowerCase();
 
         const matchesOrg = !selectedOrganization.value || initiative.business_unit === selectedOrganization.value;
+        const coeName = normalizeCoeName(initiative.coe_name || initiative.coe?.name);
+        const matchesCoe = !selectedCoe.value || coeName === selectedCoe.value;
 
-        if (isItInitiative && matchesStatus && matchesOrg) {
-            const coeName = normalizeCoeName(initiative.coe_name || initiative.coe?.name);
+        if (isItInitiative && matchesStatus && matchesOrg && matchesCoe) {
             if (!coeMap.has(coeName)) {
                 coeMap.set(coeName, []);
             }
@@ -304,7 +362,7 @@ const getCoeColorClass = (coeName) => {
     if (name === 'Advance Cloud') return 'coe-color-emerald';
     if (name === 'RPA') return 'coe-color-amber';
     if (name === 'Robotics') return 'coe-color-purple';
-    if (name === 'AI / Adv. Analytics') return 'coe-color-none';
+    if (name === 'AI / Adv. Analytics') return 'coe-color-rose';
     if (name === 'CoE Not Identified') return 'coe-color-none';
     return 'coe-color-none';
 };
@@ -358,6 +416,11 @@ const getCoeColorClass = (coeName) => {
                     <select v-model="selectedPeriod" class="initiative-view-select mr-2">
                         <option value="" disabled>Pilih Periode</option>
                         <option v-for="period in availablePeriods" :key="period.value" :value="period.value">{{ period.label }}</option>
+                    </select>
+
+                    <select v-model="selectedCoe" class="initiative-view-select mr-2">
+                        <option value="">All CoE</option>
+                        <option v-for="coe in availableCoeOptions" :key="`coe-opt-${coe}`" :value="coe">{{ coe }}</option>
                     </select>
 
                     <select v-model="selectedStatus" class="initiative-view-select mr-2">
@@ -547,13 +610,23 @@ a.initiative-box {
 .initiative-box__bu { font-size: 7.5px; font-weight: 700; font-style: italic; opacity: 0.7; }
 .initiative-box__name--full { grid-column: 1 / -1; }
 
-.coe-color-blue { background-color: #eff6ff; color: #1d4ed8; border-left: 4px solid #1d4ed8 !important; }
-.coe-color-emerald { background-color: #ecfdf5; color: #047857; border-left: 4px solid #047857 !important; }
-.coe-color-amber { background-color: #fffbeb; color: #b45309; border-left: 4px solid #b45309 !important; }
-.coe-color-purple { background-color: #faf5ff; color: #6d28d9; border-left: 4px solid #6d28d9 !important; }
-.coe-color-rose { background-color: #fff1f2; color: #be123c; border-left: 4px solid #be123c !important; }
-.coe-color-indigo { background-color: #eef2ff; color: #4338ca; border-left: 4px solid #4338ca !important; }
-.coe-color-none { background-color: #ffffff; color: #475569; }
+.coe-color-blue { background-color: #ffffff; color: #1e3a8a; border-left: 4px solid #1d4ed8 !important; border-color: #1d4ed8 !important; }
+.coe-color-emerald { background-color: #ffffff; color: #065f46; border-left: 4px solid #047857 !important; border-color: #047857 !important; }
+.coe-color-amber { background-color: #ffffff; color: #92400e; border-left: 4px solid #b45309 !important; border-color: #b45309 !important; }
+.coe-color-purple { background-color: #ffffff; color: #5b21b6; border-left: 4px solid #6d28d9 !important; border-color: #6d28d9 !important; }
+.coe-color-rose { background-color: #ffffff; color: #9f1239; border-left: 4px solid #be123c !important; border-color: #be123c !important; }
+.coe-color-indigo { background-color: #ffffff; color: #3730a3; border-left: 4px solid #4338ca !important; border-color: #4338ca !important; }
+.coe-color-none { background-color: #ffffff; color: #334155; border-color: #475569 !important; }
+
+.initiative-box.coe-color-rose {
+    border-left-width: 1px !important;
+    border-color: #374151 !important;
+}
+
+.primary-cell.coe-color-rose {
+    border-left-width: 1px !important;
+    border-color: #000000 !important;
+}
 
 /* Status colors consistent with IT Initiative */
 .status-color-ontrack { background-color: #10b981 !important; color: #ffffff !important; border-color: #059669 !important; }
@@ -571,6 +644,14 @@ a.initiative-box {
     border-radius: 2px;
     flex-shrink: 0;
 }
+
+.legend-swatch.coe-color-blue { background-color: #dbeafe !important; border: 1px solid #1d4ed8; }
+.legend-swatch.coe-color-emerald { background-color: #d1fae5 !important; border: 1px solid #047857; }
+.legend-swatch.coe-color-amber { background-color: #fef3c7 !important; border: 1px solid #b45309; }
+.legend-swatch.coe-color-purple { background-color: #ede9fe !important; border: 1px solid #6d28d9; }
+.legend-swatch.coe-color-rose { background-color: #ffe4e6 !important; border: none; }
+.legend-swatch.coe-color-indigo { background-color: #e0e7ff !important; border: 1px solid #4338ca; }
+.legend-swatch.coe-color-none { background-color: #f8fafc !important; border: 1px solid #475569; }
 
 .initiative-view-switch { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 10px; border-radius: 12px; background: transparent; padding: 2px; }
 .initiative-view-select { appearance: none; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff; padding: 4px 24px 4px 10px; font-size: 11px; font-weight: 700; color: #475569; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 6px center; background-size: 12px; transition: all 0.15s ease; }

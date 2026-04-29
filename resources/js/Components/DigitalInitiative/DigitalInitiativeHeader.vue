@@ -154,11 +154,13 @@ const getScoreLabel = (type) => {
     // Define potential data paths based on DigitalCharterDocument and AppendixCharterDocument structures
     const paths = [
         source,
-        source.appendix_data,
-        source.appendixData,
         source.project_charter,
         source.projectCharter,
         source.charter,
+        source.project_charter?.charter,
+        source.projectCharter?.charter,
+        source.appendix_data,
+        source.appendixData,
     ];
 
     // 1. Try to find direct label (e.g., value_label, valueLabel)
@@ -203,17 +205,43 @@ const getLongText = (key) => {
     const source = props.initiative;
     if (!source) return '-';
 
+    // Field mapping for implementation data (Project Charter)
+    const charterMapping = {
+        'value_rationale': 'background',
+        'value_matrics': 'impact_value',
+        'urgency_rationale': 'objectives',
+        'urgency_expected': 'duration'
+    };
+
     const paths = [
         source,
-        source.appendix_data,
-        source.appendixData,
         source.project_charter,
         source.projectCharter,
         source.charter,
+        source.project_charter?.charter,
+        source.projectCharter?.charter,
+        source.appendix_data,
+        source.appendixData,
     ];
 
     for (const p of paths) {
         if (!p) continue;
+
+        // Try mapped key if it's a charter path
+        if (charterMapping[key] && (
+            p === source.project_charter || 
+            p === source.projectCharter || 
+            p === source.charter ||
+            p === source.project_charter?.charter ||
+            p === source.projectCharter?.charter
+        )) {
+            const mKey = charterMapping[key];
+            const val = p[mKey];
+            if (val && String(val).trim() !== '' && val !== '-') {
+                return String(val).trim();
+            }
+        }
+
         const val = p[key];
         if (val && String(val).trim() !== '' && val !== '-') {
             return String(val).trim();

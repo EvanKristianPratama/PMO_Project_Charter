@@ -440,7 +440,18 @@ const statusLegend = computed(() => {
             <!-- Legend & Overall Total -->
             <div class="space-y-2.5">
                 <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
-                    <div v-for="coe in coeLegend" :key="`coe-legend-${coe.id}`" class="flex items-center gap-1.5">
+                    <div
+                        v-for="coe in coeLegend"
+                        :key="`coe-legend-${coe.id}`"
+                        class="flex items-center gap-1.5 cursor-pointer select-none transition-opacity"
+                        :class="{ 'opacity-40': selectedCoe && selectedCoe !== coe.name }"
+                        :title="`Filter CoE: ${coe.name}`"
+                        role="button"
+                        tabindex="0"
+                        @click="selectedCoe = selectedCoe === coe.name ? '' : coe.name"
+                        @keydown.enter.prevent="selectedCoe = selectedCoe === coe.name ? '' : coe.name"
+                        @keydown.space.prevent="selectedCoe = selectedCoe === coe.name ? '' : coe.name"
+                    >
                         <span class="h-3 w-3 rounded-sm shadow-sm legend-swatch"
                             :class="getCoeColorClass(coe.name)"></span>
                         <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">
@@ -1000,13 +1011,13 @@ a.initiative-box {
 }
 
 /* COE Color Classes - aligned with ItBuildingBlocksMatrix */
-.coe-color-blue { background-color: #eff6ff; border-color: #1d4ed8 !important; }
-.coe-color-emerald { background-color: #ecfdf5; border-color: #047857 !important; }
-.coe-color-amber { background-color: #fffbeb; border-color: #b45309 !important; }
-.coe-color-purple { background-color: #faf5ff; border-color: #6d28d9 !important; }
-.coe-color-rose { background-color: #fff1f2; border-color: #be123c !important; }
-.coe-color-indigo { background-color: #eef2ff; border-color: #4338ca !important; }
-.coe-color-none { background-color: #ffffff; border-color: #374151 !important; }
+.coe-color-blue { background-color: #dbeafe; border-color: #1d4ed8 !important; color: #1e3a8a; }
+.coe-color-emerald { background-color: #d1fae5; border-color: #047857 !important; color: #065f46; }
+.coe-color-amber { background-color: #fef3c7; border-color: #b45309 !important; color: #92400e; }
+.coe-color-purple { background-color: #ede9fe; border-color: #6d28d9 !important; color: #5b21b6; }
+.coe-color-rose { background-color: #ffe4e6; border-color: #be123c !important; color: #9f1239; }
+.coe-color-indigo { background-color: #e0e7ff; border-color: #4338ca !important; color: #3730a3; }
+.coe-color-none { background-color: #f8fafc; border-color: #475569 !important; color: #334155; }
 
 .coe-color-blue .initiative-box__code { background-color: rgba(29, 78, 216, 0.1); }
 .coe-color-emerald .initiative-box__code { background-color: rgba(4, 120, 87, 0.1); }
@@ -1017,56 +1028,84 @@ a.initiative-box {
 
 /* Legend Swatches - Solid Deep Colors */
 .legend-swatch.coe-color-blue {
-    background-color: #1d4ed8 !important;
+    background-color: #dbeafe !important;
+    border: 1px solid #1d4ed8;
 }
 
 .legend-swatch.coe-color-emerald {
-    background-color: #047857 !important;
+    background-color: #d1fae5 !important;
+    border: 1px solid #047857;
 }
 
 .legend-swatch.coe-color-amber {
-    background-color: #b45309 !important;
+    background-color: #fef3c7 !important;
+    border: 1px solid #b45309;
 }
 
 .legend-swatch.coe-color-purple {
-    background-color: #6d28d9 !important;
+    background-color: #ede9fe !important;
+    border: 1px solid #6d28d9;
 }
 
 .legend-swatch.coe-color-rose {
-    background-color: #be123c !important;
+    background-color: #ffe4e6 !important;
+    border: 1px solid #be123c;
 }
 
 .legend-swatch.coe-color-indigo {
-    background-color: #4338ca !important;
+    background-color: #e0e7ff !important;
+    border: 1px solid #4338ca;
 }
 
 .legend-swatch.coe-color-none {
-    background-color: #374151 !important;
+    background-color: #f8fafc !important;
+    border: 1px solid #475569;
 }
 
 /* Dark mode overrides for CoE Colors */
 :deep(.dark) .coe-color-blue {
-    background-color: rgba(59, 130, 246, 0.2);
+    background-color: #dbeafe;
+    color: #1e3a8a;
 }
 
 :deep(.dark) .coe-color-emerald {
-    background-color: rgba(16, 185, 129, 0.2);
+    background-color: #d1fae5;
+    color: #065f46;
 }
 
 :deep(.dark) .coe-color-amber {
-    background-color: rgba(245, 158, 11, 0.2);
+    background-color: #fef3c7;
+    color: #92400e;
 }
 
 :deep(.dark) .coe-color-purple {
-    background-color: rgba(168, 85, 247, 0.2);
+    background-color: #ede9fe;
+    color: #5b21b6;
 }
 
 :deep(.dark) .coe-color-rose {
-    background-color: rgba(244, 63, 94, 0.2);
+    background-color: #ffe4e6;
+    color: #9f1239;
 }
 
 :deep(.dark) .coe-color-indigo {
-    background-color: rgba(99, 102, 241, 0.2);
+    background-color: #e0e7ff;
+    color: #3730a3;
+}
+
+:deep(.dark) .coe-color-none {
+    background-color: #f8fafc;
+    color: #334155;
+}
+
+:deep(.dark) .coe-color-blue .initiative-box__code,
+:deep(.dark) .coe-color-emerald .initiative-box__code,
+:deep(.dark) .coe-color-amber .initiative-box__code,
+:deep(.dark) .coe-color-purple .initiative-box__code,
+:deep(.dark) .coe-color-rose .initiative-box__code,
+:deep(.dark) .coe-color-indigo .initiative-box__code,
+:deep(.dark) .coe-color-none .initiative-box__code {
+    color: inherit;
 }
 
 .legend-swatch {

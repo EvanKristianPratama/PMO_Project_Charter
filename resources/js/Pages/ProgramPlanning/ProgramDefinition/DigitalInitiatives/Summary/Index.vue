@@ -237,13 +237,13 @@
                     <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Status Implementation Analysis</h2>
                 </div>
 
-                <div v-if="roadmapDuration || (computedAppendixData && computedAppendixData.urgency_expected !== '-')"
-                    class="flex justify-start">
+                <div class="flex justify-start">
                     <div class="score-panel w-full max-w-4xl overflow-hidden border border-[#3b82f6] flex flex-col">
                         <div v-if="roadmapDuration" 
                             class="flex border-b border-[#3b82f6] cursor-pointer hover:bg-slate-50 group"
                             @click="isRoadmapExpanded = !isRoadmapExpanded"
                         >
+                            <!-- Section 1: Project Duration Info -->
                             <div class="flex flex-1 border-r border-[#3b82f6]">
                                 <div
                                     class="bar-sub-mini flex items-center shrink-0 min-w-[130px] justify-center border-r border-[#3b82f6] group-hover:bg-[#255b8a]">
@@ -259,29 +259,34 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="flex flex-1">
-                                <div class="panel-body-mini flex-1 p-0 overflow-hidden relative min-h-[32px]">
-                                    <!-- Mini Roadmap Grid -->
-                                    <div class="absolute inset-0 flex">
-                                        <div v-for="year in roadmapYears" :key="year"
-                                            class="flex-1 border-r-[#3b82f6] border-r-[1.5px] last:border-0 flex flex-col">
-                                            <div
-                                                class="h-[18px] bg-slate-50 flex items-center justify-center text-[10px] font-bold text-slate-500 border-b border-[#3b82f6] leading-none uppercase tracking-wider">
-                                                {{ year }}
-                                            </div>
-                                            <div class="flex-1 flex">
-                                                <div v-for="q in 4" :key="q" class="flex-1 border-r border-slate-100 last:border-0"></div>
-                                            </div>
+                            
+                            <!-- Section 2: Mini Roadmap Grid -->
+                            <div class="panel-body-mini flex-1 p-0 overflow-hidden relative min-h-[32px]">
+                                <!-- Mini Roadmap Grid -->
+                                <div class="absolute inset-0 flex">
+                                    <div v-for="year in roadmapYears" :key="year"
+                                        class="flex-1 border-r-[#3b82f6] border-r-[1.5px] last:border-0 flex flex-col">
+                                        <div
+                                            class="h-[18px] bg-slate-50 flex items-center justify-center text-[10px] font-bold text-slate-500 border-b border-[#3b82f6] leading-none uppercase tracking-wider">
+                                            {{ year }}
                                         </div>
-                                    </div>
-                                    <!-- Roadmap Bar -->
-                                    <div class="absolute inset-x-0 top-[18px] bottom-0 flex items-center">
-                                        <div class="relative w-full h-2">
-                                            <div class="absolute h-full bg-[#1e4f8f] rounded-sm shadow-sm"
-                                                :style="roadmapBarStyle" :title="roadmapDuration"></div>
+                                        <div class="flex-1 flex">
+                                            <div v-for="q in 4" :key="q" class="flex-1 border-r border-slate-100 last:border-0"></div>
                                         </div>
                                     </div>
                                 </div>
+                                <!-- Roadmap Bar -->
+                                <div class="absolute inset-x-0 top-[18px] bottom-0 flex items-center">
+                                    <div class="relative w-full h-2">
+                                                <div class="absolute h-full bg-[#1e4f8f] rounded-sm shadow-sm"
+                                                    :style="roadmapBarStyle" :title="roadmapDuration"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section 3: Status Updated Header (Outside) -->
+                            <div class="panel-body-mini w-[100px] border-l border-[#3b82f6] flex items-center justify-center text-[10px] font-bold text-[#1e4f8f] bg-slate-50 uppercase text-center">
+                                Status Updated
                             </div>
                         </div>
 
@@ -296,6 +301,7 @@
 
                         <div v-if="computedAppendixData && computedAppendixData.urgency_expected !== '-'"
                             class="flex border-b border-[#3b82f6] last:border-0">
+                            <!-- Section 1: Expected Go Live Info -->
                             <div class="flex flex-1 border-r border-[#3b82f6]">
                                 <div
                                     class="bar-sub-mini flex items-center shrink-0 min-w-[130px] justify-center border-r border-[#3b82f6]">
@@ -304,35 +310,43 @@
                                     {{ computedAppendixData.urgency_expected }}
                                 </div>
                             </div>
-                            <div class="flex flex-1">
-                                <div class="panel-body-mini flex-1 p-0 overflow-hidden relative min-h-[32px]">
-                                    <!-- Mini Roadmap Grid (Only if expanded) -->
-                                    <div v-if="isRoadmapExpanded" class="absolute inset-0 flex">
-                                        <div v-for="year in roadmapYears" :key="year"
-                                            class="flex-1 border-r-[#3b82f6] border-r-[1.5px] last:border-0 flex flex-col">
-                                            <div class="flex-1 flex">
-                                                <div v-for="q in 4" :key="q" class="flex-1 border-r border-slate-100 last:border-0"></div>
-                                            </div>
+
+                            <!-- Section 2: Mini Roadmap Grid -->
+                            <div class="panel-body-mini flex-1 p-0 overflow-hidden relative min-h-[32px]">
+                                <!-- Mini Roadmap Grid (Only if expanded) -->
+                                <div v-if="isRoadmapExpanded" class="absolute inset-0 flex">
+                                    <div v-for="year in roadmapYears" :key="year"
+                                        class="flex-1 border-r-[#3b82f6] border-r-[1.5px] last:border-0 flex flex-col">
+                                        <div class="flex-1 flex">
+                                            <div v-for="q in 4" :key="q" class="flex-1 border-r border-slate-100 last:border-0"></div>
                                         </div>
                                     </div>
-                                    <!-- Go Live Bar (Only if expanded) -->
-                                    <div v-if="isRoadmapExpanded" class="absolute inset-0">
-                                        <div class="absolute h-full bg-slate-400"
-                                            :style="goLiveBarStyle" :title="'Expected Go Live: ' + computedAppendixData.urgency_expected"></div>
-                                    </div>
+                                </div>
+                                <!-- Go Live Bar (Only if expanded) -->
+                                <div v-if="isRoadmapExpanded" class="absolute inset-0">
+                                    <div class="absolute h-full bg-emerald-500"
+                                        :style="goLiveBarStyle" :title="'Expected Go Live: ' + computedAppendixData.urgency_expected"></div>
                                 </div>
                             </div>
+
+                            <!-- Section 3: Status Updated Placeholder (Outside) -->
+                            <div class="panel-body-mini w-[100px] border-l border-[#3b82f6] bg-slate-50/30"></div>
                         </div>
 
-                        <div v-if="computedAppendixData && computedAppendixData.urgency_expected !== '-'"
-                            class="flex last:border-0">
-                            <div
-                                class="bar-sub-mini flex items-center shrink-0 min-w-[130px] justify-center border-r border-[#3b82f6]">
-                                Status Review</div>
-                            <div class="panel-body-mini flex items-center flex-1 justify-start px-4 text-left">
-                                {{ statusReviewData }}
-                            </div>
-                        </div>
+                        <template v-if="computedAppendixData && computedAppendixData.urgency_expected !== '-'">
+                            <DigitalRoadmapStatus
+                                v-for="(marker, idx) in statusReviewMarkers"
+                                :key="`status-row-${idx}`"
+                                :show="true"
+                                :isRoadmapExpanded="isRoadmapExpanded"
+                                :roadmapYears="roadmapYears"
+                                :markers="[marker]"
+                                :statusReviewData="`${marker.label} - ${marker.status}`"
+                                :statusUpdated="marker.statusUpdated"
+                                :isFirst="idx === 0"
+                                :isLast="idx === statusReviewMarkers.length - 1"
+                            />
+                        </template>
                     </div>
                 </div>
 
@@ -378,13 +392,77 @@
                     <div class="h-6 w-1 rounded-full bg-red-600"></div>
                     <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Summary Review</h2>
                 </div>
+
+                <!-- Notes Section -->
+                <div class="space-y-4">
+                    <!-- Note Form -->
+                    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#1A1A1A]">
+                        <form @submit.prevent="submitNote" class="space-y-4">
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-500 mb-1">Month</label>
+                                    <select v-model="noteForm.month" class="w-full rounded-lg border-slate-200 text-sm dark:border-white/10 dark:bg-white/5">
+                                        <option v-for="m in months" :key="m" :value="m">{{ m }}</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-500 mb-1">Year</label>
+                                    <select v-model="noteForm.year" class="w-full rounded-lg border-slate-200 text-sm dark:border-white/10 dark:bg-white/5">
+                                        <option v-for="y in noteYears" :key="y" :value="y">{{ y }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500 mb-1">Notes</label>
+                                <textarea v-model="noteForm.notes" rows="3" class="w-full rounded-lg border-slate-200 text-sm dark:border-white/10 dark:bg-white/5" placeholder="Enter review notes..."></textarea>
+                            </div>
+                            <div class="flex justify-end gap-2">
+                                <button v-if="editingNoteId" type="button" @click="cancelEditNote" class="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/5">
+                                    Cancel
+                                </button>
+                                <button type="submit" :disabled="noteForm.processing" class="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+                                    {{ editingNoteId ? 'Update Note' : 'Add Note' }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Notes List -->
+                    <div v-if="summaryReviewNotes && summaryReviewNotes.length > 0" class="space-y-3">
+                        <div v-for="note in summaryReviewNotes" :key="note.id" class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#1A1A1A] group">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="text-xs font-bold text-blue-600 uppercase">{{ note.month }} {{ note.year }}</span>
+                                    </div>
+                                    <p class="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{{ note.notes }}</p>
+                                </div>
+                                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button @click="editNote(note)" class="p-1 text-slate-400 hover:text-blue-600 transition-colors">
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                        </svg>
+                                    </button>
+                                    <button @click="deleteNote(note.id)" class="p-1 text-slate-400 hover:text-red-600 transition-colors">
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="rounded-xl border border-dashed border-slate-200 p-8 text-center dark:border-white/10">
+                        <p class="text-sm text-slate-500 italic">No review notes available for this initiative.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </UserLayout>
 </template>
 <script setup>
 import { computed, ref } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, useForm } from '@inertiajs/vue3';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
@@ -396,6 +474,7 @@ import CompendiumCharterDocument from '@/Components/Compendium/CompendiumCharter
 import AppendixCharterDocument from '@/Components/Appendix/AppendixCharterDocument.vue';
 import DigitalRoadmapComponent from '@/Components/Roadmap/Digital/DigitalRoadmapComponent.vue';
 import DigitalRoadmapSummary from '@/Components/Roadmap/Digital/DigitalRoadmapSummary.vue';
+import DigitalRoadmapStatus from '@/Components/Roadmap/Digital/DigitalRoadmapStatus.vue';
 
 const props = defineProps({
     initiativeMaster: { type: Object, default: () => ({}) },
@@ -406,6 +485,7 @@ const props = defineProps({
     roadmapStartYear: { type: Number, default: 2024 },
     roadmapEndYear: { type: Number, default: 2029 },
     statusImplementations: { type: Array, default: () => [] },
+    summaryReviewNotes: { type: Array, default: () => [] },
 
     // Options
     coeOptions: { type: Array, default: () => [] },
@@ -419,6 +499,54 @@ const activeTab = ref('Planning');
 const route = useRouteHelper();
 
 const isRoadmapExpanded = ref(false);
+
+const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const noteYears = computed(() => {
+    const currentYear = new Date().getFullYear();
+    const list = [];
+    for (let i = currentYear - 2; i <= currentYear + 5; i++) {
+        list.push(i);
+    }
+    return list;
+});
+
+const editingNoteId = ref(null);
+const noteForm = useForm({
+    initiative_id: props.initiativeMaster?.id,
+    month: months[new Date().getMonth()],
+    year: new Date().getFullYear(),
+    notes: '',
+});
+
+const submitNote = () => {
+    if (editingNoteId.value) {
+        noteForm.put(route('program-evaluation.summary-review.notes.update', editingNoteId.value), {
+            onSuccess: () => cancelEditNote(),
+        });
+    } else {
+        noteForm.post(route('program-evaluation.summary-review.notes.store'), {
+            onSuccess: () => noteForm.reset('notes'),
+        });
+    }
+};
+
+const editNote = (note) => {
+    editingNoteId.value = note.id;
+    noteForm.month = note.month;
+    noteForm.year = note.year;
+    noteForm.notes = note.notes;
+};
+
+const cancelEditNote = () => {
+    editingNoteId.value = null;
+    noteForm.reset('notes', 'month', 'year');
+};
+
+const deleteNote = (id) => {
+    if (confirm('Are you sure you want to delete this note?')) {
+        router.delete(route('program-evaluation.summary-review.notes.destroy', id));
+    }
+};
 
 const goBack = () => {
     window.history.back();
@@ -652,14 +780,67 @@ const goLiveBarStyle = computed(() => {
     };
 });
 
+const statusReviewMarkers = computed(() => {
+    if (!props.statusImplementations || props.statusImplementations.length === 0) return [];
+
+    const monthMap = {
+        jan:1, january:1, feb:2, february:2, mar:3, march:3, apr:4, april:4,
+        may:5, mei:5, jun:6, june:6, jul:7, july:7, aug:8, augus:8, august:8, agu:8,
+        sep:9, sept:9, september:9, oct:10, octo:10, october:10, okt:10,
+        nov:11, november:11, dec:12, december:12, des:12
+    };
+
+    const minGlobalYear = props.roadmapStartYear || 2024;
+    const maxGlobalYear = props.roadmapEndYear || 2029;
+    const totalYears = maxGlobalYear - minGlobalYear + 1;
+    const totalQuarters = totalYears * 4;
+
+    const getStatusColor = (status) => {
+        const s = String(status || '').toLowerCase();
+        if (s.includes('done')) return '#10b981'; // Green
+        if (s.includes('review')) return '#f97316'; // Orange
+        if (s.includes('progress')) return '#3b82f6'; // Blue
+        return '#1e4f8f'; // Default Blue
+    };
+
+    return props.statusImplementations.map(impl => {
+        const monthStr = String(impl.start || '').trim().toLowerCase();
+        const yearNum = Number(impl.year) || NaN;
+
+        if (!monthStr || isNaN(yearNum)) return null;
+
+        let monthNum = Number(monthStr);
+        if (!Number.isFinite(monthNum) || monthNum <= 0 || monthNum > 12) {
+            const key = monthStr.slice(0,3);
+            monthNum = monthMap[key] || monthMap[monthStr] || NaN;
+        }
+
+        if (!Number.isFinite(monthNum)) return null;
+        if (yearNum < minGlobalYear || yearNum > maxGlobalYear) return null;
+
+        const q = Math.floor((monthNum - 1) / 3) + 1;
+        const quarterIndex = (yearNum - minGlobalYear) * 4 + (q - 1);
+        const left = (quarterIndex / totalQuarters) * 100;
+
+        return {
+            left: `${left}%`,
+            label: `${impl.start} ${impl.year}`,
+            status: impl.review_status || '-',
+            color: getStatusColor(impl.review_status),
+            statusUpdated: impl.status_updated || '-'
+        };
+    }).filter(marker => marker !== null);
+});
+
 const statusReviewData = computed(() => {
     if (!props.statusImplementations || props.statusImplementations.length === 0) return '-';
-    const latest = props.statusImplementations[0];
-    const month = latest.start || '-';
-    const year = latest.year || '-';
-
-    if (month === '-' && year === '-') return '-';
-    return `${month} ${year}`;
+    
+    // Sort implementation by year and month if needed, but here we just map them
+    const periods = props.statusImplementations
+        .map(impl => `${impl.start || ''} ${impl.year || ''}`.trim())
+        .filter(str => str !== '');
+    
+    return periods.length > 0 ? periods.join(', ') : '-';
 });
 </script>
 
