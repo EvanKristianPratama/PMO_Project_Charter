@@ -228,25 +228,35 @@
                     <div class="h-6 w-1 rounded-full bg-emerald-600"></div>
                     <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Evaluation</h2>
                 </div>
-                <!-- Digital Initiative Header -->
-                <DigitalInitiativeHeader v-if="unifiedInitiative" :initiative="unifiedInitiative"
+                <!-- Digital Initiative Evaluation Details -->
+                <DigitalInitiativeEvaluation v-if="unifiedInitiative" :initiative="unifiedInitiative"
                     class="overflow-hidden" />
 
                 <div class="flex items-center gap-2 px-1">
                     <div class="h-6 w-1 rounded-full bg-blue-600"></div>
-                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Status Implementation</h2>
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Status Implementation Review</h2>
                 </div>
 
                 <div v-if="roadmapDuration || (computedAppendixData && computedAppendixData.urgency_expected !== '-')"
                     class="flex justify-start">
                     <div class="score-panel w-full max-w-4xl overflow-hidden border border-[#3b82f6] flex flex-col">
-                        <div v-if="roadmapDuration" class="flex border-b border-[#3b82f6]">
+                        <div v-if="roadmapDuration" 
+                            class="flex border-b border-[#3b82f6] cursor-pointer hover:bg-slate-50 group"
+                            @click="isRoadmapExpanded = !isRoadmapExpanded"
+                        >
                             <div class="flex flex-1 border-r border-[#3b82f6]">
                                 <div
-                                    class="bar-sub-mini flex items-center shrink-0 min-w-[130px] justify-center border-r border-[#3b82f6]">
+                                    class="bar-sub-mini flex items-center shrink-0 min-w-[130px] justify-center border-r border-[#3b82f6] group-hover:bg-[#255b8a]">
                                     Project Duration</div>
                                 <div class="panel-body-mini flex items-center flex-1 justify-start px-4 text-left">
-                                    {{ roadmapDuration }}
+                                    <div class="flex items-center justify-between w-full">
+                                        <span>{{ roadmapDuration }}</span>
+                                        <svg class="h-4 w-4 text-[#3b82f6] transition-transform duration-200" 
+                                            :class="{ 'rotate-180': isRoadmapExpanded }"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7" />
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
                             <div class="flex flex-1">
@@ -272,6 +282,16 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Expanded Roadmap Content -->
+                        <div v-if="isRoadmapExpanded" class="bg-white border-b border-[#3b82f6] animate-fade-in overflow-hidden">
+                            <DigitalRoadmapSummary 
+                                :items="roadmapItems" 
+                                :start-year="roadmapStartYear" 
+                                :end-year="roadmapEndYear" 
+                            />
+                        </div>
+
                         <div v-if="computedAppendixData && computedAppendixData.urgency_expected !== '-'"
                             class="flex last:border-0">
                             <div
@@ -321,9 +341,10 @@
                         </tbody>
                     </table>
                 </div>
+                
                 <div class="flex items-center gap-2 px-1">
                     <div class="h-6 w-1 rounded-full bg-red-600"></div>
-                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Review</h2>
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Summary Review</h2>
                 </div>
             </div>
         </div>
@@ -342,6 +363,7 @@ import DigitalInitiativeEvaluation from '@/Components/DigitalInitiative/DigitalI
 import CompendiumCharterDocument from '@/Components/Compendium/CompendiumCharterDocument.vue';
 import AppendixCharterDocument from '@/Components/Appendix/AppendixCharterDocument.vue';
 import DigitalRoadmapComponent from '@/Components/Roadmap/Digital/DigitalRoadmapComponent.vue';
+import DigitalRoadmapSummary from '@/Components/Roadmap/Digital/DigitalRoadmapSummary.vue';
 
 const props = defineProps({
     initiativeMaster: { type: Object, default: () => ({}) },
@@ -363,6 +385,8 @@ const props = defineProps({
 
 const activeTab = ref('Planning');
 const route = useRouteHelper();
+
+const isRoadmapExpanded = ref(false);
 
 const goBack = () => {
     window.history.back();
