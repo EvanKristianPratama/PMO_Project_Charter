@@ -234,7 +234,7 @@
 
                 <div class="flex items-center gap-2 px-1">
                     <div class="h-6 w-1 rounded-full bg-blue-600"></div>
-                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Status Implementation's Review</h2>
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Status Implementation Analysis</h2>
                 </div>
 
                 <div v-if="roadmapDuration || (computedAppendixData && computedAppendixData.urgency_expected !== '-')"
@@ -264,17 +264,19 @@
                                     <!-- Mini Roadmap Grid -->
                                     <div class="absolute inset-0 flex">
                                         <div v-for="year in roadmapYears" :key="year"
-                                            class="flex-1 border-r border-slate-100 last:border-0 flex flex-col">
+                                            class="flex-1 border-r-[#3b82f6] border-r-[1.5px] last:border-0 flex flex-col">
                                             <div
-                                                class="h-[18px] bg-slate-50 flex items-center justify-center text-[10px] font-bold text-slate-500 border-b border-slate-100 leading-none uppercase tracking-wider">
+                                                class="h-[18px] bg-slate-50 flex items-center justify-center text-[10px] font-bold text-slate-500 border-b border-[#3b82f6] leading-none uppercase tracking-wider">
                                                 {{ year }}
                                             </div>
-                                            <div class="flex-1"></div>
+                                            <div class="flex-1 flex">
+                                                <div v-for="q in 4" :key="q" class="flex-1 border-r border-slate-100 last:border-0"></div>
+                                            </div>
                                         </div>
                                     </div>
                                     <!-- Roadmap Bar -->
-                                    <div class="absolute inset-x-0 bottom-2 flex items-center px-1">
-                                        <div class="relative w-full h-1.5">
+                                    <div class="absolute inset-x-0 top-[18px] bottom-0 flex items-center">
+                                        <div class="relative w-full h-2">
                                             <div class="absolute h-full bg-[#1e4f8f] rounded-sm shadow-sm"
                                                 :style="roadmapBarStyle" :title="roadmapDuration"></div>
                                         </div>
@@ -293,12 +295,42 @@
                         </div>
 
                         <div v-if="computedAppendixData && computedAppendixData.urgency_expected !== '-'"
+                            class="flex border-b border-[#3b82f6] last:border-0">
+                            <div class="flex flex-1 border-r border-[#3b82f6]">
+                                <div
+                                    class="bar-sub-mini flex items-center shrink-0 min-w-[130px] justify-center border-r border-[#3b82f6]">
+                                    Expected Go Live</div>
+                                <div class="panel-body-mini flex items-center flex-1 justify-start px-4 text-left">
+                                    {{ computedAppendixData.urgency_expected }}
+                                </div>
+                            </div>
+                            <div class="flex flex-1">
+                                <div class="panel-body-mini flex-1 p-0 overflow-hidden relative min-h-[32px]">
+                                    <!-- Mini Roadmap Grid (Only if expanded) -->
+                                    <div v-if="isRoadmapExpanded" class="absolute inset-0 flex">
+                                        <div v-for="year in roadmapYears" :key="year"
+                                            class="flex-1 border-r-[#3b82f6] border-r-[1.5px] last:border-0 flex flex-col">
+                                            <div class="flex-1 flex">
+                                                <div v-for="q in 4" :key="q" class="flex-1 border-r border-slate-100 last:border-0"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Go Live Bar (Only if expanded) -->
+                                    <div v-if="isRoadmapExpanded" class="absolute inset-0">
+                                        <div class="absolute h-full bg-slate-400"
+                                            :style="goLiveBarStyle" :title="'Expected Go Live: ' + computedAppendixData.urgency_expected"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div v-if="computedAppendixData && computedAppendixData.urgency_expected !== '-'"
                             class="flex last:border-0">
                             <div
                                 class="bar-sub-mini flex items-center shrink-0 min-w-[130px] justify-center border-r border-[#3b82f6]">
-                                Expected Go Live</div>
+                                Status Review</div>
                             <div class="panel-body-mini flex items-center flex-1 justify-start px-4 text-left">
-                                {{ computedAppendixData.urgency_expected }}
+                                {{ statusReviewData }}
                             </div>
                         </div>
                     </div>
@@ -470,6 +502,8 @@ const computedAppendixData = computed(() => {
         value_matrics: a?.value_matrics ?? '-',
         urgency_rationale: a?.urgency_rationale ?? '-',
         urgency_expected: a?.urgency_expected ?? '-',
+        expected_q: a?.expected_q,
+        year_q: a?.year_q,
         ease_label: getLabel(a?.ease),
         ease_rationale: a?.ease_rationale ?? '-',
         ease_detail: a?.ease_detail ?? '-',
@@ -544,6 +578,10 @@ const roadmapYears = computed(() => {
     return list;
 });
 
+const quarterCells = computed(() =>
+    roadmapYears.value.flatMap((year) => [1, 2, 3, 4].map((quarter) => ({ year, quarter })))
+);
+
 const roadmapBarStyle = computed(() => {
     if (!props.roadmapItems || props.roadmapItems.length === 0) return { width: '0%', left: '0%' };
 
@@ -587,6 +625,41 @@ const roadmapBarStyle = computed(() => {
         left: `${left}%`,
         width: `${width}%`
     };
+});
+
+const goLiveBarStyle = computed(() => {
+    if (!computedAppendixData.value?.expected_q || !computedAppendixData.value?.year_q) return { width: '0%', left: '0%', display: 'none' };
+
+    const minGlobalYear = props.roadmapStartYear || 2024;
+    const maxGlobalYear = props.roadmapEndYear || 2029;
+    const year = Number(computedAppendixData.value.year_q);
+    
+    const qMatch = String(computedAppendixData.value.expected_q).match(/Q?([1-4])/);
+    const q = qMatch ? Number(qMatch[1]) : 1;
+
+    if (year < minGlobalYear || year > maxGlobalYear) return { width: '0%', left: '0%', display: 'none' };
+
+    const totalYears = maxGlobalYear - minGlobalYear + 1;
+    const totalQuarters = totalYears * 4;
+
+    const quarterIndex = (year - minGlobalYear) * 4 + (q - 1);
+    const left = (quarterIndex / totalQuarters) * 100;
+    const width = (1 / totalQuarters) * 100; // Single quarter bar
+
+    return {
+        left: `${left}%`,
+        width: `${width}%`
+    };
+});
+
+const statusReviewData = computed(() => {
+    if (!props.statusImplementations || props.statusImplementations.length === 0) return '-';
+    const latest = props.statusImplementations[0];
+    const month = latest.start || '-';
+    const year = latest.year || '-';
+
+    if (month === '-' && year === '-') return '-';
+    return `${month} ${year}`;
 });
 </script>
 
