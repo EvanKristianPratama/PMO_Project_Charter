@@ -567,14 +567,24 @@ function getRangeFromReviewStatuses(reviewStatuses) {
     return { start: Math.min(cellStart, cellEnd), end: Math.max(cellStart, cellEnd) };
 }
 
-/**
- * Compute the month-index range that covers all milestones in `projects`
- * for a given roadmap status layer (baseline | approved).
- * This is used to determine whether a Gantt row SHOULD EXIST,
- * keeping the original chart structure intact.
- */
-function getMilestoneRange(projects, statusFilter) {
-    if (!Array.isArray(projects) || projects.length === 0) return null;
+const TYPE_DASHED = new Set([2, 4]);
+
+function buildTimelineCellsForLayer(projects, statusFilter, keyPrefix = "default") {
+    const total = totalCells.value;
+    const cells = Array.from({ length: total }, (_, i) => ({
+        type: "gap",
+        span: 1,
+        key: `${keyPrefix}-c${i}`,
+        startIndex: i,
+        endIndex: i,
+        endsYear: (i + 1) % 12 === 0,
+        hasBlock: false,
+        hasDashed: false,
+    }));
+
+    if (!Array.isArray(projects) || projects.length === 0) {
+        return cells;
+    }
 
     const pool = statusFilter
         ? projects.filter((project) => {
@@ -585,73 +595,57 @@ function getMilestoneRange(projects, statusFilter) {
           })
         : projects;
 
-    if (pool.length === 0) return null;
-
     const milestones = pool.flatMap((p) =>
         Array.isArray(p.milestones) ? p.milestones : [],
     );
-    if (milestones.length === 0) return null;
 
-    let minS = null;
-    let maxE = null;
-
-    for (const ms of milestones) {
+    milestones.forEach((ms) => {
         const si = toMonthIdx(ms.start_date ?? ms.end_date);
         const ei = toMonthIdx(ms.end_date ?? ms.start_date);
-        if (si !== null && (minS === null || si < minS)) minS = si;
-        if (ei !== null && (maxE === null || ei > maxE)) maxE = ei;
-    }
+        if (si === null && ei === null) return;
 
-    if (minS === null && maxE === null) return null;
-    const s = minS ?? maxE;
-    const e = maxE ?? minS;
-    return { start: Math.min(s, e), end: Math.max(s, e) };
-}
+        const safeStart = Math.min(si ?? ei, ei ?? si);
+        const safeEnd = Math.max(si ?? ei, ei ?? si);
+        const typeCode = Number(ms.milestone_type ?? ms.type);
+        const isDashed = TYPE_DASHED.has(typeCode);
 
-/* ── Cell builder ────────────────────────────────────── */
-
-/** Build an array of cell descriptors (gap | bar) for a given month range. */
-function buildCells(range, keyPrefix = "default") {
-    const total = totalCells.value;
-
-    if (!range) {
-        return Array.from({ length: total }, (_, i) => ({
-            type: "gap",
-            span: 1,
-            key: `${keyPrefix}-g${i}`,
-            startIndex: i,
-            endIndex: i,
-            endsYear: (i + 1) % 12 === 0,
-        }));
-    }
-
-    const { start, end } = range;
-    const safeStart = Math.max(0, Math.min(start, total - 1));
-    const safeEnd   = Math.max(safeStart, Math.min(end, total - 1));
-    const cells     = [];
-    let   c         = 0;
-
-    while (c < safeStart) {
-        cells.push({ type: "gap", span: 1, key: `${keyPrefix}-g${c}`, startIndex: c, endIndex: c, endsYear: (c + 1) % 12 === 0 });
-        c++;
-    }
-
-    cells.push({
-        type: "bar",
-        span: safeEnd - safeStart + 1,
-        key: `${keyPrefix}-bar-${safeStart}`,
-        startIndex: safeStart,
-        endIndex: safeEnd,
-        endsYear: (safeEnd + 1) % 12 === 0,
+        for (let i = safeStart; i <= safeEnd; i++) {
+            if (isDashed) {
+                cells[i].hasDashed = true;
+            } else {
+                cells[i].hasBlock = true;
+            }
+        }
     });
-    c = safeEnd + 1;
 
-    while (c < total) {
-        cells.push({ type: "gap", span: 1, key: `${keyPrefix}-g${c}`, startIndex: c, endIndex: c, endsYear: (c + 1) % 12 === 0 });
-        c++;
-    }
+    cells.forEach(cell => {
+        if (cell.hasBlock) {
+            cell.type = 'bar';
+            cell.barStyle = 'block';
+        } else if (cell.hasDashed) {
+            cell.type = 'bar';
+            cell.barStyle = 'dashed';
+        }
+    });
 
-    return cells;
+    const chunks = [];
+    let currentChunk = null;
+
+    cells.forEach(cell => {
+        if (!currentChunk) {
+            currentChunk = { ...cell };
+        } else if (currentChunk.type === cell.type && currentChunk.barStyle === cell.barStyle) {
+            currentChunk.span += 1;
+            currentChunk.endIndex = cell.endIndex;
+            currentChunk.endsYear = cell.endsYear;
+        } else {
+            chunks.push(currentChunk);
+            currentChunk = { ...cell, key: `${keyPrefix}-c${cell.startIndex}` };
+        }
+    });
+    if (currentChunk) chunks.push(currentChunk);
+
+    return chunks;
 }
 
 /**
@@ -672,15 +666,16 @@ function buildInitiativeTimelineRows(initiative, selectedPeriodValue) {
     const roadmapRows = roadmapLegendItems
         .filter((item) => isRoadmapLayerVisible(item.key))
         .map((item) => {
-            const range = getMilestoneRange(projects, item.key);
-            if (!range) return null;
+            const cells = buildTimelineCellsForLayer(projects, item.key, `${initiativeId}-${item.key}`);
+            const hasAnyBar = cells.some(c => c.type === 'bar');
+            if (!hasAnyBar) return null;
 
             return {
                 key:           `${initiativeId}-${item.key}`,
                 layerKey:      item.key,
                 label:         item.label,
                 isPlaceholder: false,
-                cells:         buildCells(range, `${initiativeId}-${item.key}`),
+                cells:         cells,
             };
         })
         .filter(Boolean);
@@ -712,7 +707,7 @@ function buildInitiativeTimelineRows(initiative, selectedPeriodValue) {
             layerKey:      "empty",
             label:         "",
             isPlaceholder: true,
-            cells:         buildCells(null, `${initiativeId}-empty`),
+            cells:         buildTimelineCellsForLayer([], null, `${initiativeId}-empty`),
         },
     ];
 
@@ -1348,6 +1343,7 @@ const reviewStatusLegendItems = computed(() => {
                                     :class="[
                                         cell.type === 'bar' ? 'cell-bar' : 'cell-gap',
                                         cell.type === 'bar' ? `cell-bar--${timelineRow.layerKey}` : '',
+                                        cell.barStyle === 'dashed' ? 'cell-bar--dashed' : '',
                                         timelineRow.isPlaceholder ? 'cell-gap--placeholder' : '',
                                         cell.endsYear ? 'year-sep' : '',
                                     ]"
@@ -1573,6 +1569,7 @@ const reviewStatusLegendItems = computed(() => {
     border: 1px solid #d9e4ef;
     background: #ffffff;
     min-width: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
 }
 
 /* ─────────────────────────────────────────────────────
@@ -1614,10 +1611,9 @@ const reviewStatusLegendItems = computed(() => {
 }
 
 .th-cell {
-    font-size: 15px;
+    font-size: 10px;
     font-weight: 700;
-    letter-spacing: 0.05em;
-    padding: 18px 12px;
+    padding: 10px 12px;
     text-align: left;
     vertical-align: middle;
     white-space: nowrap;
@@ -1627,10 +1623,10 @@ const reviewStatusLegendItems = computed(() => {
 .th-left { text-align: left; }
 
 .th-year {
-    font-size: 15px;
+    font-size: 10px;
     font-weight: 700;
     text-align: center;
-    padding: 18px 6px;
+    padding: 10px 6px;
     vertical-align: middle;
     line-height: 1.2;
 }
@@ -1654,13 +1650,13 @@ const reviewStatusLegendItems = computed(() => {
    CoE cell
    ───────────────────────────────────────────────────── */
 .gantt-table td.cell-coe {
-    font-size: 10.5px;
-    font-weight: 600;
+    font-size: 10px;
+    font-weight: 700;
     padding: 10px 12px;
     vertical-align: middle;
     line-height: 1.4;
     word-break: break-word;
-    color: #334155;
+    color: #000000;
     background: linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%);
     border-bottom: var(--group-sep-width) solid var(--group-sep-color);
 }
@@ -1683,10 +1679,10 @@ const reviewStatusLegendItems = computed(() => {
 
 .ini-name {
     font-size: 11px;
-    font-weight: 500;
+    font-weight: 400;
     line-height: 1.35;
     word-break: break-word;
-    color: #475569;
+    color: #000000;
 }
 
 .gantt-table td.cell-duration {
@@ -1695,9 +1691,9 @@ const reviewStatusLegendItems = computed(() => {
     text-align: center;
     border-right: 1px solid var(--cell-border-color);
     border-bottom: 1px solid var(--row-border-color);
-    color: #1d4ed8;
+    color: #000000;
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 400;
     line-height: 1.35;
     word-break: break-word;
 }
@@ -1762,6 +1758,11 @@ const reviewStatusLegendItems = computed(() => {
 
 .gantt-table td.cell-bar--approved::after {
     background: linear-gradient(90deg, #34d399 0%, #16a34a 100%);
+}
+
+.gantt-table td.cell-bar--dashed::after {
+    -webkit-mask-image: repeating-linear-gradient(90deg, black 0, black 6px, transparent 6px, transparent 10px);
+    mask-image: repeating-linear-gradient(90deg, black 0, black 6px, transparent 6px, transparent 10px);
 }
 
 .gantt-table td.cell-gap--placeholder { background: #fafcff; }
