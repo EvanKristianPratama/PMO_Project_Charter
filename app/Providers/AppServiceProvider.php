@@ -2,6 +2,18 @@
 
 namespace App\Providers;
 
+use App\Models\Goal;
+use App\Models\InitiativeTagging;
+use App\Models\Milestone;
+use App\Models\MstInitiative;
+use App\Models\ProjectStatusHistory;
+use App\Models\Theme;
+use App\Models\TrsProject;
+use App\Models\TrsProjectCharter;
+use App\Models\TrsStatusImplementation;
+use App\Observers\InitiativeObserver;
+use App\Observers\RoadmapObserver;
+use App\Observers\StrategicPillarObserver;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
@@ -24,6 +36,25 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureUrl();
         $this->configureDbReconnect();
+        $this->registerObservers();
+    }
+
+    private function registerObservers(): void
+    {
+        // Initiative Observers
+        MstInitiative::observe(InitiativeObserver::class);
+
+        // Roadmap Observers
+        TrsProject::observe(RoadmapObserver::class);
+        TrsProjectCharter::observe(RoadmapObserver::class);
+        Milestone::observe(RoadmapObserver::class);
+        TrsStatusImplementation::observe(RoadmapObserver::class);
+        ProjectStatusHistory::observe(RoadmapObserver::class);
+
+        // Strategic Pillar Observers
+        Goal::observe(StrategicPillarObserver::class);
+        Theme::observe(StrategicPillarObserver::class);
+        InitiativeTagging::observe(StrategicPillarObserver::class);
     }
 
     private function configureUrl(): void
