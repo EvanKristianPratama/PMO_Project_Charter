@@ -44,7 +44,7 @@ const themeMap = computed(() => {
 });
 
 const selectedThemes = computed(() => {
-    return normalizedThemeIds.value.map((id) => {
+    const list = normalizedThemeIds.value.map((id) => {
         const option = themeMap.value.get(id);
 
         return {
@@ -55,6 +55,29 @@ const selectedThemes = computed(() => {
             name: option?.name ?? `Theme ${id}`,
         };
     });
+
+    const result = [];
+    for (let i = 0; i < list.length; i++) {
+        const current = list[i];
+        let span = 1;
+        
+        let nextIdx = i + 1;
+        while (nextIdx < list.length && 
+               list[nextIdx].code === current.code && 
+               list[nextIdx].strategicPillar === current.strategicPillar) {
+            span++;
+            nextIdx++;
+        }
+
+        result.push({ ...current, rowSpan: span });
+
+        for (let k = 1; k < span; k++) {
+            result.push({ ...list[i + k], rowSpan: 0 });
+        }
+
+        i = nextIdx - 1;
+    }
+    return result;
 });
 
 const coeCoverageLabel = computed(() => {
@@ -235,13 +258,11 @@ const sourceLabel = computed(() => {
                             </thead>
                             <tbody>
                                 <tr v-if="!selectedThemes.length">
-                                    <td :colspan="editable ? 5 : 4" class="empty-row text-center">Belum ada RJPP tagging
-                                        yang
-                                        dimapping.</td>
+                                    <td :colspan="editable ? 5 : 4" class="empty-row text-center">Belum ada RJPP tagging yang dimapping.</td>
                                 </tr>
-                                <tr v-for="theme in selectedThemes" :key="`theme-row-${theme.id}`">
-                                    <td class="cell-center">{{ theme.code }}</td>
-                                    <td>{{ theme.strategicPillar }}</td>
+                                <tr v-for="(theme, index) in selectedThemes" :key="`compendium-theme-${index}`">
+                                    <td v-if="theme.rowSpan > 0" :rowspan="theme.rowSpan" class="cell-center">{{ theme.code }}</td>
+                                    <td v-if="theme.rowSpan > 0" :rowspan="theme.rowSpan">{{ theme.strategicPillar }}</td>
                                     <td class="cell-center">{{ theme.themeCode }}</td>
                                     <td>{{ theme.name }}</td>
                                     <td v-if="editable" class="cell-center">

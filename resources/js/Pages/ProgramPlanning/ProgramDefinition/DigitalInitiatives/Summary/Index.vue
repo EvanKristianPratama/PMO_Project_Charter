@@ -234,7 +234,7 @@
 
                 <div class="flex items-center gap-2 px-1">
                     <div class="h-6 w-1 rounded-full bg-blue-600"></div>
-                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Status Implementation Review</h2>
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Status Implementation's Review</h2>
                 </div>
 
                 <div v-if="roadmapDuration || (computedAppendixData && computedAppendixData.urgency_expected !== '-')"

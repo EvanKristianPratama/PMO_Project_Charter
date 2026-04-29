@@ -151,7 +151,7 @@ const mappedInitiativeGoals = computed(() => {
     
     const list = Array.isArray(source) ? source : [];
 
-    return list.flatMap((mi) => {
+    const flatList = list.flatMap((mi) => {
         const taggings = Array.isArray(mi.taggings)
             ? mi.taggings
             : Array.isArray(mi.initiative_taggings)
@@ -187,6 +187,33 @@ const mappedInitiativeGoals = computed(() => {
                 };
             });
     });
+
+    // Calculate rowSpan for merging same Goal & Strategic Pillar
+    const result = [];
+    for (let i = 0; i < flatList.length; i++) {
+        const current = flatList[i];
+        let span = 1;
+        
+        // Check next items for duplicates
+        let nextIdx = i + 1;
+        while (nextIdx < flatList.length && 
+               flatList[nextIdx].goal === current.goal && 
+               flatList[nextIdx].strategicPillar === current.strategicPillar) {
+            span++;
+            nextIdx++;
+        }
+
+        result.push({ ...current, rowSpan: span });
+
+        // Add remaining items in the group with rowSpan 0
+        for (let k = 1; k < span; k++) {
+            result.push({ ...flatList[i + k], rowSpan: 0 });
+        }
+
+        i = nextIdx - 1; // Jump past processed group
+    }
+
+    return result;
 });
 </script>
 
@@ -216,6 +243,11 @@ const mappedInitiativeGoals = computed(() => {
                 <span class="info-label info-label">Project Owner</span>
                 <span class="info-sep"></span>
                 <span class="info-value">{{ headerMeta.owners }}</span>
+            </div>
+            <div class="info-cell info-cell-pic">
+                <span class="info-label">PIC</span>
+                <span class="info-sep"></span>
+                <span class="info-value">{{ headerMeta.pics }}</span>
             </div>
             <div class="info-cell info-cell-coe">
                 <span class="info-label">CoE</span>
@@ -248,8 +280,8 @@ const mappedInitiativeGoals = computed(() => {
                                     <td colspan="4" class="empty-row text-center">Goal Not Available</td>
                                 </tr>
                                 <tr v-for="(goal, index) in mappedInitiativeGoals" :key="`goal-${index}`">
-                                    <td class="cell-center">{{ goal.goal }}</td>
-                                    <td>{{ goal.strategicPillar }}</td>
+                                    <td v-if="goal.rowSpan > 0" :rowspan="goal.rowSpan" class="cell-center">{{ goal.goal }}</td>
+                                    <td v-if="goal.rowSpan > 0" :rowspan="goal.rowSpan">{{ goal.strategicPillar }}</td>
                                     <td class="cell-center">{{ goal.themeCode }}</td>
                                     <td>{{ goal.themeName }}</td>
                                 </tr>

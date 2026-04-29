@@ -97,6 +97,39 @@ const currentRjppThemes = computed(() => {
     return props.initiative.rjppThemes ?? [];
 });
 
+const rjppThemesWithSpans = computed(() => {
+    const list = currentRjppThemes.value.map(theme => ({
+        id: theme.id,
+        code: String(theme.code ?? '-').trim().replace(/#/g, ''),
+        strategicPillar: String(theme.strategic_pillar ?? '-').trim(),
+        themeCode: String(theme.theme_code ?? '-').trim().replace(/#/g, ''),
+        themeName: String(theme.name ?? '-').trim(),
+    }));
+
+    const result = [];
+    for (let i = 0; i < list.length; i++) {
+        const current = list[i];
+        let span = 1;
+        
+        let nextIdx = i + 1;
+        while (nextIdx < list.length && 
+               list[nextIdx].code === current.code && 
+               list[nextIdx].strategicPillar === current.strategicPillar) {
+            span++;
+            nextIdx++;
+        }
+
+        result.push({ ...current, rowSpan: span });
+
+        for (let k = 1; k < span; k++) {
+            result.push({ ...list[i + k], rowSpan: 0 });
+        }
+
+        i = nextIdx - 1;
+    }
+    return result;
+});
+
 const projectOwnerOptions = computed(() => {
     const options = [];
     const seenNames = new Set();
@@ -360,14 +393,14 @@ const getLevelLabel = (type) => {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-if="!currentRjppThemes || !currentRjppThemes.length">
+                        <tr v-if="!rjppThemesWithSpans || !rjppThemesWithSpans.length">
                             <td class="cell-center h-8 empty-row" colspan="4">Belum ada RJPP tagging.</td>
                         </tr>
-                        <tr v-for="theme in currentRjppThemes" :key="theme.id">
-                            <td class="cell-center">{{ theme.code ?? '-' }}</td>
-                            <td>{{ theme.strategic_pillar ?? '-' }}</td>
-                            <td class="cell-center">{{ theme.theme_code ?? '-' }}</td>
-                            <td>{{ theme.name ?? '-' }}</td>
+                        <tr v-for="(theme, index) in rjppThemesWithSpans" :key="`appendix-theme-${index}`">
+                            <td v-if="theme.rowSpan > 0" :rowspan="theme.rowSpan" class="cell-center">{{ theme.code }}</td>
+                            <td v-if="theme.rowSpan > 0" :rowspan="theme.rowSpan">{{ theme.strategicPillar }}</td>
+                            <td class="cell-center">{{ theme.themeCode }}</td>
+                            <td>{{ theme.themeName }}</td>
                         </tr>
                     </tbody>
                 </table>
