@@ -231,11 +231,40 @@
                 </div>
 
                 <div v-if="roadmapDuration || (computedAppendixData && computedAppendixData.urgency_expected !== '-')" class="flex justify-start">
-                    <div class="score-panel w-full max-w-2xl overflow-hidden rounded-lg border border-[#3b82f6] flex flex-col">
-                        <div v-if="roadmapDuration" class="flex border-b border-[#3b82f6] last:border-0">
-                            <div class="bar-sub-mini flex items-center shrink-0 min-w-[130px] justify-center border-r border-[#3b82f6]">Project Duration</div>
-                            <div class="panel-body-mini flex items-center flex-1 justify-start px-4 text-left">
-                                {{ roadmapDuration }}
+                    <div class="score-panel w-full max-w-4xl overflow-hidden border border-[#3b82f6] flex flex-col">
+                        <div v-if="roadmapDuration" class="flex border-b border-[#3b82f6]">
+                            <div class="flex flex-1 border-r border-[#3b82f6]">
+                                <div class="bar-sub-mini flex items-center shrink-0 min-w-[130px] justify-center border-r border-[#3b82f6]">Project Duration</div>
+                                <div class="panel-body-mini flex items-center flex-1 justify-start px-4 text-left">
+                                    {{ roadmapDuration }}
+                                </div>
+                            </div>
+                            <div class="flex flex-1">
+                                <div class="panel-body-mini flex-1 p-0 overflow-hidden relative min-h-[32px]">
+                                    <!-- Mini Roadmap Grid -->
+                                    <div class="absolute inset-0 flex">
+                                        <div 
+                                            v-for="year in roadmapYears" 
+                                            :key="year" 
+                                            class="flex-1 border-r border-slate-100 last:border-0 flex flex-col"
+                                        >
+                                            <div class="h-[12px] bg-slate-50 flex items-center justify-center text-[7px] font-extrabold text-slate-400 border-b border-slate-100 leading-none uppercase tracking-tighter">
+                                                {{ year }}
+                                            </div>
+                                            <div class="flex-1"></div>
+                                        </div>
+                                    </div>
+                                    <!-- Roadmap Bar -->
+                                    <div class="absolute inset-x-0 bottom-2 flex items-center px-1">
+                                        <div class="relative w-full h-1.5">
+                                            <div 
+                                                class="absolute h-full bg-[#1e4f8f] rounded-sm shadow-sm"
+                                                :style="roadmapBarStyle"
+                                                :title="roadmapDuration"
+                                            ></div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div v-if="computedAppendixData && computedAppendixData.urgency_expected !== '-'" class="flex last:border-0">
@@ -466,6 +495,61 @@ const roadmapDuration = computed(() => {
     } else {
         return `${yearLabel} - (Q${minStartQ} ${minStartYear} - Q${maxEndQ} ${maxEndYear})`;
     }
+});
+
+const roadmapYears = computed(() => {
+    const start = props.roadmapStartYear || 2024;
+    const end = props.roadmapEndYear || 2029;
+    const list = [];
+    for (let y = start; y <= end; y++) {
+        list.push(y);
+    }
+    return list;
+});
+
+const roadmapBarStyle = computed(() => {
+    if (!props.roadmapItems || props.roadmapItems.length === 0) return { width: '0%', left: '0%' };
+
+    const startYears = props.roadmapItems.map(item => Number(item.startYear)).filter(y => y > 0);
+    const endYears = props.roadmapItems.map(item => Number(item.endYear)).filter(y => y > 0);
+
+    const minGlobalYear = props.roadmapStartYear || 2024;
+    const maxGlobalYear = props.roadmapEndYear || 2029;
+
+    if (startYears.length === 0 || endYears.length === 0) return { width: '0%', left: '0%' };
+
+    const minStartYear = Math.max(minGlobalYear, Math.min(...startYears));
+    const maxEndYear = Math.min(maxGlobalYear, Math.max(...endYears));
+    
+    const startQs = props.roadmapItems
+        .filter(item => Number(item.startYear) === minStartYear)
+        .map(item => {
+            const m = String(item.startQ).match(/Q?([1-4])/);
+            return m ? Number(m[1]) : 1;
+        });
+    const minStartQ = startQs.length ? Math.min(...startQs) : 1;
+
+    const endQs = props.roadmapItems
+        .filter(item => Number(item.endYear) === maxEndYear)
+        .map(item => {
+            const m = String(item.endQ).match(/Q?([1-4])/);
+            return m ? Number(m[1]) : 4;
+        });
+    const maxEndQ = endQs.length ? Math.max(...endQs) : 4;
+
+    const totalYears = maxGlobalYear - minGlobalYear + 1;
+    const totalQuarters = totalYears * 4;
+    
+    const startQuarterIndex = (minStartYear - minGlobalYear) * 4 + (minStartQ - 1);
+    const endQuarterIndex = (maxEndYear - minGlobalYear) * 4 + (maxEndQ - 1);
+    
+    const left = (startQuarterIndex / totalQuarters) * 100;
+    const width = ((endQuarterIndex - startQuarterIndex + 1) / totalQuarters) * 100;
+
+    return {
+        left: `${left}%`,
+        width: `${width}%`
+    };
 });
 </script>
 

@@ -91,7 +91,7 @@ const mappedInitiatives = computed(() => {
                 mi.appendix_data?.owner ?? mi.appendixData?.owner ?? mi.owner ?? mi.project_owner ?? mi.owner_name ?? mi.projectOwner
             ),
             pic: displayValue(
-                mi.appendix_data?.organization ?? mi.appendixData?.organization ?? organization?.name ?? mi.organization_name ?? mi.pic ?? mi.business_unit
+                mi.appendix_data?.organization ?? mi.appendixData?.organization ?? mi.pic ?? mi.organization_name
             ),
             group: displayValue(organization?.groub?.name ?? mi.group ?? mi.business_unit),
             description: displayValue(mi.description),
