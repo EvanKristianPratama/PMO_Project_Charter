@@ -32,15 +32,23 @@ const pickDisplayValue = (...values) => {
 const headerTitle = computed(() => (
     pickDisplayValue(
         props.initiative?.name,
+        props.initiative?.project_charter?.name,
+        props.initiative?.projectCharter?.name,
         props.initiative?.useCase,
-        props.initiative?.usecase
+        props.initiative?.usecase,
+        props.initiative?.appendix_data?.usecase,
+        props.initiative?.appendixData?.usecase
     )
 ));
 
 const headerDescription = computed(() => (
     pickDisplayValue(
         props.initiative?.description,
-        props.initiative?.detail_useCase_description
+        props.initiative?.project_charter?.description,
+        props.initiative?.projectCharter?.description,
+        props.initiative?.detail_useCase_description,
+        props.initiative?.appendix_data?.description,
+        props.initiative?.appendixData?.description
     )
 ));
 
@@ -228,9 +236,6 @@ const getLongText = (key) => {
                             <span class="mx-2 shrink-0 text-slate-400">|</span>
                             <span>{{ headerTitle }}</span>
                         </h1>
-                        <span class="ml-2 inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600 border border-slate-200">
-                            {{ statusLabel }}
-                        </span>
                     </div>
                     <p class="mt-1 text-[13px] text-slate-600">
                         {{ headerDescription }}

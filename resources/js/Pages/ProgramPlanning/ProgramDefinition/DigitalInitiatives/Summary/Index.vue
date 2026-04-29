@@ -248,7 +248,7 @@
                                             :key="year" 
                                             class="flex-1 border-r border-slate-100 last:border-0 flex flex-col"
                                         >
-                                            <div class="h-[12px] bg-slate-50 flex items-center justify-center text-[7px] font-extrabold text-slate-400 border-b border-slate-100 leading-none uppercase tracking-tighter">
+                                            <div class="h-[18px] bg-slate-50 flex items-center justify-center text-[10px] font-bold text-slate-500 border-b border-slate-100 leading-none uppercase tracking-wider">
                                                 {{ year }}
                                             </div>
                                             <div class="flex-1"></div>
@@ -311,6 +311,10 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+                <div class="flex items-center gap-2 px-1">
+                    <div class="h-6 w-1 rounded-full bg-red-600"></div>
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Review</h2>
                 </div>
             </div>
         </div>

@@ -5,97 +5,253 @@ const props = defineProps({
     initiative: { type: Object, required: true },
 });
 
-const getLevelColorClass = (label) => {
-    if (!label) return 'hidden';
-    const l = String(label).toLowerCase();
-    if (l === 'high') return 'bg-emerald-500 text-white';
-    if (l === 'medium') return 'bg-orange-500 text-white';
-    if (l === 'low') return 'bg-rose-500 text-white';
-    return 'bg-slate-400 text-white';
+const displayValue = (value) => {
+    const trimmed = String(value ?? '').trim();
+    return trimmed === '' ? '-' : trimmed;
 };
 
-const formatUpdatedDate = (value) => {
-    if (!value) return '-';
-    const str = String(value).trim();
-    if (!str) return '-';
-    const date = new Date(str);
-    if (Number.isNaN(date.getTime())) {
-        return str;
+const normalizeNumericValue = (value) => {
+    const digits = String(value ?? '').trim().replace(/[^\d-]/g, '');
+    if (digits === '') return null;
+
+    const parsed = Number(digits);
+    return Number.isFinite(parsed) ? parsed : null;
+};
+
+const pickDisplayValue = (...values) => {
+    for (const value of values) {
+        const trimmed = String(value ?? '').trim();
+        if (trimmed !== '') {
+            return trimmed;
+        }
     }
-    return new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }).format(date);
+
+    return '-';
 };
 
-const signFirst = computed(() => {
-    return props.initiative.sign_by?.[0] ?? '-';
+const headerTitle = computed(() => (
+    pickDisplayValue(
+        props.initiative?.name,
+        props.initiative?.project_charter?.name,
+        props.initiative?.projectCharter?.name,
+        props.initiative?.useCase,
+        props.initiative?.usecase,
+        props.initiative?.appendix_data?.usecase,
+        props.initiative?.appendixData?.usecase
+    )
+));
+
+const headerDescription = computed(() => (
+    pickDisplayValue(
+        props.initiative?.description,
+        props.initiative?.project_charter?.description,
+        props.initiative?.projectCharter?.description,
+        props.initiative?.detail_useCase_description,
+        props.initiative?.appendix_data?.description,
+        props.initiative?.appendixData?.description
+    )
+));
+
+const mapSourceCreated = (source) => {
+    if (!source) return '-';
+
+    const month = displayValue(source.month);
+    const year = displayValue(source.year);
+
+    if (month !== '-' && year !== '-') {
+        return `${month} ${year}`.trim();
+    }
+
+    if (month !== '-') return month;
+    if (year !== '-') return year;
+
+    return '-';
+};
+
+const mappedInitiatives = computed(() => {
+    let source = props.initiative?.mapped_initiatives ?? props.initiative?.mappedInitiatives;
+
+    if (!source && props.initiative) {
+        source = [props.initiative];
+    }
+
+    const list = Array.isArray(source) ? source : [];
+
+    return list.map((mi) => {
+        const organization = mi.organization ?? null;
+        const sourceData = mi.source_data ?? mi.sourceData ?? null;
+
+        let sourceCreated = mapSourceCreated(sourceData);
+        if (sourceCreated === '-') {
+            sourceCreated = displayValue(mi.data_source_created ?? mi.source_data_created);
+        }
+
+        return {
+            id: mi.id,
+            code: String(mi.code ?? '').trim().replace(/#/g, ''),
+            name: displayValue(mi.name),
+            projectOwner: displayValue(
+                mi.appendix_data?.owner ?? mi.appendixData?.owner ?? mi.owner ?? mi.project_owner ?? mi.owner_name ?? mi.projectOwner
+            ),
+            pic: displayValue(
+                mi.appendix_data?.organization ?? mi.appendixData?.organization ?? mi.pic ?? mi.organization_name
+            ),
+            group: displayValue(organization?.groub?.name ?? mi.group ?? mi.business_unit),
+            description: displayValue(mi.description),
+            coe: displayValue(mi.appendix_data?.coe ?? mi.appendixData?.coe ?? mi.coe?.name ?? mi.coe_name ?? mi.coe),
+            dataSource: displayValue(
+                sourceData?.name ?? mi.data_source_name ?? mi.data_source ?? mi.source_name ?? (typeof mi.source === 'object' ? mi.source?.name : null)
+            ),
+            dataSourceCreated: sourceCreated,
+        };
+    });
 });
 
-const signOthers = computed(() => {
-    const rest = (props.initiative.sign_by ?? []).slice(1);
-    return rest.length ? rest.join(', ') : '-';
+const uniqueValues = (values) => {
+    const cleaned = values
+        .map((value) => String(value ?? '').trim())
+        .filter((value) => value !== '' && value !== '-');
+    return [...new Set(cleaned)];
+};
+
+const joinValues = (values) => (values.length ? values.join(', ') : '-');
+
+const headerMeta = computed(() => {
+    const owners = uniqueValues(mappedInitiatives.value.map((item) => item.projectOwner));
+    const pics = uniqueValues(mappedInitiatives.value.map((item) => item.pic));
+    const coes = uniqueValues(mappedInitiatives.value.map((item) => item.coe));
+    const sources = uniqueValues(
+        mappedInitiatives.value.map((item) => {
+            const name = String(item.dataSource ?? '').trim();
+            const created = String(item.dataSourceCreated ?? '').trim();
+
+            if (name && name !== '-' && created && created !== '-') {
+                return `${name} (${created})`;
+            }
+            if (name && name !== '-') return name;
+            if (created && created !== '-') return created;
+            return '';
+        })
+    );
+
+    return {
+        owners: joinValues(owners),
+        pics: joinValues(pics),
+        coes: joinValues(coes),
+        sources: joinValues(sources),
+    };
 });
+
+const getScoreLabel = (type) => {
+    const source = props.initiative;
+    if (!source) return '-';
+
+    const paths = [
+        source,
+        source.appendix_data,
+        source.appendixData,
+        source.project_charter,
+        source.projectCharter,
+        source.charter,
+    ];
+
+    for (const p of paths) {
+        if (!p) continue;
+        const label = p[`${type}_label`] ?? p[`${type}Label`];
+        if (label && String(label).trim() !== '' && label !== '-') {
+            return String(label).trim();
+        }
+    }
+
+    for (const p of paths) {
+        if (!p) continue;
+        const val = p[type];
+        const numeric = normalizeNumericValue(val);
+        if (numeric === 1) return 'High';
+        if (numeric === 2) return 'Medium';
+        if (numeric === 3) return 'Low';
+    }
+
+    return '-';
+};
+
+const headerScores = computed(() => ({
+    value: getScoreLabel('value'),
+    urgency: getScoreLabel('urgency'),
+    ease: getScoreLabel('ease'),
+    resource: getScoreLabel('resource'),
+}));
 </script>
 
 <template>
-    <div
-        class="charter-wrapper w-full border border-[#3b82f6] bg-white text-slate-800 shadow-sm print:shadow-none"
-        style="font-family: 'Segoe UI', sans-serif;"
-    >
-        <!-- Header Section -->
-        <div class="flex flex-wrap items-center justify-between border-b border-slate-200 px-5 py-2">
-            <div class="min-w-0 flex-1">
-                <h1 class="text-[18px] font-extrabold leading-tight text-slate-900">
-                    <span class="shrink-0 text-[#3b5e96]">Digital Initiative</span>
-                    <span class="mx-2 shrink-0 text-slate-400">|</span>
-                    <span>{{ initiative.usecase ?? '-' }}</span>
-                </h1>
-            </div>
+    <div class="charter-wrapper w-full bg-white text-slate-900 border border-[#3b82f6] shadow-sm print:shadow-none" style="font-family: 'Segoe UI', sans-serif;">
+        <!-- Header -->
+        <div class="border-b border-slate-200 px-5 pb-3 pt-5">
+            <div class="flex flex-wrap items-start justify-between gap-4">
+                <div class="min-w-0 flex-1">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h1 class="text-[18px] font-extrabold leading-tight text-slate-900">
+                            <span class="shrink-0 text-[#3b5e96]">Digital Initiative</span>
+                            <span class="mx-2 shrink-0 text-slate-400">|</span>
+                            <span>{{ headerTitle }}</span>
+                        </h1>
+                    </div>
+                    <p class="mt-1 text-[13px] text-slate-600">
+                        {{ headerDescription }}
+                    </p>
+                </div>
 
-            <!-- Score Panel -->
-            <div class="score-panel">
-                <div class="score-column border-r border-[#3b82f6]">
-                    <div class="bar-sub-mini text-center">Value</div>
-                    <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
-                        {{ initiative.value_label ?? '-' }}
+                <!-- Score Panel -->
+                <div class="score-panel">
+                    <div class="score-column border-r border-[#3b82f6]">
+                        <div class="bar-sub-mini text-center">Value</div>
+                        <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
+                            {{ headerScores.value }}
+                        </div>
                     </div>
-                </div>
-                <div class="score-column border-r border-[#3b82f6]">
-                    <div class="bar-sub-mini text-center">Urgency</div>
-                    <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
-                        {{ initiative.urgency_label ?? '-' }}
+                    <div class="score-column border-r border-[#3b82f6]">
+                        <div class="bar-sub-mini text-center">Urgency</div>
+                        <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
+                            {{ headerScores.urgency }}
+                        </div>
                     </div>
-                </div>
-                <div class="score-column border-r border-[#3b82f6]">
-                    <div class="bar-sub-mini text-center">Easy</div>
-                    <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
-                        {{ initiative.ease_label ?? '-' }}
+                    <div class="score-column border-r border-[#3b82f6]">
+                        <div class="bar-sub-mini text-center">Easy</div>
+                        <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
+                            {{ headerScores.ease }}
+                        </div>
                     </div>
-                </div>
-                <div class="score-column">
-                    <div class="bar-sub-mini text-center">Resource</div>
-                    <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
-                        {{ initiative.resource_label ?? '-' }}
+                    <div class="score-column">
+                        <div class="bar-sub-mini text-center">Resource</div>
+                        <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
+                            {{ headerScores.resource }}
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Metadata Bar -->
-        <div class="grid grid-cols-1 overflow-hidden border-x border-b border-[#3b82f6] lg:grid-cols-4">
-            <div class="flex border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
-                <div class="flex w-28 shrink-0 items-center justify-center bg-[#2e6ea2] px-2 py-1.5 text-center text-[12px] font-bold text-white">Project Owner</div>
-                <div class="flex flex-1 items-center bg-white px-3 py-1.5 text-[12px] text-slate-900">{{ initiative.owner ?? '-' }}</div>
+        <!-- Info Bar -->
+        <div class="info-bar border-b border-[#3b82f6] bg-[#f8f8f8] text-[12px]">
+            <div class="info-cell info-cell-compact">
+                <span class="info-label">Project Owner</span>
+                <span class="info-sep"></span>
+                <span class="info-value">{{ headerMeta.owners }}</span>
             </div>
-            <div class="flex border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
-                <div class="flex w-16 shrink-0 items-center justify-center bg-[#2e6ea2] px-2 py-1.5 text-center text-[12px] font-bold text-white">PIC</div>
-                <div class="flex flex-1 items-center bg-white px-3 py-1.5 text-[12px] text-slate-900">{{ initiative.organization ?? '-' }}</div>
+            <div class="info-cell info-cell-pic">
+                <span class="info-label">PIC</span>
+                <span class="info-sep"></span>
+                <span class="info-value">{{ headerMeta.pics }}</span>
             </div>
-            <div class="flex border-b border-[#3b82f6] lg:border-b-0 lg:border-r lg:border-r-[#3b82f6]">
-                <div class="flex w-16 shrink-0 items-center justify-center bg-[#2e6ea2] px-2 py-1.5 text-center text-[12px] font-bold text-white">CoE</div>
-                <div class="flex flex-1 items-center bg-white px-3 py-1.5 text-[12px] text-slate-900">{{ initiative.coe ?? '-' }}</div>
+            <div class="info-cell info-cell-coe">
+                <span class="info-label">CoE</span>
+                <span class="info-sep"></span>
+                <span class="info-value">{{ headerMeta.coes }}</span>
             </div>
-            <div class="flex">
-                <div class="flex w-16 shrink-0 items-center justify-center bg-[#2e6ea2] px-2 py-1.5 text-center text-[12px] font-bold text-white">Updated</div>
-                <div class="flex flex-1 items-center bg-white px-3 py-1.5 text-[12px] text-slate-900">{{ formatUpdatedDate(initiative.update_doc) }}</div>
+            <div class="info-cell info-cell-last">
+                <span class="info-label">Data Source</span>
+                <span class="info-sep"></span>
+                <span class="info-value">{{ headerMeta.sources }}</span>
             </div>
         </div>
     </div>
@@ -107,6 +263,7 @@ const signOthers = computed(() => {
     border: 1px solid #3b82f6;
     min-width: 320px;
     background: #fff;
+    align-self: flex-start;
 }
 
 .score-column {
@@ -121,12 +278,57 @@ const signOthers = computed(() => {
     padding: 3px 8px;
     font-size: 11px;
     line-height: 1.2;
+    text-align: center;
 }
 
 .panel-body-mini {
     padding: 6px;
     background: #fff;
     min-height: 32px;
+}
+
+.info-bar {
+    display: flex;
+    background: #f8f8f8;
+}
+
+.info-cell {
+    display: flex;
+    align-items: stretch;
+    border-right: 1px solid #ccc;
+    flex: 1;
+}
+
+.info-cell-compact { flex: 0.35; }
+.info-cell-pic { flex: 0.25; }
+.info-cell-coe { flex: 0.3; }
+.info-cell-last { border-right: none; flex: 0.5; }
+
+.info-label {
+    background: #2563a8;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.info-sep {
+    width: 0;
+    border-right: 1px solid #aac4e0;
+}
+
+.info-value {
+    padding: 6px 10px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    color: #0f172a;
 }
 
 @media print {
@@ -143,6 +345,12 @@ const signOthers = computed(() => {
 
     .score-panel {
         border-color: #3b82f6 !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .info-bar {
+        flex-direction: column;
     }
 }
 </style>
