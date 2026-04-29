@@ -87,12 +87,15 @@ const mappedInitiatives = computed(() => {
             id: mi.id,
             code: String(mi.code ?? '').trim().replace(/#/g, ''),
             name: displayValue(mi.name),
-            coe: displayValue(mi.coe?.name ?? mi.coe_name ?? mi.coe),
             projectOwner: displayValue(
-                organization?.name ?? mi.project_owner ?? mi.owner_name ?? mi.projectOwner ?? mi.business_unit
+                mi.appendix_data?.owner ?? mi.appendixData?.owner ?? mi.owner ?? mi.project_owner ?? mi.owner_name ?? mi.projectOwner
+            ),
+            pic: displayValue(
+                mi.appendix_data?.organization ?? mi.appendixData?.organization ?? organization?.name ?? mi.organization_name ?? mi.pic ?? mi.business_unit
             ),
             group: displayValue(organization?.groub?.name ?? mi.group ?? mi.business_unit),
             description: displayValue(mi.description),
+            coe: displayValue(mi.appendix_data?.coe ?? mi.appendixData?.coe ?? mi.coe?.name ?? mi.coe_name ?? mi.coe),
             dataSource: displayValue(
                 sourceData?.name ?? mi.data_source_name ?? mi.data_source ?? mi.source_name ?? (typeof mi.source === 'object' ? mi.source?.name : null)
             ),
@@ -112,6 +115,7 @@ const joinValues = (values) => (values.length ? values.join(', ') : '-');
 
 const headerMeta = computed(() => {
     const owners = uniqueValues(mappedInitiatives.value.map((item) => item.projectOwner));
+    const pics = uniqueValues(mappedInitiatives.value.map((item) => item.pic));
     const coes = uniqueValues(mappedInitiatives.value.map((item) => item.coe));
     const sources = uniqueValues(
         mappedInitiatives.value.map((item) => {
@@ -129,6 +133,7 @@ const headerMeta = computed(() => {
 
     return {
         owners: joinValues(owners),
+        pics: joinValues(pics),
         coes: joinValues(coes),
         sources: joinValues(sources),
     };
@@ -236,25 +241,25 @@ const getLongText = (key) => {
                 <div class="score-panel">
                     <div class="score-column border-r border-[#3b82f6]">
                         <div class="bar-sub-mini text-center">Value</div>
-                        <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900 font-bold">
+                        <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
                             {{ headerScores.value }}
                         </div>
                     </div>
                     <div class="score-column border-r border-[#3b82f6]">
                         <div class="bar-sub-mini text-center">Urgency</div>
-                        <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900 font-bold">
+                        <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
                             {{ headerScores.urgency }}
                         </div>
                     </div>
                     <div class="score-column border-r border-[#3b82f6]">
                         <div class="bar-sub-mini text-center">Easy</div>
-                        <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900 font-bold">
+                        <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
                             {{ headerScores.ease }}
                         </div>
                     </div>
                     <div class="score-column">
                         <div class="bar-sub-mini text-center">Resource</div>
-                        <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900 font-bold">
+                        <div class="panel-body-mini flex items-center justify-center text-[13px] text-slate-900">
                             {{ headerScores.resource }}
                         </div>
                     </div>
@@ -263,11 +268,16 @@ const getLongText = (key) => {
         </div>
 
         <!-- Info Bar -->
-        <div class="info-bar">
+        <div class="info-bar text-[12px]">
             <div class="info-cell info-cell-compact">
-                <span class="info-label info-label">Project Owner</span>
+                <span class="info-label">Project Owner</span>
                 <span class="info-sep"></span>
                 <span class="info-value">{{ headerMeta.owners }}</span>
+            </div>
+            <div class="info-cell info-cell-pic">
+                <span class="info-label">PIC</span>
+                <span class="info-sep"></span>
+                <span class="info-value">{{ headerMeta.pics }}</span>
             </div>
             <div class="info-cell info-cell-coe">
                 <span class="info-label">CoE</span>
@@ -349,16 +359,20 @@ const getLongText = (key) => {
 }
 
 .info-cell-compact {
-    flex: 0.45;
+    flex: 0.35;
+}
+
+.info-cell-pic {
+    flex: 0.25;
 }
 
 .info-cell-coe {
-    flex: 0.34;
+    flex: 0.3;
 }
 
 .info-cell-last {
     border-right: none;
-    flex: 0.8;
+    flex: 0.5;
 }
 
 .info-label {
@@ -406,7 +420,6 @@ const getLongText = (key) => {
     color: #fff;
     padding: 3px 8px;
     font-size: 11px;
-    font-weight: 700;
     line-height: 1.2;
 }
 

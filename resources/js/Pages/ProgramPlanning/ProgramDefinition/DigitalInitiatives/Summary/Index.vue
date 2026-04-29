@@ -162,45 +162,48 @@
                 <!-- Digital Initiative Header -->
                 <DigitalInitiativeHeader v-if="unifiedInitiative" :initiative="unifiedInitiative"
                     class="overflow-hidden" />
+
                 <div class="flex items-center gap-2 px-1">
                     <div class="h-6 w-1 rounded-full bg-blue-600"></div>
                     <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Status Implementation</h2>
                 </div>
 
-                <table class="w-full text-left text-xs text-slate-700 dark:text-slate-300">
-                    <thead
-                        class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:bg-white/5 dark:text-slate-400">
-                        <tr>
-                            <th class="px-4 py-3">Start</th>
-                            <th class="px-4 py-3">End</th>
-                            <th class="px-4 py-3">Year</th>
-                            <th class="px-4 py-3">Current PIC</th>
-                            <th class="px-4 py-3">Review Status</th>
-                            <th class="px-4 py-3">Status Updated</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-200 dark:divide-white/10">
-                        <tr v-for="impl in statusImplementations" :key="impl.id"
-                            class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition-colors">
-                            <td class="px-4 py-3">{{ impl.start || '-' }}</td>
-                            <td class="px-4 py-3">{{ impl.end || '-' }}</td>
-                            <td class="px-4 py-3 font-medium">{{ impl.year || '-' }}</td>
-                            <td class="px-4 py-3">{{ impl.pic || '-' }}</td>
-                            <td class="px-4 py-3">
-                                <span
-                                    class="inline-flex rounded-full bg-blue-100 px-2.5 py-0.5 text-[10px] font-medium text-blue-800 dark:bg-blue-500/20 dark:text-blue-300">
-                                    {{ impl.review_status || '-' }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3">{{ impl.status_updated || '-' }}</td>
-                        </tr>
-                        <tr v-if="!statusImplementations || !statusImplementations.length">
-                            <td colspan="6" class="px-4 py-12 text-center text-slate-500 italic">
-                                Status Implementation Not Available
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#1A1A1A]">
+                    <table class="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+                        <thead
+                            class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:bg-white/5 dark:text-slate-400">
+                            <tr>
+                                <th class="px-4 py-3">Start</th>
+                                <th class="px-4 py-3">End</th>
+                                <th class="px-4 py-3">Year</th>
+                                <th class="px-4 py-3">Current PIC</th>
+                                <th class="px-4 py-3">Review Status</th>
+                                <th class="px-4 py-3">Status Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 dark:divide-white/10">
+                            <tr v-for="impl in statusImplementations" :key="impl.id"
+                                class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition-colors">
+                                <td class="px-4 py-3">{{ impl.start || '-' }}</td>
+                                <td class="px-4 py-3">{{ impl.end || '-' }}</td>
+                                <td class="px-4 py-3 font-medium">{{ impl.year || '-' }}</td>
+                                <td class="px-4 py-3">{{ impl.pic || '-' }}</td>
+                                <td class="px-4 py-3">
+                                    <span
+                                        class="inline-flex rounded-full bg-blue-100 px-2.5 py-0.5 text-[10px] font-medium text-blue-800 dark:bg-blue-500/20 dark:text-blue-300">
+                                        {{ impl.review_status || '-' }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3">{{ impl.status_updated || '-' }}</td>
+                            </tr>
+                            <tr v-if="!statusImplementations || !statusImplementations.length">
+                                <td colspan="6" class="px-4 py-12 text-center text-slate-500 italic">
+                                    Status Implementation Not Available
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
                 <div class="flex items-center gap-2 px-1">
                     <div class="h-6 w-1 rounded-full bg-purple-600"></div>
@@ -218,10 +221,68 @@
                     <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Evaluation</h2>
                 </div>
 
-
                 <!-- Digital Initiative Evaluation Details -->
                 <DigitalInitiativeEvaluation v-if="computedAppendixData" :initiative="computedAppendixData"
-                    class="!border-none !shadow-none" />
+                    class="border shadow" />
+
+                <div class="flex items-center gap-2 px-1">
+                    <div class="h-6 w-1 rounded-full bg-blue-600"></div>
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Status Implementation</h2>
+                </div>
+
+                <div v-if="roadmapDuration || (computedAppendixData && computedAppendixData.urgency_expected !== '-')" class="flex justify-start">
+                    <div class="score-panel w-full max-w-2xl overflow-hidden rounded-lg border border-[#3b82f6] flex flex-col">
+                        <div v-if="roadmapDuration" class="flex border-b border-[#3b82f6] last:border-0">
+                            <div class="bar-sub-mini flex items-center shrink-0 min-w-[130px] justify-center border-r border-[#3b82f6]">Project Duration</div>
+                            <div class="panel-body-mini flex items-center flex-1 justify-start px-4 text-left">
+                                {{ roadmapDuration }}
+                            </div>
+                        </div>
+                        <div v-if="computedAppendixData && computedAppendixData.urgency_expected !== '-'" class="flex last:border-0">
+                            <div class="bar-sub-mini flex items-center shrink-0 min-w-[130px] justify-center border-r border-[#3b82f6]">Expected Go Live</div>
+                            <div class="panel-body-mini flex items-center flex-1 justify-start px-4 text-left">
+                                {{ computedAppendixData.urgency_expected }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#1A1A1A]">
+                    <table class="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+                        <thead
+                            class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:bg-white/5 dark:text-slate-400">
+                            <tr>
+                                <th class="px-4 py-3">Start</th>
+                                <th class="px-4 py-3">End</th>
+                                <th class="px-4 py-3">Year</th>
+                                <th class="px-4 py-3">Current PIC</th>
+                                <th class="px-4 py-3">Review Status</th>
+                                <th class="px-4 py-3">Status Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 dark:divide-white/10">
+                            <tr v-for="impl in statusImplementations" :key="impl.id"
+                                class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition-colors">
+                                <td class="px-4 py-3">{{ impl.start || '-' }}</td>
+                                <td class="px-4 py-3">{{ impl.end || '-' }}</td>
+                                <td class="px-4 py-3 font-medium">{{ impl.year || '-' }}</td>
+                                <td class="px-4 py-3">{{ impl.pic || '-' }}</td>
+                                <td class="px-4 py-3">
+                                    <span
+                                        class="inline-flex rounded-full bg-blue-100 px-2.5 py-0.5 text-[10px] font-medium text-blue-800 dark:bg-blue-500/20 dark:text-blue-300">
+                                        {{ impl.review_status || '-' }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3">{{ impl.status_updated || '-' }}</td>
+                            </tr>
+                            <tr v-if="!statusImplementations || !statusImplementations.length">
+                                <td colspan="6" class="px-4 py-12 text-center text-slate-500 italic">
+                                    Status Implementation Not Available
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </UserLayout>
@@ -367,4 +428,70 @@ const getStatusClass = (status) => {
     if (s.includes('postpone')) return 'bg-rose-100 text-rose-700 ring-1 ring-rose-300';
     return 'bg-slate-100 text-slate-500 ring-1 ring-slate-200';
 };
+
+const roadmapDuration = computed(() => {
+    if (!props.roadmapItems || props.roadmapItems.length === 0) return null;
+
+    const startYears = props.roadmapItems.map(item => Number(item.startYear)).filter(y => y > 0);
+    const endYears = props.roadmapItems.map(item => Number(item.endYear)).filter(y => y > 0);
+
+    if (startYears.length === 0 || endYears.length === 0) return null;
+
+    const minStartYear = Math.min(...startYears);
+    const maxEndYear = Math.max(...endYears);
+
+    // Get Q for min start year
+    const startQs = props.roadmapItems
+        .filter(item => Number(item.startYear) === minStartYear)
+        .map(item => {
+            const m = String(item.startQ).match(/Q?([1-4])/);
+            return m ? Number(m[1]) : 1;
+        });
+    const minStartQ = Math.min(...startQs);
+
+    // Get Q for max end year
+    const endQs = props.roadmapItems
+        .filter(item => Number(item.endYear) === maxEndYear)
+        .map(item => {
+            const m = String(item.endQ).match(/Q?([1-4])/);
+            return m ? Number(m[1]) : 4;
+        });
+    const maxEndQ = Math.max(...endQs);
+
+    const years = maxEndYear - minStartYear + 1;
+    const yearLabel = years > 1 ? `${years} Years` : `${years} Year`;
+
+    if (minStartYear === maxEndYear) {
+        return `${yearLabel} - (Q${minStartQ} - Q${maxEndQ} ${minStartYear})`;
+    } else {
+        return `${yearLabel} - (Q${minStartQ} ${minStartYear} - Q${maxEndQ} ${maxEndYear})`;
+    }
+});
 </script>
+
+<style scoped>
+.score-panel {
+    display: flex;
+    background: #fff;
+}
+
+.bar-sub-mini {
+    background: #2e6ea2;
+    color: #fff;
+    padding: 3px 12px;
+    font-size: 11px;
+    line-height: 1.2;
+    text-align: center;
+    min-height: 32px;
+}
+
+.panel-body-mini {
+    padding: 3px 12px;
+    background: #fff;
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    color: #0f172a;
+}
+</style>

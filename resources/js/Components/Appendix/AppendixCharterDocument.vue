@@ -689,7 +689,6 @@ const getLevelLabel = (type) => {
     color: #fff;
     padding: 3px 8px;
     font-size: 11px;
-    font-weight: 700;
     line-height: 1.2;
 }
 
