@@ -4,6 +4,7 @@ namespace App\Services\ProgramPlanning\StrategicHouse\RoadMap;
 
 use App\Models\Milestone;
 use App\Models\MstInitiative;
+use Illuminate\Support\Facades\Cache;
 
 class ItInitiativeRoadmapService
 {
@@ -25,6 +26,11 @@ class ItInitiativeRoadmapService
     ];
 
     public function getPageProps(): array
+    {
+        return Cache::remember('pp_it_roadmap_v1', 3600, fn () => $this->buildPageProps());
+    }
+
+    private function buildPageProps(): array
     {
         $initiatives = MstInitiative::query()
             ->where('tipe_initiative', 2)

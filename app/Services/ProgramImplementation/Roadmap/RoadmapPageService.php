@@ -7,14 +7,16 @@ use App\Models\MstInitiative;
 use App\Models\TrsProjectCharter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class RoadmapPageService
 {
     public function getOverviewPageProps(?int $projectCharterId, ?int $legacyProjectId): array
     {
-        $roadmapSources = $this->roadmapSourceQuery()
+        $roadmapSources = Cache::remember('pi_roadmap_sources_v1', 3600, fn () => $this->roadmapSourceQuery()
             ->orderByDesc('trs_project_charters.id')
-            ->get();
+            ->get()
+        );
 
         $projects = $this->groupRoadmapSources($roadmapSources);
         $requestedProjectCharterId = $this->resolveRequestedProjectCharterId($projectCharterId, $legacyProjectId);
@@ -36,9 +38,10 @@ class RoadmapPageService
 
     public function getEditorPageProps(?int $projectCharterId, ?int $legacyProjectId): array
     {
-        $roadmapSources = $this->roadmapSourceQuery()
+        $roadmapSources = Cache::remember('pi_roadmap_sources_v1', 3600, fn () => $this->roadmapSourceQuery()
             ->orderByDesc('trs_project_charters.id')
-            ->get();
+            ->get()
+        );
 
         $projects = $this->groupRoadmapSources($roadmapSources);
         $requestedProjectCharterId = $this->resolveRequestedProjectCharterId($projectCharterId, $legacyProjectId);

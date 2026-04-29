@@ -7,6 +7,7 @@ use App\Models\ProjectStatusHistory;
 use App\Models\TrsProject;
 use App\Services\Shared\InitiativeStatusService;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class ProgramImplementationPageService
 {
@@ -16,43 +17,47 @@ class ProgramImplementationPageService
 
     public function getDashboardPageProps(): array
     {
-        $statusOptions = $this->initiativeStatusService->statusOptions();
-        $baselineStatusId = $this->initiativeStatusService->baselineStatusId($statusOptions);
-        $flowStatusOptions = $this->flowStatusOptions();
+        return Cache::remember('pi_dashboard_props_v1', 3600, function () {
+            $statusOptions = $this->initiativeStatusService->statusOptions();
+            $baselineStatusId = $this->initiativeStatusService->baselineStatusId($statusOptions);
+            $flowStatusOptions = $this->flowStatusOptions();
 
-        $digitalProjects = $this->projectsByType(1);
-        $itProjects = $this->projectsByType(2);
+            $digitalProjects = $this->projectsByType(1);
+            $itProjects = $this->projectsByType(2);
 
-        return [
-            'overview' => [
-                'total_projects' => TrsProject::query()->count(),
-                'total_digital_initiatives' => $digitalProjects->count(),
-                'total_it_initiatives' => $itProjects->count(),
-                'status_options' => $flowStatusOptions,
-                'it_status_counts' => $this->projectStatusCounts($itProjects),
-                'digital_status_counts' => $this->projectStatusCounts($digitalProjects),
-                'total_digital_approved' => $this->approvedInitiativeCountByType(1),
-                'total_it_approved' => $this->approvedInitiativeCountByType(2),
-            ],
-            'completedStatusId' => $baselineStatusId,
-            'openDigitalInitiatives' => $digitalProjects,
-            'openItInitiatives' => $itProjects,
-        ];
+            return [
+                'overview' => [
+                    'total_projects' => TrsProject::query()->count(),
+                    'total_digital_initiatives' => $digitalProjects->count(),
+                    'total_it_initiatives' => $itProjects->count(),
+                    'status_options' => $flowStatusOptions,
+                    'it_status_counts' => $this->projectStatusCounts($itProjects),
+                    'digital_status_counts' => $this->projectStatusCounts($digitalProjects),
+                    'total_digital_approved' => $this->approvedInitiativeCountByType(1),
+                    'total_it_approved' => $this->approvedInitiativeCountByType(2),
+                ],
+                'completedStatusId' => $baselineStatusId,
+                'openDigitalInitiatives' => $digitalProjects,
+                'openItInitiatives' => $itProjects,
+            ];
+        });
     }
 
     public function getOverviewPageProps(): array
     {
-        $statusOptions = $this->initiativeStatusService->statusOptions();
-        $digitalProjects = $this->projectsByType(1);
-        $itProjects = $this->projectsByType(2);
+        return Cache::remember('pi_overview_props_v1', 3600, function () {
+            $statusOptions = $this->initiativeStatusService->statusOptions();
+            $digitalProjects = $this->projectsByType(1);
+            $itProjects = $this->projectsByType(2);
 
-        return [
-            'projectCharterOverview' => [
-                'status_options' => $statusOptions,
-                'digital_status_counts' => $this->countsByStatusOptions($digitalProjects, $statusOptions),
-                'it_status_counts' => $this->countsByStatusOptions($itProjects, $statusOptions),
-            ],
-        ];
+            return [
+                'projectCharterOverview' => [
+                    'status_options' => $statusOptions,
+                    'digital_status_counts' => $this->countsByStatusOptions($digitalProjects, $statusOptions),
+                    'it_status_counts' => $this->countsByStatusOptions($itProjects, $statusOptions),
+                ],
+            ];
+        });
     }
 
     private function flowStatusOptions(): array

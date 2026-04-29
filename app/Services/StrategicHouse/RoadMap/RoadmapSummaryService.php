@@ -3,6 +3,7 @@
 namespace App\Services\StrategicHouse\RoadMap;
 
 use App\Models\MstInitiative;
+use Illuminate\Support\Facades\Cache;
 
 class RoadmapSummaryService
 {
@@ -23,6 +24,11 @@ class RoadmapSummaryService
     ) {}
 
     public function getPageProps(): array
+    {
+        return Cache::remember('sh_roadmap_summary_v1', 3600, fn () => $this->buildPageProps());
+    }
+
+    private function buildPageProps(): array
     {
         $digitalGroups = $this->buildDigitalSummaryGroups();
         $itGroups = $this->buildItSummaryGroups();
