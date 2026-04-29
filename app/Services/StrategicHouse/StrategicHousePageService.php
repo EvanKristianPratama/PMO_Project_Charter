@@ -22,7 +22,7 @@ class StrategicHousePageService
     private const DEFAULT_INITIATIVE_TYPE = 1;
 
     private const TECHNOLOGY_COE_CONFIG = [
-        ['name' => 'IoT', 'label' => 'IoT', 'tone' => 'sky'],
+        ['name' => 'IoTs', 'label' => 'IoT', 'tone' => 'sky'],
         ['name' => 'Cloud & Advanced Computing', 'label' => 'Advance Cloud', 'tone' => 'indigo'],
         ['name' => 'RPA', 'label' => 'RPA', 'tone' => 'cyan'],
         ['name' => 'Robotics', 'label' => 'Robotics', 'tone' => 'slate'],
@@ -309,7 +309,7 @@ class StrategicHousePageService
             'pilar' => $filters['pilar'] ?? null,
             'view' => $filters['view'] ?? 'mapping',
             'roadmap' => in_array($filters['roadmap'] ?? 'it', ['it', 'digital', 'all'], true)
-                ? $filters['roadmap']
+                ? ($filters['roadmap'] ?? 'it')
                 : 'it',
         ];
     }
