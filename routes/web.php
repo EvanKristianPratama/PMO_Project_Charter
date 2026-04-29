@@ -52,7 +52,7 @@ use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Up
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\IndexController as ProgramDefinitionController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\ITInitiatives\IndexController as ProgramDefinitionITInitiativesController;
 use App\Http\Controllers\ProgramPlanning\ProgramPlanningController;
-use App\Http\Controllers\ProfileController;
+// ProfileController removed: database connection switching feature disabled
 use App\Http\Controllers\StrategicHouse\IndexController as StrategicHouseController;
 use App\Http\Controllers\StrategicHouse\InitiativeRelation\InitiativeRelationController as StrategicHouseInitiativeRelationController;
 use App\Http\Controllers\StrategicHouse\InitiativeSupport\IndexController as StrategicHouseInitiativeSupportIndexController;
@@ -86,7 +86,6 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [SsoController::class, 'logout'])->name('logout');
-    Route::post('/profile/connection', [ProfileController::class, 'updateConnection'])->name('profile.updateConnection');
 
 });
 

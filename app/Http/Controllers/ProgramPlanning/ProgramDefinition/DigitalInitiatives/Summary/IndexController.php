@@ -135,6 +135,8 @@ class IndexController extends Controller
                     'value_matrics' => $appDetail?->value_matrics,
                     'urgency_rationale' => $appDetail?->urgency_rationale,
                     'urgency_expected' => $appDetail?->urgency_expected,
+                    'expected_q' => $appDetail?->expected_q,
+                    'year_q' => $appDetail?->year_q,
                     'ease' => $appDetail?->ease,
                     'ease_rationale' => $appDetail?->ease_rationale,
                     'ease_detail' => $appDetail?->ease_detail,
