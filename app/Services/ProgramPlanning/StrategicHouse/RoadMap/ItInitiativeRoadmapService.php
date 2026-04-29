@@ -27,7 +27,7 @@ class ItInitiativeRoadmapService
 
     public function getPageProps(): array
     {
-        return Cache::remember('pp_it_roadmap_v2', 3600, fn () => $this->buildPageProps());
+        return Cache::remember('pp_it_roadmap_v1', 3600, fn () => $this->buildPageProps());
     }
 
     private function buildPageProps(): array
@@ -36,13 +36,6 @@ class ItInitiativeRoadmapService
             ->where('tipe_initiative', 2)
             ->with([
                 'coe:id,name',
-                'statusImplementations' => fn ($query) => $query
-                    ->select([
-                        'id', 'initiative_id', 'start', 'end', 'year', 'review_status', 'status_updated', 'created_at', 'updated_at'
-                    ])
-                    ->orderByDesc('year')
-                    ->orderByDesc('updated_at')
-                    ->orderByDesc('id'),
                 'latestStatusImplementation' => fn ($query) => $query
                     ->select([
                         'trs_status_implementation.id',
@@ -50,6 +43,16 @@ class ItInitiativeRoadmapService
                         'trs_status_implementation.review_status',
                     ]),
                 'mappedProjects' => fn ($q) => $q->with([
+                    'reviewPcStatusImplementations' => fn ($rq) => $rq
+                        ->select(['id', 'project_id', 'start', 'end', 'year', 'review_status', 'created_at', 'updated_at'])
+                        ->orderByDesc('year')
+                        ->orderByDesc('updated_at')
+                        ->orderByDesc('id'),
+                    'pcStatusImplementations' => fn ($pq) => $pq
+                        ->select(['id', 'project_id', 'month', 'year', 'status', 'created_at', 'updated_at'])
+                        ->orderByDesc('year')
+                        ->orderByDesc('updated_at')
+                        ->orderByDesc('id'),
                     'charters' => fn ($cq) => $cq
                         ->select(['id', 'project_id', 'version_label', 'status', 'objectives', 'duration'])
                         ->with(['statusRef:id,name', 'milestones' => fn ($mq) => $mq
@@ -114,13 +117,15 @@ class ItInitiativeRoadmapService
 
     private function collectInitiativeReviewStatuses(mixed $initiative): array
     {
-        $reviewLogs = $initiative->statusImplementations ?? collect();
+        $reviewLogs = ($initiative->mappedProjects ?? collect())
+            ->flatMap(fn ($project) => $project->reviewPcStatusImplementations ?? collect())
+            ->filter();
 
         return $reviewLogs
             ->map(function ($log): ?array {
                 $reviewStatus = trim((string) ($log?->review_status ?? ''));
                 $periodKey = $this->buildPeriodKey($log);
-                $periodLabel = $this->buildImplementationPeriodLabel($log);
+                $periodLabel = trim((string) ($log?->periode_label ?? ''));
 
                 if ($reviewStatus === '' || $periodKey === null || $periodLabel === '') {
                     return null;
@@ -128,7 +133,7 @@ class ItInitiativeRoadmapService
 
                 return [
                     'id' => (int) ($log?->id ?? 0),
-                    'initiative_id' => (int) ($log?->initiative_id ?? 0),
+                    'project_id' => (int) ($log?->project_id ?? 0),
                     'review_status' => $reviewStatus,
                     'period_key' => $periodKey,
                     'periode_label' => $periodLabel,
@@ -147,14 +152,14 @@ class ItInitiativeRoadmapService
 
     private function collectInitiativeImplementationStatuses(mixed $initiative): array
     {
-        $implementationLogs = $initiative->statusImplementations ?? collect();
+        $implementationLogs = ($initiative->mappedProjects ?? collect())
+            ->flatMap(fn ($project) => $project->pcStatusImplementations ?? collect())
+            ->filter();
 
         return $implementationLogs
             ->map(function ($log): ?array {
-                $status = trim((string) ($log?->review_status ?? ''));
-                $startMonth = trim((string) ($log?->start ?? ''));
-                $endMonth = trim((string) ($log?->end ?? ''));
-                $month = $endMonth !== '' ? $endMonth : $startMonth;
+                $status = trim((string) ($log?->status ?? ''));
+                $month = trim((string) ($log?->month ?? ''));
                 $year = trim((string) ($log?->year ?? ''));
 
                 if ($status === '' || $month === '' || $year === '') {
@@ -163,11 +168,11 @@ class ItInitiativeRoadmapService
 
                 return [
                     'id' => (int) ($log?->id ?? 0),
-                    'initiative_id' => (int) ($log?->initiative_id ?? 0),
+                    'project_id' => (int) ($log?->project_id ?? 0),
                     'status' => $status,
                     'month' => $month,
                     'year' => $year,
-                    'periode_label' => $this->buildImplementationPeriodLabel($log),
+                    'periode_label' => trim($month . ' ' . $year),
                     'created_at' => $log?->created_at?->toISOString(),
                     'updated_at' => $log?->updated_at?->toISOString(),
                 ];

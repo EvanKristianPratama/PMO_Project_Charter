@@ -11,16 +11,50 @@ class InitiativeRelationService
     public function getIndexProps(): array
     {
         return [
-            'mstInitiatives' => Cache::remember('sh_relation_initiatives_v2', 3600, fn () => MstInitiative::query()
-                ->select(['id', 'code', 'name', 'coe_id', 'tipe_initiative', 'business_unit'])
+            'mstInitiatives' => Cache::remember('sh_relation_initiatives_v3', 3600, fn () => MstInitiative::query()
+                ->select(['id', 'code', 'name', 'coe_id', 'tipe_initiative', 'business_unit', 'status'])
                 ->with([
                     'initiativeRelationsRow:id,initiative_code_row,initiative_code_column,type_relation,model_relasi',
                     'initiativeRelationsColumn:id,initiative_code_row,initiative_code_column,type_relation,model_relasi',
                     'coe:id,name',
-                    'latestStatusImplementation:id,initiative_id,review_status',
                     'relationPosition:id,initiative_id,x,y,is_locked',
+                    'mappedProjects:id',
+                    'mappedProjects.pcStatusImplementations' => fn ($query) => $query
+                        ->select(['id', 'project_id', 'month', 'year', 'status']),
                 ])
-                ->get()),
+                ->get()
+                ->map(function (MstInitiative $initiative): array {
+                    $latestStatus = $initiative->mappedProjects
+                        ->flatMap(fn ($project) => $project->pcStatusImplementations)
+                        ->sort(function ($left, $right): int {
+                            $yearComparison = (int) ($right->year ?? 0) <=> (int) ($left->year ?? 0);
+                            if ($yearComparison !== 0) {
+                                return $yearComparison;
+                            }
+                            $monthComparison = $this->monthToNumber($right->month ?? null) <=> $this->monthToNumber($left->month ?? null);
+                            if ($monthComparison !== 0) {
+                                return $monthComparison;
+                            }
+                            return (int) ($right->id ?? 0) <=> (int) ($left->id ?? 0);
+                        })
+                        ->first();
+
+                    return [
+                        'id' => $initiative->id,
+                        'code' => $initiative->code,
+                        'name' => $initiative->name,
+                        'coe_id' => $initiative->coe_id,
+                        'tipe_initiative' => $initiative->tipe_initiative,
+                        'business_unit' => $initiative->business_unit,
+                        'initiative_relations_row' => $initiative->initiativeRelationsRow,
+                        'initiative_relations_column' => $initiative->initiativeRelationsColumn,
+                        'coe' => $initiative->coe,
+                        'relation_position' => $initiative->relationPosition,
+                        'status' => $latestStatus?->status ?? $initiative->status,
+                    ];
+                })
+                ->all()
+            ),
             'initiativeRelations' => $this->initiativeRelations(),
             'typeRelationOptions' => $this->typeRelationOptions(),
             'modelRelationOptions' => $this->modelRelationOptions(),
@@ -156,21 +190,45 @@ class InitiativeRelationService
                 'status',
                 'business_unit',
             ])
-            ->with(['organization:id,name', 'coe:id,name', 'relationPosition', 'latestStatusImplementation:id,initiative_id,review_status'])
+            ->with([
+                'organization:id,name', 
+                'coe:id,name', 
+                'relationPosition', 
+                'mappedProjects:id',
+                'mappedProjects.pcStatusImplementations' => fn ($query) => $query
+                    ->select(['id', 'project_id', 'month', 'year', 'status']),
+            ])
             ->orderBy('id')
             ->get()
-            ->map(fn (MstInitiative $initiative): array => [
-                'id' => (int) $initiative->id,
-                'code' => $initiative->code,
-                'name' => $initiative->name,
-                'tipe_initiative' => $initiative->tipe_initiative,
-                'description' => $initiative->description,
-                'status' => $initiative->latestStatusImplementation?->review_status ?? $initiative->status,
-                'business_unit' => $initiative->business_unit,
-                'business_unit_name' => $initiative->organization?->name,
-                'coe_name' => $initiative->coe?->name,
-                'relation_position' => $initiative->relationPosition,
-            ])
+            ->map(function (MstInitiative $initiative): array {
+                $latestStatus = $initiative->mappedProjects
+                    ->flatMap(fn ($project) => $project->pcStatusImplementations)
+                    ->sort(function ($left, $right): int {
+                        $yearComparison = (int) ($right->year ?? 0) <=> (int) ($left->year ?? 0);
+                        if ($yearComparison !== 0) {
+                            return $yearComparison;
+                        }
+                        $monthComparison = $this->monthToNumber($right->month ?? null) <=> $this->monthToNumber($left->month ?? null);
+                        if ($monthComparison !== 0) {
+                            return $monthComparison;
+                        }
+                        return (int) ($right->id ?? 0) <=> (int) ($left->id ?? 0);
+                    })
+                    ->first();
+
+                return [
+                    'id' => (int) $initiative->id,
+                    'code' => $initiative->code,
+                    'name' => $initiative->name,
+                    'tipe_initiative' => $initiative->tipe_initiative,
+                    'description' => $initiative->description,
+                    'status' => $latestStatus?->status ?? $initiative->status,
+                    'business_unit' => $initiative->business_unit,
+                    'business_unit_name' => $initiative->organization?->name,
+                    'coe_name' => $initiative->coe?->name,
+                    'relation_position' => $initiative->relationPosition,
+                ];
+            })
             ->values()
             ->all();
     }
@@ -208,5 +266,24 @@ class InitiativeRelationService
             ->pluck('model_relasi')
             ->values()
             ->all());
+    }
+
+    private function monthToNumber(?string $month): int
+    {
+        return match (trim((string) $month)) {
+            'Januari' => 1,
+            'Februari' => 2,
+            'Maret' => 3,
+            'April' => 4,
+            'Mei' => 5,
+            'Juni' => 6,
+            'Juli' => 7,
+            'Agustus' => 8,
+            'September' => 9,
+            'Oktober' => 10,
+            'November' => 11,
+            'Desember' => 12,
+            default => 0,
+        };
     }
 }
