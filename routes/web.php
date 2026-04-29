@@ -215,6 +215,12 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/program-implementation/initiative-relation/{initiativeRelation}/edit', static function (string $initiativeRelation) {
         return redirect("/strategic-house/initiative-relation/{$initiativeRelation}/edit");
     });
+
+    Route::get('/test-status', function() {
+        return \App\Models\TrsStatusImplementation::whereHas('initiative', function($q) {
+            $q->where('tipe_initiative', 2);
+        })->get();
+    });
     Route::get('/program-implementation', ProgramImplementationController::class)->name('program-implementation.index');
 
     // IT Building Blocks (moved to Program Planning)

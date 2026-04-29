@@ -31,26 +31,14 @@ class ItBuildingBlockService
                 ->with([
                     'coe:id,name',
                     'organization:id,name,groub_id',
+                    'latestStatusImplementation' => fn ($query) => $query->select([
+                        'trs_status_implementation.id',
+                        'trs_status_implementation.initiative_id',
+                        'trs_status_implementation.review_status',
+                    ]),
+                    'statusImplementations:id,initiative_id,start,end,year,review_status',
                     'sourceData:id,name',
                     'mappedProjects:id',
-                    'mappedProjects.pcStatusImplementations' => fn ($query) => $query
-                        ->select(['id', 'project_id', 'month', 'year', 'status'])
-                        ->orderBy('year', 'desc')
-                        ->orderByRaw("CASE
-                        WHEN month = 'Desember' THEN 12
-                        WHEN month = 'November' THEN 11
-                        WHEN month = 'Oktober' THEN 10
-                        WHEN month = 'September' THEN 9
-                        WHEN month = 'Agustus' THEN 8
-                        WHEN month = 'Juli' THEN 7
-                        WHEN month = 'Juni' THEN 6
-                        WHEN month = 'Mei' THEN 5
-                        WHEN month = 'April' THEN 4
-                        WHEN month = 'Maret' THEN 3
-                        WHEN month = 'Februari' THEN 2
-                        WHEN month = 'Januari' THEN 1
-                        ELSE 0 END DESC")
-                        ->orderBy('id', 'desc'),
                 ])
                 ->where('tipe_initiative', 2)
                 ->orderBy('code')
@@ -59,13 +47,6 @@ class ItBuildingBlockService
 
         return $initiatives->map(function (MstInitiative $initiative): array {
             // ... (rest of the mapping logic remains same)
-
-                $latestStatus = $initiative->mappedProjects
-                    ->flatMap(fn ($project) => $project->pcStatusImplementations)
-                    ->sortByDesc(fn ($status) => $status->year
-                        . str_pad($this->monthToNumber($status->month), 2, '0', STR_PAD_LEFT)
-                        . str_pad($status->id, 10, '0', STR_PAD_LEFT))
-                    ->first();
 
                 return [
                     'id' => (int) $initiative->id,
@@ -76,16 +57,13 @@ class ItBuildingBlockService
                     'coe_name' => $initiative->coe?->name ?: 'No COE',
                     'business_unit' => $initiative->organization?->name ?: '-',
                     'groub_id' => $initiative->organization?->groub_id,
-                    'implementation_status' => $latestStatus?->status ?: null,
-                    'statuses' => $initiative->mappedProjects
-                        ->flatMap(fn ($project) => $project->pcStatusImplementations)
-                        ->map(fn ($status) => [
-                            'month' => $status->month,
-                            'year' => $status->year,
-                            'status' => $status->status,
-                        ])
-                        ->values()
-                        ->all(),
+                    'implementation_status' => $initiative->latestStatusImplementation?->review_status ?: null,
+                    'statuses' => $initiative->statusImplementations->map(fn ($status) => [
+                        'start' => $status->start,
+                        'end' => $status->end,
+                        'year' => (int) $status->year,
+                        'status' => $status->review_status,
+                    ])->values()->all(),
                     'tipe_initiative' => (int) $initiative->tipe_initiative,
                     'source' => $initiative->source,
                     'source_name' => $initiative->sourceData?->name,
@@ -171,7 +149,7 @@ class ItBuildingBlockService
 
     public function getGroupedMappings(): array
     {
-        return Cache::remember('sh_it_building_block_matrix_v1', 3600, fn () => $this->buildGroupedMappings());
+        return Cache::remember('sh_it_building_block_matrix_v2', 3600, fn () => $this->buildGroupedMappings());
     }
 
     private function buildGroupedMappings(): array

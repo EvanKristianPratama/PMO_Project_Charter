@@ -29,7 +29,11 @@
                         <td :class="tbodyCellClass">{{ initiative.code || '-' }}</td>
                         <td :class="tbodyCellClass">{{ initiative.name || '-' }}</td>
                         <td :class="tbodyCellClass">{{ initiative.description || '-' }}</td>
-                        <td :class="tbodyCellClass">{{ initiative.status || '-' }}</td>
+                        <td :class="tbodyCellClass">
+                            <span class="inline-block rounded px-2 py-0.5 text-[10px] font-bold shadow-sm whitespace-nowrap" :style="getStatusBadgeStyle(initiative.status)">
+                                {{ getStatusLabel(initiative.status) }}
+                            </span>
+                        </td>
                         <td :class="tbodyCellClass">{{ formatInitiativeType(initiative.tipe_initiative) }}</td>
                         <td :class="tbodyCellClass">{{ initiative.organization?.name || initiative.business_unit_name ||
                             initiative.business_unit || '-' }}</td>
@@ -184,6 +188,52 @@ const relationTextColorClass = computed(() => {
         ? 'text-emerald-700 dark:text-emerald-200'
         : 'text-blue-700 dark:text-blue-200';
 });
+
+const IT_STATUS_PALETTE = {
+    'On Track': { backgroundColor: '#ecfdf5', color: '#064e3b', borderColor: '#059669' },
+    'Done': { backgroundColor: '#eff6ff', color: '#1e3a8a', borderColor: '#2563eb' },
+    'At Risk': { backgroundColor: '#fffbeb', color: '#78350f', borderColor: '#d97706' },
+    'Delayed': { backgroundColor: '#fff1f2', color: '#881337', borderColor: '#e11d48' },
+    'Not Signed': { backgroundColor: '#fff1f2', color: '#881337', borderColor: '#e11d48' },
+    'Not Started': { backgroundColor: '#f8fafc', color: '#0f172a', borderColor: '#475569' },
+};
+
+const normalizeItStatus = (rawStatus) => {
+    const normalized = String(rawStatus ?? '').trim().toLowerCase();
+
+    if (!normalized || normalized === '-' || normalized === 'null') {
+        return 'Not Started';
+    }
+
+    if (normalized.includes('on track')) return 'On Track';
+    if (normalized.includes('at risk')) return 'At Risk';
+    if (normalized.includes('not signed')) return 'Not Signed';
+    if (normalized.includes('not started')) return 'Not Started';
+    if (normalized.includes('done') || normalized.includes('completed')) return 'Done';
+    if (normalized.includes('delayed')) return 'Delayed';
+
+    if (normalized === '4' || normalized === 'approved') return 'On Track';
+    if (normalized === '3' || normalized === 'review' || normalized === 'propose') return 'At Risk';
+    if (normalized === '2' || normalized === 'draft' || normalized === 'drafting' || normalized === '0' || normalized === '1') return 'Not Started';
+
+    return 'Not Started';
+};
+
+const getStatusBadgeStyle = (status) => {
+    const normalized = normalizeItStatus(status);
+    const palette = IT_STATUS_PALETTE[normalized] || IT_STATUS_PALETTE['Not Started'];
+    return {
+        backgroundColor: palette.backgroundColor,
+        color: palette.color,
+        borderColor: palette.borderColor,
+        borderWidth: '1px',
+        borderStyle: 'solid',
+    };
+};
+
+const getStatusLabel = (status) => {
+    return normalizeItStatus(status);
+};
 
 const formatInitiativeType = (typeValue) => {
     const typeMap = {

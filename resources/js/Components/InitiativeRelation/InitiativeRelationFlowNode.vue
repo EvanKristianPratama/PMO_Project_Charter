@@ -143,31 +143,45 @@ const cardTitle = computed(() => {
 }
 
 .status-on-track {
-    --initiative-status-border: #16a34a;
-    --initiative-status-accent: #16a34a;
+    --initiative-status-border: #059669;
+    --initiative-status-accent: #10b981;
     --initiative-status-bg: #ecfdf5;
-    --initiative-status-text: #14532d;
+    --initiative-status-text: #064e3b;
+}
+
+.status-done {
+    --initiative-status-border: #2563eb;
+    --initiative-status-accent: #3b82f6;
+    --initiative-status-bg: #eff6ff;
+    --initiative-status-text: #1e3a8a;
 }
 
 .status-at-risk {
     --initiative-status-border: #d97706;
-    --initiative-status-accent: #d97706;
-    --initiative-status-bg: #fef3c7;
-    --initiative-status-text: #92400e;
+    --initiative-status-accent: #f59e0b;
+    --initiative-status-bg: #fffbeb;
+    --initiative-status-text: #78350f;
+}
+
+.status-delayed {
+    --initiative-status-border: #e11d48;
+    --initiative-status-accent: #f43f5e;
+    --initiative-status-bg: #fff1f2;
+    --initiative-status-text: #881337;
 }
 
 .status-not-signed {
-    --initiative-status-border: #dc2626;
-    --initiative-status-accent: #dc2626;
-    --initiative-status-bg: #fee2e2;
-    --initiative-status-text: #991b1b;
+    --initiative-status-border: #e11d48;
+    --initiative-status-accent: #f43f5e;
+    --initiative-status-bg: #fff1f2;
+    --initiative-status-text: #881337;
 }
 
 .status-not-started {
-    --initiative-status-border: #2563eb;
-    --initiative-status-accent: #2563eb;
-    --initiative-status-bg: #dbeafe;
-    --initiative-status-text: #1e3a8a;
+    --initiative-status-border: #475569;
+    --initiative-status-accent: #64748b;
+    --initiative-status-bg: #f8fafc;
+    --initiative-status-text: #0f172a;
 }
 
 :deep(.dark) .initiative-status-card {
@@ -180,30 +194,44 @@ const cardTitle = computed(() => {
 }
 
 :deep(.dark) .status-on-track {
-    --initiative-status-border: #34d399;
+    --initiative-status-border: #10b981;
     --initiative-status-accent: #059669;
     --initiative-status-bg: rgba(16, 185, 129, 0.14);
     --initiative-status-text: #d1fae5;
 }
 
+:deep(.dark) .status-done {
+    --initiative-status-border: #3b82f6;
+    --initiative-status-accent: #2563eb;
+    --initiative-status-bg: rgba(59, 130, 246, 0.14);
+    --initiative-status-text: #dbeafe;
+}
+
 :deep(.dark) .status-at-risk {
-    --initiative-status-border: #fbbf24;
+    --initiative-status-border: #f59e0b;
     --initiative-status-accent: #d97706;
     --initiative-status-bg: rgba(245, 158, 11, 0.14);
     --initiative-status-text: #fef3c7;
 }
 
+:deep(.dark) .status-delayed {
+    --initiative-status-border: #f43f5e;
+    --initiative-status-accent: #e11d48;
+    --initiative-status-bg: rgba(244, 63, 94, 0.14);
+    --initiative-status-text: #ffe4e6;
+}
+
 :deep(.dark) .status-not-signed {
-    --initiative-status-border: #f87171;
-    --initiative-status-accent: #dc2626;
-    --initiative-status-bg: rgba(239, 68, 68, 0.14);
-    --initiative-status-text: #fee2e2;
+    --initiative-status-border: #f43f5e;
+    --initiative-status-accent: #e11d48;
+    --initiative-status-bg: rgba(244, 63, 94, 0.14);
+    --initiative-status-text: #ffe4e6;
 }
 
 :deep(.dark) .status-not-started {
-    --initiative-status-border: #60a5fa;
-    --initiative-status-accent: #2563eb;
-    --initiative-status-bg: rgba(59, 130, 246, 0.16);
-    --initiative-status-text: #dbeafe;
+    --initiative-status-border: #64748b;
+    --initiative-status-accent: #475569;
+    --initiative-status-bg: rgba(100, 116, 139, 0.14);
+    --initiative-status-text: #f1f5f9;
 }
 </style>

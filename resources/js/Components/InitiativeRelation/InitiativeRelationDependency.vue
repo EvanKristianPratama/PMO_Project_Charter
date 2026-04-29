@@ -493,7 +493,7 @@ const emit = defineEmits(['edit-relation']);
 const showFilters = ref(false);
 const showAllTable = ref(false);
 const selectedType = ref('all');
-const selectedModelRelasi = ref('all');
+const selectedModelRelasi = ref('v3');
 const selectedInitiative = ref('all');
 const displayMode = ref('all');
 
@@ -628,31 +628,45 @@ const filteredInitiatives = computed(() => {
 const IT_STATUS_PALETTE = {
     'On Track': {
         className: 'status-on-track',
-        borderColor: '#16a34a',
-        backgroundColor: '#dcfce7',
-        textColor: '#166534',
-        swatchColor: '#16a34a',
+        borderColor: '#059669',
+        backgroundColor: '#ecfdf5',
+        textColor: '#064e3b',
+        swatchColor: '#10b981',
+    },
+    'Done': {
+        className: 'status-done',
+        borderColor: '#2563eb',
+        backgroundColor: '#eff6ff',
+        textColor: '#1e3a8a',
+        swatchColor: '#3b82f6',
     },
     'At Risk': {
         className: 'status-at-risk',
         borderColor: '#d97706',
-        backgroundColor: '#fef3c7',
-        textColor: '#92400e',
+        backgroundColor: '#fffbeb',
+        textColor: '#78350f',
         swatchColor: '#f59e0b',
+    },
+    'Delayed': {
+        className: 'status-delayed',
+        borderColor: '#e11d48',
+        backgroundColor: '#fff1f2',
+        textColor: '#881337',
+        swatchColor: '#f43f5e',
     },
     'Not Signed': {
         className: 'status-not-signed',
-        borderColor: '#dc2626',
-        backgroundColor: '#fee2e2',
-        textColor: '#991b1b',
-        swatchColor: '#ef4444',
+        borderColor: '#e11d48',
+        backgroundColor: '#fff1f2',
+        textColor: '#881337',
+        swatchColor: '#f43f5e',
     },
     'Not Started': {
         className: 'status-not-started',
-        borderColor: '#2563eb',
-        backgroundColor: '#dbeafe',
-        textColor: '#1e3a8a',
-        swatchColor: '#2563eb',
+        borderColor: '#475569',
+        backgroundColor: '#f8fafc',
+        textColor: '#0f172a',
+        swatchColor: '#64748b',
     },
 };
 
@@ -667,8 +681,10 @@ const normalizeItStatus = (rawStatus) => {
     if (normalized.includes('at risk')) return 'At Risk';
     if (normalized.includes('not signed')) return 'Not Signed';
     if (normalized.includes('not started')) return 'Not Started';
+    if (normalized.includes('done') || normalized.includes('completed')) return 'Done';
+    if (normalized.includes('delayed')) return 'Delayed';
 
-    if (normalized === '4' || normalized === 'approved' || normalized === 'done' || normalized === 'completed') {
+    if (normalized === '4' || normalized === 'approved') {
         return 'On Track';
     }
 
@@ -698,7 +714,7 @@ const getStatusColorClass = (statusLabel) => {
 };
 
 const statusLegend = computed(() => {
-    const order = ['On Track', 'At Risk', 'Not Signed', 'Not Started'];
+    const order = ['On Track', 'At Risk', 'Done', 'Delayed', 'Not Started', 'Not Signed'];
     const counts = order.reduce((accumulator, label) => {
         accumulator[label] = 0;
         return accumulator;
