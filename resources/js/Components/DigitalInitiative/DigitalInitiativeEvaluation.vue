@@ -35,9 +35,7 @@ const headerTitle = computed(() => (
         props.initiative?.project_charter?.name,
         props.initiative?.projectCharter?.name,
         props.initiative?.useCase,
-        props.initiative?.usecase,
-        props.initiative?.appendix_data?.usecase,
-        props.initiative?.appendixData?.usecase
+        props.initiative?.usecase
     )
 ));
 
@@ -46,9 +44,7 @@ const headerDescription = computed(() => (
         props.initiative?.description,
         props.initiative?.project_charter?.description,
         props.initiative?.projectCharter?.description,
-        props.initiative?.detail_useCase_description,
-        props.initiative?.appendix_data?.description,
-        props.initiative?.appendixData?.description
+        props.initiative?.detail_useCase_description
     )
 ));
 
@@ -91,14 +87,14 @@ const mappedInitiatives = computed(() => {
             code: String(mi.code ?? '').trim().replace(/#/g, ''),
             name: displayValue(mi.name),
             projectOwner: displayValue(
-                mi.appendix_data?.owner ?? mi.appendixData?.owner ?? mi.owner ?? mi.project_owner ?? mi.owner_name ?? mi.projectOwner
+                mi.owner ?? mi.project_owner ?? mi.owner_name ?? mi.projectOwner
             ),
             pic: displayValue(
-                mi.appendix_data?.organization ?? mi.appendixData?.organization ?? mi.pic ?? mi.organization_name
+                mi.pic ?? mi.organization_name
             ),
             group: displayValue(organization?.groub?.name ?? mi.group ?? mi.business_unit),
             description: displayValue(mi.description),
-            coe: displayValue(mi.appendix_data?.coe ?? mi.appendixData?.coe ?? mi.coe?.name ?? mi.coe_name ?? mi.coe),
+            coe: displayValue(mi.coe?.name ?? mi.coe_name ?? mi.coe),
             dataSource: displayValue(
                 sourceData?.name ?? mi.data_source_name ?? mi.data_source ?? mi.source_name ?? (typeof mi.source === 'object' ? mi.source?.name : null)
             ),
@@ -146,6 +142,7 @@ const getScoreLabel = (type) => {
     const source = props.initiative;
     if (!source) return '-';
 
+    // Define potential data paths based on DigitalCharterDocument and AppendixCharterDocument structures
     const paths = [
         source,
         source.appendix_data,
@@ -155,6 +152,7 @@ const getScoreLabel = (type) => {
         source.charter,
     ];
 
+    // 1. Try to find direct label (e.g., value_label, valueLabel)
     for (const p of paths) {
         if (!p) continue;
         const label = p[`${type}_label`] ?? p[`${type}Label`];
@@ -163,6 +161,7 @@ const getScoreLabel = (type) => {
         }
     }
 
+    // 2. Try to map numeric value (1=High, 2=Medium, 3=Low)
     for (const p of paths) {
         if (!p) continue;
         const val = p[type];
@@ -181,10 +180,32 @@ const headerScores = computed(() => ({
     ease: getScoreLabel('ease'),
     resource: getScoreLabel('resource'),
 }));
+
+const getLongText = (key) => {
+    const source = props.initiative;
+    if (!source) return '-';
+
+    const paths = [
+        source,
+        source.project_charter,
+        source.projectCharter,
+        source.charter,
+    ];
+
+    for (const p of paths) {
+        if (!p) continue;
+        const val = p[key];
+        if (val && String(val).trim() !== '' && val !== '-') {
+            return String(val).trim();
+        }
+    }
+
+    return '-';
+};
 </script>
 
 <template>
-    <div class="charter-wrapper w-full bg-white text-slate-900 border border-[#3b82f6] shadow-sm print:shadow-none" style="font-family: 'Segoe UI', sans-serif;">
+    <div class="charter-header-wrap bg-white text-slate-900 border border-[#3b82f6] shadow-sm print:shadow-none">
         <!-- Header -->
         <div class="border-b border-slate-200 px-5 pb-3 pt-5">
             <div class="flex flex-wrap items-start justify-between gap-4">
@@ -254,37 +275,59 @@ const headerScores = computed(() => ({
                 <span class="info-value">{{ headerMeta.sources }}</span>
             </div>
         </div>
+
+        <!-- Additional Info: Value & Urgency Rationale -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 border-t border-[#3b82f6]">
+            <!-- Value Indication Detail -->
+            <div class="flex flex-col lg:border-r lg:border-[#3b82f6]">
+                <div class="bg-[#1e4f8f] px-3 py-1.5 text-[12px] font-bold text-white flex items-center justify-start gap-2">
+                    <span>Value Indication</span>
+                </div>
+                <div class="flex-1 flex flex-col divide-y divide-[#3b82f6] bg-white text-[11px] text-slate-600">
+                    <div class="flex flex-1">
+                        <div class="bg-[#2e6ea2] w-28 shrink-0 px-2 py-1.5 font-bold text-white border-r border-[#3b82f6] flex items-center">Rationale</div>
+                        <div class="px-2 py-1.5 flex-1">
+                            <p class="whitespace-pre-line break-words">{{ getLongText('value_rationale') }}</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-1">
+                        <div class="bg-[#2e6ea2] w-28 shrink-0 px-2 py-1.5 font-bold text-white border-r border-[#3b82f6] flex items-center">Metrics Impacted</div>
+                        <div class="px-2 py-1.5 flex-1">
+                            <p class="whitespace-pre-line break-words">{{ getLongText('value_matrics') }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Urgency Detail -->
+            <div class="flex flex-col">
+                <div class="bg-[#1e4f8f] px-3 py-1.5 text-[12px] font-bold text-white flex items-center justify-start gap-2">
+                    <span>Urgency</span>    
+                </div>
+                <div class="flex-1 flex flex-col divide-y divide-[#3b82f6] bg-white text-[11px] text-slate-600">
+                    <div class="flex flex-1">
+                        <div class="bg-[#2e6ea2] w-28 shrink-0 px-2 py-1.5 font-bold text-white border-r border-[#3b82f6] flex items-center">Rationale</div>
+                        <div class="px-2 py-1.5 flex-1">
+                            <p class="whitespace-pre-line break-words">{{ getLongText('urgency_rationale') }}</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-1">
+                        <div class="bg-[#2e6ea2] w-28 shrink-0 px-2 py-1.5 font-bold text-white border-r border-[#3b82f6] flex items-center text-[10px] leading-tight">Expected Go-Live</div>
+                        <div class="px-2 py-1.5 flex-1">
+                            <p class="whitespace-pre-line break-words">{{ getLongText('urgency_expected') }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
 <style scoped>
-.score-panel {
-    display: flex;
-    border: 1px solid #3b82f6;
-    min-width: 320px;
-    background: #fff;
-    align-self: flex-start;
-}
-
-.score-column {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.bar-sub-mini {
-    background: #2e6ea2;
-    color: #fff;
-    padding: 3px 8px;
-    font-size: 11px;
-    line-height: 1.2;
-    text-align: center;
-}
-
-.panel-body-mini {
-    padding: 6px;
-    background: #fff;
-    min-height: 32px;
+.charter-header-wrap {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+    color: #1a1a1a;
 }
 
 .info-bar {
@@ -323,7 +366,7 @@ const headerScores = computed(() => ({
 
 .info-value {
     padding: 6px 10px;
-    font-size: 12px;
+    font-size: 13px;
     display: flex;
     align-items: center;
     flex: 1;
@@ -331,16 +374,39 @@ const headerScores = computed(() => ({
     color: #0f172a;
 }
 
+.score-panel {
+    display: flex;
+    border: 1px solid #3b82f6;
+    min-width: 320px;
+    background: #fff;
+    align-self: flex-start;
+}
+
+.score-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.bar-sub-mini {
+    background: #2e6ea2;
+    color: #fff;
+    padding: 3px 8px;
+    font-size: 11px;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.panel-body-mini {
+    padding: 6px;
+    background: #fff;
+    min-height: 32px;
+}
+
 @media print {
     :deep(*) {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
-    }
-
-    .charter-wrapper {
-        max-width: none !important;
-        width: 100% !important;
-        padding: 0 !important;
     }
 
     .score-panel {

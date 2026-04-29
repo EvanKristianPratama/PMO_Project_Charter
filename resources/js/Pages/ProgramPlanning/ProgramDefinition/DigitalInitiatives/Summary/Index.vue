@@ -46,12 +46,16 @@
                     </div>
 
                     <!-- Status History Table -->
-                    <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#1A1A1A]">
-                        <div class="bg-slate-50 px-4 py-2 border-b border-slate-200 dark:bg-white/5 dark:border-white/10">
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Status History</h3>
+                    <div
+                        class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#1A1A1A]">
+                        <div
+                            class="bg-slate-50 px-4 py-2 border-b border-slate-200 dark:bg-white/5 dark:border-white/10">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                                Status History</h3>
                         </div>
                         <table class="w-full text-left text-xs text-slate-700 dark:text-slate-300">
-                            <thead class="bg-slate-50/50 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:bg-white/5 dark:text-slate-400 border-b border-slate-200 dark:border-white/10">
+                            <thead
+                                class="bg-slate-50/50 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:bg-white/5 dark:text-slate-400 border-b border-slate-200 dark:border-white/10">
                                 <tr>
                                     <th class="px-4 py-2 w-40">Tanggal</th>
                                     <th class="px-4 py-2 w-48">Status</th>
@@ -59,17 +63,20 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-200 dark:divide-white/10">
-                                <tr v-for="status in (initiativeMaster.status_history ?? [])" :key="status.id" class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition-colors">
+                                <tr v-for="status in (initiativeMaster.status_history ?? [])" :key="status.id"
+                                    class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition-colors">
                                     <td class="px-4 py-2 whitespace-nowrap">{{ formatDate(status.tanggal) }}</td>
                                     <td class="px-4 py-2">
-                                        <span :class="['inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-tight capitalize shadow-sm transition-all', getStatusClass(status.status)]">
+                                        <span
+                                            :class="['inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-tight capitalize shadow-sm transition-all', getStatusClass(status.status)]">
                                             {{ status.status }}
                                         </span>
                                     </td>
                                     <td class="px-4 py-2 text-slate-500">{{ status.notes || '-' }}</td>
                                 </tr>
                                 <tr v-if="!initiativeMaster.status_history?.length">
-                                    <td colspan="3" class="px-4 py-8 text-center text-slate-500 italic">No status history available.</td>
+                                    <td colspan="3" class="px-4 py-8 text-center text-slate-500 italic">No status
+                                        history available.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -168,7 +175,8 @@
                     <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Status Implementation</h2>
                 </div>
 
-                <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#1A1A1A]">
+                <div
+                    class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#1A1A1A]">
                     <table class="w-full text-left text-xs text-slate-700 dark:text-slate-300">
                         <thead
                             class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:bg-white/5 dark:text-slate-400">
@@ -211,7 +219,7 @@
                 </div>
 
                 <DigitalRoadmapComponent :data="roadmapItems" :start-year="roadmapStartYear"
-                        :end-year="roadmapEndYear" />
+                    :end-year="roadmapEndYear" />
             </div>
 
             <!-- Evaluation Tab Content -->
@@ -220,21 +228,23 @@
                     <div class="h-6 w-1 rounded-full bg-emerald-600"></div>
                     <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Evaluation</h2>
                 </div>
-
-                <!-- Digital Initiative Evaluation Details -->
-                <DigitalInitiativeEvaluation v-if="computedAppendixData" :initiative="computedAppendixData"
-                    class="border shadow" />
+                <!-- Digital Initiative Header -->
+                <DigitalInitiativeHeader v-if="unifiedInitiative" :initiative="unifiedInitiative"
+                    class="overflow-hidden" />
 
                 <div class="flex items-center gap-2 px-1">
                     <div class="h-6 w-1 rounded-full bg-blue-600"></div>
                     <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Status Implementation</h2>
                 </div>
 
-                <div v-if="roadmapDuration || (computedAppendixData && computedAppendixData.urgency_expected !== '-')" class="flex justify-start">
+                <div v-if="roadmapDuration || (computedAppendixData && computedAppendixData.urgency_expected !== '-')"
+                    class="flex justify-start">
                     <div class="score-panel w-full max-w-4xl overflow-hidden border border-[#3b82f6] flex flex-col">
                         <div v-if="roadmapDuration" class="flex border-b border-[#3b82f6]">
                             <div class="flex flex-1 border-r border-[#3b82f6]">
-                                <div class="bar-sub-mini flex items-center shrink-0 min-w-[130px] justify-center border-r border-[#3b82f6]">Project Duration</div>
+                                <div
+                                    class="bar-sub-mini flex items-center shrink-0 min-w-[130px] justify-center border-r border-[#3b82f6]">
+                                    Project Duration</div>
                                 <div class="panel-body-mini flex items-center flex-1 justify-start px-4 text-left">
                                     {{ roadmapDuration }}
                                 </div>
@@ -243,12 +253,10 @@
                                 <div class="panel-body-mini flex-1 p-0 overflow-hidden relative min-h-[32px]">
                                     <!-- Mini Roadmap Grid -->
                                     <div class="absolute inset-0 flex">
-                                        <div 
-                                            v-for="year in roadmapYears" 
-                                            :key="year" 
-                                            class="flex-1 border-r border-slate-100 last:border-0 flex flex-col"
-                                        >
-                                            <div class="h-[18px] bg-slate-50 flex items-center justify-center text-[10px] font-bold text-slate-500 border-b border-slate-100 leading-none uppercase tracking-wider">
+                                        <div v-for="year in roadmapYears" :key="year"
+                                            class="flex-1 border-r border-slate-100 last:border-0 flex flex-col">
+                                            <div
+                                                class="h-[18px] bg-slate-50 flex items-center justify-center text-[10px] font-bold text-slate-500 border-b border-slate-100 leading-none uppercase tracking-wider">
                                                 {{ year }}
                                             </div>
                                             <div class="flex-1"></div>
@@ -257,18 +265,18 @@
                                     <!-- Roadmap Bar -->
                                     <div class="absolute inset-x-0 bottom-2 flex items-center px-1">
                                         <div class="relative w-full h-1.5">
-                                            <div 
-                                                class="absolute h-full bg-[#1e4f8f] rounded-sm shadow-sm"
-                                                :style="roadmapBarStyle"
-                                                :title="roadmapDuration"
-                                            ></div>
+                                            <div class="absolute h-full bg-[#1e4f8f] rounded-sm shadow-sm"
+                                                :style="roadmapBarStyle" :title="roadmapDuration"></div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div v-if="computedAppendixData && computedAppendixData.urgency_expected !== '-'" class="flex last:border-0">
-                            <div class="bar-sub-mini flex items-center shrink-0 min-w-[130px] justify-center border-r border-[#3b82f6]">Expected Go Live</div>
+                        <div v-if="computedAppendixData && computedAppendixData.urgency_expected !== '-'"
+                            class="flex last:border-0">
+                            <div
+                                class="bar-sub-mini flex items-center shrink-0 min-w-[130px] justify-center border-r border-[#3b82f6]">
+                                Expected Go Live</div>
                             <div class="panel-body-mini flex items-center flex-1 justify-start px-4 text-left">
                                 {{ computedAppendixData.urgency_expected }}
                             </div>
@@ -276,7 +284,8 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#1A1A1A]">
+                <div
+                    class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#1A1A1A]">
                     <table class="w-full text-left text-xs text-slate-700 dark:text-slate-300">
                         <thead
                             class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:bg-white/5 dark:text-slate-400">
@@ -524,7 +533,7 @@ const roadmapBarStyle = computed(() => {
 
     const minStartYear = Math.max(minGlobalYear, Math.min(...startYears));
     const maxEndYear = Math.min(maxGlobalYear, Math.max(...endYears));
-    
+
     const startQs = props.roadmapItems
         .filter(item => Number(item.startYear) === minStartYear)
         .map(item => {
@@ -543,10 +552,10 @@ const roadmapBarStyle = computed(() => {
 
     const totalYears = maxGlobalYear - minGlobalYear + 1;
     const totalQuarters = totalYears * 4;
-    
+
     const startQuarterIndex = (minStartYear - minGlobalYear) * 4 + (minStartQ - 1);
     const endQuarterIndex = (maxEndYear - minGlobalYear) * 4 + (maxEndQ - 1);
-    
+
     const left = (startQuarterIndex / totalQuarters) * 100;
     const width = ((endQuarterIndex - startQuarterIndex + 1) / totalQuarters) * 100;
 
