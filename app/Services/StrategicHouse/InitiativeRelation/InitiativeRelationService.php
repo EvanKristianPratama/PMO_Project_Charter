@@ -18,6 +18,7 @@ class InitiativeRelationService
                     'initiativeRelationsColumn:id,initiative_code_row,initiative_code_column,type_relation,model_relasi',
                     'coe:id,name',
                     'latestStatusImplementation:id,initiative_id,review_status',
+                    'relationPosition:id,initiative_id,x,y,is_locked',
                 ])
                 ->get()),
             'initiativeRelations' => $this->initiativeRelations(),
@@ -155,7 +156,7 @@ class InitiativeRelationService
                 'status',
                 'business_unit',
             ])
-            ->with(['organization:id,name', 'coe:id,name'])
+            ->with(['organization:id,name', 'coe:id,name', 'relationPosition'])
             ->orderBy('id')
             ->get()
             ->map(fn (MstInitiative $initiative): array => [
@@ -168,6 +169,7 @@ class InitiativeRelationService
                 'business_unit' => $initiative->business_unit,
                 'business_unit_name' => $initiative->organization?->name,
                 'coe_name' => $initiative->coe?->name,
+                'relation_position' => $initiative->relationPosition,
             ])
             ->values()
             ->all();

@@ -75,4 +75,31 @@ class InitiativeRelationController extends Controller
 
         return back()->with('success', 'Initiative relation berhasil dihapus.');
     }
+
+    public function syncPositions(\Illuminate\Http\Request $request): RedirectResponse
+    {
+        $positions = $request->input('positions', []);
+        
+        $upsertData = [];
+        foreach ($positions as $pos) {
+            $upsertData[] = [
+                'initiative_id' => $pos['initiative_id'],
+                'x' => $pos['x'],
+                'y' => $pos['y'],
+                'is_locked' => $pos['is_locked'] ?? false,
+            ];
+        }
+
+        if (!empty($upsertData)) {
+            \App\Models\TrsInitiativeRelationPosition::upsert(
+                $upsertData,
+                ['initiative_id'],
+                ['x', 'y', 'is_locked']
+            );
+        }
+
+        \Illuminate\Support\Facades\Cache::forget('sh_relation_initiatives_v1');
+
+        return back()->with('success', 'Posisi diagram berhasil disimpan.');
+    }
 }

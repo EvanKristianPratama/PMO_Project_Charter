@@ -114,6 +114,11 @@ class MstInitiative extends Model
         return $this->hasMany(InitiativeTagging::class, 'initiative_id');
     }
 
+    public function relationPosition(): HasOne
+    {
+        return $this->hasOne(TrsInitiativeRelationPosition::class, 'initiative_id');
+    }
+
     public function latestPlanningStatusValue(): ?string
     {
         $latestStatus = null;

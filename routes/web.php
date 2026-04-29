@@ -186,6 +186,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
         Route::get('/', [StrategicHouseInitiativeRelationController::class, 'index'])->name('index');
         Route::get('/create', [StrategicHouseInitiativeRelationController::class, 'create'])->name('create');
         Route::post('/', [StrategicHouseInitiativeRelationController::class, 'store'])->name('store');
+        Route::post('/sync-positions', [StrategicHouseInitiativeRelationController::class, 'syncPositions'])->name('sync-positions');
         Route::get('/{initiativeRelation}/edit', [StrategicHouseInitiativeRelationController::class, 'edit'])
             ->whereNumber('initiativeRelation')
             ->name('edit');

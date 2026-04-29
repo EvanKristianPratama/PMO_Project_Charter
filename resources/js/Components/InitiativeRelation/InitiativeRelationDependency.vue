@@ -1,7 +1,47 @@
 <template>
     <section
         class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-        <div class="flex items-center justify-end border-b border-slate-200 px-5 py-2 dark:border-white/10">
+        <div class="flex items-center justify-end gap-2 border-b border-slate-200 px-5 py-2 dark:border-white/10">
+            <button
+                v-if="displayMode === 'all'"
+                type="button"
+                class="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[11px] font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200"
+                @click="showAllTable = !showAllTable"
+            >
+                <svg v-if="showAllTable" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.543 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                {{ showAllTable ? 'Sembunyikan Tabel' : 'Tampilkan Tabel' }}
+            </button>
+            <button
+                v-if="displayMode === 'all'"
+                type="button"
+                class="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[11px] font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200"
+                @click="savePositions"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                </svg>
+                Simpan Posisi
+            </button>
+            <button
+                v-if="displayMode === 'all'"
+                type="button"
+                class="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[11px] font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200"
+                @click="toggleLockPositions"
+            >
+                <svg v-if="isPositionsLocked" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                </svg>
+                {{ isPositionsLocked ? 'Buka Kunci Posisi' : 'Kunci Posisi' }}
+            </button>
             <button
                 type="button"
                 class="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[11px] font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200"
@@ -255,28 +295,12 @@
                     </template>
 
                     <template v-else>
-                        <tr class="bg-slate-100 dark:bg-slate-900/30">
-                            <td colspan="6"
-                                class="border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-800 dark:border-white/10 dark:text-slate-200">
-                                Mode All - Semua Kode Initiative
-                                <span class="mx-2 text-slate-400">|</span>
-                                Total Relasi: {{ allRelationRows.length }}
-                            </td>
-                        </tr>
                         <tr>
                             <td colspan="6"
                                 class="border border-slate-200 bg-slate-50/70 px-4 py-4 dark:border-white/10 dark:bg-[#141414]">
                                 <div class="rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-[#101010]">
                                     <div
-                                        class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-white/10">
-                                        <div>
-                                            <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                                                Diagram Relasi Semua Initiative
-                                            </h3>
-                                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                                Mode `all` memprioritaskan posisi node dari koordinat `x` dan `y` pada `mst_initiative_relation`.
-                                            </p>
-                                        </div>
+                                        class="flex flex-wrap items-center justify-end gap-3 border-b border-slate-200 px-4 py-3 dark:border-white/10">
                                         <div class="flex flex-wrap items-center gap-3 text-[11px] font-medium text-slate-500 dark:text-slate-400">
                                             <span class="inline-flex items-center gap-1.5">
                                                 <span class="h-0.5 w-6 rounded bg-emerald-600 dark:bg-emerald-400"></span>
@@ -309,7 +333,7 @@
                                                     :nodes="allRelationGraph.nodes"
                                                     :edges="allRelationGraph.edges"
                                                     :fit-view-on-init="true"
-                                                    :nodes-draggable="false"
+                                                    :nodes-draggable="!isPositionsLocked"
                                                     :nodes-connectable="false"
                                                     :elements-selectable="true"
                                                     :zoom-on-double-click="false"
@@ -328,9 +352,10 @@
                                 </div>
                             </td>
                         </tr>
-                        <tr class="bg-slate-50 dark:bg-white/5">
-                            <th
-                                class="border border-slate-200 bg-slate-50 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-400">
+                        <template v-if="showAllTable">
+                            <tr class="bg-slate-50 dark:bg-white/5">
+                                <th
+                                    class="border border-slate-200 bg-slate-50 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-400">
                                 Initiative A
                             </th>
                             <th
@@ -411,6 +436,7 @@
                                 </button>
                             </td>
                         </tr>
+                        </template>
                     </template>
                 </tbody>
             </table>
@@ -421,12 +447,13 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { MarkerType, Position, VueFlow, useVueFlow } from '@vue-flow/core';
+import { router } from '@inertiajs/vue3';
 import '@vue-flow/core/dist/style.css';
 import '@vue-flow/core/dist/theme-default.css';
 import InitiativeRelationFlowNode from '@/Components/InitiativeRelation/InitiativeRelationFlowNode.vue';
 
 const ALL_FLOW_ID = 'initiative-relation-all-flow';
-const { updateNode: updateAllFlowNode } = useVueFlow(ALL_FLOW_ID);
+const { updateNode: updateAllFlowNode, getNodes: getAllFlowNodes } = useVueFlow(ALL_FLOW_ID);
 const allSelectedNodeId = ref(null);
 
 const handleAllNodeClick = ({ node }) => {
@@ -464,10 +491,61 @@ const props = defineProps({
 const emit = defineEmits(['edit-relation']);
 
 const showFilters = ref(false);
+const showAllTable = ref(false);
 const selectedType = ref('all');
 const selectedModelRelasi = ref('all');
 const selectedInitiative = ref('all');
 const displayMode = ref('all');
+
+const isPositionsLocked = ref(
+    props.mstInitiatives.some((initiative) => initiative.relation_position?.is_locked)
+);
+
+const savePositions = () => {
+    const nodes = getAllFlowNodes.value.filter(n => n.type === 'initiative-status-card' || n.id.startsWith('initiative-'));
+    const positionsToSync = nodes.map((node) => {
+        const initiativeId = Number(String(node.id).replace('initiative-', ''));
+        return {
+            initiative_id: initiativeId,
+            x: node.position.x,
+            y: node.position.y,
+            is_locked: isPositionsLocked.value,
+        };
+    }).filter(pos => !isNaN(pos.initiative_id) && pos.initiative_id > 0);
+
+    router.post(route('initiative-relations.sync-positions'), {
+        positions: positionsToSync,
+    }, {
+        preserveScroll: true,
+        preserveState: true,
+    });
+};
+
+const toggleLockPositions = () => {
+    const nextLockState = !isPositionsLocked.value;
+    
+    // Get nodes before updating the state
+    const nodes = getAllFlowNodes.value.filter(n => n.type === 'initiative-status-card' || n.id.startsWith('initiative-'));
+    const positionsToSync = nodes.map((node) => {
+        const initiativeId = Number(String(node.id).replace('initiative-', ''));
+        return {
+            initiative_id: initiativeId,
+            x: node.position.x,
+            y: node.position.y,
+            is_locked: nextLockState,
+        };
+    }).filter(pos => !isNaN(pos.initiative_id) && pos.initiative_id > 0);
+
+    // Flip state
+    isPositionsLocked.value = nextLockState;
+
+    router.post(route('initiative-relations.sync-positions'), {
+        positions: positionsToSync,
+    }, {
+        preserveScroll: true,
+        preserveState: true,
+    });
+};
 
 watch(displayMode, (mode) => {
     if (mode === 'all') {
@@ -1005,53 +1083,18 @@ const initiativeFromRelation = (relation) => (
     findInitiativeById(relation?.predecessor_id) ?? findInitiativeById(relation?.successor_id) ?? null
 );
 
-const resolveStoredAllGraphPositions = (relations) => {
-    const positionCandidates = new Map();
-
-    const registerCandidate = (initiativeId, x, y) => {
-        const resolvedId = toNumericId(initiativeId);
-        const resolvedX = toCoordinate(x);
-        const resolvedY = toCoordinate(y);
-
-        if (resolvedId == null || resolvedX == null || resolvedY == null) {
-            return;
+const resolveStoredAllGraphPositionsFromInitiatives = (initiativeIds) => {
+    const positions = new Map();
+    initiativeIds.forEach((initiativeId) => {
+        const initiative = findInitiativeById(initiativeId);
+        if (initiative?.relation_position?.x != null && initiative?.relation_position?.y != null) {
+            positions.set(initiativeId, { 
+                x: Number(initiative.relation_position.x), 
+                y: Number(initiative.relation_position.y) 
+            });
         }
-
-        if (!positionCandidates.has(resolvedId)) {
-            positionCandidates.set(resolvedId, []);
-        }
-
-        positionCandidates.get(resolvedId).push({ x: resolvedX, y: resolvedY });
-    };
-
-    relations.forEach((relation) => {
-        registerCandidate(relation?.row_initiative_id, relation?.x, relation?.y);
     });
-
-    return new Map(
-        Array.from(positionCandidates.entries()).map(([initiativeId, candidates]) => {
-            const counts = new Map();
-
-            candidates.forEach(({ x, y }) => {
-                const key = `${x}|${y}`;
-                counts.set(key, (counts.get(key) ?? 0) + 1);
-            });
-
-            let selectedKey = null;
-            let selectedCount = -1;
-
-            counts.forEach((count, key) => {
-                if (count > selectedCount) {
-                    selectedKey = key;
-                    selectedCount = count;
-                }
-            });
-
-            const [x, y] = String(selectedKey).split('|').map(Number);
-
-            return [initiativeId, { x, y }];
-        }),
-    );
+    return positions;
 };
 
 const buildGraphForAllRelations = (relations) => {
@@ -1088,7 +1131,7 @@ const buildGraphForAllRelations = (relations) => {
         };
     }
 
-    const storedPositions = resolveStoredAllGraphPositions(relations);
+    const storedPositions = resolveStoredAllGraphPositionsFromInitiatives(uniqueInitiativeIds);
     const rawPositions = new Map(storedPositions);
     const storedPositionCount = storedPositions.size;
     const missingPositionCount = Math.max(uniqueInitiativeIds.length - storedPositionCount, 0);
@@ -1144,7 +1187,7 @@ const buildGraphForAllRelations = (relations) => {
             class: 'initiative-status-card',
             sourcePosition: Position.Right,
             targetPosition: Position.Left,
-            draggable: false,
+            draggable: !isPositionsLocked.value,
             selectable: true,
             style: resolveInitiativeNodeStyle(linkedInitiative),
         };
@@ -1195,7 +1238,7 @@ const buildGraphForAllRelations = (relations) => {
         nodes,
         edges,
         width: Math.max(960, (maxX - minX) + FLOW_NODE_WIDTH + (FLOW_GRAPH_PADDING * 2)),
-        height: Math.max(360, (maxY - minY) + FLOW_NODE_HEIGHT + (FLOW_GRAPH_PADDING * 2)),
+        height: Math.max(600, (maxY - minY) + FLOW_NODE_HEIGHT + (FLOW_GRAPH_PADDING * 2)),
         storedPositionCount,
         missingPositionCount,
         usesStoredPositions: storedPositionCount > 0,
