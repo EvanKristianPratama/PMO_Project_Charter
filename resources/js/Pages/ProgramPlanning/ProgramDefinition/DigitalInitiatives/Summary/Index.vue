@@ -91,6 +91,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
+import Swal from 'sweetalert2';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import Evaluation from './Evaluation.vue';
@@ -118,7 +119,7 @@ const tabs = ['Planning', 'Implementation', 'Evaluation'];
 const activeTab = ref('Planning');
 const route = useRouteHelper();
 
-const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 const noteYears = computed(() => {
     const currentYear = new Date().getFullYear();
     const list = [];
@@ -136,17 +137,33 @@ const noteForm = useForm({
     notes: '',
 });
 
-const submitNote = () => {
+const submitNote = (options = {}) => {
+    const requestOptions = {
+        onSuccess: () => {
+            if (options.onSuccess) options.onSuccess();
+            
+            Swal.fire({
+                title: 'Berhasil!',
+                text: editingNoteId.value ? 'Catatan review berhasil diperbarui.' : 'Catatan review berhasil ditambahkan.',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false,
+            });
+
+            if (editingNoteId.value) {
+                cancelEditNote();
+            } else {
+                noteForm.reset('notes');
+            }
+        },
+    };
+
     if (editingNoteId.value) {
-        noteForm.put(route('program-evaluation.summary-review.notes.update', editingNoteId.value), {
-            onSuccess: () => cancelEditNote(),
-        });
+        noteForm.put(route('program-evaluation.summary-review.notes.update', editingNoteId.value), requestOptions);
         return;
     }
 
-    noteForm.post(route('program-evaluation.summary-review.notes.store'), {
-        onSuccess: () => noteForm.reset('notes'),
-    });
+    noteForm.post(route('program-evaluation.summary-review.notes.store'), requestOptions);
 };
 
 const editNote = (note) => {
@@ -162,9 +179,31 @@ const cancelEditNote = () => {
 };
 
 const deleteNote = (id) => {
-    if (confirm('Are you sure you want to delete this note?')) {
-        router.delete(route('program-evaluation.summary-review.notes.destroy', id));
-    }
+    Swal.fire({
+        title: 'Apakah Anda yakin?',
+        text: "Catatan ini akan dihapus secara permanen!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Ya, hapus!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+    }).then((result) => {
+        if (result.isConfirmed) {
+            router.delete(route('program-evaluation.summary-review.notes.destroy', id), {
+                onSuccess: () => {
+                    Swal.fire({
+                        title: 'Terhapus!',
+                        text: 'Catatan berhasil dihapus.',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false,
+                    });
+                },
+            });
+        }
+    });
 };
 
 const goBack = () => {

@@ -12,8 +12,8 @@ class TrsReviewScController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'initiative_id' => 'required|exists:mst_initiatives,id',
-            'month' => 'required|string',
+            'initiative_id' => 'required|exists:mst_initiative,id',
+            'month' => 'required|string|in:Januari,Februari,Maret,April,Mei,Juni,Juli,Agustus,September,Oktober,November,Desember',
             'year' => 'required|integer',
             'notes' => 'required|string',
         ]);

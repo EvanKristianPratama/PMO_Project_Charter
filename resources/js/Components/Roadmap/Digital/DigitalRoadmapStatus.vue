@@ -8,8 +8,13 @@
         <!-- Visual merge hack: cover the bottom border if not the last row -->
         <div v-if="!isLast && !hideLabelText" class="absolute -bottom-[1px] left-0 right-0 h-[1.5px] bg-[#2e6ea2] z-10"></div>
       </div>
-      <div class="panel-body-mini flex items-center flex-1 justify-start px-4 text-left">
-        <span class="truncate" :title="statusReviewData">{{ statusReviewData }}</span>
+      <div class="panel-body-mini flex items-center flex-1 justify-start px-4 text-left gap-2">
+        <span class="font-medium text-slate-600 shrink-0">{{ statusLabel }}</span>
+        <span v-if="statusValue && statusValue !== '-'" 
+            class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider shadow-sm"
+            :class="getStatusClass(statusValue)">
+            {{ statusValue }}
+        </span>
       </div>
     </div>
 
@@ -55,12 +60,21 @@ const props = defineProps({
   isRoadmapExpanded: { type: Boolean, default: false },
   roadmapYears: { type: Array, default: () => [] },
   markers: { type: Array, default: () => [] },
-  statusReviewData: { type: String, default: '-' },
+  statusLabel: { type: String, default: '' },
+  statusValue: { type: String, default: '-' },
   statusUpdated: { type: String, default: '-' },
   isFirst: { type: Boolean, default: true },
   isLast: { type: Boolean, default: true },
   hideLabelText: { type: Boolean, default: false },
 });
+
+const getStatusClass = (status) => {
+  const s = String(status || '').toLowerCase();
+  if (s.includes('done')) return 'bg-emerald-500 text-white';
+  if (s.includes('progress')) return 'bg-blue-500 text-white';
+  if (s.includes('review')) return 'bg-orange-500 text-white';
+  return 'bg-slate-500 text-white';
+};
 
 const getMarkerStyle = (left, color) => ({
   left: left || '0%',
