@@ -111,7 +111,7 @@
                     class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 shadow-sm dark:border-white/10 dark:bg-[#1f1f1f]"
                 >
                     <span
-                        class="h-2.5 w-2.5 rounded-sm border"
+                        class="h-2 w-2 shrink-0 rotate-45 rounded-sm border"
                         :style="legend.swatchStyle"
                     ></span>
                     <span>{{ legend.label }}</span>
@@ -637,45 +637,45 @@ const filteredInitiatives = computed(() => {
 const IT_STATUS_PALETTE = {
     'On Track': {
         className: 'status-on-track',
-        borderColor: '#059669',
-        backgroundColor: '#ecfdf5',
-        textColor: '#064e3b',
-        swatchColor: '#10b981',
+        borderColor: '#0ea5e9',
+        backgroundColor: '#f0f9ff',
+        textColor: '#0369a1',
+        swatchColor: '#38bdf8',
     },
     'Done': {
         className: 'status-done',
-        borderColor: '#2563eb',
-        backgroundColor: '#eff6ff',
-        textColor: '#1e3a8a',
-        swatchColor: '#3b82f6',
+        borderColor: '#16a34a',
+        backgroundColor: '#f0fdf4',
+        textColor: '#166534',
+        swatchColor: '#22c55e',
     },
     'At Risk': {
         className: 'status-at-risk',
-        borderColor: '#d97706',
-        backgroundColor: '#fffbeb',
-        textColor: '#78350f',
-        swatchColor: '#f59e0b',
+        borderColor: '#eab308',
+        backgroundColor: '#fefce8',
+        textColor: '#854d0e',
+        swatchColor: '#facc15',
     },
     'Delayed': {
         className: 'status-delayed',
-        borderColor: '#e11d48',
-        backgroundColor: '#fff1f2',
-        textColor: '#881337',
-        swatchColor: '#f43f5e',
+        borderColor: '#dc2626',
+        backgroundColor: '#fef2f2',
+        textColor: '#991b1b',
+        swatchColor: '#ef4444',
     },
     'Not Signed': {
         className: 'status-not-signed',
-        borderColor: '#e11d48',
-        backgroundColor: '#fff1f2',
-        textColor: '#881337',
-        swatchColor: '#f43f5e',
+        borderColor: '#dc2626',
+        backgroundColor: '#fef2f2',
+        textColor: '#991b1b',
+        swatchColor: '#ef4444',
     },
     'Not Started': {
         className: 'status-not-started',
-        borderColor: '#475569',
-        backgroundColor: '#f8fafc',
-        textColor: '#0f172a',
-        swatchColor: '#64748b',
+        borderColor: '#2563eb',
+        backgroundColor: '#eff6ff',
+        textColor: '#1e40af',
+        swatchColor: '#3b82f6',
     },
 };
 
