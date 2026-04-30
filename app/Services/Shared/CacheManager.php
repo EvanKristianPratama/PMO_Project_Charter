@@ -24,6 +24,7 @@ class CacheManager
             'it_building_block_digital_initiative_options',
             'it_building_block_grouped_mappings',
             'sh_relation_initiatives_v1',
+            'sh_relation_initiatives_v3',
             'sh_initiative_relations_v1',
             'sh_model_relation_options_v1',
             'sh_map_technology_props_v1',
