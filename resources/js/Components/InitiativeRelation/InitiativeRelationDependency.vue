@@ -117,6 +117,14 @@
                     <span>{{ legend.label }}</span>
                     <span class="text-slate-400 dark:text-slate-500">({{ legend.count }})</span>
                 </span>
+
+                <div class="ml-auto flex items-center gap-2 border-l border-slate-200 pl-4 dark:border-white/10">
+                    <label class="relative inline-flex cursor-pointer items-center">
+                        <input type="checkbox" v-model="showEdgeLabels" class="peer sr-only">
+                        <div class="peer h-4 w-7 rounded-full bg-slate-200 after:absolute after:left-[2px] after:top-[2px] after:h-3 after:w-3 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none dark:bg-slate-700"></div>
+                        <span class="ml-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Show Labels</span>
+                    </label>
+                </div>
             </div>
         </div>
 
@@ -496,6 +504,7 @@ const selectedType = ref('all');
 const selectedModelRelasi = ref('v3');
 const selectedInitiative = ref('all');
 const displayMode = ref('all');
+const showEdgeLabels = ref(true);
 
 const isPositionsLocked = ref(
     props.mstInitiatives.some((initiative) => initiative.relation_position?.is_locked)
@@ -1228,12 +1237,12 @@ const buildGraphForAllRelations = (relations) => {
                     type: MarkerType.ArrowClosed,
                     color: lineColor,
                 },
-                type: 'smoothstep',
+                type: 'straight',
                 style: {
                     stroke: lineColor,
                     strokeWidth: 2.1,
                 },
-                label: relation?.model_relasi && relation.model_relasi !== '-' ? relation.model_relasi : undefined,
+                label: showEdgeLabels.value && relation?.model_relasi && relation.model_relasi !== '-' ? relation.model_relasi : undefined,
                 labelStyle: {
                     fill: '#475569',
                     fontSize: 11,
@@ -1371,12 +1380,12 @@ const buildGraphForInitiative = (initiative, relations) => {
                     type: MarkerType.ArrowClosed,
                     color: lineColor,
                 },
-                type: 'smoothstep',
+                type: 'straight',
                 style: {
                     stroke: lineColor,
                     strokeWidth: 2.1,
                 },
-                label: relation?.model_relasi && relation.model_relasi !== '-' ? relation.model_relasi : undefined,
+                label: showEdgeLabels.value && relation?.model_relasi && relation.model_relasi !== '-' ? relation.model_relasi : undefined,
                 labelStyle: {
                     fill: '#475569',
                     fontSize: 11,
