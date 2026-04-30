@@ -1428,9 +1428,7 @@ const allRelationGraph = computed(() => buildGraphForAllRelations(allRelationRow
 
 <style scoped>
 :deep(.initiative-relation-flow.vue-flow) {
-    background:
-        radial-gradient(circle at 1px 1px, rgba(148, 163, 184, 0.3) 1px, transparent 0);
-    background-size: 16px 16px;
+    background: transparent;
 }
 
 :deep(.initiative-relation-flow .vue-flow__node) {
@@ -1472,8 +1470,6 @@ const allRelationGraph = computed(() => buildGraphForAllRelations(allRelationRow
 }
 
 :deep(.dark .initiative-relation-flow.vue-flow) {
-    background:
-        radial-gradient(circle at 1px 1px, rgba(100, 116, 139, 0.35) 1px, transparent 0);
-    background-size: 16px 16px;
+    background: transparent;
 }
 </style>
