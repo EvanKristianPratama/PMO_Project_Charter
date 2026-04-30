@@ -149,7 +149,24 @@ class TrsReviewPCController extends Controller
      */
     public function update(Request $request, TrsReviewPC $trsReviewPC)
     {
-        //
+        $validated = $request->validate([
+            'month' => 'nullable|string',
+            'year' => 'nullable|integer|min:1901|max:2155',
+            'kesimpulan' => 'nullable|string',
+            'detail_kesimpulan' => 'nullable|string',
+            'detail_penjelasan' => 'nullable|string',
+            'penjelasan' => 'nullable|string',
+            'why' => 'nullable|string',
+            'what' => 'nullable|string',
+            'how' => 'nullable|string',
+            'project_profile' => 'nullable|string',
+            'key_milestone' => 'nullable|string',
+            'risk_impact' => 'nullable|string',
+        ]);
+
+        $trsReviewPC->update($validated);
+
+        return back()->with('success', 'Review PC berhasil diperbarui.');
     }
 
     /**

@@ -35,7 +35,7 @@ class DashboardController extends Controller
         $statusOptions = $this->statusOptions();
         $baselineStatusId = $this->baselineStatusId($statusOptions);
 
-        $mstInitiatives = MstInitiative::with(['coe', 'organization.groub', 'latestStatus', 'sourceData:id,name'])
+        $mstInitiatives = MstInitiative::with(['coe', 'organization.groub', 'latestStatus', 'statusHistory', 'sourceData:id,name'])
             ->orderBy('tipe_initiative')
             ->orderBy('id')
             ->get();
@@ -116,19 +116,44 @@ class DashboardController extends Controller
 
     private function planningStatusKey(MstInitiative $initiative): string
     {
-        $rawStatus = strtolower(trim((string) ($initiative->latestStatus?->status ?? $initiative->status ?? '')));
         $aliasMap = [
             'draft' => 'drafting',
             'approve' => 'approved',
             'aproved' => 'approved',
         ];
 
-        $normalizedStatus = $aliasMap[$rawStatus] ?? $rawStatus;
-        $validStatuses = ['not_start', 'drafting', 'propose', 'review', 'baseline', 'approved'];
+        $statusRank = [
+            'approved' => 5,
+            'baseline' => 4,
+            'review' => 3,
+            'propose' => 2,
+            'drafting' => 1,
+            'not_start' => 0,
+        ];
 
-        return in_array($normalizedStatus, $validStatuses, true)
-            ? $normalizedStatus
-            : 'not_start';
+        $highestRank = -1;
+        $highestStatus = 'not_start';
+
+        if ($initiative->relationLoaded('statusHistory') && $initiative->statusHistory->isNotEmpty()) {
+            foreach ($initiative->statusHistory as $statusRecord) {
+                $rawStatus = strtolower(trim((string) $statusRecord->status));
+                $normalizedStatus = $aliasMap[$rawStatus] ?? $rawStatus;
+
+                if (isset($statusRank[$normalizedStatus]) && $statusRank[$normalizedStatus] > $highestRank) {
+                    $highestRank = $statusRank[$normalizedStatus];
+                    $highestStatus = $normalizedStatus;
+                }
+            }
+        } else {
+            $rawStatus = strtolower(trim((string) ($initiative->latestStatus?->status ?? $initiative->status ?? '')));
+            $normalizedStatus = $aliasMap[$rawStatus] ?? $rawStatus;
+            
+            if (isset($statusRank[$normalizedStatus])) {
+                $highestStatus = $normalizedStatus;
+            }
+        }
+
+        return $highestStatus;
     }
 
     private function planningStatusId(string $statusKey): int
