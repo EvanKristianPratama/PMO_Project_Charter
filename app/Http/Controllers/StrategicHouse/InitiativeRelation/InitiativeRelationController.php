@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ProgramPlanning\InitiativeRelation\StoreInitiativeRelationRequest;
 use App\Http\Requests\ProgramPlanning\InitiativeRelation\UpdateInitiativeRelationRequest;
 use App\Models\MstInitiativeRelation;
+use App\Services\Shared\CacheManager;
 use App\Services\StrategicHouse\InitiativeRelation\InitiativeRelationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -37,6 +38,7 @@ class InitiativeRelationController extends Controller
     public function store(StoreInitiativeRelationRequest $request): RedirectResponse
     {
         $this->initiativeRelationService->createInitiativeRelation($request->validated());
+        CacheManager::clearInitiativeCaches();
 
         return redirect()
             ->route('initiative-relations.index')
@@ -63,6 +65,7 @@ class InitiativeRelationController extends Controller
         MstInitiativeRelation $initiativeRelation
     ): RedirectResponse {
         $this->initiativeRelationService->updateInitiativeRelation($initiativeRelation, $request->validated());
+        CacheManager::clearInitiativeCaches();
 
         return redirect()
             ->route('initiative-relations.index')
@@ -72,6 +75,7 @@ class InitiativeRelationController extends Controller
     public function destroy(MstInitiativeRelation $initiativeRelation): RedirectResponse
     {
         $this->initiativeRelationService->deleteInitiativeRelation($initiativeRelation);
+        CacheManager::clearInitiativeCaches();
 
         return back()->with('success', 'Initiative relation berhasil dihapus.');
     }
@@ -98,7 +102,7 @@ class InitiativeRelationController extends Controller
             );
         }
 
-        \Illuminate\Support\Facades\Cache::forget('sh_relation_initiatives_v1');
+        CacheManager::clearInitiativeCaches();
 
         return back()->with('success', 'Posisi diagram berhasil disimpan.');
     }
