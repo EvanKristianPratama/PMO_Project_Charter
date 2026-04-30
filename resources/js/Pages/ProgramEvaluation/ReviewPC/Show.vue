@@ -334,6 +334,8 @@ const howParsed = computed(() => parseHow(review.value?.how));
 
 const isEditingReview = ref(false);
 const reviewForm = useForm({
+    month: props.trsReviewPC?.month ?? '',
+    year: props.trsReviewPC?.year ?? '',
     kesimpulan: props.trsReviewPC?.kesimpulan ?? '',
     detail_kesimpulan: props.trsReviewPC?.detail_kesimpulan ?? props.trsReviewPC?.detail_penjelasan ?? '',
     penjelasan: props.trsReviewPC?.penjelasan ?? '',
@@ -343,7 +345,7 @@ const reviewForm = useForm({
     project_profile: props.trsReviewPC?.project_profile ?? '',
     key_milestone: props.trsReviewPC?.key_milestone ?? '',
     risk_impact: props.trsReviewPC?.risk_impact ?? '',
-});
+})
 
 const saveReview = () => {
     reviewForm.put(route('program-evaluation.update', props.trsReviewPC.id), {

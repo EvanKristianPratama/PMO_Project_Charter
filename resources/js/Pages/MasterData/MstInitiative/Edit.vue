@@ -83,18 +83,16 @@
                                 </td>
                             </tr>
                             <tr class="border-b border-slate-100 dark:border-white/5">
-                                <td class="px-4 py-2 bg-slate-50 dark:bg-white/[0.03] text-[11px] font-semibold text-slate-500 dark:text-slate-400 align-top pt-3">Organisasi</td>
+                                <td class="px-4 py-2 bg-slate-50 dark:bg-white/[0.03] text-[11px] font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">Organisasi</td>
                                 <td class="px-3 py-1.5">
-                                    <div class="max-h-32 overflow-y-auto border border-slate-200 dark:border-white/10 rounded divide-y divide-slate-100 dark:divide-white/5">
-                                        <label v-for="opt in organizationOptions" :key="opt.id"
-                                            class="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5">
-                                            <input v-model="masterForm.organization_ids" type="checkbox" :value="opt.id"
-                                                class="h-3 w-3 rounded border-slate-300 text-[#0f63b5] focus:ring-[#0f63b5] dark:border-white/10" />
-                                            <span class="text-[11px] text-slate-700 dark:text-slate-300 truncate">{{ opt.name }}</span>
-                                            <span v-if="opt.groub" class="ml-auto shrink-0 text-[9px] text-slate-400 dark:text-slate-500">{{ opt.groub }}</span>
-                                        </label>
-                                    </div>
+                                    <select v-model="masterForm.business_unit" class="form-input-inline">
+                                        <option :value="null">— Pilih —</option>
+                                        <option v-for="opt in organizationOptions" :key="opt.id" :value="opt.id">
+                                            {{ opt.name }}{{ opt.groub ? ` (${opt.groub})` : '' }}
+                                        </option>
+                                    </select>
                                     <p v-if="masterForm.errors.organization_ids" class="mt-0.5 text-[10px] text-rose-500">{{ masterForm.errors.organization_ids }}</p>
+                                    <p v-if="masterForm.errors.business_unit" class="mt-0.5 text-[10px] text-rose-500">{{ masterForm.errors.business_unit }}</p>
                                 </td>
                             </tr>
                             <tr>
@@ -134,7 +132,7 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200 bg-white dark:divide-white/5 dark:bg-[#1a1a1a]">
-                            <tr v-for="(entry, idx) in initiative.status_history" :key="entry.id"
+                            <tr v-for="(entry, idx) in sortedStatusHistory" :key="entry.id"
                                 class="transition-colors hover:bg-slate-50/50 dark:hover:bg-white/5 group">
                                 <td class="px-6 py-4 text-slate-400 font-medium">{{ idx + 1 }}</td>
 
@@ -191,7 +189,7 @@
                                 </template>
                             </tr>
 
-                            <tr v-if="!initiative.status_history?.length && !showNewRow">
+                            <tr v-if="!sortedStatusHistory.length && !showNewRow">
                                 <td colspan="5" class="px-6 py-12 text-center">
                                     <p class="text-[11px] font-medium text-slate-400 uppercase tracking-widest italic">Belum ada riwayat status yang tercatat.</p>
                                 </td>
@@ -354,34 +352,27 @@ const masterForm = useForm({
     description:     props.initiative.description ?? '',
     tipe_initiative: props.initiative.tipe_initiative ?? '',
     coe_id:          props.initiative.coe_id ?? null,
-    business_unit:   props.initiative.business_unit ?? null,
-    organization_ids: Array.isArray(props.selectedOrganizationIds) && props.selectedOrganizationIds.length
-        ? props.selectedOrganizationIds.map((id) => Number(id))
-        : (
-            Array.isArray(props.initiative.organizations) && props.initiative.organizations.length
-                ? props.initiative.organizations.map((item) => Number(item?.id))
-                : (props.initiative.business_unit ? [Number(props.initiative.business_unit)] : [])
-        ),
+    business_unit:   props.initiative.business_unit ?? (
+        Array.isArray(props.selectedOrganizationIds) && props.selectedOrganizationIds.length
+            ? Number(props.selectedOrganizationIds[0])
+            : (
+                Array.isArray(props.initiative.organizations) && props.initiative.organizations.length
+                    ? Number(props.initiative.organizations[0]?.id)
+                    : null
+            )
+    ),
     source:          props.initiative.source ?? null,
 });
-
-const normalizeOrganizationIds = (ids) => {
-    if (!Array.isArray(ids)) return [];
-
-    return [...new Set(ids
-        .map((id) => Number(id))
-        .filter((id) => Number.isInteger(id) && id > 0))];
-};
 
 const submitMaster = () => {
     masterForm
         .transform((data) => {
-            const organizationIds = normalizeOrganizationIds(data.organization_ids);
+            const organizationIds = data.business_unit ? [Number(data.business_unit)] : [];
 
         return {
             ...data,
             organization_ids: organizationIds,
-            business_unit: organizationIds[0] ?? null,
+            business_unit: data.business_unit ? Number(data.business_unit) : null,
         };
     })
         .put(route('master-data.mst-initiatives.update', props.initiative.id));
@@ -394,6 +385,32 @@ const newRowErrors = reactive({ status: '' });
 const newRowProcessing = ref(false);
 
 const statusList = ['Drafting', 'Propose', 'Review', 'Approved', 'Postpone'];
+
+const sortedStatusHistory = computed(() => {
+    if (!props.initiative.status_history) return [];
+    
+    return [...props.initiative.status_history].sort((a, b) => {
+        const statusA = String(a.status || '').toLowerCase();
+        const statusB = String(b.status || '').toLowerCase();
+        
+        const statusListLower = statusList.map(s => s.toLowerCase());
+        
+        let orderA = statusListLower.indexOf(statusA);
+        let orderB = statusListLower.indexOf(statusB);
+        
+        if (orderA === -1) orderA = -1;
+        if (orderB === -1) orderB = -1;
+        
+        if (orderA !== orderB) {
+            return orderB - orderA;
+        }
+        
+        // Secondary sort by date (newest first)
+        const dateA = new Date(a.tanggal || 0).getTime();
+        const dateB = new Date(b.tanggal || 0).getTime();
+        return dateB - dateA;
+    });
+});
 
 const openNewRow = () => {
     showNewRow.value = true;
@@ -531,11 +548,11 @@ const formatDate = (d) => {
 <style scoped>
 @reference "tailwindcss";
 .form-input-premium {
-    @apply w-full rounded-xl border-slate-200 bg-white px-4 py-2.5 text-xs font-medium shadow-sm transition-all focus:border-[#0f63b5] focus:ring-4 focus:ring-[#0f63b5]/10 hover:border-slate-300 dark:border-white/10 dark:bg-[#131313] dark:text-slate-100 dark:focus:border-[#0f63b5] dark:placeholder-slate-600;
+    @apply w-full rounded-xl border-slate-200 bg-white px-4 py-2.5 text-xs font-medium text-black shadow-sm transition-all focus:border-[#0f63b5] focus:ring-4 focus:ring-[#0f63b5]/10 hover:border-slate-300 dark:border-white/10 dark:bg-white/5 dark:text-black dark:focus:border-[#0f63b5] dark:placeholder-slate-500;
 }
 
 .form-input-inline {
-    @apply w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs font-medium transition-all focus:border-[#0f63b5] focus:ring-1 focus:ring-[#0f63b5]/20 dark:border-white/10 dark:bg-[#131313] dark:text-slate-100 dark:placeholder-slate-500;
+    @apply w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-black transition-all focus:border-[#0f63b5] focus:ring-1 focus:ring-[#0f63b5]/20 dark:border-white/10 dark:bg-white/5 dark:text-black dark:placeholder-slate-500;
 }
 
 .scrollbar-thin::-webkit-scrollbar {

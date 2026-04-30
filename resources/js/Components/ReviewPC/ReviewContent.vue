@@ -29,13 +29,37 @@ const props = defineProps({
         default: () => ({}),
     },
 });
+
+const monthOptions = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+];
 </script>
 
 <template>
     <section id="review-content" class="space-y-0">
         <div class="overflow-hidden border border-[#1661ad] bg-white dark:bg-[#171717]">
-            <div class="bg-[#1661ad] px-4 py-1.5 text-[14px] font-bold text-white">
-                Kesimpulan / Hasil Review
+            <div class="bg-[#1661ad] pl-4 text-[14px] font-bold text-white flex justify-between items-stretch">
+                <div class="py-1.5 flex items-center">
+                    Kesimpulan / Hasil Review
+                </div>
+                <div class="flex items-stretch border-l border-white/30 text-xs font-medium">
+                    <div class="flex items-center bg-[#12508f] px-3 text-[#f8f9fa] font-semibold tracking-wide">
+                        Periode Status
+                    </div>
+                    <div class="flex items-center bg-white text-slate-900">
+                        <template v-if="editable">
+                            <select v-model="form.month" class="w-[90px] border-0 bg-transparent py-1.5 pl-2 pr-5 text-slate-900 focus:ring-0 text-xs">
+                                <option value="" disabled>Bulan</option>
+                                <option v-for="m in monthOptions" :key="m" :value="m">{{ m }}</option>
+                            </select>
+                            <input v-model="form.year" type="number" class="w-[50px] border-0 bg-transparent py-1.5 pl-0 pr-2 text-slate-900 placeholder-slate-400 focus:ring-0 text-xs" placeholder="YYYY" />
+                        </template>
+                        <span v-else class="px-3 py-1.5">
+                            {{ [review.month, review.year].filter(Boolean).join(' ') || '-' }}
+                        </span>
+                    </div>
+                </div>
             </div>
             <article class="border border-[#9ec6e7] bg-white px-5 py-4 dark:border-sky-600/40 dark:bg-[#171717]">
                 <h2 v-if="!editable" class="text-xl font-extrabold leading-tight text-slate-900 dark:text-white">

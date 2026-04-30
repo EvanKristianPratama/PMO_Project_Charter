@@ -14,6 +14,8 @@ class TrsReviewPC extends Model
 
     protected $fillable = [
         'initiative_id',
+        'month',
+        'year',
         'kesimpulan',
         'detail_kesimpulan',
         'detail_penjelasan',
