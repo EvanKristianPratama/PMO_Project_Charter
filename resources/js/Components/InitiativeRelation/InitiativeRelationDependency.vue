@@ -581,16 +581,19 @@ watch(displayMode, (mode) => {
 });
 
 const downloadScreenshot = () => {
-    const element = document.querySelector('.initiative-relation-flow');
+    const selector = displayMode.value === 'all' ? `#${ALL_FLOW_ID}` : '.initiative-relation-flow';
+    const element = document.querySelector(selector);
+    
     if (!element || isExporting.value) return;
 
     isExporting.value = true;
 
+    // Use toPng on the flow container but with specific options to focus on content
     toPng(element, {
         backgroundColor: '#ffffff',
-        filter: (node) => {
-            // Filter out handles or other elements if necessary
-            return true;
+        pixelRatio: 2, // Higher quality
+        style: {
+            borderRadius: '0',
         },
     }).then((dataUrl) => {
         const link = document.createElement('a');
@@ -598,7 +601,7 @@ const downloadScreenshot = () => {
         link.href = dataUrl;
         link.click();
     }).catch((err) => {
-        console.error('oops, something went wrong!', err);
+        console.error('Export failed:', err);
     }).finally(() => {
         isExporting.value = false;
     });
