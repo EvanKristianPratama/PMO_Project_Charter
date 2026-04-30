@@ -44,6 +44,21 @@
             </button>
             <button
                 type="button"
+                :disabled="isExporting"
+                class="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[11px] font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200"
+                @click="downloadScreenshot"
+            >
+                <svg v-if="isExporting" class="h-3.5 w-3.5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                {{ isExporting ? 'Exporting...' : 'Export PNG' }}
+            </button>
+            <button
+                type="button"
                 class="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[11px] font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200"
                 @click="showFilters = !showFilters"
             >
@@ -456,6 +471,7 @@
 import { computed, ref, watch } from 'vue';
 import { MarkerType, Position, VueFlow, useVueFlow } from '@vue-flow/core';
 import { router } from '@inertiajs/vue3';
+import { toPng } from 'html-to-image';
 import '@vue-flow/core/dist/style.css';
 import '@vue-flow/core/dist/theme-default.css';
 import InitiativeRelationFlowNode from '@/Components/InitiativeRelation/InitiativeRelationFlowNode.vue';
@@ -505,6 +521,7 @@ const selectedModelRelasi = ref('v3');
 const selectedInitiative = ref('all');
 const displayMode = ref('all');
 const showEdgeLabels = ref(true);
+const isExporting = ref(false);
 
 const isPositionsLocked = ref(
     props.mstInitiatives.some((initiative) => initiative.relation_position?.is_locked)
@@ -562,6 +579,30 @@ watch(displayMode, (mode) => {
         selectedInitiative.value = 'all';
     }
 });
+
+const downloadScreenshot = () => {
+    const element = document.querySelector('.initiative-relation-flow');
+    if (!element || isExporting.value) return;
+
+    isExporting.value = true;
+
+    toPng(element, {
+        backgroundColor: '#ffffff',
+        filter: (node) => {
+            // Filter out handles or other elements if necessary
+            return true;
+        },
+    }).then((dataUrl) => {
+        const link = document.createElement('a');
+        link.download = `initiative-relation-${new Date().getTime()}.png`;
+        link.href = dataUrl;
+        link.click();
+    }).catch((err) => {
+        console.error('oops, something went wrong!', err);
+    }).finally(() => {
+        isExporting.value = false;
+    });
+};
 
 const handleEditRelation = (initiative, relation) => {
     emit('edit-relation', {
