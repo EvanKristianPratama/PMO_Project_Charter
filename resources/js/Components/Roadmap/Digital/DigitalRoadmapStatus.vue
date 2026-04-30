@@ -3,10 +3,10 @@
     <!-- Section 1: Label & Data (Left) -->
     <div class="flex flex-1 border-r border-[#3b82f6]">
       <div class="bar-sub-mini flex items-center shrink-0 min-w-[130px] justify-center border-r border-[#3b82f6] relative">
-        <span v-if="isFirst">Status Review</span>
+        <span v-if="isFirst && !hideLabelText">Status Review</span>
         
         <!-- Visual merge hack: cover the bottom border if not the last row -->
-        <div v-if="!isLast" class="absolute -bottom-[1px] left-0 right-0 h-[1.5px] bg-[#2e6ea2] z-10"></div>
+        <div v-if="!isLast && !hideLabelText" class="absolute -bottom-[1px] left-0 right-0 h-[1.5px] bg-[#2e6ea2] z-10"></div>
       </div>
       <div class="panel-body-mini flex items-center flex-1 justify-start px-4 text-left">
         <span class="truncate" :title="statusReviewData">{{ statusReviewData }}</span>
@@ -41,7 +41,7 @@
     </div>
       
     <!-- Section 3: Status Updated (Right - Outside Year Structure) -->
-    <div class="panel-body-mini w-[100px] border-l border-[#3b82f6] flex items-center justify-center text-center font-medium bg-slate-50/50">
+    <div class="panel-body-mini w-[100px] border-l border-[#3b82f6] flex items-center font-medium bg-slate-50/50">
         {{ statusUpdated }}
     </div>
   </div>
@@ -59,6 +59,7 @@ const props = defineProps({
   statusUpdated: { type: String, default: '-' },
   isFirst: { type: Boolean, default: true },
   isLast: { type: Boolean, default: true },
+  hideLabelText: { type: Boolean, default: false },
 });
 
 const getMarkerStyle = (left, color) => ({
@@ -79,9 +80,12 @@ const getMarkerStyle = (left, color) => ({
   color: #fff;
   padding: 3px 12px;
   font-size: 11px;
-  line-height: 1.2;
+  line-height: 1;
   text-align: center;
   min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .panel-body-mini {

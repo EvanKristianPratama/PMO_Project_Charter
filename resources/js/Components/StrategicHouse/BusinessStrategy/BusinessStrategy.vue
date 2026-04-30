@@ -50,7 +50,7 @@ const isEditMode = ref(false);
 const showInitiatives = ref(false);
 const showEnablers = ref(false);
 const showLastUpdatePeriod = ref(false);
-const showStrategyData = ref(false);
+const showStrategyData = ref(true);
 const selectedSource = ref('');
 const selectedStatus = ref('');
 

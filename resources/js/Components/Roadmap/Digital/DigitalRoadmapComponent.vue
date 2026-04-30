@@ -261,7 +261,7 @@ const buildLaneCells = (initiativeKey, laneIndex, items) => {
 <template>
     <div class="roadmap-wrap">
         <div v-if="groupedRoadmapRows.length === 0" class="roadmap-empty">
-            Belum ada data roadmap untuk ditampilkan.
+            Roadmap Not Available
         </div>
 
         <table v-else class="roadmap-table" :style="{ '--qcount': Math.max(totalCells, 1) }">

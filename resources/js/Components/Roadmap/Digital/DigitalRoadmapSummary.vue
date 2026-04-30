@@ -69,11 +69,12 @@ const isActivityActive = (row, qIdx) => {
     <div class="roadmap-summary-wrap overflow-x-auto">
         <table class="roadmap-table-evaluation w-full text-[10px] border-collapse" :style="{ '--qcount': Math.max(quarterCells.length, 1) }">
             <colgroup>
-                <!-- Leave 100px for the end, split remaining 50/50 -->
-                <col :style="{ width: 'calc((100% - 100px) / 2)' }">
+                <!-- Activity column -->
+                <col style="width: 385px;">
+                <!-- Quarter columns - equal width for all quarters -->
                 <col v-for="(_, i) in quarterCells" :key="`col-q-${i}`" 
-                     :style="{ width: `calc((100% - 100px) / 2 / ${quarterCells.length})` }">
-                <!-- Status Updated column placeholder -->
+                     :style="{ width: `calc((100% - 485px) / ${quarterCells.length})` }">
+                <!-- Status Updated column -->
                 <col style="width: 100px;">
             </colgroup>
             <thead>
@@ -188,9 +189,10 @@ const isActivityActive = (row, qIdx) => {
     color: #334155;
     border-right: 1px solid #b9d1e8;
     border-bottom: 1px solid #b9d1e8;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    vertical-align: top;
 }
 
 .cell-tl-eval {
