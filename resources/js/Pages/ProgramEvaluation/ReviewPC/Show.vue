@@ -1,8 +1,8 @@
-<template>
+j<template>
     <UserLayout title="Detail Review PC">
         <div class="animate-fade-in-up">
             <section
-                class="mx-auto mb-3 w-full max-w-[1200px] rounded-2xl border border-slate-200 bg-white shadow-sm print:hidden dark:border-white/10 dark:bg-[#171717]">
+                class="mx-auto mb-3 w-full max-w-[1200px] rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="flex flex-wrap items-center gap-2 px-3 py-2.5">
                     <Link :href="route('program-evaluation.index')"
                         class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-slate-500 dark:text-slate-400">
@@ -43,19 +43,18 @@
                             Review
                         </button>
                     </div>
-                    <Link v-if="activeNav === 'review'" :href="route('program-evaluation.index', { edit: trsReviewPC.id })"
+                    <button v-if="activeNav === 'review' && !isEditingReview" @click="isEditingReview = true"
                         class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5">
                         Edit
-                    </Link>
-                    <button type="button"
-                        class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5"
-                        @click="printPage">
-                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 9V4h12v5M6 17h12v3H6v-3Zm-2-2h16a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2Z" />
-                        </svg>
-                        Print
                     </button>
+                    <div v-if="activeNav === 'review' && isEditingReview" class="flex items-center gap-2">
+                        <button @click="saveReview" :disabled="reviewForm.processing" class="inline-flex items-center gap-2 rounded-lg border border-transparent bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-blue-700 disabled:opacity-50">
+                            Save
+                        </button>
+                        <button @click="cancelEditReview" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5">
+                            Cancel
+                        </button>
+                    </div>
                 </div>
             </section>
             <div id="review"
@@ -94,7 +93,8 @@
                         </div>
                     </div>
                     <ReviewContent :review="review" :penjelasan-items="penjelasanItems" :why-items="whyItems"
-                        :how-parsed="howParsed" :project-profile-items="projectProfileItems" />
+                        :how-parsed="howParsed" :project-profile-items="projectProfileItems"
+                        :editable="isEditingReview" :form="reviewForm" />
                 </section>
 
                 <section v-if="activeNav === 'project-charter'" id="project-charter" class="space-y-0">
@@ -198,7 +198,7 @@
                     </div>
                 </section>
 
-                <section v-if="activeNav === 'roadmap'" id="roadmap" class="print:hidden">
+                <section v-if="activeNav === 'roadmap'" id="roadmap">
                     <div class="px-3 py-3">
                         <StatusImplementationTable
                             :projects="mappedProjects"
@@ -234,7 +234,7 @@
 
 <script setup>
 import { computed, onMounted, ref, reactive } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, useForm } from '@inertiajs/vue3';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import ItCharterDocument from '@/Components/ProjectCharter/ItCharterDocument.vue';
@@ -332,8 +332,31 @@ const whyItems = computed(() => splitToItems(review.value?.why));
 const projectProfileItems = computed(() => splitToItems(review.value?.project_profile));
 const howParsed = computed(() => parseHow(review.value?.how));
 
-const printPage = () => {
-    window.print();
+const isEditingReview = ref(false);
+const reviewForm = useForm({
+    kesimpulan: props.trsReviewPC?.kesimpulan ?? '',
+    detail_kesimpulan: props.trsReviewPC?.detail_kesimpulan ?? props.trsReviewPC?.detail_penjelasan ?? '',
+    penjelasan: props.trsReviewPC?.penjelasan ?? '',
+    why: props.trsReviewPC?.why ?? '',
+    what: props.trsReviewPC?.what ?? '',
+    how: props.trsReviewPC?.how ?? '',
+    project_profile: props.trsReviewPC?.project_profile ?? '',
+    key_milestone: props.trsReviewPC?.key_milestone ?? '',
+    risk_impact: props.trsReviewPC?.risk_impact ?? '',
+});
+
+const saveReview = () => {
+    reviewForm.put(route('program-evaluation.update', props.trsReviewPC.id), {
+        onSuccess: () => {
+            isEditingReview.value = false;
+        },
+        preserveScroll: true,
+    });
+};
+
+const cancelEditReview = () => {
+    reviewForm.reset();
+    isEditingReview.value = false;
 };
 
 const activeNav = ref('review');
