@@ -294,6 +294,7 @@
                                                 :style="{ height: `${relationGraphByInitiative(initiative).height}px` }"
                                             >
                                                 <VueFlow
+                                                    ref="initiativeFlowRefs"
                                                     class="initiative-relation-flow"
                                                     :nodes="relationGraphByInitiative(initiative).nodes"
                                                     :edges="relationGraphByInitiative(initiative).edges"
@@ -352,6 +353,7 @@
                                             >
                                                 <VueFlow
                                                     :id="ALL_FLOW_ID"
+                                                    ref="allFlowRef"
                                                     class="initiative-relation-flow"
                                                     :nodes="allRelationGraph.nodes"
                                                     :edges="allRelationGraph.edges"
@@ -479,6 +481,8 @@ import InitiativeRelationFlowNode from '@/Components/InitiativeRelation/Initiati
 const ALL_FLOW_ID = 'initiative-relation-all-flow';
 const { updateNode: updateAllFlowNode, getNodes: getAllFlowNodes } = useVueFlow(ALL_FLOW_ID);
 const allSelectedNodeId = ref(null);
+const allFlowRef = ref(null);
+const initiativeFlowRefs = ref([]);
 
 const handleAllNodeClick = ({ node }) => {
     const prevId = allSelectedNodeId.value;
@@ -581,30 +585,53 @@ watch(displayMode, (mode) => {
 });
 
 const downloadScreenshot = () => {
-    const selector = displayMode.value === 'all' ? `#${ALL_FLOW_ID}` : '.initiative-relation-flow';
-    const element = document.querySelector(selector);
+    if (isExporting.value) return;
+
+    let element = null;
+    if (displayMode.value === 'all') {
+        // Target the element via ref or ID
+        element = allFlowRef.value?.$el || document.getElementById(ALL_FLOW_ID);
+    } else {
+        // In per-code mode, it's trickier, we take the first visible one
+        element = document.querySelector('.initiative-relation-flow');
+    }
     
-    if (!element || isExporting.value) return;
+    if (!element) {
+        console.error('Export Error: Diagram element not found');
+        alert('Gagal mengekspor: Elemen diagram tidak ditemukan.');
+        return;
+    }
 
     isExporting.value = true;
+    console.log('Starting export for element:', element);
 
-    // Use toPng on the flow container but with specific options to focus on content
-    toPng(element, {
-        backgroundColor: '#ffffff',
-        pixelRatio: 2, // Higher quality
-        style: {
-            borderRadius: '0',
-        },
-    }).then((dataUrl) => {
-        const link = document.createElement('a');
-        link.download = `initiative-relation-${new Date().getTime()}.png`;
-        link.href = dataUrl;
-        link.click();
-    }).catch((err) => {
-        console.error('Export failed:', err);
-    }).finally(() => {
-        isExporting.value = false;
-    });
+    // Small timeout to ensure UI is ready
+    setTimeout(() => {
+        toPng(element, {
+            backgroundColor: '#ffffff',
+            pixelRatio: 2,
+            style: {
+                borderRadius: '0',
+            },
+            // Include some margin if needed
+            width: element.offsetWidth,
+            height: element.offsetHeight,
+        }).then((dataUrl) => {
+            if (!dataUrl || dataUrl.length < 100) {
+                throw new Error('Generated image is empty');
+            }
+            const link = document.createElement('a');
+            link.download = `initiative-relation-${new Date().getTime()}.png`;
+            link.href = dataUrl;
+            link.click();
+            console.log('Export successful');
+        }).catch((err) => {
+            console.error('Export failed:', err);
+            alert('Gagal mengekspor gambar. Silakan cek konsol browser untuk detailnya.');
+        }).finally(() => {
+            isExporting.value = false;
+        });
+    }, 100);
 };
 
 const handleEditRelation = (initiative, relation) => {
