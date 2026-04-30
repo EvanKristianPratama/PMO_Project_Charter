@@ -69,19 +69,19 @@ const isActivityActive = (row, qIdx) => {
     <div class="roadmap-summary-wrap overflow-x-auto">
         <table class="roadmap-table-evaluation w-full text-[10px] border-collapse" :style="{ '--qcount': Math.max(quarterCells.length, 1) }">
             <colgroup>
-                <!-- Activity column -->
-                <col style="width: 385px;">
+                <!-- Activity columnz -->
+                <col style="width: 413px;">
                 <!-- Quarter columns - equal width for all quarters -->
                 <col v-for="(_, i) in quarterCells" :key="`col-q-${i}`" 
                      :style="{ width: `calc((100% - 485px) / ${quarterCells.length})` }">
                 <!-- Status Updated column -->
-                <col style="width: 100px;">
+                <col style="width: 300px;">
             </colgroup>
             <thead>
                 <tr>
                     <th rowspan="2" class="th-eval"></th>
                     <th v-for="year in roadmapYears" :key="`ey-${year}`" colspan="4" class="th-eval th-year-eval">{{ year }}</th>
-                    <th rowspan="2" class="th-eval bg-slate-50 border-l-[#3b82f6]"></th>
+                    <!-- <th rowspan="2" class="th-eval bg-slate-50 border-l-[#3b82f6]"></th> -->
                 </tr>
                 <tr>
                     <th v-for="(cell, i) in quarterCells" :key="`eqh-${i}`" 
@@ -98,7 +98,7 @@ const isActivityActive = (row, qIdx) => {
                             class="cell-section-gap-eval"
                             :class="{ 'border-r-blue-eval': cell.quarter === 4 }"
                         ></td>
-                        <td class="bg-slate-50/50 border-l border-[#b9d1e8]"></td>
+                        <!-- <td class="bg-slate-50/50 border-l border-[#b9d1e8]"></td> -->
                     </tr>
                     <!-- Activities -->
                     <tr v-for="(row, ri) in section.rows" :key="`erow-${si}-${ri}`" class="row-data-eval">
@@ -110,7 +110,7 @@ const isActivityActive = (row, qIdx) => {
                                 'border-r-blue-eval': cell.quarter === 4 
                             }"
                         ></td>
-                        <td class="bg-slate-50/30 border-l border-[#b9d1e8]"></td>
+                        <!-- <td class="bg-slate-50/30 border-l border-[#b9d1e8]"></td> -->
                     </tr>
                 </template>
                 <tr v-if="!roadmapSections.length">

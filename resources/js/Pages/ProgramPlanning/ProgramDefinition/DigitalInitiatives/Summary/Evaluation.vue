@@ -13,7 +13,7 @@
         </div>
 
         <div class="flex justify-start">
-            <div class="score-panel flex w-full max-w-4xl flex-col overflow-hidden border border-[#3b82f6]">
+            <div class="score-panel flex w-full max-w-6xl flex-col overflow-hidden border border-[#3b82f6]">
                 <div v-if="roadmapDuration"
                     class="group flex cursor-pointer border-b border-[#3b82f6] hover:bg-slate-50"
                     @click="isRoadmapExpanded = !isRoadmapExpanded">
@@ -57,7 +57,7 @@
                     </div>
 
                     <div
-                        class="panel-body-mini w-[100px] items-center justify-center border-l border-[#3b82f6] bg-slate-50 text-center text-[10px] font-bold uppercase text-[#1e4f8f]">
+                        class="panel-body-mini w-[300px] items-center justify-center border-l border-[#3b82f6] bg-slate-50 text-center text-[10px] font-bold uppercase text-[#1e4f8f]">
                         Status Updated
                     </div>
                 </div>
@@ -93,7 +93,7 @@
                         </div>
                     </div>
 
-                    <div class="panel-body-mini w-[100px] border-l border-[#3b82f6] bg-slate-50/30"></div>
+                    <div class="panel-body-mini w-[300px] border-l border-[#3b82f6] bg-slate-50/30"></div>
                 </div>
 
                 <div v-if="computedAppendixData && computedAppendixData.urgency_expected !== '-' && statusReviewMarkers.length > 0"

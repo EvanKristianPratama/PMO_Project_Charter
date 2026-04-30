@@ -41,8 +41,8 @@
     </div>
       
     <!-- Section 3: Status Updated (Right - Outside Year Structure) -->
-    <div class="panel-body-mini w-[100px] border-l border-[#3b82f6] flex items-center font-medium bg-slate-50/50">
-        {{ statusUpdated }}
+    <div class="panel-body-mini w-[300px] border-l border-[#3b82f6] flex items-center font-medium bg-slate-50/50 py-2">
+        <span class="break-words w-full">{{ statusUpdated }}</span>
     </div>
   </div>
 </template>
