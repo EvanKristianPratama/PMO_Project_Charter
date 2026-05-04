@@ -1,4 +1,4 @@
-j<template>
+<template>
     <UserLayout title="Detail Review PC">
         <div class="animate-fade-in-up">
             <section
@@ -43,15 +43,27 @@ j<template>
                             Review
                         </button>
                     </div>
-                    <button v-if="activeNav === 'review' && !isEditingReview" @click="isEditingReview = true"
+                    <button v-if="activeNav === 'review' && !isEditingReview && !isAddingReview" @click="startEditReview"
                         class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5">
                         Edit
+                    </button>
+                    <button v-if="activeNav === 'review' && !isEditingReview && !isAddingReview" @click="isAddingReview = true"
+                        class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 transition hover:bg-emerald-100 dark:border-white/10 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/40">
+                        Add
                     </button>
                     <div v-if="activeNav === 'review' && isEditingReview" class="flex items-center gap-2">
                         <button @click="saveReview" :disabled="reviewForm.processing" class="inline-flex items-center gap-2 rounded-lg border border-transparent bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-blue-700 disabled:opacity-50">
                             Save
                         </button>
                         <button @click="cancelEditReview" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5">
+                            Cancel
+                        </button>
+                    </div>
+                    <div v-if="activeNav === 'review' && isAddingReview" class="flex items-center gap-2">
+                        <button @click="saveNewReview" :disabled="newReviewForm.processing" class="inline-flex items-center gap-2 rounded-lg border border-transparent bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50">
+                            Save
+                        </button>
+                        <button @click="cancelAddReview" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5">
                             Cancel
                         </button>
                     </div>
@@ -92,9 +104,35 @@ j<template>
                             </template>
                         </div>
                     </div>
-                    <ReviewContent :review="review" :penjelasan-items="penjelasanItems" :why-items="whyItems"
+                    <div v-if="!isEditingReview && !isAddingReview && reviewMonthFilterOptions.length > 1"
+                        class="flex flex-wrap items-center gap-2 px-3 py-2 bg-white border-b border-slate-100 dark:bg-[#171717] dark:border-white/10">
+                        <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Filter
+                            Bulan:</span>
+                        <button v-for="opt in reviewMonthFilterOptions" :key="`review-month-${opt.value || 'all'}`" type="button"
+                            @click="reviewMonthFilter = opt.value" :class="[
+                                'inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold capitalize transition',
+                                reviewMonthFilter === opt.value
+                                    ? opt.activeClass
+                                    : 'bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-white/10 dark:text-slate-400 dark:hover:bg-white/20'
+                            ]">
+                            {{ opt.label }}
+                        </button>
+                    </div>
+                    <ReviewContent
+                        v-if="!isEditingReview && !isAddingReview"
+                        :review="review"
+                        :reviews="filteredReviewHistory"
+                    />
+
+                    <ReviewContent v-else-if="!isAddingReview"
+                        :review="editableReview"
+                        :penjelasan-items="penjelasanItems" :why-items="whyItems"
                         :how-parsed="howParsed" :project-profile-items="projectProfileItems"
                         :editable="isEditingReview" :form="reviewForm" />
+
+                    <ReviewContent v-else :review="{}" :penjelasan-items="[]" :why-items="[]"
+                        :how-parsed="{ intro: '', steps: [] }" :project-profile-items="[]"
+                        :editable="true" :form="newReviewForm" />
                 </section>
 
                 <section v-if="activeNav === 'project-charter'" id="project-charter" class="space-y-0">
@@ -254,6 +292,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    initiativeReviews: {
+        type: Array,
+        default: () => [],
+    },
     mappedProject: {
         type: Object,
         default: null,
@@ -274,6 +316,49 @@ const review = computed(() => ({
     ...props.trsReviewPC,
     detail_kesimpulan: props.trsReviewPC?.detail_kesimpulan ?? props.trsReviewPC?.detail_penjelasan ?? '',
 }));
+
+const reviewHistory = computed(() => {
+    const items = Array.isArray(props.initiativeReviews) ? props.initiativeReviews : [];
+    return items.length > 0 ? items : [review.value];
+});
+
+const normalizeMonth = (value) => String(value ?? '').trim().toLowerCase();
+
+const reviewMonthFilter = ref('');
+
+const reviewMonthFilterOptions = computed(() => {
+    const months = new Map();
+
+    reviewHistory.value.forEach((item) => {
+        const label = String(item?.month ?? '').trim();
+        const value = normalizeMonth(label);
+
+        if (!value || months.has(value)) {
+            return;
+        }
+
+        months.set(value, label);
+    });
+
+    return [
+        { value: '', label: 'Semua', activeClass: 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900' },
+        ...Array.from(months.entries()).map(([value, label]) => ({
+            value,
+            label,
+            activeClass: 'bg-blue-100 text-blue-700 ring-1 ring-blue-300',
+        })),
+    ];
+});
+
+const filteredReviewHistory = computed(() => {
+    if (!reviewMonthFilter.value) {
+        return reviewHistory.value;
+    }
+
+    return reviewHistory.value.filter((item) => normalizeMonth(item?.month) === reviewMonthFilter.value);
+});
+
+const editableReview = computed(() => filteredReviewHistory.value[0] ?? review.value);
 
 const initiativeName = computed(() => review.value?.initiative?.name ?? '-');
 
@@ -333,6 +418,22 @@ const projectProfileItems = computed(() => splitToItems(review.value?.project_pr
 const howParsed = computed(() => parseHow(review.value?.how));
 
 const isEditingReview = ref(false);
+const editingReviewId = ref(props.trsReviewPC?.id ?? null);
+
+const mapReviewToForm = (item = {}) => ({
+    month: item?.month ?? '',
+    year: item?.year ?? '',
+    kesimpulan: item?.kesimpulan ?? '',
+    detail_kesimpulan: item?.detail_kesimpulan ?? item?.detail_penjelasan ?? '',
+    penjelasan: item?.penjelasan ?? '',
+    why: item?.why ?? '',
+    what: item?.what ?? '',
+    how: item?.how ?? '',
+    project_profile: item?.project_profile ?? '',
+    key_milestone: item?.key_milestone ?? '',
+    risk_impact: item?.risk_impact ?? '',
+});
+
 const reviewForm = useForm({
     month: props.trsReviewPC?.month ?? '',
     year: props.trsReviewPC?.year ?? '',
@@ -347,10 +448,56 @@ const reviewForm = useForm({
     risk_impact: props.trsReviewPC?.risk_impact ?? '',
 })
 
+const setReviewFormValues = (item = {}) => {
+    const values = mapReviewToForm(item);
+
+    Object.keys(values).forEach((key) => {
+        reviewForm[key] = values[key];
+    });
+
+    reviewForm.defaults(values);
+    reviewForm.clearErrors();
+};
+
+const isAddingReview = ref(false);
+const newReviewForm = useForm({
+    initiative_id: props.trsReviewPC?.initiative_id ?? '',
+    month: '',
+    year: '',
+    kesimpulan: '',
+    detail_kesimpulan: '',
+    detail_penjelasan: '',
+    penjelasan: '',
+    why: '',
+    what: '',
+    how: '',
+    project_profile: '',
+    key_milestone: '',
+    risk_impact: '',
+});
+
+const startEditReview = () => {
+    const targetReview = editableReview.value ?? review.value;
+    editingReviewId.value = targetReview?.id ?? props.trsReviewPC?.id ?? null;
+    setReviewFormValues(targetReview);
+    isEditingReview.value = true;
+};
+
 const saveReview = () => {
-    reviewForm.put(route('program-evaluation.update', props.trsReviewPC.id), {
+    const targetReviewId = editingReviewId.value ?? editableReview.value?.id ?? props.trsReviewPC.id;
+
+    reviewForm.put(route('program-evaluation.update', targetReviewId), {
         onSuccess: () => {
             isEditingReview.value = false;
+        },
+        preserveScroll: true,
+    });
+};
+
+const saveNewReview = () => {
+    newReviewForm.post(route('program-evaluation.store'), {
+        onSuccess: () => {
+            isAddingReview.value = false;
         },
         preserveScroll: true,
     });
@@ -359,6 +506,11 @@ const saveReview = () => {
 const cancelEditReview = () => {
     reviewForm.reset();
     isEditingReview.value = false;
+};
+
+const cancelAddReview = () => {
+    newReviewForm.reset();
+    isAddingReview.value = false;
 };
 
 const activeNav = ref('review');

@@ -251,6 +251,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     // Program Evaluation
     Route::redirect('/program-evalution', '/program-evalution/review');
     Route::get('/program-evalution/review', [TrsReviewPCController::class, 'index'])->name('program-evaluation.index');
+    Route::post('/program-evalution/review', [TrsReviewPCController::class, 'store'])->name('program-evaluation.store');
     Route::get('/program-evalution/review/{trsReviewPC}', [TrsReviewPCController::class, 'show'])->name('program-evaluation.show');
     Route::put('/program-evalution/review/{trsReviewPC}', [TrsReviewPCController::class, 'update'])->name('program-evaluation.update');
     Route::get('/program-evalution/review-timeline', [ReviewTimelineController::class, 'index'])->name('program-evaluation.review-timeline');

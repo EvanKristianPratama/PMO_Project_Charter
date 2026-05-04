@@ -37,7 +37,24 @@ class TrsReviewPCController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'initiative_id' => 'required|exists:mst_initiative,id',
+            'month' => 'nullable|string',
+            'year' => 'nullable|integer|min:1901|max:2155',
+            'kesimpulan' => 'nullable|string',
+            'detail_kesimpulan' => 'nullable|string',
+            'penjelasan' => 'nullable|string',
+            'why' => 'nullable|string',
+            'what' => 'nullable|string',
+            'how' => 'nullable|string',
+            'project_profile' => 'nullable|string',
+            'key_milestone' => 'nullable|string',
+            'risk_impact' => 'nullable|string',
+        ]);
+
+        $trsReviewPC = TrsReviewPC::create($validated);
+
+        return redirect()->route('program-evaluation.show', $trsReviewPC->id)->with('success', 'Review PC berhasil ditambahkan.');
     }
 
     /**
@@ -53,6 +70,48 @@ class TrsReviewPCController extends Controller
                 ->with('initiativeRelationsColumn.initiativeRow')
                 ->with('initiativeRelationsColumn.initiativeColumn'),
         ]);
+
+        $initiativeReviews = TrsReviewPC::query()
+            ->with(['initiative:id,code,name,tipe_initiative'])
+            ->where('initiative_id', $trsReviewPC->initiative_id)
+            ->get()
+            ->map(static function (TrsReviewPC $review) {
+                $monthName = strtolower(trim((string) $review->month));
+                $monthOrder = match ($monthName) {
+                    'januari' => 1,
+                    'februari' => 2,
+                    'maret' => 3,
+                    'april' => 4,
+                    'mei' => 5,
+                    'juni' => 6,
+                    'juli' => 7,
+                    'agustus' => 8,
+                    'september' => 9,
+                    'oktober' => 10,
+                    'november' => 11,
+                    'desember' => 12,
+                    default => 0,
+                };
+
+                return array_merge(
+                    $review->toArray(),
+                    ['month_order' => $monthOrder]
+                );
+            })
+            ->sort(function (array $left, array $right) {
+                $yearComparison = (int) ($right['year'] ?? 0) <=> (int) ($left['year'] ?? 0);
+                if ($yearComparison !== 0) {
+                    return $yearComparison;
+                }
+
+                $monthComparison = (int) ($right['month_order'] ?? 0) <=> (int) ($left['month_order'] ?? 0);
+                if ($monthComparison !== 0) {
+                    return $monthComparison;
+                }
+
+                return (int) ($right['id'] ?? 0) <=> (int) ($left['id'] ?? 0);
+            })
+            ->values();
 
         $mappedProject = null;
         $mappedProjects = [];
@@ -130,6 +189,7 @@ class TrsReviewPCController extends Controller
 
         return inertia('ProgramEvaluation/ReviewPC/Show', [
             'trsReviewPC' => $trsReviewPC,
+            'initiativeReviews' => $initiativeReviews,
             'reviewOptions' => $reviewOptions,
             'mappedProject' => $mappedProject,
             'mappedProjects' => $mappedProjects,
