@@ -98,6 +98,9 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/program-planning', PlanningDashboardController::class)->name('program-planning');
+    // Program Planning → Business Strategy (separate from Strategic House)
+    Route::get('/program-planning/business-strategy', fn () => Inertia::render('ProgramPlanning/BusinessStrategy/Index'))
+        ->name('program-planning.business-strategy');
     Route::get('/program-planning/rsti-sub-holding', [ProgramPlanningController::class, 'rstiSubHolding'])->name('program-planning.rsti-sub-holding');
     Route::get('/program-planning/program-definition', ProgramDefinitionController::class)->name('program-planning.program-definition');
     Route::get('/program-planning/program-definition/digital-initiatives', ProgramDefinitionDigitalInitiativesController::class)->name('program-planning.program-definition.digital-initiatives');

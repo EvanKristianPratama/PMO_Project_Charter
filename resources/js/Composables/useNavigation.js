@@ -42,9 +42,11 @@ export function useNavigation() {
         const programPlanningChildren = [
             {
                 label: "Business Strategy",
-                href: safeRoute("business-strategy.index"),
+                href: '/program-planning/business-strategy',
                 icon: DocumentTextIcon,
-                active: (url) => url.startsWith("/strategic-house") && url.includes("business-strategy"),
+                // Only mark active when under program-planning routes,
+                // not when viewing Business Strategy inside Strategic House.
+                active: (url) => url.startsWith("/program-planning") && url.includes("business-strategy"),
             },
             {
                 label: "Digital Initiative Definition",

@@ -1,12 +1,13 @@
 <template>
-    <div class="p-6">
-        <h1 class="text-2xl font-bold">Strategic House — Program Planning</h1>
-        <p class="mt-2 text-sm text-slate-500">This page is intentionally left blank.</p>
-    </div>
+    <UserLayout title="Business Strategy">
+        <div class="space-y-6 p-6 animate-fade-in-up">
+            <h1 class="text-2xl font-bold">Business Strategy</h1>
+        </div>
+    </UserLayout>
 </template>
 
 <script setup>
-// Empty index page for Program Planning → Strategic House
+import UserLayout from '@/Layouts/UserLayout.vue';
 </script>
 
 <style scoped>
