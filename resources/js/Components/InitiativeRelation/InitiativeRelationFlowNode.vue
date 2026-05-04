@@ -59,8 +59,7 @@ const cardTitle = computed(() => {
 .initiative-status-card {
     position: relative;
     display: inline-flex;
-    min-width: 230px;
-    max-width: 280px;
+    width: 260px;
     overflow: hidden;
     border: 1px solid var(--initiative-status-border, #2563eb);
     border-radius: 0.25rem;

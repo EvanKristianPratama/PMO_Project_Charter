@@ -893,7 +893,7 @@ const getRelationDirection = (relation) => {
 };
 
 const initiativeNodeId = (initiativeId) => `initiative-${initiativeId}`;
-const FLOW_NODE_WIDTH = 240;
+const FLOW_NODE_WIDTH = 260;
 const FLOW_NODE_HEIGHT = 74;
 const FLOW_GRAPH_PADDING = 56;
 const ALL_GRAPH_FALLBACK_COLUMNS = 4;
@@ -1503,7 +1503,7 @@ const allRelationGraph = computed(() => buildGraphForAllRelations(allRelationRow
 }
 
 :deep(.initiative-relation-flow .vue-flow__node) {
-    width: 240px;
+    width: 260px;
     white-space: normal;
     text-align: center;
     cursor: pointer;
