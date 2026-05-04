@@ -2,11 +2,14 @@
     <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
         <div class="border-b border-slate-200 px-5 py-4 dark:border-white/10">
             <div class="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 dark:border-white/5">
-                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider">Implementation Status:</span>
+                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider">Select Status Summary:</span>
                 <div
                     v-for="status in statusLegend"
                     :key="`status-legend-${status.label}`"
-                    class="flex items-center gap-1.5 select-none"
+                    class="flex cursor-pointer items-center gap-1.5 select-none transition-opacity"
+                    :class="{ 'opacity-40': selectedStatus && selectedStatus !== status.label }"
+                    :title="`Filter: ${status.label}`"
+                    @click="toggleStatusFilter(status.label)"
                 >
                     <span
                         class="h-3 w-3 rounded-sm shadow-sm legend-swatch"
@@ -22,14 +25,14 @@
                     </span>
                 </div>
             </div>
-            <div class="flex flex-wrap items-center gap-3">
-                <label for="coe-filter" class="text-xs font-medium text-slate-700 dark:text-slate-200">CoE</label>
+            <div class="review-filter-switch">
+                <label for="coe-filter" class="text-xs font-medium text-slate-700 dark:text-slate-200">IT Building Blocks</label>
                 <select
                     id="coe-filter"
                     v-model="selectedCoe"
-                    class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-sky-400 focus:outline-none dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-200"
+                    class="review-filter-select dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-200"
                 >
-                    <option value="all">All CoE</option>
+                    <option value="all">All IT Building Blocks</option>
                     <option
                         v-for="coe in coeOptions"
                         :key="`coe-filter-${coe}`"
@@ -38,13 +41,13 @@
                         {{ coe }}
                     </option>
                 </select>
-                <label for="month-filter" class="text-xs font-medium text-slate-700 dark:text-slate-200">Bulan</label>
+                <label for="month-filter" class="text-xs font-medium text-slate-700 dark:text-slate-200">Periode</label>
                 <select
                     id="month-filter"
                     v-model="selectedMonth"
-                    class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-sky-400 focus:outline-none dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-200"
+                    class="review-filter-select dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-200"
                 >
-                    <option value="all">All Bulan</option>
+                    <option value="all">All Month</option>
                     <option
                         v-for="period in monthOptions"
                         :key="`month-filter-${period.value}`"
@@ -53,12 +56,12 @@
                         {{ period.label }}
                     </option>
                 </select>
-                <label for="initiative" class="text-xs font-medium text-slate-700 dark:text-slate-200">Initiative</label>
+                <label for="initiative" class="text-xs font-medium text-slate-700 dark:text-slate-200">IT Initiatives</label>
                 <select
                     v-model="selectedInitiativeId"
-                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-sky-400 focus:outline-none dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-200 md:w-72"
+                    class="review-filter-select review-filter-select--wide dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-200"
                 >
-                    <option value="all">All Initiative</option>
+                    <option value="all">All IT Initiatives</option>
                     <option
                         v-for="initiative in initiativeOptions"
                         :key="initiative.id"
@@ -84,10 +87,10 @@
                             IT Initiatives
                         </th>
                         <th class="border border-slate-300 bg-slate-100 px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-300">
-                            Kesimpulan
+                            Summary
                         </th>
                         <th class="border border-slate-300 bg-slate-100 px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-300">
-                            Action
+                            Month
                         </th>
                     </tr>
                 </thead>
@@ -137,18 +140,8 @@
                                 {{ displayText(review.review_pc_conclusion) }}
                             </p>
                         </td>
-                        <td class="border border-slate-300 px-3 py-2 text-slate-600 dark:border-white/20 dark:text-slate-400">
-                            <Link
-                                v-if="review.id"
-                                :href="route('program-evaluation.show', review.id)"
-                                class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700 dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-200 dark:hover:border-sky-500/60 dark:hover:bg-sky-900/30 dark:hover:text-sky-200"
-                                @click.stop
-                            >
-                                Detail
-                            </Link>
-                            <span v-else class="text-xs italic text-slate-400">
-                                Belum ada review
-                            </span>
+                        <td class="border border-slate-300 px-3 py-2 text-[10px] font-semibold text-slate-600 dark:border-white/20 dark:text-slate-300">
+                            {{ displayText(review.review_pc_period) }}
                         </td>
                     </tr>
                 </tbody>
@@ -158,7 +151,7 @@
 </template>
 
 <script setup>
-import { Link } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 
 const props = defineProps({
@@ -173,6 +166,7 @@ const emit = defineEmits(['select', 'count-change']);
 const selectedCoe = ref('all');
 const selectedMonth = ref('all');
 const selectedInitiativeId = ref('all');
+const selectedStatus = ref('');
 const selectedReviewId = ref(null);
 
 const normalizedReviews = computed(() => {
@@ -228,7 +222,7 @@ const getCoeColorClass = (coeName) => {
     return 'coe-color-none';
 };
 
-const statusDesiredOrder = ['On Track', 'At Risk', 'Not Signed', 'Not Started'];
+const statusDesiredOrder = ['On Track', 'At Risk', 'Not Signed', 'Not Started', 'Done'];
 
 const normalizeStatus = (value) => String(value ?? '').trim().toLowerCase();
 
@@ -238,14 +232,14 @@ const statusCapsuleClass = (status) => {
     if (normalized === 'at risk') return 'status-color-atrisk';
     if (normalized === 'not signed') return 'status-color-notsigned';
     if (normalized === 'not started') return 'status-color-notstarted';
+    if (normalized === 'done') return 'status-color-done';
     return 'status-color-other';
 };
 
 const statusLegend = computed(() => {
     const counts = Object.fromEntries(statusDesiredOrder.map((status) => [status, 0]));
-    let otherCount = 0;
 
-    normalizedReviews.value.forEach((review) => {
+    baseFilteredReviews.value.forEach((review) => {
         const rawStatus = String(review?.latest_review_progress_status ?? '').trim();
         if (!rawStatus) return;
 
@@ -257,8 +251,6 @@ const statusLegend = computed(() => {
             counts[matchedStatus] += 1;
             return;
         }
-
-        otherCount += 1;
     });
 
     const legend = statusDesiredOrder.map((label) => ({
@@ -266,14 +258,6 @@ const statusLegend = computed(() => {
         class: statusCapsuleClass(label),
         count: counts[label],
     }));
-
-    if (otherCount > 0) {
-        legend.push({
-            label: 'Other',
-            class: 'status-color-other',
-            count: otherCount,
-        });
-    }
 
     return legend;
 });
@@ -355,7 +339,7 @@ const getMonthOrder = (month) => {
     }[normalized] ?? 0;
 };
 
-const filteredReviews = computed(() => {
+const baseFilteredReviews = computed(() => {
     return normalizedReviews.value.filter((review) => {
         const matchesCoe = selectedCoe.value === 'all'
             || review.latest_coe_name === selectedCoe.value;
@@ -366,6 +350,13 @@ const filteredReviews = computed(() => {
             || String(initiativeId) === String(selectedInitiativeId.value);
 
         return matchesCoe && matchesMonth && matchesInitiative;
+    });
+});
+
+const filteredReviews = computed(() => {
+    return baseFilteredReviews.value.filter((review) => {
+        return !selectedStatus.value
+            || normalizeStatus(review.latest_review_progress_status) === normalizeStatus(selectedStatus.value);
     });
 });
 
@@ -423,6 +414,14 @@ watch(
 const selectReview = (review) => {
     selectedReviewId.value = review.id;
     emit('select', review);
+
+    if (review.id) {
+        router.visit(route('program-evaluation.show', review.id));
+    }
+};
+
+const toggleStatusFilter = (status) => {
+    selectedStatus.value = selectedStatus.value === status ? '' : status;
 };
 
 const displayText = (value) => {
@@ -441,6 +440,49 @@ const displayText = (value) => {
     min-height: 12px;
     border-radius: 2px;
     flex-shrink: 0;
+}
+
+.review-filter-switch {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    border-radius: 12px;
+    background: transparent;
+    padding: 2px;
+}
+
+.review-filter-select {
+    appearance: none;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background-color: #ffffff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 6px center;
+    background-size: 12px;
+    color: #475569;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 24px 4px 10px;
+    transition: all 0.15s ease;
+}
+
+.review-filter-select:hover {
+    border-color: #0f6fb7;
+    color: #0f6fb7;
+}
+
+.review-filter-select:focus {
+    outline: none;
+    border-color: #0f6fb7;
+    box-shadow: 0 0 0 3px rgba(15, 111, 183, 0.1);
+}
+
+.review-filter-select--wide {
+    width: 18rem;
+    max-width: 100%;
 }
 
 .status-color-ontrack {
@@ -465,6 +507,12 @@ const displayText = (value) => {
     background-color: #3b82f6 !important;
     color: #ffffff !important;
     border: 1px solid #2563eb !important;
+}
+
+.status-color-done {
+    background-color: #64748b !important;
+    color: #ffffff !important;
+    border: 1px solid #475569 !important;
 }
 
 .status-color-other {

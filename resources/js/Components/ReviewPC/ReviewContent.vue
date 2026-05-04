@@ -34,6 +34,10 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
+    statusImplementation: {
+        type: Object,
+        default: null,
+    },
 });
 
 const monthOptions = [
@@ -66,6 +70,22 @@ const getReviewItems = (reviewItem) => ({
 
 const formatPeriod = (reviewItem) => {
     return [reviewItem?.month, reviewItem?.year].filter(Boolean).join(' ') || '-';
+};
+
+const statusImplementationLabel = computed(() => {
+    return String(props.statusImplementation?.review_status ?? '').trim();
+});
+
+const normalizeStatus = (value) => String(value ?? '').trim().toLowerCase();
+
+const statusCapsuleClass = (status) => {
+    const normalized = normalizeStatus(status);
+    if (normalized === 'on track') return 'bg-emerald-500 text-white ring-1 ring-emerald-600';
+    if (normalized === 'at risk') return 'bg-amber-500 text-white ring-1 ring-amber-600';
+    if (normalized === 'not signed') return 'bg-rose-500 text-white ring-1 ring-rose-600';
+    if (normalized === 'not started') return 'bg-blue-500 text-white ring-1 ring-blue-600';
+    if (normalized === 'done') return 'bg-slate-500 text-white ring-1 ring-slate-600';
+    return 'bg-slate-100 text-slate-700 ring-1 ring-slate-300';
 };
 
 const displayReviewItems = computed(() => {
@@ -129,6 +149,12 @@ const normalizeText = (value) => String(value ?? '').replace(/\u200B/g, '').trim
                     <div class="bg-[#1661ad] pl-4 text-[14px] font-bold text-white flex justify-between items-stretch">
                         <div class="py-1.5 flex items-center">
                             Kesimpulan / Hasil Review
+                            <span
+                                v-if="statusImplementationLabel"
+                                :class="['ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold leading-none', statusCapsuleClass(statusImplementationLabel)]"
+                            >
+                                {{ statusImplementationLabel }}
+                            </span>
                         </div>
                         <div class="flex items-stretch border-l border-white/30 text-xs font-medium">
                             <div class="flex items-center bg-[#12508f] px-3 text-[#f8f9fa] font-semibold tracking-wide">
@@ -263,6 +289,12 @@ const normalizeText = (value) => String(value ?? '').replace(/\u200B/g, '').trim
             <div class="bg-[#1661ad] pl-4 text-[14px] font-bold text-white flex justify-between items-stretch">
                 <div class="py-1.5 flex items-center">
                     Kesimpulan / Hasil Review
+                    <span
+                        v-if="statusImplementationLabel"
+                        :class="['ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold leading-none', statusCapsuleClass(statusImplementationLabel)]"
+                    >
+                        {{ statusImplementationLabel }}
+                    </span>
                 </div>
                 <div class="flex items-stretch border-l border-white/30 text-xs font-medium">
                     <div class="flex items-center bg-[#12508f] px-3 text-[#f8f9fa] font-semibold tracking-wide">

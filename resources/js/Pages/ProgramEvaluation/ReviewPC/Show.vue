@@ -122,17 +122,20 @@
                         v-if="!isEditingReview && !isAddingReview"
                         :review="review"
                         :reviews="filteredReviewHistory"
+                        :status-implementation="latestReviewImplementationStatus"
                     />
 
                     <ReviewContent v-else-if="!isAddingReview"
                         :review="editableReview"
                         :penjelasan-items="penjelasanItems" :why-items="whyItems"
                         :how-parsed="howParsed" :project-profile-items="projectProfileItems"
-                        :editable="isEditingReview" :form="reviewForm" />
+                        :editable="isEditingReview" :form="reviewForm"
+                        :status-implementation="latestReviewImplementationStatus" />
 
                     <ReviewContent v-else :review="{}" :penjelasan-items="[]" :why-items="[]"
                         :how-parsed="{ intro: '', steps: [] }" :project-profile-items="[]"
-                        :editable="true" :form="newReviewForm" />
+                        :editable="true" :form="newReviewForm"
+                        :status-implementation="latestReviewImplementationStatus" />
                 </section>
 
                 <section v-if="activeNav === 'project-charter'" id="project-charter" class="space-y-0">
@@ -356,6 +359,50 @@ const filteredReviewHistory = computed(() => {
     }
 
     return reviewHistory.value.filter((item) => normalizeMonth(item?.month) === reviewMonthFilter.value);
+});
+
+const monthOrderMap = new Map([
+    ['januari', 1],
+    ['februari', 2],
+    ['maret', 3],
+    ['april', 4],
+    ['mei', 5],
+    ['juni', 6],
+    ['juli', 7],
+    ['agustus', 8],
+    ['september', 9],
+    ['oktober', 10],
+    ['november', 11],
+    ['desember', 12],
+]);
+
+const asArray = (value) => Array.isArray(value) ? value : [];
+
+const parseStatusYear = (value) => {
+    const parsed = Number.parseInt(String(value ?? '').trim(), 10);
+    return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const statusMonthOrder = (log) => {
+    const endMonth = monthOrderMap.get(String(log?.end ?? '').trim().toLowerCase()) ?? 0;
+    const startMonth = monthOrderMap.get(String(log?.start ?? '').trim().toLowerCase()) ?? 0;
+    return endMonth || startMonth;
+};
+
+const sortReviewStatusDescending = (left, right) => {
+    const yearDiff = parseStatusYear(right?.year) - parseStatusYear(left?.year);
+    if (yearDiff !== 0) return yearDiff;
+
+    const monthDiff = statusMonthOrder(right) - statusMonthOrder(left);
+    if (monthDiff !== 0) return monthDiff;
+
+    return Number(right?.id || 0) - Number(left?.id || 0);
+};
+
+const latestReviewImplementationStatus = computed(() => {
+    return props.mappedProjects
+        .flatMap((project) => asArray(project?.review_pc_status_implementations ?? project?.reviewPcStatusImplementations))
+        .sort(sortReviewStatusDescending)[0] ?? null;
 });
 
 const editableReview = computed(() => filteredReviewHistory.value[0] ?? review.value);
