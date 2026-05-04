@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\ProgramEvaluation;
 
 use App\Http\Controllers\Controller;
+use App\Models\MstInitiative;
+use App\Models\TrsMapItBuilding;
 use App\Models\TrsProject;
 use App\Models\TrsReviewPC;
 use Illuminate\Http\Request;
@@ -16,7 +18,87 @@ class TrsReviewPCController extends Controller
      */
     public function index()
     {
-        $trsReviewPCs = TrsReviewPC::with('initiative')->get();
+        $latestReviewsByInitiative = TrsReviewPC::query()
+            ->select(['id', 'initiative_id', 'month', 'year', 'kesimpulan'])
+            ->orderByDesc('id')
+            ->get()
+            ->unique('initiative_id')
+            ->keyBy(static fn (TrsReviewPC $review) => (int) $review->initiative_id);
+
+        $itBuildingBlocksByInitiative = TrsMapItBuilding::query()
+            ->with(['primaryCoe:id,name'])
+            ->get(['primary', 'initiative_id'])
+            ->filter(static fn (TrsMapItBuilding $mapping) => $mapping->initiative_id && $mapping->primaryCoe)
+            ->groupBy(static fn (TrsMapItBuilding $mapping) => (int) $mapping->initiative_id)
+            ->map(static fn ($mappings) => $mappings
+                ->map(static fn (TrsMapItBuilding $mapping) => [
+                    'id' => (int) $mapping->primary,
+                    'name' => $mapping->primaryCoe->name,
+                ])
+                ->unique('id')
+                ->sortBy('name')
+                ->first());
+
+        $trsReviewPCs = MstInitiative::query()
+            ->select(['id', 'code', 'name', 'description', 'status', 'tipe_initiative', 'coe_id'])
+            ->whereHas('mappedProjects')
+            ->with([
+                'coe:id,name',
+                'mappedProjects' => static fn ($query) => $query
+                    ->select(['trs_projects.id', 'trs_projects.code', 'trs_projects.name', 'trs_projects.status'])
+                    ->with([
+                        'reviewPcStatusImplementations' => static fn ($reviewQuery) => $reviewQuery
+                            ->orderByDesc('year')
+                            ->orderByDesc('id'),
+                    ])
+                    ->orderBy('trs_projects.code')
+                    ->orderBy('trs_projects.id'),
+            ])
+            ->orderByRaw('CASE WHEN code IS NULL OR code = "" THEN 1 ELSE 0 END')
+            ->orderBy('code')
+            ->orderBy('id')
+            ->get()
+            ->map(static function (MstInitiative $initiative) use ($latestReviewsByInitiative, $itBuildingBlocksByInitiative): array {
+                $projects = ($initiative->mappedProjects ?? collect())->values();
+                $latestReviewStatus = $projects
+                    ->flatMap(static fn (TrsProject $project) => $project->reviewPcStatusImplementations ?? collect())
+                    ->sortBy([
+                        ['year', 'desc'],
+                        ['id', 'desc'],
+                    ])
+                    ->first();
+                $itBuildingBlock = $itBuildingBlocksByInitiative->get((int) $initiative->id);
+                $coeName = $itBuildingBlock['name'] ?? $initiative->coe?->name;
+                $latestReviewPc = $latestReviewsByInitiative->get((int) $initiative->id);
+
+                return [
+                    'id' => $latestReviewPc?->id,
+                    'initiative_id' => (int) $initiative->id,
+                    'month' => $latestReviewPc?->month,
+                    'year' => $latestReviewPc?->year,
+                    'kesimpulan' => $latestReviewPc?->kesimpulan,
+                    'initiative' => [
+                        'id' => (int) $initiative->id,
+                        'code' => $initiative->code,
+                        'name' => $initiative->name,
+                        'description' => $initiative->description,
+                        'status' => $initiative->status,
+                        'tipe_initiative' => $initiative->tipe_initiative,
+                        'coe_id' => $initiative->coe_id,
+                        'coe' => $initiative->coe
+                            ? [
+                                'id' => (int) $initiative->coe->id,
+                                'name' => $initiative->coe->name,
+                            ]
+                            : null,
+                        'coe_name' => $coeName,
+                        'it_building_block' => $itBuildingBlock,
+                    ],
+                    'projects' => $projects,
+                    'latest_review_status_implementation' => $latestReviewStatus,
+                ];
+            })
+            ->values();
 
         // dd($trsReviewPCs->toArray());
         return inertia('ProgramEvaluation/ReviewPC/Index', [
