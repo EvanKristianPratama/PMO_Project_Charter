@@ -1,5 +1,5 @@
 <template>
-  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
     <!-- Top: first two main goals -->
     <div v-for="goal in topMainGoals" :key="goal.id" class="rounded-lg bg-white shadow-sm dark:bg-[#171717]">
       <div class="px-4 py-2 bg-sky-100 dark:bg-sky-800/40">
