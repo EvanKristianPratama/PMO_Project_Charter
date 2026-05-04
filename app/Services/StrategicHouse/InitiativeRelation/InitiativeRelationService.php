@@ -11,7 +11,7 @@ class InitiativeRelationService
     public function getIndexProps(): array
     {
         return [
-            'mstInitiatives' => Cache::remember('sh_relation_initiatives_v3', 3600, fn () => MstInitiative::query()
+            'mstInitiatives' => Cache::remember('sh_relation_initiatives_v4', 3600, fn () => MstInitiative::query()
                 ->select(['id', 'code', 'name', 'coe_id', 'tipe_initiative', 'business_unit', 'status'])
                 ->with([
                     'initiativeRelationsRow:id,initiative_code_row,initiative_code_column,type_relation,model_relasi',
@@ -51,6 +51,7 @@ class InitiativeRelationService
                         'coe' => $initiative->coe,
                         'relation_position' => $initiative->relationPosition,
                         'status' => $latestStatus?->status ?? $initiative->status,
+                        'project_id' => $initiative->mappedProjects->first()?->id,
                     ];
                 })
                 ->all()

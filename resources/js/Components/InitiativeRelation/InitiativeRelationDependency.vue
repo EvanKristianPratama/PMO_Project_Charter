@@ -18,7 +18,7 @@
                 {{ showAllTable ? 'Sembunyikan Tabel' : 'Tampilkan Tabel' }}
             </button>
             <button
-                v-if="displayMode === 'all'"
+                v-if="displayMode === 'all' && canEditPositions"
                 type="button"
                 class="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[11px] font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200"
                 @click="savePositions"
@@ -29,7 +29,7 @@
                 Simpan Posisi
             </button>
             <button
-                v-if="displayMode === 'all'"
+                v-if="displayMode === 'all' && canEditPositions"
                 type="button"
                 class="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[11px] font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200"
                 @click="toggleLockPositions"
@@ -145,7 +145,7 @@
 
 
 
-        <div class="overflow-x-auto">
+        <div class="overflow-hidden">
             <table class="w-full border-collapse text-sm">
                 <colgroup>
                     <col style="width: 16%;">
@@ -291,7 +291,7 @@
                                             <div
                                                 v-else
                                                 class="rounded-lg border border-slate-200 dark:border-white/10"
-                                                :style="{ height: `${relationGraphByInitiative(initiative).height}px` }"
+                                                style="height: 400px"
                                             >
                                                 <VueFlow
                                                     ref="initiativeFlowRefs"
@@ -299,12 +299,16 @@
                                                     :nodes="relationGraphByInitiative(initiative).nodes"
                                                     :edges="relationGraphByInitiative(initiative).edges"
                                                     :fit-view-on-init="true"
-                                                    :nodes-draggable="true"
+                                                    :nodes-draggable="canEditPositions && !isPositionsLocked"
                                                     :nodes-connectable="false"
-                                                    :elements-selectable="true"
+                                                    :elements-selectable="canEditPositions"
                                                     :zoom-on-double-click="false"
-                                                    :min-zoom="0.35"
+                                                    :zoom-on-scroll="canEditPositions"
+                                                    :zoom-on-pinch="canEditPositions"
+                                                    :pan-on-drag="canEditPositions"
+                                                    :min-zoom="0.1"
                                                     :max-zoom="1.5"
+                                                    @node-click="handleAllNodeClick"
                                                 >
                                                         <template #node-initiative-status-card="nodeProps">
                                                             <InitiativeRelationFlowNode :data="nodeProps.data" :selected="nodeProps.selected" />
@@ -347,9 +351,9 @@
                                             class="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-center text-sm text-slate-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-400">
                                             Tidak ada relasi untuk divisualisasikan pada filter saat ini.
                                         </div>
-                                        <div v-else class="overflow-x-auto rounded-lg border border-slate-200 dark:border-white/10">
+                                        <div v-else class="overflow-hidden rounded-lg border border-slate-200 dark:border-white/10">
                                             <div
-                                                :style="{ width: `${allRelationGraph.width}px`, height: `${allRelationGraph.height}px` }"
+                                                :style="{ width: '100%', height: '500px' }"
                                             >
                                                 <VueFlow
                                                     :id="ALL_FLOW_ID"
@@ -358,11 +362,14 @@
                                                     :nodes="allRelationGraph.nodes"
                                                     :edges="allRelationGraph.edges"
                                                     :fit-view-on-init="true"
-                                                    :nodes-draggable="!isPositionsLocked"
+                                                    :nodes-draggable="canEditPositions && !isPositionsLocked"
                                                     :nodes-connectable="false"
-                                                    :elements-selectable="true"
+                                                    :elements-selectable="canEditPositions"
                                                     :zoom-on-double-click="false"
-                                                    :min-zoom="0.25"
+                                                    :zoom-on-scroll="canEditPositions"
+                                                    :zoom-on-pinch="canEditPositions"
+                                                    :pan-on-drag="canEditPositions"
+                                                    :min-zoom="0.1"
                                                     :max-zoom="1.5"
                                                     @node-click="handleAllNodeClick"
                                                     @pane-click="handleAllPaneClick"
@@ -473,7 +480,10 @@
 import { computed, ref, watch } from 'vue';
 import { MarkerType, Position, VueFlow, useVueFlow } from '@vue-flow/core';
 import { router } from '@inertiajs/vue3';
+import { useRouteHelper } from '@/Composables/useRouteHelper';
 import { toPng } from 'html-to-image';
+
+const route = useRouteHelper();
 import '@vue-flow/core/dist/style.css';
 import '@vue-flow/core/dist/theme-default.css';
 import InitiativeRelationFlowNode from '@/Components/InitiativeRelation/InitiativeRelationFlowNode.vue';
@@ -485,6 +495,24 @@ const allFlowRef = ref(null);
 const initiativeFlowRefs = ref([]);
 
 const handleAllNodeClick = ({ node }) => {
+    if (!props.canEditPositions) {
+        const initiativeId = Number(String(node.id).replace('initiative-', ''));
+        const initiative = props.mstInitiatives.find(i => Number(i.id) === initiativeId);
+
+        if (initiative) {
+            const isDigital = Number(initiative.tipe_initiative) === 1;
+            const routeName = isDigital ? 'digital-initiatives.show' : 'it-initiatives.show';
+            const paramName = isDigital ? 'digital_initiative' : 'project';
+            const targetId = initiative.project_id || initiativeId;
+
+            router.get(route(routeName, {
+                [paramName]: targetId,
+                tab: 'evaluation'
+            }));
+        }
+        return;
+    }
+
     const prevId = allSelectedNodeId.value;
     if (prevId && prevId !== node.id) {
         updateAllFlowNode(prevId, { draggable: false });
@@ -513,6 +541,10 @@ const props = defineProps({
     modelRelationOptions: {
         type: Array,
         default: () => [],
+    },
+    canEditPositions: {
+        type: Boolean,
+        default: false,
     },
 });
 
@@ -576,6 +608,15 @@ const toggleLockPositions = () => {
         preserveState: true,
     });
 };
+
+watch(() => props.canEditPositions, (isEditing) => {
+    if (!isEditing) {
+        setTimeout(() => {
+            const flow = useVueFlow(ALL_FLOW_ID);
+            flow.fitView({ padding: 2.0 });
+        }, 100);
+    }
+});
 
 watch(displayMode, (mode) => {
     if (mode === 'all') {
