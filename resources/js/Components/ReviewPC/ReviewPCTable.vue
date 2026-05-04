@@ -206,6 +206,7 @@ const normalizeCoeName = (rawName) => {
     if (upper.includes('CLOUD') || upper.includes('COMPUTING') || name === 'Advance Cloud') return 'Advance Cloud';
     if (upper === 'RPA') return 'RPA';
     if (upper.includes('ROBOT') || name === 'Robotics') return 'Robotics';
+    
     // Prefer explicit Data-related CoE over generic Analytics mapping
     if (upper.includes('DATA')) return 'Data and Analytics';
     if (upper === 'AI / ADV. ANALYTICS' || upper.includes('AI') || upper.includes('ANALYTICS') || upper.includes('ADV')) return 'AI / Adv. Analytics';
@@ -215,11 +216,25 @@ const normalizeCoeName = (rawName) => {
 
 const getCoeColorClass = (coeName) => {
     const name = normalizeCoeName(coeName);
+    
+    // Tipe 1 Colors
     if (name === 'IoT') return 'coe-color-blue';
     if (name === 'Advance Cloud') return 'coe-color-emerald';
     if (name === 'RPA') return 'coe-color-amber';
     if (name === 'Robotics') return 'coe-color-purple';
     if (name === 'AI / Adv. Analytics') return 'coe-color-neutral';
+    
+    // Tipe 2 Colors (IT Building Blocks)
+    const upper = name.toUpperCase();
+    if (upper.includes('INTERFACE') || upper.includes('UX')) return 'coe-color-blue';
+    if (upper.includes('INTEGRATION') || upper.includes('AUTOMATION')) return 'coe-color-emerald';
+    if (upper.includes('BUSINESS APPLICATION')) return 'coe-color-amber';
+    if (upper.includes('INFRASTRUCTURE')) return 'coe-color-purple';
+    if (upper.includes('DATA AND ANALYTICS')) return 'coe-color-neutral';
+    if (upper.includes('CYBERSECURITY')) return 'coe-color-rose';
+    if (upper.includes('PEOPLE')) return 'coe-color-slate';
+    if (upper.includes('ARCHITECTURE')) return 'coe-color-indigo';
+
     if (name === 'CoE Not Identified') return 'coe-color-none';
     return 'coe-color-none';
 };
@@ -593,5 +608,23 @@ const displayText = (value) => {
     background-color: #ffffff;
     color: #334155;
     border-color: #cbd5e1 !important;
+}
+
+.coe-color-rose {
+    background-color: #ffffff;
+    color: #9f1239;
+    border-color: #e11d48 !important;
+}
+
+.coe-color-slate {
+    background-color: #ffffff;
+    color: #1e293b;
+    border-color: #475569 !important;
+}
+
+.coe-color-indigo {
+    background-color: #ffffff;
+    color: #312e81;
+    border-color: #4f46e5 !important;
 }
 </style>

@@ -28,7 +28,8 @@ class TrsReviewPCController extends Controller
             ->select(['id', 'code', 'name', 'description', 'status', 'tipe_initiative', 'coe_id'])
             ->whereHas('mappedProjects')
             ->with([
-                    'coe' => static fn ($q) => $q->select(['id', 'name']),
+                'coe' => static fn ($q) => $q->select(['id', 'name', 'tipe']),
+                'itBuildingMapping.primaryCoe:id,name,tipe',
                 'mappedProjects' => static fn ($query) => $query
                     ->select(['trs_projects.id', 'trs_projects.code', 'trs_projects.name', 'trs_projects.status'])
                     ->with([
@@ -52,8 +53,22 @@ class TrsReviewPCController extends Controller
                         ['id', 'desc'],
                     ])
                     ->first();
+
+                // Logic for IT Building Block (must be CoE tipe 2)
                 $coe = $initiative->coe;
-                $coeName = ($initiative->tipe_initiative == 2 && $coe) ? $coe->name : null;
+                $itBuildingBlock = null;
+
+                if ($coe && $coe->tipe == 2) {
+                    $itBuildingBlock = $coe;
+                } else {
+                    // For Digital Initiatives (tipe 1) or those with non-tipe 2 CoE, fetch from mapping
+                    $mapping = $initiative->itBuildingMapping;
+                    if ($mapping && $mapping->primaryCoe && $mapping->primaryCoe->tipe == 2) {
+                        $itBuildingBlock = $mapping->primaryCoe;
+                    }
+                }
+
+                $coeName = $itBuildingBlock?->name ?? ($coe?->name ?: 'CoE Not Identified');
                 $latestReviewPc = $latestReviewsByInitiative->get((int) $initiative->id);
 
                 return [
@@ -74,13 +89,15 @@ class TrsReviewPCController extends Controller
                             ? [
                                 'id' => (int) $coe->id,
                                 'name' => $coe->name,
+                                'tipe' => $coe->tipe,
                             ]
                             : null,
                         'coe_name' => $coeName,
-                        'it_building_block' => ($initiative->tipe_initiative == 2 && $coe)
+                        'it_building_block' => $itBuildingBlock
                             ? [
-                                'id' => (int) $coe->id,
-                                'name' => $coe->name,
+                                'id' => (int) $itBuildingBlock->id,
+                                'name' => $itBuildingBlock->name,
+                                'tipe' => $itBuildingBlock->tipe,
                             ]
                             : null,
                     ],
@@ -136,18 +153,66 @@ class TrsReviewPCController extends Controller
     {
         $trsReviewPC->load([
             'initiative' => fn ($query) => $query
-                ->with('organization')
-                ->with('initiativeRelationsRow.initiativeRow')
-                ->with('initiativeRelationsRow.initiativeColumn')
-                ->with('initiativeRelationsColumn.initiativeRow')
-                ->with('initiativeRelationsColumn.initiativeColumn'),
+                ->with([
+                    'organization',
+                    'coe:id,name,tipe',
+                    'itBuildingMapping.primaryCoe:id,name,tipe',
+                    'initiativeRelationsRow.initiativeRow',
+                    'initiativeRelationsRow.initiativeColumn',
+                    'initiativeRelationsColumn.initiativeRow',
+                    'initiativeRelationsColumn.initiativeColumn'
+                ]),
         ]);
 
+        // Same logic for IT Building Block as index()
+        $initiative = $trsReviewPC->initiative;
+        $coe = $initiative?->coe;
+        $itBuildingBlock = null;
+
+        if ($coe && $coe->tipe == 2) {
+            $itBuildingBlock = $coe;
+        } else {
+            $mapping = $initiative?->itBuildingMapping;
+            if ($mapping && $mapping->primaryCoe && $mapping->primaryCoe->tipe == 2) {
+                $itBuildingBlock = $mapping->primaryCoe;
+            }
+        }
+
+        if ($initiative) {
+            $initiative->setAttribute('coe_name', $itBuildingBlock?->name ?? ($coe?->name ?: 'CoE Not Identified'));
+            $initiative->setAttribute('it_building_block', $itBuildingBlock);
+        }
+
         $initiativeReviews = TrsReviewPC::query()
-            ->with(['initiative:id,code,name,tipe_initiative'])
+            ->with([
+                'initiative' => fn ($query) => $query
+                    ->select(['id', 'code', 'name', 'tipe_initiative', 'coe_id'])
+                    ->with([
+                        'coe:id,name,tipe',
+                        'itBuildingMapping.primaryCoe:id,name,tipe',
+                    ])
+            ])
             ->where('initiative_id', $trsReviewPC->initiative_id)
             ->get()
             ->map(static function (TrsReviewPC $review) {
+                $initiative = $review->initiative;
+                $coe = $initiative?->coe;
+                $itBuildingBlock = null;
+
+                if ($coe && $coe->tipe == 2) {
+                    $itBuildingBlock = $coe;
+                } else {
+                    $mapping = $initiative?->itBuildingMapping;
+                    if ($mapping && $mapping->primaryCoe && $mapping->primaryCoe->tipe == 2) {
+                        $itBuildingBlock = $mapping->primaryCoe;
+                    }
+                }
+
+                if ($initiative) {
+                    $initiative->setAttribute('coe_name', $itBuildingBlock?->name ?? ($coe?->name ?: 'CoE Not Identified'));
+                    $initiative->setAttribute('it_building_block', $itBuildingBlock);
+                }
+
                 $monthName = strtolower(trim((string) $review->month));
                 $monthOrder = match ($monthName) {
                     'januari' => 1,
@@ -243,7 +308,11 @@ class TrsReviewPCController extends Controller
 
         $reviewOptions = TrsReviewPC::query()
             ->select(['id', 'initiative_id'])
-            ->with(['initiative:id,code,name'])
+            ->with([
+                'initiative' => fn ($query) => $query
+                    ->select(['id', 'code', 'name', 'coe_id'])
+                    ->with('coe:id,name')
+            ])
             ->orderBy('id')
             ->get()
             ->map(static fn (TrsReviewPC $item) => [
@@ -254,6 +323,7 @@ class TrsReviewPCController extends Controller
                         'id' => (int) $item->initiative->id,
                         'code' => $item->initiative->code,
                         'name' => $item->initiative->name,
+                        'coe_name' => $item->initiative->coe?->name,
                     ]
                     : null,
             ])

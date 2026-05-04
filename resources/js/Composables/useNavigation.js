@@ -174,7 +174,7 @@ export function useNavigation() {
         const items = [
             {
                 label: "Strategic House",
-                href: safeRoute("strategic-house.index"),
+                href: safeRoute("strategic-house.index", { view: 'mapping' }),
                 icon: Squares2X2Icon,
                 active: (url) =>
                     url.startsWith("/strategic-house") ||

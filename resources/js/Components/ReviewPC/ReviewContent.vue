@@ -150,6 +150,12 @@ const normalizeText = (value) => String(value ?? '').replace(/\u200B/g, '').trim
                         <div class="py-1.5 flex items-center">
                             Kesimpulan / Hasil Review
                             <span
+                                v-if="entry.initiative?.coe_name"
+                                class="ml-2 inline-flex items-center rounded bg-white/20 px-1.5 py-0.5 text-[9px] font-bold uppercase text-white ring-1 ring-white/30"
+                            >
+                                {{ entry.initiative.coe_name }}
+                            </span>
+                            <span
                                 v-if="statusImplementationLabel"
                                 :class="['ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold leading-none', statusCapsuleClass(statusImplementationLabel)]"
                             >
@@ -289,6 +295,12 @@ const normalizeText = (value) => String(value ?? '').replace(/\u200B/g, '').trim
             <div class="bg-[#1661ad] pl-4 text-[14px] font-bold text-white flex justify-between items-stretch">
                 <div class="py-1.5 flex items-center">
                     Kesimpulan / Hasil Review
+                    <span
+                        v-if="displayReview.initiative?.coe_name"
+                        class="ml-2 inline-flex items-center rounded bg-white/20 px-1.5 py-0.5 text-[9px] font-bold uppercase text-white ring-1 ring-white/30"
+                    >
+                        {{ displayReview.initiative.coe_name }}
+                    </span>
                     <span
                         v-if="statusImplementationLabel"
                         :class="['ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold leading-none', statusCapsuleClass(statusImplementationLabel)]"

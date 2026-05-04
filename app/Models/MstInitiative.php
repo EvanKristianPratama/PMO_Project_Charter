@@ -218,4 +218,9 @@ class MstInitiative extends Model
     {
         return $this->hasMany(TrsMapTechnology::class, 'initiative_id');
     }
+
+    public function itBuildingMapping(): HasOne
+    {
+        return $this->hasOne(TrsMapItBuilding::class, 'initiative_id');
+    }
 }
