@@ -41,6 +41,12 @@ export function useNavigation() {
 
         const programPlanningChildren = [
             {
+                label: "Business Strategy",
+                href: safeRoute("business-strategy.index"),
+                icon: DocumentTextIcon,
+                active: (url) => url.startsWith("/strategic-house") && url.includes("business-strategy"),
+            },
+            {
                 label: "Digital Initiative Definition",
                 href: safeRoute(
                     "program-planning.program-definition.digital-initiatives",
@@ -174,7 +180,7 @@ export function useNavigation() {
         const items = [
             {
                 label: "Strategic House",
-                href: safeRoute("strategic-house.index", { view: 'mapping' }),
+                href: safeRoute("strategic-house.index"),
                 icon: Squares2X2Icon,
                 active: (url) =>
                     url.startsWith("/strategic-house") ||

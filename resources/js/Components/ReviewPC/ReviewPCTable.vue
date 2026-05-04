@@ -1,6 +1,6 @@
 <template>
-    <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-        <div class="border-b border-slate-200 px-5 py-4 dark:border-white/10">
+    <article class="overflow-hidden rounded-2xl border border-slate-900 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+        <div class="border-b border-slate-900 px-5 py-4 dark:border-white/10">
             <div class="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 dark:border-white/5">
                 <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider">Select Status Summary:</span>
                 <div
@@ -19,7 +19,7 @@
                         {{ status.label }} <span class="text-slate-400 dark:text-slate-500 font-medium">({{ status.count }})</span>
                     </span>
                 </div>
-                <div v-if="totalStatusCount > 0" class="flex items-center gap-1.5 border-l border-slate-300 pl-4 ml-1 dark:border-white/10">
+                <div v-if="totalStatusCount > 0" class="flex items-center gap-1.5 border-l border-slate-900 pl-4 ml-1 dark:border-white/10">
                     <span class="text-[10px] font-bold text-slate-800 dark:text-slate-200">
                         Total <span class="text-slate-500 dark:text-slate-400 font-medium">({{ totalStatusCount }})</span>
                     </span>
@@ -77,26 +77,26 @@
             <table class="w-full min-w-[760px] border-collapse text-xs">
                 <thead class="bg-slate-100 dark:bg-white/5">
                     <tr>
-                        <th class="border border-slate-300 bg-slate-100 px-3 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-300">
+                        <th class="border border-slate-900 bg-slate-100 px-3 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-300">
                             IT Building Blocks
                         </th>
-                        <th class="border border-slate-300 bg-slate-100 px-3 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-300">
+                        <th class="border border-slate-900 bg-slate-100 px-3 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-300">
                             No
                         </th>
-                        <th class="border border-slate-300 bg-slate-100 px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-300">
+                        <th class="border border-slate-900 bg-slate-100 px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-300">
                             IT Initiatives
                         </th>
-                        <th class="border border-slate-300 bg-slate-100 px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-300">
+                        <th class="border border-slate-900 bg-slate-100 px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-300">
                             Summary
                         </th>
-                        <th class="border border-slate-300 bg-slate-100 px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-300">
+                        <th class="border border-slate-900 bg-slate-100 px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-300">
                             Month
                         </th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-if="!groupedFilteredReviews.length">
-                        <td colspan="5" class="border border-slate-300 px-3 py-6 text-center text-xs text-slate-500 dark:border-white/20 dark:text-slate-400">
+                        <td colspan="5" class="border border-slate-900 px-3 py-6 text-center text-xs text-slate-500 dark:border-white/20 dark:text-slate-400">
                             Data review belum tersedia.
                         </td>
                     </tr>
@@ -112,7 +112,7 @@
                         <td
                             v-if="review.showCoeCell"
                             :rowspan="review.coeRowspan"
-                            class="primary-cell border border-slate-300 px-2 py-2 text-center dark:border-white/20"
+                            class="primary-cell border border-slate-900 px-2 py-2 text-center dark:border-white/20"
                             :class="getCoeColorClass(review.latest_coe_name)"
                         >
                             <div class="primary-cell__content">
@@ -124,7 +124,7 @@
                                 </span>
                             </div>
                         </td>
-                        <td class="border border-slate-300 px-2 py-2 text-center font-medium text-slate-800 dark:border-white/20 dark:text-slate-200">
+                        <td class="border border-slate-900 px-2 py-2 text-center font-medium text-slate-800 dark:border-white/20 dark:text-slate-200">
                             <span
                                 class="inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold"
                                 :class="statusCapsuleClass(review.latest_review_progress_status)"
@@ -132,15 +132,15 @@
                                 {{ review.initiative?.code ?? review.initiative_id ?? '-' }}
                             </span>
                         </td>
-                        <td class="border border-slate-300 px-3 py-2 text-slate-800 dark:border-white/20 dark:text-slate-200">
+                        <td class="border border-slate-900 px-3 py-2 text-slate-800 dark:border-white/20 dark:text-slate-200">
                             <p class="font-medium">{{ review.initiative?.name ?? '-' }}</p>
                         </td>
-                        <td class="border border-slate-300 px-3 py-2 text-slate-700 dark:border-white/20 dark:text-slate-300">
+                        <td class="border border-slate-900 px-3 py-2 text-slate-700 dark:border-white/20 dark:text-slate-300">
                             <p class="whitespace-pre-line break-words leading-snug">
                                 {{ displayText(review.review_pc_conclusion) }}
                             </p>
                         </td>
-                        <td class="border border-slate-300 px-3 py-2 text-[10px] font-semibold text-slate-600 dark:border-white/20 dark:text-slate-300">
+                        <td class="border border-slate-900 px-3 py-2 text-[10px] font-semibold text-slate-600 dark:border-white/20 dark:text-slate-300">
                             {{ displayText(review.review_pc_period) }}
                         </td>
                     </tr>
@@ -577,54 +577,45 @@ const displayText = (value) => {
 .coe-color-blue {
     background-color: #ffffff;
     color: #1e3a8a;
-    border-color: #1d4ed8 !important;
 }
 
 .coe-color-emerald {
     background-color: #ffffff;
     color: #065f46;
-    border-color: #047857 !important;
 }
 
 .coe-color-amber {
     background-color: #ffffff;
     color: #92400e;
-    border-color: #b45309 !important;
 }
 
 .coe-color-purple {
     background-color: #ffffff;
     color: #5b21b6;
-    border-color: #6d28d9 !important;
 }
 
 .coe-color-none {
     background-color: #ffffff;
     color: #334155;
-    border-color: #475569 !important;
 }
 
 .coe-color-neutral {
     background-color: #ffffff;
     color: #334155;
-    border-color: #cbd5e1 !important;
 }
 
 .coe-color-rose {
     background-color: #ffffff;
     color: #9f1239;
-    border-color: #e11d48 !important;
 }
 
 .coe-color-slate {
     background-color: #ffffff;
     color: #1e293b;
-    border-color: #475569 !important;
 }
 
 .coe-color-indigo {
     background-color: #ffffff;
     color: #312e81;
-    border-color: #4f46e5 !important;
 }
 </style>
