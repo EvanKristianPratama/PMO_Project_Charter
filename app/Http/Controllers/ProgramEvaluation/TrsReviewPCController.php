@@ -4,7 +4,6 @@ namespace App\Http\Controllers\ProgramEvaluation;
 
 use App\Http\Controllers\Controller;
 use App\Models\MstInitiative;
-use App\Models\TrsMapItBuilding;
 use App\Models\TrsProject;
 use App\Models\TrsReviewPC;
 use Illuminate\Http\Request;
@@ -25,25 +24,11 @@ class TrsReviewPCController extends Controller
             ->unique('initiative_id')
             ->keyBy(static fn (TrsReviewPC $review) => (int) $review->initiative_id);
 
-        $itBuildingBlocksByInitiative = TrsMapItBuilding::query()
-            ->with(['primaryCoe:id,name'])
-            ->get(['primary', 'initiative_id'])
-            ->filter(static fn (TrsMapItBuilding $mapping) => $mapping->initiative_id && $mapping->primaryCoe)
-            ->groupBy(static fn (TrsMapItBuilding $mapping) => (int) $mapping->initiative_id)
-            ->map(static fn ($mappings) => $mappings
-                ->map(static fn (TrsMapItBuilding $mapping) => [
-                    'id' => (int) $mapping->primary,
-                    'name' => $mapping->primaryCoe->name,
-                ])
-                ->unique('id')
-                ->sortBy('name')
-                ->first());
-
         $trsReviewPCs = MstInitiative::query()
             ->select(['id', 'code', 'name', 'description', 'status', 'tipe_initiative', 'coe_id'])
             ->whereHas('mappedProjects')
             ->with([
-                'coe:id,name',
+                    'coe' => static fn ($q) => $q->select(['id', 'name']),
                 'mappedProjects' => static fn ($query) => $query
                     ->select(['trs_projects.id', 'trs_projects.code', 'trs_projects.name', 'trs_projects.status'])
                     ->with([
@@ -58,7 +43,7 @@ class TrsReviewPCController extends Controller
             ->orderBy('code')
             ->orderBy('id')
             ->get()
-            ->map(static function (MstInitiative $initiative) use ($latestReviewsByInitiative, $itBuildingBlocksByInitiative): array {
+            ->map(static function (MstInitiative $initiative) use ($latestReviewsByInitiative): array {
                 $projects = ($initiative->mappedProjects ?? collect())->values();
                 $latestReviewStatus = $projects
                     ->flatMap(static fn (TrsProject $project) => $project->reviewPcStatusImplementations ?? collect())
@@ -67,8 +52,8 @@ class TrsReviewPCController extends Controller
                         ['id', 'desc'],
                     ])
                     ->first();
-                $itBuildingBlock = $itBuildingBlocksByInitiative->get((int) $initiative->id);
-                $coeName = $itBuildingBlock['name'] ?? $initiative->coe?->name;
+                $coe = $initiative->coe;
+                $coeName = ($initiative->tipe_initiative == 2 && $coe) ? $coe->name : null;
                 $latestReviewPc = $latestReviewsByInitiative->get((int) $initiative->id);
 
                 return [
@@ -85,14 +70,19 @@ class TrsReviewPCController extends Controller
                         'status' => $initiative->status,
                         'tipe_initiative' => $initiative->tipe_initiative,
                         'coe_id' => $initiative->coe_id,
-                        'coe' => $initiative->coe
+                        'coe' => $coe
                             ? [
-                                'id' => (int) $initiative->coe->id,
-                                'name' => $initiative->coe->name,
+                                'id' => (int) $coe->id,
+                                'name' => $coe->name,
                             ]
                             : null,
                         'coe_name' => $coeName,
-                        'it_building_block' => $itBuildingBlock,
+                        'it_building_block' => ($initiative->tipe_initiative == 2 && $coe)
+                            ? [
+                                'id' => (int) $coe->id,
+                                'name' => $coe->name,
+                            ]
+                            : null,
                     ],
                     'projects' => $projects,
                     'latest_review_status_implementation' => $latestReviewStatus,
