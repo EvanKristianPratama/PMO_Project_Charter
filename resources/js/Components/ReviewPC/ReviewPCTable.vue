@@ -206,7 +206,9 @@ const normalizeCoeName = (rawName) => {
     if (upper.includes('CLOUD') || upper.includes('COMPUTING') || name === 'Advance Cloud') return 'Advance Cloud';
     if (upper === 'RPA') return 'RPA';
     if (upper.includes('ROBOT') || name === 'Robotics') return 'Robotics';
-    if (upper.includes('ANALYTICS') || name === 'AI / Adv. Analytics') return 'AI / Adv. Analytics';
+    // Prefer explicit Data-related CoE over generic Analytics mapping
+    if (upper.includes('DATA')) return 'Data and Analytics';
+    if (upper === 'AI / ADV. ANALYTICS' || upper.includes('AI') || upper.includes('ANALYTICS') || upper.includes('ADV')) return 'AI / Adv. Analytics';
 
     return name;
 };
