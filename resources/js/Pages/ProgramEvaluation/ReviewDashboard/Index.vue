@@ -1,10 +1,10 @@
 <template>
-    <UserLayout title="Review Dashboard">
+    <UserLayout title="Review Approval">
         <div class="space-y-6 animate-fade-in-up">
             <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Review Dashboard</h1>
+                        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Review Approval Project Charter</h1>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
                         <label class="text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
@@ -18,85 +18,6 @@
                             <option value="asc">Tercepat ke Terlama</option>
                         </select>
                     </div>
-                </div>
-            </section>
-
-            <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
-                        Total Initiative
-                    </p>
-                    <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">
-                        {{ summary.total }}
-                    </p>
-                </article>
-
-                <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
-                        Building Block
-                    </p>
-                    <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">
-                        {{ summary.buildingBlock }}
-                    </p>
-                </article>
-
-                <article class="rounded-2xl border border-emerald-200 bg-white p-5 shadow-sm dark:border-emerald-500/20 dark:bg-[#171717]">
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600 dark:text-emerald-300">
-                        Sudah Ada Status Review
-                    </p>
-                    <p class="mt-2 text-3xl font-bold text-emerald-600 dark:text-emerald-300">
-                        {{ summary.withReviewStatus }}
-                    </p>
-                </article>
-
-                <article class="rounded-2xl border border-amber-200 bg-white p-5 shadow-sm dark:border-amber-500/20 dark:bg-[#171717]">
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-amber-600 dark:text-amber-300">
-                        Belum Ada Status Review
-                    </p>
-                    <p class="mt-2 text-3xl font-bold text-amber-600 dark:text-amber-300">
-                        {{ summary.withoutReviewStatus }}
-                    </p>
-                </article>
-            </section>
-
-            <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                <div class="border-b border-slate-200 px-5 py-4 dark:border-white/10">
-                    <h2 class="text-lg font-bold text-slate-900 dark:text-white">Statistik Status Review</h2>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-left text-xs text-slate-700 dark:text-slate-200">
-                        <thead class="bg-slate-50 text-[11px] uppercase tracking-[0.06em] text-slate-500 dark:bg-white/5 dark:text-slate-400">
-                            <tr>
-                                <th class="px-4 py-3 font-semibold">Status</th>
-                                <th class="px-4 py-3 font-semibold">Jumlah</th>
-                                <th class="px-4 py-3 font-semibold">Persentase</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr
-                                v-for="item in statusBreakdown"
-                                :key="`status-row-${item.status}`"
-                                class="border-t border-slate-100 dark:border-white/10"
-                            >
-                                <td class="px-4 py-3">
-                                    <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" :class="statusBadgeClass(item.status)">
-                                        {{ item.status }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3 font-semibold text-slate-900 dark:text-white">
-                                    {{ item.count }}
-                                </td>
-                                <td class="px-4 py-3">
-                                    {{ item.percentage }}%
-                                </td>
-                            </tr>
-                            <tr v-if="statusBreakdown.length === 0">
-                                <td colspan="3" class="px-4 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
-                                    Belum ada data status review.
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
                 </div>
             </section>
 

@@ -80,18 +80,18 @@ export function useNavigation() {
                     !url.startsWith("/program-evalution/review-dashboard"),
             },
             {
+                label: "Review Approval",
+                href: safeRoute("program-evaluation.review-dashboard"),
+                icon: ClipboardDocumentCheckIcon,
+                active: (url) =>
+                    url.startsWith("/program-evalution/review-dashboard"),
+            },
+            {
                 label: "Review Timeline",
                 href: safeRoute("program-evaluation.review-timeline"),
                 icon: ClipboardDocumentCheckIcon,
                 active: (url) =>
                     url.startsWith("/program-evalution/review-timeline"),
-            },
-            {
-                label: "Review Dashboard",
-                href: safeRoute("program-evaluation.review-dashboard"),
-                icon: ClipboardDocumentCheckIcon,
-                active: (url) =>
-                    url.startsWith("/program-evalution/review-dashboard"),
             },
         ];
 

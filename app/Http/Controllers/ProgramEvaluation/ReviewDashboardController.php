@@ -55,29 +55,13 @@ class ReviewDashboardController extends Controller
                         'trs_status_implementation.review_status',
                     ]),
                 'mappedProjects' => static fn ($query) => $query
-                    ->select(['trs_projects.id', 'trs_projects.code', 'trs_projects.name'])
                     ->with([
+                        'projectCharters' => static fn ($charterQuery) => $charterQuery
+                            ->orderByDesc('id'),
                         'projectStatusHistories' => static fn ($historyQuery) => $historyQuery
-                            ->select([
-                                'trs_project_status_history.id',
-                                'trs_project_status_history.project_charter_id',
-                                'trs_project_status_history.status',
-                                'trs_project_status_history.tanggal',
-                                'trs_project_status_history.version',
-                            ])
-                            ->orderByDesc('trs_project_status_history.tanggal')
-                            ->orderByDesc('trs_project_status_history.id'),
+                            ->orderByDesc('tanggal')
+                            ->orderByDesc('id'),
                         'reviewPcStatusImplementations' => static fn ($reviewQuery) => $reviewQuery
-                            ->select([
-                                'id',
-                                'project_id',
-                                'start',
-                                'end',
-                                'year',
-                                'review_status',
-                                'created_at',
-                                'updated_at',
-                            ])
                             ->orderByDesc('year')
                             ->orderByDesc('updated_at')
                             ->orderByDesc('id'),
@@ -96,6 +80,15 @@ class ReviewDashboardController extends Controller
                 $processMonthValue = $this->resolveProcessMonthValue($baselineDate, $approveDate);
                 $latestReviewState = $this->resolveLatestReviewState($initiative, $projects);
 
+                // Get owner and leader from the latest project charter of any mapped project
+                $latestCharter = $projects
+                    ->flatMap(fn ($p) => $p->projectCharters ?? collect())
+                    ->sortByDesc('id')
+                    ->first();
+
+                $projectOwner = $latestCharter?->owner ?? '-';
+                $projectLeader = $latestCharter?->leader ?? '-';
+
                 return [
                     'no' => $index + 1,
                     'initiative_id' => (int) $initiative->id,
@@ -107,6 +100,8 @@ class ReviewDashboardController extends Controller
                     'process_month' => $this->formatProcessMonth($processMonthValue),
                     'latest_review_status' => $latestReviewState['status'],
                     'latest_review_period' => $latestReviewState['period'],
+                    'project_owner' => $projectOwner,
+                    'project_leader' => $projectLeader,
                 ];
             })
             ->values();
