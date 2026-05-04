@@ -206,7 +206,7 @@ const uniqueSorted = (arr) => [...new Set(arr.filter((v) => v && v !== '-'))].so
 const coeOptions = computed(() => uniqueSorted(props.items.map((item) => coeName(item))));
 const groubOptions = computed(() => uniqueSorted(props.items.map((item) => groubName(item))));
 const organizationOptions = computed(() => uniqueSorted(props.items.map((item) => organizationName(item))));
-const statusTimelineOptions = computed(() => uniqueSorted(props.items.map((item) => normalizeText(item?.latest_status?.status))));
+const statusTimelineOptions = computed(() => uniqueSorted(props.items.map((item) => scStatus(item))));
 const sumberOptions = computed(() => uniqueSorted(props.items.map((item) => statusName(item))));
 
 const filteredItems = computed(() => {
@@ -244,7 +244,8 @@ const statusName = (item) => normalizeText(item?.status);
 const descriptionText = (item) => normalizeText(item?.description);
 
 const scStatus = (item) => {
-    return normalizeText(item?.latest_status?.status);
+    const key = item?.project_status_key ?? item?.latest_status?.status;
+    return normalizeText(key);
 };
 
 const scReviewStatus = (item) => {

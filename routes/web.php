@@ -63,6 +63,7 @@ use App\Http\Controllers\StrategicHouse\StrategicPillars\GoalController as Strat
 use App\Http\Controllers\StrategicHouse\StrategicPillars\IndexController as StrategicHouseStrategicPillarsIndexController;
 use App\Http\Controllers\StrategicHouse\StrategicPillars\InitiativeTaggingController as StrategicHouseInitiativeTaggingController;
 use App\Http\Controllers\StrategicHouse\StrategicPillars\ThemeController as StrategicHouseStrategicPillarThemeController;
+use App\Http\Controllers\ProgramPlanning\BusinessStrategy\IndexController as ProgramPlanningBusinessStrategyIndexController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -99,7 +100,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/program-planning', PlanningDashboardController::class)->name('program-planning');
     // Program Planning → Business Strategy (separate from Strategic House)
-    Route::get('/program-planning/business-strategy', fn () => Inertia::render('ProgramPlanning/BusinessStrategy/Index'))
+    Route::get('/program-planning/business-strategy', ProgramPlanningBusinessStrategyIndexController::class)
         ->name('program-planning.business-strategy');
     Route::get('/program-planning/rsti-sub-holding', [ProgramPlanningController::class, 'rstiSubHolding'])->name('program-planning.rsti-sub-holding');
     Route::get('/program-planning/program-definition', ProgramDefinitionController::class)->name('program-planning.program-definition');
