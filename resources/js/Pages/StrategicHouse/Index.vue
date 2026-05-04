@@ -592,7 +592,7 @@ const availableViewModes = new Set([
 ]);
 
 const getInitialViewMode = () => {
-    if (typeof window === "undefined") return "business-strategy";
+    if (typeof window === "undefined") return "mapping";
     const urlParams = new URLSearchParams(window.location.search);
     const requestedView = urlParams.get("view");
 
@@ -642,7 +642,7 @@ const getInitialRoadmapMode = () => {
 };
 
 function getInitialServerView() {
-    return props.filters?.view || "business-strategy";
+    return props.filters?.view || "mapping";
 }
 
 function getInitialServerRoadmapMode() {
@@ -671,7 +671,7 @@ function preloadViewAssets(mode) {
 }
 
 // Use Inertia's useRemember to cache state client-side
-const viewMode = useRemember(getInitialViewMode() || "business-strategy", "StrategicHouse/viewMode");
+const viewMode = useRemember(getInitialViewMode() || "mapping", "StrategicHouse/viewMode");
 const roadmapMode = useRemember(getInitialRoadmapMode() || "it", "StrategicHouse/roadmapMode");
 
 function getViewCacheKey(mode, selectedRoadmapMode = roadmapMode.value) {
@@ -803,7 +803,7 @@ onMounted(async () => {
     const initialView = getInitialServerView();
     const initialRoadmapMode = getInitialServerRoadmapMode();
 
-    if (!hasViewParam && viewMode.value !== "business-strategy") {
+    if (!hasViewParam && viewMode.value !== "mapping") {
         isLoading.value = true;
         isReloading.value = true;
         startProgress();
