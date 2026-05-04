@@ -1,13 +1,19 @@
 <template>
     <UserLayout title="Business Strategy">
-        <div class="space-y-6 p-6 animate-fade-in-up">
-            <h1 class="text-2xl font-bold">Business Strategy</h1>
+        <div class="w-full max-w-full px-0">
+            <BusinessStrategy :goals="goals" :strategies="strategies" />
         </div>
     </UserLayout>
 </template>
 
 <script setup>
 import UserLayout from '@/Layouts/UserLayout.vue';
+import BusinessStrategy from '@/Components/ProgramPlanning/BusinessStrategy/BusinessStrategy.vue';
+
+const props = defineProps({
+    goals: { type: Array, default: () => [] },
+    strategies: { type: Object, default: () => ({}) },
+});
 </script>
 
 <style scoped>

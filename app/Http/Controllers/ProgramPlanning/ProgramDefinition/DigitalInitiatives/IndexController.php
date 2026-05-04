@@ -52,67 +52,76 @@ class IndexController extends Controller
                 'coe:id,name',
                 'organization:id,name,groub_id',
                 'organization.groub:id,name',
-                'latestStatus',
+                'statusHistory',
             ])
             ->where('tipe_initiative', 1)
             ->orderBy('code')
-            ->get()
-            ->values();
+            ->get();
 
-        // Build statusCounts from the loaded collection so every initiative
-        // is accounted for, even those without a trs_status_mstinitiative row.
         $aliasMap = [
             'draft' => 'drafting',
             'approve' => 'approved',
             'aproved' => 'approved',
         ];
+        $statusRank = [
+            'approved' => 4,
+            'review' => 3,
+            'propose' => 2,
+            'drafting' => 1,
+            'draft' => 1,
+        ];
         $validStatuses = ['drafting', 'propose', 'review', 'approved', 'postpone'];
+
         $statusCounts = collect();
+        $postponeFromCounts = collect();
+
         foreach ($masterDigitalInitiatives as $initiative) {
-            $raw = strtolower(trim($initiative->latestStatus?->status ?? $initiative->status ?? 'drafting'));
-            $canonical = $aliasMap[$raw] ?? $raw;
+            $history = $initiative->statusHistory;
+            $absoluteLatest = $history->sortByDesc('id')->first();
+            $absStatusRaw = strtolower(trim($absoluteLatest?->status ?? ''));
+            $absStatus = $aliasMap[$absStatusRaw] ?? $absStatusRaw;
+
+            // Find highest rank (excluding postpone)
+            $highestEntry = $history->filter(fn ($s) => strtolower(trim($s->status)) !== 'postpone')
+                ->sortByDesc(function ($s) use ($statusRank, $aliasMap) {
+                    $r = strtolower(trim($s->status));
+
+                    return $statusRank[$aliasMap[$r] ?? $r] ?? 0;
+                })
+                ->sortByDesc('id') // tie-breaker
+                ->first();
+
+            if ($absStatus === 'postpone') {
+                $canonical = 'postpone';
+                $displayStatus = $absoluteLatest;
+
+                if ($highestEntry) {
+                    $hr = strtolower(trim($highestEntry->status));
+                    $fromKey = $aliasMap[$hr] ?? $hr;
+                    $postponeFromCounts[$fromKey] = ($postponeFromCounts[$fromKey] ?? 0) + 1;
+                }
+            } else {
+                if ($highestEntry) {
+                    $hr = strtolower(trim($highestEntry->status));
+                    $canonical = $aliasMap[$hr] ?? $hr;
+                    $displayStatus = $highestEntry;
+                } else {
+                    $raw = strtolower(trim($initiative->status ?? 'drafting'));
+                    $canonical = $aliasMap[$raw] ?? $raw;
+                    $displayStatus = (object) ['status' => $canonical, 'notes' => ''];
+                }
+            }
+
             if (! in_array($canonical, $validStatuses)) {
                 $canonical = 'drafting';
             }
+
+            $initiative->setAttribute('project_status_key', $canonical);
+            $initiative->setRelation('latestStatus', $displayStatus);
             $statusCounts[$canonical] = ($statusCounts[$canonical] ?? 0) + 1;
         }
 
-        // For initiatives whose latest status is "postpone", find the status
-        // just before postpone so the frontend knows which main node to branch from.
-        // Result: { "drafting": 1, "propose": 2, ... }
-        $postponeFromCounts = [];
-        $latestIds = StatusMstInitiative::query()
-            ->select(DB::raw('MAX(id) as id'))
-            ->whereHas('initiative', fn ($q) => $q->where('tipe_initiative', 1))
-            ->groupBy('initiative_id');
-
-        $postponedInitiativeIds = StatusMstInitiative::query()
-            ->joinSub($latestIds, 'latest', fn ($join) => $join->on('trs_status_mstinitiative.id', '=', 'latest.id'))
-            ->whereRaw('LOWER(status) = ?', ['postpone'])
-            ->pluck('initiative_id');
-
-        if ($postponedInitiativeIds->isNotEmpty()) {
-            // For each postponed initiative, get the second-to-last status entry
-            $prevStatuses = StatusMstInitiative::query()
-                ->whereIn('initiative_id', $postponedInitiativeIds)
-                ->whereRaw('LOWER(status) != ?', ['postpone'])
-                ->select('initiative_id', DB::raw('MAX(id) as prev_id'))
-                ->groupBy('initiative_id');
-
-            $postponeFromCounts = StatusMstInitiative::query()
-                ->joinSub($prevStatuses, 'prev', fn ($join) => $join->on('trs_status_mstinitiative.id', '=', 'prev.prev_id'))
-                ->selectRaw('LOWER(trs_status_mstinitiative.status) as from_key, COUNT(*) as total')
-                ->groupBy('from_key')
-                ->pluck('total', 'from_key');
-
-            // Normalize aliases for postponeFromCounts too
-            $normalizedPfc = collect();
-            foreach ($postponeFromCounts as $key => $total) {
-                $canonical = $aliasMap[$key] ?? $key;
-                $normalizedPfc[$canonical] = ($normalizedPfc[$canonical] ?? 0) + $total;
-            }
-            $postponeFromCounts = $normalizedPfc;
-        }
+        $masterDigitalInitiatives = $masterDigitalInitiatives->values();
 
         $initiativeItems = TrsScInitiative::query()
             ->select(['id'])

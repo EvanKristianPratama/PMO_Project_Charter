@@ -54,12 +54,15 @@ const initiativeItemsList = computed(() => Array.isArray(props.initiativeItems) 
 
 const normalizeStatus = (val) => String(val ?? '').trim().toLowerCase();
 
+const resolveStatusKey = (item) => {
+    return normalizeStatus(item?.project_status_key ?? item?.latest_status?.status ?? item?.status) || 'drafting';
+};
+
 const filteredList = computed(() => {
     if (!activeStatusFilter.value) return masterDigitalList.value;
     const filterKey = normalizeStatus(activeStatusFilter.value);
     return masterDigitalList.value.filter((item) => {
-        const latestStatus = normalizeStatus(item?.latest_status?.status ?? item?.status);
-        return latestStatus === filterKey;
+        return resolveStatusKey(item) === filterKey;
     });
 });
 
