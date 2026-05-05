@@ -120,7 +120,7 @@ const availableGitsPeriods = computed(() => {
 });
 
 const statusDesiredOrder = ['DF', 'Done', 'DT 2026', 'ITSBP', 'On Progress', 'On Review', 'SH'];
-const gitsStatusDesiredOrder = ['On Track', 'Delayed', 'At Risk', 'Completed', 'Done', 'Not Started', 'Not Signed'];
+const gitsStatusDesiredOrder = ['On Track', 'At Risk', 'Done', 'Not Signed', 'Not Started'];
 
 const normalizeStatusLabel = (rawStatus) => {
     const s = String(rawStatus ?? '').trim();
@@ -139,9 +139,8 @@ const normalizeStatusLabel = (rawStatus) => {
 const getGitsStatusColorClass = (status) => {
     const normalized = String(status ?? '').trim().toLowerCase();
     if (normalized === 'on track') return 'status-color-itontrack';
-    if (normalized === 'done' || normalized === 'completed') return 'status-color-itdone';
+    if (normalized === 'done') return 'status-color-itdone';
     if (normalized === 'at risk') return 'status-color-itatrisk';
-    if (normalized === 'delayed') return 'status-color-itdelayed';
     if (normalized === 'not started') return 'status-color-itnotstarted';
     if (normalized === 'not signed') return 'status-color-itnotsigned';
     return '';
@@ -883,7 +882,7 @@ const getBusinessUnitInitiativeCount = (row) => {
                 <div v-if="showGitsStatusImplementation" class="mb-4 animate-fade-in-up">
                     <div class="status-legend-container">
                         <div class="status-legend-header">
-                            <span class="status-legend-title">Implementation Status (IT):</span>
+                            <span class="status-legend-title">Review Implementation Status (IT):</span>
                             <select 
                                 v-model="selectedGitsPeriod" 
                                 class="status-period-select"
@@ -2370,12 +2369,12 @@ const getBusinessUnitInitiativeCount = (row) => {
 .status-color-neutral { background-color: #94a3b8 !important; border: 1px solid #64748b; }
 
 /* IT Initiative (GITS) Status Colors - Consistent with IT Building Blocks */
-.status-color-itontrack { background-color: #10b981 !important; color: #ffffff !important; border: 1px solid #059669 !important; }
-.status-color-itdone { background-color: #3b82f6 !important; color: #ffffff !important; border: 1px solid #2563eb !important; }
-.status-color-itatrisk { background-color: #f59e0b !important; color: #ffffff !important; border: 1px solid #d97706 !important; }
+.status-color-itontrack { background-color: #3b82f6 !important; color: #ffffff !important; border: 1px solid #2563eb !important; }
+.status-color-itdone { background-color: #10b981 !important; color: #ffffff !important; border: 1px solid #059669 !important; }
+.status-color-itatrisk { background-color: #ddf907 !important; color: #ffffff !important; border: 1px solid #ca8a04 !important; }
 .status-color-itdelayed { background-color: #f43f5e !important; color: #ffffff !important; border: 1px solid #e11d48 !important; }
-.status-color-itnotstarted { background-color: #64748b !important; color: #ffffff !important; border: 1px solid #475569 !important; }
-.status-color-itnotsigned { background-color: #94a3b8 !important; color: #ffffff !important; border: 1px solid #64748b !important; }
+.status-color-itnotstarted { background-color: #3b82f6 !important; color: #ffffff !important; border: 1px solid #2563eb !important; }
+.status-color-itnotsigned { background-color: #ef4444 !important; color: #ffffff !important; border: 1px solid #dc2626 !important; }
 
 .dti-toggle--active {
     background: #184f96 !important;

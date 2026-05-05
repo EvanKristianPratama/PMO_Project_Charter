@@ -348,11 +348,11 @@ class StrategicHousePageService
             $history = [];
             
             if ($project) {
-                $history = collect($project->pcStatusImplementations ?? [])->map(fn($s) => [
-                    'start' => $s->month,
-                    'end' => $s->month,
+                $history = collect($project->reviewPcStatusImplementations ?? [])->map(fn($s) => [
+                    'start' => $s->start,
+                    'end' => $s->end,
                     'year' => (int) $s->year,
-                    'status' => $s->status
+                    'status' => $s->review_status
                 ])->values();
                 
                 $latestStatus = $history->first()['status'] ?? null;
@@ -646,7 +646,7 @@ class StrategicHousePageService
                 'organization:id,name,groub_id',
                 'sourceData:id,name',
                 'mappedProjects:id',
-                'mappedProjects.pcStatusImplementations' => fn ($query) => $this->orderProjectStatusHistoryQuery($query),
+                'mappedProjects.reviewPcStatusImplementations' => fn ($query) => $this->orderReviewProjectStatusHistoryQuery($query),
             ],
             self::CONSOLIDATED_PROFILE_STRATEGIC_PILLARS => [
                 'organization:id,name',
@@ -666,7 +666,7 @@ class StrategicHousePageService
                 'statusImplementations:id,initiative_id,start,end,year,review_status',
                 'sourceData:id,name',
                 'mappedProjects:id',
-                'mappedProjects.pcStatusImplementations' => fn ($query) => $this->orderProjectStatusHistoryQuery($query),
+                'mappedProjects.reviewPcStatusImplementations' => fn ($query) => $this->orderReviewProjectStatusHistoryQuery($query),
             ],
         };
     }
@@ -715,6 +715,35 @@ class StrategicHousePageService
                 WHEN trs_pc_status_implementation.month = 'Januari' THEN 1
                 ELSE 0 END DESC")
             ->orderBy('trs_pc_status_implementation.id', 'desc');
+    }
+
+    private function orderReviewProjectStatusHistoryQuery($query)
+    {
+        return $query
+            ->select([
+                'trs_review_pc_status_implementation.id',
+                'trs_review_pc_status_implementation.project_id',
+                'trs_review_pc_status_implementation.start',
+                'trs_review_pc_status_implementation.end',
+                'trs_review_pc_status_implementation.year',
+                'trs_review_pc_status_implementation.review_status'
+            ])
+            ->orderBy('trs_review_pc_status_implementation.year', 'desc')
+            ->orderByRaw("CASE
+                WHEN trs_review_pc_status_implementation.start = 'Desember' THEN 12
+                WHEN trs_review_pc_status_implementation.start = 'November' THEN 11
+                WHEN trs_review_pc_status_implementation.start = 'Oktober' THEN 10
+                WHEN trs_review_pc_status_implementation.start = 'September' THEN 9
+                WHEN trs_review_pc_status_implementation.start = 'Agustus' THEN 8
+                WHEN trs_review_pc_status_implementation.start = 'Juli' THEN 7
+                WHEN trs_review_pc_status_implementation.start = 'Juni' THEN 6
+                WHEN trs_review_pc_status_implementation.start = 'Mei' THEN 5
+                WHEN trs_review_pc_status_implementation.start = 'April' THEN 4
+                WHEN trs_review_pc_status_implementation.start = 'Maret' THEN 3
+                WHEN trs_review_pc_status_implementation.start = 'Februari' THEN 2
+                WHEN trs_review_pc_status_implementation.start = 'Januari' THEN 1
+                ELSE 0 END DESC")
+            ->orderBy('trs_review_pc_status_implementation.id', 'desc');
     }
 
     private function normalizeDigitalRoadmapCoeName(string $rawName): string { $name = strtolower(trim($rawName)); if ($name === '') return 'CoE Not Identified'; if (str_contains($name, 'ai') || str_contains($name, 'analytics')) return 'AI / Adv. Analytics'; if (str_contains($name, 'cloud')) return 'Advance Cloud'; if (str_contains($name, 'iot')) return 'IoT'; if (str_contains($name, 'rpa')) return 'RPA'; return 'CoE Not Identified'; }

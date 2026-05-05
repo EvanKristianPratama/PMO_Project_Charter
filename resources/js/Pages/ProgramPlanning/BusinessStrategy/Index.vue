@@ -34,6 +34,15 @@
                                     " @click="() => activeTab = 'Prioritas Inisiatif Strategis Perusahaan'">
                                 Prioritas Inisiatif Strategis Perusahaan
                             </button>
+
+                            <button type="button"
+                                class="w-full text-left px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
+                                :class="activeTab === 'Priority Strategic Initiatives'
+                                    ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
+                                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                                    " @click="() => activeTab = 'Priority Strategic Initiatives'">
+                                Priority Strategic Initiatives of Pertamina 2026
+                            </button>
                         </div>
                     </div>
                 </aside>
@@ -73,9 +82,12 @@
                             <BusinessStrategy v-if="subTab === 'dual_growth'"
                                 :goals="goals" :strategies="strategies" :active-tab="activeTab" />
 
-                            <MisiBumn v-else-if="subTab === 'kbumn'"
+                            <KBUMN v-else-if="subTab === 'kbumn'"
                                 :missions="misiBumn" />
                         </div>
+
+                        <StrategicInitiative v-else-if="activeTab === 'Priority Strategic Initiatives'"
+                            :initiatives="priorityStrategicInitiatives" />
 
                     </div>
                 </main>
@@ -87,9 +99,10 @@
 <script setup>
 import UserLayout from '@/Layouts/UserLayout.vue';
 import BusinessStrategy from '@/Components/ProgramPlanning/BusinessStrategy/BusinessStrategy.vue';
-import MisiBumn from '@/Components/ProgramPlanning/BusinessStrategy/MisiBumn.vue';
+import KBUMN from '@/Components/ProgramPlanning/BusinessStrategy/KBUMN.vue';
 import ListMisiBumn from '@/Components/ProgramPlanning/BusinessStrategy/ListMisiBumn.vue';
 import StrategicHouseBusinessStrategy from '@/Components/StrategicHouse/BusinessStrategy/BusinessStrategy.vue';
+import StrategicInitiative from '@/Components/ProgramPlanning/BusinessStrategy/StrategicInitiative.vue';
 import { ref } from 'vue';
 
 const props = defineProps({
@@ -97,6 +110,7 @@ const props = defineProps({
     strategies: { type: Object, default: () => ({}) },
     misiBumn: { type: Array, default: () => [] },
     dualGrowthProps: { type: Object, default: () => ({}) },
+    priorityStrategicInitiatives: { type: Array, default: () => [] },
 });
 
 const defaultTab = 'KBUMN Mission';

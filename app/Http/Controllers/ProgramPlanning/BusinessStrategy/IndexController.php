@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Goal;
 use App\Models\MstBusinessStrategy;
 use App\Models\MstMisiBumn;
+use App\Models\MstPriorityStrategicInitiative;
 use App\Services\StrategicHouse\BusinessStrategy\BusinessStrategyService;
 use Inertia\Inertia;
 
@@ -32,6 +33,8 @@ class IndexController extends Controller
             });
 
         $misiBumn = MstMisiBumn::with('prioritasStrategy')->orderBy('code')->get()->keyBy('id');
+        
+        $priorityStrategicInitiatives = MstPriorityStrategicInitiative::orderBy('no')->get();
 
         $businessStrategyService = app(BusinessStrategyService::class);
         $dualGrowthProps = $businessStrategyService->getPageProps(collect());
@@ -41,6 +44,7 @@ class IndexController extends Controller
             'strategies' => $strategies,
             'misiBumn' => $misiBumn,
             'dualGrowthProps' => $dualGrowthProps,
+            'priorityStrategicInitiatives' => $priorityStrategicInitiatives,
         ]);
     }
 }
