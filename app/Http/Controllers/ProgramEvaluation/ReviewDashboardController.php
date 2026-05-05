@@ -5,9 +5,7 @@ namespace App\Http\Controllers\ProgramEvaluation;
 use App\Http\Controllers\Controller;
 use App\Models\InitiativeStatus;
 use App\Models\MstInitiative;
-use App\Models\ProjectStatusHistory;
 use Carbon\Carbon;
-use DateTimeInterface;
 use Illuminate\Support\Collection;
 use Inertia\Response;
 
@@ -189,29 +187,17 @@ class ReviewDashboardController extends Controller
 
     private function resolveStatusDate(Collection $projects, int $statusId): ?Carbon
     {
-        /** @var ProjectStatusHistory|null $latest */
         $latest = $projects
-            ->flatMap(static fn ($project) => $project->projectStatusHistories ?? collect())
-            ->filter(static fn (ProjectStatusHistory $history) => (int) $history->status === $statusId)
-            ->sortByDesc(static function (ProjectStatusHistory $history): string {
-                $rawDate = $history->tanggal;
-                $date = '';
-
-                if ($rawDate instanceof DateTimeInterface) {
-                    $date = Carbon::instance($rawDate)->format('Y-m-d');
-                } elseif ($rawDate) {
-                    $date = Carbon::parse((string) $rawDate)->format('Y-m-d');
-                }
-
-                return sprintf('%s-%09d', $date, (int) $history->id);
-            })
+            ->flatMap(static fn ($project) => $project->projectCharters ?? collect())
+            ->filter(static fn ($charter) => (int) $charter->status === $statusId)
+            ->sortByDesc('id')
             ->first();
 
-        if (! $latest || ! $latest->tanggal) {
+        if (! $latest || ! $latest->tgl_dokumen) {
             return null;
         }
 
-        return Carbon::parse($latest->tanggal);
+        return Carbon::parse($latest->tgl_dokumen);
     }
 
     private function formatDate(?Carbon $date): ?string
@@ -229,7 +215,8 @@ class ReviewDashboardController extends Controller
             return null;
         }
 
-        return (int) $baselineDate->diffInMonths($approveDate);
+        // Subtract absolute month count to match frontend logic (e.g., Oct - Feb = 8)
+        return ($approveDate->year * 12 + $approveDate->month) - ($baselineDate->year * 12 + $baselineDate->month);
     }
 
     private function formatProcessMonth(?int $months): ?string
@@ -238,7 +225,7 @@ class ReviewDashboardController extends Controller
             return null;
         }
 
-        return sprintf('%d bulan', $months);
+        return (string) $months;
     }
 
     private function normalizeReviewStatus(?string $rawStatus): ?string
