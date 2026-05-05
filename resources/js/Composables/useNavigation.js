@@ -123,6 +123,12 @@ export function useNavigation() {
                     url.startsWith("/roadmap"),
                 children: [
                     {
+                        label: "Dashboard Summary",
+                        href: safeRoute("program-implementation.index"),
+                        icon: ChartBarIcon,
+                        active: (url) => url === "/program-implementation",
+                    },
+                    {
                         label: "Roadmap Project Charter",
                         href: safeRoute("roadmap.index"),
                         icon: ClipboardDocumentCheckIcon,
