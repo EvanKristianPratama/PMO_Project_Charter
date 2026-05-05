@@ -40,6 +40,20 @@ class ReviewDashboardController extends Controller
 
     public function index(): Response
     {
+        $data = $this->getDashboardData();
+
+        return inertia('ProgramEvaluation/ReviewDashboard/Index', $data);
+    }
+
+    public function summary(): Response
+    {
+        $data = $this->getDashboardData();
+
+        return inertia('ProgramEvaluation/ReviewDashboard/Summary', $data);
+    }
+
+    private function getDashboardData(): array
+    {
         $rows = MstInitiative::query()
             ->select(['id', 'code', 'name', 'tipe_initiative', 'coe_id'])
             ->whereIn('tipe_initiative', [1, 2])
@@ -109,7 +123,7 @@ class ReviewDashboardController extends Controller
         )->count();
         $statusBreakdown = $this->buildStatusBreakdown($rows);
 
-        return inertia('ProgramEvaluation/ReviewDashboard/Index', [
+        return [
             'rows' => $rows,
             'summary' => [
                 'total' => $rows->count(),
@@ -118,7 +132,7 @@ class ReviewDashboardController extends Controller
                 'withoutReviewStatus' => $rows->count() - $withReviewStatus,
                 'statusBreakdown' => $statusBreakdown,
             ],
-        ]);
+        ];
     }
 
     private function resolveLatestReviewState(MstInitiative $initiative, Collection $projects): array

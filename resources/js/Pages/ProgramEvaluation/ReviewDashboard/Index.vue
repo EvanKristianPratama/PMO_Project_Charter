@@ -11,219 +11,27 @@
 
             <InitiativesTimelineTable :items="sortedRows" />
 
-            <!-- Statistics Summary Table -->
-            <section v-if="durationStats" class="mt-12 overflow-hidden animate-fade-in-up delay-100">
-                <div class="overflow-x-auto rounded-2xl border border-slate-900 shadow-sm dark:border-white/20">
-                    <table class="w-full border-collapse text-left text-[11px]">
-                        <thead>
-                            <tr class="bg-slate-50 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:bg-white/5 dark:text-slate-400">
-                                <th class="border-b border-r border-slate-900 px-4 py-3 dark:border-white/20">Category</th>
-                                <th class="border-b border-r border-slate-900 px-4 py-3 text-center dark:border-white/20">Total</th>
-                                <th class="border-b border-r border-slate-900 px-4 py-3 dark:border-white/20">Statistik</th>
-                                <th class="border-b border-r border-slate-900 px-4 py-3 dark:border-white/20">Deskripsi</th>
-                                <th class="border-b border-r border-slate-900 px-4 py-3 text-center dark:border-white/20">Bulan</th>
-                                <th class="border-b border-r border-slate-900 px-4 py-3 text-center dark:border-white/20">Jumlah</th>
-                                <th class="border-b border-slate-900 px-4 py-3 dark:border-white/20">Inisiatif</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white dark:bg-[#171717]">
-                            <tr v-for="(stat, index) in durationStats.stats" :key="stat.label" class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-                                <!-- Rowspan for Total Approval Category and Total Count -->
-                                <td v-if="index === 0" :rowspan="durationStats.stats.length" class="border-r border-slate-900 p-4 text-center font-black uppercase dark:border-white/20">
-                                    <div class="flex flex-col items-center justify-center">
-                                        <span class="text-slate-900 dark:text-white">Total Approval</span>
-                                    </div>
-                                </td>
-                                <td v-if="index === 0" :rowspan="durationStats.stats.length" class="border-r border-slate-900 p-4 text-center text-3xl font-black text-slate-900 dark:border-white/20 dark:text-white">
-                                    {{ durationStats.totalApproved }}
-                                </td>
+            <!-- Duration Statistics Table Component -->
+            <DurationStatsTable
+                v-if="durationStats"
+                :stats="durationStats.stats"
+                :totalApproved="durationStats.totalApproved"
+                :totalNotApproved="durationStats.totalNotApproved"
+                :notApprovedInitiatives="durationStats.notApprovedInitiatives"
+                :getCircleColor="getCircleColor"
+            />
 
-                                <!-- Stat Rows -->
-                                <td class="border-r border-slate-900 px-4 py-2 font-bold uppercase text-slate-700 dark:border-white/20 dark:text-slate-300">
-                                    {{ stat.label }}
-                                </td>
-                                <td class="border-r border-slate-900 px-4 py-2 italic text-slate-500 dark:border-white/20 dark:text-slate-400">
-                                    {{ stat.desc }}
-                                </td>
-                                <td class="border-r border-slate-900 px-4 py-2 text-center font-black text-slate-900 dark:border-white/20 dark:text-white">
-                                    {{ stat.bulan }} <span class="ml-0.5 text-[9px] font-normal text-slate-400">bulan</span>
-                                </td>
-                                <td class="border-r border-slate-900 px-4 py-2 text-center font-black text-slate-900 dark:border-white/20 dark:text-white">
-                                    {{ stat.jumlah }}
-                                </td>
-                                <td class="px-4 py-2 font-medium text-slate-600 dark:text-slate-400">
-                                    <div v-if="stat.customText" class="italic text-slate-500 dark:text-slate-400">
-                                        {{ stat.customText }}
-                                    </div>
-                                    <div v-else class="flex flex-wrap gap-1.5">
-                                        <span
-                                            v-for="init in stat.initiatives"
-                                            :key="init.no"
-                                            class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
-                                            :class="getCircleColor(init.status)"
-                                            :title="init.status"
-                                        >
-                                            {{ init.no }}
-                                        </span>
-                                        <span v-if="stat.initiatives.length === 0" class="text-slate-400">-</span>
-                                    </div>
-                                </td>
-                            </tr>
+            <!-- Project Owner Breakdown Table Component -->
+            <OwnerBreakdownTable
+                :data="ownerBreakdown"
+                :getCircleColor="getCircleColor"
+            />
 
-                            <!-- Not Approved Row -->
-                            <tr class="border-t border-slate-900 bg-slate-50/50 dark:border-white/20 dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-                                <td class="border-r border-slate-900 p-4 text-center font-black uppercase dark:border-white/20">
-                                    Total Not Approval
-                                </td>
-                                <td class="border-r border-slate-900 p-4 text-center text-3xl font-black text-slate-900 dark:border-white/20 dark:text-white">
-                                    {{ durationStats.totalNotApproved }}
-                                </td>
-                                <td colspan="4" class="px-4 py-4">
-                                    <div class="flex flex-wrap items-center gap-2">
-                                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Inisiatif:</span>
-                                        <div class="flex flex-wrap gap-1.5">
-                                            <span
-                                                v-for="init in durationStats.notApprovedInitiatives"
-                                                :key="init.no"
-                                                class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
-                                                :class="getCircleColor(init.status)"
-                                                :title="init.status"
-                                            >
-                                                {{ init.no }}
-                                            </span>
-                                            <span v-if="durationStats.notApprovedInitiatives.length === 0" class="text-slate-400">-</span>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- Project Owner Breakdown Table -->
-            <section v-if="ownerBreakdown.length > 0" class="mt-8 overflow-hidden animate-fade-in-up delay-125">
-                <div class="overflow-x-auto rounded-2xl border border-slate-900 shadow-sm dark:border-white/20">
-                    <table class="w-full border-collapse text-left text-[11px]">
-                        <thead>
-                            <tr class="bg-slate-50 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:bg-white/5 dark:text-slate-400">
-                                <th rowspan="2" class="border-b border-r border-slate-900 px-4 py-3 dark:border-white/20">Project Owner</th>
-                                <th colspan="2" class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20">Aproval</th>
-                                <th colspan="2" class="border-b border-slate-900 px-4 py-2 text-center dark:border-white/20">no aprove</th>
-                            </tr>
-                            <tr class="bg-slate-50/50 text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:bg-white/5 dark:text-slate-500">
-                                <th class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20">Total</th>
-                                <th class="border-b border-r border-slate-900 px-4 py-2 dark:border-white/20">Inisiatif</th>
-                                <th class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20">Total</th>
-                                <th class="border-b border-slate-900 px-4 py-2 dark:border-white/20">Inisiatif</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white dark:bg-[#171717]">
-                            <tr v-for="row in ownerBreakdown" :key="row.owner" class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-                                <td class="border-r border-slate-900 px-4 py-4 font-black uppercase text-slate-900 dark:border-white/20 dark:text-white">
-                                    {{ row.owner }}
-                                </td>
-                                <td class="border-r border-slate-900 px-4 py-4 text-center font-black text-slate-900 dark:border-white/20 dark:text-white">
-                                    {{ row.approved.length }}
-                                </td>
-                                <td class="border-r border-slate-900 px-4 py-4 dark:border-white/20">
-                                    <div class="flex flex-wrap gap-1.5">
-                                        <span
-                                            v-for="init in row.approved"
-                                            :key="init.no"
-                                            class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
-                                            :class="getCircleColor(init.status)"
-                                            :title="init.status"
-                                        >
-                                            {{ init.no }}
-                                        </span>
-                                        <span v-if="row.approved.length === 0" class="text-slate-400">-</span>
-                                    </div>
-                                </td>
-                                <td class="border-r border-slate-900 px-4 py-4 text-center font-black text-slate-900 dark:border-white/20 dark:text-white">
-                                    {{ row.notApproved.length }}
-                                </td>
-                                <td class="px-4 py-4">
-                                    <div class="flex flex-wrap gap-1.5">
-                                        <span
-                                            v-for="init in row.notApproved"
-                                            :key="init.no"
-                                            class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
-                                            :class="getCircleColor(init.status)"
-                                            :title="init.status"
-                                        >
-                                            {{ init.no }}
-                                        </span>
-                                        <span v-if="row.notApproved.length === 0" class="text-slate-400">-</span>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- Project Leader Breakdown Table -->
-            <section v-if="leaderBreakdown.length > 0" class="mt-8 overflow-hidden animate-fade-in-up delay-150">
-                <div class="overflow-x-auto rounded-2xl border border-slate-900 shadow-sm dark:border-white/20">
-                    <table class="w-full border-collapse text-left text-[11px]">
-                        <thead>
-                            <tr class="bg-slate-50 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:bg-white/5 dark:text-slate-400">
-                                <th rowspan="2" class="border-b border-r border-slate-900 px-4 py-3 dark:border-white/20">Project Leader</th>
-                                <th colspan="2" class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20">Aproval</th>
-                                <th colspan="2" class="border-b border-slate-900 px-4 py-2 text-center dark:border-white/20">no aprove</th>
-                            </tr>
-                            <tr class="bg-slate-50/50 text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:bg-white/5 dark:text-slate-500">
-                                <th class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20">Total</th>
-                                <th class="border-b border-r border-slate-900 px-4 py-2 dark:border-white/20">Inisiatif</th>
-                                <th class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20">Total</th>
-                                <th class="border-b border-slate-900 px-4 py-2 dark:border-white/20">Inisiatif</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white dark:bg-[#171717]">
-                            <tr v-for="row in leaderBreakdown" :key="row.leader" class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-                                <td class="border-r border-slate-900 px-4 py-4 font-black uppercase text-slate-900 dark:border-white/20 dark:text-white">
-                                    {{ row.leader }}
-                                </td>
-                                <td class="border-r border-slate-900 px-4 py-4 text-center font-black text-slate-900 dark:border-white/20 dark:text-white">
-                                    {{ row.approved.length }}
-                                </td>
-                                <td class="border-r border-slate-900 px-4 py-4 dark:border-white/20">
-                                    <div class="flex flex-wrap gap-1.5">
-                                        <span
-                                            v-for="init in row.approved"
-                                            :key="init.no"
-                                            class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
-                                            :class="getCircleColor(init.status)"
-                                            :title="init.status"
-                                        >
-                                            {{ init.no }}
-                                        </span>
-                                        <span v-if="row.approved.length === 0" class="text-slate-400">-</span>
-                                    </div>
-                                </td>
-                                <td class="border-r border-slate-900 px-4 py-4 text-center font-black text-slate-900 dark:border-white/20 dark:text-white">
-                                    {{ row.notApproved.length }}
-                                </td>
-                                <td class="px-4 py-4">
-                                    <div class="flex flex-wrap gap-1.5">
-                                        <span
-                                            v-for="init in row.notApproved"
-                                            :key="init.no"
-                                            class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
-                                            :class="getCircleColor(init.status)"
-                                            :title="init.status"
-                                        >
-                                            {{ init.no }}
-                                        </span>
-                                        <span v-if="row.notApproved.length === 0" class="text-slate-400">-</span>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+            <!-- Project Leader Breakdown Table Component -->
+            <LeaderBreakdownTable
+                :data="leaderBreakdown"
+                :getCircleColor="getCircleColor"
+            />
 
             <!-- Footer Note -->
             <footer class="mt-12 mb-8 flex justify-center border-t border-slate-100 pt-8 dark:border-white/5">
@@ -238,6 +46,9 @@
 <script setup>
 import { computed, ref } from 'vue';
 import InitiativesTimelineTable from '@/Components/ProgramEvaluation/ReviewDashboard/InitiativesTimelineTable.vue';
+import DurationStatsTable from '@/Components/ProgramEvaluation/ReviewDashboard/DurationStatsTable.vue';
+import OwnerBreakdownTable from '@/Components/ProgramEvaluation/ReviewDashboard/OwnerBreakdownTable.vue';
+import LeaderBreakdownTable from '@/Components/ProgramEvaluation/ReviewDashboard/LeaderBreakdownTable.vue';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
 const props = defineProps({
