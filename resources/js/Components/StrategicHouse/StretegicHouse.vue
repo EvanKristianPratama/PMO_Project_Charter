@@ -444,7 +444,7 @@ const filteredDtiInitiativesCount = computed(() => {
 
 const coeTooltip = (card) => {
     if (!card?.initiatives?.length) {
-        return `${card?.display_name ?? 'CoE'}: belum ada initiative`;
+        return `${card?.display_name ?? 'CoE'}: -`;
     }
 
     const lines = card.initiatives.map((initiative) => initiative.label);
@@ -863,7 +863,7 @@ const getBusinessUnitInitiativeCount = (row) => {
                                     </li>
                                 </ul>
                                 <div v-else class="dti-card-list-empty">
-                                    Belum ada initiative
+                                    -
                                 </div>
                             </div>
                         </div>
@@ -957,7 +957,7 @@ const getBusinessUnitInitiativeCount = (row) => {
                                 </div>
                             </template>
                             <p v-if="card.is_empty" class="gits-pillar-empty">
-                                Belum ada initiative yang terhubung ke area ini.
+                                - yang terhubung ke area ini.
                             </p>
                         </div>
 
@@ -981,7 +981,7 @@ const getBusinessUnitInitiativeCount = (row) => {
                                 </li>
                             </ul>
                             <div v-else class="gits-pillar-list-empty">
-                                Belum ada initiative
+                                -
                             </div>
                         </div>
                     </article>
@@ -1018,7 +1018,7 @@ const getBusinessUnitInitiativeCount = (row) => {
                             </li>
                         </ul>
                         <div v-else class="gits-pillar-list-empty">
-                            Belum ada initiative
+                            -
                         </div>
                     </div>
                 </div>
@@ -1051,7 +1051,7 @@ const getBusinessUnitInitiativeCount = (row) => {
                             </li>
                         </ul>
                         <div v-else class="gits-pillar-list-empty">
-                            Belum ada initiative
+                            -
                         </div>
                     </div>
                 </div>
