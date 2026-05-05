@@ -33,6 +33,8 @@ class TrsReviewPCController extends Controller
                 'mappedProjects' => static fn ($query) => $query
                     ->select(['trs_projects.id', 'trs_projects.code', 'trs_projects.name', 'trs_projects.status'])
                     ->with([
+                        'projectCharters' => static fn ($charterQuery) => $charterQuery
+                            ->orderByDesc('id'),
                         'reviewPcStatusImplementations' => static fn ($reviewQuery) => $reviewQuery
                             ->orderByDesc('year')
                             ->orderByDesc('id'),
@@ -44,7 +46,7 @@ class TrsReviewPCController extends Controller
             ->orderBy('code')
             ->orderBy('id')
             ->get()
-            ->map(static function (MstInitiative $initiative) use ($latestReviewsByInitiative): array {
+            ->map(static function (MstInitiative $initiative, int $index) use ($latestReviewsByInitiative): array {
                 $projects = ($initiative->mappedProjects ?? collect())->values();
                 $latestReviewStatus = $projects
                     ->flatMap(static fn (TrsProject $project) => $project->reviewPcStatusImplementations ?? collect())
@@ -53,6 +55,15 @@ class TrsReviewPCController extends Controller
                         ['id', 'desc'],
                     ])
                     ->first();
+
+                // Get owner and leader from the latest project charter
+                $latestCharter = $projects
+                    ->flatMap(fn ($p) => $p->projectCharters ?? collect())
+                    ->sortByDesc('id')
+                    ->first();
+
+                $projectOwner = $latestCharter?->owner ?? '-';
+                $projectLeader = $latestCharter?->leader ?? '-';
 
                 // Logic for IT Building Block (must be CoE tipe 2)
                 $coe = $initiative->coe;
@@ -73,6 +84,7 @@ class TrsReviewPCController extends Controller
 
                 return [
                     'id' => $latestReviewPc?->id,
+                    'no' => $index + 1,
                     'initiative_id' => (int) $initiative->id,
                     'month' => $latestReviewPc?->month,
                     'year' => $latestReviewPc?->year,
@@ -102,6 +114,9 @@ class TrsReviewPCController extends Controller
                             : null,
                     ],
                     'projects' => $projects,
+                    'project_owner' => $projectOwner,
+                    'project_leader' => $projectLeader,
+                    'latest_review_status' => $latestReviewStatus?->review_status ?? 'Belum Ada Status',
                     'latest_review_status_implementation' => $latestReviewStatus,
                 ];
             })

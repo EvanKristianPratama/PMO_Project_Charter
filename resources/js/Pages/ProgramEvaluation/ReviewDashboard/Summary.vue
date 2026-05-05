@@ -32,6 +32,22 @@
                 :getCircleColor="getCircleColor"
             />
 
+            <!-- Status Matrix - Project Owner -->
+            <StatusMatrix
+                v-if="rows.length > 0"
+                :rows="rows"
+                groupBy="project_owner"
+                label="Project Owner"
+            />
+
+            <!-- Status Matrix - Project Leader -->
+            <StatusMatrix
+                v-if="rows.length > 0"
+                :rows="rows"
+                groupBy="project_leader"
+                label="Project Leader"
+            />
+
             <!-- Footer Note -->
             <footer class="mt-12 mb-8 flex justify-center border-t border-slate-100 pt-8 dark:border-white/5">
                 <div class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
@@ -47,6 +63,7 @@ import { computed } from 'vue';
 import DurationStatsTable from '@/Components/ProgramEvaluation/ReviewDashboard/DurationStatsTable.vue';
 import OwnerBreakdownTable from '@/Components/ProgramEvaluation/ReviewDashboard/OwnerBreakdownTable.vue';
 import LeaderBreakdownTable from '@/Components/ProgramEvaluation/ReviewDashboard/LeaderBreakdownTable.vue';
+import StatusMatrix from '@/Components/ProgramEvaluation/ReviewDashboard/StatusMatrix.vue';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
 const props = defineProps({
