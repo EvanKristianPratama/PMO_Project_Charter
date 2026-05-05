@@ -16,13 +16,13 @@
         </thead>
         <tbody>
           <tr v-for="(item, idx) in initiatives" :key="item.id || idx" class="hover:bg-slate-50 dark:hover:bg-slate-800/30">
-            <td class="px-2 py-1 text-center border border-slate-200 dark:border-slate-700/50 align-top font-semibold text-slate-700 dark:text-slate-200">
+            <td class="px-2 py-1 text-center border border-slate-200 dark:border-slate-700/50 align-middle font-semibold text-slate-700 dark:text-slate-200">
               {{ item.priority }}
             </td>
-            <td class="px-2 py-1 text-center border border-slate-200 dark:border-slate-700/50 align-top">
+            <td class="px-2 py-1 text-center border border-slate-200 dark:border-slate-700/50 align-middle">
               {{ item.no }}
             </td>
-            <td class="px-2 py-1 border border-slate-200 dark:border-slate-700/50 align-top text-slate-700 dark:text-slate-200">
+            <td class="px-2 py-1 border border-slate-200 dark:border-slate-700/50 align-middle text-slate-700 dark:text-slate-200">
               {{ item.initiative }}
             </td>
             <td class="px-2 py-1 border border-slate-200 dark:border-slate-700/50 align-top text-slate-600 dark:text-slate-400">
