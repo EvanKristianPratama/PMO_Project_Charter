@@ -93,6 +93,13 @@ export function useNavigation() {
                 active: (url) =>
                     url.startsWith("/program-evalution/review-timeline"),
             },
+            {
+                label: "Dashboard Summary",
+                href: safeRoute("program-evaluation.review-summary"),
+                icon: ClipboardDocumentCheckIcon,
+                active: (url) =>
+                    url.startsWith("/program-evalution/review-summary"),
+            },
         ];
 
         const programImplementationChildren = [
