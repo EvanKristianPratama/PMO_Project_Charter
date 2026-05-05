@@ -1,6 +1,7 @@
 <template>
   <div class="rounded-lg bg-white shadow-sm dark:bg-[#171717] overflow-hidden">
     <div class="overflow-x-auto">
+      <h3 class="text-base font-semibold text-slate-700 dark:text-slate-200">Prioritas Inisiatif Strategis Perusahaan 2025 -2029</h3>
       <table class="w-full text-sm text-left border-collapse border border-slate-200 dark:border-slate-700/50">
         <thead class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-800/50 dark:text-slate-400">
           <tr>
