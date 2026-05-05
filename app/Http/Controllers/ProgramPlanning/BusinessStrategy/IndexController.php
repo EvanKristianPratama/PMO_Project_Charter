@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Goal;
 use App\Models\MstBusinessStrategy;
 use App\Models\MstMisiBumn;
+use App\Services\StrategicHouse\BusinessStrategy\BusinessStrategyService;
 use Inertia\Inertia;
 
 class IndexController extends Controller
@@ -32,10 +33,14 @@ class IndexController extends Controller
 
         $misiBumn = MstMisiBumn::with('prioritasStrategy')->orderBy('code')->get()->keyBy('id');
 
+        $businessStrategyService = app(BusinessStrategyService::class);
+        $dualGrowthProps = $businessStrategyService->getPageProps(collect());
+
         return Inertia::render('ProgramPlanning/BusinessStrategy/Index', [
             'goals' => $goals,
             'strategies' => $strategies,
             'misiBumn' => $misiBumn,
+            'dualGrowthProps' => $dualGrowthProps,
         ]);
     }
 }

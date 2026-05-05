@@ -38,6 +38,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    readonly: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const route = useRouteHelper();
@@ -682,7 +686,7 @@ watch(filterOrganizationOptions, (options) => {
 
 <template>
     <div class="space-y-4">
-        <div class="strategy-toolbar">
+        <div v-if="!readonly" class="strategy-toolbar">
             <div class="strategy-toolbar__actions">
                 <button v-if="!isEditMode" type="button"
                     class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 dark:bg-white dark:text-slate-900"
