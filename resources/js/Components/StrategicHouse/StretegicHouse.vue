@@ -120,7 +120,7 @@ const availableGitsPeriods = computed(() => {
 });
 
 const statusDesiredOrder = ['DF', 'Done', 'DT 2026', 'ITSBP', 'On Progress', 'On Review', 'SH'];
-const gitsStatusDesiredOrder = ['On Track', 'At Risk', 'Done', 'Not Signed', 'Not Started'];
+const gitsStatusDesiredOrder = ['On Track', 'At Risk', 'Done', 'Not Started', 'Not Signed',];
 
 const normalizeStatusLabel = (rawStatus) => {
     const s = String(rawStatus ?? '').trim();
