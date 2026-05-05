@@ -14,7 +14,7 @@
                                     ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                                     : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                                     " @click="() => activeTab = 'Prioritas Inisiatif Strategis Perusahaan'">
-                                Prioritas Inisiatif Strategis Perusahaan
+                                Priotitas Inisiatif Berdasarkan KBUMN Mission
                             </button>
 
                             <button type="button"
@@ -23,7 +23,7 @@
                                     ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                                     : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                                     " @click="() => activeTab = defaultTab">
-                                Dual Growth Strategy Priotitas Inisiatif
+                                Priotitas Inisiatif Berdasarkan Dual Growth Strategy 
                             </button>
                         </div>
                     </div>
