@@ -1,4 +1,5 @@
 <template>
+  <h2 class="text-base font-semibold text-slate-700 dark:text-slate-200 mt-4 mb-4">Prioritas Inisiatif Strategis Perusahaan 2025 -2029</h2>
   <div class="grid gap-4">
     <!-- Top: first two main goals -->
     <div v-for="goal in topMainGoals" :key="goal.id" class="rounded-lg bg-white shadow-sm dark:bg-[#171717]">
