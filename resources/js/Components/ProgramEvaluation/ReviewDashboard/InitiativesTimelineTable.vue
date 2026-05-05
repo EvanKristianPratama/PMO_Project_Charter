@@ -186,7 +186,7 @@
                         <td class="border border-slate-900 px-3 py-2 text-center text-[10px] text-slate-600 dark:border-white/20 dark:text-slate-300">
                             {{ row.approve_date || '-' }}
                         </td>
-                        <td class="border border-slate-900 px-3 py-2 text-center font-bold text-slate-900 dark:border-white/20 dark:text-white">
+                        <td class="border border-slate-900 px-3 py-2 text-center text-[12px] text-slate-600 dark:border-white/20 dark:text-slate-300">
                             {{ row.process_month || '-' }}
                         </td>
                     </tr>

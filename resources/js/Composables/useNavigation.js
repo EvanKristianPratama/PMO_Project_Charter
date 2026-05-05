@@ -87,7 +87,7 @@ export function useNavigation() {
                     url.startsWith("/program-evalution/review-dashboard"),
             },
             {
-                label: "Review Timeline",
+                label: "Review Status",
                 href: safeRoute("program-evaluation.review-timeline"),
                 icon: ClipboardDocumentCheckIcon,
                 active: (url) =>

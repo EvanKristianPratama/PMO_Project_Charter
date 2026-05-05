@@ -3,7 +3,7 @@
         <div class="space-y-6 animate-fade-in-up">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Review Timeline</h1>
+                    <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Review Status</h1>
                 </div>
                 <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end">
                     <div class="w-full sm:w-[360px]">
