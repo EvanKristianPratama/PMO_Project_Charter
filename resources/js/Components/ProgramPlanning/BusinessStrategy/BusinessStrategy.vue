@@ -1,5 +1,5 @@
 <template>
-  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+  <div class="grid gap-4">
     <!-- Top: first two main goals -->
     <div v-for="goal in topMainGoals" :key="goal.id" class="rounded-lg bg-white shadow-sm dark:bg-[#171717]">
       <div class="px-4 py-2 bg-sky-100 dark:bg-sky-800/40">
@@ -9,7 +9,9 @@
         <ul class="space-y-3">
           <li v-for="strategy in strategiesByGoal(goal.id)" :key="strategy.id" class="flex gap-3 items-start">
             <div class="w-8 flex-shrink-0">
-              <div class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-sky-200 text-sky-800 text-xs font-semibold">{{ strategy.code }}</div>
+              <div
+                class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-sky-200 text-sky-800 text-xs font-semibold">
+                {{ strategy.code }}</div>
             </div>
             <div class="flex-1 text-sm text-slate-700 dark:text-slate-200">{{ strategy.strategy }}</div>
           </li>
@@ -25,11 +27,14 @@
         </div>
         <div class="p-4">
           <div v-for="goal in enablerGoals" :key="`enabler-${goal.id}`" class="mb-4">
-            <h5 v-if="!isHeaderTitle(goal)" class="text-sm font-semibold text-slate-700 dark:text-white mb-1">{{ goal.title }}</h5>
+            <h5 v-if="!isHeaderTitle(goal)" class="text-sm font-semibold text-slate-700 dark:text-white mb-1">{{
+              goal.title }}</h5>
             <ul class="space-y-3">
               <li v-for="strategy in strategiesByGoal(goal.id)" :key="strategy.id" class="flex gap-3 items-start">
                 <div class="w-8 flex-shrink-0">
-                  <div class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-sky-200 text-sky-800 text-xs font-semibold">{{ strategy.code }}</div>
+                  <div
+                    class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-sky-200 text-sky-800 text-xs font-semibold">
+                    {{ strategy.code }}</div>
                 </div>
                 <div class="flex-1 text-sm text-slate-700 dark:text-slate-200">{{ strategy.strategy }}</div>
               </li>
@@ -48,7 +53,9 @@
         <ul class="space-y-3">
           <li v-for="strategy in strategiesByGoal(goal.id)" :key="strategy.id" class="flex gap-3 items-start">
             <div class="w-8 flex-shrink-0">
-              <div class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-sky-200 text-sky-800 text-xs font-semibold">{{ strategy.code }}</div>
+              <div
+                class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-sky-200 text-sky-800 text-xs font-semibold">
+                {{ strategy.code }}</div>
             </div>
             <div class="flex-1 text-sm text-slate-700 dark:text-slate-200">{{ strategy.strategy }}</div>
           </li>
