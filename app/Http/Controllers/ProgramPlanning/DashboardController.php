@@ -116,44 +116,7 @@ class DashboardController extends Controller
 
     private function planningStatusKey(MstInitiative $initiative): string
     {
-        $aliasMap = [
-            'draft' => 'drafting',
-            'approve' => 'approved',
-            'aproved' => 'approved',
-        ];
-
-        $statusRank = [
-            'approved' => 5,
-            'baseline' => 4,
-            'review' => 3,
-            'propose' => 2,
-            'drafting' => 1,
-            'not_start' => 0,
-        ];
-
-        $highestRank = -1;
-        $highestStatus = 'not_start';
-
-        if ($initiative->relationLoaded('statusHistory') && $initiative->statusHistory->isNotEmpty()) {
-            foreach ($initiative->statusHistory as $statusRecord) {
-                $rawStatus = strtolower(trim((string) $statusRecord->status));
-                $normalizedStatus = $aliasMap[$rawStatus] ?? $rawStatus;
-
-                if (isset($statusRank[$normalizedStatus]) && $statusRank[$normalizedStatus] > $highestRank) {
-                    $highestRank = $statusRank[$normalizedStatus];
-                    $highestStatus = $normalizedStatus;
-                }
-            }
-        } else {
-            $rawStatus = strtolower(trim((string) ($initiative->latestStatus?->status ?? $initiative->status ?? '')));
-            $normalizedStatus = $aliasMap[$rawStatus] ?? $rawStatus;
-            
-            if (isset($statusRank[$normalizedStatus])) {
-                $highestStatus = $normalizedStatus;
-            }
-        }
-
-        return $highestStatus;
+        return $initiative->resolveCanonicalPlanningStatus()['canonical'];
     }
 
     private function planningStatusId(string $statusKey): int

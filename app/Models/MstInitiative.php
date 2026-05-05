@@ -119,24 +119,67 @@ class MstInitiative extends Model
         return $this->hasOne(TrsInitiativeRelationPosition::class, 'initiative_id');
     }
 
+    public function resolveCanonicalPlanningStatus(): array
+    {
+        $aliasMap = [
+            'draft' => 'drafting',
+            'approve' => 'approved',
+            'aproved' => 'approved',
+        ];
+        $statusRank = [
+            'baseline' => 5,
+            'approved' => 4,
+            'review' => 3,
+            'propose' => 2,
+            'drafting' => 1,
+            'draft' => 1,
+        ];
+
+        $history = $this->statusHistory;
+        if (! $this->relationLoaded('statusHistory')) {
+            $history = $this->statusHistory()->get();
+        }
+
+        $absoluteLatest = $history->sortByDesc('id')->first();
+        $absStatusRaw = strtolower(trim($absoluteLatest?->status ?? ''));
+        $absStatus = $aliasMap[$absStatusRaw] ?? $absStatusRaw;
+
+        // Find highest rank (excluding postpone)
+        $highestEntry = $history->filter(fn ($s) => strtolower(trim($s->status)) !== 'postpone')
+            ->sortByDesc(fn ($s) => [
+                $statusRank[$aliasMap[strtolower(trim($s->status))] ?? strtolower(trim($s->status))] ?? 0,
+                $s->id,
+            ])
+            ->first();
+
+        if ($absStatus === 'postpone') {
+            return [
+                'canonical' => 'postpone',
+                'displayStatus' => $absoluteLatest,
+            ];
+        }
+
+        if ($highestEntry) {
+            $hr = strtolower(trim($highestEntry->status));
+
+            return [
+                'canonical' => $aliasMap[$hr] ?? $hr,
+                'displayStatus' => $highestEntry,
+            ];
+        }
+
+        $raw = strtolower(trim($this->status ?? 'drafting'));
+        $canonical = $aliasMap[$raw] ?? $raw;
+
+        return [
+            'canonical' => $canonical,
+            'displayStatus' => (object) ['status' => $canonical, 'notes' => ''],
+        ];
+    }
+
     public function latestPlanningStatusValue(): ?string
     {
-        $latestStatus = null;
-
-        if ($this->relationLoaded('latestStatus')) {
-            $latestStatus = $this->latestStatus;
-        } elseif ($this->exists) {
-            $latestStatus = $this->latestStatus()->first();
-        }
-
-        $status = trim((string) ($latestStatus?->status ?? ''));
-        if ($status !== '') {
-            return $status;
-        }
-
-        $fallbackStatus = trim((string) ($this->status ?? ''));
-
-        return $fallbackStatus !== '' ? $fallbackStatus : null;
+        return $this->resolveCanonicalPlanningStatus()['canonical'];
     }
 
     public function isApprovedForImplementation(): bool

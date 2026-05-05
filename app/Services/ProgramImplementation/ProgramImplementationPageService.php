@@ -173,13 +173,13 @@ class ProgramImplementationPageService
 
         return MstInitiative::query()
             ->select(['id', 'status'])
-            ->with('latestStatus')
+            ->with('statusHistory')
             ->where('tipe_initiative', $initiativeType)
             ->get()
             ->filter(static function (MstInitiative $initiative) use ($approvedAliases): bool {
-                $rawStatus = strtolower(trim((string) ($initiative->latestStatus?->status ?? $initiative->status ?? '')));
+                $canonical = $initiative->resolveCanonicalPlanningStatus()['canonical'];
 
-                return in_array($rawStatus, $approvedAliases, true);
+                return in_array($canonical, $approvedAliases, true);
             })
             ->count();
     }

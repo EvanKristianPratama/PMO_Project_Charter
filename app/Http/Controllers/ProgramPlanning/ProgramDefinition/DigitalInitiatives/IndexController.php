@@ -76,39 +76,23 @@ class IndexController extends Controller
         $postponeFromCounts = collect();
 
         foreach ($masterDigitalInitiatives as $initiative) {
-            $history = $initiative->statusHistory;
-            $absoluteLatest = $history->sortByDesc('id')->first();
-            $absStatusRaw = strtolower(trim($absoluteLatest?->status ?? ''));
-            $absStatus = $aliasMap[$absStatusRaw] ?? $absStatusRaw;
+            $resolved = $initiative->resolveCanonicalPlanningStatus();
+            $canonical = $resolved['canonical'];
+            $displayStatus = $resolved['displayStatus'];
 
-            // Find highest rank (excluding postpone)
-            $highestEntry = $history->filter(fn ($s) => strtolower(trim($s->status)) !== 'postpone')
-                ->sortByDesc(function ($s) use ($statusRank, $aliasMap) {
-                    $r = strtolower(trim($s->status));
-
-                    return $statusRank[$aliasMap[$r] ?? $r] ?? 0;
-                })
-                ->sortByDesc('id') // tie-breaker
-                ->first();
-
-            if ($absStatus === 'postpone') {
-                $canonical = 'postpone';
-                $displayStatus = $absoluteLatest;
+            if ($canonical === 'postpone') {
+                $history = $initiative->statusHistory;
+                $highestEntry = $history->filter(fn ($s) => strtolower(trim($s->status)) !== 'postpone')
+                    ->sortByDesc(fn ($s) => [
+                        $statusRank[$aliasMap[strtolower(trim($s->status))] ?? strtolower(trim($s->status))] ?? 0,
+                        $s->id,
+                    ])
+                    ->first();
 
                 if ($highestEntry) {
                     $hr = strtolower(trim($highestEntry->status));
                     $fromKey = $aliasMap[$hr] ?? $hr;
                     $postponeFromCounts[$fromKey] = ($postponeFromCounts[$fromKey] ?? 0) + 1;
-                }
-            } else {
-                if ($highestEntry) {
-                    $hr = strtolower(trim($highestEntry->status));
-                    $canonical = $aliasMap[$hr] ?? $hr;
-                    $displayStatus = $highestEntry;
-                } else {
-                    $raw = strtolower(trim($initiative->status ?? 'drafting'));
-                    $canonical = $aliasMap[$raw] ?? $raw;
-                    $displayStatus = (object) ['status' => $canonical, 'notes' => ''];
                 }
             }
 

@@ -232,7 +232,7 @@ class DigitalInitiativeService
 
     private function mstDigitalInitiatives()
     {
-        return MstInitiative::query()
+        $initiatives = MstInitiative::query()
             ->select([
                 'id',
                 'coe_id',
@@ -247,12 +247,40 @@ class DigitalInitiativeService
                 'coe:id,name',
                 'organization:id,name,groub_id',
                 'organization.groub:id,name',
-                'latestStatus',
+                'statusHistory',
             ])
             ->where('tipe_initiative', 1)
             ->orderBy('code')
-            ->get()
-            ->values();
+            ->get();
+
+        $aliasMap = [
+            'draft' => 'drafting',
+            'approve' => 'approved',
+            'aproved' => 'approved',
+        ];
+        $statusRank = [
+            'approved' => 4,
+            'review' => 3,
+            'propose' => 2,
+            'drafting' => 1,
+            'draft' => 1,
+        ];
+        $validStatuses = ['drafting', 'propose', 'review', 'approved', 'postpone'];
+
+        foreach ($initiatives as $initiative) {
+            $resolved = $initiative->resolveCanonicalPlanningStatus();
+            $canonical = $resolved['canonical'];
+            $displayStatus = $resolved['displayStatus'];
+
+            if (! in_array($canonical, $validStatuses)) {
+                $canonical = 'drafting';
+            }
+
+            $initiative->setAttribute('project_status_key', $canonical);
+            $initiative->setRelation('latestStatus', $displayStatus);
+        }
+
+        return $initiatives->values();
     }
 
     private function implementationStatusRows(): Collection
