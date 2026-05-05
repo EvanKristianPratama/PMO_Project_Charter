@@ -6,7 +6,7 @@
           <tr>
             <th scope="col" class="px-4 py-3 w-24 text-center border border-slate-200 dark:border-slate-700/50">No</th>
             <th scope="col" class="px-4 py-3 border border-slate-200 dark:border-slate-700/50">KBUMN Mission</th>
-            <th scope="col" class="px-4 py-3 border border-slate-200 dark:border-slate-700/50">Prioritas Strategis Perusahaan</th>
+            <th scope="col" class="px-4 py-3 border border-slate-200 dark:border-slate-700/50">Prioritas Inisiatif Strategis Perusahaan</th>
           </tr>
         </thead>
         <tbody>
