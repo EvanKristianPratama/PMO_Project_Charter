@@ -27,4 +27,9 @@ class MstBusinessStrategy extends Model
     {
         return $this->hasMany(TrsMapBusinessStrategy::class, 'strategy_id');
     }
+
+    public function misiBumn(): BelongsTo
+    {
+        return $this->belongsTo(MstMisiBumn::class, 'misi_id');
+    }
 }

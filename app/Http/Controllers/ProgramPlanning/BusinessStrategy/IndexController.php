@@ -5,6 +5,7 @@ namespace App\Http\Controllers\ProgramPlanning\BusinessStrategy;
 use App\Http\Controllers\Controller;
 use App\Models\Goal;
 use App\Models\MstBusinessStrategy;
+use App\Models\MstMisiBumn;
 use Inertia\Inertia;
 
 class IndexController extends Controller
@@ -29,9 +30,12 @@ class IndexController extends Controller
                 })->values();
             });
 
+        $misiBumn = MstMisiBumn::with('prioritasStrategy')->orderBy('code')->get()->keyBy('id');
+
         return Inertia::render('ProgramPlanning/BusinessStrategy/Index', [
             'goals' => $goals,
             'strategies' => $strategies,
+            'misiBumn' => $misiBumn,
         ]);
     }
 }

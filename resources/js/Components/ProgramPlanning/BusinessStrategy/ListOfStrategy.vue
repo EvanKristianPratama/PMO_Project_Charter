@@ -1,6 +1,6 @@
 <template>
   <div class="rounded-lg bg-white shadow-sm dark:bg-[#171717] p-4">
-    <h3 class="text-sm font-semibold text-sky-800 dark:text-white mb-3">List of Strategies</h3>
+    <h3 class="text-sm font-semibold text-sky-800 dark:text-white mb-3">Prioritas Initiative Strategis Perusahaan 2025 - 2029</h3>
     <ul class="space-y-2">
       <li v-for="item in flatStrategies" :key="item._uniqueId" class="flex items-start gap-3">
         <div class="w-8 flex-shrink-0">
