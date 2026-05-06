@@ -8,6 +8,7 @@
                     <div class="sticky top-40">
                         <div
                             class="inline-flex flex-col items-start gap-2 rounded-xl bg-slate-200/50 p-2 dark:bg-white/5 w-full">
+
                             <button type="button"
                                 class="w-full text-left px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
                                 :class="activeTab === 'KBUMN Mission'
@@ -43,6 +44,24 @@
                                     " @click="() => activeTab = 'Priority Strategic Initiatives'">
                                 Priority Strategic Initiatives of Pertamina 2026
                             </button>
+
+                            <button type="button"
+                                class="w-full text-left px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
+                                :class="activeTab === 'Strategic House Pertamina'
+                                    ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
+                                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                                    " @click="() => activeTab = 'Strategic House Pertamina'">
+                                Strategic House Pertamina
+                            </button>
+
+                            <button type="button"
+                                class="w-full text-left px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
+                                :class="activeTab === 'Strategic House Upstream'
+                                    ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
+                                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                                    " @click="() => activeTab = 'Strategic House Upstream'">
+                                Strategic House Upstream
+                            </button>
                         </div>
                     </div>
                 </aside>
@@ -52,7 +71,15 @@
                         <img src="/icon/MisiBUMN.png" alt="Misi BUMN Icon" class="h-80 w-auto object-contain" />
                     </div>
                     <div>
-                        <ListMisiBumn v-if="activeTab === 'KBUMN Mission'"
+                        <StrategicHousePertamina v-if="activeTab === 'Strategic House Pertamina'"
+                            :strategicHousePertamina="strategicHousePertamina"
+                            :pertaminaGoals="pertaminaGoals" />
+
+                        <StrategicHouseUpstream v-else-if="activeTab === 'Strategic House Upstream'"
+                            :strategicHouseUpstream="strategicHouseUpstream"
+                            :upstreamGoals="upstreamGoals" />
+
+                        <ListMisiBumn v-else-if="activeTab === 'KBUMN Mission'"
                             :missions="misiBumn" />
 
                         <StrategicHouseBusinessStrategy v-else-if="activeTab === 'Dual Growth'"
@@ -104,6 +131,8 @@ import KBUMN from '@/Components/ProgramPlanning/BusinessStrategy/KBUMN.vue';
 import ListMisiBumn from '@/Components/ProgramPlanning/BusinessStrategy/ListMisiBumn.vue';
 import StrategicHouseBusinessStrategy from '@/Components/StrategicHouse/BusinessStrategy/BusinessStrategy.vue';
 import StrategicInitiative from '@/Components/ProgramPlanning/BusinessStrategy/StrategicInitiative.vue';
+import StrategicHousePertamina from '@/Components/ProgramPlanning/BusinessStrategy/StrategisHouse/StrategicHousePertamina.vue';
+import StrategicHouseUpstream from '@/Components/ProgramPlanning/BusinessStrategy/StrategisHouse/StrategicHouseUpstream.vue';
 import { ref } from 'vue';
 
 const props = defineProps({
@@ -112,6 +141,10 @@ const props = defineProps({
     misiBumn: { type: Array, default: () => [] },
     dualGrowthProps: { type: Object, default: () => ({}) },
     priorityStrategicInitiatives: { type: Array, default: () => [] },
+    strategicHousePertamina: { type: Object, default: () => ({}) },
+    pertaminaGoals: { type: Array, default: () => [] },
+    strategicHouseUpstream: { type: Object, default: () => ({}) },
+    upstreamGoals: { type: Array, default: () => [] },
 });
 
 const defaultTab = 'KBUMN Mission';
