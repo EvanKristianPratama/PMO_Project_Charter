@@ -34,7 +34,7 @@ class IndexController extends Controller
 
         $misiBumn = MstMisiBumn::with('prioritasStrategy')->orderBy('code')->get()->keyBy('id');
         
-        $priorityStrategicInitiatives = MstPriorityStrategicInitiative::orderBy('no')->get();
+        $priorityStrategicInitiatives = MstPriorityStrategicInitiative::with('mapPriorityStrategicInitiative.picPrioriyStrategic')->orderBy('no')->get();
 
         $businessStrategyService = app(BusinessStrategyService::class);
         $dualGrowthProps = $businessStrategyService->getPageProps(collect());
