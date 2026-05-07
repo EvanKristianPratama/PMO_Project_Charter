@@ -17,11 +17,6 @@ class NativeAppServiceProvider implements ProvidesPhpIni
      */
     public function boot(): void
     {
-        // Force database connection back to MySQL (Aiven remote)
-        // NativePHP overrides DB_CONNECTION to 'nativephp' (SQLite),
-        // but our app data lives in the remote MySQL database.
-        config(['database.default' => 'mysql']);
-
         Window::open()
             ->title('PMO Project Charter')
             ->width(1400)
