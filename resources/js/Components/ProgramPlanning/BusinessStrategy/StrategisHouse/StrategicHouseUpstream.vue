@@ -97,6 +97,8 @@
             <div v-for="enabler in getEnablerGoals(upstreamGoals)" :key="'enabler-goal-' + enabler.id" 
                 class="w-[90%] bg-[#00a688] text-white text-center py-2 px-6 shadow-sm mt-2">
                 <h2 class="text-sm font-bold italic">{{ enabler.title }}</h2>
+                <p class="text-blue-50">Digital Transformation, HSSE &Sustainability, Human Resources & Execution, 
+                  Good Corporate Governance, Risk Management, Community Development and Stakeholder Relations   </p>
             </div>
         </template>
     </div>
