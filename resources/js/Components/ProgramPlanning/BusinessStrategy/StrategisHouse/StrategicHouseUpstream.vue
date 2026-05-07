@@ -107,7 +107,7 @@
                     class="w-full flex flex-wrap justify-start gap-x-[1.33%]">
                     <div v-for="theme in enablerGoal.themes" :key="theme.id"
                         class="w-[32.44%] bg-[#1c75bc] text-white text-center py-4 mt-2 rounded-sm flex items-center justify-center">
-                        <h5 class="text-xs font-bold italic">{{ theme.name }}</h5>
+                        <h5 class="text-xs font-bold">{{ theme.name }}</h5>
                     </div>
                 </div>
             </div>

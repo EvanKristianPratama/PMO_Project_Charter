@@ -62,6 +62,15 @@
                                     " @click="() => activeTab = 'Strategic House Upstream'">
                                 Strategic House Upstream
                             </button>
+
+                            <button type="button"
+                                class="w-full text-left px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
+                                :class="activeTab === 'Strategic House Gas'
+                                    ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
+                                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                                    " @click="() => activeTab = 'Strategic House Gas'">
+                                Strategic House Gas
+                            </button>
                         </div>
                     </div>
                 </aside>
@@ -78,6 +87,10 @@
                         <StrategicHouseUpstream v-else-if="activeTab === 'Strategic House Upstream'"
                             :strategicHouseUpstream="strategicHouseUpstream"
                             :upstreamGoals="upstreamGoals" />
+
+                        <StrategicHouseGas v-else-if="activeTab === 'Strategic House Gas'"
+                            :strategicHouseGas="strategicHouseGas"
+                            :gasGoals="gasGoals" />
 
                         <ListMisiBumn v-else-if="activeTab === 'KBUMN Mission'"
                             :missions="misiBumn" />
@@ -133,6 +146,7 @@ import StrategicHouseBusinessStrategy from '@/Components/StrategicHouse/Business
 import StrategicInitiative from '@/Components/ProgramPlanning/BusinessStrategy/StrategicInitiative.vue';
 import StrategicHousePertamina from '@/Components/ProgramPlanning/BusinessStrategy/StrategisHouse/StrategicHousePertamina.vue';
 import StrategicHouseUpstream from '@/Components/ProgramPlanning/BusinessStrategy/StrategisHouse/StrategicHouseUpstream.vue';
+import StrategicHouseGas from '@/Components/ProgramPlanning/BusinessStrategy/StrategisHouse/StrategicHouseGas.vue';
 import { ref } from 'vue';
 
 const props = defineProps({
@@ -145,6 +159,8 @@ const props = defineProps({
     pertaminaGoals: { type: Array, default: () => [] },
     strategicHouseUpstream: { type: Object, default: () => ({}) },
     upstreamGoals: { type: Array, default: () => [] },
+    strategicHouseGas: { type: Object, default: () => ({}) },
+    gasGoals: { type: Array, default: () => [] },
 });
 
 const defaultTab = 'KBUMN Mission';

@@ -47,6 +47,11 @@ class IndexController extends Controller
             $query->orderBy('theme_number');
         }, 'themes.pillarThemes'])->get();
 
+        $strategicHouseGas = MstStrategicHouse::where('id', 6)->first();
+        $gasGoals = Goal::where('pilar', 6)->with(['themes' => function($query) {
+            $query->orderBy('theme_number');
+        }, 'themes.pillarThemes'])->get();
+
         $businessStrategyService = app(BusinessStrategyService::class);
         $dualGrowthProps = $businessStrategyService->getPageProps(collect());
 
@@ -60,6 +65,8 @@ class IndexController extends Controller
             'pertaminaGoals' => $pertaminaGoals,
             'strategicHouseUpstream' => $strategicHouseUpstream,
             'upstreamGoals' => $upstreamGoals,
+            'strategicHouseGas' => $strategicHouseGas,
+            'gasGoals' => $gasGoals,
         ]);
     }
 }
