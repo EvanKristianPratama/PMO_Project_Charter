@@ -7,6 +7,7 @@ use App\Models\Goal;
 use App\Models\MstBusinessStrategy;
 use App\Models\MstMisiBumn;
 use App\Models\MstPriorityStrategicInitiative;
+use App\Models\MstStrategicHouse;
 use App\Services\StrategicHouse\BusinessStrategy\BusinessStrategyService;
 use Inertia\Inertia;
 
@@ -36,6 +37,16 @@ class IndexController extends Controller
         
         $priorityStrategicInitiatives = MstPriorityStrategicInitiative::with('mapPriorityStrategicInitiative.picPrioriyStrategic')->orderBy('no')->get();
 
+        $strategicHousePertamina = MstStrategicHouse::where('id', 4)->first();
+        $pertaminaGoals = Goal::where('pilar', 4)->with(['themes' => function($query) {
+            $query->orderBy('theme_number');
+        }, 'themes.pillarThemes'])->get();
+
+        $strategicHouseUpstream = MstStrategicHouse::where('id', 5)->first();
+        $upstreamGoals = Goal::where('pilar', 5)->with(['themes' => function($query) {
+            $query->orderBy('theme_number');
+        }, 'themes.pillarThemes'])->get();
+
         $businessStrategyService = app(BusinessStrategyService::class);
         $dualGrowthProps = $businessStrategyService->getPageProps(collect());
 
@@ -45,6 +56,10 @@ class IndexController extends Controller
             'misiBumn' => $misiBumn,
             'dualGrowthProps' => $dualGrowthProps,
             'priorityStrategicInitiatives' => $priorityStrategicInitiatives,
+            'strategicHousePertamina' => $strategicHousePertamina,
+            'pertaminaGoals' => $pertaminaGoals,
+            'strategicHouseUpstream' => $strategicHouseUpstream,
+            'upstreamGoals' => $upstreamGoals,
         ]);
     }
 }

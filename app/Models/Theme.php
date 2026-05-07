@@ -35,4 +35,9 @@ class Theme extends Model
     {
         return $this->hasMany(InitiativeTagging::class, 'themes_id');
     }
+    
+    public function pillarThemes(): HasMany
+    {
+        return $this->hasMany(TrsPillarStrategy::class, 'themes_id');
+    }
 }
