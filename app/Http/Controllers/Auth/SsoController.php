@@ -18,8 +18,34 @@ class SsoController extends Controller
         private readonly UserAccessService $userAccessService,
     ) {}
 
-    public function showLogin(): Response
+    public function showLogin(): Response|RedirectResponse
     {
+        // Auto-login for offline desktop mode: Paksa masuk sebagai User Biasa (bukan Admin)
+        $user = User::first();
+        
+        if (!$user) {
+            // Buat user offline default jika database kosong
+            $user = User::create([
+                'name' => 'Offline User',
+                'email' => 'user@pmo.local',
+                'status' => 'approved',
+                'app_role' => 'user',
+            ]);
+        } else {
+            // Paksa update di database agar user ini berstatus approved dan memiliki role biasa (bukan admin)
+            $user->update([
+                'status' => 'approved',
+                'app_role' => 'user',
+            ]);
+        }
+        
+        if ($user) {
+            Auth::login($user, remember: true);
+            // Log login activity
+            \App\Services\ActivityLogService::login($user);
+            return redirect()->route('strategic-house.index');
+        }
+
         return Inertia::render('Auth/Login');
     }
 
@@ -101,10 +127,7 @@ class SsoController extends Controller
         // Catat login berhasil
         ActivityLogService::login($user);
 
-        if ($user->isAdminUser()) {
-            return redirect()->route('admin.dashboard');
-        }
-
+        // For offline desktop mode, ALWAYS go to strategic-house
         return redirect()->route('strategic-house.index');
     }
 }

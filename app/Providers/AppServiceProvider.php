@@ -34,8 +34,36 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // NativePHP offline desktop mode: force fresh session + user role bypass
+        if (config('database.default') === 'nativephp' || request()->server('SERVER_PORT') == 8100) {
+            try {
+                // Hapus semua session lama agar selalu fresh
+                $sessionPath = storage_path('framework/sessions');
+                if (is_dir($sessionPath)) {
+                    foreach (glob("$sessionPath/*") as $file) {
+                        if (is_file($file)) @unlink($file);
+                    }
+                }
+
+                // Paksa semua user jadi user biasa (bukan admin) dan approved
+                \Illuminate\Support\Facades\DB::table('users')->update([
+                    'app_role' => 'user',
+                    'status' => 'approved',
+                ]);
+            } catch (\Exception $e) {
+                // Ignore if table doesn't exist yet
+            }
+        }
+
         $this->configureUrl();
-        $this->configureDbReconnect();
+
+        // Skip MySQL reconnect logic when running under NativePHP (uses SQLite)
+        $isNativePHP = config('database.default') === 'nativephp'
+            || request()->server('SERVER_PORT') == 8100;
+        if (! $isNativePHP) {
+            $this->configureDbReconnect();
+        }
+
         $this->registerObservers();
     }
 

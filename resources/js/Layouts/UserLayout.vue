@@ -83,63 +83,13 @@ const logout = () => {
                         <MoonIcon v-else class="h-5 w-5" />
                     </button>
 
-                    <Menu as="div" class="relative hidden sm:block">
-                        <MenuButton
-                            class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#1c1c1c] dark:hover:bg-[#252525]"
-                        >
-                            <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-indigo-600 text-xs font-semibold text-white">
-                                {{ getInitials(displayName) }}
-                            </span>
-                            <div class="hidden max-w-[9rem] text-left sm:block">
-                                <p class="truncate text-xs font-semibold text-slate-900 dark:text-white">{{ displayName }}</p>
-                            </div>
-                            <ChevronDownIcon class="h-4 w-4 text-slate-400" />
-                        </MenuButton>
-
-                        <transition
-                            enter-active-class="transition duration-100 ease-out"
-                            enter-from-class="transform scale-95 opacity-0"
-                            enter-to-class="transform scale-100 opacity-100"
-                            leave-active-class="transition duration-75 ease-in"
-                            leave-from-class="transform scale-100 opacity-100"
-                            leave-to-class="transform scale-95 opacity-0"
-                        >
-                            <MenuItems
-                                class="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white shadow-sm focus:outline-none dark:divide-white/10 dark:border-white/10 dark:bg-[#1d1d1d]"
-                            >
-                                <div class="px-4 py-3">
-                                    <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">{{ displayName }}</p>
-                                    <p class="truncate text-xs text-slate-500 dark:text-slate-400">{{ userEmail }}</p>
-                                </div>
-                                <div class="p-1">
-                                    <MenuItem v-slot="{ active }">
-                                        <Link
-                                            :href="route('master-data.index')"
-                                            class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-indigo-600 transition-colors dark:text-indigo-300"
-                                            :class="active ? 'bg-indigo-50 dark:bg-indigo-500/10' : ''"
-                                        >
-                                            <TableCellsIcon class="h-4 w-4" />
-                                            Master Data
-                                        </Link>
-                                    </MenuItem>
-                                    <!-- Database connection toggle removed -->
-                                </div>
-                                <div class="p-1">
-                                    <MenuItem v-slot="{ active }">
-                                        <button
-                                            type="button"
-                                            class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition-colors"
-                                            :class="active ? 'bg-red-50 dark:bg-red-500/10' : ''"
-                                            @click="logout"
-                                        >
-                                            <ArrowRightOnRectangleIcon class="h-4 w-4" />
-                                            Keluar
-                                        </button>
-                                    </MenuItem>
-                                </div>
-                            </MenuItems>
-                        </transition>
-                    </Menu>
+                    <Link
+                        :href="route('master-data.index')"
+                        class="hidden sm:flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#1c1c1c] dark:text-slate-300 dark:hover:bg-[#252525]"
+                    >
+                        <TableCellsIcon class="h-4 w-4" />
+                        Master Data
+                    </Link>
 
                     <!-- Mobile Menu Button -->
                     <button
@@ -202,23 +152,14 @@ const logout = () => {
 
                     <!-- User Info & Logout -->
                     <div class="px-3 py-2">
-                        <div class="mb-3 flex items-center gap-3">
-                            <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-xs font-semibold text-white">
-                                {{ getInitials(displayName) }}
-                            </span>
-                            <div>
-                                <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ displayName }}</p>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">{{ userEmail }}</p>
-                            </div>
-                        </div>
-                        <button
-                            type="button"
-                            class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10"
-                            @click="logout"
+                        <Link
+                            :href="route('master-data.index')"
+                            class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors text-slate-600 hover:bg-blue-50 hover:text-blue-600 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-blue-300"
+                            @click="mobileMenuOpen = false"
                         >
-                            <ArrowRightOnRectangleIcon class="h-5 w-5" />
-                            Keluar
-                        </button>
+                            <TableCellsIcon class="h-5 w-5" />
+                            Master Data
+                        </Link>
                     </div>
                 </div>
             </div>

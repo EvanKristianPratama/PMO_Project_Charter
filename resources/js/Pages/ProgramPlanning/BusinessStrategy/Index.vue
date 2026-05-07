@@ -63,19 +63,20 @@
                             <div class="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg w-max">
                                 <button type="button"
                                     class="px-4 py-2 text-sm font-medium rounded-md transition-all"
-                                    :class="subTab === 'dual_growth' 
-                                        ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-slate-700 dark:text-white' 
-                                        : 'text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'"
-                                    @click="subTab = 'dual_growth'">
-                                    Dual Growth Strategy
-                                </button>
-                                <button type="button"
-                                    class="px-4 py-2 text-sm font-medium rounded-md transition-all"
                                     :class="subTab === 'kbumn' 
                                         ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-slate-700 dark:text-white' 
                                         : 'text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'"
                                     @click="subTab = 'kbumn'">
                                     KBUMN Mission
+                                </button>
+                                
+                                <button type="button"
+                                    class="px-4 py-2 text-sm font-medium rounded-md transition-all"
+                                    :class="subTab === 'dual_growth' 
+                                        ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-slate-700 dark:text-white' 
+                                        : 'text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'"
+                                    @click="subTab = 'dual_growth'">
+                                    Dual Growth Strategy
                                 </button>
                             </div>
 
