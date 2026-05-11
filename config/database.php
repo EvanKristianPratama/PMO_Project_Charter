@@ -174,11 +174,11 @@ return [
 
         'cloud' => [
             'driver' => 'mysql',
-            'host' => env('DB_CLOUD_HOST', 'mysql-3fb43829-pmopc01.h.aivencloud.com'),
-            'port' => env('DB_CLOUD_PORT', '14759'),
-            'database' => env('DB_CLOUD_DATABASE', 'defaultdb'),
-            'username' => env('DB_CLOUD_USERNAME', 'avnadmin'),
-            'password' => env('DB_CLOUD_PASSWORD', ''),
+            'host' => env('DB_MASTER_HOST', 'mysql-3fb43829-pmopc01.h.aivencloud.com'),
+            'port' => env('DB_MASTER_PORT', '14759'),
+            'database' => env('DB_MASTER_DATABASE', 'defaultdb'),
+            'username' => env('DB_MASTER_USERNAME', 'avnadmin'),
+            'password' => env('DB_MASTER_PASSWORD', ''),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => env('DB_CHARSET', 'utf8mb4'),
             'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
