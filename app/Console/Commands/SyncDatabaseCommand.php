@@ -40,6 +40,25 @@ class SyncDatabaseCommand extends Command
             ]]);
         }
 
+        // Override mysql connection configuration to point to Aiven MySQL Cloud remote database
+        config(['database.connections.mysql' => [
+            'driver' => 'mysql',
+            'host' => env('DB_CLOUD_HOST', 'mysql-3fb43829-pmopc01.h.aivencloud.com'),
+            'port' => env('DB_CLOUD_PORT', '14759'),
+            'database' => env('DB_CLOUD_DATABASE', 'defaultdb'),
+            'username' => env('DB_CLOUD_USERNAME', 'avnadmin'),
+            'password' => env('DB_CLOUD_PASSWORD'),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                \PDO::MYSQL_ATTR_SSL_CA => base_path('ca.pem'),
+            ]) : [],
+        ]]);
+
         // Get all tables from MySQL
         $tables = DB::connection('mysql')->select('SHOW TABLES');
         $dbName = env('DB_DATABASE', 'defaultdb');
@@ -103,23 +122,22 @@ class SyncDatabaseCommand extends Command
                 });
             }
 
-            // 4. Pindahkan Data
-            $this->line("Menyalin data {$table}...");
-            
-            // Dapatkan nama kolom pertama untuk orderBy agar chunk tidak error jika tidak ada kolom 'id'
-            $columnsList = Schema::connection('mysql')->getColumnListing($table);
-            $orderByColumn = count($columnsList) > 0 ? $columnsList[0] : 'id';
-
-            DB::connection('mysql')->table($table)->orderBy($orderByColumn)->chunk(500, function ($rows) use ($table) {
+            try {
+                $rows = DB::connection('mysql')->table($table)->get();
                 $insertData = [];
                 foreach ($rows as $row) {
                     $insertData[] = (array) $row;
                 }
                 
                 if (count($insertData) > 0) {
-                    DB::connection('nativephp')->table($table)->insert($insertData);
+                    // Chunk insertion to avoid SQLite placeholder limit
+                    foreach (array_chunk($insertData, 100) as $chunk) {
+                        DB::connection('nativephp')->table($table)->insert($chunk);
+                    }
                 }
-            });
+            } catch (\Exception $e) {
+                $this->error("Gagal menyalin data untuk {$table}: " . $e->getMessage());
+            }
 
             $this->info("✓ Tabel {$table} berhasil disinkronisasi!");
         }

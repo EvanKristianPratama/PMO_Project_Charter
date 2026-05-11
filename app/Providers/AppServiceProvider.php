@@ -60,7 +60,7 @@ class AppServiceProvider extends ServiceProvider
         // Skip MySQL reconnect logic when running under NativePHP (uses SQLite)
         $isNativePHP = config('database.default') === 'nativephp'
             || request()->server('SERVER_PORT') == 8100;
-        if (! $isNativePHP) {
+        if (! $isNativePHP && ! $this->app->runningInConsole()) {
             $this->configureDbReconnect();
         }
 

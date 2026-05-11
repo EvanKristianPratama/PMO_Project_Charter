@@ -21,29 +21,41 @@ class SsoController extends Controller
     public function showLogin(): Response|RedirectResponse
     {
         // Auto-login for offline desktop mode: Paksa masuk sebagai User Biasa (bukan Admin)
-        $user = User::first();
-        
-        if (!$user) {
-            // Buat user offline default jika database kosong
-            $user = User::create([
-                'name' => 'Offline User',
-                'email' => 'user@pmo.local',
-                'status' => 'approved',
-                'app_role' => 'user',
+        try {
+            // Auto-sync jika tabel users belum ada di database SQLite lokal
+            if (!\Illuminate\Support\Facades\Schema::hasTable('users')) {
+                \Illuminate\Support\Facades\Artisan::call('app:sync-to-sqlite');
+            }
+
+            $user = User::first();
+            
+            if (!$user) {
+                // Buat user offline default jika database kosong
+                $user = User::create([
+                    'name' => 'Offline User',
+                    'email' => 'user@pmo.local',
+                    'status' => 'approved',
+                    'app_role' => 'user',
+                ]);
+            } else {
+                // Paksa update di database agar user ini berstatus approved dan memiliki role biasa (bukan admin)
+                $user->update([
+                    'status' => 'approved',
+                    'app_role' => 'user',
+                ]);
+            }
+            
+            if ($user) {
+                Auth::login($user, remember: true);
+                // Log login activity
+                \App\Services\ActivityLogService::login($user);
+                return redirect()->route('strategic-house.index');
+            }
+        } catch (\Exception $e) {
+            // Jika database kosong / tabel belum ada, tampilkan halaman login biasa dengan opsi sinkronisasi
+            return Inertia::render('Auth/Login', [
+                'error' => 'Database belum tersinkronisasi. Silakan jalankan perintah php artisan app:sync-to-sqlite.'
             ]);
-        } else {
-            // Paksa update di database agar user ini berstatus approved dan memiliki role biasa (bukan admin)
-            $user->update([
-                'status' => 'approved',
-                'app_role' => 'user',
-            ]);
-        }
-        
-        if ($user) {
-            Auth::login($user, remember: true);
-            // Log login activity
-            \App\Services\ActivityLogService::login($user);
-            return redirect()->route('strategic-house.index');
         }
 
         return Inertia::render('Auth/Login');

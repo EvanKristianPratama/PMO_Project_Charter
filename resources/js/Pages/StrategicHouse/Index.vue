@@ -797,65 +797,71 @@ function reloadRoadmapData(mode, callbacks = {}) {
 
 // Sync URL on mount if useRemember restored a value that isn't in URL
 onMounted(async () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const hasViewParam = urlParams.has("view");
-    const hasRoadmapParam = urlParams.has("roadmap");
-    const initialView = getInitialServerView();
-    const initialRoadmapMode = getInitialServerRoadmapMode();
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasViewParam = urlParams.has("view");
+        const hasRoadmapParam = urlParams.has("roadmap");
+        const initialView = getInitialServerView();
+        const initialRoadmapMode = getInitialServerRoadmapMode();
 
-    if (!hasViewParam && viewMode.value !== "mapping") {
-        isLoading.value = true;
-        isReloading.value = true;
-        startProgress();
-        pendingViewMode.value = viewMode.value;
-        pendingRoadmapMode.value = viewMode.value === "roadmap" ? roadmapMode.value : null;
+        if (!hasViewParam && viewMode.value !== "mapping") {
+            isLoading.value = true;
+            isReloading.value = true;
+            startProgress();
+            pendingViewMode.value = viewMode.value;
+            pendingRoadmapMode.value = viewMode.value === "roadmap" ? roadmapMode.value : null;
 
-        await Promise.all([
-            preloadViewAssets(viewMode.value),
-            reloadViewData(
-                viewMode.value,
-                viewMode.value === "roadmap" ? roadmapMode.value : undefined,
-            ),
-        ]);
+            await Promise.all([
+                preloadViewAssets(viewMode.value),
+                reloadViewData(
+                    viewMode.value,
+                    viewMode.value === "roadmap" ? roadmapMode.value : undefined,
+                ),
+            ]);
 
-        pendingRoadmapMode.value = null;
-        pendingViewMode.value = null;
-        finishProgress();
+            pendingRoadmapMode.value = null;
+            pendingViewMode.value = null;
+            finishProgress();
+            isLoading.value = false;
+            isReloading.value = false;
+            return;
+        }
+
+        if (
+            viewMode.value === "roadmap"
+            && !hasRoadmapParam
+            && roadmapMode.value !== initialRoadmapMode
+        ) {
+            isLoading.value = true;
+            isReloading.value = true;
+            startProgress();
+            pendingViewMode.value = "roadmap";
+            pendingRoadmapMode.value = roadmapMode.value;
+
+            await Promise.all([
+                preloadViewAssets("roadmap"),
+                reloadRoadmapData(roadmapMode.value),
+            ]);
+
+            pendingRoadmapMode.value = null;
+            pendingViewMode.value = null;
+            finishProgress();
+            isLoading.value = false;
+            isReloading.value = false;
+            return;
+        }
+
+        await preloadViewAssets(initialView);
+        markViewLoaded(initialView, initialRoadmapMode);
+        isLoading.value = false;
+        syncViewModeInUrl(viewMode.value);
+        if (viewMode.value === "roadmap") {
+            syncRoadmapModeInUrl(roadmapMode.value);
+        }
+    } catch (error) {
+        console.error("onMounted error in StrategicHouse/Index.vue:", error);
         isLoading.value = false;
         isReloading.value = false;
-        return;
-    }
-
-    if (
-        viewMode.value === "roadmap"
-        && !hasRoadmapParam
-        && roadmapMode.value !== initialRoadmapMode
-    ) {
-        isLoading.value = true;
-        isReloading.value = true;
-        startProgress();
-        pendingViewMode.value = "roadmap";
-        pendingRoadmapMode.value = roadmapMode.value;
-
-        await Promise.all([
-            preloadViewAssets("roadmap"),
-            reloadRoadmapData(roadmapMode.value),
-        ]);
-
-        pendingRoadmapMode.value = null;
-        pendingViewMode.value = null;
-        finishProgress();
-        isLoading.value = false;
-        isReloading.value = false;
-        return;
-    }
-
-    await preloadViewAssets(initialView);
-    markViewLoaded(initialView, initialRoadmapMode);
-    isLoading.value = false;
-    syncViewModeInUrl(viewMode.value);
-    if (viewMode.value === "roadmap") {
-        syncRoadmapModeInUrl(roadmapMode.value);
     }
 });
 

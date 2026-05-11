@@ -74,7 +74,7 @@ use Inertia\Inertia;
 */
 
 Route::middleware('guest')->group(function () {
-    Route::get('/login', [SsoController::class, 'showLogin'])->name('login');
+    // Route::get('/login', [SsoController::class, 'showLogin'])->name('login');
     Route::get('/auth/google', [SsoController::class, 'redirectToGoogle'])->name('auth.google');
     Route::get('/auth/google/callback', [SsoController::class, 'handleGoogleCallback']);
 });
@@ -85,7 +85,7 @@ Route::middleware('guest')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth')->group(function () {
+Route::group([], function () {
     Route::post('/logout', [SsoController::class, 'logout'])->name('logout');
 
 });
@@ -96,7 +96,7 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'approved'])->group(function () {
+Route::group([], function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/program-planning', PlanningDashboardController::class)->name('program-planning');
     // Program Planning → Business Strategy (separate from Strategic House)
@@ -365,7 +365,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'approved', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
     Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
@@ -390,4 +390,4 @@ Route::middleware(['auth', 'approved', 'admin'])->prefix('admin')->name('admin.'
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', fn () => redirect()->route('login'));
+Route::get('/', fn () => redirect()->route('strategic-house.index'));

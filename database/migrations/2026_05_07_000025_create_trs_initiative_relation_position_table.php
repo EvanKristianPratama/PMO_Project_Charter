@@ -13,17 +13,11 @@ return new class extends Migration
     {
         Schema::create('trs_initiative_relation_position', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('initiative_id')->unique();
-            $table->float('x')->nullable();
-            $table->float('y')->nullable();
-            $table->boolean('is_locked')->default(false);
+            $table->integer('initiative_id')->unique();
+            $table->double('x')->nullable();
+            $table->double('y')->nullable();
+            $table->boolean('is_locked')->default(0);
             $table->timestamps();
-
-            // Only add foreign key if mst_initiative table exists (MySQL remote)
-            // Skip on NativePHP SQLite where mst_initiative doesn't exist locally
-            if (Schema::hasTable('mst_initiative')) {
-                $table->foreign('initiative_id')->references('id')->on('mst_initiative')->onDelete('cascade');
-            }
         });
     }
 

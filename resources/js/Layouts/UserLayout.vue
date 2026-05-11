@@ -1,6 +1,6 @@
 <script setup>
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
@@ -50,11 +50,81 @@ const logout = () => {
     router.post(route('logout'));
 };
 
-// Database connection toggle removed
+// Premium Splash Loader States
+const showLoader = ref(false);
+const progress = ref(0);
+
+const loadingText = computed(() => {
+    if (progress.value < 25) return 'Inisialisasi sistem & database SQLite...';
+    if (progress.value < 55) return 'Sinkronisasi relasi program & inisiatif strategis...';
+    if (progress.value < 85) return 'Memuat modul Vue & antarmuka sistem...';
+    return 'Hampir selesai, selamat datang!';
+});
+
+onMounted(() => {
+    // TIPS TESTING: Diubah ke false agar loading selalu muncul setiap di-refresh (sangat cocok untuk testing tampilan).
+    // Ubah kembali ke sessionStorage.getItem('app_loaded') jika ingin hanya muncul sekali per pembukaan aplikasi.
+    const hasLoaded = sessionStorage.getItem('app_loaded'); 
+    if (!hasLoaded) {
+        showLoader.value = true;
+        const interval = setInterval(() => {
+            if (progress.value < 100) {
+                let increment = Math.floor(Math.random() * 6) + 3;
+                if (progress.value + increment > 100) {
+                    progress.value = 100;
+                } else {
+                    progress.value += increment;
+                }
+            } else {
+                clearInterval(interval);
+                sessionStorage.setItem('app_loaded', 'true');
+                setTimeout(() => {
+                    showLoader.value = false;
+                }, 400);
+            }
+        }, 50);
+    }
+});
 </script>
 
 <template>
     <div class="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#0f0f0f] dark:text-slate-100">
+        <!-- Premium 0-100% Loading Screen Overlay -->
+        <transition name="fade">
+            <div v-if="showLoader" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-slate-950/95 text-white backdrop-blur-xl transition-all duration-500 ease-in-out">
+                <div class="flex flex-col items-center max-w-md px-6 text-center">
+                    <!-- Glowing Logo Container -->
+                    <div class="relative mb-8 h-20 w-20 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 shadow-[0_0_50px_rgba(59,130,246,0.15)] animate-pulse">
+                        <img src="/logo.png" alt="Logo" class="h-10 w-auto" />
+                    </div>
+
+                    <!-- App Title -->
+                    <h2 class="text-lg font-bold tracking-tight text-white mb-1">IT Strategic Planning System</h2>
+                    <p class="text-[11px] text-slate-400 mb-8">Review ITSP Pertamina 2025-2029 Collaboration System</p>
+
+                    <!-- Large Glowing Percentage -->
+                    <div class="relative mb-4">
+                        <span class="text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 drop-shadow-[0_0_15px_rgba(99,102,241,0.4)]">
+                            {{ progress }}%
+                        </span>
+                    </div>
+
+                    <!-- Glowing Horizontal Progress Bar -->
+                    <div class="w-64 h-1.5 bg-white/10 rounded-full overflow-hidden mb-4 relative">
+                        <div 
+                            class="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-full transition-all duration-100 ease-out shadow-[0_0_12px_rgba(99,102,241,0.6)]"
+                            :style="{ width: `${progress}%` }"
+                        ></div>
+                    </div>
+
+                    <!-- Dynamic Subtle Status Text -->
+                    <p class="text-[11px] text-slate-400 font-medium tracking-wide animate-pulse min-h-[16px]">
+                        {{ loadingText }}
+                    </p>
+                </div>
+            </div>
+        </transition>
+
         <Head :title="title" />
 
         <nav class="sticky top-0 z-50 border-b border-slate-200 bg-white dark:border-white/10 dark:bg-[#141414] print:hidden">
@@ -197,3 +267,12 @@ const logout = () => {
         </footer>
     </div>
 </template>
+
+<style scoped>
+.fade-leave-active {
+  transition: opacity 0.4s ease-out;
+}
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
