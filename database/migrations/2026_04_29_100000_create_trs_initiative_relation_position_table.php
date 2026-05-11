@@ -11,16 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('trs_initiative_relation_position', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedInteger('initiative_id')->unique();
-            $table->float('x')->nullable();
-            $table->float('y')->nullable();
-            $table->boolean('is_locked')->default(false);
-            $table->timestamps();
+        if (!Schema::hasTable('trs_initiative_relation_position')) {
+            Schema::create('trs_initiative_relation_position', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedInteger('initiative_id')->unique();
+                $table->float('x')->nullable();
+                $table->float('y')->nullable();
+                $table->boolean('is_locked')->default(false);
+                $table->timestamps();
 
-            $table->foreign('initiative_id')->references('id')->on('mst_initiative')->onDelete('cascade');
-        });
+                $table->foreign('initiative_id')->references('id')->on('mst_initiative')->onDelete('cascade');
+            });
+        }
     }
 
     /**
