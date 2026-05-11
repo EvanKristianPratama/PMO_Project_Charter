@@ -6,7 +6,7 @@ use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class TrsReviewSc extends Model
+class TrsReviewSC extends Model
 {
     use LogsActivity;
     protected $table = 'trs_review_sc';
