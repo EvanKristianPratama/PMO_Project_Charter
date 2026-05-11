@@ -9,6 +9,7 @@ import {
     Bars3Icon,
     ChevronDownIcon,
     ClipboardDocumentListIcon,
+    CloudArrowDownIcon,
     HomeIcon,
     KeyIcon,
     MoonIcon,
@@ -64,6 +65,12 @@ const navItems = [
         href: route('admin.activity-log.index'),
         icon: ClipboardDocumentListIcon,
         active: (url) => url.startsWith('/admin/activity-log'),
+    },
+    {
+        label: 'Sinkronisasi Data',
+        href: route('sync.index'),
+        icon: CloudArrowDownIcon,
+        active: (url) => url.startsWith('/sync'),
     },
 ];
 

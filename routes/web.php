@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\SyncController;
 use App\Http\Controllers\Architecture\BusinessCapability\BusinessCapabilityController;
 use App\Http\Controllers\Architecture\OrganizationStructure\IndexController as ArchitectureOrganizationStructureIndexController;
 use App\Http\Controllers\Auth\SsoController;
@@ -357,6 +358,10 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::put('/it-initiatives/{project}/project-status-history/{history}', [ITInitiativeController::class, 'updateProjectStatusHistory'])->name('it-initiatives.project-status-history.update');
     Route::delete('/it-initiatives/{project}/project-status-history/{history}', [ITInitiativeController::class, 'destroyProjectStatusHistory'])->name('it-initiatives.project-status-history.destroy');
     Route::put('/it-initiatives/{project}/mapping', [ITInitiativeController::class, 'updateMapping'])->name('it-initiatives.mapping.update');
+
+    // Cloud Data Synchronization (Accessible for all validated app instances)
+    Route::get('/sync', [SyncController::class, 'index'])->name('sync.index');
+    Route::post('/sync/pull', [SyncController::class, 'pull'])->name('sync.pull');
 });
 
 /*

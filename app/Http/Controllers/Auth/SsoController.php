@@ -37,10 +37,24 @@ class SsoController extends Controller
         if (! $user) {
             $user = User::where('email', $googleUser->getEmail())->first();
 
+            // 🔍 Smart Sync: Check Cloud Master for existing approved user profile
+            $cloudUser = null;
+            try {
+                $cloudUser = \Illuminate\Support\Facades\DB::connection('cloud')
+                    ->table('users')
+                    ->where('email', $googleUser->getEmail())
+                    ->first();
+            } catch (\Exception $e) {
+                // Silently ignore if offline, fall back to safe default
+            }
+
             if ($user) {
                 $user->update([
                     'google_id' => $googleUser->getId(),
                     'avatar' => $googleUser->getAvatar(),
+                    // Sync roles/status if local is outdated and cloud was fetched
+                    'status' => $cloudUser ? $cloudUser->status : $user->status,
+                    'app_role' => $cloudUser ? $cloudUser->app_role : $user->app_role,
                 ]);
             } else {
                 $user = User::create([
@@ -48,8 +62,9 @@ class SsoController extends Controller
                     'email' => $googleUser->getEmail(),
                     'google_id' => $googleUser->getId(),
                     'avatar' => $googleUser->getAvatar(),
-                    'status' => 'pending',
-                    'app_role' => User::APP_ROLE_USER,
+                    // Use cloud status/role, fallback to safe pending if completely new everywhere
+                    'status' => $cloudUser ? $cloudUser->status : 'pending',
+                    'app_role' => $cloudUser ? $cloudUser->app_role : User::APP_ROLE_USER,
                 ]);
             }
         } else {

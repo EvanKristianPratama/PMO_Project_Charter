@@ -13,6 +13,7 @@ import {
     TableCellsIcon,
     ClipboardDocumentCheckIcon,
     CircleStackIcon,
+    CloudArrowDownIcon,
 } from "@heroicons/vue/24/outline";
 
 export function useNavigation() {
@@ -255,6 +256,12 @@ export function useNavigation() {
                 href: safeRoute("master-data.index"),
                 icon: TableCellsIcon,
                 active: (url) => url.startsWith("/master-data"),
+            },
+            {
+                label: "Sinkronisasi Data",
+                href: safeRoute("sync.index"),
+                icon: CloudArrowDownIcon,
+                active: (url) => url.startsWith("/sync"),
             },
         ];
 
