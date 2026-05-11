@@ -1,0 +1,66 @@
+name: CD Docker to GCP VM
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+  workflow_dispatch:
+
+concurrency:
+  group: cd-main-deploy
+  cancel-in-progress: true
+
+jobs:
+  cd:
+    name: CD - Deploy to GCP VM
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event_name == 'workflow_run' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'main'
+      )
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy through SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.GCP_HOST }}
+          username: ${{ secrets.GCP_USER }}
+          key: ${{ secrets.GCP_SSH_KEY }}
+          port: ${{ secrets.GCP_PORT || 22 }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+            cd "${{ secrets.APP_DIR }}"
+
+            # Sync with the latest main branch
+            git fetch --all --prune
+            git reset --hard origin/main
+
+            # Optional: write runtime secrets to files on server
+            if [ -n "${{ secrets.APP_ENV_FILE }}" ]; then
+              cat > .env <<'EOF'
+            ${{ secrets.APP_ENV_FILE }}
+            EOF
+            fi
+
+            if [ -n "${{ secrets.CA_PEM }}" ]; then
+              cat > ca.pem <<'EOF'
+            ${{ secrets.CA_PEM }}
+            EOF
+            fi
+
+            # Build and run containers
+            docker compose up -d --build
+
+            # Laravel post-deploy
+            docker compose exec -T app php artisan migrate --force
+            docker compose exec -T app php artisan optimize:clear
+            docker compose exec -T app php artisan config:cache
+            docker compose exec -T app php artisan route:cache
+            docker compose exec -T app php artisan view:cache
+
+            docker compose ps
