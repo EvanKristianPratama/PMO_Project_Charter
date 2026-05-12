@@ -196,10 +196,6 @@ const getLogClass = (type) => {
                             </div>
                         </div>
                         
-                        <div class="p-3 text-xs rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300 border border-blue-100 dark:border-blue-500/20">
-                            <strong>Host Sumber:</strong> {{ stats.cloud_host }}
-                        </div>
-                        
                         <div class="rounded-xl bg-slate-50 p-4 dark:bg-black/20 border border-slate-200 dark:border-white/10">
                             <h3 class="text-xs font-semibold text-slate-800 dark:text-slate-200 mb-2">Bagaimana cara kerjanya?</h3>
                             <ul class="space-y-2 text-xs text-slate-600 dark:text-slate-400">
