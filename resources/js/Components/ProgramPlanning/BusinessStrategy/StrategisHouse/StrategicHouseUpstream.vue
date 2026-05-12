@@ -22,8 +22,8 @@
             <!-- Row 1: Goal Bars (side by side) -->
             <div class="w-[90%] flex gap-2 mt-1">
                 <div v-for="goal in getMainGoals(upstreamGoals)" :key="'goal-' + goal.id"
-                    class="flex-1 bg-[#1c75bc] text-white text-center py-2 px-4 shadow-sm">
-                    <h2 class="text-sm font-bold italic">{{ goal.title }}</h2>
+                    class="flex-1 bg-[#1c75bc] text-white text-center py-2 px-4 shadow-sm flex items-center justify-center">
+                    <h2 class="text-sm font-bold">{{ goal.title }}</h2>
                 </div>
             </div>
 
@@ -56,8 +56,8 @@
 
                                     <!-- Theme Header -->
                                     <div
-                                        class="relative z-10 border-b border-white/30 py-3 px-2 text-center bg-[#1256a0]/80">
-                                        <h3 class="font-bold text-xs italic text-white drop-shadow-sm">{{ theme.name }}
+                                        class="relative z-10 border-b border-white/30 px-2 text-center bg-[#1256a0]/80 min-h-[48px] flex items-center justify-center">
+                                        <h3 class="font-bold text-[10px] text-white drop-shadow-sm leading-tight">{{ theme.name }}
                                         </h3>
                                     </div>
 
@@ -100,14 +100,14 @@
             <div v-for="enablerGoal in getEnablerGoals(upstreamGoals)" :key="'enabler-goal-' + enablerGoal.id"
                 class="w-[90%] mt-1">
                 <div class="bg-[#00a688] text-white text-center py-2 px-6 shadow-sm">
-                    <h2 class="text-sm font-bold italic">{{ enablerGoal.title }}</h2>
+                    <h2 class="text-sm font-bold">{{ enablerGoal.title }}</h2>
                 </div>
 
                 <div v-if="enablerGoal.themes && enablerGoal.themes.length > 0"
                     class="w-full flex flex-wrap justify-start gap-x-[1.33%]">
                     <div v-for="theme in enablerGoal.themes" :key="theme.id"
                         class="w-[32.44%] bg-[#1c75bc] text-white text-center py-4 mt-2 rounded-sm flex items-center justify-center">
-                        <h5 class="text-xs font-bold">{{ theme.name }}</h5>
+                        <h5 class="text-xs text-[10px] font-bold">{{ theme.name }}</h5>
                     </div>
                 </div>
             </div>
