@@ -26,7 +26,7 @@
                     <tr v-for="(item, idx) in initiatives" :key="item.id || idx"
                         class="hover:bg-slate-50 dark:hover:bg-slate-800/30">
                         <td
-                            class="px-2 py-1 text-center border border-slate-200 dark:border-slate-700/50 align-midle font-semibold text-slate-700 dark:text-slate-200">
+                            class="px-2 py-1 text-center border border-slate-200 dark:border-slate-700/50 align-midle text-slate-700 dark:text-slate-200">
                             {{ item.priority }}
                         </td>
                         <td class="px-2 py-1 text-center border border-slate-200 dark:border-slate-700/50 align-midle">

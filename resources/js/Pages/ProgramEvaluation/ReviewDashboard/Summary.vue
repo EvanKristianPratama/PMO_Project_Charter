@@ -1,15 +1,6 @@
 <template>
     <UserLayout title="Review Summary">
         <div class="space-y-6 animate-fade-in-up">
-            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Dashboard Summary</h1>
-                        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Rangkuman statistik dan breakdown inisiatif</p>
-                    </div>
-                </div>
-            </section>
-
             <!-- Duration Statistics Table -->
             <DurationStatsTable
                 v-if="durationStats"
