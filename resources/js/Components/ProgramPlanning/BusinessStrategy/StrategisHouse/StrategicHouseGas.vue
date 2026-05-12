@@ -22,7 +22,7 @@
 
         <!-- Base of roof: Ambition -->
         <div class="w-[90%] bg-[#0a4e4e] text-white text-center py-2 px-8 shadow-md flex items-center" v-if="strategicHouseGas">
-            <div class="font-semibold text-sm max-w-70 text-left">
+            <div class="font-semibold text-xs max-w-65 text-left">
                 <div>Connecting Indonesia to a Cleaner and Sustainable Energy Future</div>
             </div>
             <div class="font-semibold text-xs px-4 border-l-2 border-white/30 text-center">
@@ -54,8 +54,8 @@
 
                                     <!-- Theme Header -->
                                     <div
-                                        class="relative z-10 border-b border-white/30 py-3 px-2 text-center bg-[#0a6e6e]/80">
-                                        <h3 class="font-bold text-xs text-white ">{{ theme.name
+                                        class="relative z-10 border-b border-white/30 px-2 text-center bg-[#0a6e6e]/80 min-h-[48px] flex items-center justify-center">
+                                        <h3 class="font-semibold text-xs text-white leading-tight">{{ theme.name
                                             }}</h3>
                                     </div>
 
@@ -97,7 +97,7 @@
                         <div class="flex flex-wrap justify-center gap-x-1.5">
                             <template v-for="(pillar, pIndex) in theme.pillar_themes" :key="pillar.id">
                                 <div class="flex items-center">
-                                    <span class="italic text-white font-bold">{{ pillar.strategy }}</span>
+                                    <span class="italic text-white">{{ pillar.strategy }}</span>
                                     <span v-if="pIndex < theme.pillar_themes.length - 1"
                                         class="ml-1.5 text-white/40 font-bold">|</span>
                                 </div>
