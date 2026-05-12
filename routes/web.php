@@ -5,10 +5,13 @@ use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\DatabaseSwitcherController;
 use App\Http\Controllers\Admin\SyncController;
 use App\Http\Controllers\Architecture\BusinessCapability\BusinessCapabilityController;
 use App\Http\Controllers\Architecture\OrganizationStructure\IndexController as ArchitectureOrganizationStructureIndexController;
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\SsoController;
+use App\Http\Controllers\PublicSyncController;
 use App\Http\Controllers\MasterData\ActivityLogController as MasterDataActivityLogController;
 use App\Http\Controllers\MasterData\MasterDataController;
 use App\Http\Controllers\MasterData\MstInitiative\MstInitiativeController;
@@ -76,8 +79,12 @@ use Inertia\Inertia;
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [SsoController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+    // Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    // Route::post('/register', [AuthController::class, 'register']);
     Route::get('/auth/google', [SsoController::class, 'redirectToGoogle'])->name('auth.google');
     Route::get('/auth/google/callback', [SsoController::class, 'handleGoogleCallback']);
+    Route::post('/public/sync-master', [PublicSyncController::class, 'sync'])->name('public.sync');
 });
 
 /*
@@ -372,7 +379,9 @@ Route::middleware(['auth', 'approved'])->group(function () {
 
 Route::middleware(['auth', 'approved', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
+    Route::post('/switch-database', [DatabaseSwitcherController::class, 'switch'])->name('switch-database');
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+    Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
     Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
     Route::get('/roles', [AdminRoleController::class, 'index'])->name('roles.index');

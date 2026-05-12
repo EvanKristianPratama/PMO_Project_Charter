@@ -8,6 +8,7 @@ import {
     ArrowRightOnRectangleIcon,
     Bars3Icon,
     ChevronDownIcon,
+    CircleStackIcon,
     ClipboardDocumentListIcon,
     CloudArrowDownIcon,
     HomeIcon,
@@ -34,6 +35,18 @@ const authUser = computed(() => page.props.auth?.user || {});
 const currentUrl = computed(() => page.url || '');
 const displayName = computed(() => authUser.value?.name || authUser.value?.email || 'Admin');
 const userEmail = computed(() => authUser.value?.email || '-');
+
+const currentDb = computed(() => page.props.currentConnection || 'sqlite');
+const dbOptions = [
+    { id: 'sqlite', label: 'Lokal (SQLite)', desc: 'Mode Luring / Cepat' },
+    { id: 'cloud', label: 'Master Server', desc: 'Server Utama Terpusat' },
+];
+
+const switchDb = (target) => {
+    if (confirm(`Pindah ke ${target}? Anda akan otomatis Logout untuk menyinkronkan sesi.`)) {
+        router.post(route('admin.switch-database'), { connection: target });
+    }
+};
 
 const navItems = [
     {
@@ -125,6 +138,48 @@ const logout = () => {
                 </div>
 
                 <div class="flex items-center gap-2">
+                    <!-- Database Switcher Pill -->
+                    <Menu as="div" class="relative hidden sm:block">
+                        <MenuButton class="group flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-bold transition hover:bg-slate-100 dark:border-white/10 dark:bg-[#1c1c1c] dark:hover:bg-[#252525]">
+                            <CircleStackIcon class="h-4 w-4 text-slate-400 group-hover:text-indigo-500 transition-colors" />
+                            <span class="uppercase tracking-wider text-slate-600 dark:text-slate-300">DB:</span>
+                            <span :class="['px-1.5 py-0.5 rounded text-[10px] tracking-wide uppercase', currentDb === 'sqlite' ? 'bg-slate-200 text-slate-700 dark:bg-white/10 dark:text-slate-300' : 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400']">
+                                {{ currentDb }}
+                            </span>
+                            <ChevronDownIcon class="h-3 w-3 text-slate-400" />
+                        </MenuButton>
+                        <transition
+                            enter-active-class="transition duration-100 ease-out"
+                            enter-from-class="transform scale-95 opacity-0"
+                            enter-to-class="transform scale-100 opacity-100"
+                            leave-active-class="transition duration-75 ease-in"
+                            leave-from-class="transform scale-100 opacity-100"
+                            leave-to-class="transform scale-95 opacity-0"
+                        >
+                            <MenuItems class="absolute right-0 mt-2 w-52 origin-top-right rounded-lg border border-slate-200 bg-white p-1 shadow-md focus:outline-none dark:border-white/10 dark:bg-[#1d1d1d]">
+                                <div class="px-3 py-2">
+                                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Pilih Koneksi Database</p>
+                                </div>
+                                <MenuItem v-for="opt in dbOptions" :key="opt.id" v-slot="{ active }">
+                                    <button
+                                        @click="switchDb(opt.id)"
+                                        class="flex w-full flex-col gap-0.5 rounded-md px-3 py-2 text-left text-sm transition-colors"
+                                        :class="[
+                                            active ? 'bg-slate-100 dark:bg-white/5' : '',
+                                            currentDb === opt.id ? 'ring-1 ring-indigo-500/30 bg-indigo-50/50 dark:bg-indigo-500/10' : ''
+                                        ]"
+                                    >
+                                        <span class="font-semibold text-slate-800 dark:text-white flex items-center justify-between">
+                                            {{ opt.label }}
+                                            <span v-if="currentDb === opt.id" class="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
+                                        </span>
+                                        <span class="text-[10px] text-slate-500">{{ opt.desc }}</span>
+                                    </button>
+                                </MenuItem>
+                            </MenuItems>
+                        </transition>
+                    </Menu>
+
                     <button
                         type="button"
                         class="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/10"
