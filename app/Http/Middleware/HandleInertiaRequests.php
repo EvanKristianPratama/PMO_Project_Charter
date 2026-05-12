@@ -45,7 +45,7 @@ class HandleInertiaRequests extends Middleware
                 'check_status' => $request->session()->get('check_status'),
             ],
 
-            // 'currentConnection' removed: DB switch feature disabled
+            'currentConnection' => $request->session()->get('active_db_connection', config('database.default')),
         ];
     }
 }

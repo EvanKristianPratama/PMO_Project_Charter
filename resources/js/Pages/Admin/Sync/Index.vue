@@ -36,7 +36,7 @@ const scrollToBottom = async () => {
 };
 
 async function submitSync() {
-    if (!confirm('Peringatan: Seluruh data di database LOKAL akan ditimpa dengan data dari CLOUD/MASTER. Lanjutkan?')) {
+    if (!confirm('Peringatan: Seluruh data di database LOKAL akan ditimpa dengan data dari MASTER SERVER. Lanjutkan?')) {
         return;
     }
 
@@ -135,7 +135,7 @@ const getLogClass = (type) => {
                         <p class="text-xs font-semibold uppercase tracking-[0.2em] text-blue-500 dark:text-blue-400">Maintenance Control</p>
                         <h1 class="mt-2 text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Sinkronisasi Data (Pull New Data)</h1>
                         <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                            Tarik data terbaru dari Master Server (Cloud) ke database Lokal Anda (Clone/Update konsep Git).
+                            Tarik data terbaru dari Master Server ke database Lokal Anda (Clone/Update konsep Git).
                         </p>
                     </div>
 
@@ -147,7 +147,7 @@ const getLogClass = (type) => {
                                 : 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300'
                         ]">
                             <div :class="['h-2 w-2 rounded-full', stats.is_cloud_accessible ? 'bg-emerald-500' : 'bg-rose-500']"></div>
-                            {{ stats.is_cloud_accessible ? 'Cloud Connected' : 'Cloud Offline' }}
+                            {{ stats.is_cloud_accessible ? 'Master Connected' : 'Master Offline' }}
                         </div>
                     </div>
                 </div>
@@ -191,7 +191,7 @@ const getLogClass = (type) => {
                                 <p class="text-xs text-slate-500 dark:text-slate-400">Database Master (Sumber)</p>
                                 <p class="mt-1 font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                                     <CloudArrowDownIcon class="h-4 w-4 text-blue-500" />
-                                    MYSQL CLOUD
+                                    MYSQL MASTER SERVER
                                 </p>
                             </div>
                         </div>
@@ -210,7 +210,7 @@ const getLogClass = (type) => {
                                     <span class="font-bold">2.</span> Menghapus record tabel di database lokal yang akan diperbarui.
                                 </li>
                                 <li class="flex items-start gap-2">
-                                    <span class="font-bold">3.</span> Menarik row demi row data terbaru dari Master Cloud.
+                                    <span class="font-bold">3.</span> Menarik row demi row data terbaru dari Master Server.
                                 </li>
                                 <li class="flex items-start gap-2">
                                     <span class="font-bold">4.</span> Memasukkan data ke database lokal secara bulk chunks.
@@ -228,7 +228,7 @@ const getLogClass = (type) => {
                     
                     <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">Tarik Data dari Master</h2>
                     <p class="max-w-xs text-sm text-slate-500 dark:text-slate-400 mb-6">
-                        Tekan tombol di bawah untuk menyinkronkan data lokal Anda dengan data server Master Cloud terbaru.
+                        Tekan tombol di bawah untuk menyinkronkan data lokal Anda dengan data Master Server terbaru.
                     </p>
 
                     <button
@@ -244,7 +244,7 @@ const getLogClass = (type) => {
                     
                     <p v-if="!stats.is_cloud_accessible" class="mt-4 text-xs font-medium text-rose-500 flex items-center gap-1">
                         <ExclamationTriangleIcon class="h-4 w-4" />
-                        Koneksi cloud tidak tersedia. Cek .env atau koneksi internet Anda.
+                        Koneksi Master Server tidak tersedia. Cek .env atau koneksi internet Anda.
                     </p>
                     
                     <div class="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/5 dark:text-amber-300">

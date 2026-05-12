@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UserIndexRequest;
+use App\Http\Requests\Admin\UserStoreRequest;
 use App\Http\Requests\Admin\UserUpdateRequest;
 use App\Models\User;
 use App\Services\UserAccessService;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -50,6 +52,24 @@ class AdminUserController extends Controller
                 'permission_role' => $filters['permission_role'] ?? null,
             ],
         ]);
+    }
+
+    public function store(UserStoreRequest $request): RedirectResponse
+    {
+        $validated = $request->validated();
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'status' => $validated['status'],
+            'app_role' => $validated['app_role'],
+        ]);
+
+        // Assign Spatie Permission Role
+        $user->assignRole($validated['permission_role']);
+
+        return back()->with('success', "User {$user->name} berhasil ditambahkan.");
     }
 
     public function update(UserUpdateRequest $request, User $user): RedirectResponse

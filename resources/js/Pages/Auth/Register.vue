@@ -14,37 +14,38 @@
                         </p>
                     </div>
 
-                    <!-- ABSOLUTE SYNC BUTTON -->
-                    <button
-                        type="button"
-                        @click="triggerSync"
-                        :disabled="isSyncing"
-                        class="fixed right-14 top-4 z-30 flex items-center gap-1.5 rounded-lg bg-white/80 backdrop-blur p-2.5 text-xs font-bold uppercase tracking-wider text-slate-600 shadow-sm ring-1 ring-slate-200 transition hover:bg-white dark:bg-white/5 dark:text-slate-300 dark:ring-white/10 dark:hover:bg-white/10 disabled:opacity-50"
-                        title="Sync Data dari Master"
-                    >
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644h4.992m0 0a2.25 2.25 0 104.5 0m-4.5 0a2.25 2.25 0 014.5 0m0 0h8.523m-16.5-10.3h8.523m0 0a2.25 2.25 0 104.5 0m-4.5 0a2.25 2.25 0 014.5 0" />
-                        </svg>
-                        <span class="hidden sm:inline">Sync Master</span>
-                    </button>
-
-                    <form @submit.prevent="submit" class="space-y-5">
+                    <form @submit.prevent="submit" class="space-y-3.5">
                         <div>
-                            <label for="login_identity" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama</label>
+                            <label for="name" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Lengkap</label>
                             <input
-                                v-model="form.login_identity"
+                                v-model="form.name"
                                 type="text"
-                                id="login_identity"
-                                placeholder="Masukkan nama Anda"
+                                id="name"
+                                placeholder="Nama Lengkap"
                                 required
-                                autocomplete="username"
-                                class="block w-full rounded-2xl border-slate-200 bg-white px-4 py-3 text-sm shadow-sm placeholder:text-slate-300 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                                autofocus
+                                autocomplete="name"
+                                class="block w-full rounded-2xl border-slate-200 bg-white px-4 py-2.5 text-sm shadow-sm placeholder:text-slate-300 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                             />
-                            <p v-if="form.errors.login_identity" class="mt-1 text-sm text-red-500">{{ form.errors.login_identity }}</p>
+                            <p v-if="form.errors.name" class="mt-1 text-sm text-red-500">{{ form.errors.name }}</p>
                         </div>
 
                         <div>
-                            <label for="password" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
+                            <label for="email" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Email</label>
+                            <input
+                                v-model="form.email"
+                                type="email"
+                                id="email"
+                                placeholder="admin@example.com"
+                                required
+                                autocomplete="username"
+                                class="block w-full rounded-2xl border-slate-200 bg-white px-4 py-2.5 text-sm shadow-sm placeholder:text-slate-300 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                            />
+                            <p v-if="form.errors.email" class="mt-1 text-sm text-red-500">{{ form.errors.email }}</p>
+                        </div>
+
+                        <div>
+                            <label for="password" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Kata Sandi</label>
                             <div class="relative">
                                 <input
                                     v-model="form.password"
@@ -52,8 +53,8 @@
                                     id="password"
                                     placeholder="••••••••"
                                     required
-                                    autocomplete="current-password"
-                                    class="block w-full rounded-2xl border-slate-200 bg-white px-4 py-3 text-sm shadow-sm placeholder:text-slate-300 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                                    autocomplete="new-password"
+                                    class="block w-full rounded-2xl border-slate-200 bg-white px-4 py-2.5 text-sm shadow-sm placeholder:text-slate-300 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                                 />
                                 <button
                                     type="button"
@@ -72,42 +73,39 @@
                             <p v-if="form.errors.password" class="mt-1 text-sm text-red-500">{{ form.errors.password }}</p>
                         </div>
 
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <input
-                                    v-model="form.remember"
-                                    id="remember-me"
-                                    name="remember-me"
-                                    type="checkbox"
-                                    class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 dark:bg-slate-800 dark:border-slate-700"
-                                />
-                                <label for="remember-me" class="ml-2 block text-sm font-medium text-slate-600 dark:text-slate-400">Ingat Saya</label>
-                            </div>
+                        <div>
+                            <label for="password_confirmation" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Konfirmasi Kata Sandi</label>
+                            <input
+                                v-model="form.password_confirmation"
+                                :type="showPassword ? 'text' : 'password'"
+                                id="password_confirmation"
+                                placeholder="••••••••"
+                                required
+                                autocomplete="new-password"
+                                class="block w-full rounded-2xl border-slate-200 bg-white px-4 py-2.5 text-sm shadow-sm placeholder:text-slate-300 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                            />
+                            <p v-if="form.errors.password_confirmation" class="mt-1 text-sm text-red-500">{{ form.errors.password_confirmation }}</p>
                         </div>
 
-                        <div>
+                        <div class="pt-1.5">
                             <button
                                 type="submit"
                                 :disabled="form.processing"
-                                class="flex w-full justify-center rounded-xl bg-[#1c3b6e] px-4 py-3 text-sm font-bold text-white shadow-md hover:bg-[#152c53] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1c3b6e] disabled:opacity-50 transition-all duration-200"
+                                class="flex w-full justify-center rounded-xl bg-[#1c3b6e] px-4 py-2.5 text-sm font-bold text-white shadow-md hover:bg-[#152c53] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1c3b6e] disabled:opacity-50 transition-all duration-200"
                             >
-                                {{ form.processing ? 'Memuat...' : 'Masuk' }}
+                                {{ form.processing ? 'Memuat...' : 'Daftar' }}
                             </button>
                         </div>
                     </form>
 
-
+                    <p class="mt-8 text-center text-sm text-slate-600 dark:text-slate-400">
+                        Sudah punya akun?
+                        <Link :href="route('login')" class="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
+                            Masuk sekarang
+                        </Link>
+                    </p>
                 </div>
             </section>
-
-            <!-- Full Screen Sync Loader Overlay -->
-            <div v-if="isSyncing" class="fixed inset-0 z-[100] flex items-center justify-center bg-white/80 backdrop-blur-md dark:bg-black/80 transition-all">
-                <LoadingProgress 
-                    :progress="Math.floor(syncProgress)" 
-                    title="Menyinkronkan Data" 
-                    message="Sedang memperbarui data lokal dari Server Master..." 
-                />
-            </div>
 
             <section class="relative hidden overflow-hidden lg:block">
                 <div class="absolute inset-0">
@@ -150,13 +148,6 @@
                 </div>
             </section>
         </div>
-
-        <StatusModal
-            :show="showModal"
-            :status="statusData.status"
-            :user="{ name: statusData.name, email: statusData.email }"
-            @close="closeModal"
-        />
     </GuestLayout>
 </template>
 
@@ -164,82 +155,21 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
-import StatusModal from '@/Components/StatusModal.vue';
-import LoadingProgress from '@/Components/Shared/LoadingProgress.vue';
-import axios from 'axios';
-import Swal from 'sweetalert2';
 
 const form = useForm({
-    login_identity: '',
+    name: '',
+    email: '',
     password: '',
-    remember: false,
+    password_confirmation: '',
 });
 
 const showPassword = ref(false);
-const showModal = ref(false);
-const statusData = ref({});
 const activeSlide = ref(0);
-const isSyncing = ref(false);
-const syncProgress = ref(0);
 let slideInterval = null;
-let progressInterval = null;
-
-const triggerSync = async () => {
-    isSyncing.value = true;
-    syncProgress.value = 0;
-    
-    // Start simple dynamic fake progress interval
-    progressInterval = setInterval(() => {
-        if (syncProgress.value < 90) {
-            syncProgress.value += Math.random() * 15; // jumpy but natural
-        } else if (syncProgress.value < 98) {
-            syncProgress.value += 0.5; // slow down
-        }
-    }, 600);
-
-    try {
-        const response = await axios.post(route('public.sync'));
-        
-        // Force to 100 immediately
-        clearInterval(progressInterval);
-        syncProgress.value = 100;
-        
-        // Brief wait for UI animation satisfaction
-        await new Promise(r => setTimeout(r, 400));
-
-        if (response.data.success) {
-            Swal.fire({
-                icon: 'success',
-                title: 'Sync Berhasil',
-                text: response.data.message,
-                confirmButtonColor: '#1c3b6e',
-            });
-        } else {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Selesai dengan Catatan',
-                text: response.data.message,
-                confirmButtonColor: '#1c3b6e',
-            });
-        }
-    } catch (error) {
-        clearInterval(progressInterval);
-        console.error(error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Sync Gagal',
-            text: error.response?.data?.message || 'Terjadi kesalahan koneksi saat memperbarui data.',
-            confirmButtonColor: '#1c3b6e',
-        });
-    } finally {
-        isSyncing.value = false;
-        clearInterval(progressInterval);
-    }
-};
 
 const submit = () => {
-    form.post(route('login'), {
-        onFinish: () => form.reset('password'),
+    form.post(route('register'), {
+        onFinish: () => form.reset('password', 'password_confirmation'),
     });
 };
 
@@ -265,20 +195,6 @@ const slides = [
 ];
 
 onMounted(() => {
-    // Check for query params 'status', 'name', 'email'
-    const urlParams = new URLSearchParams(window.location.search);
-    const status = urlParams.get('status');
-
-    if (status && ['pending', 'rejected', 'deactivated'].includes(status)) {
-        statusData.value = {
-            status: status,
-            name: urlParams.get('name'),
-            email: urlParams.get('email')
-        };
-        showModal.value = true;
-    }
-
-    // Start Carousel
     slideInterval = setInterval(() => {
         activeSlide.value = (activeSlide.value + 1) % slides.length;
     }, 5000);
@@ -287,8 +203,4 @@ onMounted(() => {
 onUnmounted(() => {
     if (slideInterval) clearInterval(slideInterval);
 });
-
-const closeModal = () => {
-    showModal.value = false;
-};
 </script>

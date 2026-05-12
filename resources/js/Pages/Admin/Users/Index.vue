@@ -11,16 +11,28 @@
                         <h1 class="mt-2 text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">User Management</h1>
                         <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Kelola role, approval, dan akses user secara terpusat.</p>
                     </div>
-                    <button
-                        type="button"
-                        @click="applyFilters"
-                        class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-300 dark:hover:border-white/20 dark:hover:bg-white/5"
-                    >
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644h4.992m0 0a2.25 2.25 0 104.5 0m-4.5 0a2.25 2.25 0 014.5 0m0 0h8.523m-16.5-10.3h8.523m0 0a2.25 2.25 0 104.5 0m-4.5 0a2.25 2.25 0 014.5 0" />
-                        </svg>
-                        Refresh Data
-                    </button>
+                    <div class="flex gap-2 flex-wrap justify-end">
+                        <button
+                            type="button"
+                            @click="isCreateModalOpen = true"
+                            class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                        >
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                            Tambah User
+                        </button>
+                        <button
+                            type="button"
+                            @click="applyFilters"
+                            class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-300 dark:hover:border-white/20 dark:hover:bg-white/5"
+                        >
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644h4.992m0 0a2.25 2.25 0 104.5 0m-4.5 0a2.25 2.25 0 014.5 0m0 0h8.523m-16.5-10.3h8.523m0 0a2.25 2.25 0 104.5 0m-4.5 0a2.25 2.25 0 014.5 0" />
+                            </svg>
+                            Refresh Data
+                        </button>
+                    </div>
                 </div>
             </section>
 
@@ -244,12 +256,110 @@
                 </div>
             </section>
         </div>
+
+        <!-- Modal Create User -->
+        <TransitionRoot appear :show="isCreateModalOpen" as="template">
+            <Dialog as="div" @close="closeCreateModal" class="relative z-50">
+                <TransitionChild
+                    as="template"
+                    enter="duration-300 ease-out"
+                    enter-from="opacity-0"
+                    enter-to="opacity-100"
+                    leave="duration-200 ease-in"
+                    leave-from="opacity-100"
+                    leave-to="opacity-0"
+                >
+                    <div class="fixed inset-0 bg-black/40 backdrop-blur-sm" />
+                </TransitionChild>
+
+                <div class="fixed inset-0 overflow-y-auto">
+                    <div class="flex min-h-full items-center justify-center p-4">
+                        <TransitionChild
+                            as="template"
+                            enter="duration-300 ease-out"
+                            enter-from="opacity-0 scale-95"
+                            enter-to="opacity-100 scale-100"
+                            leave="duration-200 ease-in"
+                            leave-from="opacity-100 scale-100"
+                            leave-to="opacity-0 scale-95"
+                        >
+                            <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all dark:bg-[#1a1a1a] border dark:border-white/10">
+                                <DialogTitle as="h3" class="text-lg font-semibold leading-6 text-slate-900 dark:text-white">
+                                    Tambah User Baru
+                                </DialogTitle>
+                                
+                                <form @submit.prevent="submitCreateUser" class="mt-5 space-y-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider dark:text-slate-400 mb-1">Nama Lengkap</label>
+                                        <input v-model="createForm.name" type="text" class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#1f1f1f] dark:text-white" required placeholder="John Doe"/>
+                                        <p class="mt-0.5 text-xs text-red-500" v-if="createForm.errors.name">{{ createForm.errors.name }}</p>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider dark:text-slate-400 mb-1">Email</label>
+                                        <input v-model="createForm.email" type="email" class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#1f1f1f] dark:text-white" required placeholder="john@example.com"/>
+                                        <p class="mt-0.5 text-xs text-red-500" v-if="createForm.errors.email">{{ createForm.errors.email }}</p>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider dark:text-slate-400 mb-1">Kata Sandi</label>
+                                            <input v-model="createForm.password" type="password" class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#1f1f1f] dark:text-white" required />
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider dark:text-slate-400 mb-1">Konfirmasi</label>
+                                            <input v-model="createForm.password_confirmation" type="password" class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#1f1f1f] dark:text-white" required />
+                                        </div>
+                                        <p class="col-span-2 mt-0.5 text-xs text-red-500" v-if="createForm.errors.password">{{ createForm.errors.password }}</p>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider dark:text-slate-400 mb-1">App Role</label>
+                                            <select v-model="createForm.app_role" class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-sm dark:border-white/10 dark:bg-[#1f1f1f] dark:text-white">
+                                                <option v-for="role in appRoles" :key="role" :value="role">{{ role }}</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider dark:text-slate-400 mb-1">Permission Role</label>
+                                            <select v-model="createForm.permission_role" class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-sm dark:border-white/10 dark:bg-[#1f1f1f] dark:text-white">
+                                                <option v-for="role in permissionRoles" :key="role" :value="role">{{ role }}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider dark:text-slate-400 mb-1">Status Approval</label>
+                                        <select v-model="createForm.status" class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-sm dark:border-white/10 dark:bg-[#1f1f1f] dark:text-white">
+                                            <option value="pending">Pending</option>
+                                            <option value="approved">Approved</option>
+                                            <option value="rejected">Rejected</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mt-6 flex justify-end gap-3 pt-2 border-t dark:border-white/10">
+                                        <button type="button" @click="closeCreateModal" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
+                                            Batal
+                                        </button>
+                                        <button type="submit" :disabled="createForm.processing" class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-500 shadow-md disabled:opacity-50 transition-all flex items-center gap-2">
+                                            <span v-if="createForm.processing" class="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white"></span>
+                                            Simpan User
+                                        </button>
+                                    </div>
+                                </form>
+                            </DialogPanel>
+                        </TransitionChild>
+                    </div>
+                </div>
+            </Dialog>
+        </TransitionRoot>
     </AdminLayout>
 </template>
 
 <script setup>
-import { computed, reactive } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { computed, reactive, ref } from 'vue';
+import { Link, router, useForm } from '@inertiajs/vue3';
+import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import StatusBadge from '@/Components/StatusBadge.vue';
@@ -271,6 +381,33 @@ const localFilters = reactive({
     app_role: props.filters.app_role || 'all',
     permission_role: props.filters.permission_role || 'all',
 });
+
+// Create User Logic
+const isCreateModalOpen = ref(false);
+const createForm = useForm({
+    name: '',
+    email: '',
+    password: '',
+    password_confirmation: '',
+    app_role: 'user',
+    permission_role: 'Viewer',
+    status: 'approved',
+});
+
+const closeCreateModal = () => {
+    isCreateModalOpen.value = false;
+    createForm.reset();
+    createForm.clearErrors();
+};
+
+const submitCreateUser = () => {
+    createForm.post(route('admin.users.store'), {
+        onSuccess: () => {
+            closeCreateModal();
+        },
+        preserveScroll: true
+    });
+};
 
 const statCards = computed(() => [
     {
