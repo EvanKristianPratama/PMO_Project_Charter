@@ -28,6 +28,24 @@ class DynamicDatabaseConnection
             }
         }
 
-        return $next($request);
+        $response = $next($request);
+
+        // Post-Request Enforcement Guard:
+        // If a logged-in user is detected NOT to be an Administrator, 
+        // immediately enforce 'sqlite' fallback to lock non-admins into local mode exclusively.
+        if (auth()->check() && !auth()->user()->isAdminUser()) {
+            if (Config::get('database.default') !== 'sqlite') {
+                auth()->logout();
+                
+                if ($request->hasSession()) {
+                    $request->session()->put('active_db_connection', 'sqlite');
+                    $request->session()->flash('error', 'Akses Master dibatasi hanya untuk Administrator. Mode Lokal diaktifkan.');
+                }
+                
+                return redirect()->route('login');
+            }
+        }
+
+        return $response;
     }
 }
