@@ -41,7 +41,7 @@
             <div class="w-[90%] flex gap-2">
                 <div v-for="goal in getMainGoals(gasGoals)" :key="'pillar-' + goal.id" class="flex-1 flex flex-col">
 
-                    <!-- Theme Pillar Columns -->
+                    <!-- Theme Pillar Column -->
                     <div class="w-full flex items-stretch">
                         <template v-for="(theme, index) in getPillarThemes(goal.themes)" :key="theme.id">
                             <div class="flex-1 flex flex-col">
