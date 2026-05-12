@@ -21,7 +21,7 @@
             <div v-for="goal in pertaminaGoals" :key="goal.id" class="w-full flex flex-col items-center">
 
                 <div class="w-[90%] bg-[#1c75bc] text-white text-center py-2 px-6 shadow-sm mt-1">
-                    <h2 class="text-lg font-bold italic">{{ goal.title }}</h2>
+                    <h2 class="font-bold text-base italic">{{ goal.title }}</h2>
                 </div>
 
                 <!-- Themes / Pillars -->
@@ -52,7 +52,7 @@
                 <div v-if="getEnablerTheme(goal.themes)"
                     class="w-[90%] bg-[#00a688] text-white text-center py-2 px-6 shadow-sm mt-2">
                     <h3 class="font-bold text-base italic">{{ getEnablerTheme(goal.themes).name }}</h3>
-                    <p class="text-blue-50">HSSE Excellence, Sustainability, Technology Innovation,
+                    <p class="text-xs text-blue-50">HSSE Excellence, Sustainability, Technology Innovation,
                         Digital Transformation, Policy Advocacy, Human Capital & Stakeholder Management,
                         Integrated Risk Management</p>
                 </div>
@@ -75,11 +75,11 @@ const props = defineProps({
 
 const getPillarThemes = (themes) => {
     if (!themes) return [];
-    return themes.filter(t => t.theme_number !== 3);
+    return themes.filter(t => Number(t.theme_number) !== 3);
 };
 
 const getEnablerTheme = (themes) => {
     if (!themes) return null;
-    return themes.find(t => t.theme_number === 3);
+    return themes.find(t => Number(t.theme_number) === 3);
 };
 </script>
