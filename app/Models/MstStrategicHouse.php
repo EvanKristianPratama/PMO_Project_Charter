@@ -12,7 +12,8 @@ class MstStrategicHouse extends Model
     protected $fillable = [
         'source',
         'vision',
-        'mission'
+        'mission',
+        'additional_info'
     ];
 
     public function strategicHouseGoal(): HasMany

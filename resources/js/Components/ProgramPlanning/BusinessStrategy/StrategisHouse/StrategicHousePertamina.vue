@@ -17,8 +17,8 @@
         </div>
 
         <!-- Goals (Fostering Energy Resilience) -->
-        <template v-if="pertaminaGoals && pertaminaGoals.length > 0">
-            <div v-for="goal in pertaminaGoals" :key="goal.id" class="w-full flex flex-col items-center">
+        <template v-if="filteredGoals && filteredGoals.length > 0">
+            <div v-for="goal in filteredGoals" :key="goal.id" class="w-full flex flex-col items-center">
 
                 <div class="w-[90%] bg-[#1c75bc] text-white text-center py-2 px-6 shadow-sm mt-1">
                     <h2 class="font-bold text-base italic">{{ goal.title }}</h2>
@@ -47,21 +47,21 @@
                         </div>
                     </template>
                 </div>
-
-                <!-- Enabler Theme (Bottom Foundation) -->
-                <div v-if="getEnablerTheme(goal.themes)"
-                    class="w-[90%] bg-[#00a688] text-white text-center py-2 px-6 shadow-sm mt-2">
-                    <h3 class="font-bold text-base italic">{{ getEnablerTheme(goal.themes).name }}</h3>
-                    <p class="text-xs text-blue-50">HSSE Excellence, Sustainability, Technology Innovation,
-                        Digital Transformation, Policy Advocacy, Human Capital & Stakeholder Management,
-                        Integrated Risk Management</p>
-                </div>
             </div>
         </template>
+
+        <!-- Enabler Theme (Bottom Foundation) -->
+        <div v-if="enablerGoal"
+            class="w-[90%] bg-[#00a688] text-white text-center py-2 px-6 shadow-sm mt-2">
+            <h3 class="font-bold text-base italic">{{ enablerGoal.title }}</h3>
+            <p class="text-xs text-blue-50">{{ enablerThemesText }}</p>
+        </div>
     </div>
 </template>
 
 <script setup>
+import { computed } from 'vue';
+
 const props = defineProps({
     strategicHousePertamina: {
         type: Object,
@@ -71,6 +71,21 @@ const props = defineProps({
         type: Array,
         default: () => []
     }
+});
+
+const filteredGoals = computed(() => {
+    if (!props.pertaminaGoals) return [];
+    return props.pertaminaGoals.filter(goal => goal.id !== 23);
+});
+
+const enablerGoal = computed(() => {
+    if (!props.pertaminaGoals) return null;
+    return props.pertaminaGoals.find(goal => goal.id === 23);
+});
+
+const enablerThemesText = computed(() => {
+    if (!enablerGoal.value || !enablerGoal.value.themes) return '';
+    return enablerGoal.value.themes.map(t => t.name).join(', ');
 });
 
 const getPillarThemes = (themes) => {

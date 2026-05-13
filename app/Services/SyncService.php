@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -114,6 +115,20 @@ class SyncService
                                 foreach ($columns as $col) {
                                     if ($col === 'id') $blueprint->id();
                                     else $blueprint->text($col)->nullable();
+                                }
+                            });
+                        }
+                    } else {
+                        // 1.b Ensure local table has all columns from Cloud
+                        $cloudColumns = Schema::connection('cloud')->getColumnListing($table);
+                        $localColumns = Schema::getColumnListing($table);
+                        $missingColumns = array_diff($cloudColumns, $localColumns);
+
+                        if (!empty($missingColumns)) {
+                            $log("Menambahkan kolom baru ke tabel {$table}: " . implode(', ', $missingColumns), "info");
+                            Schema::table($table, function (Blueprint $blueprint) use ($missingColumns) {
+                                foreach ($missingColumns as $column) {
+                                    $blueprint->text($column)->nullable();
                                 }
                             });
                         }
