@@ -6,7 +6,7 @@ import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy/dist/index.esm.js';
 
-const appName = import.meta.env.VITE_APP_NAME || 'PMO Portal';
+const appName = import.meta.env.VITE_APP_NAME || 'Review ITSPS';
 
 createInertiaApp({
     title: (title) => title ? `${title} — ${appName}` : appName,

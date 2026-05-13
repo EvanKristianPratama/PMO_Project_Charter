@@ -67,7 +67,7 @@ const logout = () => {
                             class="h-7 w-auto transition-opacity group-hover:opacity-90"
                         />
                         <div class="hidden md:block">
-                            <p class="text-sm font-semibold tracking-tight text-slate-900 dark:text-white">IT Strategic Planning System</p>
+                            <p class="text-sm font-semibold tracking-tight text-slate-900 dark:text-white">Review ITSPS</p>
                             <p class="text-[11px] text-slate-400 dark:text-slate-500">Review ITSP Pertamina 2025-2029 Collaboration System</p>
                         </div>
                     </Link>
@@ -251,7 +251,7 @@ const logout = () => {
 
         <footer class="mx-auto w-full max-w-7xl px-4 pb-8 sm:px-6 lg:px-8 print:hidden">
             <div class="border-t border-slate-200/70 pt-5 dark:border-white/5">
-                <p class="text-center text-xs text-slate-400 dark:text-slate-500">IT Strategic Planning System</p>
+                <p class="text-center text-xs text-slate-400 dark:text-slate-500">Review ITSPS</p>
             </div>
         </footer>
     </div>
