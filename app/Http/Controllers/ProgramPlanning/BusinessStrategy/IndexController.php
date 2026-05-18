@@ -8,6 +8,8 @@ use App\Models\MstBusinessStrategy;
 use App\Models\MstMisiBumn;
 use App\Models\MstPriorityStrategicInitiative;
 use App\Models\MstStrategicHouse;
+use App\Models\Theme;
+use App\Models\TrsPillarStrategy;
 use App\Services\StrategicHouse\BusinessStrategy\BusinessStrategyService;
 use Inertia\Inertia;
 
@@ -33,7 +35,7 @@ class IndexController extends Controller
                 })->values();
             });
 
-        $misiBumn = MstMisiBumn::with('prioritasStrategy')->orderBy('code')->get()->keyBy('id');
+        $misiBumn = MstMisiBumn::with('prioritasStrategy')->orderBy('code')->get();
         
         $priorityStrategicInitiatives = MstPriorityStrategicInitiative::with('mapPriorityStrategicInitiative.picPrioriyStrategic')->orderBy('no')->get();
 
@@ -55,6 +57,17 @@ class IndexController extends Controller
         $businessStrategyService = app(BusinessStrategyService::class);
         $dualGrowthProps = $businessStrategyService->getPageProps(collect());
 
+        $strategicHouseKPI = MstStrategicHouse::where('id', 7)->first();
+        
+        $strategyThemes = Theme::where('idGoal', 24)->orderBy('theme_number')->get();
+        $perspectiveThemes = Theme::where('idGoal', 25)->orderBy('theme_number')->get();
+        $additionalThemes = Theme::where('idGoal', 26)->orderBy('theme_number')->get();
+        
+        $pillarStrategies = TrsPillarStrategy::whereIn('themes_id', [70, 71, 72, 73])
+            ->orderBy('themes_id')
+            ->orderBy('id')
+            ->get();
+
         return Inertia::render('ProgramPlanning/BusinessStrategy/Index', [
             'goals' => $goals,
             'strategies' => $strategies,
@@ -67,6 +80,11 @@ class IndexController extends Controller
             'upstreamGoals' => $upstreamGoals,
             'strategicHouseGas' => $strategicHouseGas,
             'gasGoals' => $gasGoals,
+            'strategicHouseKPI' => $strategicHouseKPI,
+            'strategyThemes' => $strategyThemes,
+            'perspectiveThemes' => $perspectiveThemes,
+            'pillarStrategies' => $pillarStrategies,
+            'additionalThemes' => $additionalThemes,
         ]);
     }
 }

@@ -9,9 +9,11 @@
                         <div
                             class="inline-flex flex-col items-start gap-2 rounded-xl bg-slate-200/50 p-2 dark:bg-white/5 w-full">
 
+                            
                             <button type="button"
                                 class="w-full text-left px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
                                 :class="activeTab === 'KBUMN Mission'
+                                
                                     ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                                     : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                                     " @click="() => activeTab = 'KBUMN Mission'">
@@ -42,6 +44,7 @@
                                     ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
                                     : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                                     " @click="() => activeTab = 'Priority Strategic Initiatives'">
+                                    
                                 Priority Strategic Initiatives of Pertamina 2026
                             </button>
 
@@ -70,6 +73,15 @@
                                     : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                                     " @click="() => activeTab = 'Strategic House Gas'">
                                 Strategic House Gas
+                            </button>
+
+                            <button type="button"
+                                class="w-full text-left px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
+                                :class="activeTab === 'Strategic House PT KPI'
+                                    ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
+                                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
+                                @click="() => activeTab = 'Strategic House PT KPI'">
+                                Strategic House PT KPI
                             </button>
                         </div>
                     </div>
@@ -130,6 +142,13 @@
                         <StrategicInitiative v-else-if="activeTab === 'Priority Strategic Initiatives'"
                             :initiatives="priorityStrategicInitiatives" />
 
+                        <StrategicHousePTKPI v-else-if="activeTab === 'Strategic House PT KPI'"
+                            :strategicHouseKPI="strategicHouseKPI"
+                            :strategyThemes="strategyThemes"
+                            :perspectiveThemes="perspectiveThemes"
+                            :pillarStrategies="pillarStrategies"
+                            :additionalThemes="additionalThemes" />
+
                     </div>
                 </main>
             </div>
@@ -147,6 +166,7 @@ import StrategicInitiative from '@/Components/ProgramPlanning/BusinessStrategy/S
 import StrategicHousePertamina from '@/Components/ProgramPlanning/BusinessStrategy/StrategisHouse/StrategicHousePertamina.vue';
 import StrategicHouseUpstream from '@/Components/ProgramPlanning/BusinessStrategy/StrategisHouse/StrategicHouseUpstream.vue';
 import StrategicHouseGas from '@/Components/ProgramPlanning/BusinessStrategy/StrategisHouse/StrategicHouseGas.vue';
+import StrategicHousePTKPI from '@/Components/ProgramPlanning/BusinessStrategy/StrategisHouse/StrategicHousePTKPI.vue';
 import { ref } from 'vue';
 
 const props = defineProps({
@@ -161,6 +181,11 @@ const props = defineProps({
     upstreamGoals: { type: Array, default: () => [] },
     strategicHouseGas: { type: Object, default: () => ({}) },
     gasGoals: { type: Array, default: () => [] },
+    strategicHouseKPI: { type: Object, default: () => ({}) },
+    strategyThemes: { type: Array, default: () => [] },
+    perspectiveThemes: { type: Array, default: () => [] },
+    pillarStrategies: { type: Array, default: () => [] },
+    additionalThemes: { type: Array, default: () => [] },
 });
 
 const defaultTab = 'KBUMN Mission';
