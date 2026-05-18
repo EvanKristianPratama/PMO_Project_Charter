@@ -55,7 +55,7 @@ const normalizeCoeName = (rawName) => {
     if (!name || name === '-' || name.toUpperCase() === 'NO COE') return 'CoE Not Identified';
 
     const upper = name.toUpperCase();
-    if (upper === 'IOT') return 'IoT';
+    if (upper.includes('IOT')) return 'IoT';
     if (upper.includes('CLOUD') || upper.includes('COMPUTING') || name === 'Advance Cloud') return 'Advance Cloud';
     if (upper === 'RPA') return 'RPA';
     if (upper.includes('ROBOT') || name === 'Robotics') return 'Robotics';
@@ -141,7 +141,7 @@ const organizationOptions = computed(() => {
     props.items.forEach(ini => {
         const org = ini.business_unit;
         if (org && org !== '-') {
-            const groupLabel = ini.groub_id === 2 ? 'Sub Holding' : 'Holding';
+            const groupLabel = Number(ini.groub_id) === 2 ? 'Sub Holding' : 'Holding';
             if (!orgMap.has(org)) {
                 orgMap.set(org, groupLabel);
             }
@@ -213,9 +213,9 @@ const displayGroups = computed(() => {
         // 1. Filter Organisasi
         let matchesOrg = true;
         if (selectedOrganization.value === 'all_holding') {
-            matchesOrg = initiative.groub_id !== 2;
+            matchesOrg = Number(initiative.groub_id) !== 2;
         } else if (selectedOrganization.value === 'all_subholding') {
-            matchesOrg = initiative.groub_id === 2;
+            matchesOrg = Number(initiative.groub_id) === 2;
         } else if (selectedOrganization.value !== '') {
             matchesOrg = initiative.business_unit === selectedOrganization.value;
         }
@@ -258,8 +258,8 @@ const coeGroups = foundCoeNames.map(name => {
     };
 
     // Split by groub_id: 2 is Sub Holding, others (1 or null) are Holding (default grouping)
-    const holdingInitiatives = initiatives.filter(i => i.groub_id !== 2).sort(sortByCode);
-    const subHoldingInitiatives = initiatives.filter(i => i.groub_id === 2).sort(sortByCode);
+    const holdingInitiatives = initiatives.filter(i => Number(i.groub_id) !== 2).sort(sortByCode);
+    const subHoldingInitiatives = initiatives.filter(i => Number(i.groub_id) === 2).sort(sortByCode);
 
     // Synchronize row count between Holding and Sub Holding to maintain consistent box height
     const holdingCols = Math.max(1, Math.floor(initiativeColumnCount.value / 2));

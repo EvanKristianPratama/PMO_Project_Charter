@@ -780,7 +780,7 @@ class StrategicHousePageService
             'label' => trim(collect([$i->code, $i->name])->filter()->implode(' - ')), 
             'tipe_initiative' => (int) $i->tipe_initiative,
             'business_unit' => $i->organization?->name, 
-            'groub_id' => $i->organization?->groub_id, 
+            'groub_id' => $i->organization ? (int) $i->organization->groub_id : null, 
             'implementation_status' => $implData['implementation_status'], 
             'statuses' => $implData['statuses'], 
             'source' => !is_null($i->source) ? (int) $i->source : null,

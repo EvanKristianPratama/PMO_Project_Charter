@@ -193,7 +193,7 @@ const normalizeCoeName = (rawName) => {
     if (!name || name === '-' || name.toUpperCase() === 'NO COE') return 'CoE Not Identified';
     
     const upper = name.toUpperCase();
-    if (upper === 'IOT') return 'IoT';
+    if (upper.includes('IOT')) return 'IoT';
     if (upper.includes('CLOUD') || upper.includes('COMPUTING') || name === 'Advance Cloud') return 'Advance Cloud';
     if (upper === 'RPA') return 'RPA';
     if (upper.includes('ROBOT') || name === 'Robotics') return 'Robotics';

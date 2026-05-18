@@ -19,6 +19,10 @@ class TrsOrganization extends Model
         'name',
     ];
 
+    protected $casts = [
+        'groub_id' => 'integer',
+    ];
+
     public function groub(): BelongsTo
     {
         return $this->belongsTo(Groub::class, 'groub_id');

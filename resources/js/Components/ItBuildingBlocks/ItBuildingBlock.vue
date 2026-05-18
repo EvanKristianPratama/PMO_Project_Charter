@@ -40,7 +40,7 @@ const normalizeCoeName = (rawName) => {
     if (!name || name === '-' || name.toUpperCase() === 'NO COE') return 'CoE Not Identified';
     
     const upper = name.toUpperCase();
-    if (upper === 'IOT') return 'IoT';
+    if (upper.includes('IOT')) return 'IoT';
     if (upper.includes('CLOUD') || upper.includes('COMPUTING') || name === 'Advance Cloud') return 'Advance Cloud';
     if (upper === 'RPA') return 'RPA';
     if (upper.includes('ROBOT') || name === 'Robotics') return 'Robotics';
@@ -81,7 +81,7 @@ const organizationOptions = computed(() => {
     props.items.forEach(ini => {
         const org = ini.business_unit;
         if (org && org !== '-') {
-            const groupLabel = ini.groub_id === 2 ? 'Sub Holding' : 'Holding';
+            const groupLabel = Number(ini.groub_id) === 2 ? 'Sub Holding' : 'Holding';
             if (!orgMap.has(org)) {
                 orgMap.set(org, groupLabel);
             }

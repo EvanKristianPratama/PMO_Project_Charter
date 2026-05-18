@@ -75,7 +75,7 @@ class ItBuildingBlockService
                     'coe_id' => (int) $initiative->coe_id,
                     'coe_name' => $initiative->coe?->name ?: 'No COE',
                     'business_unit' => $initiative->organization?->name ?: '-',
-                    'groub_id' => $initiative->organization?->groub_id,
+                    'groub_id' => $initiative->organization ? (int) $initiative->organization->groub_id : null,
                     'implementation_status' => $latestStatus?->status ?: null,
                     'statuses' => $initiative->mappedProjects
                         ->flatMap(fn ($project) => $project->pcStatusImplementations)
@@ -154,7 +154,7 @@ class ItBuildingBlockService
                 'coe_id' => (int) $initiative->coe_id,
                 'coe_name' => $initiative->coe?->name ?: 'No COE',
                 'business_unit' => $initiative->organization?->name ?: '-',
-                'groub_id' => $initiative->organization?->groub_id,
+                'groub_id' => $initiative->organization ? (int) $initiative->organization->groub_id : null,
                 'implementation_status' => $initiative->latestStatusImplementation?->review_status ?: null,
                 'statuses' => $initiative->statusImplementations->map(fn ($status) => [
                     'start' => $status->start,
@@ -223,7 +223,7 @@ class ItBuildingBlockService
                                         'coe_id' => (int) ($item->initiative?->coe_id ?? 0),
                                         'coe_name' => $item->initiative?->coe?->name ?: 'No COE',
                                         'business_unit' => $item->initiative?->organization?->name ?: '-',
-                                        'groub_id' => $item->initiative?->organization?->groub_id,
+                                        'groub_id' => $item->initiative?->organization ? (int) $item->initiative->organization->groub_id : null,
                                         'implementation_status' => $item->initiative?->latestStatusImplementation?->review_status ?: null,
                                         'statuses' => $item->initiative?->statusImplementations
                                             ?->map(fn ($status) => [
