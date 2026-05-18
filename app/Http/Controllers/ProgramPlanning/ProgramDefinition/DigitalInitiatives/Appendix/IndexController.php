@@ -19,9 +19,6 @@ class IndexController extends Controller
 {
     public function __invoke(): Response|RedirectResponse
     {
-        if (request()->user()?->isAdminUser()) {
-            return redirect()->route('admin.dashboard');
-        }
 
         $records = TrsScInitiative::with([
             'mstInitiatives:id,code,name,description,coe_id,business_unit,source',

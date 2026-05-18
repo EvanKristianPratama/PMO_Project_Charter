@@ -16,9 +16,6 @@ class IndexController extends Controller
 
     public function __invoke(): Response|RedirectResponse
     {
-        if (request()->user()?->isAdminUser()) {
-            return redirect()->route('admin.dashboard');
-        }
 
         return Inertia::render(
             'StrategicHouse/RoadMap/Index',

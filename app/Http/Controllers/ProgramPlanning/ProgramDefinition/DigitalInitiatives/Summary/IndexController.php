@@ -24,9 +24,6 @@ class IndexController extends Controller
 {
     public function __invoke(MstInitiative $initiative): Response|RedirectResponse
     {
-        if (request()->user()?->isAdminUser()) {
-            return redirect()->route('admin.dashboard');
-        }
 
         // 0. Status Implementation
         $statusImplementations = TrsStatusImplementation::query()

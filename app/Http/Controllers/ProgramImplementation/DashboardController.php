@@ -17,9 +17,6 @@ class DashboardController extends Controller
 
     public function __invoke(): Response|RedirectResponse
     {
-        if (request()->user()?->isAdminUser()) {
-            return redirect()->route('admin.dashboard');
-        }
 
         return redirect()->route('strategic-house.index');
     }

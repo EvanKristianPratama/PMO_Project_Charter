@@ -15,9 +15,6 @@ class CreateController extends Controller
 {
     public function __invoke(): Response|RedirectResponse
     {
-        if (request()->user()?->isAdminUser()) {
-            return redirect()->route('admin.dashboard');
-        }
 
         $initiativeOptions = MstInitiative::where('tipe_initiative', 1)
             ->with([

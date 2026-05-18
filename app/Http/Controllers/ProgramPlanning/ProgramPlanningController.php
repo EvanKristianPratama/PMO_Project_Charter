@@ -11,10 +11,6 @@ class ProgramPlanningController extends Controller
 {
     public function rstiSubHolding(): Response|RedirectResponse
     {
-        if (request()->user()?->isAdminUser()) {
-            return redirect()->route('admin.dashboard');
-        }
-
         return Inertia::render('ProgramPlanning/RstiSubHolding');
     }
 }

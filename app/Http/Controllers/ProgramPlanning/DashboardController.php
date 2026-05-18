@@ -17,10 +17,6 @@ class DashboardController extends Controller
 
     public function __invoke(Request $request): Response|RedirectResponse
     {
-        if (request()->user()?->isAdminUser()) {
-            return redirect()->route('admin.dashboard');
-        }
-
         $filters = [
             'search' => $request->string('search')->toString(),
             'category_fase' => $request->input('category_fase'),

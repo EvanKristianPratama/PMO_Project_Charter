@@ -16,9 +16,6 @@ class CreateController extends Controller
 
     public function __invoke(): Response|RedirectResponse
     {
-        if (request()->user()?->isAdminUser()) {
-            return redirect()->route('admin.dashboard');
-        }
 
         $selectedInitiativeId = request()->filled('initiative_id')
             ? (int) request()->input('initiative_id')

@@ -18,9 +18,6 @@ class EditController extends Controller
 {
     public function __invoke(TrsScInitiative $scInitiative): Response|RedirectResponse
     {
-        if (request()->user()?->isAdminUser()) {
-            return redirect()->route('admin.dashboard');
-        }
 
         $scInitiative->load([
             'mstInitiatives:id,code,name',

@@ -116,10 +116,6 @@ class SsoController extends Controller
         // Catat login berhasil
         ActivityLogService::login($user);
 
-        if ($user->isAdminUser()) {
-            return redirect()->route('admin.dashboard');
-        }
-
         return redirect()->route('strategic-house.index');
     }
 }

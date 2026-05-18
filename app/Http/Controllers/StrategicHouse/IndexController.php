@@ -20,10 +20,6 @@ class IndexController extends Controller
         // Allow more time for cold-cache initial load from remote cloud DB
         set_time_limit(120);
 
-        if ($request->user()?->isAdminUser()) {
-            return redirect()->route('admin.dashboard');
-        }
-
         $filters = $request->filters();
         $selectedProps = $this->getPropsForView(
             $filters['view'] ?? 'mapping',
