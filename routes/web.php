@@ -255,7 +255,18 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/service-portofolio', fn () => Inertia::render('Placeholder/Index', [
         'title' => 'Service Portofolio',
     ]))->name('service-portofolio.index');
-    Route::get('/policy', fn () => Inertia::render('Policy/Index'))->name('policy.index');
+    
+    // Policy CRUD (mst_objective & mst_practice)
+    Route::prefix('/policy')->name('policy.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Policy\PolicyController::class, 'index'])->name('index');
+        Route::post('/objective', [\App\Http\Controllers\Policy\PolicyController::class, 'storeObjective'])->name('objective.store');
+        Route::put('/objective/{objective}', [\App\Http\Controllers\Policy\PolicyController::class, 'updateObjective'])->name('objective.update');
+        Route::delete('/objective/{objective}', [\App\Http\Controllers\Policy\PolicyController::class, 'destroyObjective'])->name('objective.destroy');
+        Route::post('/practice', [\App\Http\Controllers\Policy\PolicyController::class, 'storePractice'])->name('practice.store');
+        Route::put('/practice/{practice}', [\App\Http\Controllers\Policy\PolicyController::class, 'updatePractice'])->name('practice.update');
+        Route::delete('/practice/{practice}', [\App\Http\Controllers\Policy\PolicyController::class, 'destroyPractice'])->name('practice.destroy');
+    });
+
     Route::get('/program-information', fn () => Inertia::render('Placeholder/Index', [
         'title' => 'Program Information',
     ]))->name('program-information.index');
