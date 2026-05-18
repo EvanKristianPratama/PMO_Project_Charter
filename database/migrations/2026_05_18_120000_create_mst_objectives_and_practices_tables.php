@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('mst_objective', function (Blueprint $blueprint) {
             $blueprint->string('objective_id', 255)->primary();
+            $blueprint->string('domain', 255)->nullable();
             $blueprint->string('objective', 255);
             $blueprint->text('objective_description')->nullable();
             $blueprint->text('objective_purpose')->nullable();

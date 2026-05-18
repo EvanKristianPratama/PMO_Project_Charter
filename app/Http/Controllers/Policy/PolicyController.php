@@ -33,6 +33,7 @@ class PolicyController extends Controller
     {
         $validated = $request->validate([
             'objective_id' => 'required|string|max:255|unique:mst_objective,objective_id',
+            'domain' => 'nullable|string|max:255',
             'objective' => 'required|string|max:255',
             'objective_description' => 'nullable|string',
             'objective_purpose' => 'nullable|string',
@@ -57,6 +58,7 @@ class PolicyController extends Controller
         $objective = MstObjective::findOrFail($id);
 
         $validated = $request->validate([
+            'domain' => 'nullable|string|max:255',
             'objective' => 'required|string|max:255',
             'objective_description' => 'nullable|string',
             'objective_purpose' => 'nullable|string',

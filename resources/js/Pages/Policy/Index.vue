@@ -63,15 +63,25 @@
                     <form @submit.prevent="submitCreateObjective" class="space-y-4 bg-white rounded-xl border border-slate-200 shadow-lg overflow-hidden dark:border-white/15 dark:bg-[#1a1a1a]">
                         <!-- COBIT Burgundy Header Band -->
                         <div class="bg-[#821f44] p-5 text-white">
-                            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-xs font-semibold tracking-wider opacity-90 mb-2">
+                            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-xs font-semibold tracking-wider opacity-90 mb-3">
                                 <div class="flex items-center gap-2">
-                                    <span>Domain:</span>
-                                    <span class="bg-white/20 px-2 py-0.5 rounded uppercase font-bold">{{ getDomainName(objectiveForm.objective_id) }}</span>
+                                    <span>Domain (Bahasa Indonesia):</span>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <span>Focus Area:</span>
                                     <span class="bg-white/20 px-2 py-0.5 rounded font-bold">COBIT Core Model</span>
                                 </div>
+                            </div>
+
+                            <!-- Input Domain Manual -->
+                            <div class="mb-4 space-y-1">
+                                <input 
+                                    type="text" 
+                                    v-model="objectiveForm.domain" 
+                                    placeholder="Masukkan nama domain manual (e.g. Evaluasi, Arahan dan Pemantauan)" 
+                                    class="w-full bg-white/10 text-white placeholder-white/40 border border-white/20 rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-white/40"
+                                />
+                                <div v-if="objectiveForm.errors.domain" class="text-xs text-red-200 font-medium bg-red-900/30 p-2 rounded">{{ objectiveForm.errors.domain }}</div>
                             </div>
                             
                             <div class="space-y-3">
@@ -193,15 +203,25 @@
                         <form @submit.prevent="submitUpdateObjective(obj.objective_id)">
                             <!-- Burgundy Header Band -->
                             <div class="bg-[#821f44] p-5 text-white">
-                                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-xs font-semibold tracking-wider opacity-90 mb-2">
+                                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-xs font-semibold tracking-wider opacity-90 mb-3">
                                     <div class="flex items-center gap-2">
-                                        <span>Domain:</span>
-                                        <span class="bg-white/20 px-2 py-0.5 rounded uppercase font-bold">{{ getDomainName(obj.objective_id) }}</span>
+                                        <span>Domain (Bahasa Indonesia):</span>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <span>Focus Area:</span>
                                         <span class="bg-white/20 px-2 py-0.5 rounded font-bold">COBIT Core Model</span>
                                     </div>
+                                </div>
+
+                                <!-- Input Domain Manual di Edit Mode -->
+                                <div class="mb-4 space-y-1">
+                                    <input 
+                                        type="text" 
+                                        v-model="editObjectiveForm.domain" 
+                                        placeholder="Nama Domain Manual..." 
+                                        class="w-full bg-white/10 text-white placeholder-white/40 border border-white/20 rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-white/40"
+                                    />
+                                    <div v-if="editObjectiveForm.errors.domain" class="text-xs text-red-200 font-medium bg-red-900/30 p-2 rounded">{{ editObjectiveForm.errors.domain }}</div>
                                 </div>
                                 
                                 <div class="space-y-2">
@@ -309,7 +329,7 @@
 
                             <div class="flex flex-wrap items-center justify-between text-xs font-semibold tracking-wider opacity-90 pr-20">
                                 <div class="flex items-center gap-2">
-                                    <span class="bg-white/20 px-2 py-0.5 rounded uppercase font-bold">{{ getDomainName(obj.objective_id) }}</span>
+                                    <span class="bg-white/20 px-2 py-0.5 rounded uppercase font-bold">{{ obj.domain || getDomainName(obj.objective_id) }}</span>
                                 </div>
                             </div>
                             
@@ -525,7 +545,7 @@ watch(
     { deep: true, immediate: true }
 );
 
-// Helper to determine Domain name by Objective ID prefix
+// Helper to determine Domain name by Objective ID prefix (English fallback)
 function getDomainName(id) {
     if (!id) return 'Governance / Management Domain';
     const cleanId = id.trim().toUpperCase();
@@ -537,6 +557,18 @@ function getDomainName(id) {
     return 'COBIT Governance Objective';
 }
 
+// Indonesian auto-suggestion mapping helper
+function getDomainNameInIndonesian(id) {
+    if (!id) return '';
+    const cleanId = id.trim().toUpperCase();
+    if (cleanId.startsWith('EDM')) return 'Evaluasi, Arahan dan Pemantauan (EDM)';
+    if (cleanId.startsWith('APO')) return 'Penyelarasan, Perencanaan dan Pengorganisasian (APO)';
+    if (cleanId.startsWith('BAI')) return 'Pembangunan, Perolehan dan Penerapan (BAI)';
+    if (cleanId.startsWith('DSS')) return 'Pemberian Layanan, Operasional dan Dukungan (DSS)';
+    if (cleanId.startsWith('MEA')) return 'Pemantauan, Evaluasi dan Pengukuran (MEA)';
+    return '';
+}
+
 // ---------------------------------------------------
 // OBJECTIVE: CREATE STATE
 // ---------------------------------------------------
@@ -544,10 +576,21 @@ const isCreatingObjective = ref(false);
 
 const objectiveForm = useForm({
     objective_id: '',
+    domain: '',
     objective: '',
     objective_description: '',
     objective_purpose: '',
 });
+
+// Auto-suggest Indonesian Domain Name as they type the ID (e.g. EDM01 -> EDM translation)
+watch(
+    () => objectiveForm.objective_id,
+    (newVal) => {
+        if (newVal) {
+            objectiveForm.domain = getDomainNameInIndonesian(newVal);
+        }
+    }
+);
 
 function startCreateObjective() {
     isCreatingObjective.value = true;
@@ -580,6 +623,7 @@ function submitCreateObjective() {
 // ---------------------------------------------------
 const editingObjectiveId = ref(null);
 const editObjectiveForm = useForm({
+    domain: '',
     objective: '',
     objective_description: '',
     objective_purpose: '',
@@ -587,6 +631,7 @@ const editObjectiveForm = useForm({
 
 function startEditObjective(obj) {
     editingObjectiveId.value = obj.objective_id;
+    editObjectiveForm.domain = obj.domain || '';
     editObjectiveForm.objective = obj.objective;
     editObjectiveForm.objective_description = obj.objective_description || '';
     editObjectiveForm.objective_purpose = obj.objective_purpose || '';

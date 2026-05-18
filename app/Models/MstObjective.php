@@ -15,6 +15,7 @@ class MstObjective extends Model
 
     protected $fillable = [
         'objective_id',
+        'domain',
         'objective',
         'objective_description',
         'objective_purpose',
