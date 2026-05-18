@@ -1,4 +1,5 @@
 {
+<<<<<<< Updated upstream
   "_ActivityQuarterManager-CqHkQqvK.js": {
     "file": "assets/ActivityQuarterManager-CqHkQqvK.js",
     "name": "ActivityQuarterManager",
@@ -15,14 +16,37 @@
       "_useDarkMode-B-l0Zjhu.js",
       "_menu-CbWT6zLb.js",
       "_ClipboardDocumentListIcon-HFsie51U.js"
+=======
+  "_ActivityQuarterManager-BDkc-i_h.js": {
+    "file": "assets/ActivityQuarterManager-BDkc-i_h.js",
+    "name": "ActivityQuarterManager",
+    "imports": [
+      "resources/js/app.js",
+      "_menu-BChd8NNS.js"
+    ]
+  },
+  "_AdminLayout-kqzlyfOJ.js": {
+    "file": "assets/AdminLayout-kqzlyfOJ.js",
+    "name": "AdminLayout",
+    "imports": [
+      "resources/js/app.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_menu-BChd8NNS.js",
+      "_ClipboardDocumentListIcon-BS6jX7fb.js"
+>>>>>>> Stashed changes
     ]
   },
   "_AppendixCharterDocument-BcG_vuux.css": {
     "file": "assets/AppendixCharterDocument-BcG_vuux.css",
     "src": "_AppendixCharterDocument-BcG_vuux.css"
   },
+<<<<<<< Updated upstream
   "_AppendixCharterDocument-PGnHMzEe.js": {
     "file": "assets/AppendixCharterDocument-PGnHMzEe.js",
+=======
+  "_AppendixCharterDocument-BeBQhFG7.js": {
+    "file": "assets/AppendixCharterDocument-BeBQhFG7.js",
+>>>>>>> Stashed changes
     "name": "AppendixCharterDocument",
     "imports": [
       "resources/js/app.js",
@@ -32,6 +56,7 @@
       "assets/AppendixCharterDocument-BcG_vuux.css"
     ]
   },
+<<<<<<< Updated upstream
   "_AppendixCharterModal-CUdTRskb.js": {
     "file": "assets/AppendixCharterModal-CUdTRskb.js",
     "name": "AppendixCharterModal",
@@ -42,6 +67,18 @@
   },
   "_ArrowPathIcon-BxuSbM4w.js": {
     "file": "assets/ArrowPathIcon-BxuSbM4w.js",
+=======
+  "_AppendixCharterModal-CIEQ-jvZ.js": {
+    "file": "assets/AppendixCharterModal-CIEQ-jvZ.js",
+    "name": "AppendixCharterModal",
+    "imports": [
+      "resources/js/app.js",
+      "_menu-BChd8NNS.js"
+    ]
+  },
+  "_ArrowPathIcon-BiCfQmuY.js": {
+    "file": "assets/ArrowPathIcon-BiCfQmuY.js",
+>>>>>>> Stashed changes
     "name": "ArrowPathIcon",
     "imports": [
       "resources/js/app.js"
@@ -51,48 +88,79 @@
     "file": "assets/BusinessStrategy-BbimpHqL.css",
     "src": "_BusinessStrategy-BbimpHqL.css"
   },
+<<<<<<< Updated upstream
   "_BusinessStrategy-Bwi0_i6S.js": {
     "file": "assets/BusinessStrategy-Bwi0_i6S.js",
+=======
+  "_BusinessStrategy-DlKy0rwG.js": {
+    "file": "assets/BusinessStrategy-DlKy0rwG.js",
+>>>>>>> Stashed changes
     "name": "BusinessStrategy",
     "imports": [
       "resources/js/app.js",
       "_sweetalert2.esm.all-DVN6D7eS.js",
+<<<<<<< Updated upstream
       "_ConfirmationModal-D-s_8c8i.js",
       "_menu-CbWT6zLb.js",
+=======
+      "_ConfirmationModal-Ca0YLz7P.js",
+      "_menu-BChd8NNS.js",
+>>>>>>> Stashed changes
       "__plugin-vue_export-helper-DlAUqK2U.js"
     ],
     "css": [
       "assets/BusinessStrategy-BbimpHqL.css"
     ]
   },
+<<<<<<< Updated upstream
   "_CheckCircleIcon-BQJR1wAC.js": {
     "file": "assets/CheckCircleIcon-BQJR1wAC.js",
+=======
+  "_CheckCircleIcon-BCpc0xDr.js": {
+    "file": "assets/CheckCircleIcon-BCpc0xDr.js",
+>>>>>>> Stashed changes
     "name": "CheckCircleIcon",
     "imports": [
       "resources/js/app.js"
     ]
   },
+<<<<<<< Updated upstream
   "_ClipboardDocumentListIcon-HFsie51U.js": {
     "file": "assets/ClipboardDocumentListIcon-HFsie51U.js",
+=======
+  "_ClipboardDocumentListIcon-BS6jX7fb.js": {
+    "file": "assets/ClipboardDocumentListIcon-BS6jX7fb.js",
+>>>>>>> Stashed changes
     "name": "ClipboardDocumentListIcon",
     "imports": [
       "resources/js/app.js"
     ]
   },
+<<<<<<< Updated upstream
   "_ClockIcon-DJsYJtyz.js": {
     "file": "assets/ClockIcon-DJsYJtyz.js",
+=======
+  "_ClockIcon-Dp2Y1TdR.js": {
+    "file": "assets/ClockIcon-Dp2Y1TdR.js",
+>>>>>>> Stashed changes
     "name": "ClockIcon",
     "imports": [
       "resources/js/app.js"
     ]
   },
+<<<<<<< Updated upstream
   "_ConfirmDeleteModal-DPRTkAcH.js": {
     "file": "assets/ConfirmDeleteModal-DPRTkAcH.js",
+=======
+  "_ConfirmDeleteModal-CiT010cM.js": {
+    "file": "assets/ConfirmDeleteModal-CiT010cM.js",
+>>>>>>> Stashed changes
     "name": "ConfirmDeleteModal",
     "imports": [
       "resources/js/app.js"
     ]
   },
+<<<<<<< Updated upstream
   "_ConfirmationModal-D-s_8c8i.js": {
     "file": "assets/ConfirmationModal-D-s_8c8i.js",
     "name": "ConfirmationModal",
@@ -112,6 +180,31 @@
   },
   "_DigitalInitiativeCharterDocument-BlGSg_cD.js": {
     "file": "assets/DigitalInitiativeCharterDocument-BlGSg_cD.js",
+=======
+  "_ConfirmationModal-Ca0YLz7P.js": {
+    "file": "assets/ConfirmationModal-Ca0YLz7P.js",
+    "name": "ConfirmationModal",
+    "imports": [
+      "resources/js/app.js",
+      "_transition-BzEpyeFb.js"
+    ]
+  },
+  "_CreateInitiativeModal-D9fNS_d8.js": {
+    "file": "assets/CreateInitiativeModal-D9fNS_d8.js",
+    "name": "CreateInitiativeModal",
+    "imports": [
+      "resources/js/app.js",
+      "_menu-BChd8NNS.js",
+      "_transition-BzEpyeFb.js"
+    ]
+  },
+  "_DigitalInitiativeCharterDocument-ByBn9-qv.css": {
+    "file": "assets/DigitalInitiativeCharterDocument-ByBn9-qv.css",
+    "src": "_DigitalInitiativeCharterDocument-ByBn9-qv.css"
+  },
+  "_DigitalInitiativeCharterDocument-SH9JIcat.js": {
+    "file": "assets/DigitalInitiativeCharterDocument-SH9JIcat.js",
+>>>>>>> Stashed changes
     "name": "DigitalInitiativeCharterDocument",
     "imports": [
       "resources/js/app.js",
@@ -121,6 +214,7 @@
       "assets/DigitalInitiativeCharterDocument-ByBn9-qv.css"
     ]
   },
+<<<<<<< Updated upstream
   "_DigitalInitiativeCharterDocument-ByBn9-qv.css": {
     "file": "assets/DigitalInitiativeCharterDocument-ByBn9-qv.css",
     "src": "_DigitalInitiativeCharterDocument-ByBn9-qv.css"
@@ -131,6 +225,10 @@
   },
   "_DigitalRoadmapComponent-DiJBfVBt.js": {
     "file": "assets/DigitalRoadmapComponent-DiJBfVBt.js",
+=======
+  "_DigitalRoadmapComponent-B1cuOXuB.js": {
+    "file": "assets/DigitalRoadmapComponent-B1cuOXuB.js",
+>>>>>>> Stashed changes
     "name": "DigitalRoadmapComponent",
     "imports": [
       "__plugin-vue_export-helper-DlAUqK2U.js",
@@ -140,20 +238,35 @@
       "assets/DigitalRoadmapComponent-BFhsYGwO.css"
     ]
   },
+<<<<<<< Updated upstream
   "_EyeIcon-Bm-6foCf.js": {
     "file": "assets/EyeIcon-Bm-6foCf.js",
+=======
+  "_DigitalRoadmapComponent-BFhsYGwO.css": {
+    "file": "assets/DigitalRoadmapComponent-BFhsYGwO.css",
+    "src": "_DigitalRoadmapComponent-BFhsYGwO.css"
+  },
+  "_EyeIcon-CFtLyov2.js": {
+    "file": "assets/EyeIcon-CFtLyov2.js",
+>>>>>>> Stashed changes
     "name": "EyeIcon",
     "imports": [
       "resources/js/app.js"
     ]
   },
+<<<<<<< Updated upstream
   "_FormField-CyOmNR2h.js": {
     "file": "assets/FormField-CyOmNR2h.js",
+=======
+  "_FormField-DiKcc7ni.js": {
+    "file": "assets/FormField-DiKcc7ni.js",
+>>>>>>> Stashed changes
     "name": "FormField",
     "imports": [
       "resources/js/app.js"
     ]
   },
+<<<<<<< Updated upstream
   "_GuestLayout-BWLAW4Mj.js": {
     "file": "assets/GuestLayout-BWLAW4Mj.js",
     "name": "GuestLayout",
@@ -164,11 +277,24 @@
   },
   "_InitiativeDetailsWithRelations-mUnUS5jG.js": {
     "file": "assets/InitiativeDetailsWithRelations-mUnUS5jG.js",
+=======
+  "_GuestLayout-DrYae_2L.js": {
+    "file": "assets/GuestLayout-DrYae_2L.js",
+    "name": "GuestLayout",
+    "imports": [
+      "_useDarkMode-D8p27aGg.js",
+      "resources/js/app.js"
+    ]
+  },
+  "_InitiativeDetailsWithRelations-Byq5cJQ5.js": {
+    "file": "assets/InitiativeDetailsWithRelations-Byq5cJQ5.js",
+>>>>>>> Stashed changes
     "name": "InitiativeDetailsWithRelations",
     "imports": [
       "resources/js/app.js"
     ]
   },
+<<<<<<< Updated upstream
   "_InitiativeRelationFormCard-CE-uoCRn.js": {
     "file": "assets/InitiativeRelationFormCard-CE-uoCRn.js",
     "name": "InitiativeRelationFormCard",
@@ -180,11 +306,25 @@
   },
   "_LeaderBreakdownTable-GTY2mukM.js": {
     "file": "assets/LeaderBreakdownTable-GTY2mukM.js",
+=======
+  "_InitiativeRelationFormCard-CaMW3bQb.js": {
+    "file": "assets/InitiativeRelationFormCard-CaMW3bQb.js",
+    "name": "InitiativeRelationFormCard",
+    "imports": [
+      "resources/js/app.js",
+      "_InitiativeDetailsWithRelations-Byq5cJQ5.js",
+      "_menu-BChd8NNS.js"
+    ]
+  },
+  "_LeaderBreakdownTable-C6O_VYjU.js": {
+    "file": "assets/LeaderBreakdownTable-C6O_VYjU.js",
+>>>>>>> Stashed changes
     "name": "LeaderBreakdownTable",
     "imports": [
       "resources/js/app.js"
     ]
   },
+<<<<<<< Updated upstream
   "_MasterInitiativeTable-CGkSrrJQ.js": {
     "file": "assets/MasterInitiativeTable-CGkSrrJQ.js",
     "name": "MasterInitiativeTable",
@@ -205,13 +345,44 @@
   },
   "_PencilSquareIcon-gDRZMeFg.js": {
     "file": "assets/PencilSquareIcon-gDRZMeFg.js",
+=======
+  "_MasterInitiativeTable-CUpz8n9i.js": {
+    "file": "assets/MasterInitiativeTable-CUpz8n9i.js",
+    "name": "MasterInitiativeTable",
+    "imports": [
+      "resources/js/app.js",
+      "_menu-BChd8NNS.js",
+      "_ConfirmationModal-Ca0YLz7P.js"
+    ]
+  },
+  "_MasterInitiativeTable-joByqCT2.js": {
+    "file": "assets/MasterInitiativeTable-joByqCT2.js",
+    "name": "MasterInitiativeTable",
+    "imports": [
+      "resources/js/app.js",
+      "_menu-BChd8NNS.js",
+      "_ConfirmationModal-Ca0YLz7P.js"
+    ]
+  },
+  "_PencilSquareIcon-BJGsP6zX.js": {
+    "file": "assets/PencilSquareIcon-BJGsP6zX.js",
+>>>>>>> Stashed changes
     "name": "PencilSquareIcon",
     "imports": [
       "resources/js/app.js"
     ]
   },
+<<<<<<< Updated upstream
   "_ProjectRoadmap-BjTbLYrP.js": {
     "file": "assets/ProjectRoadmap-BjTbLYrP.js",
+=======
+  "_ProjectRoadmap-CCFnGCWE.css": {
+    "file": "assets/ProjectRoadmap-CCFnGCWE.css",
+    "src": "_ProjectRoadmap-CCFnGCWE.css"
+  },
+  "_ProjectRoadmap-CUdab5Ev.js": {
+    "file": "assets/ProjectRoadmap-CUdab5Ev.js",
+>>>>>>> Stashed changes
     "name": "ProjectRoadmap",
     "imports": [
       "__plugin-vue_export-helper-DlAUqK2U.js",
@@ -229,24 +400,38 @@
     "file": "assets/ProjectRoadmapSummary-BEcfVRCh.css",
     "src": "_ProjectRoadmapSummary-BEcfVRCh.css"
   },
+<<<<<<< Updated upstream
   "_ProjectRoadmapSummary-CMXeHNec.js": {
     "file": "assets/ProjectRoadmapSummary-CMXeHNec.js",
+=======
+  "_ProjectRoadmapSummary-Dzs21lwb.js": {
+    "file": "assets/ProjectRoadmapSummary-Dzs21lwb.js",
+>>>>>>> Stashed changes
     "name": "ProjectRoadmapSummary",
     "imports": [
       "resources/js/app.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js"
+=======
+      "_menu-BChd8NNS.js"
+>>>>>>> Stashed changes
     ],
     "css": [
       "assets/ProjectRoadmapSummary-BEcfVRCh.css"
     ]
   },
+<<<<<<< Updated upstream
   "_ReviewContent-C51BIVPQ.css": {
     "file": "assets/ReviewContent-C51BIVPQ.css",
     "src": "_ReviewContent-C51BIVPQ.css"
   },
   "_ReviewContent-mQTCgilH.js": {
     "file": "assets/ReviewContent-mQTCgilH.js",
+=======
+  "_ReviewContent-Bua2JOvW.js": {
+    "file": "assets/ReviewContent-Bua2JOvW.js",
+>>>>>>> Stashed changes
     "name": "ReviewContent",
     "imports": [
       "resources/js/app.js",
@@ -256,36 +441,65 @@
       "assets/ReviewContent-C51BIVPQ.css"
     ]
   },
+<<<<<<< Updated upstream
   "_ReviewStatusImplementationTable-BkWXy3BL.js": {
     "file": "assets/ReviewStatusImplementationTable-BkWXy3BL.js",
+=======
+  "_ReviewContent-C51BIVPQ.css": {
+    "file": "assets/ReviewContent-C51BIVPQ.css",
+    "src": "_ReviewContent-C51BIVPQ.css"
+  },
+  "_ReviewStatusImplementationTable-BB22rCVl.js": {
+    "file": "assets/ReviewStatusImplementationTable-BB22rCVl.js",
+>>>>>>> Stashed changes
     "name": "ReviewStatusImplementationTable",
     "imports": [
       "_initiativeStatus-Bc5j02tn.js",
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_transition-D7EqEbDd.js"
     ]
   },
   "_ServerStackIcon-DFtKOZ_l.js": {
     "file": "assets/ServerStackIcon-DFtKOZ_l.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_transition-BzEpyeFb.js"
+    ]
+  },
+  "_ServerStackIcon-DlVvs2df.js": {
+    "file": "assets/ServerStackIcon-DlVvs2df.js",
+>>>>>>> Stashed changes
     "name": "ServerStackIcon",
     "imports": [
       "resources/js/app.js"
     ]
   },
+<<<<<<< Updated upstream
   "_ShieldCheckIcon-B7km92NI.js": {
     "file": "assets/ShieldCheckIcon-B7km92NI.js",
+=======
+  "_ShieldCheckIcon-BKIVte7m.js": {
+    "file": "assets/ShieldCheckIcon-BKIVte7m.js",
+>>>>>>> Stashed changes
     "name": "ShieldCheckIcon",
     "imports": [
       "resources/js/app.js"
     ]
   },
+<<<<<<< Updated upstream
   "_StatusImplementationTable-CDifRv6r.js": {
     "file": "assets/StatusImplementationTable-CDifRv6r.js",
+=======
+  "_StatusImplementationTable-aUBjajdB.js": {
+    "file": "assets/StatusImplementationTable-aUBjajdB.js",
+>>>>>>> Stashed changes
     "name": "StatusImplementationTable",
     "imports": [
       "resources/js/app.js",
       "_sweetalert2.esm.all-DVN6D7eS.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_initiativeStatus-Bc5j02tn.js",
       "_transition-D7EqEbDd.js"
@@ -293,18 +507,33 @@
   },
   "_StatusMatrix-Dz8C0MGn.js": {
     "file": "assets/StatusMatrix-Dz8C0MGn.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_initiativeStatus-Bc5j02tn.js",
+      "_transition-BzEpyeFb.js"
+    ]
+  },
+  "_StatusMatrix-iyYivGVz.js": {
+    "file": "assets/StatusMatrix-iyYivGVz.js",
+>>>>>>> Stashed changes
     "name": "StatusMatrix",
     "imports": [
       "resources/js/app.js"
     ]
   },
+<<<<<<< Updated upstream
   "_TrashIcon-CIr0-RsW.js": {
     "file": "assets/TrashIcon-CIr0-RsW.js",
+=======
+  "_TrashIcon-C5oVSjfL.js": {
+    "file": "assets/TrashIcon-C5oVSjfL.js",
+>>>>>>> Stashed changes
     "name": "TrashIcon",
     "imports": [
       "resources/js/app.js"
     ]
   },
+<<<<<<< Updated upstream
   "_UserLayout-DAbQBSxP.js": {
     "file": "assets/UserLayout-DAbQBSxP.js",
     "name": "UserLayout",
@@ -313,6 +542,16 @@
       "_useDarkMode-B-l0Zjhu.js",
       "_menu-CbWT6zLb.js",
       "_ShieldCheckIcon-B7km92NI.js"
+=======
+  "_UserLayout-yYl23bWu.js": {
+    "file": "assets/UserLayout-yYl23bWu.js",
+    "name": "UserLayout",
+    "imports": [
+      "resources/js/app.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_menu-BChd8NNS.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+>>>>>>> Stashed changes
     ]
   },
   "__plugin-vue_export-helper-DlAUqK2U.js": {
@@ -323,25 +562,40 @@
     "file": "assets/initiativeStatus-Bc5j02tn.js",
     "name": "initiativeStatus"
   },
+<<<<<<< Updated upstream
   "_keyboard-Df9ibhZA.js": {
     "file": "assets/keyboard-Df9ibhZA.js",
+=======
+  "_keyboard-BYoTzO9V.js": {
+    "file": "assets/keyboard-BYoTzO9V.js",
+>>>>>>> Stashed changes
     "name": "keyboard",
     "imports": [
       "resources/js/app.js"
     ]
   },
+<<<<<<< Updated upstream
   "_menu-CbWT6zLb.js": {
     "file": "assets/menu-CbWT6zLb.js",
     "name": "menu",
     "imports": [
       "resources/js/app.js",
       "_keyboard-Df9ibhZA.js"
+=======
+  "_menu-BChd8NNS.js": {
+    "file": "assets/menu-BChd8NNS.js",
+    "name": "menu",
+    "imports": [
+      "resources/js/app.js",
+      "_keyboard-BYoTzO9V.js"
+>>>>>>> Stashed changes
     ]
   },
   "_sweetalert2.esm.all-DVN6D7eS.js": {
     "file": "assets/sweetalert2.esm.all-DVN6D7eS.js",
     "name": "sweetalert2.esm.all"
   },
+<<<<<<< Updated upstream
   "_transition-D7EqEbDd.js": {
     "file": "assets/transition-D7EqEbDd.js",
     "name": "transition",
@@ -352,20 +606,41 @@
   },
   "_useDarkMode-B-l0Zjhu.js": {
     "file": "assets/useDarkMode-B-l0Zjhu.js",
+=======
+  "_transition-BzEpyeFb.js": {
+    "file": "assets/transition-BzEpyeFb.js",
+    "name": "transition",
+    "imports": [
+      "_keyboard-BYoTzO9V.js",
+      "resources/js/app.js"
+    ]
+  },
+  "_useDarkMode-D8p27aGg.js": {
+    "file": "assets/useDarkMode-D8p27aGg.js",
+>>>>>>> Stashed changes
     "name": "useDarkMode",
     "imports": [
       "resources/js/app.js"
     ]
   },
+<<<<<<< Updated upstream
   "_useFlowFilter-BsROHpR_.js": {
     "file": "assets/useFlowFilter-BsROHpR_.js",
+=======
+  "_useFlowFilter-BkVUIcmD.js": {
+    "file": "assets/useFlowFilter-BkVUIcmD.js",
+>>>>>>> Stashed changes
     "name": "useFlowFilter",
     "imports": [
       "resources/js/app.js"
     ]
   },
   "resources/css/app.css": {
+<<<<<<< Updated upstream
     "file": "assets/app-CapYmz0I.css",
+=======
+    "file": "assets/app-BU9bMOXI.css",
+>>>>>>> Stashed changes
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -374,12 +649,17 @@
     ]
   },
   "resources/js/Components/ItBuildingBlocks/DigitalBuildingBlock.vue": {
+<<<<<<< Updated upstream
     "file": "assets/DigitalBuildingBlock-QQV8aGU8.js",
+=======
+    "file": "assets/DigitalBuildingBlock-BBbNapYr.js",
+>>>>>>> Stashed changes
     "name": "DigitalBuildingBlock",
     "src": "resources/js/Components/ItBuildingBlocks/DigitalBuildingBlock.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
       "_keyboard-Df9ibhZA.js"
@@ -391,11 +671,25 @@
   },
   "resources/js/Components/ItBuildingBlocks/ItBuildingBlock.vue": {
     "file": "assets/ItBuildingBlock-CU3H4u50.js",
+=======
+      "_menu-BChd8NNS.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_keyboard-BYoTzO9V.js"
+    ],
+    "css": [
+      "assets/DigitalBuildingBlock-BygTbEdW.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Components/ItBuildingBlocks/ItBuildingBlock.vue": {
+    "file": "assets/ItBuildingBlock-C6L_Fhqx.js",
+>>>>>>> Stashed changes
     "name": "ItBuildingBlock",
     "src": "resources/js/Components/ItBuildingBlocks/ItBuildingBlock.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
       "_keyboard-Df9ibhZA.js"
@@ -407,11 +701,25 @@
   },
   "resources/js/Components/StrategicHouse/DualGrowth.vue": {
     "file": "assets/DualGrowth-CP4xweBH.js",
+=======
+      "_menu-BChd8NNS.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_keyboard-BYoTzO9V.js"
+    ],
+    "css": [
+      "assets/ItBuildingBlock--Sk36hYK.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Components/StrategicHouse/DualGrowth.vue": {
+    "file": "assets/DualGrowth-fmPWHSNA.js",
+>>>>>>> Stashed changes
     "name": "DualGrowth",
     "src": "resources/js/Components/StrategicHouse/DualGrowth.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
       "_keyboard-Df9ibhZA.js"
@@ -423,11 +731,25 @@
   },
   "resources/js/Components/StrategicHouse/DualGrowthFull.vue": {
     "file": "assets/DualGrowthFull-BGWg_Qv6.js",
+=======
+      "_menu-BChd8NNS.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_keyboard-BYoTzO9V.js"
+    ],
+    "css": [
+      "assets/DualGrowth-DFzjyfpd.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Components/StrategicHouse/DualGrowthFull.vue": {
+    "file": "assets/DualGrowthFull-CqxQACfM.js",
+>>>>>>> Stashed changes
     "name": "DualGrowthFull",
     "src": "resources/js/Components/StrategicHouse/DualGrowthFull.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
       "_keyboard-Df9ibhZA.js"
@@ -439,22 +761,47 @@
   },
   "resources/js/Components/StrategicHouse/RoadMap/AllInitiativeRoadmapContent.vue": {
     "file": "assets/AllInitiativeRoadmapContent-23Ls1x8j.js",
+=======
+      "_menu-BChd8NNS.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_keyboard-BYoTzO9V.js"
+    ],
+    "css": [
+      "assets/DualGrowthFull-DZrZ6x8q.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Components/StrategicHouse/RoadMap/AllInitiativeRoadmapContent.vue": {
+    "file": "assets/AllInitiativeRoadmapContent-ByLehdjC.js",
+>>>>>>> Stashed changes
     "name": "AllInitiativeRoadmapContent",
     "src": "resources/js/Components/StrategicHouse/RoadMap/AllInitiativeRoadmapContent.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/Components/StrategicHouse/RoadMap/ItInitiativeRoadmapContent.vue",
       "__plugin-vue_export-helper-DlAUqK2U.js",
+<<<<<<< Updated upstream
       "_EyeIcon-Bm-6foCf.js",
+=======
+      "_EyeIcon-CFtLyov2.js",
+>>>>>>> Stashed changes
       "resources/js/app.js"
     ],
     "css": [
       "assets/AllInitiativeRoadmapContent-c8N7Evbr.css",
+<<<<<<< Updated upstream
       "assets/app-CapYmz0I.css"
     ]
   },
   "resources/js/Components/StrategicHouse/RoadMap/ItInitiativeRoadmapContent.vue": {
     "file": "assets/ItInitiativeRoadmapContent-DcS8_AXQ.js",
+=======
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Components/StrategicHouse/RoadMap/ItInitiativeRoadmapContent.vue": {
+    "file": "assets/ItInitiativeRoadmapContent-mvQrQGpc.js",
+>>>>>>> Stashed changes
     "name": "ItInitiativeRoadmapContent",
     "src": "resources/js/Components/StrategicHouse/RoadMap/ItInitiativeRoadmapContent.vue",
     "isDynamicEntry": true,
@@ -464,16 +811,25 @@
     ],
     "css": [
       "assets/ItInitiativeRoadmapContent-BTM8XhqX.css",
+<<<<<<< Updated upstream
       "assets/app-CapYmz0I.css"
     ]
   },
   "resources/js/Components/StrategicHouse/StretegicHouse.vue": {
     "file": "assets/StretegicHouse-C3DW2IKI.js",
+=======
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Components/StrategicHouse/StretegicHouse.vue": {
+    "file": "assets/StretegicHouse-C6KbNHG7.js",
+>>>>>>> Stashed changes
     "name": "StretegicHouse",
     "src": "resources/js/Components/StrategicHouse/StretegicHouse.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
       "_EyeIcon-Bm-6foCf.js",
@@ -486,11 +842,26 @@
   },
   "resources/js/Pages/Admin/ActivityLog.vue": {
     "file": "assets/ActivityLog-CkdS3XhP.js",
+=======
+      "_menu-BChd8NNS.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_EyeIcon-CFtLyov2.js",
+      "_keyboard-BYoTzO9V.js"
+    ],
+    "css": [
+      "assets/StretegicHouse-Co4JFez_.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/Admin/ActivityLog.vue": {
+    "file": "assets/ActivityLog-CVoxB6t8.js",
+>>>>>>> Stashed changes
     "name": "ActivityLog",
     "src": "resources/js/Pages/Admin/ActivityLog.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_AdminLayout-Dj01gXFD.js",
       "_PencilSquareIcon-gDRZMeFg.js",
@@ -506,11 +877,29 @@
   },
   "resources/js/Pages/Admin/Backup/Index.vue": {
     "file": "assets/Index-CGz_CRqI.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_AdminLayout-kqzlyfOJ.js",
+      "_PencilSquareIcon-BJGsP6zX.js",
+      "_TrashIcon-C5oVSjfL.js",
+      "_ClipboardDocumentListIcon-BS6jX7fb.js",
+      "_ArrowPathIcon-BiCfQmuY.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/Admin/Backup/Index.vue": {
+    "file": "assets/Index-BraAfXMS.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/Admin/Backup/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_AdminLayout-Dj01gXFD.js",
       "_ArrowPathIcon-BxuSbM4w.js",
@@ -526,11 +915,29 @@
   },
   "resources/js/Pages/Admin/Dashboard.vue": {
     "file": "assets/Dashboard-DjDwxOC8.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_AdminLayout-kqzlyfOJ.js",
+      "_ArrowPathIcon-BiCfQmuY.js",
+      "_ClockIcon-Dp2Y1TdR.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ClipboardDocumentListIcon-BS6jX7fb.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/Admin/Dashboard.vue": {
+    "file": "assets/Dashboard-Bkq0rLmP.js",
+>>>>>>> Stashed changes
     "name": "Dashboard",
     "src": "resources/js/Pages/Admin/Dashboard.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_AdminLayout-Dj01gXFD.js",
       "_ClockIcon-DJsYJtyz.js",
@@ -545,11 +952,28 @@
   },
   "resources/js/Pages/Admin/Roles/Index.vue": {
     "file": "assets/Index-Da8tuGlV.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_AdminLayout-kqzlyfOJ.js",
+      "_ClockIcon-Dp2Y1TdR.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+      "_ClipboardDocumentListIcon-BS6jX7fb.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/Admin/Roles/Index.vue": {
+    "file": "assets/Index-DxjDKUI0.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/Admin/Roles/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_AdminLayout-Dj01gXFD.js",
       "_ShieldCheckIcon-B7km92NI.js",
@@ -565,11 +989,29 @@
   },
   "resources/js/Pages/Admin/Sync/Index.vue": {
     "file": "assets/Index-DfDmoETA.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_AdminLayout-kqzlyfOJ.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+      "_CheckCircleIcon-BCpc0xDr.js",
+      "_TrashIcon-C5oVSjfL.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ClipboardDocumentListIcon-BS6jX7fb.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/Admin/Sync/Index.vue": {
+    "file": "assets/Index-Ckk0lwgm.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/Admin/Sync/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_AdminLayout-Dj01gXFD.js",
       "_CheckCircleIcon-BQJR1wAC.js",
@@ -584,11 +1026,28 @@
   },
   "resources/js/Pages/Admin/Users/Index.vue": {
     "file": "assets/Index-BijSOkVm.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_AdminLayout-kqzlyfOJ.js",
+      "_CheckCircleIcon-BCpc0xDr.js",
+      "_ServerStackIcon-DlVvs2df.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ClipboardDocumentListIcon-BS6jX7fb.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/Admin/Users/Index.vue": {
+    "file": "assets/Index-blM4ZxY5.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/Admin/Users/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_AdminLayout-Dj01gXFD.js",
       "_transition-D7EqEbDd.js",
@@ -602,11 +1061,27 @@
   },
   "resources/js/Pages/Architecture/BusinessCapability/Index.vue": {
     "file": "assets/Index-BmedAaRF.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_AdminLayout-kqzlyfOJ.js",
+      "_transition-BzEpyeFb.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ClipboardDocumentListIcon-BS6jX7fb.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/Architecture/BusinessCapability/Index.vue": {
+    "file": "assets/Index-BgG0Jo2V.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/Architecture/BusinessCapability/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "_ConfirmationModal-D-s_8c8i.js",
@@ -621,10 +1096,27 @@
   },
   "resources/js/Pages/Architecture/Index.vue": {
     "file": "assets/Index-DmWHTrQ3.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "_ConfirmationModal-Ca0YLz7P.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+      "_transition-BzEpyeFb.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/Architecture/Index.vue": {
+    "file": "assets/Index-CXTLa6pE.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/Architecture/Index.vue",
     "isDynamicEntry": true,
     "imports": [
+<<<<<<< Updated upstream
       "_UserLayout-DAbQBSxP.js",
       "resources/js/app.js",
       "_useDarkMode-B-l0Zjhu.js",
@@ -638,10 +1130,26 @@
   },
   "resources/js/Pages/Architecture/InformaticSystem/Index.vue": {
     "file": "assets/Index-zDASrFcg.js",
+=======
+      "_UserLayout-yYl23bWu.js",
+      "resources/js/app.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_menu-BChd8NNS.js",
+      "_keyboard-BYoTzO9V.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/Architecture/InformaticSystem/Index.vue": {
+    "file": "assets/Index-DVrevAF9.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/Architecture/InformaticSystem/Index.vue",
     "isDynamicEntry": true,
     "imports": [
+<<<<<<< Updated upstream
       "_UserLayout-DAbQBSxP.js",
       "resources/js/app.js",
       "_useDarkMode-B-l0Zjhu.js",
@@ -655,10 +1163,26 @@
   },
   "resources/js/Pages/Architecture/OrganizationStructure/Index.vue": {
     "file": "assets/Index-B75gAt8d.js",
+=======
+      "_UserLayout-yYl23bWu.js",
+      "resources/js/app.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_menu-BChd8NNS.js",
+      "_keyboard-BYoTzO9V.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/Architecture/OrganizationStructure/Index.vue": {
+    "file": "assets/Index-9gamOfaw.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/Architecture/OrganizationStructure/Index.vue",
     "isDynamicEntry": true,
     "imports": [
+<<<<<<< Updated upstream
       "_UserLayout-DAbQBSxP.js",
       "resources/js/Pages/Architecture/OrganizationStructure/Partials/OrganizationStructureFilters.vue",
       "resources/js/Pages/Architecture/OrganizationStructure/Partials/OrganizationStructureTable.vue",
@@ -674,6 +1198,23 @@
   },
   "resources/js/Pages/Architecture/OrganizationStructure/Partials/OrganizationStructureFilters.vue": {
     "file": "assets/OrganizationStructureFilters-NUIjmXDJ.js",
+=======
+      "_UserLayout-yYl23bWu.js",
+      "resources/js/Pages/Architecture/OrganizationStructure/Partials/OrganizationStructureFilters.vue",
+      "resources/js/Pages/Architecture/OrganizationStructure/Partials/OrganizationStructureTable.vue",
+      "resources/js/app.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_menu-BChd8NNS.js",
+      "_keyboard-BYoTzO9V.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/Architecture/OrganizationStructure/Partials/OrganizationStructureFilters.vue": {
+    "file": "assets/OrganizationStructureFilters-CMNVVrXT.js",
+>>>>>>> Stashed changes
     "name": "OrganizationStructureFilters",
     "src": "resources/js/Pages/Architecture/OrganizationStructure/Partials/OrganizationStructureFilters.vue",
     "isDynamicEntry": true,
@@ -681,11 +1222,19 @@
       "resources/js/app.js"
     ],
     "css": [
+<<<<<<< Updated upstream
       "assets/app-CapYmz0I.css"
     ]
   },
   "resources/js/Pages/Architecture/OrganizationStructure/Partials/OrganizationStructureTable.vue": {
     "file": "assets/OrganizationStructureTable-zcApk19i.js",
+=======
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/Architecture/OrganizationStructure/Partials/OrganizationStructureTable.vue": {
+    "file": "assets/OrganizationStructureTable-Blc2tOiw.js",
+>>>>>>> Stashed changes
     "name": "OrganizationStructureTable",
     "src": "resources/js/Pages/Architecture/OrganizationStructure/Partials/OrganizationStructureTable.vue",
     "isDynamicEntry": true,
@@ -693,16 +1242,25 @@
       "resources/js/app.js"
     ],
     "css": [
+<<<<<<< Updated upstream
       "assets/app-CapYmz0I.css"
     ]
   },
   "resources/js/Pages/Auth/Login.vue": {
     "file": "assets/Login-B7wubVrH.js",
+=======
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/Auth/Login.vue": {
+    "file": "assets/Login-CqkQkFVX.js",
+>>>>>>> Stashed changes
     "name": "Login",
     "src": "resources/js/Pages/Auth/Login.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_GuestLayout-BWLAW4Mj.js",
       "_transition-D7EqEbDd.js",
       "_sweetalert2.esm.all-DVN6D7eS.js",
@@ -715,11 +1273,26 @@
   },
   "resources/js/Pages/Auth/Register.vue": {
     "file": "assets/Register-wiGjpFEF.js",
+=======
+      "_GuestLayout-DrYae_2L.js",
+      "_transition-BzEpyeFb.js",
+      "_sweetalert2.esm.all-DVN6D7eS.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_keyboard-BYoTzO9V.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/Auth/Register.vue": {
+    "file": "assets/Register-D2qltyWF.js",
+>>>>>>> Stashed changes
     "name": "Register",
     "src": "resources/js/Pages/Auth/Register.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_GuestLayout-BWLAW4Mj.js",
       "_useDarkMode-B-l0Zjhu.js"
     ],
@@ -729,11 +1302,23 @@
   },
   "resources/js/Pages/MasterData/ActivityLog.vue": {
     "file": "assets/ActivityLog-D6HPkqoF.js",
+=======
+      "_GuestLayout-DrYae_2L.js",
+      "_useDarkMode-D8p27aGg.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/MasterData/ActivityLog.vue": {
+    "file": "assets/ActivityLog-ytQ14Kmz.js",
+>>>>>>> Stashed changes
     "name": "ActivityLog",
     "src": "resources/js/Pages/MasterData/ActivityLog.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "_PencilSquareIcon-gDRZMeFg.js",
@@ -750,11 +1335,30 @@
   },
   "resources/js/Pages/MasterData/Index.vue": {
     "file": "assets/Index-DsHKuFKG.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "_PencilSquareIcon-BJGsP6zX.js",
+      "_TrashIcon-C5oVSjfL.js",
+      "_ClipboardDocumentListIcon-BS6jX7fb.js",
+      "_ArrowPathIcon-BiCfQmuY.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/MasterData/Index.vue": {
+    "file": "assets/Index-TlmLpPFO.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/MasterData/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "_keyboard-Df9ibhZA.js",
@@ -767,11 +1371,26 @@
   },
   "resources/js/Pages/MasterData/MstInitiative/Create.vue": {
     "file": "assets/Create-DQc6jCTX.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/MasterData/MstInitiative/Create.vue": {
+    "file": "assets/Create-DV1menUU.js",
+>>>>>>> Stashed changes
     "name": "Create",
     "src": "resources/js/Pages/MasterData/MstInitiative/Create.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
@@ -786,11 +1405,28 @@
   },
   "resources/js/Pages/MasterData/MstInitiative/Edit.vue": {
     "file": "assets/Edit-D0GVvKkF.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/Create-DnwsRO-M.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/MasterData/MstInitiative/Edit.vue": {
+    "file": "assets/Edit-B93E-ZYz.js",
+>>>>>>> Stashed changes
     "name": "Edit",
     "src": "resources/js/Pages/MasterData/MstInitiative/Edit.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
@@ -805,11 +1441,28 @@
   },
   "resources/js/Pages/MasterData/MstInitiative/Index.vue": {
     "file": "assets/Index-TFcGa0AR.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/Edit-Bkhthxi1.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/MasterData/MstInitiative/Index.vue": {
+    "file": "assets/Index-sHGxQPNQ.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/MasterData/MstInitiative/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "_ConfirmDeleteModal-DPRTkAcH.js",
@@ -823,11 +1476,27 @@
   },
   "resources/js/Pages/MasterData/ProjectCharter/Index.vue": {
     "file": "assets/Index-BhwMshoo.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "_ConfirmDeleteModal-CiT010cM.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/MasterData/ProjectCharter/Index.vue": {
+    "file": "assets/Index-DmrvzcKc.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/MasterData/ProjectCharter/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "_FormField-CyOmNR2h.js",
@@ -844,11 +1513,30 @@
   },
   "resources/js/Pages/MasterData/ScopeCharter/Index.vue": {
     "file": "assets/Index-BIHUWagQ.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "_FormField-DiKcc7ni.js",
+      "_ConfirmDeleteModal-CiT010cM.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/Index-bOBgg8Df.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/MasterData/ScopeCharter/Index.vue": {
+    "file": "assets/Index-B_lkgxHY.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/MasterData/ScopeCharter/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "_FormField-CyOmNR2h.js",
@@ -865,10 +1553,29 @@
   },
   "resources/js/Pages/Placeholder/Index.vue": {
     "file": "assets/Index-CH8HvqrV.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "_FormField-DiKcc7ni.js",
+      "_ConfirmDeleteModal-CiT010cM.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/Index-BfdWrL8t.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/Placeholder/Index.vue": {
+    "file": "assets/Index-Csr8nP72.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/Placeholder/Index.vue",
     "isDynamicEntry": true,
     "imports": [
+<<<<<<< Updated upstream
       "_UserLayout-DAbQBSxP.js",
       "resources/js/app.js",
       "_useDarkMode-B-l0Zjhu.js",
@@ -882,10 +1589,26 @@
   },
   "resources/js/Pages/Policy/Index.vue": {
     "file": "assets/Index-B9SPRGaT.js",
+=======
+      "_UserLayout-yYl23bWu.js",
+      "resources/js/app.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_menu-BChd8NNS.js",
+      "_keyboard-BYoTzO9V.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/Policy/Index.vue": {
+    "file": "assets/Index-SmXm83-C.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/Policy/Index.vue",
     "isDynamicEntry": true,
     "imports": [
+<<<<<<< Updated upstream
       "resources/js/app.js",
       "_UserLayout-DAbQBSxP.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
@@ -901,6 +1624,21 @@
   },
   "resources/js/Pages/Profile/Index.vue": {
     "file": "assets/Index-wxW_ne5b.js",
+=======
+      "_UserLayout-yYl23bWu.js",
+      "resources/js/app.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_menu-BChd8NNS.js",
+      "_keyboard-BYoTzO9V.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/Profile/Index.vue": {
+    "file": "assets/Index-DIDzSv-Y.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/Profile/Index.vue",
     "isDynamicEntry": true,
@@ -908,17 +1646,26 @@
       "resources/js/app.js"
     ],
     "css": [
+<<<<<<< Updated upstream
       "assets/app-CapYmz0I.css"
     ]
   },
   "resources/js/Pages/ProgramEvaluation/ReviewDashboard/Index.vue": {
     "file": "assets/Index-DBXfYlDq.js",
+=======
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramEvaluation/ReviewDashboard/Index.vue": {
+    "file": "assets/Index-XiozLUsI.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/ProgramEvaluation/ReviewDashboard/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
+<<<<<<< Updated upstream
       "_LeaderBreakdownTable-GTY2mukM.js",
       "_UserLayout-DAbQBSxP.js",
       "_useDarkMode-B-l0Zjhu.js",
@@ -933,10 +1680,27 @@
   },
   "resources/js/Pages/ProgramEvaluation/ReviewDashboard/Summary.vue": {
     "file": "assets/Summary-Bhp6JxBB.js",
+=======
+      "_LeaderBreakdownTable-C6O_VYjU.js",
+      "_UserLayout-yYl23bWu.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_menu-BChd8NNS.js",
+      "_keyboard-BYoTzO9V.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/Index-B6Si8IbG.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramEvaluation/ReviewDashboard/Summary.vue": {
+    "file": "assets/Summary-BsFgq2tR.js",
+>>>>>>> Stashed changes
     "name": "Summary",
     "src": "resources/js/Pages/ProgramEvaluation/ReviewDashboard/Summary.vue",
     "isDynamicEntry": true,
     "imports": [
+<<<<<<< Updated upstream
       "_LeaderBreakdownTable-GTY2mukM.js",
       "_StatusMatrix-Dz8C0MGn.js",
       "_UserLayout-DAbQBSxP.js",
@@ -952,12 +1716,30 @@
   },
   "resources/js/Pages/ProgramEvaluation/ReviewPC/Index.vue": {
     "file": "assets/Index-Bsnox9Gc.js",
+=======
+      "_LeaderBreakdownTable-C6O_VYjU.js",
+      "_StatusMatrix-iyYivGVz.js",
+      "_UserLayout-yYl23bWu.js",
+      "resources/js/app.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_menu-BChd8NNS.js",
+      "_keyboard-BYoTzO9V.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramEvaluation/ReviewPC/Index.vue": {
+    "file": "assets/Index-D8TelF8e.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/ProgramEvaluation/ReviewPC/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
+<<<<<<< Updated upstream
       "_StatusMatrix-Dz8C0MGn.js",
       "_UserLayout-DAbQBSxP.js",
       "_useDarkMode-B-l0Zjhu.js",
@@ -972,11 +1754,28 @@
   },
   "resources/js/Pages/ProgramEvaluation/ReviewPC/Show.vue": {
     "file": "assets/Show-Cp_Q0j_y.js",
+=======
+      "_StatusMatrix-iyYivGVz.js",
+      "_UserLayout-yYl23bWu.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_menu-BChd8NNS.js",
+      "_keyboard-BYoTzO9V.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/Index-YQqES5ZP.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramEvaluation/ReviewPC/Show.vue": {
+    "file": "assets/Show-DqijaDRc.js",
+>>>>>>> Stashed changes
     "name": "Show",
     "src": "resources/js/Pages/ProgramEvaluation/ReviewPC/Show.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "_ReviewContent-mQTCgilH.js",
@@ -993,11 +1792,33 @@
     ],
     "css": [
       "assets/app-CapYmz0I.css",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "_ReviewContent-Bua2JOvW.js",
+      "_ProjectRoadmap-CUdab5Ev.js",
+      "_ProjectRoadmapSummary-Dzs21lwb.js",
+      "_ReviewStatusImplementationTable-BB22rCVl.js",
+      "_InitiativeDetailsWithRelations-Byq5cJQ5.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_initiativeStatus-Bc5j02tn.js",
+      "_transition-BzEpyeFb.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css",
+>>>>>>> Stashed changes
       "assets/ProjectRoadmapSummary-BEcfVRCh.css"
     ]
   },
   "resources/js/Pages/ProgramEvaluation/ReviewPC/detail/InitiativeRelation.vue": {
+<<<<<<< Updated upstream
     "file": "assets/InitiativeRelation-BtfCodVy.js",
+=======
+    "file": "assets/InitiativeRelation-FO1CPf2c.js",
+>>>>>>> Stashed changes
     "name": "InitiativeRelation",
     "src": "resources/js/Pages/ProgramEvaluation/ReviewPC/detail/InitiativeRelation.vue",
     "isDynamicEntry": true,
@@ -1006,11 +1827,19 @@
       "resources/js/app.js"
     ],
     "css": [
+<<<<<<< Updated upstream
       "assets/app-CapYmz0I.css"
     ]
   },
   "resources/js/Pages/ProgramEvaluation/ReviewPC/detail/ProjectCharter.vue": {
     "file": "assets/ProjectCharter-B8M9mjTg.js",
+=======
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramEvaluation/ReviewPC/detail/ProjectCharter.vue": {
+    "file": "assets/ProjectCharter-BxOymvKK.js",
+>>>>>>> Stashed changes
     "name": "ProjectCharter",
     "src": "resources/js/Pages/ProgramEvaluation/ReviewPC/detail/ProjectCharter.vue",
     "isDynamicEntry": true,
@@ -1019,11 +1848,19 @@
       "resources/js/app.js"
     ],
     "css": [
+<<<<<<< Updated upstream
       "assets/app-CapYmz0I.css"
     ]
   },
   "resources/js/Pages/ProgramEvaluation/ReviewPC/detail/Roadmap.vue": {
     "file": "assets/Roadmap-C0ZSWGRh.js",
+=======
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramEvaluation/ReviewPC/detail/Roadmap.vue": {
+    "file": "assets/Roadmap-UPSt-7-3.js",
+>>>>>>> Stashed changes
     "name": "Roadmap",
     "src": "resources/js/Pages/ProgramEvaluation/ReviewPC/detail/Roadmap.vue",
     "isDynamicEntry": true,
@@ -1032,16 +1869,25 @@
       "resources/js/app.js"
     ],
     "css": [
+<<<<<<< Updated upstream
       "assets/app-CapYmz0I.css"
     ]
   },
   "resources/js/Pages/ProgramEvaluation/ReviewTimeline/Index.vue": {
     "file": "assets/Index-B7A2vjRO.js",
+=======
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramEvaluation/ReviewTimeline/Index.vue": {
+    "file": "assets/Index-C2O6gGU7.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/ProgramEvaluation/ReviewTimeline/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_UserLayout-DAbQBSxP.js",
       "_ReviewStatusImplementationTable-BkWXy3BL.js",
       "_ProjectRoadmapSummary-CMXeHNec.js",
@@ -1056,16 +1902,37 @@
     ],
     "css": [
       "assets/app-CapYmz0I.css",
+=======
+      "_UserLayout-yYl23bWu.js",
+      "_ReviewStatusImplementationTable-BB22rCVl.js",
+      "_ProjectRoadmapSummary-Dzs21lwb.js",
+      "_ProjectRoadmap-CUdab5Ev.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_menu-BChd8NNS.js",
+      "_keyboard-BYoTzO9V.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+      "_initiativeStatus-Bc5j02tn.js",
+      "_transition-BzEpyeFb.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css",
+>>>>>>> Stashed changes
       "assets/ProjectRoadmapSummary-BEcfVRCh.css"
     ]
   },
   "resources/js/Pages/ProgramImplementation/Dashboard.vue": {
+<<<<<<< Updated upstream
     "file": "assets/Dashboard-DyGR6gZb.js",
+=======
+    "file": "assets/Dashboard-D5zvl9j_.js",
+>>>>>>> Stashed changes
     "name": "Dashboard",
     "src": "resources/js/Pages/ProgramImplementation/Dashboard.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_UserLayout-DAbQBSxP.js",
       "_initiativeStatus-Bc5j02tn.js",
       "_useDarkMode-B-l0Zjhu.js",
@@ -1079,11 +1946,27 @@
   },
   "resources/js/Pages/ProgramImplementation/ProjectCharter/DigitalInitiatives/Create.vue": {
     "file": "assets/Create-D5xStmwk.js",
+=======
+      "_UserLayout-yYl23bWu.js",
+      "_initiativeStatus-Bc5j02tn.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_menu-BChd8NNS.js",
+      "_keyboard-BYoTzO9V.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramImplementation/ProjectCharter/DigitalInitiatives/Create.vue": {
+    "file": "assets/Create-BIXtXM85.js",
+>>>>>>> Stashed changes
     "name": "Create",
     "src": "resources/js/Pages/ProgramImplementation/ProjectCharter/DigitalInitiatives/Create.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
@@ -1098,11 +1981,28 @@
   },
   "resources/js/Pages/ProgramImplementation/ProjectCharter/DigitalInitiatives/Edit.vue": {
     "file": "assets/Edit-CZq0GRA6.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/Create-CexZcxsj.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramImplementation/ProjectCharter/DigitalInitiatives/Edit.vue": {
+    "file": "assets/Edit-Cvc0ANyC.js",
+>>>>>>> Stashed changes
     "name": "Edit",
     "src": "resources/js/Pages/ProgramImplementation/ProjectCharter/DigitalInitiatives/Edit.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "_initiativeStatus-Bc5j02tn.js",
@@ -1118,11 +2018,29 @@
   },
   "resources/js/Pages/ProgramImplementation/ProjectCharter/DigitalInitiatives/Index.vue": {
     "file": "assets/Index-CT8v6ogT.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "_initiativeStatus-Bc5j02tn.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/Edit-BVCm4oVB.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramImplementation/ProjectCharter/DigitalInitiatives/Index.vue": {
+    "file": "assets/Index-CgYaX3Pw.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/ProgramImplementation/ProjectCharter/DigitalInitiatives/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_UserLayout-DAbQBSxP.js",
       "_initiativeStatus-Bc5j02tn.js",
       "_useFlowFilter-BsROHpR_.js",
@@ -1143,6 +2061,28 @@
   },
   "resources/js/Pages/ProgramImplementation/ProjectCharter/DigitalInitiatives/Partials/DigitalCharterDocument.vue": {
     "file": "assets/DigitalCharterDocument-5XV-oGl5.js",
+=======
+      "_UserLayout-yYl23bWu.js",
+      "_initiativeStatus-Bc5j02tn.js",
+      "_useFlowFilter-BkVUIcmD.js",
+      "_MasterInitiativeTable-CUpz8n9i.js",
+      "_sweetalert2.esm.all-DVN6D7eS.js",
+      "_ConfirmationModal-Ca0YLz7P.js",
+      "_menu-BChd8NNS.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+      "_transition-BzEpyeFb.js",
+      "_keyboard-BYoTzO9V.js"
+    ],
+    "css": [
+      "assets/Index-DNrnoTsx.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramImplementation/ProjectCharter/DigitalInitiatives/Partials/DigitalCharterDocument.vue": {
+    "file": "assets/DigitalCharterDocument-DeKC1n6s.js",
+>>>>>>> Stashed changes
     "name": "DigitalCharterDocument",
     "src": "resources/js/Pages/ProgramImplementation/ProjectCharter/DigitalInitiatives/Partials/DigitalCharterDocument.vue",
     "isDynamicEntry": true,
@@ -1150,16 +2090,25 @@
       "resources/js/app.js"
     ],
     "css": [
+<<<<<<< Updated upstream
       "assets/app-CapYmz0I.css"
     ]
   },
   "resources/js/Pages/ProgramImplementation/ProjectCharter/DigitalInitiatives/Show.vue": {
     "file": "assets/Show-BOWCp-N-.js",
+=======
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramImplementation/ProjectCharter/DigitalInitiatives/Show.vue": {
+    "file": "assets/Show-Y7wz1cGF.js",
+>>>>>>> Stashed changes
     "name": "Show",
     "src": "resources/js/Pages/ProgramImplementation/ProjectCharter/DigitalInitiatives/Show.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "resources/js/Pages/ProgramImplementation/ProjectCharter/DigitalInitiatives/Partials/DigitalCharterDocument.vue",
@@ -1176,11 +2125,30 @@
   },
   "resources/js/Pages/ProgramImplementation/ProjectCharter/ITInitiatives/Create.vue": {
     "file": "assets/Create-DUOWYhZQ.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "resources/js/Pages/ProgramImplementation/ProjectCharter/DigitalInitiatives/Partials/DigitalCharterDocument.vue",
+      "_ReviewStatusImplementationTable-BB22rCVl.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+      "_initiativeStatus-Bc5j02tn.js",
+      "_transition-BzEpyeFb.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramImplementation/ProjectCharter/ITInitiatives/Create.vue": {
+    "file": "assets/Create-PMNhlGOM.js",
+>>>>>>> Stashed changes
     "name": "Create",
     "src": "resources/js/Pages/ProgramImplementation/ProjectCharter/ITInitiatives/Create.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
@@ -1195,11 +2163,28 @@
   },
   "resources/js/Pages/ProgramImplementation/ProjectCharter/ITInitiatives/Edit.vue": {
     "file": "assets/Edit-8Cl59iOW.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/Create-CWKYJ18V.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramImplementation/ProjectCharter/ITInitiatives/Edit.vue": {
+    "file": "assets/Edit-9dECGANW.js",
+>>>>>>> Stashed changes
     "name": "Edit",
     "src": "resources/js/Pages/ProgramImplementation/ProjectCharter/ITInitiatives/Edit.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "_ConfirmationModal-D-s_8c8i.js",
@@ -1217,11 +2202,31 @@
   },
   "resources/js/Pages/ProgramImplementation/ProjectCharter/ITInitiatives/Index.vue": {
     "file": "assets/Index-B_RR6Qf-.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "_ConfirmationModal-Ca0YLz7P.js",
+      "_initiativeStatus-Bc5j02tn.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+      "_transition-BzEpyeFb.js"
+    ],
+    "css": [
+      "assets/Edit-Dep7TZqU.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramImplementation/ProjectCharter/ITInitiatives/Index.vue": {
+    "file": "assets/Index-CUG8jUb4.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/ProgramImplementation/ProjectCharter/ITInitiatives/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "_initiativeStatus-Bc5j02tn.js",
@@ -1235,21 +2240,45 @@
       "_ShieldCheckIcon-B7km92NI.js",
       "_ConfirmationModal-D-s_8c8i.js",
       "_transition-D7EqEbDd.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "_initiativeStatus-Bc5j02tn.js",
+      "_useFlowFilter-BkVUIcmD.js",
+      "_MasterInitiativeTable-joByqCT2.js",
+      "_StatusImplementationTable-aUBjajdB.js",
+      "_ProjectRoadmap-CUdab5Ev.js",
+      "_ProjectRoadmapSummary-Dzs21lwb.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+      "_ConfirmationModal-Ca0YLz7P.js",
+      "_transition-BzEpyeFb.js",
+>>>>>>> Stashed changes
       "_sweetalert2.esm.all-DVN6D7eS.js",
       "__plugin-vue_export-helper-DlAUqK2U.js"
     ],
     "css": [
+<<<<<<< Updated upstream
       "assets/app-CapYmz0I.css",
+=======
+      "assets/app-BU9bMOXI.css",
+>>>>>>> Stashed changes
       "assets/ProjectRoadmapSummary-BEcfVRCh.css"
     ]
   },
   "resources/js/Pages/ProgramImplementation/ProjectCharter/ITInitiatives/Show.vue": {
+<<<<<<< Updated upstream
     "file": "assets/Show-D7LA1Rqt.js",
+=======
+    "file": "assets/Show-4qBC3HwD.js",
+>>>>>>> Stashed changes
     "name": "Show",
     "src": "resources/js/Pages/ProgramImplementation/ProjectCharter/ITInitiatives/Show.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "_ReviewContent-mQTCgilH.js",
@@ -1270,11 +2299,34 @@
   },
   "resources/js/Pages/ProgramImplementation/ResourceManagement/Index.vue": {
     "file": "assets/Index-CNaYQJTk.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "_ReviewContent-Bua2JOvW.js",
+      "_ProjectRoadmap-CUdab5Ev.js",
+      "_StatusImplementationTable-aUBjajdB.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+      "_sweetalert2.esm.all-DVN6D7eS.js",
+      "_initiativeStatus-Bc5j02tn.js",
+      "_transition-BzEpyeFb.js"
+    ],
+    "css": [
+      "assets/Show-DfUSh60f.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramImplementation/ResourceManagement/Index.vue": {
+    "file": "assets/Index-DqE6SMR7.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/ProgramImplementation/ResourceManagement/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_UserLayout-DAbQBSxP.js",
       "_useDarkMode-B-l0Zjhu.js",
       "_menu-CbWT6zLb.js",
@@ -1287,11 +2339,26 @@
   },
   "resources/js/Pages/ProgramImplementation/RoadMap/Create.vue": {
     "file": "assets/Create-CGS2Lyl7.js",
+=======
+      "_UserLayout-yYl23bWu.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_menu-BChd8NNS.js",
+      "_keyboard-BYoTzO9V.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramImplementation/RoadMap/Create.vue": {
+    "file": "assets/Create-D_GTBSYj.js",
+>>>>>>> Stashed changes
     "name": "Create",
     "src": "resources/js/Pages/ProgramImplementation/RoadMap/Create.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "_ActivityQuarterManager-CqHkQqvK.js",
@@ -1307,11 +2374,29 @@
   },
   "resources/js/Pages/ProgramImplementation/RoadMap/Edit.vue": {
     "file": "assets/Edit-DgMLHxED.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "_ActivityQuarterManager-BDkc-i_h.js",
+      "_ProjectRoadmap-CUdab5Ev.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramImplementation/RoadMap/Edit.vue": {
+    "file": "assets/Edit-D_z729ux.js",
+>>>>>>> Stashed changes
     "name": "Edit",
     "src": "resources/js/Pages/ProgramImplementation/RoadMap/Edit.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "_ActivityQuarterManager-CqHkQqvK.js",
@@ -1327,31 +2412,66 @@
   },
   "resources/js/Pages/ProgramImplementation/RoadMap/Index.vue": {
     "file": "assets/Index-DHvmYt-g.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "_ActivityQuarterManager-BDkc-i_h.js",
+      "_ProjectRoadmap-CUdab5Ev.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramImplementation/RoadMap/Index.vue": {
+    "file": "assets/Index-DNdxjsHd.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/ProgramImplementation/RoadMap/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_UserLayout-DAbQBSxP.js",
       "_ProjectRoadmap-BjTbLYrP.js",
       "_useDarkMode-B-l0Zjhu.js",
       "_menu-CbWT6zLb.js",
       "_keyboard-Df9ibhZA.js",
       "_ShieldCheckIcon-B7km92NI.js",
+=======
+      "_UserLayout-yYl23bWu.js",
+      "_ProjectRoadmap-CUdab5Ev.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_menu-BChd8NNS.js",
+      "_keyboard-BYoTzO9V.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+>>>>>>> Stashed changes
       "__plugin-vue_export-helper-DlAUqK2U.js"
     ],
     "css": [
       "assets/ProjectRoadmapSummary-BEcfVRCh.css",
+<<<<<<< Updated upstream
       "assets/app-CapYmz0I.css"
     ]
   },
   "resources/js/Pages/ProgramImplementation/RoadMap/Show.vue": {
     "file": "assets/Show-1hpUHpjh.js",
+=======
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramImplementation/RoadMap/Show.vue": {
+    "file": "assets/Show-Cd5DY2oh.js",
+>>>>>>> Stashed changes
     "name": "Show",
     "src": "resources/js/Pages/ProgramImplementation/RoadMap/Show.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_UserLayout-DAbQBSxP.js",
       "_ProjectRoadmap-BjTbLYrP.js",
       "_useDarkMode-B-l0Zjhu.js",
@@ -1366,10 +2486,27 @@
   },
   "resources/js/Pages/ProgramPlanning/BusinessStrategy/Index.vue": {
     "file": "assets/Index-Bs-nBRMl.js",
+=======
+      "_UserLayout-yYl23bWu.js",
+      "_ProjectRoadmap-CUdab5Ev.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_menu-BChd8NNS.js",
+      "_keyboard-BYoTzO9V.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramPlanning/BusinessStrategy/Index.vue": {
+    "file": "assets/Index-BpWO6YEx.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/ProgramPlanning/BusinessStrategy/Index.vue",
     "isDynamicEntry": true,
     "imports": [
+<<<<<<< Updated upstream
       "_UserLayout-DAbQBSxP.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
       "resources/js/app.js",
@@ -1389,11 +2526,33 @@
   },
   "resources/js/Pages/ProgramPlanning/Dashboard.vue": {
     "file": "assets/Dashboard-2gW8xS6D.js",
+=======
+      "_UserLayout-yYl23bWu.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "resources/js/app.js",
+      "_BusinessStrategy-DlKy0rwG.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_menu-BChd8NNS.js",
+      "_keyboard-BYoTzO9V.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+      "_sweetalert2.esm.all-DVN6D7eS.js",
+      "_ConfirmationModal-Ca0YLz7P.js",
+      "_transition-BzEpyeFb.js"
+    ],
+    "css": [
+      "assets/Index-B3CsS1on.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramPlanning/Dashboard.vue": {
+    "file": "assets/Dashboard-DERbAZ9Y.js",
+>>>>>>> Stashed changes
     "name": "Dashboard",
     "src": "resources/js/Pages/ProgramPlanning/Dashboard.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_UserLayout-DAbQBSxP.js",
       "_menu-CbWT6zLb.js",
       "_initiativeStatus-Bc5j02tn.js",
@@ -1407,11 +2566,27 @@
   },
   "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Appendix/Edit.vue": {
     "file": "assets/Edit-NP2B1u8t.js",
+=======
+      "_UserLayout-yYl23bWu.js",
+      "_menu-BChd8NNS.js",
+      "_initiativeStatus-Bc5j02tn.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+      "_keyboard-BYoTzO9V.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Appendix/Edit.vue": {
+    "file": "assets/Edit-CsHCQn2s.js",
+>>>>>>> Stashed changes
     "name": "Edit",
     "src": "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Appendix/Edit.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "_AppendixCharterDocument-PGnHMzEe.js",
@@ -1426,11 +2601,28 @@
   },
   "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Appendix/Index.vue": {
     "file": "assets/Index-CyVO1baG.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "_AppendixCharterDocument-BeBQhFG7.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Appendix/Index.vue": {
+    "file": "assets/Index-pY5gxr1B.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Appendix/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_UserLayout-DAbQBSxP.js",
       "_AppendixCharterModal-CUdTRskb.js",
       "_useDarkMode-B-l0Zjhu.js",
@@ -1444,11 +2636,27 @@
   },
   "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Appendix/Show.vue": {
     "file": "assets/Show-DwBtnYEs.js",
+=======
+      "_UserLayout-yYl23bWu.js",
+      "_AppendixCharterModal-CIEQ-jvZ.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_menu-BChd8NNS.js",
+      "_keyboard-BYoTzO9V.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Appendix/Show.vue": {
+    "file": "assets/Show-tahdO9V4.js",
+>>>>>>> Stashed changes
     "name": "Show",
     "src": "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Appendix/Show.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "_AppendixCharterDocument-PGnHMzEe.js",
@@ -1463,11 +2671,28 @@
   },
   "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Compendium/Index.vue": {
     "file": "assets/Index-COhsnDiU.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "_AppendixCharterDocument-BeBQhFG7.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Compendium/Index.vue": {
+    "file": "assets/Index-rydH7KGh.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Compendium/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "_keyboard-Df9ibhZA.js",
@@ -1480,11 +2705,26 @@
   },
   "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Compendium/Show.vue": {
     "file": "assets/Show-Dl3x4Cl5.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Compendium/Show.vue": {
+    "file": "assets/Show-kvMZyOQG.js",
+>>>>>>> Stashed changes
     "name": "Show",
     "src": "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Compendium/Show.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "_DigitalInitiativeCharterDocument-BlGSg_cD.js",
@@ -1501,11 +2741,30 @@
   },
   "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Edit.vue": {
     "file": "assets/Edit-vru7sJ4m.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "_DigitalInitiativeCharterDocument-SH9JIcat.js",
+      "_AppendixCharterDocument-BeBQhFG7.js",
+      "_AppendixCharterModal-CIEQ-jvZ.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Edit.vue": {
+    "file": "assets/Edit-DgZQNDgi.js",
+>>>>>>> Stashed changes
     "name": "Edit",
     "src": "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Edit.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "_keyboard-Df9ibhZA.js",
@@ -1518,11 +2777,26 @@
   },
   "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Index.vue": {
     "file": "assets/Index-B9fBDP9q.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Index.vue": {
+    "file": "assets/Index-EE-2tM6P.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_UserLayout-DAbQBSxP.js",
       "_MasterInitiativeTable-CGkSrrJQ.js",
       "_CreateInitiativeModal-XYALMylf.js",
@@ -1539,11 +2813,30 @@
   },
   "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Mapping/Index.vue": {
     "file": "assets/Index-vYU4Z_8G.js",
+=======
+      "_UserLayout-yYl23bWu.js",
+      "_MasterInitiativeTable-CUpz8n9i.js",
+      "_CreateInitiativeModal-D9fNS_d8.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_menu-BChd8NNS.js",
+      "_keyboard-BYoTzO9V.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+      "_ConfirmationModal-Ca0YLz7P.js",
+      "_transition-BzEpyeFb.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Mapping/Index.vue": {
+    "file": "assets/Index-Uieqrw3q.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Mapping/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_UserLayout-DAbQBSxP.js",
       "_AppendixCharterModal-CUdTRskb.js",
       "_useDarkMode-B-l0Zjhu.js",
@@ -1557,11 +2850,27 @@
   },
   "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/MasterDigitalInitiative/Index.vue": {
     "file": "assets/Index-gh7zZLXb.js",
+=======
+      "_UserLayout-yYl23bWu.js",
+      "_AppendixCharterModal-CIEQ-jvZ.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_menu-BChd8NNS.js",
+      "_keyboard-BYoTzO9V.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/MasterDigitalInitiative/Index.vue": {
+    "file": "assets/Index-BvpTQT0z.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/MasterDigitalInitiative/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_UserLayout-DAbQBSxP.js",
       "_MasterInitiativeTable-CGkSrrJQ.js",
       "_CreateInitiativeModal-XYALMylf.js",
@@ -1578,12 +2887,31 @@
   },
   "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Roadmap/Create.vue": {
     "file": "assets/Create-BsjC7AJq.js",
+=======
+      "_UserLayout-yYl23bWu.js",
+      "_MasterInitiativeTable-CUpz8n9i.js",
+      "_CreateInitiativeModal-D9fNS_d8.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_menu-BChd8NNS.js",
+      "_keyboard-BYoTzO9V.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+      "_ConfirmationModal-Ca0YLz7P.js",
+      "_transition-BzEpyeFb.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Roadmap/Create.vue": {
+    "file": "assets/Create-Cgv0pIbX.js",
+>>>>>>> Stashed changes
     "name": "Create",
     "src": "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Roadmap/Create.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Roadmap/EditorPage.vue",
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_ConfirmationModal-D-s_8c8i.js",
       "_transition-D7EqEbDd.js",
       "_keyboard-Df9ibhZA.js",
@@ -1600,12 +2928,31 @@
   },
   "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Roadmap/Edit.vue": {
     "file": "assets/Edit-5YBwePbC.js",
+=======
+      "_ConfirmationModal-Ca0YLz7P.js",
+      "_transition-BzEpyeFb.js",
+      "_keyboard-BYoTzO9V.js",
+      "_DigitalRoadmapComponent-B1cuOXuB.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Roadmap/Edit.vue": {
+    "file": "assets/Edit-mHlaZddv.js",
+>>>>>>> Stashed changes
     "name": "Edit",
     "src": "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Roadmap/Edit.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Roadmap/EditorPage.vue",
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_ConfirmationModal-D-s_8c8i.js",
       "_transition-D7EqEbDd.js",
       "_keyboard-Df9ibhZA.js",
@@ -1622,11 +2969,30 @@
   },
   "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Roadmap/EditorPage.vue": {
     "file": "assets/EditorPage-CCHCunGn.js",
+=======
+      "_ConfirmationModal-Ca0YLz7P.js",
+      "_transition-BzEpyeFb.js",
+      "_keyboard-BYoTzO9V.js",
+      "_DigitalRoadmapComponent-B1cuOXuB.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Roadmap/EditorPage.vue": {
+    "file": "assets/EditorPage-BRat_l4x.js",
+>>>>>>> Stashed changes
     "name": "EditorPage",
     "src": "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Roadmap/EditorPage.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_ConfirmationModal-D-s_8c8i.js",
       "_DigitalRoadmapComponent-DiJBfVBt.js",
       "_menu-CbWT6zLb.js",
@@ -1643,11 +3009,30 @@
   },
   "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Roadmap/Index.vue": {
     "file": "assets/Index-OeIA1Yuw.js",
+=======
+      "_ConfirmationModal-Ca0YLz7P.js",
+      "_DigitalRoadmapComponent-B1cuOXuB.js",
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "_transition-BzEpyeFb.js",
+      "_keyboard-BYoTzO9V.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Roadmap/Index.vue": {
+    "file": "assets/Index-B0ndN-qI.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Roadmap/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_DigitalRoadmapComponent-DiJBfVBt.js",
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
@@ -1662,12 +3047,29 @@
   },
   "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Summary/Evaluation.vue": {
     "file": "assets/Evaluation-eY8VstEM.js",
+=======
+      "_DigitalRoadmapComponent-B1cuOXuB.js",
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Summary/Evaluation.vue": {
+    "file": "assets/Evaluation-DF2Sjr8U.js",
+>>>>>>> Stashed changes
     "name": "Evaluation",
     "src": "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Summary/Evaluation.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
+<<<<<<< Updated upstream
       "_ConfirmationModal-D-s_8c8i.js",
       "_transition-D7EqEbDd.js",
       "_keyboard-Df9ibhZA.js"
@@ -1679,12 +3081,26 @@
   },
   "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Summary/Implementation.vue": {
     "file": "assets/Implementation-yzzRa7IB.js",
+=======
+      "_ConfirmationModal-Ca0YLz7P.js",
+      "_transition-BzEpyeFb.js",
+      "_keyboard-BYoTzO9V.js"
+    ],
+    "css": [
+      "assets/Evaluation-DkFBuqfA.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Summary/Implementation.vue": {
+    "file": "assets/Implementation-ByDVjGGQ.js",
+>>>>>>> Stashed changes
     "name": "Implementation",
     "src": "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Summary/Implementation.vue",
     "isDynamicEntry": true,
     "imports": [
       "__plugin-vue_export-helper-DlAUqK2U.js",
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_DigitalRoadmapComponent-DiJBfVBt.js"
     ],
     "css": [
@@ -1694,12 +3110,24 @@
   },
   "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Summary/Index.vue": {
     "file": "assets/Index-Dnx3Veuq.js",
+=======
+      "_DigitalRoadmapComponent-B1cuOXuB.js"
+    ],
+    "css": [
+      "assets/Implementation-Bh6EFYhw.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Summary/Index.vue": {
+    "file": "assets/Index-DC4tFAud.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Summary/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
       "_sweetalert2.esm.all-DVN6D7eS.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Summary/Evaluation.vue",
@@ -1721,26 +3149,64 @@
   },
   "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Summary/Planning.vue": {
     "file": "assets/Planning-C0tQhDc3.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Summary/Evaluation.vue",
+      "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Summary/Implementation.vue",
+      "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Summary/Planning.vue",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_ConfirmationModal-Ca0YLz7P.js",
+      "_transition-BzEpyeFb.js",
+      "_DigitalRoadmapComponent-B1cuOXuB.js",
+      "_AppendixCharterDocument-BeBQhFG7.js",
+      "_DigitalInitiativeCharterDocument-SH9JIcat.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Summary/Planning.vue": {
+    "file": "assets/Planning-C18kay40.js",
+>>>>>>> Stashed changes
     "name": "Planning",
     "src": "resources/js/Pages/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Summary/Planning.vue",
     "isDynamicEntry": true,
     "imports": [
+<<<<<<< Updated upstream
       "_AppendixCharterDocument-PGnHMzEe.js",
       "_DigitalInitiativeCharterDocument-BlGSg_cD.js",
       "_DigitalRoadmapComponent-DiJBfVBt.js",
+=======
+      "_AppendixCharterDocument-BeBQhFG7.js",
+      "_DigitalInitiativeCharterDocument-SH9JIcat.js",
+      "_DigitalRoadmapComponent-B1cuOXuB.js",
+>>>>>>> Stashed changes
       "resources/js/app.js",
       "__plugin-vue_export-helper-DlAUqK2U.js"
     ],
     "css": [
+<<<<<<< Updated upstream
       "assets/app-CapYmz0I.css"
     ]
   },
   "resources/js/Pages/ProgramPlanning/ProgramDefinition/ITInitiatives/Index.vue": {
     "file": "assets/Index-CRK-in6W.js",
+=======
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/ProgramPlanning/ProgramDefinition/ITInitiatives/Index.vue": {
+    "file": "assets/Index-D3bAkOr1.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/ProgramPlanning/ProgramDefinition/ITInitiatives/Index.vue",
     "isDynamicEntry": true,
     "imports": [
+<<<<<<< Updated upstream
       "_UserLayout-DAbQBSxP.js",
       "resources/js/app.js",
       "_initiativeStatus-Bc5j02tn.js",
@@ -1759,10 +3225,31 @@
   },
   "resources/js/Pages/StrategicHouse/BusinessStrategy/Index.vue": {
     "file": "assets/Index-BqMF6_cW.js",
+=======
+      "_UserLayout-yYl23bWu.js",
+      "resources/js/app.js",
+      "_initiativeStatus-Bc5j02tn.js",
+      "_MasterInitiativeTable-joByqCT2.js",
+      "_CreateInitiativeModal-D9fNS_d8.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_menu-BChd8NNS.js",
+      "_keyboard-BYoTzO9V.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+      "_ConfirmationModal-Ca0YLz7P.js",
+      "_transition-BzEpyeFb.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/StrategicHouse/BusinessStrategy/Index.vue": {
+    "file": "assets/Index-HxgAdSFi.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/StrategicHouse/BusinessStrategy/Index.vue",
     "isDynamicEntry": true,
     "imports": [
+<<<<<<< Updated upstream
       "_BusinessStrategy-Bwi0_i6S.js",
       "_UserLayout-DAbQBSxP.js",
       "resources/js/app.js",
@@ -1781,18 +3268,47 @@
   },
   "resources/js/Pages/StrategicHouse/Index.vue": {
     "file": "assets/Index-sXGbSjaL.js",
+=======
+      "_BusinessStrategy-DlKy0rwG.js",
+      "_UserLayout-yYl23bWu.js",
+      "resources/js/app.js",
+      "_sweetalert2.esm.all-DVN6D7eS.js",
+      "_ConfirmationModal-Ca0YLz7P.js",
+      "_transition-BzEpyeFb.js",
+      "_keyboard-BYoTzO9V.js",
+      "_menu-BChd8NNS.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/StrategicHouse/Index.vue": {
+    "file": "assets/Index-DAM773Fv.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/StrategicHouse/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
+<<<<<<< Updated upstream
       "_UserLayout-DAbQBSxP.js",
       "_EyeIcon-Bm-6foCf.js",
       "_useDarkMode-B-l0Zjhu.js",
       "_menu-CbWT6zLb.js",
       "_keyboard-Df9ibhZA.js",
       "_ShieldCheckIcon-B7km92NI.js"
+=======
+      "_UserLayout-yYl23bWu.js",
+      "_EyeIcon-CFtLyov2.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_menu-BChd8NNS.js",
+      "_keyboard-BYoTzO9V.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+>>>>>>> Stashed changes
     ],
     "dynamicImports": [
       "resources/js/Components/StrategicHouse/StretegicHouse.vue",
@@ -1811,16 +3327,25 @@
     ],
     "css": [
       "assets/Index-Mygq9mA5.css",
+<<<<<<< Updated upstream
       "assets/app-CapYmz0I.css"
     ]
   },
   "resources/js/Pages/StrategicHouse/InitiativeRelation/Create.vue": {
     "file": "assets/Create-By8PRIIp.js",
+=======
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/StrategicHouse/InitiativeRelation/Create.vue": {
+    "file": "assets/Create-Z1nKkgJP.js",
+>>>>>>> Stashed changes
     "name": "Create",
     "src": "resources/js/Pages/StrategicHouse/InitiativeRelation/Create.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_InitiativeRelationFormCard-CE-uoCRn.js",
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
@@ -1835,11 +3360,28 @@
   },
   "resources/js/Pages/StrategicHouse/InitiativeRelation/Edit.vue": {
     "file": "assets/Edit-CAfCZqG3.js",
+=======
+      "_InitiativeRelationFormCard-CaMW3bQb.js",
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "_InitiativeDetailsWithRelations-Byq5cJQ5.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/StrategicHouse/InitiativeRelation/Edit.vue": {
+    "file": "assets/Edit-BX4Kuk11.js",
+>>>>>>> Stashed changes
     "name": "Edit",
     "src": "resources/js/Pages/StrategicHouse/InitiativeRelation/Edit.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_InitiativeRelationFormCard-CE-uoCRn.js",
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
@@ -1854,11 +3396,28 @@
   },
   "resources/js/Pages/StrategicHouse/InitiativeRelation/Index.vue": {
     "file": "assets/Index-CYg6MPdc.js",
+=======
+      "_InitiativeRelationFormCard-CaMW3bQb.js",
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "_InitiativeDetailsWithRelations-Byq5cJQ5.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/StrategicHouse/InitiativeRelation/Index.vue": {
+    "file": "assets/Index-CrG5iXvY.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/StrategicHouse/InitiativeRelation/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
       "_UserLayout-DAbQBSxP.js",
@@ -1873,11 +3432,28 @@
   },
   "resources/js/Pages/StrategicHouse/InitiativeSupport/Index.vue": {
     "file": "assets/Index-8XoCT6hE.js",
+=======
+      "_menu-BChd8NNS.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_UserLayout-yYl23bWu.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/Index-CuZDVnQB.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/StrategicHouse/InitiativeSupport/Index.vue": {
+    "file": "assets/Index-DfGd1yKm.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/StrategicHouse/InitiativeSupport/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_ConfirmationModal-D-s_8c8i.js",
       "_menu-CbWT6zLb.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
@@ -1894,11 +3470,30 @@
   },
   "resources/js/Pages/StrategicHouse/ItBuildingBlocks/Index.vue": {
     "file": "assets/Index-BmI5IxaD.js",
+=======
+      "_ConfirmationModal-Ca0YLz7P.js",
+      "_menu-BChd8NNS.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_UserLayout-yYl23bWu.js",
+      "_transition-BzEpyeFb.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/Index-P9-vwAO7.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/StrategicHouse/ItBuildingBlocks/Index.vue": {
+    "file": "assets/Index-CtVJ5_Ph.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/StrategicHouse/ItBuildingBlocks/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_ConfirmationModal-D-s_8c8i.js",
       "_menu-CbWT6zLb.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
@@ -1915,11 +3510,30 @@
   },
   "resources/js/Pages/StrategicHouse/MapTechnology/Index.vue": {
     "file": "assets/Index-COUZOS1U.js",
+=======
+      "_ConfirmationModal-Ca0YLz7P.js",
+      "_menu-BChd8NNS.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_UserLayout-yYl23bWu.js",
+      "_transition-BzEpyeFb.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/Index-dF-kj5YQ.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/StrategicHouse/MapTechnology/Index.vue": {
+    "file": "assets/Index-Ck4-eDlA.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/StrategicHouse/MapTechnology/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_UserLayout-DAbQBSxP.js",
       "_ConfirmationModal-D-s_8c8i.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
@@ -1936,11 +3550,30 @@
   },
   "resources/js/Pages/StrategicHouse/RoadMap/Index.vue": {
     "file": "assets/Index-C2Nf9PcK.js",
+=======
+      "_UserLayout-yYl23bWu.js",
+      "_ConfirmationModal-Ca0YLz7P.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_menu-BChd8NNS.js",
+      "_keyboard-BYoTzO9V.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+      "_transition-BzEpyeFb.js"
+    ],
+    "css": [
+      "assets/Index-alHqmrI7.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/StrategicHouse/RoadMap/Index.vue": {
+    "file": "assets/Index-BIBY8v6C.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/StrategicHouse/RoadMap/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "resources/js/Components/StrategicHouse/RoadMap/ItInitiativeRoadmapContent.vue",
@@ -1956,11 +3589,29 @@
   },
   "resources/js/Pages/StrategicHouse/RoadMap/Summary.vue": {
     "file": "assets/Summary-D0zoo9yQ.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "resources/js/Components/StrategicHouse/RoadMap/ItInitiativeRoadmapContent.vue",
+      "_EyeIcon-CFtLyov2.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/StrategicHouse/RoadMap/Summary.vue": {
+    "file": "assets/Summary-BJQ66SEi.js",
+>>>>>>> Stashed changes
     "name": "Summary",
     "src": "resources/js/Pages/StrategicHouse/RoadMap/Summary.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
@@ -1975,11 +3626,28 @@
   },
   "resources/js/Pages/StrategicHouse/StrategicPillar/Index.vue": {
     "file": "assets/Index-Bvtl7dmN.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/Summary-kXVTJ-wb.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/StrategicHouse/StrategicPillar/Index.vue": {
+    "file": "assets/Index-Dmv1STIG.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/StrategicHouse/StrategicPillar/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "_transition-D7EqEbDd.js",
@@ -1996,11 +3664,30 @@
   },
   "resources/js/Pages/Sync/Index.vue": {
     "file": "assets/Index-ke_XYDgK.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "_transition-BzEpyeFb.js",
+      "_ConfirmationModal-Ca0YLz7P.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/Index-DReDaQDt.css",
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/Pages/Sync/Index.vue": {
+    "file": "assets/Index-BB2KJxhA.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/Sync/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+<<<<<<< Updated upstream
       "_menu-CbWT6zLb.js",
       "_UserLayout-DAbQBSxP.js",
       "_CheckCircleIcon-BQJR1wAC.js",
@@ -2015,6 +3702,22 @@
   },
   "resources/js/app.js": {
     "file": "assets/app-BpyAr72k.js",
+=======
+      "_menu-BChd8NNS.js",
+      "_UserLayout-yYl23bWu.js",
+      "_CheckCircleIcon-BCpc0xDr.js",
+      "_ServerStackIcon-DlVvs2df.js",
+      "_keyboard-BYoTzO9V.js",
+      "_useDarkMode-D8p27aGg.js",
+      "_ShieldCheckIcon-BKIVte7m.js"
+    ],
+    "css": [
+      "assets/app-BU9bMOXI.css"
+    ]
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-DXf5GR_c.js",
+>>>>>>> Stashed changes
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -2100,7 +3803,11 @@
       "resources/js/Pages/Sync/Index.vue"
     ],
     "css": [
+<<<<<<< Updated upstream
       "assets/app-CapYmz0I.css"
+=======
+      "assets/app-BU9bMOXI.css"
+>>>>>>> Stashed changes
     ]
   }
 }

@@ -83,6 +83,15 @@
                                 @click="() => activeTab = 'Strategic House PT KPI'">
                                 Strategic House PT KPI
                             </button>
+
+                            <button type="button"
+                                class="w-full text-left px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
+                                :class="activeTab === 'Strategic House C&T'
+                                    ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
+                                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
+                                @click="() => activeTab = 'Strategic House C&T'">
+                                Strategic House C&T
+                            </button>
                         </div>
                     </div>
                 </aside>
@@ -149,6 +158,10 @@
                             :pillarStrategies="pillarStrategies"
                             :additionalThemes="additionalThemes" />
 
+                        <StrategicHouseCT v-else-if="activeTab === 'Strategic House C&T'"
+                            :strategicHouseCT="strategicHouseCT"
+                            :ctGoals="ctGoals" />
+
                     </div>
                 </main>
             </div>
@@ -167,6 +180,7 @@ import StrategicHousePertamina from '@/Components/ProgramPlanning/BusinessStrate
 import StrategicHouseUpstream from '@/Components/ProgramPlanning/BusinessStrategy/StrategisHouse/StrategicHouseUpstream.vue';
 import StrategicHouseGas from '@/Components/ProgramPlanning/BusinessStrategy/StrategisHouse/StrategicHouseGas.vue';
 import StrategicHousePTKPI from '@/Components/ProgramPlanning/BusinessStrategy/StrategisHouse/StrategicHousePTKPI.vue';
+import StrategicHouseCT from '@/Components/ProgramPlanning/BusinessStrategy/StrategisHouse/StrategicHouseC&T.vue';
 import { ref } from 'vue';
 
 const props = defineProps({
@@ -186,6 +200,8 @@ const props = defineProps({
     perspectiveThemes: { type: Array, default: () => [] },
     pillarStrategies: { type: Array, default: () => [] },
     additionalThemes: { type: Array, default: () => [] },
+    strategicHouseCT: { type: Object, default: () => ({}) },
+    ctGoals: { type: Array, default: () => [] },
 });
 
 const defaultTab = 'KBUMN Mission';

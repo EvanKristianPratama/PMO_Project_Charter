@@ -65,8 +65,12 @@ class IndexController extends Controller
         
         $pillarStrategies = TrsPillarStrategy::whereIn('themes_id', [70, 71, 72, 73])
             ->orderBy('themes_id')
-            ->orderBy('id')
             ->get();
+
+        $strategicHouseCT = MstStrategicHouse::where('id', 8)->first();
+        $ctGoals = Goal::where('pilar', 8)->with(['themes' => function($query) {
+            $query->orderBy('theme_number');
+        }, 'themes.pillarThemes'])->get();
 
         return Inertia::render('ProgramPlanning/BusinessStrategy/Index', [
             'goals' => $goals,
@@ -80,11 +84,15 @@ class IndexController extends Controller
             'upstreamGoals' => $upstreamGoals,
             'strategicHouseGas' => $strategicHouseGas,
             'gasGoals' => $gasGoals,
+            'strategicHouseCT' => $strategicHouseCT,
+            'ctGoals' => $ctGoals,
             'strategicHouseKPI' => $strategicHouseKPI,
             'strategyThemes' => $strategyThemes,
             'perspectiveThemes' => $perspectiveThemes,
             'pillarStrategies' => $pillarStrategies,
             'additionalThemes' => $additionalThemes,
+            'strategicHouseCT' => $strategicHouseCT,
+            'ctGoals' => $ctGoals,
         ]);
     }
 }
