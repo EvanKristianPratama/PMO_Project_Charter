@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="COBIT Policy Management">
+    <UserLayout title="Kebijakan & Butir Kebijakan">
         <div class="animate-fade-in-up space-y-6">
             <!-- Page Header -->
             <section class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717]">
@@ -8,8 +8,8 @@
 
                 <div class="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#821f44] dark:text-[#a83262]"> Variabel_Pedoman Tata Kelola Teknologi Informasi Pertamina (Persero)</p>
-                        <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Variable_Kebijakan Khusus</h1>
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#821f44] dark:text-[#a83262]">Pedoman Tata Kelola Teknologi Informasi Pertamina (Persero)</p>
+                        <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Kebijakan Khusus</h1>
                     </div>
                     <div class="flex items-center gap-3">
                         <button
@@ -19,7 +19,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                             </svg>
-                            Tambah Objective
+                            Tambah Kebijakan Khusus
                         </button>
                     </div>
                 </div>
@@ -50,7 +50,7 @@
                     <div class="flex items-center justify-between border-b border-slate-200 pb-3 dark:border-white/10 mb-4">
                         <h3 class="text-base font-bold text-[#821f44] dark:text-[#a83262] flex items-center gap-2">
                             <span class="inline-block w-2.5 h-2.5 rounded-full bg-[#821f44] animate-ping"></span>
-                            Buat Governance Objective Baru
+                            Buat Kebijakan Khusus Baru
                         </h3>
                         <button @click="cancelCreateObjective" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
@@ -65,11 +65,7 @@
                         <div class="bg-[#821f44] p-5 text-white">
                             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-xs font-semibold tracking-wider opacity-90 mb-3">
                                 <div class="flex items-center gap-2">
-                                    <span>Domain (Bahasa Indonesia):</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span>Focus Area:</span>
-                                    <span class="bg-white/20 px-2 py-0.5 rounded font-bold">COBIT Core Model</span>
+                                    <span>Kebijakan (Bahasa Indonesia):</span>
                                 </div>
                             </div>
 
@@ -78,14 +74,14 @@
                                 <input 
                                     type="text" 
                                     v-model="objectiveForm.domain" 
-                                    placeholder="Masukkan nama domain manual (e.g. Evaluasi, Arahan dan Pemantauan)" 
+                                    placeholder="Masukkan nama kebijakan manual (e.g. Evaluasi, Arahan dan Pemantauan)" 
                                     class="w-full bg-white/10 text-white placeholder-white/40 border border-white/20 rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-white/40"
                                 />
                                 <div v-if="objectiveForm.errors.domain" class="text-xs text-red-200 font-medium bg-red-900/30 p-2 rounded">{{ objectiveForm.errors.domain }}</div>
                             </div>
                             
                             <div class="space-y-3">
-                                <label class="block text-xs font-bold uppercase tracking-wider text-white/80">Governance Objective:</label>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-white/80">Kebijakan Khusus:</label>
                                 <div class="flex flex-col sm:flex-row gap-3">
                                     <input 
                                         type="text" 
@@ -97,7 +93,7 @@
                                     <input 
                                         type="text" 
                                         v-model="objectiveForm.objective" 
-                                        placeholder="Nama Objective (e.g. Ensured Governance Framework Setting...)" 
+                                        placeholder="Nama Kebijakan Khusus (e.g. Ensured Governance Framework Setting...)" 
                                         class="w-full sm:w-3/4 bg-white/10 text-white placeholder-white/40 border border-white/20 rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-white/40"
                                         required
                                     />
@@ -112,13 +108,13 @@
                             <!-- Description Box -->
                             <div class="border border-slate-200 rounded-lg overflow-hidden dark:border-white/10">
                                 <div class="bg-slate-100 px-4 py-2 text-xs font-bold uppercase text-slate-700 dark:bg-white/5 dark:text-slate-300 border-b border-slate-200 dark:border-white/10">
-                                    Description
+                                    Deskripsi
                                 </div>
                                 <div class="p-4">
                                     <textarea 
                                         v-model="objectiveForm.objective_description" 
                                         rows="3" 
-                                        placeholder="Masukkan deskripsi lengkap objective di sini..." 
+                                        placeholder="Masukkan deskripsi lengkap kebijakan khusus di sini..." 
                                         class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-black/20 dark:text-white dark:border-white/10"
                                     ></textarea>
                                 </div>
@@ -127,13 +123,13 @@
                             <!-- Purpose Box -->
                             <div class="border border-slate-200 rounded-lg overflow-hidden dark:border-white/10">
                                 <div class="bg-slate-100 px-4 py-2 text-xs font-bold uppercase text-slate-700 dark:bg-white/5 dark:text-slate-300 border-b border-slate-200 dark:border-white/10">
-                                    Purpose
+                                    Tujuan
                                 </div>
                                 <div class="p-4">
                                     <textarea 
                                         v-model="objectiveForm.objective_purpose" 
                                         rows="3" 
-                                        placeholder="Masukkan tujuan (purpose) dari governance objective di sini..." 
+                                        placeholder="Masukkan tujuan dari kebijakan khusus di sini..." 
                                         class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-black/20 dark:text-white dark:border-white/10"
                                     ></textarea>
                                 </div>
@@ -146,7 +142,7 @@
                                 </svg>
                                 <div>
                                     <span class="font-bold">What You See Is What You Get:</span> 
-                                    Isi nama dan informasi Objective utama terlebih dahulu. Setelah Anda menyimpannya ke database, Anda dapat menambahkan baris <strong>Management Practices</strong> yang berkaitan dengannya.
+                                    Isi nama dan informasi Kebijakan Khusus utama terlebih dahulu. Setelah Anda menyimpannya ke database, Anda dapat menambahkan baris <strong>Butir Kebijakan</strong> yang berkaitan dengannya.
                                 </div>
                             </div>
                         </div>
@@ -166,7 +162,7 @@
                                 :disabled="objectiveForm.processing"
                             >
                                 <span v-if="objectiveForm.processing" class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></span>
-                                Simpan Objective
+                                Simpan Kebijakan Khusus
                             </button>
                         </div>
                     </form>
@@ -180,9 +176,9 @@
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 text-slate-400 mx-auto mb-4">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                     </svg>
-                    <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Belum ada Governance Objective</p>
+                    <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Belum ada Kebijakan Khusus</p>
                     <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                        Klik tombol di atas untuk membuat objective dan management practice COBIT pertama Anda.
+                        Klik tombol di atas untuk membuat Kebijakan Khusus dan Butir Kebijakan pertama Anda.
                     </p>
                     <button 
                         @click="startCreateObjective"
@@ -205,11 +201,7 @@
                             <div class="bg-[#821f44] p-5 text-white">
                                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-xs font-semibold tracking-wider opacity-90 mb-3">
                                     <div class="flex items-center gap-2">
-                                        <span>Domain (Bahasa Indonesia):</span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span>Focus Area:</span>
-                                        <span class="bg-white/20 px-2 py-0.5 rounded font-bold">COBIT Core Model</span>
+                                        <span>Kebijakan (Bahasa Indonesia):</span>
                                     </div>
                                 </div>
 
@@ -218,14 +210,14 @@
                                     <input 
                                         type="text" 
                                         v-model="editObjectiveForm.domain" 
-                                        placeholder="Nama Domain Manual..." 
+                                        placeholder="Nama Kebijakan Manual..." 
                                         class="w-full bg-white/10 text-white placeholder-white/40 border border-white/20 rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-white/40"
                                     />
                                     <div v-if="editObjectiveForm.errors.domain" class="text-xs text-red-200 font-medium bg-red-900/30 p-2 rounded">{{ editObjectiveForm.errors.domain }}</div>
                                 </div>
                                 
                                 <div class="space-y-2">
-                                    <label class="block text-xs font-bold uppercase tracking-wider text-white/80">Governance Objective (ID: {{ obj.objective_id }}):</label>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-white/80">Kebijakan Khusus (ID: {{ obj.objective_id }}):</label>
                                     <input 
                                         type="text" 
                                         v-model="editObjectiveForm.objective" 
@@ -241,7 +233,7 @@
                                 <!-- Description -->
                                 <div class="border border-slate-200 rounded-lg overflow-hidden dark:border-white/10">
                                     <div class="bg-slate-100 px-4 py-2 text-xs font-bold uppercase text-slate-700 dark:bg-white/5 dark:text-slate-300 border-b border-slate-200 dark:border-white/10">
-                                        Description
+                                        Deskripsi
                                     </div>
                                     <div class="p-4">
                                         <textarea 
@@ -255,7 +247,7 @@
                                 <!-- Purpose -->
                                 <div class="border border-slate-200 rounded-lg overflow-hidden dark:border-white/10">
                                     <div class="bg-slate-100 px-4 py-2 text-xs font-bold uppercase text-slate-700 dark:bg-white/5 dark:text-slate-300 border-b border-slate-200 dark:border-white/10">
-                                        Purpose
+                                        Tujuan
                                     </div>
                                     <div class="p-4">
                                         <textarea 
@@ -277,7 +269,7 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                                     </svg>
-                                    Hapus Objective
+                                    Hapus Kebijakan Khusus
                                 </button>
                                 
                                 <div class="flex gap-3">
@@ -310,7 +302,7 @@
                                 <button 
                                     @click="startEditObjective(obj)"
                                     class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm shadow transition-all duration-150 active:scale-95"
-                                    title="Edit Objective"
+                                    title="Edit Kebijakan Khusus"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.83 20.013a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
@@ -319,7 +311,7 @@
                                 <button 
                                     @click="deleteObjective(obj)"
                                     class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-rose-500/80 hover:bg-rose-500 text-white backdrop-blur-sm shadow transition-all duration-150 active:scale-95"
-                                    title="Hapus Objective"
+                                    title="Hapus Kebijakan Khusus"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
@@ -334,7 +326,7 @@
                             </div>
                             
                             <h2 class="mt-2 text-lg sm:text-xl font-bold tracking-tight pr-10">
-                                Governance Objective: <span class="font-mono text-yellow-300">{{ obj.objective_id }}</span> — {{ obj.objective }}
+                                Kebijakan Khusus: <span class="font-mono text-yellow-300">{{ obj.objective_id }}</span> — {{ obj.objective }}
                             </h2>
                         </div>
 
@@ -346,7 +338,7 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-[#821f44]">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                                     </svg>
-                                    Description
+                                    Deskripsi
                                 </div>
                                 <div class="p-4 text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">
                                     {{ obj.objective_description || 'Belum ada deskripsi.' }}
@@ -360,21 +352,21 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 21l8.982-2.01c.784-.176 1.485-.645 1.947-1.3l2.898-4.078a1.534 1.534 0 00-.472-2.186l-4.502-2.602a1.534 1.534 0 00-2.122.441L12.83 13.8a4.117 4.117 0 01-3.017 2.104z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 10l1.25-2 .5-2-2.25 1-1.5 2-1 2-1 2.5" />
                                     </svg>
-                                    Purpose
+                                    Tujuan
                                 </div>
                                 <div class="p-4 text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">
                                     {{ obj.objective_purpose || 'Belum ada deskripsi tujuan.' }}
                                 </div>
                             </div>
 
-                            <!-- Management Practices Section (mst_practice) -->
+                            <!-- Butir Kebijakan Section (mst_practice) -->
                             <div class="border border-[#821f44]/25 rounded-lg overflow-hidden dark:border-[#a83262]/30 shadow-sm">
                                 <div class="bg-[#821f44]/5 px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-800 dark:bg-white/5 dark:text-slate-300 border-b border-[#821f44]/25 dark:border-white/10 flex items-center justify-between">
                                     <div class="flex items-center gap-2 text-[#821f44] dark:text-[#db588c]">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                                         </svg>
-                                        Management Practices (mst_practice)
+                                        Butir Kebijakan (mst_practice)
                                     </div>
                                     <button 
                                         @click="startCreatePractice(obj.objective_id)"
@@ -383,7 +375,7 @@
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-3 h-3">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                         </svg>
-                                        Tambah Practice
+                                        Tambah Butir Kebijakan
                                     </button>
                                 </div>
 
@@ -391,13 +383,13 @@
                                 <div v-if="activePracticeObjectiveId === obj.objective_id" class="bg-slate-50 p-4 border-b border-dashed border-[#821f44]/20 dark:bg-[#262626]">
                                     <h4 class="text-xs font-bold text-[#821f44] dark:text-[#a83262] mb-3 flex items-center gap-1.5">
                                         <span class="inline-block w-1.5 h-1.5 rounded-full bg-[#821f44] animate-pulse"></span>
-                                        {{ editingPracticeId ? 'Edit Management Practice' : 'Tambah Management Practice Baru' }}
+                                        {{ editingPracticeId ? 'Edit Butir Kebijakan' : 'Tambah Butir Kebijakan Baru' }}
                                     </h4>
                                     
                                     <form @submit.prevent="submitPracticeForm" class="space-y-3">
                                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                             <div class="space-y-1 sm:col-span-1">
-                                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Practice ID:</label>
+                                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">ID Butir Kebijakan:</label>
                                                 <input 
                                                     type="text" 
                                                     v-model="practiceForm.practice_id" 
@@ -409,22 +401,22 @@
                                                 <div v-if="practiceForm.errors.practice_id" class="text-[10px] text-red-500 font-medium font-mono">{{ practiceForm.errors.practice_id }}</div>
                                             </div>
                                             <div class="space-y-1 sm:col-span-2">
-                                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Practice Name:</label>
+                                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nama Butir Kebijakan:</label>
                                                 <input 
                                                     type="text" 
                                                     v-model="practiceForm.practice_name" 
-                                                    placeholder="Nama Practice (e.g. Evaluate the governance system)" 
+                                                    placeholder="Nama Butir Kebijakan..." 
                                                     class="w-full bg-white text-slate-800 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-black/20 dark:text-white dark:border-white/10"
                                                 />
                                             </div>
                                         </div>
 
                                         <div class="space-y-1">
-                                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Practice Description:</label>
+                                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Deskripsi Butir Kebijakan:</label>
                                             <textarea 
                                                 v-model="practiceForm.practice_description" 
                                                 rows="2" 
-                                                placeholder="Detail aktivitas atau deskripsi practice..."
+                                                placeholder="Detail aktivitas atau deskripsi butir kebijakan..."
                                                 class="w-full bg-white text-slate-800 border border-slate-300 rounded-lg p-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-black/20 dark:text-white dark:border-white/10"
                                             ></textarea>
                                         </div>
@@ -443,7 +435,7 @@
                                                 :disabled="practiceForm.processing"
                                             >
                                                 <span v-if="practiceForm.processing" class="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></span>
-                                                Simpan Practice
+                                                Simpan Butir Kebijakan
                                             </button>
                                         </div>
                                     </form>
@@ -453,7 +445,7 @@
                                 <div class="divide-y divide-slate-100 dark:divide-white/5">
                                     <!-- No practices yet -->
                                     <div v-if="!obj.practices || obj.practices.length === 0" class="p-4 text-center text-xs text-slate-400 dark:text-slate-500">
-                                        Belum ada Management Practice. Klik "+ Tambah Practice" untuk memasukkan data.
+                                        Belum ada Butir Kebijakan. Klik "+ Tambah Butir Kebijakan" untuk memasukkan data.
                                     </div>
 
                                     <!-- Loop practices -->
@@ -472,7 +464,7 @@
                                         <!-- Name & Desc Column -->
                                         <div class="flex-1 space-y-1">
                                             <div class="text-xs font-bold text-slate-800 dark:text-slate-200">
-                                                {{ prac.practice_name || 'Tanpa Nama Practice' }}
+                                                {{ prac.practice_name || 'Tanpa Nama Butir Kebijakan' }}
                                             </div>
                                             <div class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed whitespace-pre-line">
                                                 {{ prac.practice_description || 'Belum ada deskripsi detail.' }}
@@ -484,7 +476,7 @@
                                             <button 
                                                 @click="startEditPractice(obj.objective_id, prac)"
                                                 class="p-1 text-slate-400 hover:text-[#821f44] dark:hover:text-[#db588c] rounded transition"
-                                                title="Edit Practice"
+                                                title="Edit Butir Kebijakan"
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.83 20.013a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
@@ -493,7 +485,7 @@
                                             <button 
                                                 @click="deletePractice(prac)"
                                                 class="p-1 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded transition"
-                                                title="Hapus Practice"
+                                                title="Hapus Butir Kebijakan"
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
@@ -651,19 +643,19 @@ function submitUpdateObjective(id) {
             editObjectiveForm.reset();
         },
         onError: () => {
-            localError.value = 'Gagal menyimpan perubahan Objective.';
+            localError.value = 'Gagal menyimpan perubahan Kebijakan Khusus.';
         }
     });
 }
 
 function deleteObjective(obj) {
-    if (confirm(`Apakah Anda yakin ingin menghapus Objective "${obj.objective_id} - ${obj.objective}" beserta seluruh Management Practices di dalamnya?`)) {
+    if (confirm(`Apakah Anda yakin ingin menghapus Kebijakan Khusus "${obj.objective_id} - ${obj.objective}" beserta seluruh Butir Kebijakan di dalamnya?`)) {
         router.delete(route('policy.objective.destroy', obj.objective_id), {
             onSuccess: () => {
-                localSuccess.value = 'Objective berhasil dihapus.';
+                localSuccess.value = 'Kebijakan Khusus berhasil dihapus.';
             },
             onError: () => {
-                localError.value = 'Gagal menghapus Objective.';
+                localError.value = 'Gagal menghapus Kebijakan Khusus.';
             }
         });
     }
@@ -728,7 +720,7 @@ function submitPracticeForm() {
                 cancelPracticeForm();
             },
             onError: () => {
-                localError.value = 'Gagal memperbarui Management Practice.';
+                localError.value = 'Gagal memperbarui Butir Kebijakan.';
             }
         });
     } else {
@@ -738,20 +730,20 @@ function submitPracticeForm() {
                 cancelPracticeForm();
             },
             onError: () => {
-                localError.value = 'Mohon periksa kesalahan input pada Management Practice.';
+                localError.value = 'Mohon periksa kesalahan input pada Butir Kebijakan.';
             }
         });
     }
 }
 
 function deletePractice(practice) {
-    if (confirm(`Apakah Anda yakin ingin menghapus Management Practice "${practice.practice_id} - ${practice.practice_name || ''}"?`)) {
+    if (confirm(`Apakah Anda yakin ingin menghapus Butir Kebijakan "${practice.practice_id} - ${practice.practice_name || ''}"?`)) {
         router.delete(route('policy.practice.destroy', practice.practice_id), {
             onSuccess: () => {
-                localSuccess.value = 'Management Practice berhasil dihapus.';
+                localSuccess.value = 'Butir Kebijakan berhasil dihapus.';
             },
             onError: () => {
-                localError.value = 'Gagal menghapus Management Practice.';
+                localError.value = 'Gagal menghapus Butir Kebijakan.';
             }
         });
     }
