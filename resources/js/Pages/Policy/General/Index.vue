@@ -54,7 +54,7 @@
                             <tr>
                                 <th scope="col" class="w-20 px-6 py-4 text-center">No.</th>
                                 <th scope="col" class="px-6 py-4">Kebijakan Umum</th>
-                                <th scope="col" class="w-32 px-6 py-4 text-center">Aksi</th>
+                                <th scope="col" class="w-48 px-6 py-4 text-center pr-16 lg:pr-20">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200 dark:divide-white/10 dark:bg-transparent">
@@ -77,7 +77,7 @@
                                     {{ policy.description }}
                                 </td>
                                 <!-- Actions Column -->
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 pr-16 lg:pr-20">
                                     <div class="flex items-center justify-center gap-2">
                                         <button 
                                             @click="openEditModal(policy)"
