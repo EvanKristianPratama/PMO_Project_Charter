@@ -101,6 +101,15 @@
                                 @click="() => activeTab = 'Strategic House IML'">
                                 Strategic House IML
                             </button>
+
+                            <button type="button"
+                                class="w-full text-left px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
+                                :class="activeTab === 'Strategic House PNRE'
+                                    ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
+                                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
+                                @click="() => activeTab = 'Strategic House PNRE'">
+                                Strategic House PNRE
+                            </button>
                         </div>
                     </div>
                 </aside>
@@ -174,6 +183,10 @@
                         <StrategicHouseIML v-else-if="activeTab === 'Strategic House IML'"
                             :strategicHouseIML="strategicHouseIML"
                             :imlGoals="imlGoals" />
+
+                        <StrategicHousePNRE v-else-if="activeTab === 'Strategic House PNRE'"
+                            :strategicHousePNRE="strategicHousePNRE"
+                            :pnreGoals="pnreGoals" />
                     </div>
                 </main>
             </div>
@@ -194,6 +207,7 @@ import StrategicHouseGas from '@/Components/ProgramPlanning/BusinessStrategy/Str
 import StrategicHousePTKPI from '@/Components/ProgramPlanning/BusinessStrategy/StrategisHouse/StrategicHousePTKPI.vue';
 import StrategicHouseCT from '@/Components/ProgramPlanning/BusinessStrategy/StrategisHouse/StrategicHouseC&T.vue';
 import StrategicHouseIML from '@/Components/ProgramPlanning/BusinessStrategy/StrategisHouse/StrategicHouseIML.vue';
+import StrategicHousePNRE from '@/Components/ProgramPlanning/BusinessStrategy/StrategisHouse/StrategicHousePNRE.vue';
 import { ref } from 'vue';
 
 const props = defineProps({
@@ -217,6 +231,8 @@ const props = defineProps({
     ctGoals: { type: Array, default: () => [] },
     strategicHouseIML: { type: Object, default: () => ({}) },
     imlGoals: { type: Array, default: () => [] },
+    strategicHousePNRE: { type: Object, default: () => ({}) },
+    pnreGoals: { type: Array, default: () => [] },
 });
 
 const defaultTab = 'KBUMN Mission';
