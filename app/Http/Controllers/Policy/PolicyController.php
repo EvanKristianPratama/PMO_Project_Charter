@@ -17,9 +17,11 @@ class PolicyController extends Controller
      */
     public function index(): Response
     {
-        $objectives = MstObjective::with('practices')
-            ->orderBy('objective_id')
-            ->get();
+        $objectives = MstObjective::with(['practices' => function($query) {
+            $query->orderBy('practice_id', 'asc');
+        }])
+        ->orderBy('objective_id')
+        ->get();
 
         return Inertia::render('Policy/Index', [
             'objectives' => $objectives,
