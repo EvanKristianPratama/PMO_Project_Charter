@@ -318,6 +318,19 @@ const selectedBusinessUnitIds = computed(() => {
 const matchesSelectedBusinessUnit = (initiative) => {
     if (!selectedBusinessUnitIds.value) return true;
 
+    if (String(selectedBusinessUnit.value).startsWith('group:')) {
+        const groupKey = normalizeBusinessStrategyGroupKey(String(selectedBusinessUnit.value).replace('group:', ''));
+        const initiativeGroupKey = Number(initiative?.groub_id ?? 0) === 2
+            ? 'subholding'
+            : Number(initiative?.groub_id ?? 0) > 0
+                ? 'holding'
+                : '';
+
+        if (initiativeGroupKey) {
+            return initiativeGroupKey === groupKey;
+        }
+    }
+
     return selectedBusinessUnitIds.value.has(String(initiative?.business_unit_id ?? ''));
 };
 
@@ -2413,4 +2426,3 @@ const getBusinessUnitInitiativeCount = (row) => {
     }
 }
 </style>
-

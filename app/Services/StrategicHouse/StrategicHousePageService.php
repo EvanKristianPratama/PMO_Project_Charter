@@ -289,7 +289,7 @@ class StrategicHousePageService
 
     private function getConsolidatedInitiatives(string $profile = self::CONSOLIDATED_PROFILE_MAPPING): Collection
     {
-        $cacheKey = sprintf('sh_consolidated_initiatives_%s_v10', $profile);
+        $cacheKey = sprintf('sh_consolidated_initiatives_%s_v12', $profile);
 
         return Cache::remember($cacheKey, 3600, function () use ($profile) {
             return MstInitiative::query()
@@ -336,6 +336,7 @@ class StrategicHousePageService
             'statuses' => $implData['statuses'],
             'source' => !is_null($initiative->source) ? (int) $initiative->source : null,
             'source_name' => $initiative->sourceData?->name,
+            'groub_id' => max(1, (int) ($initiative->organization?->groub_id ?? 1)),
             'mapped_project_id' => $mappedProject?->id,
         ];
     }
@@ -661,7 +662,7 @@ class StrategicHousePageService
             ],
             default => [
                 'latestStatus' => fn ($query) => $this->selectLatestPlanningStatus($query),
-                'organization:id,name',
+                'organization:id,name,groub_id',
                 'latestStatusImplementation' => fn ($query) => $this->selectLatestImplementationStatus($query),
                 'statusImplementations:id,initiative_id,start,end,year,review_status',
                 'sourceData:id,name',
