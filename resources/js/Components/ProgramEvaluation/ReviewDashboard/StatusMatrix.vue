@@ -18,7 +18,7 @@
                 </thead>
                 <tbody class="bg-white dark:bg-[#171717]">
                     <tr v-for="row in matrixData" :key="row.name" class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-                        <td class="border-r border-slate-900 px-4 py-4 font-black uppercase text-slate-900 dark:border-white/20 dark:text-white">
+                        <td class="border-r border-slate-900 px-4 py-4 font-black text-slate-900 dark:border-white/20 dark:text-white">
                             {{ row.name }}
                         </td>
                         <template v-for="status in statuses" :key="row.name + status">
