@@ -160,7 +160,7 @@ const logout = () => {
                             <Link
                                 :href="item.href"
                                 class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
-                                :class="item.active(currentUrl)
+                                :class="item.active(currentUrl.value)
                                     ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
                                     : 'text-slate-600 hover:bg-blue-50 hover:text-blue-600 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-blue-300'"
                                 @click="mobileMenuOpen = false"
@@ -174,7 +174,7 @@ const logout = () => {
                                     :key="`mobile-sub-${child.href}`"
                                     :href="child.href"
                                     class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
-                                    :class="child.active(currentUrl)
+                                    :class="child.active(currentUrl.value)
                                         ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
                                         : 'text-slate-600 hover:bg-blue-50 hover:text-blue-600 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-blue-300'"
                                     @click="mobileMenuOpen = false"
@@ -188,7 +188,7 @@ const logout = () => {
                             v-else
                             :href="item.href"
                             class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
-                            :class="item.active(currentUrl)
+                            :class="item.active(currentUrl.value)
                                 ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
                                 : 'text-slate-600 hover:bg-blue-50 hover:text-blue-600 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-blue-300'"
                             @click="mobileMenuOpen = false"
