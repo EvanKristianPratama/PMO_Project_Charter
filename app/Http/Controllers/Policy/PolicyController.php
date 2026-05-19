@@ -20,7 +20,17 @@ class PolicyController extends Controller
         $objectives = MstObjective::with(['practices' => function($query) {
             $query->orderBy('practice_id', 'asc');
         }])
-        ->orderBy('objective_id')
+        ->orderByRaw("
+            CASE 
+                WHEN objective_id LIKE 'EDM%' THEN 1
+                WHEN objective_id LIKE 'APO%' THEN 2
+                WHEN objective_id LIKE 'BAI%' THEN 3
+                WHEN objective_id LIKE 'DSS%' THEN 4
+                WHEN objective_id LIKE 'MEA%' THEN 5
+                ELSE 6
+            END ASC
+        ")
+        ->orderBy('objective_id', 'asc')
         ->get();
 
         return Inertia::render('Policy/Index', [
