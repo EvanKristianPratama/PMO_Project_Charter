@@ -5,7 +5,7 @@ import { useNavigation } from '@/Composables/useNavigation';
 
 const { navItems } = useNavigation();
 const page = usePage();
-const currentUrl = computed(() => page.url);
+const currentUrl = computed(() => page.url || '');
 
 const strategicHouseItem = computed(() => {
     return navItems.value.find((item) => item.label === 'Strategic House') ?? null;

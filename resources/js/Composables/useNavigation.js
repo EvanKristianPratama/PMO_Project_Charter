@@ -223,11 +223,11 @@ export function useNavigation() {
                 href: safeRoute("program-implementation.index"),
                 icon: ChartBarIcon,
                 active: (url) =>
-                    url.startsWith("/program-implementation") ||
+                    (url || '').startsWith("/program-implementation") ||
                     url === "/dashboard" ||
-                    url.startsWith("/digital-initiatives") ||
-                    url.startsWith("/it-initiatives") ||
-                    url.startsWith("/roadmap"),
+                    (url || '').startsWith("/digital-initiatives") ||
+                    (url || '').startsWith("/it-initiatives") ||
+                    (url || '').startsWith("/roadmap"),
                 children: programImplementationChildren,
             },
             {
@@ -235,33 +235,33 @@ export function useNavigation() {
                 href: safeRoute("architecture.index"),
                 icon: CubeIcon,
                 active: (url) =>
-                    url.startsWith("/architecture") ||
-                    url.startsWith("/master-data/business-capabilities"),
+                    (url || '').startsWith("/architecture") ||
+                    (url || '').startsWith("/master-data/business-capabilities"),
                 children: architectureChildren,
             },
             {
                 label: "Service Portofolio",
                 href: safeRoute("service-portofolio.index"),
                 icon: CubeIcon,
-                active: (url) => url.startsWith("/service-portofolio"),
+                active: (url) => (url || '').startsWith("/service-portofolio"),
             },
             {
                 label: "Policy",
                 href: safeRoute("policy.general.index"),
                 icon: DocumentTextIcon,
-                active: (url) => url.startsWith("/policy"),
+                active: (url) => (url || '').startsWith("/policy"),
                 children: [
                     {
                         label: "Kebijakan Umum",
                         href: safeRoute("policy.general.index"),
                         icon: DocumentTextIcon,
-                        active: (url) => url.startsWith("/policy/general"),
+                        active: (url) => (url || '').startsWith("/policy/general"),
                     },
                     {
                         label: "Kebijakan Khusus",
                         href: safeRoute("policy.specific.index"),
                         icon: DocumentTextIcon,
-                        active: (url) => url.startsWith("/policy/specific"),
+                        active: (url) => (url || '').startsWith("/policy/specific"),
                     },
                 ],
             },
@@ -269,13 +269,13 @@ export function useNavigation() {
                 label: "Master Data",
                 href: safeRoute("master-data.index"),
                 icon: TableCellsIcon,
-                active: (url) => url.startsWith("/master-data"),
+                active: (url) => (url || '').startsWith("/master-data"),
             },
             {
                 label: "Sinkronisasi Data",
                 href: safeRoute("sync.index"),
                 icon: CloudArrowDownIcon,
-                active: (url) => url.startsWith("/sync"),
+                active: (url) => (url || '').startsWith("/sync"),
             },
         ];
 
@@ -284,7 +284,7 @@ export function useNavigation() {
                 label: "Admin",
                 href: safeRoute("admin.dashboard"),
                 icon: ShieldCheckIcon,
-                active: (url) => url.startsWith("/admin"),
+                active: (url) => (url || '').startsWith("/admin"),
             });
         }
 

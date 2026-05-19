@@ -5,7 +5,7 @@ import { useNavigation } from '@/Composables/useNavigation';
 
 const { navItems } = useNavigation();
 const page = usePage();
-const currentUrl = computed(() => page.url);
+const currentUrl = computed(() => page.url || '');
 
 // Grup kiri: Program Planning s/d IT Initiatives (index 0-4)
 const leftNavItems = computed(() => navItems.value.slice(0, 5));

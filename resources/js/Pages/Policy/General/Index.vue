@@ -54,7 +54,7 @@
                             <tr>
                                 <th scope="col" class="w-20 px-6 py-4 text-center">No.</th>
                                 <th scope="col" class="px-6 py-4">Kebijakan Umum</th>
-                                <th scope="col" class="w-48 px-6 py-4 text-center pr-16 lg:pr-20">Aksi</th>
+                                <th scope="col" class="w-32 px-6 py-4 text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200 dark:divide-white/10 dark:bg-transparent">
@@ -77,7 +77,7 @@
                                     {{ policy.description }}
                                 </td>
                                 <!-- Actions Column -->
-                                <td class="px-6 py-4 pr-16 lg:pr-20">
+                                <td class="px-6 py-4">
                                     <div class="flex items-center justify-center gap-2">
                                         <button 
                                             @click="openEditModal(policy)"
@@ -178,52 +178,6 @@
                 </div>
             </transition>
 
-            <!-- Floating Navigation Controls on the Right Side -->
-            <div class="fixed right-6 bottom-24 z-[9999] flex flex-col gap-3 pointer-events-none">
-                <!-- Add Policy Shortcut Button -->
-                <button 
-                    @click="openAddModal" 
-                    class="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#821f44] text-white shadow-lg border border-[#821f44]/20 transition-all hover:bg-[#9c2552] active:scale-90 hover:shadow-xl"
-                    title="Tambah Kebijakan Umum"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                </button>
-
-                <!-- Scroll to Top Button -->
-                <button 
-                    @click="scrollToTop" 
-                    class="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg border border-slate-200/80 transition-all hover:bg-slate-50 active:scale-90 hover:shadow-xl dark:bg-[#1a1a1a] dark:border-white/10"
-                    title="Kembali ke Atas"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 text-[#0a2540] dark:text-white">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" />
-                    </svg>
-                </button>
-
-                <!-- Scroll to Bottom Button -->
-                <button 
-                    @click="scrollToBottom" 
-                    class="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg border border-slate-200/80 transition-all hover:bg-slate-50 active:scale-90 hover:shadow-xl dark:bg-[#1a1a1a] dark:border-white/10"
-                    title="Ke Paling Bawah"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 text-[#0a2540] dark:text-white">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
-                    </svg>
-                </button>
-
-                <!-- Go to Home Button -->
-                <Link 
-                    :href="route('dashboard')" 
-                    class="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg border border-slate-200/80 transition-all hover:bg-slate-50 active:scale-90 hover:shadow-xl dark:bg-[#1a1a1a] dark:border-white/10"
-                    title="Kembali ke Beranda"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-5 h-5 text-[#0a2540] dark:text-white">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                    </svg>
-                </Link>
-            </div>
         </div>
     </UserLayout>
 </template>
@@ -263,19 +217,7 @@ watch(
     { deep: true, immediate: true }
 );
 
-function scrollToTop() {
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
-}
 
-function scrollToBottom() {
-    window.scrollTo({
-        top: document.documentElement.scrollHeight,
-        behavior: 'smooth'
-    });
-}
 
 // ---------------------------------------------------
 // MODAL & FORM STATE
