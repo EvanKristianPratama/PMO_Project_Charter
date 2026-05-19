@@ -115,7 +115,8 @@
                 </aside>
 
                 <main class="flex-1">
-                    <div class="p-4 flex justify-center">
+                    <div v-if="activeTab === 'KBUMN Mission' || activeTab === 'Strategic House Pertamina'"
+                        class="p-4 flex justify-center">
                         <img src="/icon/MisiBUMN.png" alt="Misi BUMN Icon" class="h-80 w-auto object-contain" />
                     </div>
                     <div>

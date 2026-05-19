@@ -78,7 +78,8 @@ export function useNavigation() {
                 active: (url) =>
                     (url || '').startsWith("/program-evalution/review") &&
                     !(url || '').startsWith("/program-evalution/review-timeline") &&
-                    !(url || '').startsWith("/program-evalution/review-dashboard"),
+                    !(url || '').startsWith("/program-evalution/review-dashboard") &&
+                    !(url || '').startsWith("/program-evalution/review-summary"),
             },
             {
                 label: "Review Approval",

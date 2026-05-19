@@ -274,7 +274,7 @@ const themeDotClass = (goal) => {
 
 .theme-card__label {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.45rem;
     font-size: 0.8rem;
     font-weight: 800;
@@ -284,6 +284,7 @@ const themeDotClass = (goal) => {
     flex: 0 0 auto;
     width: 0.42rem;
     height: 0.42rem;
+    margin-top: 0.4rem;
     border-radius: 9999px;
     box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.75);
 }
