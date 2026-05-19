@@ -247,7 +247,7 @@ export function useNavigation() {
                 active: (url) => (url || '').startsWith("/service-portofolio"),
             },
             {
-                label: "Policy",
+                label: "Regulation",
                 href: safeRoute("policy.general.index"),
                 icon: DocumentTextIcon,
                 active: (url) => (url || '').startsWith("/policy"),

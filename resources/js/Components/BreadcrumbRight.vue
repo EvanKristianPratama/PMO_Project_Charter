@@ -24,7 +24,7 @@ const showArchitectureChildren = computed(() => {
 });
 
 const policyItem = computed(() => {
-    return navItems.value.find((item) => item.label === 'Policy') ?? null;
+    return navItems.value.find((item) => item.label === 'Regulation') ?? null;
 });
 
 const policyChildren = computed(() => {
