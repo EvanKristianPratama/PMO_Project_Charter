@@ -1,17 +1,19 @@
 <template>
-    <div class="mx-auto flex w-full max-w-7xl flex-col items-center px-4 py-4">
-        <section class="house-shell w-full max-w-[1120px]">
+    <div class="mx-auto flex w-[90%] flex-col items-center px-4 py-4">
+        <section class="house-shell">
+            <!-- Roof: Vision -->
             <div class="roof-wrap">
                 <div class="roof-panel">
-                    <div class="roof-label">Vision</div>
+                    <div class="roof-label">Vision:</div>
                     <div class="roof-vision">
                         {{ house.vision }}
                     </div>
                 </div>
             </div>
 
+            <!-- Base of roof: Mission -->
             <div class="mission-panel">
-                <div class="mission-label">Mission</div>
+                <div class="mission-label">Mission:</div>
                 <div class="mission-copy">
                     <span v-for="(line, index) in missionLines" :key="`${line}-${index}`" class="block">
                         {{ line }}
@@ -20,47 +22,41 @@
             </div>
 
             <div class="columns-grid">
-                <article
-                    v-for="column in columns"
-                    :key="column.title"
-                    class="pillar-card"
-                >
-                    <header class="pillar-card__header" :class="column.headerClass">
+                <article v-for="goal in displayMainGoals" :key="goal.id" class="pillar-card">
+                    <header class="pillar-card__header" :class="headerClass(goal)">
                         <div class="pillar-card__title">
-                            {{ column.title }}
+                            {{ goal.title }}
                         </div>
                     </header>
 
                     <div class="pillar-card__body">
-                        <div v-for="(item, index) in column.items" :key="`${column.title}-${index}`" class="pillar-item">
-                            <div class="pillar-icon" :class="column.iconClass">
-                                {{ column.icon }}
-                            </div>
-
-                            <div class="pillar-copy">
-                                <div class="pillar-copy__label">
-                                    {{ item.label }}
-                                    <span v-if="item.text">:</span>
+                        <div v-if="goal.themes && goal.themes.length" class="theme-list">
+                            <section v-for="theme in goal.themes" :key="theme.id" class="theme-card">
+                                <div class="theme-card__label">
+                                    <span class="theme-card__dot" :class="themeDotClass(goal)"></span>
+                                    <span class="theme-card__text">{{ theme.name }}</span>
                                 </div>
-                                <div class="pillar-copy__text">
-                                    {{ item.text || '-' }}
-                                </div>
-                            </div>
+                            </section>
                         </div>
                     </div>
                 </article>
             </div>
 
-            <div class="footer-grid">
-                <div v-for="(row, rowIndex) in footerRows" :key="`footer-row-${rowIndex}`" class="footer-row">
-                    <div v-for="(cell, cellIndex) in row" :key="`${rowIndex}-${cellIndex}`" class="footer-cell">
-                        {{ cell }}
+            <section v-if="displayEnablerGoal">
+                <div v-if="enablerThemeRows.length" class="enabler-grid">
+                    <div v-for="(row, rowIndex) in enablerThemeRows" :key="`enabler-row-${rowIndex}`"
+                        class="enabler-grid__row">
+                        <section v-for="theme in row" :key="theme.id" class="enabler-grid__cell">
+                            <div class="enabler-grid__label">
+                                <span class="enabler-grid__text">{{ theme.name }}</span>
+                            </div>
+                        </section>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <div class="values-bar">
-                {{ house.coreValues }}
+            <div class="core-values-bar">
+                PNRE Core Values - {{ house.coreValues }}
             </div>
         </section>
     </div>
@@ -70,77 +66,20 @@
 import { computed } from 'vue';
 
 const props = defineProps({
-    strategicHouseIML: {
+    strategicHousePNRE: {
         type: Object,
         default: () => ({})
     },
-    imlGoals: {
+    pnreGoals: {
         type: Array,
         default: () => []
     }
 });
 
-const fallbackHouse = {
-    vision: 'Energizing people and planet with green energy',
-    mission: 'To lead energy transition and become a leader of Low Carbon Solutions, Renewable Energy & Future Green Business in the region through innovation and breakthrough initiatives to create values for stakeholders',
-    coreValues: 'PNRE Core Values - Amanah Kompeten Harmonis Loyal Adaptif Kolaboratif',
-};
-
-const fallbackColumns = [
-    {
-        title: 'Grow Core Business',
-        headerClass: 'pillar-card__header--blue',
-        iconClass: 'pillar-icon--blue',
-        icon: 'G',
-        items: [
-            { label: 'Gas-to-Power', text: 'Expand Jawa Satu & optimize opportunity in Pertamina Group & expand to C&I (IPP, CPP)' },
-            { label: 'O&M Service & Energy Efficiency', text: 'Optimize opportunities in Pertamina Group' },
-            { label: 'Solar', text: 'Scale up via SOE synergy & expand into C&I' },
-            { label: 'Geothermal', text: 'Accelerate expansion of ~0.6 GW installed capacities' },
-        ],
-    },
-    {
-        title: 'Shape Future Green Business',
-        headerClass: 'pillar-card__header--green',
-        iconClass: 'pillar-icon--green',
-        icon: 'H2',
-        items: [
-            { label: 'Hydrogen', text: 'Grow capability by serving domestic captive demand and expand to serve export market (HRS, H2 for refinery)' },
-            { label: 'Battery & EV', text: 'Increase packing capacity stepwise (battery cell & pack, BSS)' },
-            { label: 'Carbon business', text: 'Optimize opportunity for tech & nature-based credit (NBS, carbon trading)' },
-            { label: 'Biofuel', text: 'Build capability to grab the opportunity (bioethanol, biomethane)' },
-            { label: 'Other RE', text: 'Ramp up capability for wider opportunity (wind, biomass)' },
-            { label: 'Decarbonization', text: 'CCS, energy efficiency, co-firing, CO2 liquefaction, binary plant' },
-        ],
-    },
-    {
-        title: 'Global Expansion',
-        headerClass: 'pillar-card__header--orange',
-        iconClass: 'pillar-icon--orange',
-        icon: 'OE',
-        items: [
-            { label: 'Seek Opportunity to Enter Overseas', text: 'Green hydrogen' },
-            { label: 'Overseas solar power plant', text: 'Export electricity' },
-            { label: 'IPP Overseas', text: 'M&A' },
-        ],
-    },
-];
-
-const footerRows = [
-    [
-        'Strategic partnerships for technology leadership and maximum value creation',
-        'Stakeholder management for supportive government policies & regulations',
-    ],
-    [
-        'Acquire & build talent for new capabilities',
-        'Equity support & competitive financing',
-    ],
-];
-
 const house = computed(() => ({
-    vision: String(props.strategicHouseIML?.vision || fallbackHouse.vision).trim(),
-    mission: String(props.strategicHouseIML?.mission || fallbackHouse.mission).trim(),
-    coreValues: fallbackHouse.coreValues,
+    vision: String(props.strategicHousePNRE?.strategy || props.strategicHousePNRE?.vision || '').trim(),
+    mission: String(props.strategicHousePNRE?.mission || '').trim(),
+    coreValues: String(props.strategicHousePNRE?.additional_info || '').trim(),
 }));
 
 const missionLines = computed(() => {
@@ -150,48 +89,65 @@ const missionLines = computed(() => {
         .filter(Boolean);
 });
 
-const normalizeItems = (goal, fallbackItems) => {
-    const themes = Array.isArray(goal?.themes) ? goal.themes : [];
+const orderedGoals = computed(() => {
+    const goals = Array.isArray(props.pnreGoals) ? props.pnreGoals.filter(Boolean) : [];
 
-    const derivedItems = themes.flatMap((theme) => {
-        const themeLabel = String(theme?.name || '').trim();
-        const pillarThemes = Array.isArray(theme?.pillar_themes) ? theme.pillar_themes : [];
-
-        if (pillarThemes.length) {
-            return pillarThemes.map((pillar) => ({
-                label: themeLabel || String(goal?.title || '').trim(),
-                text: String(pillar?.strategy || pillar?.title || '').trim(),
-            }));
-        }
-
-        const themeText = String(theme?.strategy || theme?.description || '').trim();
-        return [{
-            label: themeLabel || String(goal?.title || '').trim(),
-            text: themeText,
-        }];
-    }).filter((item) => item.label || item.text);
-
-    return derivedItems.length ? derivedItems : fallbackItems;
-};
-
-const columns = computed(() => {
-    const goals = Array.isArray(props.imlGoals) ? props.imlGoals.filter(Boolean) : [];
-    const mainGoals = goals.slice(0, 3);
-
-    if (!mainGoals.length) {
-        return fallbackColumns;
-    }
-
-    return mainGoals.map((goal, index) => {
-        const fallback = fallbackColumns[index] || fallbackColumns[fallbackColumns.length - 1];
-
-        return {
-            ...fallback,
-            title: String(goal?.title || fallback.title).trim(),
-            items: normalizeItems(goal, fallback.items),
-        };
+    return goals.slice().sort((a, b) => {
+        const left = Number(a?.code ?? a?.id ?? 0);
+        const right = Number(b?.code ?? b?.id ?? 0);
+        return left - right;
     });
 });
+
+const mainGoals = computed(() => orderedGoals.value.filter((goal) => Number(goal.id) !== 40));
+const enablerGoal = computed(() => orderedGoals.value.find((goal) => Number(goal.id) === 40) || null);
+
+const displayMainGoals = computed(() => {
+    return mainGoals.value.map((goal) => ({
+        ...goal,
+        themes: Array.isArray(goal.themes) ? goal.themes : [],
+    }));
+});
+
+const displayEnablerGoal = computed(() => {
+    if (!enablerGoal.value) return null;
+
+    return {
+        ...enablerGoal.value,
+        themes: Array.isArray(enablerGoal.value.themes) ? enablerGoal.value.themes : [],
+    };
+});
+
+const enablerThemeRows = computed(() => {
+    const themes = displayEnablerGoal.value?.themes || [];
+    const rows = [];
+
+    for (let index = 0; index < themes.length; index += 2) {
+        rows.push(themes.slice(index, index + 2));
+    }
+
+    return rows;
+});
+
+const headerClass = (goal) => {
+    const colorMap = {
+        A: 'pillar-card__header--blue',
+        B: 'pillar-card__header--green',
+        C: 'pillar-card__header--orange',
+    };
+
+    return colorMap[String(goal?.code || '').trim().toUpperCase()] || 'pillar-card__header--blue';
+};
+
+const themeDotClass = (goal) => {
+    const colorMap = {
+        A: 'theme-card__dot--blue',
+        B: 'theme-card__dot--green',
+        C: 'theme-card__dot--orange',
+    };
+
+    return colorMap[String(goal?.code || '').trim().toUpperCase()] || 'theme-card__dot--blue';
+};
 </script>
 
 <style scoped>
@@ -199,8 +155,7 @@ const columns = computed(() => {
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
-    padding-bottom: 2.25rem;
+    gap: 0.25rem;
 }
 
 .roof-wrap {
@@ -210,30 +165,32 @@ const columns = computed(() => {
 
 .roof-panel {
     width: 100%;
-    min-height: 145px;
-    padding: 1rem 2rem 0.85rem;
+    min-height: 140px;
+    padding: 3rem 3rem 1rem;
     color: #ffffff;
     text-align: center;
     background: linear-gradient(180deg, #2f7d62 0%, #1d6a51 100%);
-    clip-path: polygon(2% 22%, 50% 0%, 98% 22%, 100% 100%, 0% 100%);
-    box-shadow: 0 14px 28px rgba(8, 35, 28, 0.18);
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
 }
 
 .roof-label,
 .mission-label {
-    margin-bottom: 0.15rem;
-    font-size: 0.82rem;
+    margin-bottom: 0.25rem;
+    font-size: 0.75rem;
     font-weight: 800;
     font-style: italic;
     line-height: 1.2;
 }
 
 .roof-vision {
-    max-width: 44rem;
+    max-width: 40rem;
     margin: 0 auto;
-    font-size: 1rem;
-    font-weight: 700;
-    line-height: 1.3;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.25;
 }
 
 .mission-panel {
@@ -241,7 +198,7 @@ const columns = computed(() => {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 0.65rem 1rem 0.8rem;
+    padding: 0.5rem 2rem 0.5rem;
     border: 1px solid #93c8b4;
     background: linear-gradient(180deg, #b6d4c7 0%, #a8cbbb 100%);
     color: #ffffff;
@@ -251,8 +208,8 @@ const columns = computed(() => {
 
 .mission-copy {
     max-width: 60rem;
-    font-size: 0.92rem;
-    font-weight: 700;
+    font-size: 0.875rem;
+    font-weight: 600;
     line-height: 1.35;
 }
 
@@ -275,7 +232,8 @@ const columns = computed(() => {
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
 }
 
-.pillar-card__header {
+.pillar-card__header,
+.enabler-shell__header {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -297,7 +255,8 @@ const columns = computed(() => {
     background: linear-gradient(180deg, #f69128 0%, #e96d0e 100%);
 }
 
-.pillar-card__title {
+.pillar-card__title,
+.enabler-shell__title {
     font-size: 0.92rem;
     font-weight: 800;
     line-height: 1.2;
@@ -307,99 +266,101 @@ const columns = computed(() => {
     padding: 0.75rem 0.7rem 0.9rem;
 }
 
-.pillar-item {
-    display: flex;
-    gap: 0.6rem;
-    align-items: flex-start;
-    margin-bottom: 0.75rem;
-}
-
-.pillar-item:last-child {
-    margin-bottom: 0;
-}
-
-.pillar-icon {
-    flex: 0 0 auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 9999px;
-    font-size: 0.66rem;
-    font-weight: 900;
-    letter-spacing: 0.04em;
-}
-
-.pillar-icon--blue {
-    background: #e5efff;
-    color: #2f6ab9;
-}
-
-.pillar-icon--green {
-    background: #e2f7eb;
-    color: #14955b;
-}
-
-.pillar-icon--orange {
-    background: #fff0df;
-    color: #e96d0e;
-}
-
-.pillar-copy {
-    flex: 1 1 auto;
-    min-width: 0;
-    color: #223048;
-}
-
-.pillar-copy__label {
-    font-size: 0.78rem;
-    font-weight: 800;
-    font-style: italic;
-    line-height: 1.3;
-}
-
-.pillar-copy__text {
-    margin-top: 0.05rem;
-    font-size: 0.74rem;
-    font-weight: 600;
-    line-height: 1.35;
-    color: #4b5566;
-}
-
-.footer-grid {
+.theme-card {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    overflow: hidden;
 }
 
-.footer-row {
-    display: grid;
-    gap: 0.25rem;
-}
-
-@media (min-width: 768px) {
-    .footer-row {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
-.footer-cell {
+.theme-card__label {
     display: flex;
     align-items: center;
-    justify-content: center;
-    min-height: 36px;
-    padding: 0.55rem 0.8rem;
-    border: 1px solid #d7e3d4;
-    background: linear-gradient(180deg, #eef2c4 0%, #e7ebae 100%);
-    color: #3b4632;
-    text-align: center;
-    font-size: 0.72rem;
-    font-weight: 700;
-    line-height: 1.3;
+    gap: 0.45rem;
+    font-size: 0.8rem;
+    font-weight: 800;
 }
 
-.values-bar {
+.theme-card__dot {
+    flex: 0 0 auto;
+    width: 0.42rem;
+    height: 0.42rem;
+    border-radius: 9999px;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.75);
+}
+
+.theme-card__dot--blue {
+    background: #2f6ab9;
+}
+
+.theme-card__dot--green {
+    background: #14955b;
+}
+
+.theme-card__dot--orange {
+    background: #e96d0e;
+}
+
+.theme-card__dot--enabler {
+    background: #0f5f88;
+}
+
+.theme-card__text {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.pillar-empty {
+    padding: 0.45rem;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-style: italic;
+    line-height: 1.35;
+    text-align: center;
+}
+
+.enabler-shell__header {
+    background: linear-gradient(180deg, #0f5f88 0%, #0c4e73 100%);
+}
+
+.enabler-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.28rem;
+}
+
+.enabler-grid__row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.28rem;
+}
+
+.enabler-grid__cell {
+    display: flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0.35rem 0.65rem;
+    border-radius: 0.55rem;
+    border: 1px solid #dfe7bb;
+    background: linear-gradient(180deg, #f7f9d3 0%, #eef1ad 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.enabler-grid__label {
+    width: 100%;
+    color: #3e4634;
+    text-align: center;
+    font-size: 0.73rem;
+    font-weight: 700;
+    font-style: italic;
+    line-height: 1.25;
+}
+
+.enabler-grid__text {
+    display: inline-block;
+    max-width: 100%;
+}
+
+.core-values-bar {
     padding: 0.55rem 1rem;
     border: 1px solid #245f4c;
     background: linear-gradient(180deg, #2f7d62 0%, #1d6a51 100%);

@@ -77,6 +77,11 @@ class IndexController extends Controller
             $query->orderBy('theme_number');
         }, 'themes.pillarThemes'])->get();
 
+        $strategicHousePNRE = MstStrategicHouse::where('id', 10)->first();
+        $pnreGoals = Goal::where('pilar', 10)->with(['themes' => function($query) {
+            $query->orderBy('theme_number');
+        }, 'themes.pillarThemes'])->orderBy('code')->get();
+
         return Inertia::render('ProgramPlanning/BusinessStrategy/Index', [
             'goals' => $goals,
             'strategies' => $strategies,
@@ -98,6 +103,8 @@ class IndexController extends Controller
             'additionalThemes' => $additionalThemes,
             'strategicHouseIML' => $strategicHouseIML,
             'imlGoals' => $imlGoals,
+            'strategicHousePNRE' => $strategicHousePNRE,
+            'pnreGoals' => $pnreGoals,
         ]);
     }
 }
