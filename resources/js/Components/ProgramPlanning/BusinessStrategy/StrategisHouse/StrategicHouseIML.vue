@@ -105,7 +105,7 @@ const goalBadge = (goal) => {
 
 <style scoped>
 .goal-card {
-    background: linear-gradient(to bottom, #d9e7f6 0 35%, #172754 20%);
+    background: linear-gradient(to bottom, #d9e7f6 0 37%, #172754 20%);
     box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
 }
 
