@@ -48,7 +48,7 @@
 
             <!-- Inline Objective Creator (Shown when isCreatingObjective is true) -->
             <transition name="slide-down">
-                <div v-if="isCreatingObjective" class="overflow-hidden rounded-2xl border-2 border-dashed border-[#821f44]/30 bg-slate-50/50 p-6 dark:bg-white/5">
+                <div v-if="isCreatingObjective" class="max-w-4xl mx-auto overflow-hidden rounded-2xl border-2 border-dashed border-[#821f44]/30 bg-slate-50/50 p-6 dark:bg-white/5">
                     <div class="flex items-center justify-between border-b border-slate-200 pb-3 dark:border-white/10 mb-4">
                         <h3 class="text-base font-bold text-[#821f44] dark:text-[#a83262] flex items-center gap-2">
                             <span class="inline-block w-2.5 h-2.5 rounded-full bg-[#821f44] animate-ping"></span>
@@ -314,22 +314,22 @@
                         <!-- Burgundy Header Band -->
                         <div class="bg-[#821f44] p-5 text-white flex flex-col gap-1 transition-all duration-300">
                             <!-- Quick floating options visible on card group hover -->
-                            <div class="absolute right-4 top-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
+                            <div class="absolute right-4 top-4 opacity-80 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
                                 <button 
                                     @click="startEditObjective(obj)"
-                                    class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm shadow transition-all duration-150 active:scale-95"
+                                    class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 border border-white/10 hover:bg-white/30 text-white backdrop-blur-md shadow transition-all duration-150 active:scale-90"
                                     title="Edit Kebijakan Khusus"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.83 20.013a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
                                     </svg>
                                 </button>
                                 <button 
                                     @click="deleteObjective(obj)"
-                                    class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-rose-500/80 hover:bg-rose-500 text-white backdrop-blur-sm shadow transition-all duration-150 active:scale-95"
+                                    class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-rose-500/80 hover:bg-rose-500 text-white backdrop-blur-md shadow transition-all duration-150 active:scale-90"
                                     title="Hapus Kebijakan Khusus"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                                     </svg>
                                 </button>
@@ -487,22 +487,23 @@
                                         </div>
 
                                         <!-- Row Actions (Edit / Delete) -->
-                                        <div class="shrink-0 flex sm:opacity-0 group-hover/row:opacity-100 transition-opacity duration-150 gap-1.5 self-end sm:self-start">
+                                        <!-- Row Actions (Edit / Delete) -->
+                                        <div class="shrink-0 flex gap-2 self-end sm:self-start opacity-80 group-hover/row:opacity-100 transition-opacity duration-150">
                                             <button 
                                                 @click="startEditPractice(obj.objective_id, prac)"
-                                                class="p-1 text-slate-400 hover:text-[#821f44] dark:hover:text-[#db588c] rounded transition"
+                                                class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-[#821f44] hover:bg-[#821f44]/5 hover:border-[#821f44]/20 transition-all duration-150 active:scale-90 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-400 dark:hover:text-[#db588c] dark:hover:bg-[#db588c]/10"
                                                 title="Edit Butir Kebijakan"
                                             >
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.83 20.013a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
                                                 </svg>
                                             </button>
                                             <button 
                                                 @click="deletePractice(prac)"
-                                                class="p-1 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded transition"
+                                                class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:border-rose-200 transition-all duration-150 active:scale-90 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-400 dark:hover:text-rose-400"
                                                 title="Hapus Butir Kebijakan"
                                             >
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                                                 </svg>
                                             </button>
