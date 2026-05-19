@@ -14,7 +14,8 @@
         <div v-if="filteredGoals.length" class="w-[90%]">
             <div class="grid gap-1" :style="goalsHeaderGridStyle">
                 <div v-for="goal in filteredGoals" :key="`goal-${goal.id}`" 
-                    class="flex items-center justify-center min-h-[40px] p-[0.7rem_0.75rem] bg-gradient-to-b from-[#6c9b9f] to-[#7fb2b6] text-white border border-[#d3dee8] shadow-[0_8px_18px_rgba(15,23,42,0.06)] w-full">
+                    class="flex items-center justify-center min-h-[40px] p-[0.7rem_0.75rem] text-white border border-[#d3dee8] shadow-[0_8px_18px_rgba(15,23,42,0.06)] w-full"
+                    :class="getGoalClass(goal)">
                     <div class="text-center text-[0.8rem] font-extrabold leading-[1.35]">{{ goal.title }}</div>
                 </div>
             </div>
@@ -23,20 +24,20 @@
                 <div
                     v-for="(cell, index) in themeRow.cells"
                     :key="`${themeRow.key}-${index}`"
-                    class="flex flex-col overflow-hidden bg-[#f5f8fb] text-[#14253b]">
+                    class="flex flex-col bg-[#f5f8fb] text-[#14253b]">
                         <template v-if="cell">
                             <div class="flex items-center gap-[0.35rem] p-[0.55rem_0.7rem] text-[0.72rem] font-extrabold leading-[1.3]">
                                 <span v-if="cell.theme_number" class="flex-none rounded-full bg-[#c81e1e] px-2 py-[0.1rem] text-[0.6rem] text-white">
                                     {{ cell.theme_number }}
                                 </span>
-                                <span class="text-center">{{ cell.name }}</span>
+                                <span class="text-left">{{ cell.name }}</span>
                             </div>
 
                             <ul v-if="cell.pillar_themes && cell.pillar_themes.length" class="m-0 list-none p-[0.5rem_0.65rem_0.65rem]">
-                                <li v-for="(pillar, pIndex) in cell.pillar_themes" :key="pillar.id" 
-                                    class="flex items-start gap-[0.35rem] text-[0.64rem] leading-[1.35] text-[#1e2d43] text-left"
-                                    :class="{ 'mt-[0.28rem]': pIndex > 0 }">
-                                    <span class="min-w-0">{{ pillar.title }}</span>
+                                <li v-for="pillar in cell.pillar_themes" :key="pillar.id" class="mb-1 last:mb-0">
+                                    <div class="flex items-start gap-[0.35rem] text-[0.64rem] leading-[1.35] text-[#1e2d43]">
+                                        <span class="min-w-0 text-left">{{ pillar.title }}</span>
+                                    </div>
                                 </li>
                             </ul>
                         </template>
@@ -45,23 +46,19 @@
         </div>
 
         <div v-if="enablerGoal" class="w-[90%]">
-            <div class="bg-[#eef3f8] border border-[#d3dee8]">
-                <div class="bg-gradient-to-b from-[#0c5f88] to-[#0a4e72] text-white border border-[#d3dee8] shadow-[0_8px_18px_rgba(15,23,42,0.06)]">
-                    <ul v-if="enablerGoal.themes && enablerGoal.themes.length" class="m-0 list-none p-[0.55rem_0.7rem_0.7rem]">
-                        <li v-for="(theme, tIndex) in enablerGoal.themes" :key="theme.id" 
-                            class="flex gap-[0.35rem] items-start text-[0.64rem] leading-[1.35] text-[#eef6ff]"
-                            :class="{ 'mt-[0.28rem]': tIndex > 0 }">
-                            <span class="mt-[0.34rem] flex-none w-[0.3rem] h-[0.3rem] rounded-full bg-white"></span>
-                            <span class="min-w-0">
-                                <template v-if="theme.pillar_themes && theme.pillar_themes.length">
-                                    <span v-for="(pillar, index) in theme.pillar_themes" :key="pillar.id">
+            <div v-for="(theme, tIndex) in enablerGoal.themes" :key="theme.id">
+                <div class="bg-[#eef3f8] border border-[#d3dee8]">
+                    <div class="bg-gradient-to-b from-[#0c5f88] to-[#0a4e72] text-white border border-[#d3dee8] shadow-[0_8px_18px_rgba(15,23,42,0.06)]">
+                        <div class="p-[0.30rem_0.7rem] text-center">
+                            <ul v-if="theme.pillar_themes && theme.pillar_themes.length" class="list-none p-0 m-0">
+                                <li v-for="pillar in theme.pillar_themes" :key="pillar.id" class="mb-0.5 last:mb-0">
+                                    <div class="text-[0.64rem] font-bold">
                                         {{ theme.name }} - {{ pillar.strategy }}
-                                        <span v-if="index < theme.pillar_themes.length - 1">, </span>
-                                    </span>
-                                </template>
-                            </span>
-                        </li>
-                    </ul>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -108,5 +105,20 @@ const themeRows = computed(() => {
 const goalsHeaderGridStyle = computed(() => ({
     gridTemplateColumns: `repeat(${Math.max(filteredGoals.value.length, 1)}, minmax(0, 1fr))`,
 }));
+
+const getGoalClass = (goal) => {
+    switch (goal.code) {
+        case 'A':
+            return 'bg-[#74c0fc] !text-white'; // Solid Pale Blue
+        case 'B':
+            return 'bg-[#8ce99a] !text-white'; // Solid Pale Green
+        case 'C':
+            return 'bg-[#ffd8a8] !text-white'; // Solid Pale Orange
+        case 'D':
+            return 'bg-[#ffa8a8] !text-white'; // Solid Pale Red
+        default:
+            return 'bg-[#dee2e6] !text-white'; // Solid Pale Gray Fallback
+    }
+};
 
 </script>

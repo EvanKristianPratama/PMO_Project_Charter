@@ -92,6 +92,15 @@
                                 @click="() => activeTab = 'Strategic House C&T'">
                                 Strategic House C&T
                             </button>
+
+                            <button type="button"
+                                class="w-full text-left px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg transition-all"
+                                :class="activeTab === 'Strategic House IML'
+                                    ? 'bg-white text-[#1C75BC] shadow-sm dark:bg-white/10 dark:text-white'
+                                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
+                                @click="() => activeTab = 'Strategic House IML'">
+                                Strategic House IML
+                            </button>
                         </div>
                     </div>
                 </aside>
@@ -162,6 +171,9 @@
                             :strategicHouseCT="strategicHouseCT"
                             :ctGoals="ctGoals" />
 
+                        <StrategicHouseIML v-else-if="activeTab === 'Strategic House IML'"
+                            :strategicHouseIML="strategicHouseIML"
+                            :imlGoals="imlGoals" />
                     </div>
                 </main>
             </div>
@@ -181,6 +193,7 @@ import StrategicHouseUpstream from '@/Components/ProgramPlanning/BusinessStrateg
 import StrategicHouseGas from '@/Components/ProgramPlanning/BusinessStrategy/StrategisHouse/StrategicHouseGas.vue';
 import StrategicHousePTKPI from '@/Components/ProgramPlanning/BusinessStrategy/StrategisHouse/StrategicHousePTKPI.vue';
 import StrategicHouseCT from '@/Components/ProgramPlanning/BusinessStrategy/StrategisHouse/StrategicHouseC&T.vue';
+import StrategicHouseIML from '@/Components/ProgramPlanning/BusinessStrategy/StrategisHouse/StrategicHouseIML.vue';
 import { ref } from 'vue';
 
 const props = defineProps({
@@ -202,6 +215,8 @@ const props = defineProps({
     additionalThemes: { type: Array, default: () => [] },
     strategicHouseCT: { type: Object, default: () => ({}) },
     ctGoals: { type: Array, default: () => [] },
+    strategicHouseIML: { type: Object, default: () => ({}) },
+    imlGoals: { type: Array, default: () => [] },
 });
 
 const defaultTab = 'KBUMN Mission';
