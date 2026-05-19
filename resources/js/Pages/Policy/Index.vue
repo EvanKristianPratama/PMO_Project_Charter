@@ -25,24 +25,26 @@
                 </div>
             </section>
 
-            <!-- Alerts / Feedback -->
-            <transition name="fade">
-                <div v-if="localSuccess" class="flex items-center gap-3 rounded-xl border border-emerald-100 bg-emerald-50/80 p-4 text-sm text-emerald-800 backdrop-blur-sm dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.807-9.617a.9.9 0 111.386 1.134l-4.5 5.5a.9.9 0 01-1.302.08l-2.5-2.5a.9.9 0 011.272-1.272l1.782 1.782 3.862-4.724z" clip-rule="evenodd" />
-                    </svg>
-                    <span>{{ localSuccess }}</span>
-                </div>
-            </transition>
+            <!-- Floating Alerts / Feedback at Bottom-Left -->
+            <div class="fixed bottom-6 left-6 z-[9999] max-w-sm space-y-3 pointer-events-none">
+                <transition name="fade">
+                    <div v-if="localSuccess" class="pointer-events-auto flex items-center gap-3 rounded-xl border border-emerald-200 bg-white p-4 text-sm text-[#065f46] shadow-2xl backdrop-blur-sm dark:border-emerald-500/30 dark:bg-[#1a1a1a] dark:text-emerald-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.807-9.617a.9.9 0 111.386 1.134l-4.5 5.5a.9.9 0 01-1.302.08l-2.5-2.5a.9.9 0 011.272-1.272l1.782 1.782 3.862-4.724z" clip-rule="evenodd" />
+                        </svg>
+                        <span>{{ localSuccess }}</span>
+                    </div>
+                </transition>
 
-            <transition name="fade">
-                <div v-if="localError" class="flex items-center gap-3 rounded-xl border border-rose-100 bg-rose-50/80 p-4 text-sm text-rose-800 backdrop-blur-sm dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
-                    </svg>
-                    <span>{{ localError }}</span>
-                </div>
-            </transition>
+                <transition name="fade">
+                    <div v-if="localError" class="pointer-events-auto flex items-center gap-3 rounded-xl border border-rose-200 bg-white p-4 text-sm text-[#991b1b] shadow-2xl backdrop-blur-sm dark:border-rose-500/30 dark:bg-[#1a1a1a] dark:text-rose-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                        </svg>
+                        <span>{{ localError }}</span>
+                    </div>
+                </transition>
+            </div>
 
             <!-- Inline Objective Creator (Shown when isCreatingObjective is true) -->
             <transition name="slide-down">
@@ -207,6 +209,7 @@
 
                                 <!-- Input Domain Manual di Edit Mode -->
                                 <div class="mb-4 space-y-1">
+                                    <label class="block text-[10px] font-bold uppercase tracking-wider text-white/70">Nama Kebijakan (Domain):</label>
                                     <input 
                                         type="text" 
                                         v-model="editObjectiveForm.domain" 
@@ -215,9 +218,22 @@
                                     />
                                     <div v-if="editObjectiveForm.errors.domain" class="text-xs text-red-200 font-medium bg-red-900/30 p-2 rounded">{{ editObjectiveForm.errors.domain }}</div>
                                 </div>
+
+                                <!-- Input ID Kebijakan Editable di Edit Mode -->
+                                <div class="mb-4 space-y-1">
+                                    <label class="block text-[10px] font-bold uppercase tracking-wider text-white/70">ID Kebijakan:</label>
+                                    <input 
+                                        type="text" 
+                                        v-model="editObjectiveForm.objective_id" 
+                                        placeholder="Contoh: EDM01..." 
+                                        class="w-full bg-white/10 text-white placeholder-white/40 border border-white/20 rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-white/40 font-mono"
+                                        required
+                                    />
+                                    <div v-if="editObjectiveForm.errors.objective_id" class="text-xs text-red-200 font-medium bg-red-900/30 p-2 rounded">{{ editObjectiveForm.errors.objective_id }}</div>
+                                </div>
                                 
                                 <div class="space-y-2">
-                                    <label class="block text-xs font-bold uppercase tracking-wider text-white/80">Kebijakan Khusus (ID: {{ obj.objective_id }}):</label>
+                                    <label class="block text-[10px] font-bold uppercase tracking-wider text-white/70">Kebijakan Khusus:</label>
                                     <input 
                                         type="text" 
                                         v-model="editObjectiveForm.objective" 
@@ -394,8 +410,7 @@
                                                     type="text" 
                                                     v-model="practiceForm.practice_id" 
                                                     placeholder="Contoh: EDM01.01" 
-                                                    class="w-full bg-white text-slate-800 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-black/20 dark:text-white dark:border-white/10 disabled:opacity-60"
-                                                    :disabled="!!editingPracticeId"
+                                                    class="w-full bg-white text-slate-800 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-black/20 dark:text-white dark:border-white/10"
                                                     required
                                                 />
                                                 <div v-if="practiceForm.errors.practice_id" class="text-[10px] text-red-500 font-medium font-mono">{{ practiceForm.errors.practice_id }}</div>
@@ -615,6 +630,7 @@ function submitCreateObjective() {
 // ---------------------------------------------------
 const editingObjectiveId = ref(null);
 const editObjectiveForm = useForm({
+    objective_id: '',
     domain: '',
     objective: '',
     objective_description: '',
@@ -623,6 +639,7 @@ const editObjectiveForm = useForm({
 
 function startEditObjective(obj) {
     editingObjectiveId.value = obj.objective_id;
+    editObjectiveForm.objective_id = obj.objective_id;
     editObjectiveForm.domain = obj.domain || '';
     editObjectiveForm.objective = obj.objective;
     editObjectiveForm.objective_description = obj.objective_description || '';

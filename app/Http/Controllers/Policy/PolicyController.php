@@ -66,7 +66,37 @@ class PolicyController extends Controller
             'objective.required' => 'Nama Objective wajib diisi.',
         ]);
 
-        $objective->update($validated);
+        if ($request->filled('objective_id') && $request->input('objective_id') !== $id) {
+            $newId = $request->input('objective_id');
+            $request->validate([
+                'objective_id' => 'required|string|max:255|unique:mst_objective,objective_id',
+            ], [
+                'objective_id.unique' => 'Objective ID sudah digunakan.',
+                'objective_id.required' => 'Objective ID wajib diisi.',
+            ]);
+
+            \DB::transaction(function() use ($id, $newId, $request) {
+                \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+                
+                \DB::table('mst_objective')
+                    ->where('objective_id', $id)
+                    ->update([
+                        'objective_id' => $newId,
+                        'domain' => $request->input('domain'),
+                        'objective' => $request->input('objective'),
+                        'objective_description' => $request->input('objective_description'),
+                        'objective_purpose' => $request->input('objective_purpose'),
+                    ]);
+                    
+                \DB::table('mst_practice')
+                    ->where('objective_id', $id)
+                    ->update(['objective_id' => $newId]);
+                    
+                \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+            });
+        } else {
+            $objective->update($validated);
+        }
 
         return redirect()
             ->route('policy.index')
@@ -121,7 +151,25 @@ class PolicyController extends Controller
             'practice_description' => 'nullable|string',
         ]);
 
-        $practice->update($validated);
+        if ($request->filled('practice_id') && $request->input('practice_id') !== $id) {
+            $newId = $request->input('practice_id');
+            $request->validate([
+                'practice_id' => 'required|string|max:255|unique:mst_practice,practice_id',
+            ], [
+                'practice_id.unique' => 'Practice ID sudah digunakan.',
+                'practice_id.required' => 'Practice ID wajib diisi.',
+            ]);
+
+            \DB::table('mst_practice')
+                ->where('practice_id', $id)
+                ->update([
+                    'practice_id' => $newId,
+                    'practice_name' => $request->input('practice_name'),
+                    'practice_description' => $request->input('practice_description'),
+                ]);
+        } else {
+            $practice->update($validated);
+        }
 
         return redirect()
             ->route('policy.index')
