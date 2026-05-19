@@ -256,9 +256,20 @@ Route::middleware(['auth', 'approved'])->group(function () {
         'title' => 'Service Portofolio',
     ]))->name('service-portofolio.index');
     
-    // Policy CRUD (mst_objective & mst_practice)
+    // Policy CRUD (mst_general_policy, mst_objective & mst_practice)
     Route::prefix('/policy')->name('policy.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Policy\PolicyController::class, 'index'])->name('index');
+        Route::get('/', function () {
+            return redirect()->route('policy.general.index');
+        })->name('index');
+
+        // Kebijakan Umum (General Policy) CRUD
+        Route::get('/general', [\App\Http\Controllers\Policy\GeneralPolicyController::class, 'index'])->name('general.index');
+        Route::post('/general', [\App\Http\Controllers\Policy\GeneralPolicyController::class, 'store'])->name('general.store');
+        Route::put('/general/{id}', [\App\Http\Controllers\Policy\GeneralPolicyController::class, 'update'])->name('general.update');
+        Route::delete('/general/{id}', [\App\Http\Controllers\Policy\GeneralPolicyController::class, 'destroy'])->name('general.destroy');
+
+        // Kebijakan Khusus (Specific Policy) CRUD
+        Route::get('/specific', [\App\Http\Controllers\Policy\PolicyController::class, 'index'])->name('specific.index');
         Route::post('/objective', [\App\Http\Controllers\Policy\PolicyController::class, 'storeObjective'])->name('objective.store');
         Route::put('/objective/{objective}', [\App\Http\Controllers\Policy\PolicyController::class, 'updateObjective'])->name('objective.update');
         Route::delete('/objective/{objective}', [\App\Http\Controllers\Policy\PolicyController::class, 'destroyObjective'])->name('objective.destroy');

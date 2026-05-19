@@ -33,7 +33,7 @@ class PolicyController extends Controller
         ->orderBy('objective_id', 'asc')
         ->get();
 
-        return Inertia::render('Policy/Index', [
+        return Inertia::render('Policy/Specific/Index', [
             'objectives' => $objectives,
         ]);
     }
@@ -58,7 +58,7 @@ class PolicyController extends Controller
         MstObjective::create($validated);
 
         return redirect()
-            ->route('policy.index')
+            ->route('policy.specific.index')
             ->with('success', 'Governance Objective berhasil ditambahkan.');
     }
 
@@ -111,7 +111,7 @@ class PolicyController extends Controller
         }
 
         return redirect()
-            ->route('policy.index')
+            ->route('policy.specific.index')
             ->with('success', 'Governance Objective berhasil diperbarui.');
     }
 
@@ -124,7 +124,7 @@ class PolicyController extends Controller
         $objective->delete();
 
         return redirect()
-            ->route('policy.index')
+            ->route('policy.specific.index')
             ->with('success', 'Governance Objective berhasil dihapus.');
     }
 
@@ -147,7 +147,7 @@ class PolicyController extends Controller
         MstPractice::create($validated);
 
         return redirect()
-            ->route('policy.index')
+            ->route('policy.specific.index')
             ->with('success', 'Management Practice berhasil ditambahkan.');
     }
 
@@ -184,7 +184,7 @@ class PolicyController extends Controller
         }
 
         return redirect()
-            ->route('policy.index')
+            ->route('policy.specific.index')
             ->with('success', 'Management Practice berhasil diperbarui.');
     }
 
@@ -197,7 +197,7 @@ class PolicyController extends Controller
         $practice->delete();
 
         return redirect()
-            ->route('policy.index')
+            ->route('policy.specific.index')
             ->with('success', 'Management Practice berhasil dihapus.');
     }
 }

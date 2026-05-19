@@ -247,9 +247,23 @@ export function useNavigation() {
             },
             {
                 label: "Policy",
-                href: safeRoute("policy.index"),
+                href: safeRoute("policy.general.index"),
                 icon: DocumentTextIcon,
                 active: (url) => url.startsWith("/policy"),
+                children: [
+                    {
+                        label: "Kebijakan Umum",
+                        href: safeRoute("policy.general.index"),
+                        icon: DocumentTextIcon,
+                        active: (url) => url.startsWith("/policy/general"),
+                    },
+                    {
+                        label: "Kebijakan Khusus",
+                        href: safeRoute("policy.specific.index"),
+                        icon: DocumentTextIcon,
+                        active: (url) => url.startsWith("/policy/specific"),
+                    },
+                ],
             },
             {
                 label: "Master Data",
