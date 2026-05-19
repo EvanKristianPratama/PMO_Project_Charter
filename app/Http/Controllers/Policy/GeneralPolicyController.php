@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Policy;
 
 use App\Http\Controllers\Controller;
 use App\Models\MstGeneralPolicy;
+use App\Models\MstRegulation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -12,7 +13,7 @@ use Inertia\Response;
 class GeneralPolicyController extends Controller
 {
     /**
-     * Display a listing of general policies.
+     * Display a listing of general policies in document view mode.
      */
     public function index(): Response
     {
@@ -136,13 +137,28 @@ class GeneralPolicyController extends Controller
         }
 
         $policies = MstGeneralPolicy::orderBy('number', 'asc')->get();
+        $regulations = MstRegulation::orderBy('id', 'desc')->get();
         } catch (\Exception $e) {
             // If the table doesn't exist on the active DB connection, render with empty data
             \Illuminate\Support\Facades\Log::warning('[GeneralPolicyController] DB error on active connection: ' . $e->getMessage());
             $policies = collect([]);
+            $regulations = collect([]);
         }
 
         return Inertia::render('Policy/General/Index', [
+            'policies' => $policies,
+            'regulations' => $regulations,
+        ]);
+    }
+
+    /**
+     * Display a listing of general policies for CRUD management.
+     */
+    public function manage(): Response
+    {
+        $policies = MstGeneralPolicy::orderBy('number', 'asc')->get();
+
+        return Inertia::render('Policy/General/Manage', [
             'policies' => $policies,
         ]);
     }

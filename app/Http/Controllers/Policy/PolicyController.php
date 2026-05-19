@@ -39,6 +39,32 @@ class PolicyController extends Controller
     }
 
     /**
+     * Display the specific policy management CRUD view.
+     */
+    public function manage(): Response
+    {
+        $objectives = MstObjective::with(['practices' => function($query) {
+            $query->orderBy('practice_id', 'asc');
+        }])
+        ->orderByRaw("
+            CASE 
+                WHEN objective_id LIKE 'EDM%' THEN 1
+                WHEN objective_id LIKE 'APO%' THEN 2
+                WHEN objective_id LIKE 'BAI%' THEN 3
+                WHEN objective_id LIKE 'DSS%' THEN 4
+                WHEN objective_id LIKE 'MEA%' THEN 5
+                ELSE 6
+            END ASC
+        ")
+        ->orderBy('objective_id', 'asc')
+        ->get();
+
+        return Inertia::render('Policy/Specific/Manage', [
+            'objectives' => $objectives,
+        ]);
+    }
+
+    /**
      * Store a newly created objective.
      */
     public function storeObjective(Request $request): RedirectResponse
@@ -58,7 +84,7 @@ class PolicyController extends Controller
         MstObjective::create($validated);
 
         return redirect()
-            ->route('policy.specific.index')
+            ->route('policy.specific.manage')
             ->with('success', 'Governance Objective berhasil ditambahkan.');
     }
 
@@ -111,7 +137,7 @@ class PolicyController extends Controller
         }
 
         return redirect()
-            ->route('policy.specific.index')
+            ->route('policy.specific.manage')
             ->with('success', 'Governance Objective berhasil diperbarui.');
     }
 
@@ -124,7 +150,7 @@ class PolicyController extends Controller
         $objective->delete();
 
         return redirect()
-            ->route('policy.specific.index')
+            ->route('policy.specific.manage')
             ->with('success', 'Governance Objective berhasil dihapus.');
     }
 
@@ -147,7 +173,7 @@ class PolicyController extends Controller
         MstPractice::create($validated);
 
         return redirect()
-            ->route('policy.specific.index')
+            ->route('policy.specific.manage')
             ->with('success', 'Management Practice berhasil ditambahkan.');
     }
 
@@ -184,7 +210,7 @@ class PolicyController extends Controller
         }
 
         return redirect()
-            ->route('policy.specific.index')
+            ->route('policy.specific.manage')
             ->with('success', 'Management Practice berhasil diperbarui.');
     }
 
@@ -197,7 +223,7 @@ class PolicyController extends Controller
         $practice->delete();
 
         return redirect()
-            ->route('policy.specific.index')
+            ->route('policy.specific.manage')
             ->with('success', 'Management Practice berhasil dihapus.');
     }
 }

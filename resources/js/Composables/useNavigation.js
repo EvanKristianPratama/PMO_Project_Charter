@@ -253,6 +253,12 @@ export function useNavigation() {
                 active: (url) => (url || '').startsWith("/policy"),
                 children: [
                     {
+                        label: "Regulasi",
+                        href: safeRoute("policy.regulation.index"),
+                        icon: DocumentTextIcon,
+                        active: (url) => url.startsWith("/policy/regulation"),
+                    },
+                    {
                         label: "Kebijakan Umum",
                         href: safeRoute("policy.general.index"),
                         icon: DocumentTextIcon,

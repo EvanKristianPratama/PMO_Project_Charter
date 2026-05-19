@@ -264,18 +264,27 @@ Route::middleware(['auth', 'approved'])->group(function () {
 
         // Kebijakan Umum (General Policy) CRUD
         Route::get('/general', [\App\Http\Controllers\Policy\GeneralPolicyController::class, 'index'])->name('general.index');
+        Route::get('/general/manage', [\App\Http\Controllers\Policy\GeneralPolicyController::class, 'manage'])->name('general.manage');
         Route::post('/general', [\App\Http\Controllers\Policy\GeneralPolicyController::class, 'store'])->name('general.store');
         Route::put('/general/{id}', [\App\Http\Controllers\Policy\GeneralPolicyController::class, 'update'])->name('general.update');
         Route::delete('/general/{id}', [\App\Http\Controllers\Policy\GeneralPolicyController::class, 'destroy'])->name('general.destroy');
 
         // Kebijakan Khusus (Specific Policy) CRUD
         Route::get('/specific', [\App\Http\Controllers\Policy\PolicyController::class, 'index'])->name('specific.index');
+        Route::get('/specific/manage', [\App\Http\Controllers\Policy\PolicyController::class, 'manage'])->name('specific.manage');
         Route::post('/objective', [\App\Http\Controllers\Policy\PolicyController::class, 'storeObjective'])->name('objective.store');
         Route::put('/objective/{objective}', [\App\Http\Controllers\Policy\PolicyController::class, 'updateObjective'])->name('objective.update');
         Route::delete('/objective/{objective}', [\App\Http\Controllers\Policy\PolicyController::class, 'destroyObjective'])->name('objective.destroy');
         Route::post('/practice', [\App\Http\Controllers\Policy\PolicyController::class, 'storePractice'])->name('practice.store');
         Route::put('/practice/{practice}', [\App\Http\Controllers\Policy\PolicyController::class, 'updatePractice'])->name('practice.update');
         Route::delete('/practice/{practice}', [\App\Http\Controllers\Policy\PolicyController::class, 'destroyPractice'])->name('practice.destroy');
+
+        // Regulasi (Regulation) CRUD
+        Route::get('/regulation', [\App\Http\Controllers\Policy\RegulationController::class, 'index'])->name('regulation.index');
+        Route::get('/regulation/manage', [\App\Http\Controllers\Policy\RegulationController::class, 'manage'])->name('regulation.manage');
+        Route::post('/regulation', [\App\Http\Controllers\Policy\RegulationController::class, 'store'])->name('regulation.store');
+        Route::put('/regulation/{id}', [\App\Http\Controllers\Policy\RegulationController::class, 'update'])->name('regulation.update');
+        Route::delete('/regulation/{id}', [\App\Http\Controllers\Policy\RegulationController::class, 'destroy'])->name('regulation.destroy');
     });
 
     Route::get('/program-information', fn () => Inertia::render('Placeholder/Index', [
