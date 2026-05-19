@@ -25,7 +25,7 @@ const rightNavItems = computed(() => navItems.value.slice(5));
                             :href="item.href"
                             class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
                             :class="[
-                                item.active(currentUrl.value)
+                                item.active(currentUrl)
                                     ? 'bg-blue-500 text-white dark:bg-blue-500 dark:text-white shadow-sm'
                                     : 'text-slate-500 hover:bg-slate-200/80 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700/80 dark:hover:text-slate-200'
                             ]"
@@ -44,7 +44,7 @@ const rightNavItems = computed(() => navItems.value.slice(5));
                             :href="item.href"
                             class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
                             :class="[
-                                item.active(currentUrl.value)
+                                item.active(currentUrl)
                                     ? 'bg-blue-500 text-white dark:bg-blue-500 dark:text-white shadow-sm'
                                     : 'text-slate-500 hover:bg-slate-200/80 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700/80 dark:hover:text-slate-200'
                             ]"

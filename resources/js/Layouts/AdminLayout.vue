@@ -53,37 +53,37 @@ const navItems = [
         label: 'Dashboard',
         href: route('admin.dashboard'),
         icon: HomeIcon,
-        active: (url) => url.startsWith('/admin/dashboard'),
+        active: (url) => (url || '').startsWith('/admin/dashboard'),
     },
     {
         label: 'User Management',
         href: route('admin.users.index'),
         icon: UsersIcon,
-        active: (url) => url.startsWith('/admin/users'),
+        active: (url) => (url || '').startsWith('/admin/users'),
     },
     {
         label: 'Role Management',
         href: route('admin.roles.index'),
         icon: KeyIcon,
-        active: (url) => url.startsWith('/admin/roles'),
+        active: (url) => (url || '').startsWith('/admin/roles'),
     },
     {
         label: 'Backup Database',
         href: route('admin.backup.index'),
         icon: ArchiveBoxIcon,
-        active: (url) => url.startsWith('/admin/backup'),
+        active: (url) => (url || '').startsWith('/admin/backup'),
     },
     {
         label: 'Log Aktivitas',
         href: route('admin.activity-log.index'),
         icon: ClipboardDocumentListIcon,
-        active: (url) => url.startsWith('/admin/activity-log'),
+        active: (url) => (url || '').startsWith('/admin/activity-log'),
     },
     {
         label: 'Sinkronisasi Data',
         href: route('sync.index'),
         icon: CloudArrowDownIcon,
-        active: (url) => url.startsWith('/sync'),
+        active: (url) => (url || '').startsWith('/sync'),
     },
 ];
 
@@ -262,7 +262,7 @@ const logout = () => {
                     :key="`side-${item.href}`"
                     :href="item.href"
                     class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
-                    :class="item.active(currentUrl.value)
+                    :class="item.active(currentUrl)
                         ? 'bg-indigo-600/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300'
                         : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200'"
                     @click="closeSidebar"

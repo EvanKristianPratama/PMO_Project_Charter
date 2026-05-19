@@ -16,7 +16,8 @@ class GeneralPolicyController extends Controller
      */
     public function index(): Response
     {
-        // Auto-seed default 14 items if empty
+        // Auto-seed default items if table is empty (guard against DB errors)
+        try {
         if (MstGeneralPolicy::count() === 0) {
             $defaultPolicies = [
                 [
@@ -135,6 +136,11 @@ class GeneralPolicyController extends Controller
         }
 
         $policies = MstGeneralPolicy::orderBy('number', 'asc')->get();
+        } catch (\Exception $e) {
+            // If the table doesn't exist on the active DB connection, render with empty data
+            \Illuminate\Support\Facades\Log::warning('[GeneralPolicyController] DB error on active connection: ' . $e->getMessage());
+            $policies = collect([]);
+        }
 
         return Inertia::render('Policy/General/Index', [
             'policies' => $policies,

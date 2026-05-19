@@ -47,7 +47,7 @@ export function useNavigation() {
                 icon: DocumentTextIcon,
                 // Only mark active when under program-planning routes,
                 // not when viewing Business Strategy inside Strategic House.
-                active: (url) => url.startsWith("/program-planning") && url.includes("business-strategy"),
+                active: (url) => (url || '').startsWith("/program-planning") && (url || '').includes("business-strategy"),
             },
             {
                 label: "Digital Initiative Definition",
@@ -56,7 +56,7 @@ export function useNavigation() {
                 ),
                 icon: DocumentTextIcon,
                 active: (url) =>
-                    url.startsWith(
+                    (url || '').startsWith(
                         "/program-planning/program-definition/digital-initiatives",
                     ) || url === "/program-planning/program-definition",
             },
@@ -66,7 +66,7 @@ export function useNavigation() {
                     "program-planning.program-definition.it-initiatives",
                 ),
                 icon: DocumentTextIcon,
-                active: (url) => url.startsWith('/program-planning/program-definition/it-initiatives'),
+                active: (url) => (url || '').startsWith('/program-planning/program-definition/it-initiatives'),
             },
         ];
 
@@ -76,30 +76,30 @@ export function useNavigation() {
                 href: safeRoute("program-evaluation.index"),
                 icon: ClipboardDocumentCheckIcon,
                 active: (url) =>
-                    url.startsWith("/program-evalution/review") &&
-                    !url.startsWith("/program-evalution/review-timeline") &&
-                    !url.startsWith("/program-evalution/review-dashboard"),
+                    (url || '').startsWith("/program-evalution/review") &&
+                    !(url || '').startsWith("/program-evalution/review-timeline") &&
+                    !(url || '').startsWith("/program-evalution/review-dashboard"),
             },
             {
                 label: "Review Approval",
                 href: safeRoute("program-evaluation.review-dashboard"),
                 icon: ClipboardDocumentCheckIcon,
                 active: (url) =>
-                    url.startsWith("/program-evalution/review-dashboard"),
+                    (url || '').startsWith("/program-evalution/review-dashboard"),
             },
             {
                 label: "Review Status",
                 href: safeRoute("program-evaluation.review-timeline"),
                 icon: ClipboardDocumentCheckIcon,
                 active: (url) =>
-                    url.startsWith("/program-evalution/review-timeline"),
+                    (url || '').startsWith("/program-evalution/review-timeline"),
             },
             {
                 label: "Dashboard Summary",
                 href: safeRoute("program-evaluation.review-summary"),
                 icon: ClipboardDocumentCheckIcon,
                 active: (url) =>
-                    url.startsWith("/program-evalution/review-summary"),
+                    (url || '').startsWith("/program-evalution/review-summary"),
             },
         ];
 
@@ -108,7 +108,7 @@ export function useNavigation() {
                 label: "Digital Initiatives",
                 href: safeRoute("digital-initiatives.index"),
                 icon: FolderIcon,
-                active: (url) => url.startsWith("/digital-initiatives"),
+                active: (url) => (url || '').startsWith("/digital-initiatives"),
                 children: [
                     {
                         label: "Status Implementation",
@@ -117,8 +117,8 @@ export function useNavigation() {
                         }),
                         icon: ClipboardDocumentCheckIcon,
                         active: (url) =>
-                            url.startsWith("/digital-initiatives") &&
-                            url.includes("tableMode=implementation"),
+                            (url || '').startsWith("/digital-initiatives") &&
+                            (url || '').includes("tableMode=implementation"),
                     },
                 ],
             },
@@ -127,8 +127,8 @@ export function useNavigation() {
                 href: safeRoute("it-initiatives.index"),
                 icon: FolderIcon,
                 active: (url) =>
-                    url.startsWith("/it-initiatives") ||
-                    url.startsWith("/roadmap"),
+                    (url || '').startsWith("/it-initiatives") ||
+                    (url || '').startsWith("/roadmap"),
                 children: [
                     {
                         label: "Dashboard Summary",
@@ -141,8 +141,8 @@ export function useNavigation() {
                         href: safeRoute("roadmap.index"),
                         icon: ClipboardDocumentCheckIcon,
                         active: (url) =>
-                            url.startsWith("/roadmap") &&
-                            !url.startsWith("/roadmap/status-implementation"),
+                            (url || '').startsWith("/roadmap") &&
+                            !(url || '').startsWith("/roadmap/status-implementation"),
                     },
                     {
                         label: "Status Implementation",
@@ -151,7 +151,7 @@ export function useNavigation() {
                         }),
                         icon: ClipboardDocumentCheckIcon,
                         active: (url) =>
-                            url.includes("tableMode=implementation"),
+                            (url || '').includes("tableMode=implementation"),
                     },
                 ],
             },
@@ -163,7 +163,7 @@ export function useNavigation() {
                 ),
                 icon: CircleStackIcon,
                 active: (url) =>
-                    url.startsWith(
+                    (url || '').startsWith(
                         "/program-implementation/resources-management",
                     ),
             },
@@ -175,21 +175,21 @@ export function useNavigation() {
                 href: safeRoute("master-data.business-capabilities.index"),
                 icon: CubeIcon,
                 active: (url) =>
-                    url.startsWith("/master-data/business-capabilities"),
+                    (url || '').startsWith("/master-data/business-capabilities"),
             },
             {
                 label: "Organization Structure",
                 href: safeRoute("architecture.organization-structure"),
                 icon: BuildingOffice2Icon,
                 active: (url) =>
-                    url.startsWith("/architecture/organization-structure"),
+                    (url || '').startsWith("/architecture/organization-structure"),
             },
             {
                 label: "Informatic System",
                 href: safeRoute("architecture.informatic-system"),
                 icon: BuildingOffice2Icon,
                 active: (url) =>
-                    url.startsWith("/architecture/informatic-system"),
+                    (url || '').startsWith("/architecture/informatic-system"),
             },
         ];
 
@@ -199,8 +199,8 @@ export function useNavigation() {
                 href: safeRoute("strategic-house.index"),
                 icon: Squares2X2Icon,
                 active: (url) =>
-                    url.startsWith("/strategic-house") ||
-                    url.startsWith("/strategic-pillars"),
+                    (url || '').startsWith("/strategic-house") ||
+                    (url || '').startsWith("/strategic-pillars"),
                 children: strategicHouseChildren,
             },
             {
@@ -208,14 +208,14 @@ export function useNavigation() {
                 href: safeRoute("program-planning"),
                 icon: FlagIcon,
                 active: (url) =>
-                    url.startsWith("/program-planning"),
+                    (url || '').startsWith("/program-planning"),
                 children: programPlanningChildren,
             },
             {
                 label: "Program Evaluation",
                 href: safeRoute("program-evaluation.index"),
                 icon: DocumentTextIcon,
-                active: (url) => url.startsWith("/program-evalution"),
+                active: (url) => (url || '').startsWith("/program-evalution"),
                 children: programEvaluationChildren,
             },
             {
