@@ -15,13 +15,16 @@ class OrganizationStructureService
             ->with([
                 'company:id,name',
                 'organizations' => fn (HasMany $query) => $query
-                    ->select(['id', 'groub_id', 'name'])
-                    ->orderBy('name'),
+                    ->select(['id', 'groub_id', 'code', 'name']),
             ])
-            ->orderBy('name')
             ->get()
             ->flatMap(fn (Groub $groub) => $groub->organizations
                 ->map(fn (TrsOrganization $organization): array => $this->organizationStructureRow($groub, $organization)))
+            ->sortBy([
+                ['company_name', 'asc'],
+                ['groub_name', 'asc'],
+                ['code', 'asc'],
+            ])
             ->values()
             ->all();
     }
@@ -30,6 +33,8 @@ class OrganizationStructureService
     {
         return [
             'organization_id' => (int) $organization->id,
+            'code' => trim((string) ($organization->code ?? '')),
+            'organization_code' => trim((string) ($organization->code ?? '')),
             'organization_name' => $organization->name,
             'groub_id' => (int) $groub->id,
             'groub_name' => $groub->name,
