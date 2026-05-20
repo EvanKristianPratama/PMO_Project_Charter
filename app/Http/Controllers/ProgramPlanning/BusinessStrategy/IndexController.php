@@ -37,7 +37,7 @@ class IndexController extends Controller
 
         $misiBumn = MstMisiBumn::with('prioritasStrategy')->orderBy('code')->get();
         
-        $priorityStrategicInitiatives = MstPriorityStrategicInitiative::with('mapPriorityStrategicInitiative.picPrioriyStrategic')->orderBy('no')->get();
+        $priorityStrategicInitiatives = MstPriorityStrategicInitiative::with('mapPriorityStrategicInitiative.picPriorityStrategic')->orderBy('no')->get();
 
         $strategicHousePertamina = MstStrategicHouse::where('id', 4)->first();
         $pertaminaGoals = Goal::where('pilar', 4)->with(['themes' => function($query) {

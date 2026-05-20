@@ -19,7 +19,7 @@ class TrsMapProjectLeader extends Model
 
     public function picProjectLeader(): BelongsTo
     {
-        return $this->belongsTo(MstPic::class, 'pic_id');
+        return $this->belongsTo(MstPicCompany::class, 'pic_id');
     }
     public function projectCharter(): BelongsTo
     {

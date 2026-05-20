@@ -17,9 +17,9 @@ class TrsMapPriorityStrategicInitiative extends Model
         'priority_strategic_id'
     ];
 
-    public function picPrioriyStrategic(): BelongsTo
+    public function picPriorityStrategic(): BelongsTo
     {
-        return $this->belongsTo(MstPic::class, 'pic_id');
+        return $this->belongsTo(MstPicCompany::class, 'pic_id');
     }
     public function priorityStrategic(): BelongsTo
     {

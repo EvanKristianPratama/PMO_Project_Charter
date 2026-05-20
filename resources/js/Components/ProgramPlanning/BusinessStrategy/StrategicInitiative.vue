@@ -44,7 +44,7 @@
                             class="px-2 py-1 border border-slate-200 dark:border-slate-700/50 align-top text-slate-600 dark:text-slate-400 whitespace-pre-wrap">
                             <ul v-if="item.map_priority_strategic_initiative && item.map_priority_strategic_initiative.length > 0" class="list-disc list-inside">
                                 <li v-for="mapPic in item.map_priority_strategic_initiative" :key="mapPic.id">
-                                    {{ mapPic.pic_prioriy_strategic?.name }}
+                                    {{ mapPic.pic_priority_strategic?.name }}
                                 </li>
                             </ul>
                             <span v-else>-</span>
