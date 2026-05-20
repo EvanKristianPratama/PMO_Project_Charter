@@ -24,4 +24,11 @@ class MstPractice extends Model
     {
         return $this->belongsTo(MstObjective::class, 'objective_id', 'objective_id');
     }
+
+    public function roles()
+    {
+        return $this->belongsToMany(MstRole::class, 'trs_practicerole', 'practice_id', 'role_id')
+            ->withPivot('r_a')
+            ->withTimestamps();
+    }
 }

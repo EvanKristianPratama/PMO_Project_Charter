@@ -276,6 +276,12 @@ export function useNavigation() {
                         icon: DocumentTextIcon,
                         active: (url) => (url || '').startsWith("/policy/roles"),
                     },
+                    {
+                        label: "Matriks RACI",
+                        href: safeRoute("policy.raci.index"),
+                        icon: DocumentTextIcon,
+                        active: (url) => (url || '').startsWith("/policy/raci"),
+                    },
                 ],
             },
             {

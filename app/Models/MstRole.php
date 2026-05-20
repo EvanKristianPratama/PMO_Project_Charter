@@ -18,4 +18,11 @@ class MstRole extends Model
     {
         return $this->hasMany(TrsResponsibility::class, 'role_id');
     }
+
+    public function practices()
+    {
+        return $this->belongsToMany(MstPractice::class, 'trs_practicerole', 'role_id', 'practice_id')
+            ->withPivot('r_a')
+            ->withTimestamps();
+    }
 }
