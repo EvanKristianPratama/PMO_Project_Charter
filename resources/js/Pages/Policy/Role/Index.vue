@@ -12,20 +12,6 @@
                         <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Peran & Tanggung Jawab</h1>
                     </div>
                     <div class="flex items-center gap-3">
-                        <!-- Regulation Switcher / Dropdown -->
-                        <div v-if="regulations && regulations.length > 0" class="flex items-center gap-2">
-                            <span class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Regulasi:</span>
-                            <select
-                                v-model="selectedRegulationId"
-                                class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 focus:border-[#821f44] focus:ring-1 focus:ring-[#821f44]"
-                            >
-                                <option :value="null">Gunakan Default</option>
-                                <option v-for="r in regulations" :key="r.id" :value="r.id">
-                                    REG-{{ r.id.toString().padStart(4, '0') }} - {{ r.owner }}
-                                </option>
-                            </select>
-                        </div>
-
                         <!-- Print Button -->
                         <button
                             @click="printDocument"
@@ -104,22 +90,20 @@
                 <!-- 2. Document Title Section -->
                 <div class="mt-16 text-center space-y-2 relative z-10">
                     <h2 class="text-lg sm:text-xl font-extrabold tracking-[0.15em] text-slate-950 dark:text-white uppercase">
-                        BAB II
+                        BAB III
                     </h2>
                     <h2 class="text-xl sm:text-2xl font-extrabold tracking-[0.2em] text-slate-950 dark:text-white uppercase">
-                        KEBIJAKAN
+                        TUGAS, KEBIJAKAN DAN TANGGUNG JAWAB
                     </h2>
-                </div>
-
-                <!-- 3. Subtitle -->
-                <div class="mt-10 relative z-10">
-                    <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide border-b border-slate-900/10 pb-2 dark:border-white/10">
-                        C. Peran dan Tanggung Jawab
-                    </h3>
                 </div>
 
                 <!-- Literal Document Content in Serif style for premium Word document look -->
                 <div class="mt-8 space-y-8 text-[15px] leading-relaxed text-slate-900 dark:text-slate-100 font-serif">
+                    
+                    <!-- Short Description Paragraph -->
+                    <p class="text-justify font-serif text-[15px] leading-relaxed mb-6">
+                        Tugas, kewenangan, dan tanggung jawab pada Pedoman ini merujuk pada peran yang dijelaskan pada kerangka COBIT 2019 sesuai dengan pemetaan peran dan tanggung jawab, serta diselaraskan dengan hasil pemetaan kebijakan Pedoman ini dengan pemetaan proses bisnis Perusahaan (SK 07/C00000/2021-08 tentang Model Proses Bisnis Pertamina Group).
+                    </p>
                     
                     <div v-for="(role, idx) in roles" :key="role.id" class="space-y-3">
                         <!-- Role Title (A. Dewan Direksi (Board), B. Executive Committee, dsb) -->
