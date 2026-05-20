@@ -45,29 +45,46 @@
                 
 
 
-                <!-- Clean Word-Style Header Info -->
-                <div class="border-b-2 border-slate-900 pb-6 dark:border-white text-slate-900 dark:text-white relative z-10">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-                        <div class="space-y-1">
-                            <span class="text-xs font-bold uppercase tracking-[0.15em] text-[#821f44] dark:text-[#a83262]">
-                                {{ activeRegulation?.owner || 'ENTERPRISE IT - DIREKTORAT PENUNJANG BISNIS' }}
-                            </span>
-                            <h1 class="text-xl sm:text-2xl font-extrabold text-slate-950 dark:text-white uppercase leading-snug mt-1">
-                                {{ activeRegulation?.judul || 'TATA KELOLA TEKNOLOGI INFORMASI' }}
-                            </h1>
+                <!-- Formal Pertamina Document Grid Header -->
+                <div class="border border-slate-900 dark:border-white text-[11px] text-slate-950 dark:text-white font-sans uppercase z-10 relative mb-8">
+                    <div class="grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-slate-900 dark:divide-white">
+                        <!-- Left Column (Fungsi & Judul) -->
+                        <div class="md:col-span-7 flex flex-col divide-y divide-slate-900 dark:divide-white">
+                            <div class="p-3 flex items-start gap-1.5 min-h-[46px]">
+                                <span class="font-bold shrink-0">FUNGSI :</span>
+                                <span class="font-bold text-slate-900 dark:text-white">{{ activeRegulation?.owner || 'ENTERPRISE IT – DIREKTORAT PENUNJANG BISNIS' }}</span>
+                            </div>
+                            <div class="p-3 flex items-start gap-1.5 min-h-[46px]">
+                                <span class="font-bold shrink-0">JUDUL :</span>
+                                <span class="font-bold text-slate-900 dark:text-white">{{ activeRegulation?.judul || 'TATA KELOLA TEKNOLOGI INFORMASI' }}</span>
+                            </div>
                         </div>
-                        <div class="grid grid-cols-2 md:flex md:flex-col gap-x-6 gap-y-1 text-xs font-bold text-slate-500 dark:text-slate-400">
-                            <div>
-                                <span class="uppercase tracking-wider mr-1.5 text-slate-400 dark:text-slate-500">Nomor:</span>
-                                <span class="font-mono text-slate-900 dark:text-white">{{ activeRegulation ? `REG-${activeRegulation.id.toString().padStart(4, '0')}` : '-' }}</span>
+                        <!-- Right Column (Metadata) -->
+                        <div class="md:col-span-5 flex flex-col divide-y divide-slate-900 dark:divide-white">
+                            <div class="p-2.5 flex items-center gap-1.5 min-h-[23px]">
+                                <span class="font-bold shrink-0">NOMOR :</span>
+                                <span class="font-mono font-bold text-slate-900 dark:text-white">{{ activeRegulation ? `REG-${activeRegulation.id.toString().padStart(4, '0')}` : '-' }}</span>
                             </div>
-                            <div>
-                                <span class="uppercase tracking-wider mr-1.5 text-slate-400 dark:text-slate-500">Revisi:</span>
-                                <span class="text-slate-900 dark:text-white">{{ activeRegulation?.revisi || '0' }}</span>
+                            <div class="p-2.5 flex items-center min-h-[23px]">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <span class="font-bold shrink-0">REVISI KE :</span>
+                                    <template v-if="[0, 1, 2, 3, 4].includes(parseInt(activeRegulation?.revisi))">
+                                        <span v-for="num in [0, 1, 2, 3, 4]" :key="num" class="inline-flex items-center gap-1 mr-1">
+                                            <span class="w-3.5 h-3.5 border border-slate-900 dark:border-white flex items-center justify-center text-[10px] font-black bg-transparent select-none animate-none">
+                                                {{ parseInt(activeRegulation?.revisi) === num ? '✓' : '' }}
+                                            </span>
+                                            <span class="font-mono">{{ num }}</span>
+                                        </span>
+                                    </template>
+                                    <template v-else>
+                                        <span class="w-3.5 h-3.5 border border-slate-900 dark:border-white flex items-center justify-center text-[10px] font-black bg-transparent select-none mr-1">✓</span>
+                                        <span class="font-bold text-slate-900 dark:text-white mr-2">{{ activeRegulation?.revisi || '0' }}</span>
+                                    </template>
+                                </div>
                             </div>
-                            <div class="col-span-2 md:col-span-1">
-                                <span class="uppercase tracking-wider mr-1.5 text-slate-400 dark:text-slate-500">Berlaku:</span>
-                                <span class="text-slate-900 dark:text-white">{{ activeRegulation?.berlaku ? formatDate(activeRegulation.berlaku) : '-' }}</span>
+                            <div class="p-2.5 flex items-center gap-1.5 min-h-[23px]">
+                                <span class="font-bold shrink-0">BERLAKU TMT :</span>
+                                <span class="font-bold text-slate-900 dark:text-white">{{ activeRegulation?.berlaku ? formatDate(activeRegulation.berlaku) : '-' }}</span>
                             </div>
                         </div>
                     </div>
@@ -91,17 +108,17 @@
                 </div>
 
                 <!-- 4. Document Body List of Policies -->
-                <div class="mt-8 space-y-6 text-sm sm:text-base leading-relaxed text-slate-800 dark:text-slate-200 relative z-10 font-sans">
+                <div class="mt-8 space-y-1.5 text-[15px] leading-relaxed text-slate-900 dark:text-slate-100 relative z-10 font-serif">
                     <div 
                         v-for="policy in policies" 
                         :key="policy.id" 
-                        class="flex gap-4 items-start pl-2 transition-all hover:bg-slate-50/50 dark:hover:bg-white/5 py-2 rounded-lg"
+                        class="flex gap-3 items-start pl-2 py-0"
                     >
-                        <span class="font-bold text-slate-950 dark:text-white min-w-[20px] text-right font-mono select-none">
+                        <span class="font-bold text-slate-950 dark:text-white min-w-[20px] text-right font-serif select-none">
                             {{ policy.number }}.
                         </span>
-                        <p class="font-medium text-slate-850 dark:text-slate-200">
-                            {{ policy.description }}
+                        <p class="text-justify whitespace-pre-line font-serif">
+                            {{ formatDescription(policy.description) }}
                         </p>
                     </div>
 
@@ -162,6 +179,12 @@ function formatDate(dateString) {
     } catch (e) {
         return dateString;
     }
+}
+
+// Format Description helper to auto-break and indent sub-points like a., b., c.
+function formatDescription(text) {
+    if (!text) return '';
+    return text.replace(/\s+([a-z])([\.\)])\s+/g, '\n   $1$2 ');
 }
 
 // Print Handler

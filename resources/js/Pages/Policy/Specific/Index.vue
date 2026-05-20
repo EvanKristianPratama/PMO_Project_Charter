@@ -42,20 +42,69 @@
             <!-- A4 Document Page Preview (Pure Word Style Document, NO watermark) -->
             <div class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 md:p-16 rounded-2xl relative font-sans text-slate-800 dark:text-slate-200 print:shadow-none print:border-none print:p-0 print:m-0">
                 
-                <!-- Document Title Header -->
-                <div class="text-slate-900 dark:text-white relative z-10 mb-8 border-b-2 border-slate-900 dark:border-white pb-6">
-                    <span class="text-xs font-bold uppercase tracking-[0.15em] text-[#821f44] dark:text-[#a83262]">
-                        PEDOMAN TATA KELOLA TEKNOLOGI INFORMASI PERTAMINA (PERSERO)
-                    </span>
-                    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-950 dark:text-white uppercase leading-snug mt-1">
-                        Lampiran B. Kebijakan Khusus
-                    </h1>
+                <!-- Formal Pertamina Document Grid Header -->
+                <div class="border border-slate-900 dark:border-white text-[11px] text-slate-950 dark:text-white font-sans uppercase z-10 relative mb-8">
+                    <div class="grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-slate-900 dark:divide-white">
+                        <!-- Left Column (Fungsi & Judul) -->
+                        <div class="md:col-span-7 flex flex-col divide-y divide-slate-900 dark:divide-white">
+                            <div class="p-3 flex items-start gap-1.5 min-h-[46px]">
+                                <span class="font-bold shrink-0">FUNGSI :</span>
+                                <span class="font-bold text-slate-900 dark:text-white">{{ activeRegulation?.owner || 'ENTERPRISE IT – DIREKTORAT PENUNJANG BISNIS' }}</span>
+                            </div>
+                            <div class="p-3 flex items-start gap-1.5 min-h-[46px]">
+                                <span class="font-bold shrink-0">JUDUL :</span>
+                                <span class="font-bold text-slate-900 dark:text-white">{{ activeRegulation?.judul || 'TATA KELOLA TEKNOLOGI INFORMASI' }}</span>
+                            </div>
+                        </div>
+                        <!-- Right Column (Metadata) -->
+                        <div class="md:col-span-5 flex flex-col divide-y divide-slate-900 dark:divide-white">
+                            <div class="p-2.5 flex items-center gap-1.5 min-h-[23px]">
+                                <span class="font-bold shrink-0">NOMOR :</span>
+                                <span class="font-mono font-bold text-slate-900 dark:text-white">{{ activeRegulation ? `REG-${activeRegulation.id.toString().padStart(4, '0')}` : '-' }}</span>
+                            </div>
+                            <div class="p-2.5 flex items-center min-h-[23px]">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <span class="font-bold shrink-0">REVISI KE :</span>
+                                    <template v-if="[0, 1, 2, 3, 4].includes(parseInt(activeRegulation?.revisi))">
+                                        <span v-for="num in [0, 1, 2, 3, 4]" :key="num" class="inline-flex items-center gap-1 mr-1">
+                                            <span class="w-3.5 h-3.5 border border-slate-900 dark:border-white flex items-center justify-center text-[10px] font-black bg-transparent select-none animate-none">
+                                                {{ parseInt(activeRegulation?.revisi) === num ? '✓' : '' }}
+                                            </span>
+                                            <span class="font-mono">{{ num }}</span>
+                                        </span>
+                                    </template>
+                                    <template v-else>
+                                        <span class="w-3.5 h-3.5 border border-slate-900 dark:border-white flex items-center justify-center text-[10px] font-black bg-transparent select-none mr-1">✓</span>
+                                        <span class="font-bold text-slate-900 dark:text-white mr-2">{{ activeRegulation?.revisi || '0' }}</span>
+                                    </template>
+                                </div>
+                            </div>
+                            <div class="p-2.5 flex items-center gap-1.5 min-h-[23px]">
+                                <span class="font-bold shrink-0">BERLAKU TMT :</span>
+                                <span class="font-bold text-slate-900 dark:text-white">{{ activeRegulation?.berlaku ? formatDate(activeRegulation.berlaku) : '-' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 2. Document Title Section -->
+                <div class="mt-16 text-center space-y-2 relative z-10">
+                    <h2 class="text-lg sm:text-xl font-extrabold tracking-[0.15em] text-slate-950 dark:text-white uppercase">
+                        BAB II
+                    </h2>
+                    <h2 class="text-xl sm:text-2xl font-extrabold tracking-[0.2em] text-slate-950 dark:text-white uppercase">
+                        KEBIJAKAN
+                    </h2>
+                </div>
+
+                <!-- 3. Specific Policy Subtitle -->
+                <div class="mt-10 relative z-10">
+                    <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide border-b border-slate-900/10 pb-2 dark:border-white/10">
+                        B. Kebijakan Khusus
+                    </h3>
                 </div>
 
                 <!-- Literal Document Content in Serif style for premium Word document look -->
-                <div class="space-y-8 text-[15px] leading-relaxed text-slate-900 dark:text-slate-100 font-serif">
-                    <!-- Title Header: B. Kebijakan Khusus -->
-                    <h2 class="text-lg font-bold text-slate-950 dark:text-white">B. Kebijakan Khusus</h2>
+                <div class="mt-8 space-y-8 text-[15px] leading-relaxed text-slate-900 dark:text-slate-100 font-serif">
 
                     <!-- Loop through Domains -->
                     <div v-for="(objectivesInDomain, domainName, domainIdx) in groupedObjectives" :key="domainName" class="space-y-6">
@@ -150,7 +199,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import { usePage, Link } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
@@ -159,6 +208,23 @@ const props = defineProps({
         type: Array,
         required: true,
     },
+    regulations: {
+        type: Array,
+        required: true,
+    },
+});
+
+const page = usePage();
+
+// Selected Regulation state
+const selectedRegulationId = ref(null);
+
+const activeRegulation = computed(() => {
+    if (!selectedRegulationId.value || props.regulations.length === 0) {
+        // Fall back to first regulation if available, otherwise null
+        return props.regulations[0] || null;
+    }
+    return props.regulations.find(r => r.id === selectedRegulationId.value) || null;
 });
 
 const groupedObjectives = computed(() => {
@@ -211,6 +277,22 @@ function getListItems(text) {
 function getLetterNumbering(index) {
     const letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
     return letters[index] || (index + 1).toString();
+}
+
+// Format Date helper
+function formatDate(dateString) {
+    if (!dateString) return '-';
+    try {
+        const d = new Date(dateString);
+        if (isNaN(d.getTime())) return dateString;
+        return d.toLocaleDateString('id-ID', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    } catch (e) {
+        return dateString;
+    }
 }
 
 function printDocument() {

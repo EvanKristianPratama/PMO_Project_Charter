@@ -17,8 +17,8 @@ return new class extends Migration
             $table->string('tipe');
             $table->string('owner');
             $table->string('revisi');
-            $table->date('terbit');
-            $table->date('berlaku');
+            $table->date('terbit')->nullable();
+            $table->date('berlaku')->nullable();
             $table->timestamps();
         });
     }

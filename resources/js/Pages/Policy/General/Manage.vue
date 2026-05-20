@@ -83,8 +83,8 @@
                                     {{ policy.number }}
                                 </td>
                                 <!-- Description Column -->
-                                <td class="px-6 py-4 text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
-                                    {{ policy.description }}
+                                <td class="px-6 py-4 text-slate-700 dark:text-slate-300 leading-relaxed font-medium whitespace-pre-line">
+                                    {{ formatDescription(policy.description) }}
                                 </td>
                                 <!-- Actions Column -->
                                 <td class="px-6 py-4">
@@ -339,6 +339,11 @@ function deletePolicy(policy) {
             });
         }
     });
+}
+
+function formatDescription(text) {
+    if (!text) return '';
+    return text.replace(/\s+([a-z])([\.\)])\s+/g, '\n   $1$2 ');
 }
 </script>
 

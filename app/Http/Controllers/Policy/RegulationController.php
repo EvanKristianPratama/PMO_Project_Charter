@@ -46,8 +46,8 @@ class RegulationController extends Controller
             'tipe' => 'required|string|max:255',
             'owner' => 'required|string|max:255',
             'revisi' => 'required|string|max:255',
-            'terbit' => 'required|date',
-            'berlaku' => 'required|date',
+            'terbit' => 'nullable|date',
+            'berlaku' => 'nullable|date',
         ], [
             'judul.required' => 'Judul Kebijakan wajib diisi.',
             'tipe.required' => 'Tipe Kebijakan wajib diisi.',
@@ -78,8 +78,8 @@ class RegulationController extends Controller
             'tipe' => 'required|string|max:255',
             'owner' => 'required|string|max:255',
             'revisi' => 'required|string|max:255',
-            'terbit' => 'required|date',
-            'berlaku' => 'required|date',
+            'terbit' => 'nullable|date',
+            'berlaku' => 'nullable|date',
         ], [
             'judul.required' => 'Judul Kebijakan wajib diisi.',
             'tipe.required' => 'Tipe Kebijakan wajib diisi.',

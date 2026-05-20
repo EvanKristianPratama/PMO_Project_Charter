@@ -33,8 +33,16 @@ class PolicyController extends Controller
         ->orderBy('objective_id', 'asc')
         ->get();
 
+        try {
+            $regulations = \App\Models\MstRegulation::orderBy('id', 'desc')->get();
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('[PolicyController] DB error loading regulations: ' . $e->getMessage());
+            $regulations = collect([]);
+        }
+
         return Inertia::render('Policy/Specific/Index', [
             'objectives' => $objectives,
+            'regulations' => $regulations,
         ]);
     }
 
