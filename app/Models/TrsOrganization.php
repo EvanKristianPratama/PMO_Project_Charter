@@ -16,6 +16,7 @@ class TrsOrganization extends Model
 
     protected $fillable = [
         'groub_id',
+        'code',
         'name',
     ];
 

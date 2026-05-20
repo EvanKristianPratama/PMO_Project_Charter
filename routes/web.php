@@ -8,7 +8,7 @@ use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\DatabaseSwitcherController;
 use App\Http\Controllers\Admin\SyncController;
 use App\Http\Controllers\Architecture\BusinessCapability\BusinessCapabilityController;
-use App\Http\Controllers\Architecture\OrganizationStructure\IndexController as ArchitectureOrganizationStructureIndexController;
+use App\Http\Controllers\Architecture\OrganizationStructure\OrganizationController as ArchitectureOrganizationStructureController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\SsoController;
 use App\Http\Controllers\PublicSyncController;
@@ -248,7 +248,10 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/program-implementation/budgeting', fn () => redirect()->route('program-implementation.resources-management.index'))
         ->name('program-implementation.budgeting');
     Route::get('/architecture', fn () => Inertia::render('Architecture/Index'))->name('architecture.index');
-    Route::get('/architecture/organization-structure', ArchitectureOrganizationStructureIndexController::class)->name('architecture.organization-structure');
+    Route::get('/architecture/organization-structure', [ArchitectureOrganizationStructureController::class, 'index'])->name('architecture.organization-structure');
+    Route::post('/architecture/organization-structure', [ArchitectureOrganizationStructureController::class, 'store'])->name('architecture.organization-structure.store');
+    Route::put('/architecture/organization-structure/{organization}', [ArchitectureOrganizationStructureController::class, 'update'])->name('architecture.organization-structure.update');
+    Route::delete('/architecture/organization-structure/{organization}', [ArchitectureOrganizationStructureController::class, 'destroy'])->name('architecture.organization-structure.destroy');
     Route::get('/architecture/informatic-system', fn () => Inertia::render('Architecture/InformaticSystem/Index'))->name('architecture.informatic-system');
     Route::get('/resources-management', fn () => redirect()->route('program-implementation.resources-management.index'))
         ->name('resources-management.index');
