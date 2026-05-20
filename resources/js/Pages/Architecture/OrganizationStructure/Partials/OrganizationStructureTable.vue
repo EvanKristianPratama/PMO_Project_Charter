@@ -88,6 +88,7 @@
                 <select
                     id="groub_id"
                     v-model="form.groub_id"
+                    @change="selectedParentCode = ''"
                     class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
                     required
                 >
@@ -97,6 +98,21 @@
                     </option>
                 </select>
                 <span v-if="form.errors.groub_id" class="text-xs text-red-500 font-medium">{{ form.errors.groub_id }}</span>
+            </div>
+
+            <!-- Parent Organization Option Select -->
+            <div v-if="form.groub_id" class="flex flex-col gap-1.5">
+                <label for="parent_org_code" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Organisasi Induk</label>
+                <select
+                    id="parent_org_code"
+                    v-model="selectedParentCode"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                >
+                    <option value="">Tanpa Induk (Root / Level 1)</option>
+                    <option v-for="org in filteredParentOrgs" :key="org.organization_id" :value="org.code">
+                        {{ org.organization_name }} ({{ org.code }})
+                    </option>
+                </select>
             </div>
 
             <!-- Code Input -->
@@ -144,7 +160,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 
@@ -172,10 +188,54 @@ const form = useForm({
     name: '',
 });
 
+const selectedParentCode = ref('');
+
+const filteredParentOrgs = computed(() => {
+    if (!form.groub_id) return [];
+    
+    return props.organizationStructureRows.filter((org) => {
+        // Must belong to the same group
+        const isSameGroup = Number(org.groub_id) === Number(form.groub_id);
+        
+        // If in edit mode, cannot select itself or any of its descendants as parent
+        if (modalMode.value === 'edit' && selectedOrg.value) {
+            const currentCode = String(selectedOrg.value.code || '').trim();
+            const orgCode = String(org.code || '').trim();
+            
+            // Exclude itself and any descendants (descendants start with the current code)
+            const isSelfOrDescendant = orgCode === currentCode || orgCode.startsWith(currentCode);
+            
+            return isSameGroup && !isSelfOrDescendant;
+        }
+        
+        return isSameGroup;
+    });
+});
+
+watch(selectedParentCode, (newParentCode, oldParentCode) => {
+    if (newParentCode) {
+        // If the code doesn't start with the new parent code, prepend or replace it
+        if (!form.code.startsWith(newParentCode)) {
+            // If it started with the old parent code, replace the old parent code with the new one
+            if (oldParentCode && form.code.startsWith(oldParentCode)) {
+                form.code = newParentCode + form.code.substring(oldParentCode.length);
+            } else {
+                form.code = newParentCode;
+            }
+        }
+    } else {
+        // If parent is cleared, and it started with the old parent code, remove it
+        if (oldParentCode && form.code.startsWith(oldParentCode)) {
+            form.code = form.code.substring(oldParentCode.length);
+        }
+    }
+});
+
 const openCreateModal = () => {
     modalMode.value = 'create';
     form.clearErrors();
     form.reset();
+    selectedParentCode.value = '';
     isModalOpen.value = true;
 };
 
@@ -186,6 +246,15 @@ const openEditModal = (org) => {
     form.groub_id = org.groub_id || '';
     form.code = org.code || '';
     form.name = org.organization_name || '';
+    
+    // Determine parent code from current organization code
+    const orgCode = String(org.code || '').trim();
+    if (orgCode.length > 2) {
+        selectedParentCode.value = orgCode.slice(0, -2);
+    } else {
+        selectedParentCode.value = '';
+    }
+    
     isModalOpen.value = true;
 };
 
@@ -200,6 +269,7 @@ const submitForm = () => {
             onSuccess: () => {
                 isModalOpen.value = false;
                 form.reset();
+                selectedParentCode.value = '';
             },
         });
     } else {
@@ -207,6 +277,7 @@ const submitForm = () => {
             onSuccess: () => {
                 isModalOpen.value = false;
                 form.reset();
+                selectedParentCode.value = '';
             },
         });
     }
