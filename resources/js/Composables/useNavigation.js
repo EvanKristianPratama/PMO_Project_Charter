@@ -270,6 +270,12 @@ export function useNavigation() {
                         icon: DocumentTextIcon,
                         active: (url) => (url || '').startsWith("/policy/specific"),
                     },
+                    {
+                        label: "Peran & Tanggung Jawab",
+                        href: safeRoute("policy.roles.index"),
+                        icon: DocumentTextIcon,
+                        active: (url) => (url || '').startsWith("/policy/roles"),
+                    },
                 ],
             },
             {

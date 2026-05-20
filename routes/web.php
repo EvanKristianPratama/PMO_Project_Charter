@@ -279,6 +279,16 @@ Route::middleware(['auth', 'approved'])->group(function () {
         Route::put('/practice/{practice}', [\App\Http\Controllers\Policy\PolicyController::class, 'updatePractice'])->name('practice.update');
         Route::delete('/practice/{practice}', [\App\Http\Controllers\Policy\PolicyController::class, 'destroyPractice'])->name('practice.destroy');
 
+        // Roles & Responsibilities CRUD
+        Route::get('/roles', [\App\Http\Controllers\Policy\RoleController::class, 'index'])->name('roles.index');
+        Route::get('/roles/manage', [\App\Http\Controllers\Policy\RoleController::class, 'manage'])->name('roles.manage');
+        Route::post('/roles/role', [\App\Http\Controllers\Policy\RoleController::class, 'storeRole'])->name('roles.role.store');
+        Route::put('/roles/role/{role}', [\App\Http\Controllers\Policy\RoleController::class, 'updateRole'])->name('roles.role.update');
+        Route::delete('/roles/role/{role}', [\App\Http\Controllers\Policy\RoleController::class, 'destroyRole'])->name('roles.role.destroy');
+        Route::post('/roles/responsibility', [\App\Http\Controllers\Policy\RoleController::class, 'storeResponsibility'])->name('roles.responsibility.store');
+        Route::put('/roles/responsibility/{responsibility}', [\App\Http\Controllers\Policy\RoleController::class, 'updateResponsibility'])->name('roles.responsibility.update');
+        Route::delete('/roles/responsibility/{responsibility}', [\App\Http\Controllers\Policy\RoleController::class, 'destroyResponsibility'])->name('roles.responsibility.destroy');
+
         // Regulasi (Regulation) CRUD
         Route::get('/regulation', [\App\Http\Controllers\Policy\RegulationController::class, 'index'])->name('regulation.index');
         Route::get('/regulation/manage', [\App\Http\Controllers\Policy\RegulationController::class, 'manage'])->name('regulation.manage');
