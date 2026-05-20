@@ -1,5 +1,0 @@
-<<<<<<<< HEAD:public/build/assets/ProjectCharter-Csrj52YF.js
-import{_ as e}from"./_plugin-vue_export-helper-DlAUqK2U.js";import{e as t,o as r}from"./app-ByxonNGl.js";/* empty css            */const o={},a={class:"rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600 dark:border-white/10 dark:bg-[#171717] dark:text-slate-300"};function s(c,d){return r(),t("section",a," Project charter detail belum tersedia. ")}const _=e(o,[["render",s]]);export{_ as default};
-========
-import{_ as e}from"./_plugin-vue_export-helper-DlAUqK2U.js";import{e as t,o as r}from"./app-Bwta62ib.js";/* empty css            */const o={},a={class:"rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600 dark:border-white/10 dark:bg-[#171717] dark:text-slate-300"};function s(c,d){return r(),t("section",a," Project charter detail belum tersedia. ")}const _=e(o,[["render",s]]);export{_ as default};
->>>>>>>> 27f38a99fc293067479dc26a9d9dff1f7f56469f:public/build/assets/ProjectCharter-LgHf6udA.js
