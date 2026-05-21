@@ -250,7 +250,7 @@ export function useNavigation() {
                 label: "Regulation",
                 href: safeRoute("policy.general.index"),
                 icon: DocumentTextIcon,
-                active: (url) => (url || '').startsWith("/policy"),
+                active: (url) => (url || '').startsWith("/policy") && !(url || '').startsWith("/policy/procedure"),
                 children: [
                     {
                         label: "Regulasi",
@@ -283,6 +283,12 @@ export function useNavigation() {
                         active: (url) => (url || '').startsWith("/policy/raci"),
                     },
                 ],
+            },
+            {
+                label: "Procedure",
+                href: safeRoute("policy.procedure.index"),
+                icon: DocumentTextIcon,
+                active: (url) => (url || "").startsWith("/policy/procedure"),
             },
             {
                 label: "Master Data",

@@ -87,7 +87,17 @@ class ITInitiativeService
             ->with([
                 'charter',
                 'charter.milestones',
-                'charters' => static fn ($query) => $query->latest('id')->with('milestones'),
+                'charter.mapProjectSponsor.picProjectSponsor',
+                'charter.mapProjectOwner.picProjectOwner',
+                'charter.mapProjectLeader.picProjectLeader',
+                'charter.mapCrossFunctions.picCrossFunction',
+                'charters' => static fn ($query) => $query->latest('id')->with([
+                    'milestones',
+                    'mapProjectSponsor.picProjectSponsor',
+                    'mapProjectOwner.picProjectOwner',
+                    'mapProjectLeader.picProjectLeader',
+                    'mapCrossFunctions.picCrossFunction',
+                ]),
                 'versionAnalysis',
                 'owner',
                 'statusRef:id,name',
@@ -102,6 +112,8 @@ class ITInitiativeService
             ->whereIn('initiative_id', $initiativeIds)
             ->latest('id')
             ->first();
+
+        $picProjects = \App\Models\MstPicProject::with('organization')->orderBy('name')->get();
 
         $relatedProjects = TrsProject::query()
             ->whereIn('id', function ($query) use ($initiativeIds) {
@@ -154,6 +166,7 @@ class ITInitiativeService
             'projectOptions' => $projectOptions,
             'statusOptions' => $this->projectCharterStatusService->getStatusOptions(),
             'review' => $review,
+            'picProjects' => $picProjects,
         ];
     }
 

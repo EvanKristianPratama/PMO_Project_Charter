@@ -18,10 +18,12 @@ class ProjectCharterService
 
         $this->syncProjectSummaryFields($project, $payload);
 
-        $project->charters()->create([
+        $charter = $project->charters()->create([
             ...$charterPayload,
             'version_label' => $versionLabel,
         ]);
+
+        $this->syncPicMappings($charter, $payload);
 
         return $versionLabel;
     }
@@ -43,7 +45,48 @@ class ProjectCharterService
             'version_label' => $versionLabel,
         ]);
 
+        $this->syncPicMappings($charter, $payload);
+
         return $versionLabel;
+    }
+
+    private function syncPicMappings(TrsProjectCharter $charter, array $payload): void
+    {
+        if (isset($payload['pic_sponsor_id'])) {
+            \App\Models\TrsMapProjectSponsor::updateOrCreate(
+                ['pc_id' => $charter->id],
+                ['pic_id' => $payload['pic_sponsor_id']]
+            );
+        }
+
+        if (isset($payload['pic_owner_id'])) {
+            \App\Models\TrsMapProjectOwner::updateOrCreate(
+                ['pc_id' => $charter->id],
+                ['pic_id' => $payload['pic_owner_id']]
+            );
+        }
+
+        if (isset($payload['pic_leader_id'])) {
+            \App\Models\TrsMapProjectLeader::updateOrCreate(
+                ['pc_id' => $charter->id],
+                ['pic_id' => $payload['pic_leader_id']]
+            );
+        }
+
+        if (isset($payload['pic_cross_function_ids']) && is_array($payload['pic_cross_function_ids'])) {
+            \App\Models\TrsMapCrossFunction::where('pc_id', $charter->id)->delete();
+            
+            $mappings = array_map(function($picId) use ($charter) {
+                return [
+                    'pc_id' => $charter->id,
+                    'pic_id' => $picId,
+                ];
+            }, array_filter($payload['pic_cross_function_ids']));
+
+            if (!empty($mappings)) {
+                \App\Models\TrsMapCrossFunction::insert($mappings);
+            }
+        }
     }
 
     private function syncProjectSummaryFields(TrsProject $project, array $payload): void

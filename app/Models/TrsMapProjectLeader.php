@@ -12,9 +12,11 @@ class TrsMapProjectLeader extends Model
 
     protected $table = 'trs_map_project_leader';
 
+    public $timestamps = false;
+
     protected $fillable = [
+        'pic_id',
         'pc_id',
-        'pic_id'
     ];
 
     public function picProjectLeader(): BelongsTo

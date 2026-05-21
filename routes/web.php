@@ -1,37 +1,41 @@
 <?php
 
 use App\Http\Controllers\Admin\ActivityLogController;
-use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\DatabaseSwitcherController;
 use App\Http\Controllers\Admin\SyncController;
 use App\Http\Controllers\Architecture\BusinessCapability\BusinessCapabilityController;
 use App\Http\Controllers\Architecture\OrganizationStructure\OrganizationController as ArchitectureOrganizationStructureController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\SsoController;
-use App\Http\Controllers\PublicSyncController;
 use App\Http\Controllers\MasterData\ActivityLogController as MasterDataActivityLogController;
 use App\Http\Controllers\MasterData\MasterDataController;
 use App\Http\Controllers\MasterData\MstInitiative\MstInitiativeController;
 use App\Http\Controllers\MasterData\ProjectCharter\ProjectCharterController as MasterDataProjectCharterController;
 use App\Http\Controllers\MasterData\ScopeCharter\ScopeCharterController;
-use App\Http\Controllers\ProgramEvaluation\ReviewTimelineController;
+use App\Http\Controllers\Policy\GeneralPolicyController;
+use App\Http\Controllers\Policy\PolicyController;
+use App\Http\Controllers\Policy\PracticeRoleController;
+use App\Http\Controllers\Policy\ProcedureController;
+use App\Http\Controllers\Policy\RegulationController;
+use App\Http\Controllers\Policy\RoleController;
 use App\Http\Controllers\ProgramEvaluation\ReviewDashboardController;
+use App\Http\Controllers\ProgramEvaluation\ReviewTimelineController;
 use App\Http\Controllers\ProgramEvaluation\TrsReviewPCController;
+use App\Http\Controllers\ProgramEvaluation\TrsReviewScController;
 use App\Http\Controllers\ProgramImplementation\DashboardController;
-use App\Http\Controllers\StrategicHouse\BusinessStrategy\IndexController as StrategicHouseBusinessStrategyController;
-use App\Http\Controllers\StrategicHouse\BusinessStrategy\BusinessStrategyController as StrategicHouseBusinessStrategyManageController;
-use App\Http\Controllers\StrategicHouse\ItBuildingBlock\IndexController as StrategicHouseItBuildingBlockController;
 use App\Http\Controllers\ProgramImplementation\ProgramImplementationController;
-use App\Http\Controllers\ProgramImplementation\ResourceManagementController;
 use App\Http\Controllers\ProgramImplementation\ProjectCharter\DigitalInitiatives\DigitalInitiativeController;
 use App\Http\Controllers\ProgramImplementation\ProjectCharter\ITInitiatives\CharterController;
 use App\Http\Controllers\ProgramImplementation\ProjectCharter\ITInitiatives\ITInitiativeController;
 use App\Http\Controllers\ProgramImplementation\ProjectCharter\ITInitiatives\MilestoneController;
 use App\Http\Controllers\ProgramImplementation\ProjectCharter\ITInitiatives\VersionAnalysisController;
+use App\Http\Controllers\ProgramImplementation\ResourceManagementController;
 use App\Http\Controllers\ProgramImplementation\Roadmap\RoadmapController;
+use App\Http\Controllers\ProgramPlanning\BusinessStrategy\IndexController as ProgramPlanningBusinessStrategyIndexController;
 use App\Http\Controllers\ProgramPlanning\DashboardController as PlanningDashboardController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Appendix\CreateController as ProgramDefinitionDigitalInitiativesAppendixCreateController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Appendix\EditController as ProgramDefinitionDigitalInitiativesAppendixEditController;
@@ -47,19 +51,22 @@ use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Ed
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\IndexController as ProgramDefinitionDigitalInitiativesController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Mapping\IndexController as ProgramDefinitionDigitalInitiativesMappingIndexController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\MasterDigitalInitiative\IndexController as ProgramDefinitionDigitalInitiativesMasterIndexController;
-use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Summary\IndexController as ProgramDefinitionDigitalInitiativesSummaryIndexController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Roadmap\CreateController as ProgramDefinitionDigitalInitiativesRoadmapCreateController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Roadmap\EditController as ProgramDefinitionDigitalInitiativesRoadmapEditController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Roadmap\IndexController as ProgramDefinitionDigitalInitiativesRoadmapIndexController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Roadmap\MilestoneController as ProgramDefinitionDigitalInitiativesRoadmapMilestoneController;
+use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Summary\IndexController as ProgramDefinitionDigitalInitiativesSummaryIndexController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\UpdateController as ProgramDefinitionDigitalInitiativesUpdateController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\IndexController as ProgramDefinitionController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\ITInitiatives\IndexController as ProgramDefinitionITInitiativesController;
 use App\Http\Controllers\ProgramPlanning\ProgramPlanningController;
-// ProfileController removed: database connection switching feature disabled
+use App\Http\Controllers\PublicSyncController;
+use App\Http\Controllers\StrategicHouse\BusinessStrategy\BusinessStrategyController as StrategicHouseBusinessStrategyManageController;
+use App\Http\Controllers\StrategicHouse\BusinessStrategy\IndexController as StrategicHouseBusinessStrategyController;
 use App\Http\Controllers\StrategicHouse\IndexController as StrategicHouseController;
 use App\Http\Controllers\StrategicHouse\InitiativeRelation\InitiativeRelationController as StrategicHouseInitiativeRelationController;
 use App\Http\Controllers\StrategicHouse\InitiativeSupport\IndexController as StrategicHouseInitiativeSupportIndexController;
+use App\Http\Controllers\StrategicHouse\ItBuildingBlock\IndexController as StrategicHouseItBuildingBlockController;
 use App\Http\Controllers\StrategicHouse\MapTechnology\MapTechnologyController;
 use App\Http\Controllers\StrategicHouse\RoadMap\IndexController as StrategicHouseRoadmapIndexController;
 use App\Http\Controllers\StrategicHouse\RoadMap\SummaryController as StrategicHouseRoadmapSummaryController;
@@ -67,7 +74,6 @@ use App\Http\Controllers\StrategicHouse\StrategicPillars\GoalController as Strat
 use App\Http\Controllers\StrategicHouse\StrategicPillars\IndexController as StrategicHouseStrategicPillarsIndexController;
 use App\Http\Controllers\StrategicHouse\StrategicPillars\InitiativeTaggingController as StrategicHouseInitiativeTaggingController;
 use App\Http\Controllers\StrategicHouse\StrategicPillars\ThemeController as StrategicHouseStrategicPillarThemeController;
-use App\Http\Controllers\ProgramPlanning\BusinessStrategy\IndexController as ProgramPlanningBusinessStrategyIndexController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -191,6 +197,14 @@ Route::middleware(['auth', 'approved'])->group(function () {
         Route::delete('/{projectCharter}', [MasterDataProjectCharterController::class, 'destroy'])->name('destroy');
     });
 
+    // Master Data → PIC Project CRUD
+    Route::prefix('/master-data/pic-projects')->name('master-data.pic-projects.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\MasterData\MstPicProject\MstPicProjectController::class, 'index'])->name('index');
+        Route::post('/', [\App\Http\Controllers\MasterData\MstPicProject\MstPicProjectController::class, 'store'])->name('store');
+        Route::put('/{picProject}', [\App\Http\Controllers\MasterData\MstPicProject\MstPicProjectController::class, 'update'])->name('update');
+        Route::delete('/{picProject}', [\App\Http\Controllers\MasterData\MstPicProject\MstPicProjectController::class, 'destroy'])->name('destroy');
+    });
+
     Route::get('/program-planning/program-definition/it-initiatives', ProgramDefinitionITInitiativesController::class)->name('program-planning.program-definition.it-initiatives');
     Route::redirect('/program-planning/initiative', '/strategic-house/initiative-relation');
     Route::prefix('/strategic-house/initiative-relation')->name('initiative-relations.')->group(function () {
@@ -266,43 +280,46 @@ Route::middleware(['auth', 'approved'])->group(function () {
         })->name('index');
 
         // Kebijakan Umum (General Policy) CRUD
-        Route::get('/general', [\App\Http\Controllers\Policy\GeneralPolicyController::class, 'index'])->name('general.index');
-        Route::get('/general/manage', [\App\Http\Controllers\Policy\GeneralPolicyController::class, 'manage'])->name('general.manage');
-        Route::post('/general', [\App\Http\Controllers\Policy\GeneralPolicyController::class, 'store'])->name('general.store');
-        Route::put('/general/{id}', [\App\Http\Controllers\Policy\GeneralPolicyController::class, 'update'])->name('general.update');
-        Route::delete('/general/{id}', [\App\Http\Controllers\Policy\GeneralPolicyController::class, 'destroy'])->name('general.destroy');
+        Route::get('/general', [GeneralPolicyController::class, 'index'])->name('general.index');
+        Route::get('/general/manage', [GeneralPolicyController::class, 'manage'])->name('general.manage');
+        Route::post('/general', [GeneralPolicyController::class, 'store'])->name('general.store');
+        Route::put('/general/{id}', [GeneralPolicyController::class, 'update'])->name('general.update');
+        Route::delete('/general/{id}', [GeneralPolicyController::class, 'destroy'])->name('general.destroy');
 
         // Kebijakan Khusus (Specific Policy) CRUD
-        Route::get('/specific', [\App\Http\Controllers\Policy\PolicyController::class, 'index'])->name('specific.index');
-        Route::get('/specific/manage', [\App\Http\Controllers\Policy\PolicyController::class, 'manage'])->name('specific.manage');
-        Route::post('/objective', [\App\Http\Controllers\Policy\PolicyController::class, 'storeObjective'])->name('objective.store');
-        Route::put('/objective/{objective}', [\App\Http\Controllers\Policy\PolicyController::class, 'updateObjective'])->name('objective.update');
-        Route::delete('/objective/{objective}', [\App\Http\Controllers\Policy\PolicyController::class, 'destroyObjective'])->name('objective.destroy');
-        Route::post('/practice', [\App\Http\Controllers\Policy\PolicyController::class, 'storePractice'])->name('practice.store');
-        Route::put('/practice/{practice}', [\App\Http\Controllers\Policy\PolicyController::class, 'updatePractice'])->name('practice.update');
-        Route::delete('/practice/{practice}', [\App\Http\Controllers\Policy\PolicyController::class, 'destroyPractice'])->name('practice.destroy');
+        Route::get('/specific', [PolicyController::class, 'index'])->name('specific.index');
+        Route::get('/specific/manage', [PolicyController::class, 'manage'])->name('specific.manage');
+        Route::post('/objective', [PolicyController::class, 'storeObjective'])->name('objective.store');
+        Route::put('/objective/{objective}', [PolicyController::class, 'updateObjective'])->name('objective.update');
+        Route::delete('/objective/{objective}', [PolicyController::class, 'destroyObjective'])->name('objective.destroy');
+        Route::post('/practice', [PolicyController::class, 'storePractice'])->name('practice.store');
+        Route::put('/practice/{practice}', [PolicyController::class, 'updatePractice'])->name('practice.update');
+        Route::delete('/practice/{practice}', [PolicyController::class, 'destroyPractice'])->name('practice.destroy');
 
         // Roles & Responsibilities CRUD
-        Route::get('/roles', [\App\Http\Controllers\Policy\RoleController::class, 'index'])->name('roles.index');
-        Route::get('/roles/manage', [\App\Http\Controllers\Policy\RoleController::class, 'manage'])->name('roles.manage');
-        Route::post('/roles/role', [\App\Http\Controllers\Policy\RoleController::class, 'storeRole'])->name('roles.role.store');
-        Route::put('/roles/role/{role}', [\App\Http\Controllers\Policy\RoleController::class, 'updateRole'])->name('roles.role.update');
-        Route::delete('/roles/role/{role}', [\App\Http\Controllers\Policy\RoleController::class, 'destroyRole'])->name('roles.role.destroy');
-        Route::post('/roles/responsibility', [\App\Http\Controllers\Policy\RoleController::class, 'storeResponsibility'])->name('roles.responsibility.store');
-        Route::put('/roles/responsibility/{responsibility}', [\App\Http\Controllers\Policy\RoleController::class, 'updateResponsibility'])->name('roles.responsibility.update');
+        Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
+        Route::get('/roles/manage', [RoleController::class, 'manage'])->name('roles.manage');
+        Route::post('/roles/role', [RoleController::class, 'storeRole'])->name('roles.role.store');
+        Route::put('/roles/role/{role}', [RoleController::class, 'updateRole'])->name('roles.role.update');
+        Route::delete('/roles/role/{role}', [RoleController::class, 'destroyRole'])->name('roles.role.destroy');
+        Route::post('/roles/responsibility', [RoleController::class, 'storeResponsibility'])->name('roles.responsibility.store');
+        Route::put('/roles/responsibility/{responsibility}', [RoleController::class, 'updateResponsibility'])->name('roles.responsibility.update');
         Route::delete('/roles/responsibility/{responsibility}', [\App\Http\Controllers\Policy\RoleController::class, 'destroyResponsibility'])->name('roles.responsibility.destroy');
 
         // Regulasi (Regulation) CRUD
-        Route::get('/regulation', [\App\Http\Controllers\Policy\RegulationController::class, 'index'])->name('regulation.index');
-        Route::get('/regulation/manage', [\App\Http\Controllers\Policy\RegulationController::class, 'manage'])->name('regulation.manage');
-        Route::post('/regulation', [\App\Http\Controllers\Policy\RegulationController::class, 'store'])->name('regulation.store');
-        Route::put('/regulation/{id}', [\App\Http\Controllers\Policy\RegulationController::class, 'update'])->name('regulation.update');
-        Route::delete('/regulation/{id}', [\App\Http\Controllers\Policy\RegulationController::class, 'destroy'])->name('regulation.destroy');
+        Route::get('/regulation', [RegulationController::class, 'index'])->name('regulation.index');
+        Route::get('/regulation/manage', [RegulationController::class, 'manage'])->name('regulation.manage');
+        Route::post('/regulation', [RegulationController::class, 'store'])->name('regulation.store');
+        Route::put('/regulation/{id}', [RegulationController::class, 'update'])->name('regulation.update');
+        Route::delete('/regulation/{id}', [RegulationController::class, 'destroy'])->name('regulation.destroy');
+
+        // Prosedur (Procedure) placeholder
+        Route::get('/procedure', [ProcedureController::class, 'index'])->name('procedure.index');
 
         // Matriks RACI (RACI Matrix) mapping
-        Route::get('/raci', [\App\Http\Controllers\Policy\PracticeRoleController::class, 'index'])->name('raci.index');
-        Route::get('/raci/manage', [\App\Http\Controllers\Policy\PracticeRoleController::class, 'manage'])->name('raci.manage');
-        Route::post('/raci', [\App\Http\Controllers\Policy\PracticeRoleController::class, 'update'])->name('raci.update');
+        Route::get('/raci', [PracticeRoleController::class, 'index'])->name('raci.index');
+        Route::get('/raci/manage', [PracticeRoleController::class, 'manage'])->name('raci.manage');
+        Route::post('/raci', [PracticeRoleController::class, 'update'])->name('raci.update');
     });
 
     Route::get('/program-information', fn () => Inertia::render('Placeholder/Index', [
@@ -321,9 +338,9 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::post('/program-evalution/review-timeline/review-status-implementation/{statusId}', [ReviewTimelineController::class, 'updateReviewStatusImplementation'])->name('program-evaluation.review-timeline.review-status.update');
 
     // Summary Review Notes (TrsReviewSc)
-    Route::post('/program-evaluation/summary-review/notes', [\App\Http\Controllers\ProgramEvaluation\TrsReviewScController::class, 'store'])->name('program-evaluation.summary-review.notes.store');
-    Route::put('/program-evaluation/summary-review/notes/{trsReviewSc}', [\App\Http\Controllers\ProgramEvaluation\TrsReviewScController::class, 'update'])->name('program-evaluation.summary-review.notes.update');
-    Route::delete('/program-evaluation/summary-review/notes/{trsReviewSc}', [\App\Http\Controllers\ProgramEvaluation\TrsReviewScController::class, 'destroy'])->name('program-evaluation.summary-review.notes.destroy');
+    Route::post('/program-evaluation/summary-review/notes', [TrsReviewScController::class, 'store'])->name('program-evaluation.summary-review.notes.store');
+    Route::put('/program-evaluation/summary-review/notes/{trsReviewSc}', [TrsReviewScController::class, 'update'])->name('program-evaluation.summary-review.notes.update');
+    Route::delete('/program-evaluation/summary-review/notes/{trsReviewSc}', [TrsReviewScController::class, 'destroy'])->name('program-evaluation.summary-review.notes.destroy');
 
     // Strategic House
     Route::prefix('/strategic-house')->name('strategic-house.')->group(function () {

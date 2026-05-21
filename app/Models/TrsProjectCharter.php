@@ -65,4 +65,24 @@ class TrsProjectCharter extends Model
     {
         return $this->hasMany(ProjectStatusHistory::class, 'project_charter_id');
     }
+
+    public function mapProjectSponsor(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(TrsMapProjectSponsor::class, 'pc_id');
+    }
+
+    public function mapProjectOwner(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(TrsMapProjectOwner::class, 'pc_id');
+    }
+
+    public function mapProjectLeader(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(TrsMapProjectLeader::class, 'pc_id');
+    }
+
+    public function mapCrossFunctions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(TrsMapCrossFunction::class, 'pc_id');
+    }
 }

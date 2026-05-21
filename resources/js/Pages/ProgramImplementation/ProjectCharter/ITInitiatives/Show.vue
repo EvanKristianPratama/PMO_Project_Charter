@@ -169,8 +169,8 @@
                         <CharterCompare v-if="showCompare && selectedCharter && previousCharter" :current="selectedCharter"
                             :previous="previousCharter" :analysis="selectedVersionAnalysis" :analysis-form="analysisForm"
                             :editable="true" :project-name="itInitiative?.name ?? ''" />
-                        <component v-else :is="resolvedCharterComponent" :it-initiative="editableItInitiative" :form="form"
-                            :status-timeline="form.status" :editable="isEditing" />
+                        <component :is="resolvedCharterComponent" :it-initiative="editableItInitiative" :form="form"
+                            :status-timeline="form.status" :editable="isEditing" :pic-projects="picProjects" />
                     </main>
                 </section>
 
@@ -256,6 +256,10 @@ const props = defineProps({
     review: {
         type: Object,
         default: null,
+    },
+    picProjects: {
+        type: Array,
+        default: () => [],
     },
 });
 
@@ -433,6 +437,10 @@ const mapCharterToForm = (charter = null, project = null) => {
             ?? charter?.metadata?.kpi_target
             ?? charter?.metadata?.kpi
             ?? '',
+        pic_sponsor_id: charter?.map_project_sponsor?.pic_id ?? '',
+        pic_owner_id: charter?.map_project_owner?.pic_id ?? '',
+        pic_leader_id: charter?.map_project_leader?.pic_id ?? '',
+        pic_cross_function_ids: charter?.map_cross_functions?.map(m => m.pic_id) ?? [],
     };
     for (const field of CHARTER_FIELDS) {
         payload[field] = charter?.[field] ?? '';
