@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Kelola Matriks RACI">
+    <UserLayout title="Kelola RACI Analisis">
         <div class="animate-fade-in-up space-y-6">
             <!-- Page Header -->
             <section class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717]">
@@ -9,7 +9,7 @@
                 <div class="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#821f44] dark:text-[#a83262]">Pedoman Tata Kelola Teknologi Informasi Pertamina (Persero)</p>
-                        <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Kelola Matriks RACI COBIT</h1>
+                        <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Kelola RACI Analisis</h1>
                     </div>
                     <div class="flex items-center gap-3">
                         <Link

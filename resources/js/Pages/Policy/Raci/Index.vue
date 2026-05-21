@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Matriks RACI">
+    <UserLayout title="RACI Analisis">
         <div class="space-y-6 animate-fade-in-up print:m-0 print:p-0">
             <!-- Sleek Action Bar at Top (print:hidden) -->
             <section class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717] print:hidden">
@@ -9,7 +9,7 @@
                 <div class="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#821f44] dark:text-[#a83262]">Pedoman Tata Kelola Teknologi Informasi Pertamina (Persero)</p>
-                        <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Matriks RACI COBIT</h1>
+                        <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">RACI Analisis</h1>
                     </div>
                     <div class="flex items-center gap-3">
                         <!-- Print Button -->
@@ -64,69 +64,12 @@
             <!-- A4 Document Page Preview (Modified to fit wider table) -->
             <div class="w-full bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-4 sm:p-6 md:p-8 rounded-2xl relative font-sans text-slate-800 dark:text-slate-200 print:shadow-none print:border-none print:p-0 print:m-0 overflow-visible">
                 
-                <!-- Formal Pertamina Document Grid Header -->
-                <div class="border border-slate-900 dark:border-white text-[11px] text-slate-950 dark:text-white font-sans uppercase z-10 relative mb-8">
-                    <div class="grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-slate-900 dark:divide-white">
-                        <!-- Left Column (Fungsi & Judul) -->
-                        <div class="md:col-span-7 flex flex-col divide-y divide-slate-900 dark:divide-white">
-                            <div class="p-3 flex items-start gap-2 min-h-[46px]">
-                                <span class="font-bold shrink-0">FUNGSI :</span>
-                                <span class="font-bold">PERTAMINA IT STRATEGY & PLANNING - ENTERPRISE IT STRATEGY, ARCHITECTURE AND RESOURCE MANAGEMENT - PERTAMINA IT STRATEGY & PLANNING - ENTERPRISE IT STRATEGY, ARCHITECTURE AND RESOURCE MANAGEMENT</span>
-                            </div>
-                            <div class="p-3 flex items-start gap-2 min-h-[46px]">
-                                <span class="font-bold shrink-0">JUDUL :</span>
-                                <span class="font-bold">PENGELOLAAN RENCANA STRATEGIS TEKNOLOGI INFORMASI (RSTI)</span>
-                            </div>
-                        </div>
-                        <!-- Right Column (Metadata) -->
-                        <div class="md:col-span-5 flex flex-col divide-y divide-slate-900 dark:divide-white">
-                            <div class="p-3 flex items-center gap-2 flex-1">
-                                <span class="font-bold shrink-0">NOMOR :</span>
-                                <span class="font-bold uppercase">REG-0002</span>
-                            </div>
-                            <div class="p-3 flex items-center gap-2 flex-1">
-                                <span class="font-bold shrink-0">REVISI KE :</span>
-                                <div class="flex items-center gap-2.5 font-bold">
-                                    <div class="flex items-center gap-1">
-                                        <div class="w-3.5 h-3.5 border border-slate-900 dark:border-white flex items-center justify-center">
-                                            <svg class="w-3 h-3 text-slate-950 dark:text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                        </div>
-                                        <span>0</span>
-                                    </div>
-                                    <div class="flex items-center gap-1">
-                                        <div class="w-3.5 h-3.5 border border-slate-900 dark:border-white"></div>
-                                        <span>1</span>
-                                    </div>
-                                    <div class="flex items-center gap-1">
-                                        <div class="w-3.5 h-3.5 border border-slate-900 dark:border-white"></div>
-                                        <span>2</span>
-                                    </div>
-                                    <div class="flex items-center gap-1">
-                                        <div class="w-3.5 h-3.5 border border-slate-900 dark:border-white"></div>
-                                        <span>3</span>
-                                    </div>
-                                    <div class="flex items-center gap-1">
-                                        <div class="w-3.5 h-3.5 border border-slate-900 dark:border-white"></div>
-                                        <span>4</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="p-3 flex items-center gap-2 flex-1">
-                                <span class="font-bold shrink-0">BERLAKU TMT :</span>
-                                <span class="font-bold uppercase">30 Oktober 2025</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Document Title Section -->
-                <div class="mt-12 text-center space-y-2 relative z-10">
-                    <h2 class="text-lg sm:text-xl font-extrabold tracking-[0.15em] text-slate-950 dark:text-white uppercase">
-                        LAMPIRAN DOKUMEN TATA KELOLA
+                <div class="text-center space-y-1.5 relative z-10 py-4 mb-2">
+                    <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#821f44] dark:text-[#a83262] uppercase">
+                        RACI Analisis
                     </h2>
-                    <h2 class="text-xl sm:text-2xl font-extrabold tracking-[0.2em] text-[#821f44] dark:text-[#a83262] uppercase">
-                        MATRIKS RACI PERAN DAN TATA KELOLA TIK
-                    </h2>
+                    <p class="text-xs text-slate-500 dark:text-zinc-400 font-medium">Matriks Peran dan Tanggung Jawab Tata Kelola TIK</p>
                 </div>
 
                 <!-- RACI Legend Key Guide -->
