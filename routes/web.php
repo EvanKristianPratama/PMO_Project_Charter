@@ -304,6 +304,12 @@ Route::middleware(['auth', 'approved'])->group(function () {
         Route::get('/raci', [\App\Http\Controllers\Policy\PracticeRoleController::class, 'index'])->name('raci.index');
         Route::get('/raci/manage', [\App\Http\Controllers\Policy\PracticeRoleController::class, 'manage'])->name('raci.manage');
         Route::post('/raci', [\App\Http\Controllers\Policy\PracticeRoleController::class, 'update'])->name('raci.update');
+
+        // Master Responsible CRUD
+        Route::get('/responsible', [\App\Http\Controllers\Policy\ResponsibleController::class, 'manage'])->name('responsible.manage');
+        Route::post('/responsible', [\App\Http\Controllers\Policy\ResponsibleController::class, 'store'])->name('responsible.store');
+        Route::put('/responsible/{id}', [\App\Http\Controllers\Policy\ResponsibleController::class, 'update'])->name('responsible.update');
+        Route::delete('/responsible/{id}', [\App\Http\Controllers\Policy\ResponsibleController::class, 'destroy'])->name('responsible.destroy');
     });
 
     Route::get('/program-information', fn () => Inertia::render('Placeholder/Index', [
