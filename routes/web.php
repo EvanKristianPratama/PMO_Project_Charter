@@ -68,6 +68,7 @@ use App\Http\Controllers\StrategicHouse\StrategicPillars\IndexController as Stra
 use App\Http\Controllers\StrategicHouse\StrategicPillars\InitiativeTaggingController as StrategicHouseInitiativeTaggingController;
 use App\Http\Controllers\StrategicHouse\StrategicPillars\ThemeController as StrategicHouseStrategicPillarThemeController;
 use App\Http\Controllers\ProgramPlanning\BusinessStrategy\IndexController as ProgramPlanningBusinessStrategyIndexController;
+use App\Http\Controllers\BpmnWorkflowController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -418,6 +419,14 @@ Route::middleware(['auth', 'approved'])->group(function () {
     // Cloud Data Synchronization (Accessible for all validated app instances)
     Route::get('/sync', [SyncController::class, 'index'])->name('sync.index');
     Route::post('/sync/pull', [SyncController::class, 'pull'])->name('sync.pull');
+
+    // BPMN Workflow Controller (Proof of Concept)
+    Route::prefix('/bpmn-workflow')->name('bpmn-workflow.')->group(function () {
+        Route::get('/', [BpmnWorkflowController::class, 'index'])->name('index');
+        Route::post('/', [BpmnWorkflowController::class, 'store'])->name('store');
+        Route::delete('/{bpmnWorkflow}', [BpmnWorkflowController::class, 'destroy'])->name('destroy');
+        Route::post('/trigger-action', [BpmnWorkflowController::class, 'triggerAction'])->name('trigger-action');
+    });
 });
 
 /*

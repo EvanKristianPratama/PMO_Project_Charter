@@ -48,3 +48,4 @@ createInertiaApp({
         color: '#6366f1',
     },
 });
+// trigger reload

@@ -14,6 +14,7 @@ import {
     ClipboardDocumentCheckIcon,
     CircleStackIcon,
     CloudArrowDownIcon,
+    CogIcon,
 } from "@heroicons/vue/24/outline";
 
 export function useNavigation() {
@@ -289,6 +290,12 @@ export function useNavigation() {
                 href: safeRoute("master-data.index"),
                 icon: TableCellsIcon,
                 active: (url) => (url || '').startsWith("/master-data"),
+            },
+            {
+                label: "BPMN Controller",
+                href: safeRoute("bpmn-workflow.index"),
+                icon: CogIcon,
+                active: (url) => (url || '').startsWith("/bpmn-workflow"),
             },
             {
                 label: "Sinkronisasi Data",
