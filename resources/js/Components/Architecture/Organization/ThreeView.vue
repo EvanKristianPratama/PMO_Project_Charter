@@ -1,51 +1,41 @@
 <template>
     <template v-if="isRoot">
-        <section class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+        <section
+            class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
             <div class="border-b border-slate-200 px-3 py-2 dark:border-white/10">
-                <h2 class="text-xs font-semibold uppercase text-slate-800 dark:text-white">Struktur Organisasi Holding</h2>
+                <h2 class="text-xs font-semibold uppercase text-slate-800 dark:text-white">Struktur Organisasi Holding
+                </h2>
             </div>
 
             <div class="px-2 py-3">
-                <div
-                    v-if="holdingTree.length === 0"
-                    class="rounded-md border border-dashed border-slate-200 py-8 text-center text-xs text-slate-500 dark:border-white/10 dark:text-slate-400"
-                >
+                <div v-if="holdingTree.length === 0"
+                    class="rounded-md border border-dashed border-slate-200 py-8 text-center text-xs text-slate-500 dark:border-white/10 dark:text-slate-400">
                     Data holding tidak ditemukan.
                 </div>
 
                 <div v-else class="grid grid-cols-[repeat(auto-fit,minmax(12rem,1fr))] gap-3">
-                    <ThreeView
-                        v-for="item in holdingTree"
-                        :key="item.organization_id"
-                        :node="item"
-                        :is-root="false"
-                        :depth="0"
-                    />
+                    <ThreeView v-for="item in holdingTree" :key="item.organization_id" :node="item" :is-root="false"
+                        :depth="0" />
                 </div>
             </div>
         </section>
 
-        <section class="mt-4 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+        <section
+            class="mt-4 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
             <div class="border-b border-slate-200 px-3 py-2 dark:border-white/10">
-                <h2 class="text-xs font-semibold uppercase text-slate-800 dark:text-white">Struktur Organisasi Sub Holding</h2>
+                <h2 class="text-xs font-semibold uppercase text-slate-800 dark:text-white">Struktur Organisasi Sub
+                    Holding</h2>
             </div>
 
             <div class="px-2 py-3">
-                <div
-                    v-if="subHoldingTree.length === 0"
-                    class="rounded-md border border-dashed border-slate-200 py-8 text-center text-xs text-slate-500 dark:border-white/10 dark:text-slate-400"
-                >
+                <div v-if="subHoldingTree.length === 0"
+                    class="rounded-md border border-dashed border-slate-200 py-8 text-center text-xs text-slate-500 dark:border-white/10 dark:text-slate-400">
                     Data sub holding tidak ditemukan.
                 </div>
 
                 <div v-else class="grid grid-cols-[repeat(auto-fit,minmax(12rem,1fr))] gap-3">
-                    <ThreeView
-                        v-for="item in subHoldingTree"
-                        :key="item.organization_id"
-                        :node="item"
-                        :is-root="false"
-                        :depth="0"
-                    />
+                    <ThreeView v-for="item in subHoldingTree" :key="item.organization_id" :node="item" :is-root="false"
+                        :depth="0" />
                 </div>
             </div>
         </section>
@@ -53,54 +43,61 @@
 
     <div v-else class="relative w-full min-w-0">
         <!-- Horizontal line -->
-        <div
-            v-if="depth > 0 && (!isFirstChild || !isLastChild)"
-            class="absolute top-[-8px] h-px bg-slate-300 dark:bg-white/20"
-            :class="[
+        <div v-if="depth > 0 && (!isFirstChild || !isLastChild)"
+            class="absolute top-[-8px] h-px bg-slate-300 dark:bg-white/20" :class="[
                 isFirstChild ? 'left-1/2 -right-1' : '',
                 isLastChild ? '-left-1 right-1/2' : '',
                 !isFirstChild && !isLastChild ? '-left-1 -right-1' : '',
-            ]"
-            aria-hidden="true"
-        />
+            ]" aria-hidden="true" />
         <!-- Vertical line going up -->
-        <div
-            v-if="depth > 0"
+        <div v-if="depth > 0"
             class="absolute left-1/2 top-[-8px] h-[8px] w-px -translate-x-1/2 bg-slate-300 dark:bg-white/20"
-            aria-hidden="true"
-        />
+            aria-hidden="true" />
 
         <div class="flex w-full min-w-0 flex-col items-center">
             <div
-                class="relative flex items-center justify-center rounded border px-1.5 text-center font-semibold leading-tight shadow-sm transition duration-200"
+                class="relative flex flex-col items-center justify-center rounded border px-1 text-center font-semibold leading-tight shadow-sm transition duration-200"
                 :class="[
                     nodeSizeClass,
                     nodeToneClass,
-                    'cursor-default',
+                    node.pic_projects && node.pic_projects.length > 0 ? 'cursor-pointer hover:border-slate-400 dark:hover:border-white/30 hover:shadow-md' : 'cursor-default',
                 ]"
-                :title="node.organization_name"
+                :title="
+                    node.pic_projects && node.pic_projects.length > 0
+                        ? `${node.organization_name} (Klik untuk ${showPics ? 'menyembunyikan' : 'menampilkan'} PIC)`
+                        : node.organization_name
+                "
+                @click="node.pic_projects && node.pic_projects.length > 0 && (showPics = !showPics)"
             >
-                <span class="block max-w-full truncate">
+                <span class="block max-w-full break-words whitespace-normal">
                     {{ node.organization_name }}
                 </span>
+                <div v-if="node.pic_projects && node.pic_projects.length > 0 && showPics" class="mt-1 w-full border-t border-slate-200 dark:border-white/10 pt-1 text-left px-0.5">
+                    <div class="text-[7px] text-slate-400 dark:text-slate-500 font-semibold mb-0.5 uppercase tracking-wider">
+                        PIC:
+                    </div>
+                    <div class="space-y-0.5">
+                        <div
+                            v-for="pic in node.pic_projects"
+                            :key="pic.id"
+                            class="text-[7px] text-slate-500 dark:text-slate-400 font-normal break-words whitespace-normal max-w-full flex items-start"
+                            :title="pic.name"
+                        >
+                            <span class="mr-0.5 select-none text-[6px] text-slate-400">•</span>
+                            <span class="flex-1 min-w-0 leading-[1.1]">{{ pic.name }}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div v-if="hasChildren && isExpanded" class="relative mt-2 w-full min-w-0 pt-2">
-                <div
-                    class="absolute left-1/2 top-[-8px] h-[8px] w-px -translate-x-1/2 bg-slate-300 dark:bg-white/20"
-                    aria-hidden="true"
-                />
+                <div class="absolute left-1/2 top-[-8px] h-[8px] w-px -translate-x-1/2 bg-slate-300 dark:bg-white/20"
+                    aria-hidden="true" />
 
                 <div class="grid w-full min-w-0 gap-x-2 gap-y-3" :style="childGridStyle">
-                    <ThreeView
-                        v-for="(child, index) in node.children"
-                        :key="child.organization_id"
-                        :node="child"
-                        :is-root="false"
-                        :depth="depth + 1"
-                        :is-first-child="index === 0"
-                        :is-last-child="index === node.children.length - 1"
-                    />
+                    <ThreeView v-for="(child, index) in node.children" :key="child.organization_id" :node="child"
+                        :is-root="false" :depth="depth + 1" :is-first-child="index === 0"
+                        :is-last-child="index === node.children.length - 1" />
                 </div>
             </div>
         </div>
@@ -142,6 +139,7 @@ const props = defineProps({
 });
 
 const isExpanded = ref(true);
+const showPics = ref(false);
 
 const normalizeCode = (value) => String(value ?? '').trim();
 
@@ -292,7 +290,11 @@ const nodeSizeClass = computed(() => {
         return 'h-8 w-28 text-[10px]';
     }
 
-    return 'h-6 w-20 text-[8px]';
+    if (showPics.value && props.node?.pic_projects?.length > 0) {
+        return 'min-h-[3rem] w-20 text-[8px] py-1.5';
+    }
+
+    return 'min-h-[1.5rem] w-20 text-[8px] py-1';
 });
 
 const nodeToneClass = computed(() => {

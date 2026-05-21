@@ -15,7 +15,8 @@ class OrganizationStructureService
             ->with([
                 'company:id,name',
                 'organizations' => fn (HasMany $query) => $query
-                    ->select(['id', 'groub_id', 'code', 'name']),
+                    ->select(['id', 'groub_id', 'code', 'name'])
+                    ->with('picOrganization:id,organization_id,name'),
             ])
             ->get()
             ->flatMap(fn (Groub $groub) => $groub->organizations
@@ -40,6 +41,10 @@ class OrganizationStructureService
             'groub_name' => $groub->name,
             'company_id' => $groub->company?->id ? (int) $groub->company->id : null,
             'company_name' => $groub->company?->name,
+            'pic_projects' => $organization->picOrganization->map(fn ($pic) => [
+                'id' => $pic->id,
+                'name' => $pic->name,
+            ])->values()->all(),
         ];
     }
 }
