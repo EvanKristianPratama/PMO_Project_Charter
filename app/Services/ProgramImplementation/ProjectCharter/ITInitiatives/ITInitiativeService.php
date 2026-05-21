@@ -87,16 +87,16 @@ class ITInitiativeService
             ->with([
                 'charter',
                 'charter.milestones',
-                'charter.mapProjectSponsor.picProjectSponsor',
-                'charter.mapProjectOwner.picProjectOwner',
-                'charter.mapProjectLeader.picProjectLeader',
-                'charter.mapCrossFunctions.picCrossFunction',
+                'charter.mapProjectSponsor.organizationSponsor',
+                'charter.mapProjectOwner.organizationOwner',
+                'charter.mapProjectLeader.organizationLeader',
+                'charter.mapCrossFunctions.organizationCrossFunction',
                 'charters' => static fn ($query) => $query->latest('id')->with([
                     'milestones',
-                    'mapProjectSponsor.picProjectSponsor',
-                    'mapProjectOwner.picProjectOwner',
-                    'mapProjectLeader.picProjectLeader',
-                    'mapCrossFunctions.picCrossFunction',
+                    'mapProjectSponsor.organizationSponsor',
+                    'mapProjectOwner.organizationOwner',
+                    'mapProjectLeader.organizationLeader',
+                    'mapCrossFunctions.organizationCrossFunction',
                 ]),
                 'versionAnalysis',
                 'owner',
@@ -113,7 +113,7 @@ class ITInitiativeService
             ->latest('id')
             ->first();
 
-        $picProjects = \App\Models\MstPicProject::with('organization')->orderBy('name')->get();
+        $allOrganizations = \App\Models\TrsOrganization::orderBy('name')->get();
 
         $relatedProjects = TrsProject::query()
             ->whereIn('id', function ($query) use ($initiativeIds) {
@@ -166,7 +166,7 @@ class ITInitiativeService
             'projectOptions' => $projectOptions,
             'statusOptions' => $this->projectCharterStatusService->getStatusOptions(),
             'review' => $review,
-            'picProjects' => $picProjects,
+            'allOrganizations' => $allOrganizations,
         ];
     }
 

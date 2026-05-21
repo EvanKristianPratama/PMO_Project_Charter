@@ -170,7 +170,7 @@
                             :previous="previousCharter" :analysis="selectedVersionAnalysis" :analysis-form="analysisForm"
                             :editable="true" :project-name="itInitiative?.name ?? ''" />
                         <component :is="resolvedCharterComponent" :it-initiative="editableItInitiative" :form="form"
-                            :status-timeline="form.status" :editable="isEditing" :pic-projects="picProjects" />
+                            :status-timeline="form.status" :editable="isEditing" :all-organizations="allOrganizations" />
                     </main>
                 </section>
 
@@ -257,7 +257,7 @@ const props = defineProps({
         type: Object,
         default: null,
     },
-    picProjects: {
+    allOrganizations: {
         type: Array,
         default: () => [],
     },

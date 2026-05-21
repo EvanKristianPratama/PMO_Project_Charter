@@ -6,18 +6,40 @@ const props = defineProps({
     form: { type: Object, required: true },
     editable: { type: Boolean, default: false },
     statusTimeline: { type: [String, Number], default: null },
-    picProjects: { type: Array, default: () => [] },
+    allOrganizations: { type: Array, default: () => [] },
 });
 
-const getPicName = (id) => {
-    const pic = props.picProjects.find(p => p.id === parseInt(id));
-    return pic ? pic.name : null;
+const selectedNewCrossFunctionId = ref('');
+
+const addCrossFunctionUnit = () => {
+    if (!selectedNewCrossFunctionId.value) return;
+    
+    if (!Array.isArray(props.form.pic_cross_function_ids)) {
+        props.form.pic_cross_function_ids = [];
+    }
+
+    const id = parseInt(selectedNewCrossFunctionId.value);
+    if (!props.form.pic_cross_function_ids.includes(id)) {
+        props.form.pic_cross_function_ids.push(id);
+    }
+    selectedNewCrossFunctionId.value = '';
 };
 
-const getPicNames = (ids) => {
+const removeCrossFunctionUnit = (id) => {
+    props.form.pic_cross_function_ids = props.form.pic_cross_function_ids.filter(
+        (existingId) => parseInt(existingId) !== parseInt(id)
+    );
+};
+
+const getOrgName = (id) => {
+    const org = props.allOrganizations.find(o => o.id === parseInt(id));
+    return org ? org.name : null;
+};
+
+const getOrgNames = (ids) => {
     if (!Array.isArray(ids)) return [];
     return ids
-        .map(id => getPicName(id))
+        .map(id => getOrgName(id))
         .filter(Boolean);
 };
 
@@ -160,17 +182,17 @@ const headlineSummary = () => {
                                 v-model="form.pic_sponsor_id"
                                 class="info-select"
                             >
-                                <option value="">-- Pilih PIC Sponsor --</option>
-                                <option v-for="pic in picProjects" :key="pic.id" :value="pic.id">
-                                    {{ pic.name }} ({{ pic.organization?.name }})
+                                <option value="">-- Pilih Unit Sponsor --</option>
+                                <option v-for="org in allOrganizations" :key="org.id" :value="org.id">
+                                    {{ org.name }}
                                 </option>
                             </select>
                         </div>
                         <template v-else>
                             <div class="flex flex-col">
                                 <span>{{ displayValue(form.sponsor) }}</span>
-                                <span v-if="getPicName(form.pic_sponsor_id)" class="text-[11px] text-slate-500 font-semibold italic">
-                                    Mapped: {{ getPicName(form.pic_sponsor_id) }}
+                                <span v-if="getOrgName(form.pic_sponsor_id)" class="text-[11px] text-slate-500 font-semibold italic">
+                                    Mapped Unit: {{ getOrgName(form.pic_sponsor_id) }}
                                 </span>
                             </div>
                         </template>
@@ -223,17 +245,17 @@ const headlineSummary = () => {
                                 v-model="form.pic_owner_id"
                                 class="info-select"
                             >
-                                <option value="">-- Pilih PIC Owner --</option>
-                                <option v-for="pic in picProjects" :key="pic.id" :value="pic.id">
-                                    {{ pic.name }} ({{ pic.organization?.name }})
+                                <option value="">-- Pilih Unit Owner --</option>
+                                <option v-for="org in allOrganizations" :key="org.id" :value="org.id">
+                                    {{ org.name }}
                                 </option>
                             </select>
                         </div>
                         <template v-else>
                             <div class="flex flex-col">
                                 <span>{{ displayValue(form.owner) }}</span>
-                                <span v-if="getPicName(form.pic_owner_id)" class="text-[11px] text-slate-500 font-semibold italic">
-                                    Mapped: {{ getPicName(form.pic_owner_id) }}
+                                <span v-if="getOrgName(form.pic_owner_id)" class="text-[11px] text-slate-500 font-semibold italic">
+                                    Mapped Unit: {{ getOrgName(form.pic_owner_id) }}
                                 </span>
                             </div>
                         </template>
@@ -270,17 +292,17 @@ const headlineSummary = () => {
                                 v-model="form.pic_leader_id"
                                 class="info-select"
                             >
-                                <option value="">-- Pilih PIC Leader --</option>
-                                <option v-for="pic in picProjects" :key="pic.id" :value="pic.id">
-                                    {{ pic.name }} ({{ pic.organization?.name }})
+                                <option value="">-- Pilih Unit Leader --</option>
+                                <option v-for="org in allOrganizations" :key="org.id" :value="org.id">
+                                    {{ org.name }}
                                 </option>
                             </select>
                         </div>
                         <template v-else>
                             <div class="flex flex-col">
                                 <span>{{ displayValue(form.leader) }}</span>
-                                <span v-if="getPicName(form.pic_leader_id)" class="text-[11px] text-slate-500 font-semibold italic">
-                                    Mapped: {{ getPicName(form.pic_leader_id) }}
+                                <span v-if="getOrgName(form.pic_leader_id)" class="text-[11px] text-slate-500 font-semibold italic">
+                                    Mapped Unit: {{ getOrgName(form.pic_leader_id) }}
                                 </span>
                             </div>
                         </template>
@@ -313,41 +335,64 @@ const headlineSummary = () => {
                                 class="info-textarea"
                                 placeholder="Satu poin per baris..."
                             ></textarea>
-                            <div class="mt-1">
-                                <label class="text-[10px] font-bold text-slate-500 uppercase">Map formal PICs:</label>
+                            <div class="mt-2">
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">Map formal Units:</label>
                                 
-                                <!-- Checkbox List (Scrollable) -->
-                                <div class="mt-1 border border-slate-200 rounded bg-white p-2">
-                                    <div class="max-h-40 overflow-y-auto space-y-1 pr-1 custom-scrollbar">
-                                        <label 
-                                            v-for="pic in picProjects" 
-                                            :key="pic.id"
-                                            class="flex items-center gap-2 px-1 py-0.5 hover:bg-slate-50 rounded cursor-pointer"
+                                <!-- Add Unit Interaction -->
+                                <div class="mt-1 flex gap-1">
+                                    <select
+                                        v-model="selectedNewCrossFunctionId"
+                                        class="info-select flex-1"
+                                    >
+                                        <option value="">-- Pilih Unit untuk Ditambahkan --</option>
+                                        <option 
+                                            v-for="org in allOrganizations" 
+                                            :key="org.id" 
+                                            :value="org.id"
+                                            :disabled="form.pic_cross_function_ids?.includes(org.id)"
                                         >
-                                            <input 
-                                                type="checkbox" 
-                                                :value="pic.id" 
-                                                v-model="form.pic_cross_function_ids"
-                                                class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 h-3 w-3"
-                                            >
-                                            <span class="text-[11px] text-slate-700 leading-tight">
-                                                {{ pic.name }} <span class="text-slate-400 text-[10px]">({{ pic.organization?.name }})</span>
-                                            </span>
-                                        </label>
-                                        <p v-if="picProjects.length === 0" class="text-[10px] text-slate-400 italic py-2 text-center">
-                                            Tidak ada PIC tersedia.
-                                        </p>
+                                            {{ org.name }}
+                                        </option>
+                                    </select>
+                                    <button 
+                                        type="button"
+                                        @click="addCrossFunctionUnit"
+                                        class="px-2 py-1 bg-blue-600 text-white text-[10px] font-bold rounded hover:bg-blue-700 transition-colors"
+                                    >
+                                        Add
+                                    </button>
+                                </div>
+
+                                <!-- Selected Units List -->
+                                <div v-if="form.pic_cross_function_ids?.length" class="mt-2 space-y-1">
+                                    <div 
+                                        v-for="id in form.pic_cross_function_ids" 
+                                        :key="id"
+                                        class="flex items-center justify-between gap-2 px-2 py-1 bg-slate-50 border border-slate-100 rounded"
+                                    >
+                                        <span class="text-[11px] text-slate-700 font-medium">{{ getOrgName(id) }}</span>
+                                        <button 
+                                            type="button"
+                                            @click="removeCrossFunctionUnit(id)"
+                                            class="text-rose-500 hover:text-rose-700 p-0.5"
+                                            title="Hapus Unit"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
                                     </div>
                                 </div>
+                                <p v-else class="text-[9px] text-slate-400 italic mt-1">Belum ada unit terpilih.</p>
                             </div>
                         </div>
                         <template v-else>
                             <div class="flex flex-col">
                                 <span>{{ displayMultilineValue(form.key_personnel) }}</span>
-                                <div v-if="getPicNames(form.pic_cross_function_ids).length" class="mt-2 pt-2 border-t border-slate-100">
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Mapped PICs:</p>
+                                <div v-if="getOrgNames(form.pic_cross_function_ids).length" class="mt-2 pt-2 border-t border-slate-100">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Mapped Units:</p>
                                     <ul class="list-disc list-inside text-[11px] text-slate-500 font-semibold italic">
-                                        <li v-for="name in getPicNames(form.pic_cross_function_ids)" :key="name">
+                                        <li v-for="name in getOrgNames(form.pic_cross_function_ids)" :key="name">
                                             {{ name }}
                                         </li>
                                     </ul>

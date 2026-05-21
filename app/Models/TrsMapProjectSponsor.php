@@ -19,9 +19,9 @@ class TrsMapProjectSponsor extends Model
         'pc_id',
     ];
 
-    public function picProjectSponsor(): BelongsTo
+    public function organizationSponsor(): BelongsTo
     {
-        return $this->belongsTo(MstPicProject::class, 'pic_id');
+        return $this->belongsTo(TrsOrganization::class, 'pic_id');
     }
     public function projectCharter(): BelongsTo
     {

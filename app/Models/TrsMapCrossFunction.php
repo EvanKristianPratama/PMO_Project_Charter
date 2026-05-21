@@ -19,9 +19,9 @@ class TrsMapCrossFunction extends Model
         'pc_id',
     ];
 
-    public function picCrossFunction(): BelongsTo
+    public function organizationCrossFunction(): BelongsTo
     {
-        return $this->belongsTo(MstPicProject::class, 'pic_id');
+        return $this->belongsTo(TrsOrganization::class, 'pic_id');
     }
     public function projectCharter(): BelongsTo
     {
