@@ -56,29 +56,36 @@
 
         <div class="flex w-full min-w-0 flex-col items-center">
             <div
-                class="relative flex flex-col items-center justify-center rounded border px-1 py-1.5 text-center font-semibold leading-tight shadow-sm transition duration-200"
+                class="relative flex flex-col items-center justify-center rounded border px-1 text-center font-semibold leading-tight shadow-sm transition duration-200"
                 :class="[
                     nodeSizeClass,
                     nodeToneClass,
-                    'cursor-default',
+                    node.pic_projects && node.pic_projects.length > 0 ? 'cursor-pointer hover:border-slate-400 dark:hover:border-white/30 hover:shadow-md' : 'cursor-default',
                 ]"
                 :title="
                     node.pic_projects && node.pic_projects.length > 0
-                        ? `${node.organization_name} (PIC: ${node.pic_projects.map(p => p.name).join(', ')})`
+                        ? `${node.organization_name} (Klik untuk ${showPics ? 'menyembunyikan' : 'menampilkan'} PIC)`
                         : node.organization_name
                 "
+                @click="node.pic_projects && node.pic_projects.length > 0 && (showPics = !showPics)"
             >
                 <span class="block max-w-full break-words whitespace-normal">
                     {{ node.organization_name }}
                 </span>
-                <div v-if="node.pic_projects && node.pic_projects.length > 0" class="mt-1 w-full border-t border-slate-200 dark:border-white/10 pt-1 space-y-0.5">
-                    <div
-                        v-for="pic in node.pic_projects"
-                        :key="pic.id"
-                        class="text-[7px] text-slate-500 dark:text-slate-400 font-normal break-words whitespace-normal max-w-full"
-                        :title="pic.name"
-                    >
-                        {{ pic.name }}
+                <div v-if="node.pic_projects && node.pic_projects.length > 0 && showPics" class="mt-1 w-full border-t border-slate-200 dark:border-white/10 pt-1 text-left px-0.5">
+                    <div class="text-[7px] text-slate-400 dark:text-slate-500 font-semibold mb-0.5 uppercase tracking-wider">
+                        PIC:
+                    </div>
+                    <div class="space-y-0.5">
+                        <div
+                            v-for="pic in node.pic_projects"
+                            :key="pic.id"
+                            class="text-[7px] text-slate-500 dark:text-slate-400 font-normal break-words whitespace-normal max-w-full flex items-start"
+                            :title="pic.name"
+                        >
+                            <span class="mr-0.5 select-none text-[6px] text-slate-400">•</span>
+                            <span class="flex-1 min-w-0 leading-[1.1]">{{ pic.name }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -132,6 +139,7 @@ const props = defineProps({
 });
 
 const isExpanded = ref(true);
+const showPics = ref(false);
 
 const normalizeCode = (value) => String(value ?? '').trim();
 
@@ -282,7 +290,11 @@ const nodeSizeClass = computed(() => {
         return 'h-8 w-28 text-[10px]';
     }
 
-    return 'min-h-[3rem] w-20 text-[8px] py-1';
+    if (showPics.value && props.node?.pic_projects?.length > 0) {
+        return 'min-h-[3rem] w-20 text-[8px] py-1.5';
+    }
+
+    return 'min-h-[1.5rem] w-20 text-[8px] py-1';
 });
 
 const nodeToneClass = computed(() => {
