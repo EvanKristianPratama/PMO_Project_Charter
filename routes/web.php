@@ -298,6 +298,11 @@ Route::middleware(['auth', 'approved'])->group(function () {
         Route::post('/regulation', [\App\Http\Controllers\Policy\RegulationController::class, 'store'])->name('regulation.store');
         Route::put('/regulation/{id}', [\App\Http\Controllers\Policy\RegulationController::class, 'update'])->name('regulation.update');
         Route::delete('/regulation/{id}', [\App\Http\Controllers\Policy\RegulationController::class, 'destroy'])->name('regulation.destroy');
+
+        // Matriks RACI (RACI Matrix) mapping
+        Route::get('/raci', [\App\Http\Controllers\Policy\PracticeRoleController::class, 'index'])->name('raci.index');
+        Route::get('/raci/manage', [\App\Http\Controllers\Policy\PracticeRoleController::class, 'manage'])->name('raci.manage');
+        Route::post('/raci', [\App\Http\Controllers\Policy\PracticeRoleController::class, 'update'])->name('raci.update');
     });
 
     Route::get('/program-information', fn () => Inertia::render('Placeholder/Index', [
