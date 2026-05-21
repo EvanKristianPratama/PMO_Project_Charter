@@ -303,18 +303,26 @@ const selectedRole = ref('');
 
 const filteredRoles = computed(() => {
     if (!selectedRole.value) return props.roles;
-    return props.roles.filter(r => r.id === selectedRole.value);
+    return props.roles.filter(r => String(r.id) === String(selectedRole.value));
 });
 
 const filteredObjectives = computed(() => {
     if (!selectedGamo.value) return props.objectives;
-    return props.objectives.filter(o => o.objective_id === selectedGamo.value);
+    return props.objectives.filter(o => String(o.objective_id) === String(selectedGamo.value));
 });
 
-// Get RACI value for a specific cells
+const raciLookup = computed(() => {
+    const entries = props.mappings.map((mapping) => [
+        `${String(mapping.practice_id)}::${String(mapping.role_id)}`,
+        mapping.r_a || '',
+    ]);
+
+    return new Map(entries);
+});
+
+// Get RACI value for a specific cell
 function getRaciValue(practiceId, roleId) {
-    const record = props.mappings.find(m => m.practice_id === practiceId && m.role_id === roleId);
-    return record ? record.r_a : '';
+    return raciLookup.value.get(`${String(practiceId)}::${String(roleId)}`) || '';
 }
 
 // Get descriptive tooltip label

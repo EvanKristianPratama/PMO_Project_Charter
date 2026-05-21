@@ -262,7 +262,9 @@ props.objectives.forEach(obj => {
     obj.practices.forEach(pr => {
         matrixState.value[pr.practice_id] = {};
         props.roles.forEach(role => {
-            const map = props.mappings.find(m => m.practice_id === pr.practice_id && m.role_id === role.id);
+            const map = props.mappings.find(
+                m => String(m.practice_id) === String(pr.practice_id) && String(m.role_id) === String(role.id)
+            );
             matrixState.value[pr.practice_id][role.id] = map ? map.r_a : '';
         });
     });
