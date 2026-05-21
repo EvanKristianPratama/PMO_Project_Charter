@@ -59,13 +59,54 @@
             <!-- Full-Width Spreadsheet-Style Table -->
             <div class="w-full">
                 <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                    <div class="bg-slate-50/70 border-b border-slate-200 px-5 py-4 dark:bg-white/5 dark:border-white/10 flex items-center justify-between">
+                    <div class="bg-slate-50/70 border-b border-slate-200 px-5 py-4 dark:bg-white/5 dark:border-white/10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <h3 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-white flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-[#821f44]">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                             </svg>
-                            Master List Responsibilities ({{ responsibles.length }})
+                            Master List Responsibilities ({{ processedResponsibles.length }})
                         </h3>
+
+                        <!-- Filtering & Sorting Controls -->
+                        <div class="flex flex-wrap items-center gap-3">
+                            <!-- Search Field -->
+                            <div class="relative w-full sm:w-64">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.637 10.637z" />
+                                    </svg>
+                                </span>
+                                <input 
+                                    v-model="searchQuery" 
+                                    type="text" 
+                                    placeholder="Cari tanggung jawab..." 
+                                    class="w-full pl-9 pr-4 py-2 text-xs font-semibold rounded-xl border border-slate-200 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:border-[#821f44] dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                                />
+                            </div>
+
+                            <!-- Sort Options Button Group -->
+                            <div class="flex items-center gap-1 bg-slate-100 dark:bg-white/5 p-1 rounded-xl border border-slate-200 dark:border-white/10">
+                                <button 
+                                    @click="sortBy = 'default'" 
+                                    type="button"
+                                    class="px-3 py-1.5 text-[11px] font-bold rounded-lg transition active:scale-95"
+                                    :class="sortBy === 'default' ? 'bg-[#821f44] text-white shadow' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/50 dark:hover:bg-white/5'"
+                                >
+                                    Default
+                                </button>
+                                <button 
+                                    @click="sortBy = 'alphabetical'" 
+                                    type="button"
+                                    class="px-3 py-1.5 text-[11px] font-bold rounded-lg transition active:scale-95 flex items-center gap-1"
+                                    :class="sortBy === 'alphabetical' ? 'bg-[#821f44] text-white shadow' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/50 dark:hover:bg-white/5'"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h9.75m4.5-4.5v12m0 0l-3.75-3.75M17.25 21L21 17.25" />
+                                    </svg>
+                                    A-Z
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Spreadsheet-Style Grid Table -->
@@ -79,13 +120,13 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-200 dark:divide-white/10">
-                                <tr v-if="responsibles.length === 0" class="hover:bg-slate-50/30 dark:hover:bg-white/5">
+                                <tr v-if="processedResponsibles.length === 0" class="hover:bg-slate-50/30 dark:hover:bg-white/5">
                                     <td colspan="3" class="px-5 py-12 text-center text-slate-400 dark:text-slate-500 font-medium border border-slate-200 dark:border-white/10">
                                         Belum ada data Master Responsible. Klik "+ Tambah Master" di atas untuk menambahkan data.
                                     </td>
                                 </tr>
                                 <tr 
-                                    v-for="(resp, index) in responsibles" 
+                                    v-for="(resp, index) in processedResponsibles" 
                                     :key="resp.id" 
                                     class="group hover:bg-slate-50/80 dark:hover:bg-white/5 transition duration-150 divide-x divide-slate-200 dark:divide-white/10"
                                 >
@@ -95,7 +136,21 @@
                                     </td>
                                     <!-- Content -->
                                     <td class="px-5 py-3.5 text-slate-900 dark:text-white font-medium whitespace-pre-line leading-relaxed border border-slate-200 dark:border-white/10">
-                                        {{ resp.responsible }}
+                                        <div class="flex flex-col gap-1.5">
+                                            <div class="flex items-center gap-2">
+                                                <span 
+                                                    v-if="resp.isDuplicate" 
+                                                    class="inline-flex items-center gap-1 rounded-md bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 text-[10px] font-extrabold text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-900/30 shrink-0 select-none"
+                                                    title="Ada data tanggung jawab lain yang sama persis di master"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3">
+                                                        <path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                                                    </svg>
+                                                    Duplikat
+                                                </span>
+                                            </div>
+                                            <span>{{ resp.responsible }}</span>
+                                        </div>
                                     </td>
                                     <!-- Actions -->
                                     <td class="px-4 py-3.5 border border-slate-200 dark:border-white/10">
@@ -194,7 +249,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { usePage, useForm, router, Link } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
@@ -203,6 +258,43 @@ const props = defineProps({
         type: Array,
         required: true,
     },
+});
+
+// Search & Sort States
+const searchQuery = ref('');
+const sortBy = ref('default');
+
+// Computed list with search, alphabetical sorting, and duplicate highlighting
+const processedResponsibles = computed(() => {
+    // 1. Detect duplicates across all entries
+    const counts = {};
+    props.responsibles.forEach(r => {
+        const text = (r.responsible || '').trim().toLowerCase();
+        if (text) {
+            counts[text] = (counts[text] || 0) + 1;
+        }
+    });
+
+    let list = props.responsibles.map(r => {
+        const text = (r.responsible || '').trim().toLowerCase();
+        return {
+            ...r,
+            isDuplicate: text ? (counts[text] > 1) : false
+        };
+    });
+
+    // 2. Filter by search query
+    if (searchQuery.value.trim()) {
+        const query = searchQuery.value.toLowerCase();
+        list = list.filter(r => (r.responsible || '').toLowerCase().includes(query));
+    }
+
+    // 3. Sort alphabetically (A-Z) if selected
+    if (sortBy.value === 'alphabetical') {
+        list.sort((a, b) => (a.responsible || '').localeCompare(b.responsible || '', 'id'));
+    }
+
+    return list;
 });
 
 const page = usePage();
