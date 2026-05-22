@@ -18,10 +18,12 @@
                 <thead class="bg-slate-50 dark:bg-white/5">
                     <tr>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">No</th>
-                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Company</th>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Group</th>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Code</th>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Organization</th>
+                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Alias</th>
+                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Jabatan</th>
+                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Pejabat</th>
                         <th class="px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-36">Actions</th>
                     </tr>
                 </thead>
@@ -32,9 +34,6 @@
                         class="transition hover:bg-slate-50 dark:hover:bg-white/5"
                     >
                         <td class="px-4 py-3 text-slate-500 dark:text-slate-400">{{ index + 1 }}</td>
-                        <td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-100">
-                            {{ displayValue(organizationStructureRow.company_name) }}
-                        </td>
                         <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
                             {{ displayValue(organizationStructureRow.groub_name) }}
                         </td>
@@ -43,6 +42,15 @@
                         </td>
                         <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
                             {{ displayValue(organizationStructureRow.organization_name) }}
+                        </td>
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
+                            {{ displayValue(organizationStructureRow.alias) }}
+                        </td>
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
+                            {{ displayValue(organizationStructureRow.jabatan) }}
+                        </td>
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
+                            {{ displayValue(organizationStructureRow.pejabat) }}
                         </td>
                         <td class="px-4 py-3 text-center space-x-3 w-36">
                             <button
@@ -142,6 +150,45 @@
                 />
                 <span v-if="form.errors.name" class="text-xs text-red-500 font-medium">{{ form.errors.name }}</span>
             </div>
+
+            <!-- Alias Input -->
+            <div class="flex flex-col gap-1.5">
+                <label for="alias" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Alias (Singkatan)</label>
+                <input
+                    id="alias"
+                    v-model="form.alias"
+                    type="text"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    placeholder="Contoh: IT-OPS"
+                />
+                <span v-if="form.errors.alias" class="text-xs text-red-500 font-medium">{{ form.errors.alias }}</span>
+            </div>
+
+            <!-- Jabatan Input -->
+            <div class="flex flex-col gap-1.5">
+                <label for="jabatan" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Jabatan</label>
+                <input
+                    id="jabatan"
+                    v-model="form.jabatan"
+                    type="text"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    placeholder="Contoh: Manager IT"
+                />
+                <span v-if="form.errors.jabatan" class="text-xs text-red-500 font-medium">{{ form.errors.jabatan }}</span>
+            </div>
+
+            <!-- Pejabat Input -->
+            <div class="flex flex-col gap-1.5">
+                <label for="pejabat" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Pejabat</label>
+                <input
+                    id="pejabat"
+                    v-model="form.pejabat"
+                    type="text"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    placeholder="Contoh: Budi Santoso"
+                />
+                <span v-if="form.errors.pejabat" class="text-xs text-red-500 font-medium">{{ form.errors.pejabat }}</span>
+            </div>
         </div>
     </ConfirmationModal>
 
@@ -186,6 +233,9 @@ const form = useForm({
     groub_id: '',
     code: '',
     name: '',
+    alias: '',
+    jabatan: '',
+    pejabat: '',
 });
 
 const selectedParentCode = ref('');
@@ -246,6 +296,9 @@ const openEditModal = (org) => {
     form.groub_id = org.groub_id || '';
     form.code = org.code || '';
     form.name = org.organization_name || '';
+    form.alias = org.alias || '';
+    form.jabatan = org.jabatan || '';
+    form.pejabat = org.pejabat || '';
     
     // Determine parent code from current organization code
     const orgCode = String(org.code || '').trim();

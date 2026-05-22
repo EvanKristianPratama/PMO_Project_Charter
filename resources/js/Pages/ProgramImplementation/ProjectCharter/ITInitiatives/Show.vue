@@ -424,6 +424,8 @@ const VERSION_ANALYSIS_FIELDS = [
 ];
 
 const mapCharterToForm = (charter = null, project = null) => {
+    const picMap = project?.map_pic_project || props.itInitiative?.map_pic_project || {};
+
     const payload = {
         version_label: charter?.version_label ?? '',
         owner: charter?.owner ?? '',
@@ -437,10 +439,10 @@ const mapCharterToForm = (charter = null, project = null) => {
             ?? charter?.metadata?.kpi_target
             ?? charter?.metadata?.kpi
             ?? '',
-        pic_sponsor_id: charter?.map_project_sponsor?.pic_id ?? '',
-        pic_owner_id: charter?.map_project_owner?.pic_id ?? '',
-        pic_leader_id: charter?.map_project_leader?.pic_id ?? '',
-        pic_cross_function_ids: charter?.map_cross_functions?.map(m => m.pic_id) ?? [],
+        pic_sponsor_id: picMap.project_sponsor ?? '',
+        pic_owner_id: picMap.project_owner ?? '',
+        pic_leader_id: picMap.project_leader ?? '',
+        pic_cross_function_ids: (project?.map_cross_functions || props.itInitiative?.map_cross_functions || []).map(m => m.organization_id),
     };
     for (const field of CHARTER_FIELDS) {
         payload[field] = charter?.[field] ?? '';

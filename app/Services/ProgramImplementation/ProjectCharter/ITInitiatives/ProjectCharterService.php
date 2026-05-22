@@ -52,34 +52,24 @@ class ProjectCharterService
 
     private function syncPicMappings(TrsProjectCharter $charter, array $payload): void
     {
-        if (isset($payload['pic_sponsor_id'])) {
-            \App\Models\TrsMapProjectSponsor::updateOrCreate(
-                ['pc_id' => $charter->id],
-                ['pic_id' => $payload['pic_sponsor_id']]
-            );
-        }
+        // Unified mapping for Sponsor, Owner, Leader at Project level
+        \App\Models\TrsMapPicProject::updateOrCreate(
+            ['project_id' => $charter->project_id],
+            [
+                'project_sponsor' => $payload['pic_sponsor_id'] ?? null,
+                'project_owner'   => $payload['pic_owner_id'] ?? null,
+                'project_leader'  => $payload['pic_leader_id'] ?? null,
+            ]
+        );
 
-        if (isset($payload['pic_owner_id'])) {
-            \App\Models\TrsMapProjectOwner::updateOrCreate(
-                ['pc_id' => $charter->id],
-                ['pic_id' => $payload['pic_owner_id']]
-            );
-        }
-
-        if (isset($payload['pic_leader_id'])) {
-            \App\Models\TrsMapProjectLeader::updateOrCreate(
-                ['pc_id' => $charter->id],
-                ['pic_id' => $payload['pic_leader_id']]
-            );
-        }
-
+        // Cross Function mapping at Project level (pc_id = project_id)
         if (isset($payload['pic_cross_function_ids']) && is_array($payload['pic_cross_function_ids'])) {
-            \App\Models\TrsMapCrossFunction::where('pc_id', $charter->id)->delete();
+            \App\Models\TrsMapCrossFunction::where('pc_id', $charter->project_id)->delete();
             
-            $mappings = array_map(function($picId) use ($charter) {
+            $mappings = array_map(function($orgId) use ($charter) {
                 return [
-                    'pc_id' => $charter->id,
-                    'pic_id' => $picId,
+                    'pc_id' => $charter->project_id,
+                    'organization_id' => $orgId,
                 ];
             }, array_filter($payload['pic_cross_function_ids']));
 

@@ -9,6 +9,10 @@ const props = defineProps({
     allOrganizations: { type: Array, default: () => [] },
 });
 
+const filteredOrgs = computed(() => {
+    return props.allOrganizations.filter(org => org.jabatan && String(org.jabatan).trim() !== '');
+});
+
 const selectedNewCrossFunctionId = ref('');
 
 const addCrossFunctionUnit = () => {
@@ -33,7 +37,7 @@ const removeCrossFunctionUnit = (id) => {
 
 const getOrgName = (id) => {
     const org = props.allOrganizations.find(o => o.id === parseInt(id));
-    return org ? org.name : null;
+    return org ? org.jabatan : null;
 };
 
 const getOrgNames = (ids) => {
@@ -183,8 +187,8 @@ const headlineSummary = () => {
                                 class="info-select"
                             >
                                 <option value="">-- Pilih Unit Sponsor --</option>
-                                <option v-for="org in allOrganizations" :key="org.id" :value="org.id">
-                                    {{ org.name }}
+                                <option v-for="org in filteredOrgs" :key="org.id" :value="org.id">
+                                    {{ org.jabatan }}
                                 </option>
                             </select>
                         </div>
@@ -192,7 +196,7 @@ const headlineSummary = () => {
                             <div class="flex flex-col">
                                 <span>{{ displayValue(form.sponsor) }}</span>
                                 <span v-if="getOrgName(form.pic_sponsor_id)" class="text-[11px] text-slate-500 font-semibold italic">
-                                    Mapped Unit: {{ getOrgName(form.pic_sponsor_id) }}
+                                    Organization: {{ getOrgName(form.pic_sponsor_id) }}
                                 </span>
                             </div>
                         </template>
@@ -246,8 +250,8 @@ const headlineSummary = () => {
                                 class="info-select"
                             >
                                 <option value="">-- Pilih Unit Owner --</option>
-                                <option v-for="org in allOrganizations" :key="org.id" :value="org.id">
-                                    {{ org.name }}
+                                <option v-for="org in filteredOrgs" :key="org.id" :value="org.id">
+                                    {{ org.jabatan }}
                                 </option>
                             </select>
                         </div>
@@ -255,7 +259,7 @@ const headlineSummary = () => {
                             <div class="flex flex-col">
                                 <span>{{ displayValue(form.owner) }}</span>
                                 <span v-if="getOrgName(form.pic_owner_id)" class="text-[11px] text-slate-500 font-semibold italic">
-                                    Mapped Unit: {{ getOrgName(form.pic_owner_id) }}
+                                    Organization: {{ getOrgName(form.pic_owner_id) }}
                                 </span>
                             </div>
                         </template>
@@ -293,8 +297,8 @@ const headlineSummary = () => {
                                 class="info-select"
                             >
                                 <option value="">-- Pilih Unit Leader --</option>
-                                <option v-for="org in allOrganizations" :key="org.id" :value="org.id">
-                                    {{ org.name }}
+                                <option v-for="org in filteredOrgs" :key="org.id" :value="org.id">
+                                    {{ org.jabatan }}
                                 </option>
                             </select>
                         </div>
@@ -302,7 +306,7 @@ const headlineSummary = () => {
                             <div class="flex flex-col">
                                 <span>{{ displayValue(form.leader) }}</span>
                                 <span v-if="getOrgName(form.pic_leader_id)" class="text-[11px] text-slate-500 font-semibold italic">
-                                    Mapped Unit: {{ getOrgName(form.pic_leader_id) }}
+                                    Organization: {{ getOrgName(form.pic_leader_id) }}
                                 </span>
                             </div>
                         </template>
@@ -336,7 +340,7 @@ const headlineSummary = () => {
                                 placeholder="Satu poin per baris..."
                             ></textarea>
                             <div class="mt-2">
-                                <label class="text-[10px] font-bold text-slate-500 uppercase">Map formal Units:</label>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">Map formal Organizations:</label>
                                 
                                 <!-- Add Unit Interaction -->
                                 <div class="mt-1 flex gap-1">
@@ -346,12 +350,12 @@ const headlineSummary = () => {
                                     >
                                         <option value="">-- Pilih Unit untuk Ditambahkan --</option>
                                         <option 
-                                            v-for="org in allOrganizations" 
+                                            v-for="org in filteredOrgs" 
                                             :key="org.id" 
                                             :value="org.id"
                                             :disabled="form.pic_cross_function_ids?.includes(org.id)"
                                         >
-                                            {{ org.name }}
+                                            {{ org.jabatan }}
                                         </option>
                                     </select>
                                     <button 
@@ -390,7 +394,7 @@ const headlineSummary = () => {
                             <div class="flex flex-col">
                                 <span>{{ displayMultilineValue(form.key_personnel) }}</span>
                                 <div v-if="getOrgNames(form.pic_cross_function_ids).length" class="mt-2 pt-2 border-t border-slate-100">
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Mapped Units:</p>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Organizations:</p>
                                     <ul class="list-disc list-inside text-[11px] text-slate-500 font-semibold italic">
                                         <li v-for="name in getOrgNames(form.pic_cross_function_ids)" :key="name">
                                             {{ name }}

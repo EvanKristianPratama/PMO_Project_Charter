@@ -15,17 +15,23 @@ class TrsMapCrossFunction extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'pic_id',
         'pc_id',
+        'organization_id',
     ];
 
-    public function organizationCrossFunction(): BelongsTo
+    /**
+     * Relasi ke TrsProject (Project level)
+     */
+    public function project(): BelongsTo
     {
-        return $this->belongsTo(TrsOrganization::class, 'pic_id');
-    }
-    public function projectCharter(): BelongsTo
-    {
-        return $this->belongsTo(TrsProject::class, 'priority_strategic_id');
+        return $this->belongsTo(TrsProject::class, 'pc_id');
     }
 
+    /**
+     * Relasi ke TrsOrganization
+     */
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(TrsOrganization::class, 'organization_id');
+    }
 }

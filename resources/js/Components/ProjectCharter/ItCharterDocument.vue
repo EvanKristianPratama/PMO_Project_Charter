@@ -1,4 +1,6 @@
 <script setup>
+import { computed } from 'vue';
+
 const props = defineProps({
     itInitiative: { type: Object, required: true },
     form: { type: Object, required: true },
@@ -7,9 +9,13 @@ const props = defineProps({
     allOrganizations: { type: Array, default: () => [] },
 });
 
+const filteredOrgs = computed(() => {
+    return props.allOrganizations.filter(org => org.jabatan && String(org.jabatan).trim() !== '');
+});
+
 const getOrgName = (id) => {
     const org = props.allOrganizations.find(o => o.id === parseInt(id));
-    return org ? org.name : null;
+    return org ? org.jabatan : null;
 };
 
 const lineItems = (value) => String(value || '')
@@ -123,8 +129,8 @@ const displayOwner = (value) => {
                             class="info-select"
                         >
                             <option value="">-- Pilih Unit Owner --</option>
-                            <option v-for="org in allOrganizations" :key="org.id" :value="org.id">
-                                {{ org.name }}
+                            <option v-for="org in filteredOrgs" :key="org.id" :value="org.id">
+                                {{ org.jabatan }}
                             </option>
                         </select>
                     </div>
@@ -132,7 +138,7 @@ const displayOwner = (value) => {
                         <div class="flex flex-col">
                             <span>{{ displayOwner(form.owner) }}</span>
                             <span v-if="getOrgName(form.pic_owner_id)" class="text-[10px] text-slate-500 font-semibold italic">
-                                Mapped Unit: {{ getOrgName(form.pic_owner_id) }}
+                                Organization: {{ getOrgName(form.pic_owner_id) }}
                             </span>
                         </div>
                     </template>
