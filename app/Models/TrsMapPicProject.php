@@ -12,6 +12,10 @@ class TrsMapPicProject extends Model
 
     protected $table = 'trs_map_pic_project';
 
+    protected $primaryKey = 'project_id';
+
+    public $incrementing = false;
+
     public $timestamps = false;
 
     protected $fillable = [
