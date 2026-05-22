@@ -315,6 +315,9 @@ Route::middleware(['auth', 'approved'])->group(function () {
 
         // Prosedur (Procedure) placeholder
         Route::get('/procedure', [ProcedureController::class, 'index'])->name('procedure.index');
+        Route::post('/procedure/actor', [ProcedureController::class, 'storeActor'])->name('procedure.actor.store');
+        Route::put('/procedure/actor/{id}', [ProcedureController::class, 'updateActor'])->name('procedure.actor.update');
+        Route::delete('/procedure/actor/{id}', [ProcedureController::class, 'destroyActor'])->name('procedure.actor.destroy');
 
         // Matriks RACI (RACI Matrix) mapping
         Route::get('/raci', [PracticeRoleController::class, 'index'])->name('raci.index');

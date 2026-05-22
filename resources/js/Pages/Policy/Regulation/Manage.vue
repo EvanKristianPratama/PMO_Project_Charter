@@ -63,8 +63,11 @@
                         <thead class="bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
                             <tr>
                                 <th scope="col" class="px-6 py-4">Judul</th>
+                                <th scope="col" class="px-6 py-4">Nomor</th>
                                 <th scope="col" class="px-6 py-4 w-36">Tipe</th>
+                                <th scope="col" class="px-6 py-4 w-32">STK</th>
                                 <th scope="col" class="px-6 py-4">Owner</th>
+                                <th scope="col" class="px-6 py-4">Organisasi</th>
                                 <th scope="col" class="px-6 py-4 text-center w-24">Revisi</th>
                                 <th scope="col" class="px-6 py-4 w-32">Terbit</th>
                                 <th scope="col" class="px-6 py-4 w-32">Berlaku</th>
@@ -73,7 +76,7 @@
                         </thead>
                         <tbody class="divide-y divide-slate-200 dark:divide-white/10 dark:bg-transparent">
                             <tr v-if="regulations.length === 0" class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
-                                <td colspan="7" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
+                                <td colspan="10" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
                                     Belum ada data Regulasi. Klik "+ Tambah Regulasi" untuk memasukkan data pertama.
                                 </td>
                             </tr>
@@ -85,6 +88,10 @@
                                 <!-- Judul -->
                                 <td class="px-6 py-4 text-slate-900 dark:text-white font-medium leading-relaxed max-w-sm">
                                     {{ reg.judul }}
+                                </td>
+                                <!-- Nomor -->
+                                <td class="px-6 py-4 text-slate-700 dark:text-slate-300 font-medium">
+                                    {{ reg.nomor || '-' }}
                                 </td>
                                 <!-- Tipe -->
                                 <td class="px-6 py-4">
@@ -102,10 +109,17 @@
                                     >
                                         {{ reg.tipe }}
                                     </span>
-                                </td>
-                                <!-- Owner -->
-                                <td class="px-6 py-4 text-slate-700 dark:text-slate-300 font-medium">
+                                    </td>
+                                    <!-- STK -->
+                                    <td class="px-6 py-4 text-slate-700 dark:text-slate-300 font-medium">
+                                    {{ reg.stk || '-' }}
+                                    </td>
+                                    <!-- Owner -->                                <td class="px-6 py-4 text-slate-700 dark:text-slate-300 font-medium">
                                     {{ reg.owner }}
+                                </td>
+                                <!-- Organisasi -->
+                                <td class="px-6 py-4 text-slate-700 dark:text-slate-300 font-medium">
+                                    {{ reg.organization?.name || '-' }}
                                 </td>
                                 <!-- Revisi -->
                                 <td class="px-6 py-4 text-center font-mono font-semibold text-slate-800 dark:text-slate-200">
@@ -184,6 +198,18 @@
                                     <div v-if="form.errors.judul" class="text-xs text-rose-500 font-medium">{{ form.errors.judul }}</div>
                                 </div>
 
+                                <!-- Nomor -->
+                                <div class="space-y-1.5">
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Nomor Regulasi:</label>
+                                    <input 
+                                        type="text" 
+                                        v-model="form.nomor" 
+                                        placeholder="Masukkan Nomor Regulasi..." 
+                                        class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-black/20 dark:text-white dark:border-white/10"
+                                    />
+                                    <div v-if="form.errors.nomor" class="text-xs text-rose-500 font-medium">{{ form.errors.nomor }}</div>
+                                </div>
+
                                 <!-- Tipe & Owner -->
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div class="space-y-1.5">
@@ -211,6 +237,33 @@
                                         />
                                         <div v-if="form.errors.owner" class="text-xs text-rose-500 font-medium">{{ form.errors.owner }}</div>
                                     </div>
+                                </div>
+
+                                <!-- STK -->
+                                <div class="space-y-1.5">
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">STK:</label>
+                                    <input 
+                                        type="text" 
+                                        v-model="form.stk" 
+                                        placeholder="Masukkan STK..." 
+                                        class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-black/20 dark:text-white dark:border-white/10"
+                                    />
+                                    <div v-if="form.errors.stk" class="text-xs text-rose-500 font-medium">{{ form.errors.stk }}</div>
+                                </div>
+
+                                <!-- Organisasi Selection -->
+                                <div class="space-y-1.5">
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Unit Organisasi Terkait:</label>
+                                    <select 
+                                        v-model="form.pic_id" 
+                                        class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-black/20 dark:text-white dark:border-white/10"
+                                    >
+                                        <option value="">-- Pilih Organisasi --</option>
+                                        <option v-for="org in organizations" :key="org.id" :value="org.id">
+                                            {{ org.code }} - {{ org.name }}
+                                        </option>
+                                    </select>
+                                    <div v-if="form.errors.pic_id" class="text-xs text-rose-500 font-medium">{{ form.errors.pic_id }}</div>
                                 </div>
 
                                 <!-- Revisi -->
@@ -289,6 +342,10 @@ const props = defineProps({
         type: Array,
         required: true,
     },
+    organizations: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const page = usePage();
@@ -339,11 +396,14 @@ const editingId = ref(null);
 
 const form = useForm({
     judul: '',
+    nomor: '',
     tipe: '',
+    stk: '',
     owner: '',
     revisi: '',
     terbit: '',
     berlaku: '',
+    pic_id: '',
 });
 
 function openAddModal() {
@@ -370,11 +430,14 @@ function openEditModal(reg) {
     }
 
     form.judul = reg.judul;
+    form.nomor = reg.nomor || '';
     form.tipe = reg.tipe;
+    form.stk = reg.stk || '';
     form.owner = reg.owner;
     form.revisi = reg.revisi;
     form.terbit = terbitVal;
     form.berlaku = berlakuVal;
+    form.pic_id = reg.pic_id || '';
     form.clearErrors();
     isModalOpen.value = true;
 }

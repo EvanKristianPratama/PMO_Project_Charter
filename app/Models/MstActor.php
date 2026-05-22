@@ -10,7 +10,16 @@ class MstActor extends Model
 
     protected $fillable = [
         'name',
+        'organization_id',
     ];
+
+    /**
+     * Relasi ke TrsOrganization
+     */
+    public function organization(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(TrsOrganization::class, 'organization_id');
+    }
 
     /**
      * One-to-Many relationship with TrsMapActorSop.

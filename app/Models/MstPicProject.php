@@ -22,15 +22,4 @@ class MstPicProject extends Model
     {
         return $this->belongsTo(TrsOrganization::class, 'organization_id');
     }
-
-    public function mapProjectOwner (): HasMany
-    {
-        return $this->hasMany(TrsMapProjectOwner::class, 'pic_id');
-    }
-
-    public function mapProjectLeader (): HasMany
-    {
-        return $this->hasMany(TrsMapProjectLeader::class, 'pic_id');
-    }
-    
 }
