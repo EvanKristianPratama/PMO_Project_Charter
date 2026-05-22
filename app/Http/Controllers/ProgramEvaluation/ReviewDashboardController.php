@@ -37,14 +37,7 @@ class ReviewDashboardController extends Controller
         'November',
         'Desember',
     ];
-
-    public function index(): Response
-    {
-        $data = $this->getDashboardData();
-
-        return inertia('ProgramEvaluation/ReviewDashboard/Index', $data);
-    }
-
+    
     public function summary(): Response
     {
         $data = $this->getDashboardData();
@@ -68,6 +61,8 @@ class ReviewDashboardController extends Controller
                     ]),
                 'mappedProjects' => static fn ($query) => $query
                     ->with([
+                        'mapPicProject.ownerOrganization',
+                        'mapPicProject.leaderOrganization',
                         'projectCharters' => static fn ($charterQuery) => $charterQuery
                             ->orderByDesc('id'),
                         'projectStatusHistories' => static fn ($historyQuery) => $historyQuery
@@ -101,6 +96,15 @@ class ReviewDashboardController extends Controller
                 $projectOwner = $latestCharter?->owner ?? '-';
                 $projectLeader = $latestCharter?->leader ?? '-';
 
+                // Restructured data (from TrsMapPicProject)
+                $latestProjectWithMap = $projects
+                    ->filter(fn ($p) => $p->mapPicProject)
+                    ->sortByDesc('id')
+                    ->first();
+
+                $projectOwnerRestructure = $latestProjectWithMap?->mapPicProject?->ownerOrganization?->jabatan ?? '-';
+                $projectLeaderRestructure = $latestProjectWithMap?->mapPicProject?->leaderOrganization?->jabatan ?? '-';
+
                 return [
                     'no' => $index + 1,
                     'initiative_id' => (int) $initiative->id,
@@ -114,6 +118,8 @@ class ReviewDashboardController extends Controller
                     'latest_review_period' => $latestReviewState['period'],
                     'project_owner' => $projectOwner,
                     'project_leader' => $projectLeader,
+                    'project_owner_restructure' => $projectOwnerRestructure,
+                    'project_leader_restructure' => $projectLeaderRestructure,
                 ];
             })
             ->values();

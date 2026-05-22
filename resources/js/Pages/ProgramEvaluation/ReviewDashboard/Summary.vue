@@ -13,13 +13,15 @@
 
             <!-- Project Owner Breakdown Table -->
             <OwnerBreakdownTable
-                :data="ownerBreakdown"
+                :originalData="ownerBreakdown.original"
+                :restructureData="ownerBreakdown.restructure"
                 :getCircleColor="getCircleColor"
             />
 
             <!-- Project Leader Breakdown Table -->
             <LeaderBreakdownTable
-                :data="leaderBreakdown"
+                :originalData="leaderBreakdown.original"
+                :restructureData="leaderBreakdown.restructure"
                 :getCircleColor="getCircleColor"
             />
 
@@ -143,69 +145,79 @@ const durationStats = computed(() => {
 });
 
 const ownerBreakdown = computed(() => {
-    const breakdown = {};
+    const getBreakdown = (field) => {
+        const breakdown = {};
+        props.rows.forEach((row) => {
+            const owner = row[field] || "Unknown Owner";
+            if (!breakdown[owner]) {
+                breakdown[owner] = {
+                    owner,
+                    approved: [],
+                    notApproved: [],
+                };
+            }
 
-    props.rows.forEach((row) => {
-        const owner = row.project_owner || "Unknown Owner";
-        if (!breakdown[owner]) {
-            breakdown[owner] = {
-                owner,
-                approved: [],
-                notApproved: [],
+            const isApproved =
+                row.process_month_value !== null &&
+                row.process_month_value !== undefined &&
+                row.process_month_value !== "";
+
+            const data = {
+                no: row.no,
+                status: row.latest_review_status,
             };
-        }
 
-        const isApproved =
-            row.process_month_value !== null &&
-            row.process_month_value !== undefined &&
-            row.process_month_value !== "";
+            if (isApproved) {
+                breakdown[owner].approved.push(data);
+            } else {
+                breakdown[owner].notApproved.push(data);
+            }
+        });
+        return Object.values(breakdown).sort((a, b) => a.owner.localeCompare(b.owner));
+    };
 
-        const data = {
-            no: row.no,
-            status: row.latest_review_status,
-        };
-
-        if (isApproved) {
-            breakdown[owner].approved.push(data);
-        } else {
-            breakdown[owner].notApproved.push(data);
-        }
-    });
-
-    return Object.values(breakdown).sort((a, b) => a.owner.localeCompare(b.owner));
+    return {
+        original: getBreakdown('project_owner'),
+        restructure: getBreakdown('project_owner_restructure'),
+    };
 });
 
 const leaderBreakdown = computed(() => {
-    const breakdown = {};
+    const getBreakdown = (field) => {
+        const breakdown = {};
+        props.rows.forEach((row) => {
+            const leader = row[field] || "Unknown Leader";
+            if (!breakdown[leader]) {
+                breakdown[leader] = {
+                    leader,
+                    approved: [],
+                    notApproved: [],
+                };
+            }
 
-    props.rows.forEach((row) => {
-        const leader = row.project_leader || "Unknown Leader";
-        if (!breakdown[leader]) {
-            breakdown[leader] = {
-                leader,
-                approved: [],
-                notApproved: [],
+            const isApproved =
+                row.process_month_value !== null &&
+                row.process_month_value !== undefined &&
+                row.process_month_value !== "";
+
+            const data = {
+                no: row.no,
+                status: row.latest_review_status,
             };
-        }
 
-        const isApproved =
-            row.process_month_value !== null &&
-            row.process_month_value !== undefined &&
-            row.process_month_value !== "";
+            if (isApproved) {
+                breakdown[leader].approved.push(data);
+            } else {
+                breakdown[leader].notApproved.push(data);
+            }
+        });
+        return Object.values(breakdown).sort((a, b) => a.leader.localeCompare(b.leader));
+    };
 
-        const data = {
-            no: row.no,
-            status: row.latest_review_status,
-        };
-
-        if (isApproved) {
-            breakdown[leader].approved.push(data);
-        } else {
-            breakdown[leader].notApproved.push(data);
-        }
-    });
-
-    return Object.values(breakdown).sort((a, b) => a.leader.localeCompare(b.leader));
+    return {
+        original: getBreakdown('project_leader'),
+        restructure: getBreakdown('project_leader_restructure'),
+    };
 });
 
 const getCircleColor = (status) => {
