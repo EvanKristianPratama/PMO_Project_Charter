@@ -17,7 +17,7 @@
                         <div class="md:col-span-5 flex flex-col divide-y divide-slate-900 dark:divide-white">
                             <div class="px-1.5 py-1 flex items-center gap-1 min-h-[22px]">
                                 <span class="font-bold shrink-0 text-[9px] leading-none">NOMOR :</span>
-                                <span class="font-mono font-bold text-[9px] leading-none text-slate-900 dark:text-white">{{ activeRegulation ? `REG-${activeRegulation.id.toString().padStart(4, '0')}` : '-' }}</span>
+                                <span class="font-mono font-bold text-[9px] leading-none text-slate-900 dark:text-white">{{ activeRegulation?.nomor || '-' }}</span>
                             </div>
                             <div class="px-1.5 py-1 flex items-center min-h-[22px]">
                                 <div class="flex items-center gap-1 flex-wrap leading-none">
