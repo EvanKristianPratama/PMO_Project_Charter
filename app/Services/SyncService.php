@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Exception;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class SyncService
 {
@@ -25,18 +25,18 @@ class SyncService
             'errors' => [],
         ];
 
-        // Safety Check: Don't allow sync if the default DB is the exact same as the Cloud DB
         $defaultConfig = config('database.connections.' . config('database.default'));
         $cloudConfig = config('database.connections.cloud');
-        
-        if (($defaultConfig['host'] ?? '') === ($cloudConfig['host'] ?? '') && 
+
+        if (($defaultConfig['host'] ?? '') === ($cloudConfig['host'] ?? '') &&
             ($defaultConfig['database'] ?? '') === ($cloudConfig['database'] ?? '')) {
             throw new Exception("Tujuan sinkronisasi sama dengan sumber (Cloud). Harap ubah default database di .env ke 'sqlite' atau 'local' terlebih dahulu.");
         }
 
         $log("Memverifikasi koneksi Cloud...", "info");
-        // Verify remote connection
         $driver = DB::getDriverName();
+        $isSqliteTarget = $driver === 'sqlite';
+
         try {
             DB::connection('cloud')->getPdo();
             $log("Koneksi Cloud berhasil.", "success");
@@ -45,20 +45,17 @@ class SyncService
             throw new Exception("Tidak dapat terhubung ke database cloud (Master): " . $e->getMessage());
         }
 
-        // Disable foreign key checks for safe syncing
         $log("Menonaktifkan foreign key checks...", "info");
         $this->toggleForeignKeys(false);
 
         try {
             $log("Mendapatkan daftar tabel dari Master...", "info");
-            // Fetch list of tables from the remote cloud connection
             $tables = DB::connection('cloud')->select('SHOW TABLES');
-            
-            // Determine variable dynamically depending on DB name
+
             $dbName = config('database.connections.cloud.database', 'defaultdb');
             $key = 'Tables_in_' . $dbName;
             if (!isset($tables[0]->$key) && count($tables) > 0) {
-                $key = array_keys((array)$tables[0])[0];
+                $key = array_keys((array) $tables[0])[0];
             }
 
             $tablesToIgnore = ['migrations', 'failed_jobs', 'cache', 'cache_locks', 'jobs', 'job_batches', 'sessions', 'activity_log'];
@@ -74,52 +71,68 @@ class SyncService
 
                 $log("Sedang memproses tabel: {$table}...", "info");
                 try {
-                    // 1. Ensure local table structure exists
-                    if (!Schema::hasTable($table)) {
-                        // Get Schema from MySQL Cloud
-                        $createStmtResult = DB::connection('cloud')->select("SHOW CREATE TABLE `{$table}`");
-                        
-                        if (empty($createStmtResult)) {
-                            throw new Exception("Could not retrieve schema definition for {$table}");
-                        }
-                        
-                        $createStmt = $createStmtResult[0]->{'Create Table'};
-                        
-                        // Convert Schema MySQL specifically for SQLite if the driver is sqlite
-                        if ($driver === 'sqlite') {
-                            // Strip MySQL params
-                            $createStmt = preg_replace('/ENGINE=.*?$/i', '', $createStmt);
-                            $createStmt = preg_replace('/AUTO_INCREMENT=\d+/i', '', $createStmt);
-                            $createStmt = preg_replace('/DEFAULT CHARSET=[^\s]+/i', '', $createStmt);
-                            $createStmt = preg_replace('/COLLATE=[^\s]+/i', '', $createStmt);
-                            
-                            // Auto increment
-                            $createStmt = preg_replace('/(int|bigint)(\(\d+\))?(\s+unsigned)? NOT NULL AUTO_INCREMENT/i', 'INTEGER PRIMARY KEY AUTOINCREMENT', $createStmt);
-                            
-                            // Specific timestamp compatibilities
-                            $createStmt = str_ireplace('ON UPDATE CURRENT_TIMESTAMP', '', $createStmt);
-                            
-                            // Remove heavy non-sqlite indexes and constraint lines temporarily
-                            $createStmt = preg_replace('/,\s*(PRIMARY KEY|KEY|UNIQUE KEY|CONSTRAINT).*/s', "\n)", $createStmt);
-                            $createStmt = preg_replace('/,\s*\)/', "\n)", $createStmt);
+                    $createStmtResult = DB::connection('cloud')->select("SHOW CREATE TABLE `{$table}`");
+
+                    if (empty($createStmtResult)) {
+                        throw new Exception("Could not retrieve schema definition for {$table}");
+                    }
+
+                    $createStmt = $createStmtResult[0]->{'Create Table'};
+
+                    if ($isSqliteTarget) {
+                        if (Schema::hasTable($table)) {
+                            Schema::dropIfExists($table);
                         }
 
-                        // Attempt creation
+                        $cloudColumns = DB::connection('cloud')->select("SHOW FULL COLUMNS FROM `{$table}`");
                         try {
-                            DB::statement($createStmt);
+                            Schema::create($table, function (Blueprint $blueprint) use ($cloudColumns) {
+                                foreach ($cloudColumns as $column) {
+                                    $columnName = $column->Field;
+                                    $columnType = strtolower((string) $column->Type);
+
+                                    if ($columnName === 'id') {
+                                        $blueprint->id($columnName);
+                                        continue;
+                                    }
+
+                                    if (str_contains($columnType, 'bigint')) {
+                                        $blueprint->bigInteger($columnName)->nullable();
+                                    } elseif (str_contains($columnType, 'int')) {
+                                        $blueprint->integer($columnName)->nullable();
+                                    } elseif (str_contains($columnType, 'decimal') || str_contains($columnType, 'numeric')) {
+                                        $blueprint->decimal($columnName, 20, 6)->nullable();
+                                    } elseif (str_contains($columnType, 'float') || str_contains($columnType, 'double')) {
+                                        $blueprint->float($columnName)->nullable();
+                                    } elseif (str_contains($columnType, 'date') || str_contains($columnType, 'time')) {
+                                        $blueprint->dateTime($columnName)->nullable();
+                                    } elseif (str_contains($columnType, 'json')) {
+                                        $blueprint->json($columnName)->nullable();
+                                    } else {
+                                        $blueprint->text($columnName)->nullable();
+                                    }
+                                }
+                            });
                         } catch (Exception $exCreate) {
-                            // Fallback: Create minimalistic table with just string columns for data backup
-                            Log::warning("Failed fast SQL convert for {$table}. Falling back to lazy generic build.");
-                            $columns = Schema::connection('cloud')->getColumnListing($table);
-                            Schema::create($table, function($blueprint) use ($columns) {
+                            Log::warning("Failed to rebuild SQLite schema for {$table}. Falling back to generic build.", [
+                                'exception' => $exCreate,
+                            ]);
+
+                            $columns = DB::connection('cloud')->getSchemaBuilder()->getColumnListing($table);
+                            Schema::create($table, function ($blueprint) use ($columns) {
                                 foreach ($columns as $col) {
-                                    if ($col === 'id') $blueprint->id();
-                                    else $blueprint->text($col)->nullable();
+                                    if ($col === 'id') {
+                                        $blueprint->id();
+                                        continue;
+                                    }
+
+                                    $blueprint->text($col)->nullable();
                                 }
                             });
                         }
+                    } elseif (!Schema::hasTable($table)) {
+                        DB::statement($createStmt);
                     } else {
-                        // 1.b Ensure local table has all columns from Cloud
                         $cloudColumns = Schema::connection('cloud')->getColumnListing($table);
                         $localColumns = Schema::getColumnListing($table);
                         $missingColumns = array_diff($cloudColumns, $localColumns);
@@ -134,19 +147,16 @@ class SyncService
                         }
                     }
 
-                    // 2. Truncate/Clear local table data
                     DB::table($table)->delete();
 
-                    // 2. Retrieve from Cloud
                     $rows = DB::connection('cloud')->table($table)->get();
                     $insertData = [];
-                    
+
                     foreach ($rows as $row) {
                         $insertData[] = (array) $row;
                     }
 
                     if (count($insertData) > 0) {
-                        // Insert in chunks to prevent large query packet limits
                         $count = count($insertData);
                         $log("- Memasukkan {$count} baris data...", "info");
                         foreach (array_chunk($insertData, 250) as $chunk) {
@@ -162,13 +172,11 @@ class SyncService
                     Log::error("Sync table failed: {$table}", ['exception' => $tableEx]);
                 }
             }
-
         } catch (Exception $globalEx) {
             $results['success'] = false;
             $results['errors'][] = "Kegagalan sistem saat sinkronisasi: " . $globalEx->getMessage();
             $log("GAGAL GLOBAL: " . $globalEx->getMessage(), "error");
         } finally {
-            // Re-enable foreign key checks
             $log("Mengaktifkan kembali foreign key checks...", "info");
             $this->toggleForeignKeys(true);
             $log("Proses selesai.", "info");
@@ -180,7 +188,7 @@ class SyncService
     private function toggleForeignKeys(bool $enable): void
     {
         $driver = DB::getDriverName();
-        
+
         if ($driver === 'sqlite') {
             DB::statement('PRAGMA foreign_keys = ' . ($enable ? 'ON' : 'OFF'));
         } elseif ($driver === 'mysql' || $driver === 'mariadb') {

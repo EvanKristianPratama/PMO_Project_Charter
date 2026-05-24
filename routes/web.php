@@ -18,7 +18,6 @@ use App\Http\Controllers\MasterData\ProjectCharter\ProjectCharterController as M
 use App\Http\Controllers\MasterData\ScopeCharter\ScopeCharterController;
 use App\Http\Controllers\Policy\GeneralPolicyController;
 use App\Http\Controllers\Policy\PolicyController;
-use App\Http\Controllers\Policy\PracticeRoleController;
 use App\Http\Controllers\Policy\ProcedureController;
 use App\Http\Controllers\Policy\RegulationController;
 use App\Http\Controllers\Policy\RoleController;
