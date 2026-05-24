@@ -169,8 +169,8 @@
                         <CharterCompare v-if="showCompare && selectedCharter && previousCharter" :current="selectedCharter"
                             :previous="previousCharter" :analysis="selectedVersionAnalysis" :analysis-form="analysisForm"
                             :editable="true" :project-name="itInitiative?.name ?? ''" />
-                        <component v-else :is="resolvedCharterComponent" :it-initiative="editableItInitiative" :form="form"
-                            :status-timeline="form.status" :editable="isEditing" />
+                        <component :is="resolvedCharterComponent" :it-initiative="editableItInitiative" :form="form"
+                            :status-timeline="form.status" :editable="isEditing" :all-organizations="allOrganizations" />
                     </main>
                 </section>
 
@@ -256,6 +256,10 @@ const props = defineProps({
     review: {
         type: Object,
         default: null,
+    },
+    allOrganizations: {
+        type: Array,
+        default: () => [],
     },
 });
 
@@ -420,6 +424,8 @@ const VERSION_ANALYSIS_FIELDS = [
 ];
 
 const mapCharterToForm = (charter = null, project = null) => {
+    const picMap = project?.map_pic_project || props.itInitiative?.map_pic_project || {};
+
     const payload = {
         version_label: charter?.version_label ?? '',
         owner: charter?.owner ?? '',
@@ -433,6 +439,10 @@ const mapCharterToForm = (charter = null, project = null) => {
             ?? charter?.metadata?.kpi_target
             ?? charter?.metadata?.kpi
             ?? '',
+        pic_sponsor_id: picMap.project_sponsor ?? '',
+        pic_owner_id: picMap.project_owner ?? '',
+        pic_leader_id: picMap.project_leader ?? '',
+        pic_cross_function_ids: (project?.map_cross_functions || props.itInitiative?.map_cross_functions || []).map(m => m.organization_id),
     };
     for (const field of CHARTER_FIELDS) {
         payload[field] = charter?.[field] ?? '';

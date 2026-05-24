@@ -87,6 +87,10 @@ class ITInitiativeService
             ->with([
                 'charter',
                 'charter.milestones',
+                'mapPicProject.sponsorOrganization',
+                'mapPicProject.ownerOrganization',
+                'mapPicProject.leaderOrganization',
+                'mapCrossFunctions.organization',
                 'charters' => static fn ($query) => $query->latest('id')->with('milestones'),
                 'versionAnalysis',
                 'owner',
@@ -102,6 +106,8 @@ class ITInitiativeService
             ->whereIn('initiative_id', $initiativeIds)
             ->latest('id')
             ->first();
+
+        $allOrganizations = \App\Models\TrsOrganization::orderBy('name')->get();
 
         $relatedProjects = TrsProject::query()
             ->whereIn('id', function ($query) use ($initiativeIds) {
@@ -154,6 +160,7 @@ class ITInitiativeService
             'projectOptions' => $projectOptions,
             'statusOptions' => $this->projectCharterStatusService->getStatusOptions(),
             'review' => $review,
+            'allOrganizations' => $allOrganizations,
         ];
     }
 

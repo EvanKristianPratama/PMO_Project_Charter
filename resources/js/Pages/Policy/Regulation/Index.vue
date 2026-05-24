@@ -32,8 +32,10 @@
                         <thead class="bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
                             <tr>
                                 <th scope="col" class="px-6 py-4">Judul</th>
+                                <th scope="col" class="px-6 py-4">Nomor</th>
                                 <th scope="col" class="px-6 py-4 w-36">Tipe</th>
-                                <th scope="col" class="px-6 py-4">Owner</th>
+                                <th scope="col" class="px-6 py-4">Fungsi</th>
+                                <th scope="col" class="px-6 py-4">Organisasi</th>
                                 <th scope="col" class="px-6 py-4 text-center w-24">Revisi</th>
                                 <th scope="col" class="px-6 py-4 w-32">Terbit</th>
                                 <th scope="col" class="px-6 py-4 w-32">Berlaku</th>
@@ -41,7 +43,7 @@
                         </thead>
                         <tbody class="divide-y divide-slate-200 dark:divide-white/10 dark:bg-transparent">
                             <tr v-if="regulations.length === 0" class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
-                                <td colspan="6" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
+                                <td colspan="7" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
                                     Belum ada data Regulasi. Silakan hubungi admin atau klik "Kelola Regulasi" untuk menambahkan.
                                 </td>
                             </tr>
@@ -53,6 +55,10 @@
                                 <!-- Judul -->
                                 <td class="px-6 py-4 text-slate-900 dark:text-white font-bold leading-relaxed max-w-sm">
                                     {{ reg.judul }}
+                                </td>
+                                <!-- Nomor -->
+                                <td class="px-6 py-4 text-slate-700 dark:text-slate-300 font-medium">
+                                    {{ reg.nomor || '-' }}
                                 </td>
                                  <!-- Tipe -->
                                  <td class="px-6 py-4">
@@ -68,12 +74,16 @@
                                                          : 'bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-500/10 dark:border-slate-500/20 dark:text-slate-400'
                                          ]"
                                      >
-                                         {{ reg.tipe }}
+                                         {{ reg.tipe }} - {{ reg.stk || '-' }}
                                      </span>
                                  </td>
                                 <!-- Owner -->
                                 <td class="px-6 py-4 text-slate-700 dark:text-slate-300 font-medium">
                                     {{ reg.owner }}
+                                </td>
+                                <!-- Organisasi -->
+                                <td class="px-6 py-4 text-slate-700 dark:text-slate-300 font-medium">
+                                    {{ reg.organization?.name || '-' }}
                                 </td>
                                 <!-- Revisi -->
                                 <td class="px-6 py-4 text-center font-mono font-semibold text-slate-800 dark:text-slate-200">

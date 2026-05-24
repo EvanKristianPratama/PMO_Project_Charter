@@ -30,6 +30,9 @@ class OrganizationController extends Controller
             'groub_id' => 'required|integer|exists:trs_groub,id',
             'code' => 'required|string|max:50',
             'name' => 'required|string|max:255',
+            'alias' => 'nullable|string|max:255',
+            'jabatan' => 'nullable|string|max:255',
+            'pejabat' => 'nullable|string|max:255',
         ]);
 
         TrsOrganization::create($validated);
@@ -39,12 +42,17 @@ class OrganizationController extends Controller
             ->with('success', 'Organisasi berhasil ditambahkan.');
     }
 
-    public function update(Request $request, TrsOrganization $organization): RedirectResponse
+    public function update(Request $request, int $id): RedirectResponse
     {
+        $organization = TrsOrganization::findOrFail($id);
+
         $validated = $request->validate([
             'groub_id' => 'required|integer|exists:trs_groub,id',
             'code' => 'required|string|max:50',
             'name' => 'required|string|max:255',
+            'alias' => 'nullable|string|max:255',
+            'jabatan' => 'nullable|string|max:255',
+            'pejabat' => 'nullable|string|max:255',
         ]);
 
         $organization->update($validated);
@@ -54,8 +62,9 @@ class OrganizationController extends Controller
             ->with('success', 'Organisasi berhasil diperbarui.');
     }
 
-    public function destroy(TrsOrganization $organization): RedirectResponse
+    public function destroy(int $id): RedirectResponse
     {
+        $organization = TrsOrganization::findOrFail($id);
         $organization->delete();
 
         return redirect()

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Policy;
 
 use App\Http\Controllers\Controller;
 use App\Models\MstRegulation;
+use App\Models\TrsOrganization;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -11,13 +12,13 @@ use Inertia\Response;
 
 class RegulationController extends Controller
 {
+
     /**
-     * Display a listing of regulations in read-only mode.
+     * Display a listing of regulations for CRUD management.
      */
     public function index(): Response
     {
-        // Fetch regulations ordered by latest release or ID
-        $regulations = MstRegulation::orderBy('id', 'desc')->get();
+        $regulations = MstRegulation::with('organization')->orderBy('id', 'desc')->get();
 
         return Inertia::render('Policy/Regulation/Index', [
             'regulations' => $regulations,
@@ -25,14 +26,16 @@ class RegulationController extends Controller
     }
 
     /**
-     * Display a listing of regulations for CRUD management.
+     * Display management page for regulations.
      */
     public function manage(): Response
     {
-        $regulations = MstRegulation::orderBy('id', 'desc')->get();
+        $regulations = MstRegulation::with('organization')->orderBy('id', 'desc')->get();
+        $organizations = TrsOrganization::orderBy('name')->get();
 
         return Inertia::render('Policy/Regulation/Manage', [
             'regulations' => $regulations,
+            'organizations' => $organizations,
         ]);
     }
 
@@ -43,11 +46,14 @@ class RegulationController extends Controller
     {
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
+            'nomor' => 'nullable|string|max:255',
             'tipe' => 'required|string|max:255',
+            'stk' => 'nullable|string|max:255',
             'owner' => 'required|string|max:255',
             'revisi' => 'required|string|max:255',
             'terbit' => 'nullable|date',
             'berlaku' => 'nullable|date',
+            'pic_id' => 'nullable|integer|exists:trs_organization,id',
         ], [
             'judul.required' => 'Judul Kebijakan wajib diisi.',
             'tipe.required' => 'Tipe Kebijakan wajib diisi.',
@@ -75,11 +81,14 @@ class RegulationController extends Controller
 
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
+            'nomor' => 'nullable|string|max:255',
             'tipe' => 'required|string|max:255',
+            'stk' => 'nullable|string|max:255',
             'owner' => 'required|string|max:255',
             'revisi' => 'required|string|max:255',
             'terbit' => 'nullable|date',
             'berlaku' => 'nullable|date',
+            'pic_id' => 'nullable|integer|exists:trs_organization,id',
         ], [
             'judul.required' => 'Judul Kebijakan wajib diisi.',
             'tipe.required' => 'Tipe Kebijakan wajib diisi.',

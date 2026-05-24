@@ -1,10 +1,51 @@
 <script setup>
+import { computed, ref } from 'vue';
+
 const props = defineProps({
     itInitiative: { type: Object, required: true },
     form: { type: Object, required: true },
     editable: { type: Boolean, default: false },
     statusTimeline: { type: [String, Number], default: null },
+    allOrganizations: { type: Array, default: () => [] },
 });
+
+const filteredOrgs = computed(() => {
+    return props.allOrganizations.filter(org => org.jabatan && String(org.jabatan).trim() !== '');
+});
+
+const selectedNewCrossFunctionId = ref('');
+
+const addCrossFunctionUnit = () => {
+    if (!selectedNewCrossFunctionId.value) return;
+    
+    if (!Array.isArray(props.form.pic_cross_function_ids)) {
+        props.form.pic_cross_function_ids = [];
+    }
+
+    const id = parseInt(selectedNewCrossFunctionId.value);
+    if (!props.form.pic_cross_function_ids.includes(id)) {
+        props.form.pic_cross_function_ids.push(id);
+    }
+    selectedNewCrossFunctionId.value = '';
+};
+
+const removeCrossFunctionUnit = (id) => {
+    props.form.pic_cross_function_ids = props.form.pic_cross_function_ids.filter(
+        (existingId) => parseInt(existingId) !== parseInt(id)
+    );
+};
+
+const getOrgName = (id) => {
+    const org = props.allOrganizations.find(o => o.id === parseInt(id));
+    return org ? org.jabatan : null;
+};
+
+const getOrgNames = (ids) => {
+    if (!Array.isArray(ids)) return [];
+    return ids
+        .map(id => getOrgName(id))
+        .filter(Boolean);
+};
 
 const lineItems = (value) => String(value || '')
     .split(/\r?\n/)
@@ -134,14 +175,31 @@ const headlineSummary = () => {
                     <span class="info-label">Project Sponsor</span>
                     <span class="info-sep"></span>
                     <span class="info-value">
-                        <input
-                            v-if="editable"
-                            v-model="form.sponsor"
-                            type="text"
-                            class="info-input"
-                            placeholder="Project sponsor"
-                        >
-                        <template v-else>{{ displayValue(form.sponsor) }}</template>
+                        <div v-if="editable" class="flex flex-col gap-2 w-full">
+                            <input
+                                v-model="form.sponsor"
+                                type="text"
+                                class="info-input"
+                                placeholder="Project sponsor"
+                            >
+                            <select
+                                v-model="form.pic_sponsor_id"
+                                class="info-select"
+                            >
+                                <option value="">-- Pilih Unit Sponsor --</option>
+                                <option v-for="org in filteredOrgs" :key="org.id" :value="org.id">
+                                    {{ org.jabatan }}
+                                </option>
+                            </select>
+                        </div>
+                        <template v-else>
+                            <div class="flex flex-col">
+                                <span>{{ displayValue(form.sponsor) }}</span>
+                                <span v-if="getOrgName(form.pic_sponsor_id)" class="text-[11px] text-slate-500 font-semibold italic">
+                                    Organization: {{ getOrgName(form.pic_sponsor_id) }}
+                                </span>
+                            </div>
+                        </template>
                     </span>
                 </div>
                 <div class="info-paired-cell info-paired-cell-subgroup">
@@ -180,14 +238,31 @@ const headlineSummary = () => {
                     <span class="info-label">Project Owner</span>
                     <span class="info-sep"></span>
                     <span class="info-value">
-                        <input
-                            v-if="editable"
-                            v-model="form.owner"
-                            type="text"
-                            class="info-input"
-                            placeholder="Project owner"
-                        >
-                        <template v-else>{{ displayValue(form.owner) }}</template>
+                        <div v-if="editable" class="flex flex-col gap-2 w-full">
+                            <input
+                                v-model="form.owner"
+                                type="text"
+                                class="info-input"
+                                placeholder="Project owner"
+                            >
+                            <select
+                                v-model="form.pic_owner_id"
+                                class="info-select"
+                            >
+                                <option value="">-- Pilih Unit Owner --</option>
+                                <option v-for="org in filteredOrgs" :key="org.id" :value="org.id">
+                                    {{ org.jabatan }}
+                                </option>
+                            </select>
+                        </div>
+                        <template v-else>
+                            <div class="flex flex-col">
+                                <span>{{ displayValue(form.owner) }}</span>
+                                <span v-if="getOrgName(form.pic_owner_id)" class="text-[11px] text-slate-500 font-semibold italic">
+                                    Organization: {{ getOrgName(form.pic_owner_id) }}
+                                </span>
+                            </div>
+                        </template>
                     </span>
                 </div>
                 <div class="info-paired-cell">
@@ -210,14 +285,31 @@ const headlineSummary = () => {
                     <span class="info-label">Project Leader</span>
                     <span class="info-sep"></span>
                     <span class="info-value">
-                        <input
-                            v-if="editable"
-                            v-model="form.leader"
-                            type="text"
-                            class="info-input"
-                            placeholder="Project leader"
-                        >
-                        <template v-else>{{ displayValue(form.leader) }}</template>
+                        <div v-if="editable" class="flex flex-col gap-2 w-full">
+                            <input
+                                v-model="form.leader"
+                                type="text"
+                                class="info-input"
+                                placeholder="Project leader"
+                            >
+                            <select
+                                v-model="form.pic_leader_id"
+                                class="info-select"
+                            >
+                                <option value="">-- Pilih Unit Leader --</option>
+                                <option v-for="org in filteredOrgs" :key="org.id" :value="org.id">
+                                    {{ org.jabatan }}
+                                </option>
+                            </select>
+                        </div>
+                        <template v-else>
+                            <div class="flex flex-col">
+                                <span>{{ displayValue(form.leader) }}</span>
+                                <span v-if="getOrgName(form.pic_leader_id)" class="text-[11px] text-slate-500 font-semibold italic">
+                                    Organization: {{ getOrgName(form.pic_leader_id) }}
+                                </span>
+                            </div>
+                        </template>
                     </span>
                 </div>
                 <div class="info-paired-cell">
@@ -241,13 +333,76 @@ const headlineSummary = () => {
                     <span class="info-label info-label-dark">Cross Function Involvement</span>
                     <span class="info-sep"></span>
                     <span class="info-value info-value-multiline">
-                        <textarea
-                            v-if="editable"
-                            v-model="form.key_personnel"
-                            class="info-textarea"
-                            placeholder="Satu poin per baris..."
-                        ></textarea>
-                        <template v-else>{{ displayMultilineValue(form.key_personnel) }}</template>
+                        <div v-if="editable" class="flex flex-col gap-2 w-full">
+                            <textarea
+                                v-model="form.key_personnel"
+                                class="info-textarea"
+                                placeholder="Satu poin per baris..."
+                            ></textarea>
+                            <div class="mt-2">
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">Map formal Organizations:</label>
+                                
+                                <!-- Add Unit Interaction -->
+                                <div class="mt-1 flex gap-1">
+                                    <select
+                                        v-model="selectedNewCrossFunctionId"
+                                        class="info-select flex-1"
+                                    >
+                                        <option value="">-- Pilih Unit untuk Ditambahkan --</option>
+                                        <option 
+                                            v-for="org in filteredOrgs" 
+                                            :key="org.id" 
+                                            :value="org.id"
+                                            :disabled="form.pic_cross_function_ids?.includes(org.id)"
+                                        >
+                                            {{ org.jabatan }}
+                                        </option>
+                                    </select>
+                                    <button 
+                                        type="button"
+                                        @click="addCrossFunctionUnit"
+                                        class="px-2 py-1 bg-blue-600 text-white text-[10px] font-bold rounded hover:bg-blue-700 transition-colors"
+                                    >
+                                        Add
+                                    </button>
+                                </div>
+
+                                <!-- Selected Units List -->
+                                <div v-if="form.pic_cross_function_ids?.length" class="mt-2 space-y-1">
+                                    <div 
+                                        v-for="id in form.pic_cross_function_ids" 
+                                        :key="id"
+                                        class="flex items-center justify-between gap-2 px-2 py-1 bg-slate-50 border border-slate-100 rounded"
+                                    >
+                                        <span class="text-[11px] text-slate-700 font-medium">{{ getOrgName(id) }}</span>
+                                        <button 
+                                            type="button"
+                                            @click="removeCrossFunctionUnit(id)"
+                                            class="text-rose-500 hover:text-rose-700 p-0.5"
+                                            title="Hapus Unit"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <p v-else class="text-[9px] text-slate-400 italic mt-1">Belum ada unit terpilih.</p>
+                            </div>
+                        </div>
+                        <template v-else>
+                            <div class="flex flex-col">
+                                <span>{{ displayMultilineValue(form.key_personnel) }}</span>
+                                <div v-if="getOrgNames(form.pic_cross_function_ids).length" class="mt-2 pt-2 border-t border-slate-100">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Organizations:</p>
+                                    <ul class="list-disc list-inside text-[11px] text-slate-500 font-semibold italic">
+                                        <li v-for="name in getOrgNames(form.pic_cross_function_ids)" :key="name">
+                                            {{ name }}
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </template>
                     </span>
                 </div>
                 <div class="info-paired-cell info-paired-cell-vertical">
@@ -535,6 +690,40 @@ const headlineSummary = () => {
     font-size: 13px;
     background: transparent;
     color: inherit;
+}
+
+.info-select {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 2px 4px;
+    font-size: 11px;
+    background: #fff;
+    outline: none;
+    color: #444;
+}
+
+.info-select-multiple {
+    height: auto;
+    min-height: 80px;
+    padding: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
 }
 
 .info-textarea {

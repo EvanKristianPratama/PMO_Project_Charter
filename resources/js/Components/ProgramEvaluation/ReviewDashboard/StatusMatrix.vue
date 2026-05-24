@@ -4,7 +4,18 @@
             <table class="w-full border-collapse text-left text-[11px]">
                 <thead>
                     <tr class="bg-slate-50 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:bg-white/5 dark:text-slate-400">
-                        <th rowspan="2" class="border-b border-r border-slate-900 px-4 py-3 dark:border-white/20">{{ label }}</th>
+                        <th rowspan="2" class="border-b border-r border-slate-900 px-4 py-3 dark:border-white/20">
+                            <div class="flex items-center justify-between gap-4">
+                                <span>{{ label }}</span>
+                                <select 
+                                    v-model="viewMode"
+                                    class="bg-white dark:bg-[#1a1a1a] border border-slate-300 dark:border-white/10 rounded px-2 py-0.5 text-[9px] font-bold outline-none focus:ring-1 focus:ring-indigo-500 transition-all cursor-pointer"
+                                >
+                                    <option value="original">Original</option>
+                                    <option value="restructure">Refinement</option>
+                                </select>
+                            </div>
+                        </th>
                         <th v-for="status in statuses" :key="status" colspan="2" class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20">
                             {{ status }}
                         </th>
@@ -42,13 +53,45 @@
                         </template>
                     </tr>
                 </tbody>
+                <tfoot>
+                    <tr class="bg-slate-50 font-black text-slate-900 dark:bg-white/5 dark:text-white uppercase text-[10px]">
+                        <td class="border-t border-r border-slate-900 px-4 py-3 dark:border-white/20">Grand Total</td>
+                        <template v-for="status in statuses" :key="'footer-total-' + status">
+                            <td class="border-t border-r border-slate-900 px-4 py-3 text-center dark:border-white/20">
+                                {{ columnTotals[status].count }}
+                            </td>
+                            <td class="border-t border-r border-slate-900 px-4 py-3 dark:border-white/20">
+                                <div class="flex flex-wrap gap-1.5">
+                                    <span
+                                        v-for="init in columnTotals[status].items"
+                                        :key="'footer-cap-' + status + init.no"
+                                        class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
+                                        :class="getCircleColor(status)"
+                                        :title="init.name"
+                                    >
+                                        {{ init.no }}
+                                    </span>
+                                    <span v-if="!columnTotals[status].count" class="text-slate-400 text-center w-full">-</span>
+                                </div>
+                            </td>
+                        </template>
+                    </tr>
+                    <tr class="bg-slate-100/80 text-slate-900 dark:bg-white/10 dark:text-white font-black uppercase text-[11px] border-t border-slate-900 dark:border-white/40">
+                        <td :colspan="1 + (statuses.length * 2) - 1" class="px-4 py-2.5 text-right border-r border-slate-900 dark:border-white/20">
+                            Total Keseluruhan Inisiatif ({{ statuses.join(' + ') }})
+                        </td>
+                        <td class="px-4 py-2.5 text-center text-[13px]">
+                            {{ grandTotalSum }}
+                        </td>
+                    </tr>
+                </tfoot>
             </table>
         </div>
     </section>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 
 const props = defineProps({
     rows: {
@@ -65,6 +108,8 @@ const props = defineProps({
     }
 });
 
+const viewMode = ref('original'); // 'original' or 'restructure'
+
 // Status list based on the user's image request order
 const statuses = [
     'On Track',
@@ -76,9 +121,10 @@ const statuses = [
 
 const matrixData = computed(() => {
     const breakdown = {};
+    const fieldKey = viewMode.value === 'original' ? props.groupBy : `${props.groupBy}_restructure`;
 
     props.rows.forEach((row) => {
-        const key = row[props.groupBy] || "Unknown";
+        const key = row[fieldKey] || "Unknown";
         // Normalize status to match our array
         let status = String(row.latest_review_status || "").trim().toLowerCase();
         
@@ -108,6 +154,32 @@ const matrixData = computed(() => {
     });
 
     return Object.values(breakdown).sort((a, b) => a.name.localeCompare(b.name));
+});
+
+const columnTotals = computed(() => {
+    const results = {};
+    statuses.forEach(s => {
+        results[s] = { count: 0, items: [] };
+    });
+
+    matrixData.value.forEach(row => {
+        statuses.forEach(s => {
+            const group = row.statusGroups[s] || [];
+            results[s].count += group.length;
+            results[s].items.push(...group);
+        });
+    });
+
+    // Sort items by no for consistency
+    statuses.forEach(s => {
+        results[s].items.sort((a, b) => (Number(a.no) || 0) - (Number(b.no) || 0));
+    });
+
+    return results;
+});
+
+const grandTotalSum = computed(() => {
+    return Object.values(columnTotals.value).reduce((sum, col) => sum + col.count, 0);
 });
 
 const getCircleColor = (status) => {

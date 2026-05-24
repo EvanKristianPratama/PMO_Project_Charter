@@ -13,11 +13,13 @@ class TrsOrganization extends Model
     use LogsActivity;
 
     protected $table = 'trs_organization';
-
-    protected $fillable = [
-        'groub_id',
-        'code',
-        'name',
+protected $fillable = [
+    'groub_id',
+    'code',
+    'name',
+    'alias',
+    'jabatan',
+    'pejabat',
     ];
 
     protected $casts = [

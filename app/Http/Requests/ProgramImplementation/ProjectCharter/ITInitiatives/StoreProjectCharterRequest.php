@@ -37,6 +37,11 @@ class StoreProjectCharterRequest extends FormRequest
             'notes' => ['nullable', 'string'],
             'target_kpi' => ['nullable', 'string'],
             'metadata' => ['nullable', 'array'],
+            'pic_sponsor_id' => ['nullable', 'integer', 'exists:trs_organization,id'],
+            'pic_owner_id' => ['nullable', 'integer', 'exists:trs_organization,id'],
+            'pic_leader_id' => ['nullable', 'integer', 'exists:trs_organization,id'],
+            'pic_cross_function_ids' => ['nullable', 'array'],
+            'pic_cross_function_ids.*' => ['integer', 'exists:trs_organization,id'],
         ];
     }
 }

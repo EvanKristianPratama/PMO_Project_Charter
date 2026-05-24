@@ -1,10 +1,22 @@
 <script setup>
+import { computed } from 'vue';
+
 const props = defineProps({
     itInitiative: { type: Object, required: true },
     form: { type: Object, required: true },
     editable: { type: Boolean, default: false },
     statusTimeline: { type: [String, Number], default: null },
+    allOrganizations: { type: Array, default: () => [] },
 });
+
+const filteredOrgs = computed(() => {
+    return props.allOrganizations.filter(org => org.jabatan && String(org.jabatan).trim() !== '');
+});
+
+const getOrgName = (id) => {
+    const org = props.allOrganizations.find(o => o.id === parseInt(id));
+    return org ? org.jabatan : null;
+};
 
 const lineItems = (value) => String(value || '')
     .split(/\r?\n/)
@@ -106,12 +118,30 @@ const displayOwner = (value) => {
                 </span>
             </div>
             <div class="info-cell info-cell-last">
-                <span class="info-label info-label-dark">Project Owner</span>
+                <span class="info-label info-label-dark">Project Owner Unit</span>
                 <span class="info-sep"></span>
                 <span class="info-value">
-                    <input v-if="editable" v-model="form.owner" type="text" class="info-input"
-                        placeholder="Nama project owner" />
-                    <template v-else>{{ displayOwner(form.owner) }}</template>
+                    <div v-if="editable" class="flex flex-col gap-1 w-full">
+                        <input v-model="form.owner" type="text" class="info-input"
+                            placeholder="Nama project owner (manual)" />
+                        <select
+                            v-model="form.pic_owner_id"
+                            class="info-select"
+                        >
+                            <option value="">-- Pilih Unit Owner --</option>
+                            <option v-for="org in filteredOrgs" :key="org.id" :value="org.id">
+                                {{ org.jabatan }}
+                            </option>
+                        </select>
+                    </div>
+                    <template v-else>
+                        <div class="flex flex-col">
+                            <span>{{ displayOwner(form.owner) }}</span>
+                            <span v-if="getOrgName(form.pic_owner_id)" class="text-[10px] text-slate-500 font-semibold italic">
+                                Organization: {{ getOrgName(form.pic_owner_id) }}
+                            </span>
+                        </div>
+                    </template>
                 </span>
             </div>
         </div>
@@ -313,6 +343,17 @@ const displayOwner = (value) => {
     outline: none;
     font-size: 13px;
     background: transparent;
+}
+
+.info-select {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 2px 4px;
+    font-size: 11px;
+    background: #fff;
+    outline: none;
+    color: #444;
 }
 
 /* --- SECTION --- */

@@ -41,63 +41,102 @@
         </section>
     </template>
 
+    <!-- Non-root: depth 0 = holding/sub-holding level (horizontal grid), depth 1 = first org child (horizontal grid) -->
+    <!-- depth >= 2 = vertical command line layout -->
     <div v-else class="relative w-full min-w-0">
-        <!-- Horizontal line -->
-        <div v-if="depth > 0 && (!isFirstChild || !isLastChild)"
+        <!-- Horizontal line (for grid-based sibling connectors at depth 1 and 2) -->
+        <div v-if="depth >= 1 && depth <= 2 && (!isFirstChild || !isLastChild)"
             class="absolute top-[-8px] h-px bg-slate-300 dark:bg-white/20" :class="[
                 isFirstChild ? 'left-1/2 -right-1' : '',
                 isLastChild ? '-left-1 right-1/2' : '',
                 !isFirstChild && !isLastChild ? '-left-1 -right-1' : '',
             ]" aria-hidden="true" />
-        <!-- Vertical line going up -->
-        <div v-if="depth > 0"
+        <!-- Vertical line going up (for grid-based sibling connectors at depth 1 and 2) -->
+        <div v-if="depth >= 1 && depth <= 2"
             class="absolute left-1/2 top-[-8px] h-[8px] w-px -translate-x-1/2 bg-slate-300 dark:bg-white/20"
             aria-hidden="true" />
 
-        <div class="flex w-full min-w-0 flex-col items-center">
-            <div
-                class="relative flex flex-col items-center justify-center rounded border px-1 text-center font-semibold leading-tight shadow-sm transition duration-200"
-                :class="[
-                    nodeSizeClass,
-                    nodeToneClass,
-                    node.pic_projects && node.pic_projects.length > 0 ? 'cursor-pointer hover:border-slate-400 dark:hover:border-white/30 hover:shadow-md' : 'cursor-default',
-                ]"
-                :title="
-                    node.pic_projects && node.pic_projects.length > 0
-                        ? `${node.organization_name} (Klik untuk ${showPics ? 'menyembunyikan' : 'menampilkan'} PIC)`
-                        : node.organization_name
-                "
-                @click="node.pic_projects && node.pic_projects.length > 0 && (showPics = !showPics)"
-            >
-                <span class="block max-w-full break-words whitespace-normal">
-                    {{ node.organization_name }}
-                </span>
-                <div v-if="node.pic_projects && node.pic_projects.length > 0 && showPics" class="mt-1 w-full border-t border-slate-200 dark:border-white/10 pt-1 text-left px-0.5">
-                    <div class="text-[7px] text-slate-400 dark:text-slate-500 font-semibold mb-0.5 uppercase tracking-wider">
-                        PIC:
-                    </div>
-                    <div class="space-y-0.5">
-                        <div
-                            v-for="pic in node.pic_projects"
-                            :key="pic.id"
-                            class="text-[7px] text-slate-500 dark:text-slate-400 font-normal break-words whitespace-normal max-w-full flex items-start"
-                            :title="pic.name"
-                        >
-                            <span class="mr-0.5 select-none text-[6px] text-slate-400">•</span>
-                            <span class="flex-1 min-w-0 leading-[1.1]">{{ pic.name }}</span>
+        <div class="flex w-full min-w-0" :class="depth >= 3 ? 'flex-row items-start' : 'flex-col items-center'">
+            <!-- For depth >= 3: vertical command line connector (left side) -->
+            <div v-if="depth >= 3" class="flex flex-col items-center shrink-0" style="width: 24px;">
+                <!-- Vertical line from parent down to this node -->
+                <div class="w-px bg-slate-300 dark:bg-white/20" style="height: 18px;" aria-hidden="true"></div>
+                <!-- Horizontal line turning right to node -->
+                <div class="self-stretch border-b border-l border-slate-300 dark:border-white/20 rounded-bl-md"
+                    style="height: 12px; margin-left: 0px;" aria-hidden="true"></div>
+            </div>
+
+            <!-- Node content + children wrapper -->
+            <div class="flex flex-col min-w-0" :class="depth >= 3 ? 'flex-1' : 'items-center w-full'">
+                <!-- The node box -->
+                <div
+                    class="relative flex flex-col items-center justify-center rounded border px-1 text-center font-semibold leading-tight shadow-sm transition duration-200"
+                    :class="[
+                        nodeSizeClass,
+                        nodeToneClass,
+                        isClickable ? 'cursor-pointer hover:border-blue-400 dark:hover:border-blue-400 hover:shadow-md hover:ring-1 hover:ring-blue-200 dark:hover:ring-blue-800' : 'cursor-default',
+                    ]"
+                    :title="nodeTitle"
+                    @click="handleNodeClick"
+                >
+                    <span class="block max-w-full break-words whitespace-normal">
+                        {{ node.organization_name }}
+                    </span>
+
+                    <!-- Expand/collapse indicator for nodes with children at depth >= 2 -->
+                    <span v-if="hasChildren && depth >= 2"
+                        class="absolute -bottom-1.5 left-1/2 -translate-x-1/2 flex items-center justify-center w-3 h-3 rounded-full text-[6px] font-bold leading-none transition-colors duration-200"
+                        :class="isExpanded
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-slate-200 text-slate-600 dark:bg-slate-600 dark:text-slate-300'"
+                        aria-hidden="true"
+                    >
+                        {{ isExpanded ? '−' : '+' }}
+                    </span>
+
+                    <!-- PIC section -->
+                    <div v-if="node.pic_projects && node.pic_projects.length > 0 && showPics" class="mt-1 w-full border-t border-slate-200 dark:border-white/10 pt-1 text-left px-0.5">
+                        <div class="text-[7px] text-slate-400 dark:text-slate-500 font-semibold mb-0.5 uppercase tracking-wider">
+                            PIC:
+                        </div>
+                        <div class="space-y-0.5">
+                            <div
+                                v-for="pic in node.pic_projects"
+                                :key="pic.id"
+                                class="text-[7px] text-slate-500 dark:text-slate-400 font-normal break-words whitespace-normal max-w-full flex items-start"
+                                :title="pic.name"
+                            >
+                                <span class="mr-0.5 select-none text-[6px] text-slate-400">•</span>
+                                <span class="flex-1 min-w-0 leading-[1.1]">{{ pic.name }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div v-if="hasChildren && isExpanded" class="relative mt-2 w-full min-w-0 pt-2">
-                <div class="absolute left-1/2 top-[-8px] h-[8px] w-px -translate-x-1/2 bg-slate-300 dark:bg-white/20"
-                    aria-hidden="true" />
+                <!-- Children: depth 0 and 1 use horizontal grid layout for their children -->
+                <div v-if="hasChildren && isExpanded && depth < 2" class="relative mt-2 w-full min-w-0 pt-2">
+                    <div class="absolute left-1/2 top-[-8px] h-[8px] w-px -translate-x-1/2 bg-slate-300 dark:bg-white/20"
+                        aria-hidden="true" />
 
-                <div class="grid w-full min-w-0 gap-x-2 gap-y-3" :style="childGridStyle">
-                    <ThreeView v-for="(child, index) in node.children" :key="child.organization_id" :node="child"
-                        :is-root="false" :depth="depth + 1" :is-first-child="index === 0"
-                        :is-last-child="index === node.children.length - 1" />
+                    <div class="grid w-full min-w-0 gap-x-2 gap-y-3" :style="childGridStyle">
+                        <ThreeView v-for="(child, index) in node.children" :key="child.organization_id" :node="child"
+                            :is-root="false" :depth="depth + 1" :is-first-child="index === 0"
+                            :is-last-child="index === node.children.length - 1" />
+                    </div>
+                </div>
+
+                <!-- Children: depth >= 2 use vertical command line layout -->
+                <div v-if="hasChildren && isExpanded && depth >= 2" class="relative mt-3 ml-3">
+                    <!-- Continuous vertical line for all children -->
+                    <div class="absolute left-0 top-0 w-px bg-slate-300 dark:bg-white/20"
+                        :style="{ height: 'calc(100% - 12px)' }"
+                        aria-hidden="true"></div>
+
+                    <div class="flex flex-col gap-0">
+                        <ThreeView v-for="(child, index) in node.children" :key="child.organization_id" :node="child"
+                            :is-root="false" :depth="depth + 1" :is-first-child="index === 0"
+                            :is-last-child="index === node.children.length - 1" />
+                    </div>
                 </div>
             </div>
         </div>
@@ -138,8 +177,35 @@ const props = defineProps({
     },
 });
 
-const isExpanded = ref(true);
+// depth 0 and 1 auto-expand, depth >= 2 collapsed by default (show on click)
+const isExpanded = ref(props.depth < 2);
 const showPics = ref(false);
+
+const hasChildren = computed(() => Array.isArray(props.node?.children) && props.node.children.length > 0);
+
+const isClickable = computed(() => {
+    return hasChildren.value || (props.node?.pic_projects && props.node.pic_projects.length > 0);
+});
+
+const nodeTitle = computed(() => {
+    const parts = [];
+    if (hasChildren.value) {
+        parts.push(`Klik untuk ${isExpanded.value ? 'menyembunyikan' : 'menampilkan'} anak organisasi`);
+    }
+    if (props.node?.pic_projects && props.node.pic_projects.length > 0) {
+        parts.push(`${showPics.value ? 'Sembunyikan' : 'Tampilkan'} PIC`);
+    }
+    return parts.length > 0 ? `${props.node?.organization_name} (${parts.join(' | ')})` : props.node?.organization_name;
+});
+
+const handleNodeClick = () => {
+    if (hasChildren.value && props.depth >= 2) {
+        isExpanded.value = !isExpanded.value;
+    }
+    if (props.node?.pic_projects && props.node.pic_projects.length > 0) {
+        showPics.value = !showPics.value;
+    }
+};
 
 const normalizeCode = (value) => String(value ?? '').trim();
 
@@ -283,7 +349,6 @@ const subHoldingTree = computed(() => {
         })
         .filter((companyNode) => companyNode.children.length > 0);
 });
-const hasChildren = computed(() => Array.isArray(props.node?.children) && props.node.children.length > 0);
 
 const nodeSizeClass = computed(() => {
     if (props.node?.type === 'holding' || props.node?.type === 'sub_holding') {

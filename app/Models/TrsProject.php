@@ -111,4 +111,14 @@ class TrsProject extends Model
     {
         return $this->belongsToMany(MstInitiative::class, 'trs_pc_initiative', 'pc_id', 'initiative_id');
     }
+
+    public function mapPicProject(): HasOne
+    {
+        return $this->hasOne(TrsMapPicProject::class, 'project_id');
+    }
+
+    public function mapCrossFunctions(): HasMany
+    {
+        return $this->hasMany(TrsMapCrossFunction::class, 'pc_id');
+    }
 }

@@ -18,10 +18,12 @@ class ProjectCharterService
 
         $this->syncProjectSummaryFields($project, $payload);
 
-        $project->charters()->create([
+        $charter = $project->charters()->create([
             ...$charterPayload,
             'version_label' => $versionLabel,
         ]);
+
+        $this->syncPicMappings($charter, $payload);
 
         return $versionLabel;
     }
@@ -43,7 +45,38 @@ class ProjectCharterService
             'version_label' => $versionLabel,
         ]);
 
+        $this->syncPicMappings($charter, $payload);
+
         return $versionLabel;
+    }
+
+    private function syncPicMappings(TrsProjectCharter $charter, array $payload): void
+    {
+        // Unified mapping for Sponsor, Owner, Leader at Project level
+        \App\Models\TrsMapPicProject::updateOrCreate(
+            ['project_id' => $charter->project_id],
+            [
+                'project_sponsor' => $payload['pic_sponsor_id'] ?? null,
+                'project_owner'   => $payload['pic_owner_id'] ?? null,
+                'project_leader'  => $payload['pic_leader_id'] ?? null,
+            ]
+        );
+
+        // Cross Function mapping at Project level (pc_id = project_id)
+        if (isset($payload['pic_cross_function_ids']) && is_array($payload['pic_cross_function_ids'])) {
+            \App\Models\TrsMapCrossFunction::where('pc_id', $charter->project_id)->delete();
+            
+            $mappings = array_map(function($orgId) use ($charter) {
+                return [
+                    'pc_id' => $charter->project_id,
+                    'organization_id' => $orgId,
+                ];
+            }, array_filter($payload['pic_cross_function_ids']));
+
+            if (!empty($mappings)) {
+                \App\Models\TrsMapCrossFunction::insert($mappings);
+            }
+        }
     }
 
     private function syncProjectSummaryFields(TrsProject $project, array $payload): void
