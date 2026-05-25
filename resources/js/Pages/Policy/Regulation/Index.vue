@@ -105,7 +105,7 @@
                                 </td>
                                 <!-- Detail -->
                                 <td class="px-6 py-4 text-center">
-                                    <div v-if="reg.tipe === 'Procedure'" class="flex items-center justify-center">
+                                    <div class="flex items-center justify-center">
                                         <button 
                                             @click="handleDetailClick(reg)"
                                             class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#821f44] px-4 py-2 text-xs font-bold text-white shadow-lg shadow-[#821f44]/25 transition-all hover:bg-[#9c2552] hover:shadow-[#821f44]/40 active:scale-95"
@@ -117,9 +117,6 @@
                                             </svg>
                                             Detail
                                         </button>
-                                    </div>
-                                    <div v-else class="text-slate-400 italic text-[10px]">
-                                        -
                                     </div>
                                 </td>
                             </tr>
@@ -143,17 +140,7 @@ defineProps({
 });
 
 function handleDetailClick(reg) {
-    const isRsti = reg.judul && (
-        reg.judul.toUpperCase().includes('RENCANA STRATEGIS') || 
-        reg.judul.toUpperCase().includes('RSTI')
-    );
-
-    if (isRsti) {
-        // By default navigate to general policy as the entry point
-        router.visit(route('policy.general.index'));
-    } else {
-        alert('Belum ada kebijakan yang ditambahkan untuk regulasi ini.');
-    }
+    router.visit(route('policy.general.index', { regulation_id: reg.id }));
 }
 
 // ---------------------------------------------------

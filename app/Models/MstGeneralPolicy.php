@@ -13,7 +13,16 @@ class MstGeneralPolicy extends Model
     public $timestamps = true;
 
     protected $fillable = [
+        'regulation_id',
         'number',
         'description',
     ];
+
+    /**
+     * Relasi ke MstRegulation
+     */
+    public function regulation(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(MstRegulation::class, 'regulation_id');
+    }
 }

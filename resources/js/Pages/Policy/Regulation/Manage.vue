@@ -1,4 +1,4 @@
-<template>
+    <template>
     <UserLayout title="Kelola Regulasi Kebijakan">
         <div class="animate-fade-in-up space-y-6">
             <!-- Page Header -->
