@@ -11,6 +11,7 @@ class TrsMapActorSop extends Model
     protected $fillable = [
         'actor_id',
         'sop_id',
+        'tipe'
     ];
 
     /**
