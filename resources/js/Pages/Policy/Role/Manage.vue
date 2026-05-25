@@ -278,101 +278,223 @@
                                 </div>
                             </div>
 
-                            <!-- Responsibilities Section -->
-                            <div class="border border-[#821f44]/25 rounded-lg overflow-hidden dark:border-[#a83262]/30 shadow-sm">
-                                <div class="bg-[#821f44]/5 px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-800 dark:bg-white/5 dark:text-slate-300 border-b border-[#821f44]/25 dark:border-white/10 flex items-center justify-between">
-                                    <div class="flex items-center gap-2 text-[#821f44] dark:text-[#db588c]">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        Daftar Tanggung Jawab (Responsibility)
-                                    </div>
-                                    <button 
-                                        @click="startCreateResponsibility(role.id)"
-                                        class="inline-flex items-center gap-1 rounded bg-[#821f44] px-2.5 py-1 text-[10px] font-bold text-white hover:bg-[#9c2552] transition active:scale-95 shadow-sm shadow-[#821f44]/20"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-3 h-3">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                        </svg>
-                                        Tambah Tanggung Jawab
-                                    </button>
-                                </div>
-
-                                <!-- Responsibility Editor Form (Inline inside the card) -->
-                                <div v-if="activeRespRoleId === role.id" class="bg-slate-50 p-4 border-b border-dashed border-[#821f44]/20 dark:bg-[#262626]">
-                                    <h4 class="text-xs font-bold text-[#821f44] dark:text-[#a83262] mb-3 flex items-center gap-1.5">
-                                        <span class="inline-block w-1.5 h-1.5 rounded-full bg-[#821f44] animate-pulse"></span>
-                                        {{ editingRespId ? 'Edit Tanggung Jawab' : 'Tambah Tanggung Jawab Baru' }}
-                                    </h4>
-                                    
-                                    <form @submit.prevent="submitResponsibilityForm" class="space-y-3">
-                                        <div class="space-y-1">
-                                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Isi Tanggung Jawab:</label>
-                                            <textarea 
-                                                v-model="respForm.content" 
-                                                rows="2" 
-                                                placeholder="Contoh: Menetapkan IT Governance atau Memonitor perkembangan teknologi..."
-                                                class="w-full bg-white text-slate-800 border border-slate-300 rounded-lg p-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-black/20 dark:text-white dark:border-white/10"
-                                                required
-                                            ></textarea>
+                            <!-- Responsibilities Grid Layout (Manual on Left, Master Mapping on Right) -->
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <!-- LEFT COLUMN: Manual Responsibilities -->
+                                <div class="border border-[#821f44]/25 rounded-lg overflow-hidden dark:border-[#a83262]/30 shadow-sm bg-white dark:bg-[#1a1a1a]">
+                                    <div class="bg-[#821f44]/5 px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-800 dark:bg-white/5 dark:text-slate-300 border-b border-[#821f44]/25 dark:border-white/10 flex items-center justify-between">
+                                        <div class="flex items-center gap-2 text-[#821f44] dark:text-[#db588c]">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            Daftar Tanggung Jawab (Responsibility)
                                         </div>
-
-                                        <div class="flex justify-end gap-2 pt-2">
-                                            <button 
-                                                type="button" 
-                                                @click="cancelResponsibilityForm"
-                                                class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a]"
-                                            >
-                                                Batal
-                                            </button>
-                                            <button 
-                                                type="submit" 
-                                                class="rounded-lg bg-[#821f44] px-3.5 py-1.5 text-[11px] font-bold text-white hover:bg-[#9c2552] disabled:opacity-60"
-                                                :disabled="respForm.processing"
-                                            >
-                                                <span v-if="respForm.processing" class="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></span>
-                                                Simpan Tanggung Jawab
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
-
-                                <!-- Responsibilities Table / List -->
-                                <div class="divide-y divide-slate-100 dark:divide-white/5">
-                                    <div v-if="!role.responsibilities || role.responsibilities.length === 0" class="p-4 text-center text-xs text-slate-400 dark:text-slate-500">
-                                        Belum ada tanggung jawab yang didaftarkan. Klik "+ Tambah Tanggung Jawab" di atas untuk memasukkan data.
+                                        <button 
+                                            @click="startCreateResponsibility(role.id)"
+                                            class="inline-flex items-center gap-1 rounded bg-[#821f44] px-2.5 py-1 text-[10px] font-bold text-white hover:bg-[#9c2552] transition active:scale-95 shadow-sm shadow-[#821f44]/20"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-3 h-3">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                            </svg>
+                                            Tambah Tanggung Jawab
+                                        </button>
                                     </div>
 
-                                    <div 
-                                        v-for="(resp, respIdx) in role.responsibilities" 
-                                        :key="resp.id"
-                                        class="p-4 hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150 flex gap-3 items-start group/row"
-                                    >
-                                        <div class="shrink-0 font-bold text-xs bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded">
-                                            {{ respIdx + 1 }}
+                                    <!-- Responsibility Editor Form (Inline inside the card) -->
+                                    <div v-if="activeRespRoleId === role.id" class="bg-slate-50 p-4 border-b border-dashed border-[#821f44]/20 dark:bg-[#262626]">
+                                        <h4 class="text-xs font-bold text-[#821f44] dark:text-[#a83262] mb-3 flex items-center gap-1.5">
+                                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-[#821f44] animate-pulse"></span>
+                                            {{ editingRespId ? 'Edit Tanggung Jawab' : 'Tambah Tanggung Jawab Baru' }}
+                                        </h4>
+                                        
+                                        <form @submit.prevent="submitResponsibilityForm" class="space-y-3">
+                                            <div class="space-y-1">
+                                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Isi Tanggung Jawab:</label>
+                                                <textarea 
+                                                    v-model="respForm.content" 
+                                                    rows="2" 
+                                                    placeholder="Contoh: Menetapkan IT Governance atau Memonitor perkembangan teknologi..."
+                                                    class="w-full bg-white text-slate-800 border border-slate-300 rounded-lg p-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-black/20 dark:text-white dark:border-white/10"
+                                                    required
+                                                ></textarea>
+                                            </div>
+
+                                            <div class="flex justify-end gap-2 pt-2">
+                                                <button 
+                                                    type="button" 
+                                                    @click="cancelResponsibilityForm"
+                                                    class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a]"
+                                                >
+                                                    Batal
+                                                </button>
+                                                <button 
+                                                    type="submit" 
+                                                    class="rounded-lg bg-[#821f44] px-3.5 py-1.5 text-[11px] font-bold text-white hover:bg-[#9c2552] disabled:opacity-60"
+                                                    :disabled="respForm.processing"
+                                                >
+                                                    <span v-if="respForm.processing" class="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></span>
+                                                    Simpan Tanggung Jawab
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <!-- Responsibilities Table / List -->
+                                    <div class="divide-y divide-slate-100 dark:divide-white/5">
+                                        <div v-if="!role.responsibilities || role.responsibilities.length === 0" class="p-4 text-center text-xs text-slate-400 dark:text-slate-500">
+                                            Belum ada tanggung jawab yang didaftarkan. Klik "+ Tambah Tanggung Jawab" di atas untuk memasukkan data.
                                         </div>
-                                        <div class="flex-1 text-xs text-slate-800 dark:text-slate-200 font-serif leading-relaxed">
-                                            {{ resp.content }}
+
+                                        <div 
+                                            v-for="(resp, respIdx) in role.responsibilities" 
+                                            :key="resp.id"
+                                            class="p-4 hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150 flex gap-3 items-start group/row"
+                                        >
+                                            <div class="shrink-0 font-bold text-xs bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded">
+                                                {{ respIdx + 1 }}
+                                            </div>
+                                            <div class="flex-1 text-xs text-slate-800 dark:text-slate-200 font-serif leading-relaxed">
+                                                {{ resp.content }}
+                                            </div>
+                                            <div class="shrink-0 flex gap-2 opacity-80 group-hover/row:opacity-100 transition-opacity duration-150">
+                                                <button 
+                                                    @click="startEditResponsibility(role.id, resp)"
+                                                    class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-[#821f44] hover:bg-[#821f44]/5 hover:border-[#821f44]/20 transition-all duration-150 active:scale-90 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-400"
+                                                    title="Edit Tanggung Jawab"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.83 20.013a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                                    </svg>
+                                                </button>
+                                                <button 
+                                                    @click="deleteResponsibility(resp)"
+                                                    class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:border-rose-200 transition-all duration-150 active:scale-90 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-400"
+                                                    title="Hapus Tanggung Jawab"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                                    </svg>
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div class="shrink-0 flex gap-2 opacity-80 group-hover/row:opacity-100 transition-opacity duration-150">
-                                            <button 
-                                                @click="startEditResponsibility(role.id, resp)"
-                                                class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-[#821f44] hover:bg-[#821f44]/5 hover:border-[#821f44]/20 transition-all duration-150 active:scale-90 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-400"
-                                                title="Edit Tanggung Jawab"
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.83 20.013a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                                                </svg>
-                                            </button>
-                                            <button 
-                                                @click="deleteResponsibility(resp)"
-                                                class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:border-rose-200 transition-all duration-150 active:scale-90 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-400"
-                                                title="Hapus Tanggung Jawab"
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                                                </svg>
-                                            </button>
+                                    </div>
+                                </div>
+
+                                <!-- RIGHT COLUMN: Mapped Master Responsibilities -->
+                                <div class="border border-blue-500/25 rounded-lg overflow-hidden dark:border-blue-500/30 shadow-sm bg-white dark:bg-[#1a1a1a]">
+                                    <div class="bg-blue-500/5 px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-800 dark:bg-white/5 dark:text-slate-300 border-b border-blue-500/25 dark:border-white/10 flex items-center justify-between">
+                                        <div class="flex items-center gap-2 text-blue-800 dark:text-blue-400">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+                                            </svg>
+                                            Pemetaan Tanggung Jawab (Master Responsible)
+                                        </div>
+                                        <button 
+                                            @click="startAddMapping(role.id)"
+                                            class="inline-flex items-center gap-1 rounded bg-blue-600 px-2.5 py-1 text-[10px] font-bold text-white hover:bg-blue-700 transition active:scale-95 shadow-sm shadow-blue-600/20"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-3 h-3">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                            </svg>
+                                            Petakan Responsible
+                                        </button>
+                                    </div>
+
+                                    <!-- Add Mapping Inline Form -->
+                                    <div v-if="activeMappingRoleId === role.id" class="bg-slate-50 p-4 border-b border-dashed border-blue-500/20 dark:bg-[#262626]">
+                                        <h4 class="text-xs font-bold text-blue-800 dark:text-blue-400 mb-3 flex items-center gap-1.5">
+                                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
+                                            Petakan Master Responsible
+                                        </h4>
+                                        <form @submit.prevent="submitMappingForm" class="space-y-3">
+                                            <div class="space-y-2">
+                                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Cari & Pilih Master Responsible:</label>
+                                                
+                                                <!-- Search input field with search icon -->
+                                                <div class="relative">
+                                                    <input 
+                                                        type="text" 
+                                                        v-model="mappingSearchQuery" 
+                                                        placeholder="Ketik kata kunci untuk mencari..." 
+                                                        class="w-full bg-white text-slate-800 border border-slate-300 rounded-lg pl-8 pr-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:bg-black/20 dark:text-white dark:border-white/10"
+                                                    />
+                                                    <div class="absolute left-2.5 top-2.5 text-slate-400">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.637 10.637Z" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Filtered Scrollable List of Responsibles -->
+                                                <div v-if="filteredSearchResponsibles(role).length > 0" class="max-h-40 overflow-y-auto border border-slate-200 dark:border-white/10 rounded-lg divide-y divide-slate-100 dark:divide-white/5 bg-white dark:bg-[#1a1a1a] shadow-inner">
+                                                    <button 
+                                                        v-for="resp in filteredSearchResponsibles(role)" 
+                                                        :key="resp.id"
+                                                        type="button"
+                                                        @click="selectResponsibleForMapping(resp)"
+                                                        class="w-full text-left px-3 py-2.5 text-xs text-slate-700 hover:bg-blue-50 dark:text-slate-300 dark:hover:bg-blue-950/30 transition flex items-center justify-between"
+                                                        :class="{'bg-blue-50/80 dark:bg-blue-950/20 font-bold text-blue-700 dark:text-blue-400': mappingForm.responsible_id === resp.id}"
+                                                    >
+                                                        <span class="flex-1 pr-4">{{ resp.responsible }}</span>
+                                                        <span v-if="mappingForm.responsible_id === resp.id" class="text-blue-600 dark:text-blue-400 shrink-0">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+                                                                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143z" clip-rule="evenodd" />
+                                                            </svg>
+                                                        </span>
+                                                    </button>
+                                                </div>
+                                                <div v-else class="p-3 text-center text-xs text-slate-400 dark:text-slate-500 border border-dashed border-slate-200 dark:border-white/10 rounded-lg bg-slate-50/50 dark:bg-black/10">
+                                                    Tidak ada master responsible yang cocok atau belum dipetakan.
+                                                </div>
+                                            </div>
+                                            <div class="flex justify-end gap-2 pt-2">
+                                                <button 
+                                                    type="button" 
+                                                    @click="cancelMappingForm"
+                                                    class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a]"
+                                                >
+                                                    Batal
+                                                </button>
+                                                <button 
+                                                    type="submit" 
+                                                    class="rounded-lg bg-blue-600 px-3.5 py-1.5 text-[11px] font-bold text-white hover:bg-blue-700 disabled:opacity-60"
+                                                    :disabled="mappingForm.processing || getAvailableResponsiblesForRole(role).length === 0"
+                                                >
+                                                    <span v-if="mappingForm.processing" class="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></span>
+                                                    Simpan Pemetaan
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <!-- Mapped Responsibles List -->
+                                    <div class="divide-y divide-slate-100 dark:divide-white/5">
+                                        <div v-if="!role.mapped_responsibles || role.mapped_responsibles.length === 0" class="p-4 text-center text-xs text-slate-400 dark:text-slate-500">
+                                            Belum ada master responsible yang dipetakan. Klik "+ Petakan Responsible" di atas.
+                                        </div>
+
+                                        <div 
+                                            v-for="(mr, mrIdx) in role.mapped_responsibles" 
+                                            :key="mr.id"
+                                            class="p-4 hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150 flex gap-3 items-start group/row"
+                                        >
+                                            <div class="shrink-0 font-bold text-xs bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded">
+                                                {{ mrIdx + 1 }}
+                                            </div>
+                                            <div class="flex-1 text-xs text-slate-800 dark:text-slate-200 font-sans leading-relaxed">
+                                                {{ mr.responsible }}
+                                            </div>
+                                            <div class="shrink-0 flex gap-2 opacity-80 group-hover/row:opacity-100 transition-opacity duration-150">
+                                                <button 
+                                                    @click="deleteMapping(role.id, mr.id)"
+                                                    class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:border-rose-200 transition-all duration-150 active:scale-90 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-400"
+                                                    title="Hapus Pemetaan"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -449,6 +571,10 @@ function scrollToBottom() {
 
 const props = defineProps({
     roles: {
+        type: Array,
+        required: true,
+    },
+    responsibles: {
         type: Array,
         required: true,
     },
@@ -636,6 +762,81 @@ function deleteResponsibility(resp) {
             },
             onError: () => {
                 localError.value = 'Gagal menghapus Tanggung Jawab.';
+            }
+        });
+    }
+}
+
+// ---------------------------------------------------
+// MAPPING: MASTER RESPONSIBLE TO ROLE STATE
+// ---------------------------------------------------
+const activeMappingRoleId = ref(null);
+const mappingSearchQuery = ref('');
+const mappingForm = useForm({
+    role_id: '',
+    responsible_id: '',
+});
+
+function startAddMapping(roleId) {
+    activeMappingRoleId.value = roleId;
+    mappingSearchQuery.value = '';
+    mappingForm.reset();
+    mappingForm.role_id = roleId;
+    mappingForm.clearErrors();
+}
+
+function cancelMappingForm() {
+    activeMappingRoleId.value = null;
+    mappingSearchQuery.value = '';
+    mappingForm.reset();
+    mappingForm.clearErrors();
+}
+
+function getAvailableResponsiblesForRole(role) {
+    const mappedIds = (role.mapped_responsibles || []).map(mr => mr.id);
+    return props.responsibles.filter(resp => !mappedIds.includes(resp.id));
+}
+
+function filteredSearchResponsibles(role) {
+    const available = getAvailableResponsiblesForRole(role);
+    if (!mappingSearchQuery.value) return available;
+    const query = mappingSearchQuery.value.toLowerCase();
+    return available.filter(resp => resp.responsible.toLowerCase().includes(query));
+}
+
+function selectResponsibleForMapping(resp) {
+    mappingForm.responsible_id = resp.id;
+}
+
+function submitMappingForm() {
+    if (!mappingForm.responsible_id) {
+        localError.value = 'Silakan pilih salah satu Master Responsible terlebih dahulu.';
+        return;
+    }
+
+    mappingForm.post(route('policy.roles.mapped-responsible.store'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            activeMappingRoleId.value = null;
+            mappingSearchQuery.value = '';
+            mappingForm.reset();
+            localSuccess.value = 'Pemetaan Master Responsible berhasil ditambahkan!';
+        },
+        onError: () => {
+            localError.value = 'Gagal menambahkan pemetaan Master Responsible.';
+        }
+    });
+}
+
+function deleteMapping(roleId, responsibleId) {
+    if (confirm('Apakah Anda yakin ingin menghapus pemetaan master responsible ini?')) {
+        router.delete(route('policy.roles.mapped-responsible.destroy', { roleId, responsibleId }), {
+            preserveScroll: true,
+            onSuccess: () => {
+                localSuccess.value = 'Pemetaan Master Responsible berhasil dihapus.';
+            },
+            onError: () => {
+                localError.value = 'Gagal menghapus pemetaan.';
             }
         });
     }

@@ -19,6 +19,12 @@ class MstRole extends Model
         return $this->hasMany(TrsResponsibility::class, 'role_id');
     }
 
+    public function mappedResponsibles()
+    {
+        return $this->belongsToMany(MstResponsible::class, 'trs_responsible', 'role_id', 'responsible_id')
+            ->withTimestamps();
+    }
+
     public function practices()
     {
         return $this->belongsToMany(MstPractice::class, 'trs_practicerole', 'role_id', 'practice_id')

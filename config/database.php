@@ -141,7 +141,7 @@ return [
                 (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA) => $mysqlSslCa,
                 \PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
                 \PDO::ATTR_TIMEOUT => 15,
-                \PDO::ATTR_PERSISTENT => true,
+                \PDO::ATTR_PERSISTENT => false,
             ]) : [],
             'sticky' => true,
             'dump' => array_filter([
@@ -190,7 +190,7 @@ return [
                 (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA) => $mysqlSslCa,
                 \PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
                 \PDO::ATTR_TIMEOUT => 15,
-                \PDO::ATTR_PERSISTENT => true,
+                \PDO::ATTR_PERSISTENT => false,
             ]) : [],
             'sticky' => true,
         ],

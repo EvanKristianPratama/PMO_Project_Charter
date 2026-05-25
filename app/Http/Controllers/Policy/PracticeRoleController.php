@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PracticeRoleController extends Controller
 {
@@ -62,40 +63,70 @@ class PracticeRoleController extends Controller
 
     /**
      * Save the bulk RACI mapping modifications.
+     * Optimized: Frontend only sends changed/dirty items, not the entire grid.
      */
     public function update(Request $request): RedirectResponse
     {
         $request->validate([
             'mappings' => 'required|array',
-            'mappings.*.practice_id' => 'required|string|exists:mst_practice,practice_id',
-            'mappings.*.role_id' => 'required|integer|exists:mst_roles,id',
-            'mappings.*.r_a' => 'nullable|string|in:R,A,C,I,r,a,c,i,', // empty string also allowed to clear
+            'mappings.*.practice_id' => 'required|string',
+            'mappings.*.role_id' => 'required|integer',
+            'mappings.*.r_a' => 'nullable|string|in:R,A,C,I,r,a,c,i,',
         ]);
 
-        DB::transaction(function () use ($request) {
-            foreach ($request->input('mappings') as $item) {
-                $raciVal = !empty($item['r_a']) ? strtoupper(trim($item['r_a'])) : null;
+        $mappings = $request->input('mappings', []);
 
-                if ($raciVal === null) {
-                    TrsPracticeRole::where('practice_id', $item['practice_id'])
-                        ->where('role_id', $item['role_id'])
-                        ->delete();
-                } else {
-                    TrsPracticeRole::updateOrCreate(
-                        [
-                            'practice_id' => $item['practice_id'],
-                            'role_id' => $item['role_id'],
-                        ],
-                        [
-                            'r_a' => $raciVal,
-                        ]
-                    );
-                }
+        // Extend execution time for bulk operations on remote cloud DB
+        set_time_limit(120);
+
+        Log::info('RACI update: received ' . count($mappings) . ' mapping items');
+
+        if (empty($mappings)) {
+            return redirect()
+                ->back()
+                ->with('success', 'Tidak ada perubahan.');
+        }
+
+        // Separate into upserts vs deletes
+        $toUpsert = [];
+        $toDelete = [];
+
+        foreach ($mappings as $item) {
+            $raciVal = !empty($item['r_a']) ? strtoupper(trim($item['r_a'])) : null;
+
+            if ($raciVal === null) {
+                $toDelete[] = $item;
+            } else {
+                $toUpsert[] = [
+                    'practice_id' => $item['practice_id'],
+                    'role_id' => $item['role_id'],
+                    'r_a' => $raciVal,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+        }
+
+        DB::transaction(function () use ($toUpsert, $toDelete) {
+            // Bulk delete cleared mappings
+            foreach ($toDelete as $item) {
+                TrsPracticeRole::where('practice_id', $item['practice_id'])
+                    ->where('role_id', $item['role_id'])
+                    ->delete();
+            }
+
+            // Bulk upsert in chunks of 500 to avoid oversized SQL statements
+            foreach (array_chunk($toUpsert, 500) as $chunk) {
+                TrsPracticeRole::upsert(
+                    $chunk,
+                    ['practice_id', 'role_id'],
+                    ['r_a', 'updated_at']
+                );
             }
         });
 
         return redirect()
-            ->route('policy.raci.index')
+            ->back()
             ->with('success', 'Matriks RACI berhasil diperbarui.');
     }
 }

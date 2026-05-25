@@ -23,7 +23,7 @@
                         </Link>
 
                         <button
-                            @click="openAddModal"
+                            @click="openAddForm"
                             class="inline-flex items-center gap-2 rounded-xl bg-[#821f44] px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#821f44]/25 transition-all hover:bg-[#9c2552] hover:shadow-[#821f44]/40 focus:ring-2 focus:ring-[#821f44]/20 active:scale-95"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
@@ -55,6 +55,57 @@
                     </div>
                 </transition>
             </div>
+
+            <!-- Inline Responsible Form (Shown when isFormOpen is true) -->
+            <transition name="slide-down">
+                <div v-if="isFormOpen" class="max-w-4xl mx-auto overflow-hidden rounded-2xl border-2 border-dashed border-[#821f44]/30 bg-slate-50/50 p-6 dark:bg-white/5">
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-3 dark:border-white/10 mb-4">
+                        <h3 class="text-base font-bold text-[#821f44] dark:text-[#a83262] flex items-center gap-2">
+                            <span class="inline-block w-2.5 h-2.5 rounded-full bg-[#821f44] animate-ping"></span>
+                            {{ editingId ? 'Edit Master Responsible' : 'Buat Master Responsible Baru' }}
+                        </h3>
+                        <button @click="closeForm" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <form @submit.prevent="editingId ? submitUpdate() : submitCreate()" class="space-y-4 bg-white rounded-xl border border-slate-200 shadow-lg overflow-hidden dark:border-white/15 dark:bg-[#1a1a1a]">
+                        <div class="bg-[#821f44] p-5 text-white">
+                            <div class="space-y-2">
+                                <label class="block text-xs font-bold uppercase tracking-wider text-white/80">Tanggung Jawab (Responsible):</label>
+                                <textarea 
+                                    v-model="responsibleForm.responsible" 
+                                    rows="3" 
+                                    placeholder="Contoh: Menetapkan tata kelola TIK Pertamina secara berkala..." 
+                                    class="w-full bg-white/10 text-white placeholder-white/40 border border-white/20 rounded-lg px-3.5 py-2.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-white/40"
+                                    required
+                                ></textarea>
+                                <div v-if="responsibleForm.errors.responsible" class="text-xs text-red-200 font-medium bg-red-900/30 p-2 rounded">{{ responsibleForm.errors.responsible }}</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 px-6 py-4 flex justify-end gap-3 border-t border-slate-100 dark:bg-black/20 dark:border-white/5">
+                            <button 
+                                type="button" 
+                                @click="closeForm"
+                                class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5 active:scale-95"
+                            >
+                                Batal
+                            </button>
+                            <button 
+                                type="submit" 
+                                class="rounded-xl bg-[#821f44] px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-[#821f44]/20 transition hover:bg-[#9c2552] disabled:opacity-60 flex items-center gap-1.5 active:scale-95"
+                                :disabled="responsibleForm.processing"
+                            >
+                                <span v-if="responsibleForm.processing" class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                                {{ editingId ? 'Simpan Perubahan' : 'Simpan Data' }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </transition>
 
             <!-- Full-Width Spreadsheet-Style Table -->
             <div class="w-full">
@@ -156,7 +207,7 @@
                                     <td class="px-4 py-3.5 border border-slate-200 dark:border-white/10">
                                         <div class="flex items-center justify-center gap-1.5">
                                             <button 
-                                                @click="openEditModal(resp)"
+                                                @click="openEditForm(resp)"
                                                 class="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-[#821f44] hover:bg-[#821f44]/5 hover:border-[#821f44]/20 transition-all duration-150 active:scale-90 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-400 dark:hover:text-[#db588c] dark:hover:bg-[#db588c]/10"
                                                 title="Edit Data"
                                             >
@@ -181,69 +232,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Sleek Modal Overlay for Create / Edit Master Responsible -->
-            <transition name="fade">
-                <div v-if="isModalOpen" class="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-                    <div 
-                        class="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-white/10 dark:bg-[#1a1a1a] animate-scale-up"
-                        @click.stop
-                    >
-                        <!-- Modal Header -->
-                        <div class="bg-[#821f44] p-5 text-white flex items-center justify-between">
-                            <h3 class="text-base font-bold flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.83 20.013a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                                </svg>
-                                {{ editingId ? 'Edit Master Responsible' : 'Tambah Master Responsible' }}
-                            </h3>
-                            <button @click="closeModal" class="text-white/80 hover:text-white transition">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <!-- Modal Form -->
-                        <form @submit.prevent="editingId ? submitUpdate() : submitCreate()" class="p-6 space-y-4">
-                            <div class="space-y-1.5">
-                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                                    Tanggung Jawab (Responsible):
-                                </label>
-                                <textarea 
-                                    v-model="responsibleForm.responsible" 
-                                    rows="5"
-                                    placeholder="Contoh: Menetapkan tata kelola TIK Pertamina secara berkala..." 
-                                    class="w-full bg-slate-50 text-slate-800 placeholder-slate-400 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-[#1f1f1f] dark:text-slate-200 dark:border-white/10 dark:placeholder-slate-500"
-                                    required
-                                ></textarea>
-                                <div v-if="responsibleForm.errors.responsible" class="text-xs text-rose-500 font-medium">
-                                    {{ responsibleForm.errors.responsible }}
-                                </div>
-                            </div>
-
-                            <!-- Modal Footer Actions -->
-                            <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-white/5">
-                                <button 
-                                    type="button" 
-                                    @click="closeModal"
-                                    class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5 active:scale-95"
-                                >
-                                    Batal
-                                </button>
-                                <button 
-                                    type="submit" 
-                                    class="rounded-xl bg-[#821f44] px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-[#821f44]/20 transition hover:bg-[#9c2552] disabled:opacity-60 flex items-center gap-1.5 active:scale-95"
-                                    :disabled="responsibleForm.processing"
-                                >
-                                    <span v-if="responsibleForm.processing" class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                                    {{ editingId ? 'Simpan Perubahan' : 'Simpan Data' }}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </transition>
         </div>
     </UserLayout>
 </template>
@@ -319,30 +307,32 @@ watch(
 );
 
 // ---------------------------------------------------
-// RESPONSIBLE: FORM STATE & CRUD OPERATIONS IN MODAL
+// RESPONSIBLE: FORM STATE & CRUD OPERATIONS INLINE
 // ---------------------------------------------------
-const isModalOpen = ref(false);
+const isFormOpen = ref(false);
 const editingId = ref(null);
 const responsibleForm = useForm({
     responsible: '',
 });
 
-function openAddModal() {
+function openAddForm() {
     editingId.value = null;
     responsibleForm.reset();
     responsibleForm.clearErrors();
-    isModalOpen.value = true;
+    isFormOpen.value = true;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function openEditModal(resp) {
+function openEditForm(resp) {
     editingId.value = resp.id;
     responsibleForm.responsible = resp.responsible;
     responsibleForm.clearErrors();
-    isModalOpen.value = true;
+    isFormOpen.value = true;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function closeModal() {
-    isModalOpen.value = false;
+function closeForm() {
+    isFormOpen.value = false;
     editingId.value = null;
     responsibleForm.reset();
     responsibleForm.clearErrors();
@@ -351,7 +341,7 @@ function closeModal() {
 function submitCreate() {
     responsibleForm.post(route('policy.responsible.store'), {
         onSuccess: () => {
-            closeModal();
+            closeForm();
             localSuccess.value = 'Master Responsible berhasil dibuat!';
         },
         onError: () => {
@@ -364,7 +354,7 @@ function submitUpdate() {
     responsibleForm.put(route('policy.responsible.update', editingId.value), {
         preserveScroll: true,
         onSuccess: () => {
-            closeModal();
+            closeForm();
             localSuccess.value = 'Master Responsible berhasil diperbarui!';
         },
         onError: () => {
@@ -378,9 +368,9 @@ function deleteResponsible(resp) {
         router.delete(route('policy.responsible.destroy', resp.id), {
             preserveScroll: true,
             onSuccess: () => {
-                // If we are currently editing the deleted record, close the modal
+                // If we are currently editing the deleted record, close the form
                 if (editingId.value === resp.id) {
-                    closeModal();
+                    closeForm();
                 }
                 localSuccess.value = 'Master Responsible berhasil dihapus.';
             },
@@ -408,26 +398,26 @@ function deleteResponsible(resp) {
     }
 }
 
-.animate-scale-up {
-    animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-@keyframes scaleUp {
-    from {
-        opacity: 0;
-        transform: scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
 .fade-enter-active, .fade-leave-active {
     transition: opacity 0.3s ease;
 }
 .fade-enter-from, .fade-leave-to {
     opacity: 0;
+}
+
+.slide-down-enter-active,
+.slide-down-leave-active {
+    transition: all 0.3s ease-out;
+    max-height: 500px;
+}
+.slide-down-enter-from,
+.slide-down-leave-to {
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 </style>
 

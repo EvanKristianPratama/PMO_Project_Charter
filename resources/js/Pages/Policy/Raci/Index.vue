@@ -51,40 +51,21 @@
                 </div>
             </section>
 
-            <!-- Filters -->
-            <div class="flex flex-col sm:flex-row gap-4 print:hidden">
-                <div class="w-full sm:w-1/3">
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">Filter GAMO</label>
-                    <select v-model="selectedGamo" class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-900 shadow-sm transition focus:border-[#821f44] focus:ring-2 focus:ring-[#821f44]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white">
-                        <option value="">Semua GAMO</option>
-                        <option v-for="obj in objectives" :key="obj.objective_id" :value="obj.objective_id">
-                            {{ obj.objective_id }} - {{ obj.objective }}
-                        </option>
-                    </select>
-                </div>
-                <div class="w-full sm:w-1/3">
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">Filter Role</label>
-                    <select v-model="selectedRole" class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-900 shadow-sm transition focus:border-[#821f44] focus:ring-2 focus:ring-[#821f44]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white">
-                        <option value="">Semua Role</option>
-                        <option v-for="role in roles" :key="role.id" :value="role.id">
-                            {{ role.name }}
-                        </option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- A4 Document Page Preview (Modified to fit wider table) -->
+            <!-- A4 Document Page Preview (Modified to fit stacked tables) -->
             <div class="w-full bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-4 sm:p-6 md:p-8 rounded-2xl relative font-sans text-slate-800 dark:text-slate-200 print:shadow-none print:border-none print:p-0 print:m-0 overflow-visible">
                 
                 <!-- Document Title Section -->
                 <div class="text-center space-y-1.5 relative z-10 py-4 mb-2">
                     <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#821f44] dark:text-[#a83262] uppercase">
-                        RACI Analisis
+                        RACI Analisis & Referensi COBIT 2019
                     </h2>
+                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">
+                        Perbandingan Struktur Tata Kelola dan Struktur Organisasi
+                    </p>
                 </div>
 
                 <!-- RACI Legend Key Guide -->
-                <div class="mt-8 flex flex-wrap gap-4 items-center justify-center bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-4 rounded-xl print:hidden">
+                <div class="mt-4 flex flex-wrap gap-4 items-center justify-center bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-4 rounded-xl print:hidden">
                     <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mr-2">Keterangan RACI:</div>
                     <div class="flex items-center gap-2">
                         <span class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-rose-50 text-[11px] font-black text-rose-600 border border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/30 shadow-sm">A</span>
@@ -104,110 +85,299 @@
                     </div>
                 </div>
 
-                <!-- RACI Matrix Table container -->
-                <div class="mt-8 overflow-x-auto border border-slate-300 dark:border-white/10 rounded-xl shadow-sm max-w-full">
-                    <table class="min-w-full border-collapse text-center">
-                        <!-- Headings -->
-                        <thead>
-                            <tr class="bg-[#d2e4df] dark:bg-[#1b3a32] text-slate-800 dark:text-slate-200 divide-x divide-[#b2cfc7] dark:divide-[#255246] border-b border-[#b2cfc7] dark:border-[#255246]">
-                                <!-- Left Sticky Header space -->
-                                <th class="sticky left-0 z-20 bg-[#d2e4df] dark:bg-[#1b3a32] p-2 text-left w-[180px] min-w-[180px] max-w-[180px] border-r border-[#b2cfc7] dark:border-[#255246] select-none">
-                                    <div class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">Governance Processes</div>
-                                </th>
-                                <!-- Role Headers rotated vertically -->
-                                <th 
-                                    v-for="role in filteredRoles" 
-                                    :key="role.id" 
-                                    class="p-0.5 text-center w-[18px] min-w-[18px] max-w-[18px] align-bottom pb-2 select-none"
-                                    :title="role.name"
-                                >
-                                    <div class="inline-flex items-center justify-center h-36 w-[14px] mx-auto">
-                                        <span class="[writing-mode:vertical-lr] rotate-180 text-[8px] font-bold text-slate-800 dark:text-slate-200 uppercase tracking-tight whitespace-nowrap text-left leading-tight py-0.5">
-                                            {{ role.name }}
-                                        </span>
-                                    </div>
-                                </th>
-                            </tr>
-                        </thead>
+                <!-- ========================================== -->
+                <!-- TOP SECTION: INTERNAL RACI MATRIX          -->
+                <!-- ========================================== -->
+                <div class="mt-8">
+                    <!-- Section Header & Dedicated Filters -->
+                    <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between border-b border-slate-200 dark:border-white/10 pb-4 mb-4 gap-4 print:hidden">
+                        <div>
+                            <h3 class="text-lg font-extrabold text-[#821f44] dark:text-[#a83262] uppercase tracking-wide">1. RACI Analisis Internal</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pemetaan Peran dan Tanggung Jawab Internal</p>
+                        </div>
+                        
+                        <!-- Local Filters for Internal Table -->
+                        <div class="flex flex-wrap items-center gap-3">
+                            <!-- Filter GAMO (Internal) -->
+                            <div class="w-full sm:w-auto min-w-[200px]">
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Filter Kebijakan Internal</label>
+                                <select v-model="selectedGamo" class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-900 shadow-sm transition focus:border-[#821f44] focus:ring-2 focus:ring-[#821f44]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white">
+                                    <option value="">Semua Kebijakan Internal</option>
+                                    <option v-for="obj in objectives" :key="obj.objective_id" :value="obj.objective_id">
+                                        {{ obj.objective_id }} - {{ obj.objective }}
+                                    </option>
+                                </select>
+                            </div>
+                            
+                            <!-- Filter Role (Internal) -->
+                            <div class="w-full sm:w-auto min-w-[150px]">
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Filter Role</label>
+                                <select v-model="selectedRole" class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-900 shadow-sm transition focus:border-[#821f44] focus:ring-2 focus:ring-[#821f44]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white">
+                                    <option value="">Semua Role</option>
+                                    <option v-for="role in roles" :key="role.id" :value="role.id">
+                                        {{ role.name }}
+                                    </option>
+                                </select>
+                            </div>
 
-                        <!-- Body grouped by objective -->
-                        <tbody class="divide-y divide-slate-200 dark:divide-white/10 text-slate-800 dark:text-slate-200">
-                            <template v-for="obj in filteredObjectives" :key="obj.objective_id">
-                                <!-- Objective Header Row -->
-                                <tr class="bg-slate-100 dark:bg-[#202020] border-y border-slate-300 dark:border-white/10">
+                            <!-- Hide Empty Columns Switch -->
+                            <div class="flex items-center h-[38px] pt-4 select-none">
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input 
+                                        type="checkbox" 
+                                        v-model="hideEmptyColumns" 
+                                        class="sr-only peer"
+                                    >
+                                    <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-[#2c2c2c] peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:after:bg-zinc-500 peer-checked:bg-[#821f44]"></div>
+                                    <span class="ml-2 text-xs font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">
+                                        Sembunyikan Kolom Kosong
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Print Title (Only shows in print layout) -->
+                    <h3 class="hidden print:block text-base font-extrabold text-[#821f44] uppercase tracking-wide border-b border-black pb-1 mb-3">
+                        1. RACI Analisis Internal
+                    </h3>
+
+                    <!-- RACI Matrix Table container -->
+                    <div class="overflow-x-auto border border-slate-300 dark:border-white/10 rounded-xl shadow-sm max-w-full">
+                        <table class="min-w-full border-collapse text-center">
+                            <thead>
+                                <tr class="bg-[#d2e4df] dark:bg-[#1b3a32] text-slate-800 dark:text-slate-200 divide-x divide-[#b2cfc7] dark:divide-[#255246] border-b border-[#b2cfc7] dark:border-[#255246]">
+                                    <th class="sticky left-0 z-20 bg-[#d2e4df] dark:bg-[#1b3a32] p-2 text-left w-[180px] min-w-[180px] max-w-[180px] border-r border-[#b2cfc7] dark:border-[#255246] select-none">
+                                        <div class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">Governance Processes</div>
+                                    </th>
+                                    <th 
+                                        v-for="role in filteredRoles" 
+                                        :key="role.id" 
+                                        class="p-0.5 text-center w-[18px] min-w-[18px] max-w-[18px] align-bottom pb-2 select-none"
+                                        :title="role.name"
+                                    >
+                                        <div class="inline-flex items-center justify-center h-36 w-[14px] mx-auto">
+                                            <span class="[writing-mode:vertical-lr] rotate-180 text-[8px] font-bold text-slate-800 dark:text-slate-200 uppercase tracking-tight whitespace-nowrap text-left leading-tight py-0.5">
+                                                {{ role.name }}
+                                            </span>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 dark:divide-white/10 text-slate-800 dark:text-slate-200">
+                                <template v-for="obj in filteredObjectives" :key="obj.objective_id">
+                                    <tr class="bg-slate-100 dark:bg-[#202020] border-y border-slate-300 dark:border-white/10">
+                                        <td 
+                                            :colspan="filteredRoles.length + 1" 
+                                            class="sticky left-0 p-1.5 text-left font-bold text-[9px] text-slate-900 dark:text-white tracking-wide uppercase select-none"
+                                        >
+                                            {{ obj.objective_id }}: {{ obj.objective }}
+                                        </td>
+                                    </tr>
+                                    <tr 
+                                        v-for="pr in obj.practices" 
+                                        :key="pr.practice_id" 
+                                        class="hover:bg-slate-50 dark:hover:bg-white/5 divide-x divide-slate-100 dark:divide-white/5"
+                                    >
+                                        <td class="sticky left-0 z-10 bg-white dark:bg-[#1a1a1a] border-r border-slate-200 dark:border-white/10 p-1.5 text-left shadow-[2px_0_5px_rgba(0,0,0,0.02)] select-none">
+                                            <div class="flex items-start gap-1">
+                                                <span class="text-[9px] font-bold text-slate-900 dark:text-white whitespace-nowrap">{{ pr.practice_id }}</span>
+                                                <span class="text-[9px] font-bold text-slate-900 dark:text-white" :title="pr.practice_name">
+                                                    {{ pr.practice_name || pr.practice_description || '-' }}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td 
+                                            v-for="role in filteredRoles" 
+                                            :key="role.id" 
+                                            class="p-0 text-center w-[18px] min-w-[18px] max-w-[18px] align-middle h-[20px]"
+                                        >
+                                            <template v-if="getRaciValue(pr.practice_id, role.id)">
+                                                   <span 
+                                                       v-if="getRaciValue(pr.practice_id, role.id).toUpperCase() === 'I'"
+                                                       class="inline-block w-[2.5px] h-[10px] bg-[#1e293b] dark:bg-slate-200 rounded-[0.5px] align-middle"
+                                                       :title="`${pr.practice_id} - ${role.name}: Informed`"
+                                                   ></span>
+                                                <span 
+                                                    v-else
+                                                    :class="getRaciTextClass(getRaciValue(pr.practice_id, role.id))"
+                                                    :title="`${pr.practice_id} - ${role.name}: ${getRaciLabel(getRaciValue(pr.practice_id, role.id))}`"
+                                                >
+                                                    {{ getRaciValue(pr.practice_id, role.id) }}
+                                                </span>
+                                            </template>
+                                        </td>
+                                    </tr>
+                                    <tr v-if="!obj.practices || obj.practices.length === 0">
+                                        <td 
+                                            :colspan="filteredRoles.length + 1" 
+                                            class="p-2 text-center text-[9px] italic text-slate-400 dark:text-slate-500"
+                                        >
+                                            Belum ada practices untuk Objective ini.
+                                        </td>
+                                    </tr>
+                                </template>
+                                <tr v-if="filteredObjectives.length === 0">
                                     <td 
                                         :colspan="filteredRoles.length + 1" 
-                                        class="sticky left-0 p-1.5 text-left font-bold text-[9px] text-slate-900 dark:text-white tracking-wide uppercase select-none"
+                                        class="p-6 text-center text-xs font-sans text-slate-400 dark:text-slate-500"
                                     >
-                                        {{ obj.objective_id }}: {{ obj.objective }}
+                                        Belum ada data Governance Objective / Practices.
                                     </td>
                                 </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
-                                <!-- Practices Rows -->
+                <!-- Decorative Section Separator (Stacked Visual Layout Divider) -->
+                <div class="my-10 border-t border-dashed border-slate-200 dark:border-white/10 print:my-6 print:border-black"></div>
+
+                <!-- ========================================== -->
+                <!-- BOTTOM SECTION: REFERENSI COBIT 2019       -->
+                <!-- ========================================== -->
+                <div>
+                    <!-- Section Header & Dedicated Filters -->
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-200 dark:border-white/10 pb-4 mb-4 gap-4 print:hidden">
+                        <div>
+                            <h3 class="text-lg font-extrabold text-[#821f44] dark:text-[#a83262] uppercase tracking-wide">2. Referensi COBIT 2019</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Komponen Struktur Organisasi Resmi COBIT 2019 (Live API)</p>
+                        </div>
+                        
+                        <!-- Local Filters for COBIT Reference Table -->
+                        <div class="flex flex-wrap items-center gap-3">
+                            <!-- Filter GAMO -->
+                            <div class="w-full sm:w-auto min-w-[220px]">
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Filter GAMO (COBIT)</label>
+                                <select v-model="selectedGamoCobit" class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-900 shadow-sm transition focus:border-[#821f44] focus:ring-2 focus:ring-[#821f44]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white">
+                                    <option value="">Semua GAMO</option>
+                                    <optgroup v-for="group in cobitObjectives" :key="group.domain" :label="group.domain" class="text-slate-400 dark:text-zinc-500 font-bold bg-white dark:bg-[#1a1a1a]">
+                                        <option v-for="item in group.items" :key="item.id" :value="item.id" class="text-slate-800 dark:text-slate-200 font-semibold">
+                                            {{ item.id }} - {{ item.name }}
+                                        </option>
+                                    </optgroup>
+                                </select>
+                            </div>
+
+                            <!-- Filter Role (COBIT) dynamically populated from API roles list -->
+                            <div class="w-full sm:w-auto min-w-[180px]">
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Filter Role (COBIT)</label>
+                                <select v-model="selectedRoleCobit" class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-900 shadow-sm transition focus:border-[#821f44] focus:ring-2 focus:ring-[#821f44]/20 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white" :disabled="!cobitData.roles || cobitData.roles.length === 0">
+                                    <option value="">Semua Role</option>
+                                    <option v-for="role in cobitData.roles" :key="role.role_id" :value="role.role_id">
+                                        {{ cleanRoleName(role.role_name) }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Print Title (Only shows in print layout) -->
+                    <h3 class="hidden print:block text-base font-extrabold text-[#821f44] uppercase tracking-wide border-b border-black pb-1 mb-3">
+                        2. Referensi COBIT 2019 (Live API)
+                    </h3>
+
+                    <!-- Loading State -->
+                    <div v-if="cobitLoading" class="flex flex-col items-center justify-center p-16 border border-dashed border-slate-200 dark:border-white/10 rounded-2xl bg-slate-50/50 dark:bg-white/5 animate-pulse">
+                        <div class="inline-block w-8 h-8 border-4 border-[#821f44] border-t-transparent rounded-full animate-spin"></div>
+                        <p class="mt-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Mengambil data referensi COBIT 2019...</p>
+                    </div>
+
+                    <!-- Error State -->
+                    <div v-else-if="cobitError" class="p-8 border border-red-200 dark:border-red-950/30 rounded-2xl bg-red-50/50 dark:bg-red-950/10 flex flex-col items-center text-center">
+                        <div class="h-12 w-12 rounded-full bg-red-100 dark:bg-red-950/50 flex items-center justify-center text-red-600 dark:text-red-400 mb-4 shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200">Gagal Memuat Referensi COBIT</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 max-w-md">{{ cobitError }}</p>
+                        <button 
+                            @click="fetchCobitMatrix"
+                            class="mt-5 px-4 py-2 bg-[#821f44] hover:bg-[#9c2552] text-white font-bold text-xs rounded-xl shadow-md transition active:scale-95 flex items-center gap-1.5"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                            </svg>
+                            Coba Lagi
+                        </button>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div v-else-if="!cobitData.matrix || cobitData.matrix.length === 0" class="p-12 border border-slate-200 dark:border-white/10 rounded-2xl bg-slate-50/50 dark:bg-white/5 text-center flex flex-col items-center">
+                        <div class="h-12 w-12 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-400 dark:text-slate-500 mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 0 1 2.008 1.24l.885 1.77a2.25 2.25 0 0 0 2.007 1.24h1.98a2.25 2.25 0 0 0 2.007-1.24l.885-1.77a2.25 2.25 0 0 1 2.007-1.24h3.86m-18 0h18" />
+                            </svg>
+                        </div>
+                        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Tidak ada data referensi COBIT 2019 yang ditemukan.</p>
+                    </div>
+
+                    <!-- Live Grid Reference Table -->
+                    <div v-else class="overflow-x-auto border border-slate-300 dark:border-white/10 rounded-xl shadow-sm max-w-full">
+                        <table class="min-w-full border-collapse text-center">
+                            <thead>
+                                <tr class="bg-[#d2e4df] dark:bg-[#1b3a32] text-slate-800 dark:text-slate-200 divide-x divide-[#b2cfc7] dark:divide-[#255246] border-b border-[#b2cfc7] dark:border-[#255246]">
+                                    <th class="sticky left-0 z-20 bg-[#d2e4df] dark:bg-[#1b3a32] p-2 text-left w-[240px] min-w-[240px] max-w-[240px] border-r border-[#b2cfc7] dark:border-[#255246] select-none">
+                                        <div class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">Key Management Practice</div>
+                                    </th>
+                                    <th 
+                                        v-for="role in filteredCobitRoles" 
+                                        :key="role.role_id" 
+                                        class="p-0.5 text-center w-[18px] min-w-[18px] max-w-[18px] align-bottom pb-2 select-none"
+                                        :title="cleanRoleName(role.role_name)"
+                                    >
+                                        <div class="inline-flex items-center justify-center h-36 w-[14px] mx-auto">
+                                            <span class="[writing-mode:vertical-lr] rotate-180 text-[8px] font-bold text-slate-800 dark:text-slate-200 uppercase tracking-tight whitespace-nowrap text-left leading-tight py-0.5">
+                                                {{ cleanRoleName(role.role_name) }}
+                                            </span>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 dark:divide-white/10 text-slate-800 dark:text-slate-200">
                                 <tr 
-                                    v-for="pr in obj.practices" 
-                                    :key="pr.practice_id" 
+                                    v-for="row in cobitData.matrix" 
+                                    :key="row.practice_id" 
                                     class="hover:bg-slate-50 dark:hover:bg-white/5 divide-x divide-slate-100 dark:divide-white/5"
                                 >
-                                    <!-- Practice details (sticky) -->
                                     <td class="sticky left-0 z-10 bg-white dark:bg-[#1a1a1a] border-r border-slate-200 dark:border-white/10 p-1.5 text-left shadow-[2px_0_5px_rgba(0,0,0,0.02)] select-none">
                                         <div class="flex items-start gap-1">
-                                            <span class="text-[9px] font-bold text-slate-900 dark:text-white whitespace-nowrap">{{ pr.practice_id }}</span>
-                                            <span class="text-[9px] font-bold text-slate-900 dark:text-white" :title="pr.practice_name">
-                                                {{ pr.practice_name || pr.practice_description || '-' }}
+                                            <span class="text-[9px] font-bold text-slate-900 dark:text-white whitespace-nowrap">{{ row.practice_id }}</span>
+                                            <span class="text-[9px] font-bold text-slate-900 dark:text-white" :title="row.practice_name">
+                                                {{ row.practice_name }}
                                             </span>
                                         </div>
                                     </td>
-
-                                    <!-- RACI Cell Values -->
                                     <td 
-                                        v-for="role in filteredRoles" 
-                                        :key="role.id" 
+                                        v-for="role in filteredCobitRoles" 
+                                        :key="role.role_id" 
                                         class="p-0 text-center w-[18px] min-w-[18px] max-w-[18px] align-middle h-[20px]"
                                     >
-                                        <template v-if="getRaciValue(pr.practice_id, role.id)">
-                                               <span 
-                                                   v-if="getRaciValue(pr.practice_id, role.id).toUpperCase() === 'I'"
-                                                   class="inline-block w-[2.5px] h-[10px] bg-[#1e293b] dark:bg-slate-200 rounded-[0.5px] align-middle"
-                                                   :title="`${pr.practice_id} - ${role.name}: Informed`"
-                                               ></span>
+                                        <template v-if="row.role_assignments[role.role_id]">
+                                            <span 
+                                                v-if="row.role_assignments[role.role_id].toUpperCase() === 'I'"
+                                                class="inline-block w-[2.5px] h-[10px] bg-[#1e293b] dark:bg-slate-200 rounded-[0.5px] align-middle"
+                                                :title="`${row.practice_id} - ${cleanRoleName(role.role_name)}: Informed`"
+                                            ></span>
                                             <span 
                                                 v-else
-                                                :class="getRaciTextClass(getRaciValue(pr.practice_id, role.id))"
-                                                :title="`${pr.practice_id} - ${role.name}: ${getRaciLabel(getRaciValue(pr.practice_id, role.id))}`"
+                                                :class="getRaciTextClass(row.role_assignments[role.role_id])"
+                                                :title="`${row.practice_id} - ${cleanRoleName(role.role_name)}: ${getRaciLabel(row.role_assignments[role.role_id])}`"
                                             >
-                                                {{ getRaciValue(pr.practice_id, role.id) }}
+                                                {{ row.role_assignments[role.role_id] }}
                                             </span>
                                         </template>
                                     </td>
                                 </tr>
-
-                                <!-- Empty practices warning if any -->
-                                <tr v-if="!obj.practices || obj.practices.length === 0">
-                                    <td 
-                                        :colspan="filteredRoles.length + 1" 
-                                        class="p-2 text-center text-[9px] italic text-slate-400 dark:text-slate-500"
-                                    >
-                                        Belum ada practices untuk Objective ini.
-                                    </td>
-                                </tr>
-                            </template>
-
-                            <tr v-if="filteredObjectives.length === 0">
-                                <td 
-                                    :colspan="filteredRoles.length + 1" 
-                                    class="p-6 text-center text-xs font-sans text-slate-400 dark:text-slate-500"
-                                >
-                                    Belum ada data Governance Objective / Practices.
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
             </div>
 
-            <!-- Print Floating Control Bar for Easy Navigation (print:hidden) -->
+            <!-- Floating Navigation Button for print or scroll -->
             <div class="fixed bottom-6 right-6 flex flex-col gap-3 z-30 print:hidden">
                 <button 
                     @click="scrollToTop"
@@ -233,7 +403,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { usePage, Link } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
@@ -253,16 +423,140 @@ const props = defineProps({
 });
 
 const selectedGamo = ref('');
+const selectedGamoCobit = ref('');
 const selectedRole = ref('');
+const selectedRoleCobit = ref('');
+const hideEmptyColumns = ref(true); // Hide columns with no data by default
 
-const filteredRoles = computed(() => {
-    if (!selectedRole.value) return props.roles;
-    return props.roles.filter(r => String(r.id) === String(selectedRole.value));
-});
+// Official COBIT 2019 Governance and Management Objectives (GAMO) list grouped by domain
+const cobitObjectives = [
+    {
+        domain: 'Evaluate, Direct and Monitor (EDM)',
+        items: [
+            { id: 'EDM01', name: 'Ensured Governance Framework Setting and Maintenance' },
+            { id: 'EDM02', name: 'Ensured Benefits Delivery' },
+            { id: 'EDM03', name: 'Ensured Risk Optimization' },
+            { id: 'EDM04', name: 'Ensured Resource Optimization' },
+            { id: 'EDM05', name: 'Ensured Stakeholder Engagement' }
+        ]
+    },
+    {
+        domain: 'Align, Plan and Organize (APO)',
+        items: [
+            { id: 'APO01', name: 'Managed I&T Management Framework' },
+            { id: 'APO02', name: 'Managed Strategy' },
+            { id: 'APO03', name: 'Managed Enterprise Architecture' },
+            { id: 'APO04', name: 'Managed Innovation' },
+            { id: 'APO05', name: 'Managed Portfolio' },
+            { id: 'APO06', name: 'Managed Budget and Costs' },
+            { id: 'APO07', name: 'Managed Human Resources' },
+            { id: 'APO08', name: 'Managed Relationships' },
+            { id: 'APO09', name: 'Managed Service Agreements' },
+            { id: 'APO10', name: 'Managed Vendors' },
+            { id: 'APO11', name: 'Managed Quality' },
+            { id: 'APO12', name: 'Managed Risk' },
+            { id: 'APO13', name: 'Managed Security' },
+            { id: 'APO14', name: 'Managed Data' }
+        ]
+    },
+    {
+        domain: 'Build, Acquire and Implement (BAI)',
+        items: [
+            { id: 'BAI01', name: 'Managed Programs and Projects' },
+            { id: 'BAI02', name: 'Managed Requirements Definition' },
+            { id: 'BAI03', name: 'Managed Solutions Identification and Build' },
+            { id: 'BAI04', name: 'Managed Availability and Capacity' },
+            { id: 'BAI05', name: 'Managed Organizational Change' },
+            { id: 'BAI06', name: 'Managed IT Changes' },
+            { id: 'BAI07', name: 'Managed IT Change Acceptance and Transitioning' },
+            { id: 'BAI08', name: 'Managed Knowledge' },
+            { id: 'BAI09', name: 'Managed Assets' },
+            { id: 'BAI10', name: 'Managed Configuration' },
+            { id: 'BAI11', name: 'Managed Projects' }
+        ]
+    },
+    {
+        domain: 'Deliver, Service and Support (DSS)',
+        items: [
+            { id: 'DSS01', name: 'Managed Operations' },
+            { id: 'DSS02', name: 'Managed Service Requests and Incidents' },
+            { id: 'DSS03', name: 'Managed Problems' },
+            { id: 'DSS04', name: 'Managed Continuity' },
+            { id: 'DSS05', name: 'Managed Security Services' },
+            { id: 'DSS06', name: 'Managed Business Process Controls' }
+        ]
+    },
+    {
+        domain: 'Monitor, Evaluate and Assess (MEA)',
+        items: [
+            { id: 'MEA01', name: 'Managed Performance and Conformance Monitoring' },
+            { id: 'MEA02', name: 'Managed System of Internal Control' },
+            { id: 'MEA03', name: 'Managed Compliance With External Requirements' },
+            { id: 'MEA04', name: 'Managed Assurance' }
+        ]
+    }
+];
+
+// Live COBIT Reference API State
+const cobitLoading = ref(false);
+const cobitError = ref(null);
+const cobitData = ref({ roles: [], matrix: [] });
+
+// Clean escaped quotes from API role names (e.g. "\"Board\"" -> "Board")
+function cleanRoleName(name) {
+    if (!name) return '';
+    return name.replace(/^["'\\\s]+|["'\\\s]+$/g, '').replace(/\\"/g, '"');
+}
+
+async function fetchCobitMatrix() {
+    cobitLoading.value = true;
+    cobitError.value = null;
+    try {
+        let url = 'https://cobit2019.divusi.co.id/api/cobit/roles-matrix';
+        if (selectedGamoCobit.value) {
+            url += `?objective_id=${encodeURIComponent(selectedGamoCobit.value)}`;
+        }
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Server returned status ${response.status}`);
+        }
+        const resJson = await response.json();
+        if (!resJson.success) {
+            throw new Error(resJson.message || 'API response indicated failure');
+        }
+        cobitData.value = {
+            roles: resJson.roles || [],
+            matrix: resJson.matrix || []
+        };
+    } catch (err) {
+        console.error('Error fetching COBIT data:', err);
+        cobitError.value = err.message || 'Gagal memuat data referensi COBIT.';
+    } finally {
+        cobitLoading.value = false;
+    }
+}
+
+// Watch selectedGamoCobit to fetch COBIT reference data live on mount or change
+watch(selectedGamoCobit, () => {
+    fetchCobitMatrix();
+    selectedRoleCobit.value = ''; // Reset role filter when objective changes
+}, { immediate: true });
 
 const filteredObjectives = computed(() => {
     if (!selectedGamo.value) return props.objectives;
     return props.objectives.filter(o => String(o.objective_id) === String(selectedGamo.value));
+});
+
+const displayedPracticeIds = computed(() => {
+    const ids = [];
+    filteredObjectives.value.forEach(obj => {
+        if (obj.practices) {
+            obj.practices.forEach(pr => {
+                ids.push(String(pr.practice_id));
+            });
+        }
+    });
+    return ids;
 });
 
 const raciLookup = computed(() => {
@@ -278,6 +572,35 @@ const raciLookup = computed(() => {
 function getRaciValue(practiceId, roleId) {
     return raciLookup.value.get(`${String(practiceId)}::${String(roleId)}`) || '';
 }
+
+const filteredRoles = computed(() => {
+    let list = props.roles;
+
+    if (selectedRole.value) {
+        list = list.filter(r => String(r.id) === String(selectedRole.value));
+    }
+
+    if (hideEmptyColumns.value) {
+        const practiceIds = displayedPracticeIds.value;
+        list = list.filter(role => {
+            return practiceIds.some(practiceId => {
+                const val = getRaciValue(practiceId, role.id);
+                return val !== null && val !== '';
+            });
+        });
+    }
+
+    return list;
+});
+
+// Filter roles dynamically for the COBIT matrix based on selectedRoleCobit dropdown
+const filteredCobitRoles = computed(() => {
+    let list = cobitData.value.roles || [];
+    if (selectedRoleCobit.value) {
+        list = list.filter(r => String(r.role_id) === String(selectedRoleCobit.value));
+    }
+    return list;
+});
 
 // Get descriptive tooltip label
 function getRaciLabel(val) {
@@ -303,14 +626,6 @@ function getRaciTextClass(val) {
         return "text-[#dd7d36] dark:text-[#fbbf24] font-black text-[10.5px] select-none";
     }
     return "text-slate-800 dark:text-slate-200 font-bold text-[10px] select-none";
-}
-
-function getCurrentDate() {
-    return new Date().toLocaleDateString('id-ID', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
 }
 
 function printDocument() {

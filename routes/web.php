@@ -306,6 +306,10 @@ Route::middleware(['auth', 'approved'])->group(function () {
         Route::put('/roles/responsibility/{responsibility}', [RoleController::class, 'updateResponsibility'])->name('roles.responsibility.update');
         Route::delete('/roles/responsibility/{responsibility}', [\App\Http\Controllers\Policy\RoleController::class, 'destroyResponsibility'])->name('roles.responsibility.destroy');
 
+        // Mapped Responsibles from Master Data
+        Route::post('/roles/mapped-responsible', [RoleController::class, 'storeMappedResponsible'])->name('roles.mapped-responsible.store');
+        Route::delete('/roles/mapped-responsible/{roleId}/{responsibleId}', [RoleController::class, 'destroyMappedResponsible'])->name('roles.mapped-responsible.destroy');
+
         // Regulasi (Regulation) CRUD
         Route::get('/regulation', [RegulationController::class, 'index'])->name('regulation.index');
         Route::get('/regulation/manage', [RegulationController::class, 'manage'])->name('regulation.manage');

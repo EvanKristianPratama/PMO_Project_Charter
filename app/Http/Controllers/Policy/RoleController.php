@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\MstRole;
 use App\Models\TrsResponsibility;
 use App\Models\MstRegulation;
+use App\Models\MstResponsible;
+use App\Models\TrsResponsible;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -75,7 +77,7 @@ class RoleController extends Controller
 
             $roles = MstRole::with(['responsibilities' => function ($query) {
                 $query->orderBy('id', 'asc');
-            }])->orderBy('id', 'asc')->get();
+            }, 'mappedResponsibles'])->orderBy('id', 'asc')->get();
 
             $regulations = MstRegulation::orderBy('id', 'desc')->get();
         } catch (\Exception $e) {
@@ -97,10 +99,13 @@ class RoleController extends Controller
     {
         $roles = MstRole::with(['responsibilities' => function ($query) {
             $query->orderBy('id', 'asc');
-        }])->orderBy('id', 'asc')->get();
+        }, 'mappedResponsibles'])->orderBy('id', 'asc')->get();
+
+        $responsibles = MstResponsible::orderBy('responsible', 'asc')->get();
 
         return Inertia::render('Policy/Role/Manage', [
             'roles' => $roles,
+            'responsibles' => $responsibles,
         ]);
     }
 
@@ -209,5 +214,54 @@ class RoleController extends Controller
         return redirect()
             ->route('policy.roles.manage')
             ->with('success', 'Responsibility berhasil dihapus.');
+    }
+
+    /**
+     * Store a newly created role mapping to a master responsible.
+     */
+    public function storeMappedResponsible(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'role_id' => 'required|integer|exists:mst_roles,id',
+            'responsible_id' => 'required|integer|exists:mst_responsible,id',
+        ], [
+            'role_id.required' => 'Role wajib dipilih.',
+            'role_id.exists' => 'Role tidak valid.',
+            'responsible_id.required' => 'Master Responsible wajib dipilih.',
+            'responsible_id.exists' => 'Master Responsible tidak valid.',
+        ]);
+
+        // Check if mapping already exists to prevent duplicate entries
+        $exists = \DB::table('trs_responsible')
+            ->where('role_id', $validated['role_id'])
+            ->where('responsible_id', $validated['responsible_id'])
+            ->exists();
+
+        if ($exists) {
+            return redirect()
+                ->route('policy.roles.manage')
+                ->with('error', 'Responsible tersebut sudah dipetakan pada role ini.');
+        }
+
+        // Attach relationship
+        $role = MstRole::findOrFail($validated['role_id']);
+        $role->mappedResponsibles()->attach($validated['responsible_id']);
+
+        return redirect()
+            ->route('policy.roles.manage')
+            ->with('success', 'Pemetaan Master Responsible berhasil ditambahkan.');
+    }
+
+    /**
+     * Remove the specified role mapping from a master responsible.
+     */
+    public function destroyMappedResponsible(int $roleId, int $responsibleId): RedirectResponse
+    {
+        $role = MstRole::findOrFail($roleId);
+        $role->mappedResponsibles()->detach($responsibleId);
+
+        return redirect()
+            ->route('policy.roles.manage')
+            ->with('success', 'Pemetaan Master Responsible berhasil dihapus.');
     }
 }
