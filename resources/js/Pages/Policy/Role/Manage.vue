@@ -425,28 +425,11 @@
                                                     </div>
                                                 </div>
 
-                                                <!-- Bulk Actions and Selection Count -->
-                                                <div v-if="getAvailableResponsiblesForRole(role).length > 0" class="flex items-center justify-between mt-1 mb-2 bg-slate-100/50 dark:bg-black/10 px-2 py-1 rounded-md">
+                                                <!-- Selection Count -->
+                                                <div v-if="getAvailableResponsiblesForRole(role).length > 0" class="flex items-center justify-between mt-1 mb-2 bg-slate-100/50 dark:bg-black/10 px-2.5 py-1.5 rounded-md">
                                                     <span class="text-[10px] text-slate-500 dark:text-slate-400">
                                                         Terpilih: <strong class="text-blue-600 dark:text-blue-400 font-extrabold">{{ mappingForm.responsible_ids.length }}</strong> item
                                                     </span>
-                                                    <div class="flex gap-2">
-                                                        <button 
-                                                            type="button" 
-                                                            @click="selectAllFilteredResponsibles(role)"
-                                                            class="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition"
-                                                        >
-                                                            ✓ Pilih Semua
-                                                        </button>
-                                                        <span class="text-slate-300 dark:text-slate-700 text-[10px]">|</span>
-                                                        <button 
-                                                            type="button" 
-                                                            @click="deselectAllFilteredResponsibles(role)"
-                                                            class="text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition"
-                                                        >
-                                                            ✕ Hapus Semua
-                                                        </button>
-                                                    </div>
                                                 </div>
                                                 
                                                 <!-- Filtered Scrollable List of Responsibles -->
@@ -845,21 +828,6 @@ function toggleResponsibleForMapping(respId) {
     } else {
         mappingForm.responsible_ids.push(respId);
     }
-}
-
-function selectAllFilteredResponsibles(role) {
-    const filtered = filteredSearchResponsibles(role);
-    filtered.forEach(resp => {
-        if (!mappingForm.responsible_ids.includes(resp.id)) {
-            mappingForm.responsible_ids.push(resp.id);
-        }
-    });
-}
-
-function deselectAllFilteredResponsibles(role) {
-    const filtered = filteredSearchResponsibles(role);
-    const filteredIds = filtered.map(resp => resp.id);
-    mappingForm.responsible_ids = mappingForm.responsible_ids.filter(id => !filteredIds.includes(id));
 }
 
 function submitMappingForm() {
