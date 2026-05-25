@@ -56,4 +56,9 @@ protected $fillable = [
     {
         return $this->hasMany(MstPicProject::class, 'organization_id');
     }
+
+    public function prosesBisnis(): HasMany
+    {
+        return $this->hasMany(TrsProsesBisnis::class, 'organization_id');
+    }
 }

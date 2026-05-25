@@ -19,6 +19,7 @@ use App\Http\Controllers\MasterData\ScopeCharter\ScopeCharterController;
 use App\Http\Controllers\Policy\GeneralPolicyController;
 use App\Http\Controllers\Policy\PolicyController;
 use App\Http\Controllers\Policy\ProcedureController;
+use App\Http\Controllers\Policy\ProsesBisnisController;
 use App\Http\Controllers\Policy\RegulationController;
 use App\Http\Controllers\Policy\RoleController;
 use App\Http\Controllers\ProgramEvaluation\ReviewDashboardController;
@@ -318,11 +319,23 @@ Route::middleware(['auth', 'approved'])->group(function () {
         Route::post('/procedure/actor', [ProcedureController::class, 'storeActor'])->name('procedure.actor.store');
         Route::put('/procedure/actor/{id}', [ProcedureController::class, 'updateActor'])->name('procedure.actor.update');
         Route::delete('/procedure/actor/{id}', [ProcedureController::class, 'destroyActor'])->name('procedure.actor.destroy');
+        Route::post('/procedure/sop', [ProcedureController::class, 'storeSop'])->name('procedure.sop.store');
+        Route::put('/procedure/sop/{id}', [ProcedureController::class, 'updateSop'])->name('procedure.sop.update');
+        Route::delete('/procedure/sop/{id}', [ProcedureController::class, 'destroySop'])->name('procedure.sop.destroy');
+        Route::post('/procedure/diagram', [ProcedureController::class, 'storeDiagram'])->name('procedure.diagram.store');
+        Route::put('/procedure/diagram/{id}', [ProcedureController::class, 'updateDiagram'])->name('procedure.diagram.update');
+        Route::delete('/procedure/diagram/{id}', [ProcedureController::class, 'destroyDiagram'])->name('procedure.diagram.destroy');
 
         // Matriks RACI (RACI Matrix) mapping
         Route::get('/raci', [\App\Http\Controllers\Policy\PracticeRoleController::class, 'index'])->name('raci.index');
         Route::get('/raci/manage', [\App\Http\Controllers\Policy\PracticeRoleController::class, 'manage'])->name('raci.manage');
         Route::post('/raci', [\App\Http\Controllers\Policy\PracticeRoleController::class, 'update'])->name('raci.update');
+
+        // Proses Bisnis (Business Process) CRUD
+        Route::get('/proses-bisnis', [ProsesBisnisController::class, 'index'])->name('proses-bisnis.index');
+        Route::post('/proses-bisnis', [ProsesBisnisController::class, 'store'])->name('proses-bisnis.store');
+        Route::put('/proses-bisnis/{id}', [ProsesBisnisController::class, 'update'])->name('proses-bisnis.update');
+        Route::delete('/proses-bisnis/{id}', [ProsesBisnisController::class, 'destroy'])->name('proses-bisnis.destroy');
 
         // Master Responsible CRUD
         Route::get('/responsible', [\App\Http\Controllers\Policy\ResponsibleController::class, 'manage'])->name('responsible.manage');

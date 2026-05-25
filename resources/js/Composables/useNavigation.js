@@ -272,6 +272,12 @@ export function useNavigation() {
                         active: (url) => (url || '').startsWith("/policy/specific"),
                     },
                     {
+                        label: "Proses Bisnis",
+                        href: safeRoute("policy.proses-bisnis.index"),
+                        icon: DocumentTextIcon,
+                        active: (url) => (url || '').startsWith("/policy/proses-bisnis"),
+                    },
+                    {
                         label: "Peran & Tanggung Jawab",
                         href: safeRoute("policy.roles.index"),
                         icon: DocumentTextIcon,
