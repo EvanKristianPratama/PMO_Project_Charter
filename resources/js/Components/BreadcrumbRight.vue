@@ -31,18 +31,6 @@ const procedureItem = computed(() => {
     return navItems.value.find((item) => item.label === 'Procedure') ?? null;
 });
 
-const policyChildren = computed(() => {
-    return policyItem.value?.children || [];
-});
-
-const showPolicyChildren = computed(() => {
-    if (policyItem.value?.active(currentUrl.value)) {
-        return true;
-    }
-
-    return policyChildren.value.some((item) => item.active(currentUrl.value));
-});
-
 const adminItem = computed(() => {
     return navItems.value.find((item) => item.label === 'Admin') ?? null;
 });
@@ -77,7 +65,7 @@ const adminItem = computed(() => {
                 :href="policyItem.href"
                 class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
                 :class="[
-                    showPolicyChildren
+                    policyItem.active(currentUrl)
                         ? 'bg-indigo-500 text-white shadow-sm'
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
@@ -133,23 +121,6 @@ const adminItem = computed(() => {
             <Link
                 v-for="item in architectureChildren"
                 :key="'right-child-' + item.label"
-                :href="item.href"
-                class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all duration-150"
-                :class="[
-                    item.active(currentUrl)
-                        ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300'
-                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
-                ]"
-            >
-                <component :is="item.icon" v-if="item.icon" class="h-3.5 w-3.5 shrink-0" />
-                <span>{{ item.label }}</span>
-            </Link>
-        </div>
-
-        <div v-if="showPolicyChildren" class="ml-2 inline-flex flex-wrap items-center gap-1">
-            <Link
-                v-for="item in policyChildren"
-                :key="'policy-child-' + item.label"
                 :href="item.href"
                 class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all duration-150"
                 :class="[
