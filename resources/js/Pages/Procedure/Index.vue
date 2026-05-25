@@ -62,43 +62,66 @@
                         <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                         </svg>
-                        Tambah Aktor
+                        Add Actor
                     </button>
                 </div>
                 
-                <div class="px-6">
-                    <ol class="list-decimal space-y-3">
-                        <li 
-                            v-for="actor in actors" 
-                            :key="actor.id"
-                            class="group text-sm font-semibold text-slate-700 dark:text-slate-300"
-                        >
-                            <div class="flex items-center justify-between gap-4">
-                                <span>
-                                    {{ actor.name }}
-                                    <span v-if="actor.organization" class="ml-2 text-[10px] text-slate-400 font-normal uppercase italic">
-                                        ({{ actor.organization.name }})
-                                    </span>
-                                </span>
-                                <div class="flex items-center gap-3">
-                                    <button 
-                                        @click="openEditActorModal(actor)"
-                                        class="text-[10px] font-bold uppercase tracking-wider text-blue-600 hover:text-blue-800 transition-colors"
-                                    >
-                                        Edit
-                                    </button>
-                                    <button 
-                                        @click="openDeleteActorModal(actor)"
-                                        class="text-[10px] font-bold uppercase tracking-wider text-rose-600 hover:text-rose-800 transition-colors"
-                                    >
-                                        Delete
-                                    </button>
-                                </div>
-                            </div>
-                        </li>
-                    </ol>
-                    <div v-if="actors.length === 0" class="py-4 text-sm text-slate-400">
-                        Belum ada data unit organisasi terkait.
+                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse text-left text-[11px] text-slate-500 dark:text-slate-400">
+                            <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 w-20 text-center">No</th>
+                                    <th scope="col" class="px-6 py-3">Fungsi/ Unit Organisasi/Jabatan terkait</th>
+                                    <th scope="col" class="px-6 py-3">Jabatan</th>
+                                    <th scope="col" class="px-6 py-3 w-32 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 dark:divide-white/10 dark:bg-transparent">
+                                <tr v-if="actors.length === 0" class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
+                                    <td colspan="4" class="px-6 py-7 text-center text-slate-400 dark:text-slate-500">
+                                        Belum ada data unit organisasi terkait.
+                                    </td>
+                                </tr>
+                                <tr
+                                    v-for="(actor, index) in actors"
+                                    :key="actor.id"
+                                    class="group hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150"
+                                >
+                                    <td class="px-6 py-2 w-20 text-center font-medium text-slate-500 dark:text-slate-400">
+                                        <span class="inline-block pl-2">{{ index + 1 }}</span>
+                                    </td>
+                                    <td class="px-6 py-2 text-slate-900 dark:text-white font-medium leading-snug">
+                                        {{ actor.name }}
+                                    </td>
+                                    <td class="px-6 py-2 text-slate-700 dark:text-slate-300 leading-snug">
+                                        <template v-if="actor.organization">
+                                            <div v-if="actor.organization.jabatan" class="font-medium text-slate-900 dark:text-white">
+                                                {{ actor.organization.jabatan }}
+                                            </div>
+                                            <span v-else class="text-slate-400 dark:text-slate-500">-</span>
+                                        </template>
+                                        <span v-else class="text-slate-400 dark:text-slate-500">-</span>
+                                    </td>
+                                    <td class="px-6 py-2 text-center">
+                                        <div class="flex items-center justify-center gap-3">
+                                            <button
+                                                @click="openEditActorModal(actor)"
+                                                class="text-[9px] font-bold uppercase tracking-wider text-blue-600 hover:text-blue-800 transition-colors"
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                @click="openDeleteActorModal(actor)"
+                                                class="text-[9px] font-bold uppercase tracking-wider text-rose-600 hover:text-rose-800 transition-colors"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>
@@ -111,35 +134,18 @@
                         A. Penyusunan RSTI
                     </h2>
                 </div>
-                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                    <div class="overflow-x-auto">
-                        <table class="w-full border-collapse text-left text-sm text-slate-500 dark:text-slate-400">
-                            <thead class="bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
-                                <tr>
-                                    <th scope="col" class="px-6 py-4 w-16 text-center">No</th>
-                                    <th scope="col" class="px-6 py-4">Deskripsi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-200 dark:divide-white/10 dark:bg-transparent">
-                                <tr v-if="sopA.length === 0" class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
-                                    <td colspan="2" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
-                                        Belum ada data SOP untuk kategori ini.
-                                    </td>
-                                </tr>
-                                <tr 
-                                    v-for="(item, index) in sopA" 
-                                    :key="item.id" 
-                                    class="group hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150"
-                                >
-                                    <td class="px-6 py-4 text-slate-500 dark:text-slate-400 w-16 text-center font-medium">
-                                        {{ index + 1 }}
-                                    </td>
-                                    <td class="px-6 py-4 text-slate-900 dark:text-white leading-relaxed whitespace-pre-line">
-                                        {{ item.description }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <div class="rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                    <ol v-if="sopA.length > 0" class="list-decimal space-y-0.5 pl-5 text-[11px] leading-[1.15] text-slate-500 dark:text-slate-400">
+                        <li
+                            v-for="item in sopA"
+                            :key="item.id"
+                            class="pl-1 py-[1px] text-slate-900 dark:text-white leading-[1.15] whitespace-pre-line break-words"
+                        >
+                            {{ item.description }}
+                        </li>
+                    </ol>
+                    <div v-else class="py-1 text-[11px] text-slate-400 dark:text-slate-500">
+                        Belum ada data SOP untuk kategori ini.
                     </div>
                 </div>
             </section>
@@ -152,37 +158,33 @@
                         B. Reviu & Pembaruan Berkala RSTI
                     </h2>
                 </div>
-                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                    <div class="overflow-x-auto">
-                        <table class="w-full border-collapse text-left text-sm text-slate-500 dark:text-slate-400">
-                            <thead class="bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
-                                <tr>
-                                    <th scope="col" class="px-6 py-4 w-16 text-center">No</th>
-                                    <th scope="col" class="px-6 py-4">Deskripsi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-200 dark:divide-white/10 dark:bg-transparent">
-                                <tr v-if="sopB.length === 0" class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
-                                    <td colspan="2" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
-                                        Belum ada data SOP untuk kategori ini.
-                                    </td>
-                                </tr>
-                                <tr 
-                                    v-for="(item, index) in sopB" 
-                                    :key="item.id" 
-                                    class="group hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150"
-                                >
-                                    <td class="px-6 py-4 text-slate-500 dark:text-slate-400 w-16 text-center font-medium">
-                                        {{ index + 1 }}
-                                    </td>
-                                    <td class="px-6 py-4 text-slate-900 dark:text-white leading-relaxed whitespace-pre-line">
-                                        {{ item.description }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <div class="rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                    <ol v-if="sopB.length > 0" class="list-decimal space-y-0.5 pl-5 text-[11px] leading-[1.15] text-slate-500 dark:text-slate-400">
+                        <li
+                            v-for="item in sopB"
+                            :key="item.id"
+                            class="pl-1 py-[1px] text-slate-900 dark:text-white leading-[1.15] whitespace-pre-line break-words"
+                        >
+                            {{ tightSopText(item.description) }}
+                        </li>
+                    </ol>
+                    <div v-else class="py-1 text-[11px] text-slate-400 dark:text-slate-500">
+                        Belum ada data SOP untuk kategori ini.
                     </div>
                 </div>
+            </section>
+
+            <section class="space-y-4">
+                <div class="flex items-center gap-2 px-1">
+                    <div class="h-5 w-1 rounded-full bg-emerald-600"></div>
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+                        DIAGRAM ALIR PENYUSUNAN RSTI 
+                    </h2>
+                </div>
+                <FlowChart
+                    :actors="actors"
+                    :sops="flowChartSops"
+                />
             </section>
         </div>
 
@@ -245,6 +247,7 @@ import { computed, ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import FlowChart from '@/Components/Procedure/FlowChart.vue';
 import Swal from 'sweetalert2';
 
 const props = defineProps({
@@ -253,6 +256,10 @@ const props = defineProps({
         default: () => [],
     },
     sop: {
+        type: Array,
+        default: () => [],
+    },
+    flowChartSops: {
         type: Array,
         default: () => [],
     },
@@ -395,6 +402,16 @@ function formatDate(dateString) {
     }
 }
 
+function tightSopText(text) {
+    if (!text) return '';
+    return String(text)
+        .replace(/\r\n/g, '\n')
+        .split('\n')
+        .map((line) => line.trim())
+        .filter((line) => line !== '')
+        .join('\n');
+}
+
 </script>
 
 <style scoped>
@@ -413,5 +430,3 @@ function formatDate(dateString) {
     }
 }
 </style>
-
-

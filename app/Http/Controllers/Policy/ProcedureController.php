@@ -21,12 +21,17 @@ class ProcedureController extends Controller
     {
         $actors = MstActor::with('organization')->get();
         $sop = MstSop::with('regulation.organization')->get();
+        $flowChartSops = MstSop::with(['mapActorSops.actor.organization'])
+            ->where('tipe', 'A')
+            ->orderBy('id')
+            ->get();
         $regulations = MstRegulation::with('organization')->orderBy('id', 'desc')->get();
         $organizations = TrsOrganization::orderBy('name')->get();
 
         return Inertia::render('Procedure/Index', [
             'actors' => $actors,
             'sop' => $sop,
+            'flowChartSops' => $flowChartSops,
             'regulations' => $regulations,
             'organizations' => $organizations,
         ]);

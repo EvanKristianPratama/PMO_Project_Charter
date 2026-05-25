@@ -8,7 +8,10 @@ class TrsMapActorSop extends Model
 {
     protected $table = 'trs_map_actor_sop';
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'actor_id',
+        'sop_id',
+    ];
 
     /**
      * Belongs to an actor.
