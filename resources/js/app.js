@@ -9,13 +9,30 @@ const appName = import.meta.env.VITE_APP_NAME || 'Review ITSPS';
 const pages = import.meta.glob('./Pages/**/*.vue');
 
 function normalizePagePath(path) {
-    return path.replace(/\\/g, '/').replace(/^\.\/+/, './');
+    return path.replace(/\\/g, '/').replace(/^\.\/+/, './').toLowerCase();
+}
+
+function normalizeRequestedPage(name) {
+    return name
+        .replace(/\\/g, '/')
+        .replace(/^\.\/Pages\//i, '')
+        .replace(/^Pages\//i, '')
+        .replace(/^\.\/+/, '')
+        .replace(/\.vue$/i, '')
+        .replace(/\/+$/, '')
+        .toLowerCase();
 }
 
 function resolvePage(name) {
+    const requested = normalizeRequestedPage(name);
+    const requestedWithoutIndex = requested.replace(/\/index$/, '');
     const candidates = [
         `./Pages/${name}.vue`,
         `./Pages/${name}/Index.vue`,
+        `./Pages/${requested}.vue`,
+        `./Pages/${requested}/Index.vue`,
+        `./Pages/${requestedWithoutIndex}.vue`,
+        `./Pages/${requestedWithoutIndex}/Index.vue`,
     ];
 
     for (const candidate of candidates) {
@@ -24,15 +41,24 @@ function resolvePage(name) {
             return exact();
         }
 
-        const normalizedCandidate = normalizePagePath(candidate).toLowerCase();
+        const normalizedCandidate = normalizePagePath(candidate);
         const foundKey = Object.keys(pages).find((key) => normalizePagePath(key).toLowerCase() === normalizedCandidate);
 
         if (foundKey) {
             return pages[foundKey]();
         }
+
+        const suffixMatch = Object.keys(pages).find((key) => {
+            const normalizedKey = normalizePagePath(key);
+            return normalizedKey.endsWith(normalizedCandidate);
+        });
+
+        if (suffixMatch) {
+            return pages[suffixMatch]();
+        }
     }
 
-    throw new Error(`Page not found: ${candidates[0]}`);
+    throw new Error(`Page not found: ${name}. Checked: ${candidates.join(', ')}`);
 }
 
 createInertiaApp({
