@@ -223,33 +223,52 @@ class RoleController extends Controller
     {
         $validated = $request->validate([
             'role_id' => 'required|integer|exists:mst_roles,id',
-            'responsible_id' => 'required|integer|exists:mst_responsible,id',
+            'responsible_id' => 'nullable|integer|exists:mst_responsible,id',
+            'responsible_ids' => 'nullable|array',
+            'responsible_ids.*' => 'integer|exists:mst_responsible,id',
         ], [
             'role_id.required' => 'Role wajib dipilih.',
             'role_id.exists' => 'Role tidak valid.',
-            'responsible_id.required' => 'Master Responsible wajib dipilih.',
             'responsible_id.exists' => 'Master Responsible tidak valid.',
+            'responsible_ids.array' => 'Daftar Master Responsible tidak valid.',
         ]);
 
-        // Check if mapping already exists to prevent duplicate entries
-        $exists = \DB::table('trs_responsible')
-            ->where('role_id', $validated['role_id'])
-            ->where('responsible_id', $validated['responsible_id'])
-            ->exists();
+        $ids = [];
+        if (!empty($validated['responsible_ids'])) {
+            $ids = $validated['responsible_ids'];
+        } elseif (!empty($validated['responsible_id'])) {
+            $ids = [$validated['responsible_id']];
+        }
 
-        if ($exists) {
+        if (empty($ids)) {
             return redirect()
                 ->route('policy.roles.manage')
-                ->with('error', 'Responsible tersebut sudah dipetakan pada role ini.');
+                ->with('error', 'Silakan pilih minimal satu Master Responsible.');
+        }
+
+        // Check which IDs are already mapped to prevent duplicate entries
+        $existingIds = \DB::table('trs_responsible')
+            ->where('role_id', $validated['role_id'])
+            ->whereIn('responsible_id', $ids)
+            ->pluck('responsible_id')
+            ->toArray();
+
+        $newIds = array_diff($ids, $existingIds);
+
+        if (empty($newIds)) {
+            return redirect()
+                ->route('policy.roles.manage')
+                ->with('error', 'Responsible yang dipilih sudah dipetakan pada role ini.');
         }
 
         // Attach relationship
         $role = MstRole::findOrFail($validated['role_id']);
-        $role->mappedResponsibles()->attach($validated['responsible_id']);
+        $role->mappedResponsibles()->attach($newIds);
 
+        $count = count($newIds);
         return redirect()
             ->route('policy.roles.manage')
-            ->with('success', 'Pemetaan Master Responsible berhasil ditambahkan.');
+            ->with('success', "{$count} Pemetaan Master Responsible berhasil ditambahkan.");
     }
 
     /**

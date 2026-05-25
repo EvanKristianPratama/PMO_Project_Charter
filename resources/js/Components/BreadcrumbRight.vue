@@ -27,12 +27,9 @@ const policyItem = computed(() => {
     return navItems.value.find((item) => item.label === 'Regulation') ?? null;
 });
 
-const procedureItem = computed(() => {
-    return navItems.value.find((item) => item.label === 'Procedure') ?? null;
-});
-
 const policyChildren = computed(() => {
-    return policyItem.value?.children || [];
+    const children = policyItem.value?.children || [];
+    return children.filter(item => item.label !== 'Kebijakan Umum' && item.label !== 'Kebijakan Khusus');
 });
 
 const showPolicyChildren = computed(() => {
@@ -41,6 +38,10 @@ const showPolicyChildren = computed(() => {
     }
 
     return policyChildren.value.some((item) => item.active(currentUrl.value));
+});
+
+const procedureItem = computed(() => {
+    return navItems.value.find((item) => item.label === 'Procedure') ?? null;
 });
 
 const adminItem = computed(() => {

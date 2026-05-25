@@ -39,11 +39,12 @@
                                 <th scope="col" class="px-6 py-4 text-center w-24">Revisi</th>
                                 <th scope="col" class="px-6 py-4 w-32">Terbit</th>
                                 <th scope="col" class="px-6 py-4 w-32">Berlaku</th>
+                                <th scope="col" class="px-6 py-4 text-center w-80">Detail</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200 dark:divide-white/10 dark:bg-transparent">
                             <tr v-if="regulations.length === 0" class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
-                                <td colspan="7" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
+                                <td colspan="9" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
                                     Belum ada data Regulasi. Silakan hubungi admin atau klik "Kelola Regulasi" untuk menambahkan.
                                 </td>
                             </tr>
@@ -97,6 +98,35 @@
                                 <td class="px-6 py-4 text-slate-600 dark:text-slate-400 font-mono text-xs">
                                     {{ formatDate(reg.berlaku) }}
                                 </td>
+                                <!-- Detail -->
+                                <td class="px-6 py-4 text-center">
+                                    <div class="flex items-center justify-center gap-1.5 flex-wrap">
+                                        <!-- Kebijakan Umum -->
+                                        <button 
+                                            @click="handleDetailClick(reg, 'umum')"
+                                            class="inline-flex items-center justify-center rounded-full bg-[#821f44]/5 border border-[#821f44]/20 text-[#821f44] px-2.5 py-1 text-[10px] font-bold transition-all duration-150 hover:bg-[#821f44] hover:text-white dark:bg-[#821f44]/10 dark:border-[#821f44]/30 dark:text-[#a83262] dark:hover:bg-[#821f44] dark:hover:text-white active:scale-95 shrink-0"
+                                            title="Kebijakan Umum"
+                                        >
+                                            Kebijakan Umum
+                                        </button>
+                                        <!-- Kebijakan Khusus -->
+                                        <button 
+                                            @click="handleDetailClick(reg, 'khusus')"
+                                            class="inline-flex items-center justify-center rounded-full bg-blue-50 border border-blue-200 text-blue-700 px-2.5 py-1 text-[10px] font-bold transition-all duration-150 hover:bg-blue-600 hover:text-white dark:bg-blue-500/10 dark:border-blue-500/20 dark:text-blue-400 dark:hover:bg-blue-600 dark:hover:text-white active:scale-95 shrink-0"
+                                            title="Kebijakan Khusus"
+                                        >
+                                            Kebijakan Khusus
+                                        </button>
+                                        <!-- Proses Bisnis -->
+                                        <button 
+                                            @click="handleDetailClick(reg, 'proses_bisnis')"
+                                            class="inline-flex items-center justify-center rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 px-2.5 py-1 text-[10px] font-bold transition-all duration-150 hover:bg-emerald-600 hover:text-white dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-600 dark:hover:text-white active:scale-95 shrink-0"
+                                            title="Proses Bisnis"
+                                        >
+                                            Proses Bisnis
+                                        </button>
+                                    </div>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -107,7 +137,7 @@
 </template>
 
 <script setup>
-import { Link } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
 defineProps({
@@ -116,6 +146,25 @@ defineProps({
         required: true,
     },
 });
+
+function handleDetailClick(reg, type) {
+    const isRsti = reg.judul && (
+        reg.judul.toUpperCase().includes('RENCANA STRATEGIS') || 
+        reg.judul.toUpperCase().includes('RSTI')
+    );
+
+    if (isRsti) {
+        if (type === 'umum') {
+            router.visit(route('policy.general.index'));
+        } else if (type === 'khusus') {
+            router.visit(route('policy.specific.index'));
+        } else if (type === 'proses_bisnis') {
+            router.visit(route('policy.procedure.index'));
+        }
+    } else {
+        alert('Belum ada kebijakan / proses bisnis yang ditambahkan untuk regulasi ini.');
+    }
+}
 
 // ---------------------------------------------------
 // DATE FORMATTER HELPER

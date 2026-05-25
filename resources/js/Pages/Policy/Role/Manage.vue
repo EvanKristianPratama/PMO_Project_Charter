@@ -424,6 +424,13 @@
                                                         </svg>
                                                     </div>
                                                 </div>
+
+                                                <!-- Selection Count -->
+                                                <div v-if="getAvailableResponsiblesForRole(role).length > 0" class="flex items-center justify-between mt-1 mb-2 bg-slate-100/50 dark:bg-black/10 px-2.5 py-1.5 rounded-md">
+                                                    <span class="text-[10px] text-slate-500 dark:text-slate-400">
+                                                        Terpilih: <strong class="text-blue-600 dark:text-blue-400 font-extrabold">{{ mappingForm.responsible_ids.length }}</strong> item
+                                                    </span>
+                                                </div>
                                                 
                                                 <!-- Filtered Scrollable List of Responsibles -->
                                                 <div v-if="filteredSearchResponsibles(role).length > 0" class="max-h-40 overflow-y-auto border border-slate-200 dark:border-white/10 rounded-lg divide-y divide-slate-100 dark:divide-white/5 bg-white dark:bg-[#1a1a1a] shadow-inner">
@@ -431,16 +438,24 @@
                                                         v-for="resp in filteredSearchResponsibles(role)" 
                                                         :key="resp.id"
                                                         type="button"
-                                                        @click="selectResponsibleForMapping(resp)"
-                                                        class="w-full text-left px-3 py-2.5 text-xs text-slate-700 hover:bg-blue-50 dark:text-slate-300 dark:hover:bg-blue-950/30 transition flex items-center justify-between"
-                                                        :class="{'bg-blue-50/80 dark:bg-blue-950/20 font-bold text-blue-700 dark:text-blue-400': mappingForm.responsible_id === resp.id}"
+                                                        @click="toggleResponsibleForMapping(resp.id)"
+                                                        class="w-full text-left px-3 py-2.5 text-xs text-slate-700 hover:bg-blue-50/50 dark:text-slate-300 dark:hover:bg-blue-950/30 transition flex items-center justify-between group/item"
+                                                        :class="{'bg-blue-50/80 dark:bg-blue-950/20 font-bold text-blue-700 dark:text-blue-400': mappingForm.responsible_ids.includes(resp.id)}"
                                                     >
-                                                        <span class="flex-1 pr-4">{{ resp.responsible }}</span>
-                                                        <span v-if="mappingForm.responsible_id === resp.id" class="text-blue-600 dark:text-blue-400 shrink-0">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
-                                                                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143z" clip-rule="evenodd" />
-                                                            </svg>
-                                                        </span>
+                                                        <div class="flex items-center gap-2.5 flex-1 pr-4">
+                                                            <!-- Modern Checkbox indicator -->
+                                                            <div class="w-4 h-4 rounded border flex items-center justify-center shrink-0 transition"
+                                                                :class="{
+                                                                    'bg-blue-600 border-blue-600 text-white dark:bg-blue-500 dark:border-blue-500': mappingForm.responsible_ids.includes(resp.id),
+                                                                    'border-slate-300 bg-white group-hover/item:border-blue-400 dark:border-white/20 dark:bg-transparent': !mappingForm.responsible_ids.includes(resp.id)
+                                                                }"
+                                                            >
+                                                                <svg v-if="mappingForm.responsible_ids.includes(resp.id)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3">
+                                                                    <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143z" clip-rule="evenodd" />
+                                                                </svg>
+                                                            </div>
+                                                            <span class="leading-snug">{{ resp.responsible }}</span>
+                                                        </div>
                                                     </button>
                                                 </div>
                                                 <div v-else class="p-3 text-center text-xs text-slate-400 dark:text-slate-500 border border-dashed border-slate-200 dark:border-white/10 rounded-lg bg-slate-50/50 dark:bg-black/10">
@@ -457,8 +472,8 @@
                                                 </button>
                                                 <button 
                                                     type="submit" 
-                                                    class="rounded-lg bg-blue-600 px-3.5 py-1.5 text-[11px] font-bold text-white hover:bg-blue-700 disabled:opacity-60"
-                                                    :disabled="mappingForm.processing || getAvailableResponsiblesForRole(role).length === 0"
+                                                    class="rounded-lg bg-blue-600 px-3.5 py-1.5 text-[11px] font-bold text-white hover:bg-blue-700 disabled:opacity-60 transition active:scale-95"
+                                                    :disabled="mappingForm.processing || mappingForm.responsible_ids.length === 0"
                                                 >
                                                     <span v-if="mappingForm.processing" class="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></span>
                                                     Simpan Pemetaan
@@ -775,6 +790,7 @@ const mappingSearchQuery = ref('');
 const mappingForm = useForm({
     role_id: '',
     responsible_id: '',
+    responsible_ids: [],
 });
 
 function startAddMapping(roleId) {
@@ -782,6 +798,7 @@ function startAddMapping(roleId) {
     mappingSearchQuery.value = '';
     mappingForm.reset();
     mappingForm.role_id = roleId;
+    mappingForm.responsible_ids = [];
     mappingForm.clearErrors();
 }
 
@@ -804,13 +821,18 @@ function filteredSearchResponsibles(role) {
     return available.filter(resp => resp.responsible.toLowerCase().includes(query));
 }
 
-function selectResponsibleForMapping(resp) {
-    mappingForm.responsible_id = resp.id;
+function toggleResponsibleForMapping(respId) {
+    const index = mappingForm.responsible_ids.indexOf(respId);
+    if (index > -1) {
+        mappingForm.responsible_ids.splice(index, 1);
+    } else {
+        mappingForm.responsible_ids.push(respId);
+    }
 }
 
 function submitMappingForm() {
-    if (!mappingForm.responsible_id) {
-        localError.value = 'Silakan pilih salah satu Master Responsible terlebih dahulu.';
+    if (mappingForm.responsible_ids.length === 0) {
+        localError.value = 'Silakan pilih minimal satu Master Responsible terlebih dahulu.';
         return;
     }
 
