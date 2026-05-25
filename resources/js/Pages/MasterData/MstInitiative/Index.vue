@@ -69,9 +69,9 @@
                 <div class="overflow-x-auto">
                     <table class="w-full table-fixed divide-y divide-slate-200 text-[11px] dark:divide-white/5">
                         <colgroup>
-                            <col class="w-[3%]"><col class="w-[6%]"><col class="w-[7%]"><col class="w-[11%]">
-                            <col class="w-[18%]"><col class="w-[10%]"><col class="w-[10%]"><col class="w-[9%]">
-                            <col class="w-[10%]"><col class="w-[10%]"><col class="w-[6%]">
+                            <col class="w-[3%]"><col class="w-[4%]"><col class="w-[6%]"><col class="w-[13%]">
+                            <col class="w-[22%]"><col class="w-[10%]"><col class="w-[12%]"><col class="w-[8%]">
+                            <col class="w-[12%]"><col class="w-[10%]">
                         </colgroup>
                         <thead class="bg-slate-50 dark:bg-white/5">
                             <tr>
@@ -103,7 +103,6 @@
                                     <span v-else class="text-slate-400">-</span>
                                 </td>
                                 <td class="px-3 py-2.5 text-slate-600 dark:text-slate-300">{{ item.source_data?.name ?? '-' }}</td>
-                                <td class="px-3 py-2.5 text-slate-600 dark:text-slate-300"><p class="line-clamp-2 break-words">{{ item.description ?? '-' }}</p></td>
                                 <td class="px-3 py-2.5">
                                     <div class="flex items-center gap-1">
                                         <a :href="route('master-data.mst-initiatives.edit', item.id)"
@@ -114,7 +113,7 @@
                                 </td>
                             </tr>
                             <tr v-if="filteredInitiatives.length === 0">
-                                <td colspan="11" class="px-6 py-8 text-center text-xs text-slate-500">Tidak ada data.</td>
+                                <td colspan="10" class="px-6 py-8 text-center text-xs text-slate-500">Tidak ada data.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -139,7 +138,7 @@ const props = defineProps({
 
 const route = useRouteHelper();
 
-const headers = ['No', 'Code', 'Tipe', 'CoE', 'Nama', 'Holding', 'Organisasi', 'Status', 'Sumber Data', 'Deskripsi', 'Action'];
+const headers = ['No', 'Code', 'Tipe', 'CoE', 'Nama', 'Holding', 'Organisasi', 'Status', 'Sumber Data', 'Action'];
 
 const filterTipe = ref('');
 const filterCoe = ref('');

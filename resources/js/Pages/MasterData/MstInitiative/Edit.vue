@@ -91,7 +91,6 @@
                                             {{ opt.name }}{{ opt.groub ? ` (${opt.groub})` : '' }}
                                         </option>
                                     </select>
-                                    <p v-if="masterForm.errors.organization_ids" class="mt-0.5 text-[10px] text-rose-500">{{ masterForm.errors.organization_ids }}</p>
                                     <p v-if="masterForm.errors.business_unit" class="mt-0.5 text-[10px] text-rose-500">{{ masterForm.errors.business_unit }}</p>
                                 </td>
                             </tr>
@@ -337,7 +336,6 @@ const props = defineProps({
     organizationOptions: { type: Array, default: () => [] },
     tipeOptions:         { type: Array, default: () => [] },
     sourceOptions:       { type: Array, default: () => [] },
-    selectedOrganizationIds: { type: Array, default: () => [] },
     allGoals:             { type: Array, default: () => [] },
     allThemes:            { type: Array, default: () => [] },
 });
@@ -352,29 +350,18 @@ const masterForm = useForm({
     description:     props.initiative.description ?? '',
     tipe_initiative: props.initiative.tipe_initiative ?? '',
     coe_id:          props.initiative.coe_id ?? null,
-    business_unit:   props.initiative.business_unit ?? (
-        Array.isArray(props.selectedOrganizationIds) && props.selectedOrganizationIds.length
-            ? Number(props.selectedOrganizationIds[0])
-            : (
-                Array.isArray(props.initiative.organizations) && props.initiative.organizations.length
-                    ? Number(props.initiative.organizations[0]?.id)
-                    : null
-            )
-    ),
+    business_unit:   props.initiative.business_unit ?? null,
     source:          props.initiative.source ?? null,
 });
 
 const submitMaster = () => {
     masterForm
         .transform((data) => {
-            const organizationIds = data.business_unit ? [Number(data.business_unit)] : [];
-
-        return {
-            ...data,
-            organization_ids: organizationIds,
-            business_unit: data.business_unit ? Number(data.business_unit) : null,
-        };
-    })
+            return {
+                ...data,
+                business_unit: data.business_unit ? Number(data.business_unit) : null,
+            };
+        })
         .put(route('master-data.mst-initiatives.update', props.initiative.id));
 };
 

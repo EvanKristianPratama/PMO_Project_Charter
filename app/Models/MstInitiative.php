@@ -46,17 +46,6 @@ class MstInitiative extends Model
         return $this->belongsTo(TrsOrganization::class, 'business_unit');
     }
 
-    public function organizations(): BelongsToMany
-    {
-        return $this->belongsToMany(
-            TrsOrganization::class,
-            'trs_bu_collaboration',
-            'initiative_id',
-            'organization_id',
-        )->using(TrsBuCollaboration::class)
-            ->withTimestamps();
-    }
-
     public function initiativeRelationsRow(): HasMany
     {
         return $this->hasMany(MstInitiativeRelation::class, 'initiative_code_row');

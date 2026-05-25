@@ -30,8 +30,6 @@ class MstInitiativeController extends Controller
             'tipe_initiative' => 'required|integer|in:1,2',
             'coe_id' => 'nullable|integer|exists:mst_coe,id',
             'business_unit' => 'nullable|integer|exists:trs_organization,id',
-            'organization_ids' => 'nullable|array',
-            'organization_ids.*' => 'integer|exists:trs_organization,id',
             'status' => 'nullable|string|max:255',
             'source' => 'nullable|integer|exists:mst_data_source,id',
         ];
@@ -103,12 +101,10 @@ class MstInitiativeController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate($this->rules());
-        $organizationIds = $this->extractOrganizationIds($validated);
-        $payload = $this->buildInitiativePayload($validated, $organizationIds);
+        $payload = $validated;
         $payload['status'] = $payload['status'] ?? 'drafting';
 
         $initiative = MstInitiative::create($payload);
-        $initiative->organizations()->sync($organizationIds);
         $this->syncScopeCharterFromSource($initiative);
 
         // Auto-create initial status history entry
@@ -140,7 +136,6 @@ class MstInitiativeController extends Controller
             'coe:id,name',
             'organization:id,name,groub_id',
             'organization.groub:id,name',
-            'organizations:id,name,groub_id',
             'taggings' => fn ($q) => $q->with(['theme', 'initiative']),
             'statusHistory' => fn ($q) => $q->orderByDesc('id'),
         ]);
@@ -155,11 +150,6 @@ class MstInitiativeController extends Controller
 
         return Inertia::render('MasterData/MstInitiative/Edit', [
             'initiative' => $mstInitiative,
-            'selectedOrganizationIds' => $mstInitiative->organizations
-                ->pluck('id')
-                ->map(fn ($id) => (int) $id)
-                ->values()
-                ->all(),
             'allGoals' => $allGoals,
             'allThemes' => $allThemes,
             ...$this->dropdownOptions(),
@@ -169,11 +159,8 @@ class MstInitiativeController extends Controller
     public function update(Request $request, MstInitiative $mstInitiative): RedirectResponse
     {
         $validated = $request->validate($this->rules());
-        $organizationIds = $this->extractOrganizationIds($validated);
-        $payload = $this->buildInitiativePayload($validated, $organizationIds);
 
-        $mstInitiative->update($payload);
-        $mstInitiative->organizations()->sync($organizationIds);
+        $mstInitiative->update($validated);
         $this->syncScopeCharterFromSource($mstInitiative->fresh());
 
         return redirect()
@@ -220,42 +207,9 @@ class MstInitiativeController extends Controller
             ->with('success', 'Status berhasil dihapus.');
     }
 
-    private function extractOrganizationIds(array $validated): array
-    {
-        $ids = $validated['organization_ids'] ?? [];
-        if (! is_array($ids)) {
-            $ids = [];
-        }
-
-        $normalized = collect($ids)
-            ->filter(fn ($id) => $id !== null && $id !== '')
-            ->map(fn ($id) => (int) $id)
-            ->unique()
-            ->values()
-            ->all();
-
-        if ($normalized === [] && ! empty($validated['business_unit'])) {
-            $normalized = [(int) $validated['business_unit']];
-        }
-
-        return $normalized;
-    }
-
-    private function buildInitiativePayload(array $validated, array $organizationIds): array
-    {
-        $payload = collect($validated)
-            ->except(['organization_ids'])
-            ->all();
-
-        $payload['business_unit'] = $organizationIds !== []
-            ? $organizationIds[0]
-            : ($payload['business_unit'] ?? null);
-
-        return $payload;
-    }
-
     private function syncScopeCharterFromSource(MstInitiative $initiative): void
     {
+
         $sourceType = $this->resolveSourceType($initiative->source);
 
         if ($sourceType === null) {

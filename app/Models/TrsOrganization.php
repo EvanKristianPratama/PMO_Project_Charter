@@ -36,17 +36,6 @@ protected $fillable = [
         return $this->hasMany(MstInitiative::class, 'business_unit');
     }
 
-    public function collaborationInitiatives(): BelongsToMany
-    {
-        return $this->belongsToMany(
-            MstInitiative::class,
-            'trs_bu_collaboration',
-            'organization_id',
-            'initiative_id',
-        )->using(TrsBuCollaboration::class)
-            ->withTimestamps();
-    }
-
     public function businessStrategies(): HasMany
     {
         return $this->hasMany(TrsBusinessStrategy::class, 'business_unit');
