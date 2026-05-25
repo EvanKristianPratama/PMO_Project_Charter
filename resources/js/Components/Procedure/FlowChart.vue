@@ -308,7 +308,7 @@ const rows = computed(() => sopsForActiveType.value);
 const activeDiagramMappings = computed(() => {
     return (props.sops || [])
         .flatMap((sop) => getMapList(sop).map((mapping) => normalizeMapping(mapping, sop)))
-        .filter((mapping) => mapping.tipe === activeFlowType.value)
+        .filter((mapping) => mapping.flowType === activeFlowType.value)
         .sort((a, b) => {
             if (Number(a.sop_id) !== Number(b.sop_id)) return Number(a.sop_id) - Number(b.sop_id);
             return String(a.actorName).localeCompare(String(b.actorName));
@@ -372,10 +372,12 @@ function getMapList(row) {
 
 function normalizeMapping(mapping, sop) {
     const actor = mapping?.actor || props.actors.find((item) => Number(item.id) === Number(mapping?.actor_id)) || null;
+    const flowType = sop?.tipe || (['A', 'B'].includes(mapping?.tipe) ? mapping.tipe : 'A');
 
     return {
         ...mapping,
-        tipe: mapping?.tipe || sop?.tipe || 'A',
+        tipe: flowType,
+        flowType,
         sop_id: mapping?.sop_id || sop?.id || '',
         actor_id: mapping?.actor_id || '',
         sopDescription: sop?.description || '-',
@@ -384,7 +386,7 @@ function normalizeMapping(mapping, sop) {
 }
 
 function mappingType(mapping, row) {
-    return mapping?.tipe || row?.tipe || 'A';
+    return row?.tipe || mapping?.flowType || 'A';
 }
 
 function hasMapping(row, actorId) {
@@ -417,7 +419,7 @@ function openAddDiagramModal() {
 function openEditDiagramModal(mapping) {
     if (!mapping?.id) return;
     editingDiagramId.value = mapping.id;
-    diagramForm.tipe = mapping.tipe || activeFlowType.value;
+    diagramForm.tipe = mapping.flowType || activeFlowType.value;
     diagramForm.sop_id = mapping.sop_id || '';
     diagramForm.actor_id = mapping.actor_id || '';
     diagramForm.clearErrors();

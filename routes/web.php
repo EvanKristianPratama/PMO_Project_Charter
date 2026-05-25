@@ -19,7 +19,7 @@ use App\Http\Controllers\MasterData\ScopeCharter\ScopeCharterController;
 use App\Http\Controllers\Policy\GeneralPolicyController;
 use App\Http\Controllers\Policy\PolicyController;
 use App\Http\Controllers\Policy\ProcedureController;
-use App\Http\Controllers\Policy\ProsesBisnisController;
+use App\Http\Controllers\Architecture\ProsesBisnis\ProsesBisnisController as ArchitectureProsesBisnisController;
 use App\Http\Controllers\Policy\RegulationController;
 use App\Http\Controllers\Policy\RoleController;
 use App\Http\Controllers\ProgramEvaluation\ReviewDashboardController;
@@ -268,6 +268,13 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::put('/architecture/organization-structure/{organization}', [ArchitectureOrganizationStructureController::class, 'update'])->name('architecture.organization-structure.update');
     Route::delete('/architecture/organization-structure/{organization}', [ArchitectureOrganizationStructureController::class, 'destroy'])->name('architecture.organization-structure.destroy');
     Route::get('/architecture/informatic-system', fn () => Inertia::render('Architecture/InformaticSystem/Index'))->name('architecture.informatic-system');
+
+    // Proses Bisnis (Business Process) CRUD under Architecture
+    Route::get('/architecture/proses-bisnis', [ArchitectureProsesBisnisController::class, 'index'])->name('architecture.proses-bisnis.index');
+    Route::get('/architecture/proses-bisnis/manage', [ArchitectureProsesBisnisController::class, 'manage'])->name('architecture.proses-bisnis.manage');
+    Route::post('/architecture/proses-bisnis', [ArchitectureProsesBisnisController::class, 'store'])->name('architecture.proses-bisnis.store');
+    Route::put('/architecture/proses-bisnis/{id}', [ArchitectureProsesBisnisController::class, 'update'])->name('architecture.proses-bisnis.update');
+    Route::delete('/architecture/proses-bisnis/{id}', [ArchitectureProsesBisnisController::class, 'destroy'])->name('architecture.proses-bisnis.destroy');
     Route::get('/resources-management', fn () => redirect()->route('program-implementation.resources-management.index'))
         ->name('resources-management.index');
     Route::get('/service-portofolio', fn () => Inertia::render('Placeholder/Index', [
@@ -334,12 +341,6 @@ Route::middleware(['auth', 'approved'])->group(function () {
         Route::get('/raci', [\App\Http\Controllers\Policy\PracticeRoleController::class, 'index'])->name('raci.index');
         Route::get('/raci/manage', [\App\Http\Controllers\Policy\PracticeRoleController::class, 'manage'])->name('raci.manage');
         Route::post('/raci', [\App\Http\Controllers\Policy\PracticeRoleController::class, 'update'])->name('raci.update');
-
-        // Proses Bisnis (Business Process) CRUD
-        Route::get('/proses-bisnis', [ProsesBisnisController::class, 'index'])->name('proses-bisnis.index');
-        Route::post('/proses-bisnis', [ProsesBisnisController::class, 'store'])->name('proses-bisnis.store');
-        Route::put('/proses-bisnis/{id}', [ProsesBisnisController::class, 'update'])->name('proses-bisnis.update');
-        Route::delete('/proses-bisnis/{id}', [ProsesBisnisController::class, 'destroy'])->name('proses-bisnis.destroy');
 
         // Master Responsible CRUD
         Route::get('/responsible', [\App\Http\Controllers\Policy\ResponsibleController::class, 'manage'])->name('responsible.manage');

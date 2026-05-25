@@ -28,9 +28,10 @@
             <!-- Regulations Table Components -->
             <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="overflow-x-auto">
-                    <table class="w-full border-collapse text-left text-sm text-slate-500 dark:text-slate-400">
-                        <thead class="bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
+                    <table class="w-full border-collapse text-left text-xs text-slate-500 dark:text-slate-400">
+                        <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
                             <tr>
+                                <th scope="col" class="px-6 py-4 w-16 text-center">No</th>
                                 <th scope="col" class="px-6 py-4">Judul</th>
                                 <th scope="col" class="px-6 py-4">Nomor</th>
                                 <th scope="col" class="px-6 py-4 w-36">Tipe</th>
@@ -49,10 +50,14 @@
                                 </td>
                             </tr>
                             <tr 
-                                v-for="reg in regulations" 
+                                v-for="(reg, index) in regulations" 
                                 :key="reg.id" 
                                 class="group hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150"
                             >
+                                <!-- No -->
+                                <td class="px-6 py-4 text-center font-medium text-slate-700 dark:text-slate-300">
+                                    {{ index + 1 }}
+                                </td>
                                 <!-- Judul -->
                                 <td class="px-6 py-4 text-slate-900 dark:text-white font-bold leading-relaxed max-w-sm">
                                     {{ reg.judul }}
@@ -100,31 +105,21 @@
                                 </td>
                                 <!-- Detail -->
                                 <td class="px-6 py-4 text-center">
-                                    <div class="flex items-center justify-center gap-1.5 flex-wrap">
-                                        <!-- Kebijakan Umum -->
+                                    <div v-if="reg.tipe === 'Procedure'" class="flex items-center justify-center">
                                         <button 
-                                            @click="handleDetailClick(reg, 'umum')"
-                                            class="inline-flex items-center justify-center rounded-full bg-[#821f44]/5 border border-[#821f44]/20 text-[#821f44] px-2.5 py-1 text-[10px] font-bold transition-all duration-150 hover:bg-[#821f44] hover:text-white dark:bg-[#821f44]/10 dark:border-[#821f44]/30 dark:text-[#a83262] dark:hover:bg-[#821f44] dark:hover:text-white active:scale-95 shrink-0"
-                                            title="Kebijakan Umum"
+                                            @click="handleDetailClick(reg)"
+                                            class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#821f44] px-4 py-2 text-xs font-bold text-white shadow-lg shadow-[#821f44]/25 transition-all hover:bg-[#9c2552] hover:shadow-[#821f44]/40 active:scale-95"
+                                            title="Lihat Detail Kebijakan"
                                         >
-                                            Kebijakan Umum
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                            Detail
                                         </button>
-                                        <!-- Kebijakan Khusus -->
-                                        <button 
-                                            @click="handleDetailClick(reg, 'khusus')"
-                                            class="inline-flex items-center justify-center rounded-full bg-blue-50 border border-blue-200 text-blue-700 px-2.5 py-1 text-[10px] font-bold transition-all duration-150 hover:bg-blue-600 hover:text-white dark:bg-blue-500/10 dark:border-blue-500/20 dark:text-blue-400 dark:hover:bg-blue-600 dark:hover:text-white active:scale-95 shrink-0"
-                                            title="Kebijakan Khusus"
-                                        >
-                                            Kebijakan Khusus
-                                        </button>
-                                        <!-- Proses Bisnis -->
-                                        <button 
-                                            @click="handleDetailClick(reg, 'proses_bisnis')"
-                                            class="inline-flex items-center justify-center rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 px-2.5 py-1 text-[10px] font-bold transition-all duration-150 hover:bg-emerald-600 hover:text-white dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-600 dark:hover:text-white active:scale-95 shrink-0"
-                                            title="Proses Bisnis"
-                                        >
-                                            Proses Bisnis
-                                        </button>
+                                    </div>
+                                    <div v-else class="text-slate-400 italic text-[10px]">
+                                        -
                                     </div>
                                 </td>
                             </tr>
@@ -147,22 +142,17 @@ defineProps({
     },
 });
 
-function handleDetailClick(reg, type) {
+function handleDetailClick(reg) {
     const isRsti = reg.judul && (
         reg.judul.toUpperCase().includes('RENCANA STRATEGIS') || 
         reg.judul.toUpperCase().includes('RSTI')
     );
 
     if (isRsti) {
-        if (type === 'umum') {
-            router.visit(route('policy.general.index'));
-        } else if (type === 'khusus') {
-            router.visit(route('policy.specific.index'));
-        } else if (type === 'proses_bisnis') {
-            router.visit(route('policy.procedure.index'));
-        }
+        // By default navigate to general policy as the entry point
+        router.visit(route('policy.general.index'));
     } else {
-        alert('Belum ada kebijakan / proses bisnis yang ditambahkan untuk regulasi ini.');
+        alert('Belum ada kebijakan yang ditambahkan untuk regulasi ini.');
     }
 }
 

@@ -18,7 +18,7 @@ class RegulationController extends Controller
      */
     public function index(): Response
     {
-        $regulations = MstRegulation::with('organization')->orderBy('id', 'desc')->get();
+        $regulations = MstRegulation::with('organization')->orderBy('id', 'asc')->get();
 
         return Inertia::render('Policy/Regulation/Index', [
             'regulations' => $regulations,
@@ -30,7 +30,7 @@ class RegulationController extends Controller
      */
     public function manage(): Response
     {
-        $regulations = MstRegulation::with('organization')->orderBy('id', 'desc')->get();
+        $regulations = MstRegulation::with('organization')->orderBy('id', 'asc')->get();
         $organizations = TrsOrganization::orderBy('name')->get();
 
         return Inertia::render('Policy/Regulation/Manage', [

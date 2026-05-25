@@ -193,6 +193,12 @@ export function useNavigation() {
                 active: (url) =>
                     (url || '').startsWith("/architecture/informatic-system"),
             },
+            {
+                label: "Proses Bisnis",
+                href: safeRoute("architecture.proses-bisnis.index"),
+                icon: DocumentTextIcon,
+                active: (url) => (url || '').startsWith("/architecture/proses-bisnis"),
+            },
         ];
 
         const items = [
@@ -270,12 +276,6 @@ export function useNavigation() {
                         href: safeRoute("policy.specific.index"),
                         icon: DocumentTextIcon,
                         active: (url) => (url || '').startsWith("/policy/specific"),
-                    },
-                    {
-                        label: "Proses Bisnis",
-                        href: safeRoute("policy.proses-bisnis.index"),
-                        icon: DocumentTextIcon,
-                        active: (url) => (url || '').startsWith("/policy/proses-bisnis"),
                     },
                     {
                         label: "Peran & Tanggung Jawab",

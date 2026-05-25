@@ -62,6 +62,7 @@
                     <table class="w-full border-collapse text-left text-sm text-slate-500 dark:text-slate-400">
                         <thead class="bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
                             <tr>
+                                <th scope="col" class="px-6 py-4 w-16 text-center">No</th>
                                 <th scope="col" class="px-6 py-4">Judul</th>
                                 <th scope="col" class="px-6 py-4">Nomor</th>
                                 <th scope="col" class="px-6 py-4 w-36">Tipe</th>
@@ -81,10 +82,14 @@
                                 </td>
                             </tr>
                             <tr 
-                                v-for="reg in regulations" 
+                                v-for="(reg, index) in regulations" 
                                 :key="reg.id" 
                                 class="group hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150"
                             >
+                                <!-- No -->
+                                <td class="px-6 py-4 text-center font-medium text-slate-700 dark:text-slate-300">
+                                    {{ index + 1 }}
+                                </td>
                                 <!-- Judul -->
                                 <td class="px-6 py-4 text-slate-900 dark:text-white font-medium leading-relaxed max-w-sm">
                                     {{ reg.judul }}

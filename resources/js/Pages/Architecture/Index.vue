@@ -5,7 +5,7 @@
                 <div>
                     <h1 class="text-xl font-semibold text-slate-900 dark:text-white">Architecture</h1>
                     <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                        Overview arsitektur bisnis, kapabilitas, dan struktur organisasi.
+                        Overview arsitektur bisnis, kapabilitas, struktur organisasi, dan proses bisnis.
                     </p>
                 </div>
             </section>
@@ -13,7 +13,7 @@
             <section class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm dark:border-white/15 dark:bg-[#171717]">
                 <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Halaman Architecture</p>
                 <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                    Gunakan sub-menu di atas untuk mengakses Business Capability atau Organization Structure.
+                    Gunakan sub-menu di atas untuk mengakses Business Capability, Organization Structure, atau Proses Bisnis.
                 </p>
             </section>
         </div>

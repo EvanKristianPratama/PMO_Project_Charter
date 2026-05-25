@@ -62,22 +62,27 @@
                     <table class="w-full border-collapse text-left text-sm text-slate-500 dark:text-slate-400">
                         <thead class="bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
                             <tr>
-                                <th scope="col" class="w-20 px-6 py-4 text-center">No.</th>
+                                <th scope="col" class="w-16 px-6 py-4 text-center">No.</th>
+                                <th scope="col" class="w-20 px-6 py-4 text-center">Item</th>
                                 <th scope="col" class="px-6 py-4">Kebijakan Umum</th>
                                 <th scope="col" class="w-32 px-6 py-4 text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200 dark:divide-white/10 dark:bg-transparent">
                             <tr v-if="policies.length === 0" class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
-                                <td colspan="3" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
+                                <td colspan="4" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
                                     Belum ada data Kebijakan Umum. Klik "+ Tambah Kebijakan Umum" untuk memasukkan data pertama.
                                 </td>
                             </tr>
                             <tr 
-                                v-for="policy in policies" 
+                                v-for="(policy, index) in policies" 
                                 :key="policy.id" 
                                 class="group hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150"
                             >
+                                <!-- No Column -->
+                                <td class="px-6 py-4 text-center font-medium text-slate-700 dark:text-slate-300">
+                                    {{ index + 1 }}
+                                </td>
                                 <!-- Number Column -->
                                 <td class="px-6 py-4 text-center font-mono font-bold text-slate-900 dark:text-white">
                                     {{ policy.number }}

@@ -137,7 +137,7 @@ class GeneralPolicyController extends Controller
         }
 
         $policies = MstGeneralPolicy::orderBy('number', 'asc')->get();
-        $regulations = MstRegulation::orderBy('id', 'desc')->get();
+        $regulations = MstRegulation::orderBy('id', 'asc')->get();
         } catch (\Exception $e) {
             // If the table doesn't exist on the active DB connection, render with empty data
             \Illuminate\Support\Facades\Log::warning('[GeneralPolicyController] DB error on active connection: ' . $e->getMessage());
