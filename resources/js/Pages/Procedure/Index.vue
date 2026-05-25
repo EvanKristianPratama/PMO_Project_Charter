@@ -134,18 +134,35 @@
                         A. Penyusunan RSTI
                     </h2>
                 </div>
-                <div class="rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                    <ol v-if="sopA.length > 0" class="list-decimal space-y-0.5 pl-5 text-[11px] leading-[1.15] text-slate-500 dark:text-slate-400">
-                        <li
-                            v-for="item in sopA"
-                            :key="item.id"
-                            class="pl-1 py-[1px] text-slate-900 dark:text-white leading-[1.15] whitespace-pre-line break-words"
-                        >
-                            {{ item.description }}
-                        </li>
-                    </ol>
-                    <div v-else class="py-1 text-[11px] text-slate-400 dark:text-slate-500">
-                        Belum ada data SOP untuk kategori ini.
+                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse text-left text-[11px] text-slate-500 dark:text-slate-400">
+                            <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
+                                <tr>
+                                    <th scope="col" class="px-3 py-3 w-10 text-right align-middle">No</th>
+                                    <th scope="col" class="px-6 py-3">Deskripsi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 dark:divide-white/10 dark:bg-transparent">
+                                <tr v-if="sopA.length === 0" class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
+                                    <td colspan="2" class="px-6 py-7 text-center text-slate-400 dark:text-slate-500">
+                                        Belum ada data SOP untuk kategori ini.
+                                    </td>
+                                </tr>
+                                <tr
+                                    v-for="(item, index) in sopA"
+                                    :key="item.id"
+                                    class="group hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150"
+                                >
+                                    <td class="px-3 py-2 w-10 text-right align-middle font-medium">
+                                        {{ index + 1 }}
+                                    </td>
+                                    <td class="px-6 py-2 text-slate-900 dark:text-white leading-[1.15] whitespace-pre-line break-words">
+                                        {{ item.description }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>
@@ -158,18 +175,35 @@
                         B. Reviu & Pembaruan Berkala RSTI
                     </h2>
                 </div>
-                <div class="rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                    <ol v-if="sopB.length > 0" class="list-decimal space-y-0.5 pl-5 text-[11px] leading-[1.15] text-slate-500 dark:text-slate-400">
-                        <li
-                            v-for="item in sopB"
-                            :key="item.id"
-                            class="pl-1 py-[1px] text-slate-900 dark:text-white leading-[1.15] whitespace-pre-line break-words"
-                        >
-                            {{ tightSopText(item.description) }}
-                        </li>
-                    </ol>
-                    <div v-else class="py-1 text-[11px] text-slate-400 dark:text-slate-500">
-                        Belum ada data SOP untuk kategori ini.
+                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse text-left text-[11px] text-slate-500 dark:text-slate-400">
+                            <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
+                                <tr>
+                                    <th scope="col" class="px-3 py-3 w-10 text-right align-middle">No</th>
+                                    <th scope="col" class="px-6 py-3">Deskripsi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 dark:divide-white/10 dark:bg-transparent">
+                                <tr v-if="sopB.length === 0" class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
+                                    <td colspan="2" class="px-6 py-7 text-center text-slate-400 dark:text-slate-500">
+                                        Belum ada data SOP untuk kategori ini.
+                                    </td>
+                                </tr>
+                                <tr
+                                    v-for="(item, index) in sopB"
+                                    :key="item.id"
+                                    class="group hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150"
+                                >
+                                    <td class="px-3 py-2 w-10 text-right align-middle font-medium">
+                                        {{ index + 1 }}
+                                    </td>
+                                    <td class="px-6 py-2 text-slate-900 dark:text-white leading-[1.15] whitespace-pre-line break-words">
+                                        {{ tightSopText(item.description) }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>
