@@ -128,11 +128,22 @@
 
             <!-- SOP Section A -->
             <section class="space-y-4">
-                <div class="flex items-center gap-2 px-1">
-                    <div class="h-5 w-1 rounded-full bg-blue-600"></div>
-                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                        A. Penyusunan RSTI
-                    </h2>
+                <div class="flex items-center justify-between px-1">
+                    <div class="flex items-center gap-2">
+                        <div class="h-5 w-1 rounded-full bg-blue-600"></div>
+                        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+                            A. Penyusunan RSTI
+                        </h2>
+                    </div>
+                    <button
+                        @click="openAddSopModal('A')"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-all active:scale-95"
+                    >
+                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Add SOP
+                    </button>
                 </div>
                 <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                     <div class="overflow-x-auto">
@@ -141,11 +152,12 @@
                                 <tr>
                                     <th scope="col" class="px-3 py-3 w-10 text-right align-middle">No</th>
                                     <th scope="col" class="px-6 py-3">Deskripsi</th>
+                                    <th scope="col" class="px-6 py-3 w-32 text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-200 dark:divide-white/10 dark:bg-transparent">
                                 <tr v-if="sopA.length === 0" class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
-                                    <td colspan="2" class="px-6 py-7 text-center text-slate-400 dark:text-slate-500">
+                                    <td colspan="3" class="px-6 py-7 text-center text-slate-400 dark:text-slate-500">
                                         Belum ada data SOP untuk kategori ini.
                                     </td>
                                 </tr>
@@ -160,6 +172,22 @@
                                     <td class="px-6 py-2 text-slate-900 dark:text-white leading-[1.15] whitespace-pre-line break-words">
                                         {{ item.description }}
                                     </td>
+                                    <td class="px-6 py-2 text-center">
+                                        <div class="flex items-center justify-center gap-3">
+                                            <button
+                                                @click="openEditSopModal(item)"
+                                                class="text-[9px] font-bold uppercase tracking-wider text-blue-600 hover:text-blue-800 transition-colors"
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                @click="openDeleteSopModal(item)"
+                                                class="text-[9px] font-bold uppercase tracking-wider text-rose-600 hover:text-rose-800 transition-colors"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -169,11 +197,22 @@
 
             <!-- SOP Section B -->
             <section class="space-y-4">
-                <div class="flex items-center gap-2 px-1">
-                    <div class="h-5 w-1 rounded-full bg-emerald-600"></div>
-                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                        B. Reviu & Pembaruan Berkala RSTI
-                    </h2>
+                <div class="flex items-center justify-between px-1">
+                    <div class="flex items-center gap-2">
+                        <div class="h-5 w-1 rounded-full bg-emerald-600"></div>
+                        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+                            B. Reviu & Pembaruan Berkala RSTI
+                        </h2>
+                    </div>
+                    <button
+                        @click="openAddSopModal('B')"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-all active:scale-95"
+                    >
+                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Add SOP
+                    </button>
                 </div>
                 <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                     <div class="overflow-x-auto">
@@ -182,11 +221,12 @@
                                 <tr>
                                     <th scope="col" class="px-3 py-3 w-10 text-right align-middle">No</th>
                                     <th scope="col" class="px-6 py-3">Deskripsi</th>
+                                    <th scope="col" class="px-6 py-3 w-32 text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-200 dark:divide-white/10 dark:bg-transparent">
                                 <tr v-if="sopB.length === 0" class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
-                                    <td colspan="2" class="px-6 py-7 text-center text-slate-400 dark:text-slate-500">
+                                    <td colspan="3" class="px-6 py-7 text-center text-slate-400 dark:text-slate-500">
                                         Belum ada data SOP untuk kategori ini.
                                     </td>
                                 </tr>
@@ -201,6 +241,22 @@
                                     <td class="px-6 py-2 text-slate-900 dark:text-white leading-[1.15] whitespace-pre-line break-words">
                                         {{ tightSopText(item.description) }}
                                     </td>
+                                    <td class="px-6 py-2 text-center">
+                                        <div class="flex items-center justify-center gap-3">
+                                            <button
+                                                @click="openEditSopModal(item)"
+                                                class="text-[9px] font-bold uppercase tracking-wider text-blue-600 hover:text-blue-800 transition-colors"
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                @click="openDeleteSopModal(item)"
+                                                class="text-[9px] font-bold uppercase tracking-wider text-rose-600 hover:text-rose-800 transition-colors"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -212,7 +268,7 @@
                 <div class="flex items-center gap-2 px-1">
                     <div class="h-5 w-1 rounded-full bg-emerald-600"></div>
                     <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                        DIAGRAM ALIR PENYUSUNAN RSTI 
+                        DIAGRAM ALIR RSTI
                     </h2>
                 </div>
                 <FlowChart
@@ -272,6 +328,56 @@
             :loading="actorForm.processing"
             @close="isDeleteActorModalOpen = false"
             @confirm="submitDeleteActor"
+        />
+
+        <!-- SOP Form Modal -->
+        <ConfirmationModal
+            :show="isSopModalOpen"
+            :title="editingSopId ? 'Edit SOP' : `Tambah SOP ${activeSopTitle}`"
+            :message="editingSopId ? 'Silakan sesuaikan deskripsi SOP di bawah ini.' : `Silakan isi deskripsi untuk ${activeSopTitle}.`"
+            confirm-text="Simpan"
+            cancel-text="Batal"
+            type="info"
+            max-width="lg"
+            :loading="sopForm.processing"
+            @close="closeSopModal"
+            @confirm="submitSopForm"
+        >
+            <div class="mt-4 space-y-4">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Kategori</label>
+                    <input
+                        :value="activeSopTitle"
+                        type="text"
+                        disabled
+                        class="w-full rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-300"
+                    />
+                    <p v-if="sopForm.errors.tipe" class="text-xs text-rose-500 mt-0.5">{{ sopForm.errors.tipe }}</p>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Deskripsi SOP</label>
+                    <textarea
+                        v-model="sopForm.description"
+                        rows="6"
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-black/20 dark:text-white"
+                        placeholder="Tuliskan deskripsi aktivitas SOP"
+                    ></textarea>
+                    <p v-if="sopForm.errors.description" class="text-xs text-rose-500 mt-0.5">{{ sopForm.errors.description }}</p>
+                </div>
+            </div>
+        </ConfirmationModal>
+
+        <!-- Delete SOP Modal -->
+        <ConfirmationModal
+            :show="isDeleteSopModalOpen"
+            title="Hapus SOP"
+            :message="`Apakah Anda yakin ingin menghapus SOP '${shortSopDescription(selectedSop?.description)}'? Tindakan ini tidak dapat dibatalkan.`"
+            confirm-text="Hapus"
+            cancel-text="Batal"
+            type="danger"
+            :loading="sopForm.processing"
+            @close="isDeleteSopModalOpen = false"
+            @confirm="submitDeleteSop"
         />
     </UserLayout>
 </template>
@@ -421,6 +527,109 @@ function submitDeleteActor() {
     });
 }
 
+// ---------------------------------------------------
+// SOP CRUD
+// ---------------------------------------------------
+const isSopModalOpen = ref(false);
+const isDeleteSopModalOpen = ref(false);
+const editingSopId = ref(null);
+const selectedSop = ref(null);
+const activeSopType = ref('A');
+
+const sopForm = useForm({
+    regulation_id: '',
+    tipe: 'A',
+    description: '',
+});
+
+const activeSopTitle = computed(() => {
+    return activeSopType.value === 'B'
+        ? 'B. Reviu & Pembaruan Berkala RSTI'
+        : 'A. Penyusunan RSTI';
+});
+
+function openAddSopModal(tipe) {
+    activeSopType.value = tipe;
+    editingSopId.value = null;
+    sopForm.reset();
+    sopForm.clearErrors();
+    sopForm.regulation_id = activeRegulation.value?.id || '';
+    sopForm.tipe = tipe;
+    isSopModalOpen.value = true;
+}
+
+function openEditSopModal(item) {
+    activeSopType.value = item.tipe || 'A';
+    editingSopId.value = item.id;
+    sopForm.regulation_id = item.regulation_id || activeRegulation.value?.id || '';
+    sopForm.tipe = item.tipe || 'A';
+    sopForm.description = item.description || '';
+    sopForm.clearErrors();
+    isSopModalOpen.value = true;
+}
+
+function openDeleteSopModal(item) {
+    selectedSop.value = item;
+    activeSopType.value = item?.tipe || 'A';
+    isDeleteSopModalOpen.value = true;
+}
+
+function closeSopModal() {
+    isSopModalOpen.value = false;
+    editingSopId.value = null;
+    sopForm.reset();
+}
+
+function submitSopForm() {
+    if (editingSopId.value) {
+        sopForm.put(route('policy.procedure.sop.update', editingSopId.value), {
+            preserveScroll: true,
+            onSuccess: () => {
+                closeSopModal();
+                Swal.fire({
+                    title: 'Berhasil!',
+                    text: 'SOP berhasil diperbarui.',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false,
+                });
+            },
+        });
+    } else {
+        sopForm.post(route('policy.procedure.sop.store'), {
+            preserveScroll: true,
+            onSuccess: () => {
+                closeSopModal();
+                Swal.fire({
+                    title: 'Berhasil!',
+                    text: 'SOP baru telah ditambahkan.',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false,
+                });
+            },
+        });
+    }
+}
+
+function submitDeleteSop() {
+    if (!selectedSop.value) return;
+    sopForm.delete(route('policy.procedure.sop.destroy', selectedSop.value.id), {
+        preserveScroll: true,
+        onSuccess: () => {
+            isDeleteSopModalOpen.value = false;
+            selectedSop.value = null;
+            Swal.fire({
+                title: 'Dihapus!',
+                text: 'SOP berhasil dihapus.',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false,
+            });
+        },
+    });
+}
+
 function formatDate(dateString) {
     if (!dateString) return '-';
     try {
@@ -444,6 +653,12 @@ function tightSopText(text) {
         .map((line) => line.trim())
         .filter((line) => line !== '')
         .join('\n');
+}
+
+function shortSopDescription(text) {
+    if (!text) return '-';
+    const normalized = tightSopText(text).replace(/\n/g, ' ');
+    return normalized.length > 80 ? `${normalized.slice(0, 80)}...` : normalized;
 }
 
 </script>
