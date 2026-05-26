@@ -411,10 +411,9 @@
 
                 <section class="mt-4 space-y-6">
                     <div class="flex items-center gap-2 px-1">
-                        <div class="h-5 w-1 rounded-full bg-emerald-600"></div>
-                        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide border-b border-slate-900/10 pb-2 dark:border-white/10">
                             VI. DIAGRAM ALIR
-                        </h2>
+                        </h3>
                     </div>
 
                     <div class="space-y-6">
