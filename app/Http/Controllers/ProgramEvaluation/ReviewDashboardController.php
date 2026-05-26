@@ -43,7 +43,7 @@ class ReviewDashboardController extends Controller
     {
         $data = $this->getDashboardData();
 
-        return inertia('ProgramEvaluation/ReviewApproval/Index', $data);
+        return inertia('ProgramEvaluation/ReviewApproval', $data);
     }
 
     public function summary(): Response
