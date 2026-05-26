@@ -6,12 +6,33 @@
                 <div class="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full bg-[#821f44]/10 blur-2xl"></div>
                 <div class="pointer-events-none absolute -bottom-16 -left-12 h-40 w-40 rounded-full bg-blue-500/5 blur-2xl"></div>
 
-                <div class="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div class="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#821f44] dark:text-[#a83262]">Pedoman Tata Kelola Teknologi Informasi Pertamina (Persero)</p>
-                        <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Peran & Tanggung Jawab</h1>
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-4 mt-2">
+                            <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Kelola Dokumen</h1>
+                            
+                            <!-- Document Type Switch Menu (Horizontal) -->
+                            <nav class="flex shrink-0 flex-row gap-1 rounded-xl bg-slate-100 p-1 dark:bg-white/5">
+                                <Link :href="route('policy.general.index')"
+                                    class="flex items-center justify-center rounded-lg px-6 py-2 text-center text-xs font-bold transition-all"
+                                    :class="route().current('policy.general.index') ? 'bg-white text-[#821f44] shadow-sm dark:bg-[#1a1a1a] dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
+                                    Kebijakan Umum
+                                </Link>
+                                <Link :href="route('policy.specific.index')"
+                                    class="flex items-center justify-center rounded-lg px-6 py-2 text-center text-xs font-bold transition-all"
+                                    :class="route().current('policy.specific.index') ? 'bg-white text-[#821f44] shadow-sm dark:bg-[#1a1a1a] dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
+                                    Kebijakan Khusus
+                                </Link>
+                                <Link :href="route('policy.roles.index')"
+                                    class="flex items-center justify-center rounded-lg px-6 py-2 text-center text-xs font-bold transition-all"
+                                    :class="route().current('policy.roles.index') ? 'bg-white text-[#821f44] shadow-sm dark:bg-[#1a1a1a] dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
+                                    Tanggung Jawab
+                                </Link>
+                            </nav>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-3 shrink-0">
                         <!-- Print Button -->
                         <button
                             @click="printDocument"
