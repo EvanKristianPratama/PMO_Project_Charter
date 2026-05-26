@@ -265,7 +265,7 @@ export function useNavigation() {
                 label: "Regulation",
                 href: safeRoute("policy.regulation.index"),
                 icon: DocumentTextIcon,
-                active: (url) => (url || '').startsWith("/policy") && !(url || '').startsWith("/policy/procedure"),
+                active: (url) => (url || '').startsWith("/policy"),
                 children: [
                     {
                         label: "Regulation",
@@ -302,6 +302,12 @@ export function useNavigation() {
                         href: safeRoute("policy.raci.index"),
                         icon: DocumentTextIcon,
                         active: (url) => (url || '').startsWith("/policy/raci"),
+                    },
+                    {
+                        label: "Procedure",
+                        href: safeRoute("policy.procedure.index"),
+                        icon: DocumentTextIcon,
+                        active: (url) => (url || '').startsWith("/policy/procedure"),
                     },
                 ],
             },
