@@ -145,16 +145,33 @@ const durationStats = computed(() => {
 });
 
 const ownerBreakdown = computed(() => {
+    const normalizeCode = (value) => String(value ?? '').trim();
+    const compareSortCode = (leftCode, rightCode) => {
+        const left = normalizeCode(leftCode);
+        const right = normalizeCode(rightCode);
+
+        if (left === '' && right === '') return 0;
+        if (left === '') return 1;
+        if (right === '') return -1;
+
+        return left.localeCompare(right, undefined, { numeric: false, sensitivity: 'base' });
+    };
+
     const getBreakdown = (field) => {
         const breakdown = {};
+        const sortField = `${field}_code`;
         props.rows.forEach((row) => {
             const owner = row[field] || "Unknown Owner";
+            const ownerCode = normalizeCode(row[sortField]);
             if (!breakdown[owner]) {
                 breakdown[owner] = {
                     owner,
+                    sortCode: ownerCode,
                     approved: [],
                     notApproved: [],
                 };
+            } else if (breakdown[owner].sortCode === '' && ownerCode !== '') {
+                breakdown[owner].sortCode = ownerCode;
             }
 
             const isApproved =
@@ -173,7 +190,11 @@ const ownerBreakdown = computed(() => {
                 breakdown[owner].notApproved.push(data);
             }
         });
-        return Object.values(breakdown).sort((a, b) => a.owner.localeCompare(b.owner));
+        return Object.values(breakdown).sort((a, b) => {
+            const codeCompare = compareSortCode(a.sortCode, b.sortCode);
+            if (codeCompare !== 0) return codeCompare;
+            return a.owner.localeCompare(b.owner);
+        });
     };
 
     return {
@@ -183,16 +204,33 @@ const ownerBreakdown = computed(() => {
 });
 
 const leaderBreakdown = computed(() => {
+    const normalizeCode = (value) => String(value ?? '').trim();
+    const compareSortCode = (leftCode, rightCode) => {
+        const left = normalizeCode(leftCode);
+        const right = normalizeCode(rightCode);
+
+        if (left === '' && right === '') return 0;
+        if (left === '') return 1;
+        if (right === '') return -1;
+
+        return left.localeCompare(right, undefined, { numeric: false, sensitivity: 'base' });
+    };
+
     const getBreakdown = (field) => {
         const breakdown = {};
+        const sortField = `${field}_code`;
         props.rows.forEach((row) => {
             const leader = row[field] || "Unknown Leader";
+            const leaderCode = normalizeCode(row[sortField]);
             if (!breakdown[leader]) {
                 breakdown[leader] = {
                     leader,
+                    sortCode: leaderCode,
                     approved: [],
                     notApproved: [],
                 };
+            } else if (breakdown[leader].sortCode === '' && leaderCode !== '') {
+                breakdown[leader].sortCode = leaderCode;
             }
 
             const isApproved =
@@ -211,7 +249,11 @@ const leaderBreakdown = computed(() => {
                 breakdown[leader].notApproved.push(data);
             }
         });
-        return Object.values(breakdown).sort((a, b) => a.leader.localeCompare(b.leader));
+        return Object.values(breakdown).sort((a, b) => {
+            const codeCompare = compareSortCode(a.sortCode, b.sortCode);
+            if (codeCompare !== 0) return codeCompare;
+            return a.leader.localeCompare(b.leader);
+        });
     };
 
     return {

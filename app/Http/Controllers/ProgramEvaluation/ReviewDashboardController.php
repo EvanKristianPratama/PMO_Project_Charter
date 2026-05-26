@@ -5,6 +5,7 @@ namespace App\Http\Controllers\ProgramEvaluation;
 use App\Http\Controllers\Controller;
 use App\Models\InitiativeStatus;
 use App\Models\MstInitiative;
+use App\Models\TrsOrganization;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Inertia\Response;
@@ -47,6 +48,8 @@ class ReviewDashboardController extends Controller
 
     private function getDashboardData(): array
     {
+        $organizationCodeLookup = $this->buildOrganizationCodeLookup();
+
         $rows = MstInitiative::query()
             ->select(['id', 'code', 'name', 'tipe_initiative', 'coe_id'])
             ->whereIn('tipe_initiative', [1, 2])
@@ -80,7 +83,7 @@ class ReviewDashboardController extends Controller
             ->orderBy('code')
             ->orderBy('name')
             ->get()
-            ->map(function (MstInitiative $initiative, int $index): array {
+            ->map(function (MstInitiative $initiative, int $index) use ($organizationCodeLookup): array {
                 $projects = $initiative->mappedProjects ?? collect();
                 $baselineDate = $this->resolveStatusDate($projects, InitiativeStatus::BASELINE);
                 $approveDate = $this->resolveStatusDate($projects, InitiativeStatus::APPROVE);
@@ -95,6 +98,8 @@ class ReviewDashboardController extends Controller
 
                 $projectOwner = $latestCharter?->owner ?? '-';
                 $projectLeader = $latestCharter?->leader ?? '-';
+                $projectOwnerCode = $this->resolveOrganizationCode($projectOwner, $organizationCodeLookup);
+                $projectLeaderCode = $this->resolveOrganizationCode($projectLeader, $organizationCodeLookup);
 
                 // Restructured data (from TrsMapPicProject)
                 $latestProjectWithMap = $projects
@@ -104,6 +109,8 @@ class ReviewDashboardController extends Controller
 
                 $projectOwnerRestructure = $latestProjectWithMap?->mapPicProject?->ownerOrganization?->jabatan ?? '-';
                 $projectLeaderRestructure = $latestProjectWithMap?->mapPicProject?->leaderOrganization?->jabatan ?? '-';
+                $projectOwnerRestructureCode = trim((string) ($latestProjectWithMap?->mapPicProject?->ownerOrganization?->code ?? '')) ?: null;
+                $projectLeaderRestructureCode = trim((string) ($latestProjectWithMap?->mapPicProject?->leaderOrganization?->code ?? '')) ?: null;
 
                 return [
                     'no' => $index + 1,
@@ -118,8 +125,12 @@ class ReviewDashboardController extends Controller
                     'latest_review_period' => $latestReviewState['period'],
                     'project_owner' => $projectOwner,
                     'project_leader' => $projectLeader,
+                    'project_owner_code' => $projectOwnerCode,
+                    'project_leader_code' => $projectLeaderCode,
                     'project_owner_restructure' => $projectOwnerRestructure,
                     'project_leader_restructure' => $projectLeaderRestructure,
+                    'project_owner_restructure_code' => $projectOwnerRestructureCode,
+                    'project_leader_restructure_code' => $projectLeaderRestructureCode,
                 ];
             })
             ->values();
@@ -139,6 +150,47 @@ class ReviewDashboardController extends Controller
                 'statusBreakdown' => $statusBreakdown,
             ],
         ];
+    }
+
+    private function buildOrganizationCodeLookup(): array
+    {
+        return TrsOrganization::query()
+            ->select(['code', 'name', 'alias', 'jabatan', 'pejabat'])
+            ->get()
+            ->flatMap(function (TrsOrganization $organization): array {
+                $code = trim((string) ($organization->code ?? ''));
+
+                if ($code === '') {
+                    return [];
+                }
+
+                $keys = [
+                    $organization->name,
+                    $organization->alias,
+                    $organization->jabatan,
+                    $organization->pejabat,
+                    $organization->code,
+                ];
+
+                return collect($keys)
+                    ->filter(static fn ($value) => trim((string) $value) !== '')
+                    ->mapWithKeys(function ($value) use ($code): array {
+                        return [mb_strtolower(trim((string) $value)) => $code];
+                    })
+                    ->all();
+            })
+            ->all();
+    }
+
+    private function resolveOrganizationCode(?string $label, array $organizationCodeLookup): ?string
+    {
+        $normalizedLabel = mb_strtolower(trim((string) $label));
+
+        if ($normalizedLabel === '' || $normalizedLabel === '-') {
+            return null;
+        }
+
+        return $organizationCodeLookup[$normalizedLabel] ?? null;
     }
 
     private function resolveLatestReviewState(MstInitiative $initiative, Collection $projects): array

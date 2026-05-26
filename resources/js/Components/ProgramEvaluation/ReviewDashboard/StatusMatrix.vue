@@ -122,9 +122,23 @@ const statuses = [
 const matrixData = computed(() => {
     const breakdown = {};
     const fieldKey = viewMode.value === 'original' ? props.groupBy : `${props.groupBy}_restructure`;
+    const sortFieldKey = `${fieldKey}_code`;
+
+    const normalizeCode = (value) => String(value ?? '').trim();
+    const compareSortCode = (leftCode, rightCode) => {
+        const left = normalizeCode(leftCode);
+        const right = normalizeCode(rightCode);
+
+        if (left === '' && right === '') return 0;
+        if (left === '') return 1;
+        if (right === '') return -1;
+
+        return left.localeCompare(right, undefined, { numeric: false, sensitivity: 'base' });
+    };
 
     props.rows.forEach((row) => {
         const key = row[fieldKey] || "Unknown";
+        const sortCode = normalizeCode(row[sortFieldKey]);
         // Normalize status to match our array
         let status = String(row.latest_review_status || "").trim().toLowerCase();
         
@@ -137,9 +151,12 @@ const matrixData = computed(() => {
         if (!breakdown[key]) {
             breakdown[key] = {
                 name: key,
+                sortCode,
                 statusGroups: {}
             };
             statuses.forEach(s => breakdown[key].statusGroups[s] = []);
+        } else if (breakdown[key].sortCode === '' && sortCode !== '') {
+            breakdown[key].sortCode = sortCode;
         }
 
         // Find match in statuses array (case-insensitive)
@@ -153,7 +170,12 @@ const matrixData = computed(() => {
         }
     });
 
-    return Object.values(breakdown).sort((a, b) => a.name.localeCompare(b.name));
+    return Object.values(breakdown).sort((a, b) => {
+        const codeCompare = compareSortCode(a.sortCode, b.sortCode);
+        if (codeCompare !== 0) return codeCompare;
+
+        return a.name.localeCompare(b.name);
+    });
 });
 
 const columnTotals = computed(() => {
