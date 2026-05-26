@@ -423,6 +423,23 @@ const VERSION_ANALYSIS_FIELDS = [
     'notes',
 ];
 
+const crossFunctionStatusForCharter = (charter) => {
+    return Number(charter?.status) === 4 ? 2 : 1;
+};
+
+const mapCrossFunctionIdsForCharter = (project = null, charter = null) => {
+    const source = Array.isArray(project?.map_cross_functions)
+        ? project.map_cross_functions
+        : Array.isArray(props.itInitiative?.map_cross_functions)
+            ? props.itInitiative.map_cross_functions
+            : [];
+    const requiredStatus = crossFunctionStatusForCharter(charter);
+
+    return source
+        .filter((item) => Number(item?.status) === requiredStatus)
+        .map((item) => item.organization_id);
+};
+
 const mapCharterToForm = (charter = null, project = null) => {
     const picMap = project?.map_pic_project || props.itInitiative?.map_pic_project || {};
 
@@ -442,7 +459,7 @@ const mapCharterToForm = (charter = null, project = null) => {
         pic_sponsor_id: picMap.project_sponsor ?? '',
         pic_owner_id: picMap.project_owner ?? '',
         pic_leader_id: picMap.project_leader ?? '',
-        pic_cross_function_ids: (project?.map_cross_functions || props.itInitiative?.map_cross_functions || []).map(m => m.organization_id),
+        pic_cross_function_ids: mapCrossFunctionIdsForCharter(project, charter),
     };
     for (const field of CHARTER_FIELDS) {
         payload[field] = charter?.[field] ?? '';

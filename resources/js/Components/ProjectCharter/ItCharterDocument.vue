@@ -276,7 +276,6 @@ const displayOwner = (value) => {
                                 </div>
                                 <template v-else>
                                     <div v-if="getOrgNames(form.pic_cross_function_ids).length" class="mt-2 pt-2 border-t border-slate-100">
-                                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Organizations:</p>
                                         <ul class="list-disc list-inside text-[11px] text-slate-500 font-semibold italic">
                                             <li v-for="name in getOrgNames(form.pic_cross_function_ids)" :key="name">
                                                 {{ name }}
