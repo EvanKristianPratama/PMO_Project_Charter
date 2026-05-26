@@ -266,22 +266,28 @@ export function useNavigation() {
                         active: (url) => (url || '').startsWith("/policy/regulation"),
                     },
                     {
-                        label: "Kebijakan Umum",
+                        label: "Bab I: Pendahuluan",
+                        href: safeRoute("policy.guidance.introduction"),
+                        icon: DocumentTextIcon,
+                        active: (url) => (url || '').startsWith("/policy/guidance/introduction"),
+                    },
+                    {
+                        label: "Bab II: Kebijakan",
                         href: safeRoute("policy.general.index"),
                         icon: DocumentTextIcon,
-                        active: (url) => (url || '').startsWith("/policy/general"),
+                        active: (url) => (url || '').startsWith("/policy/general") || (url || '').startsWith("/policy/specific"),
                     },
                     {
-                        label: "Kebijakan Khusus",
-                        href: safeRoute("policy.specific.index"),
-                        icon: DocumentTextIcon,
-                        active: (url) => (url || '').startsWith("/policy/specific"),
-                    },
-                    {
-                        label: "Peran & Tanggung Jawab",
+                        label: "Bab III: Tanggung Jawab",
                         href: safeRoute("policy.roles.index"),
                         icon: DocumentTextIcon,
                         active: (url) => (url || '').startsWith("/policy/roles"),
+                    },
+                    {
+                        label: "Bab IV: Penutup",
+                        href: safeRoute("policy.guidance.closing"),
+                        icon: DocumentTextIcon,
+                        active: (url) => (url || '').startsWith("/policy/guidance/closing"),
                     },
                     {
                         label: "Matriks RACI",

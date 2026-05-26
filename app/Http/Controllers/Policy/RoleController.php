@@ -80,13 +80,22 @@ class RoleController extends Controller
             }, 'mappedResponsibles'])->orderBy('id', 'asc')->get();
 
             $regulations = MstRegulation::orderBy('id', 'desc')->get();
+            // Filter to prioritize regulation with "PEDOMAN TATA KELOLA" title
+            $pedoman = $regulations->first(function ($r) {
+                return str_contains(strtoupper($r->judul ?? ''), 'PEDOMAN TATA KELOLA');
+            });
+            if ($pedoman) {
+                $regulations = collect([$pedoman])->merge(
+                    $regulations->where('id', '!=', $pedoman->id)->values()
+                );
+            }
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::warning('[RoleController] DB error loading roles: ' . $e->getMessage());
             $roles = collect([]);
             $regulations = collect([]);
         }
 
-        return Inertia::render('Policy/Role/Index', [
+        return Inertia::render('Policy/Guidance/Role/Index', [
             'roles' => $roles,
             'regulations' => $regulations,
         ]);
@@ -103,7 +112,7 @@ class RoleController extends Controller
 
         $responsibles = MstResponsible::orderBy('responsible', 'asc')->get();
 
-        return Inertia::render('Policy/Role/Manage', [
+        return Inertia::render('Policy/Guidance/Role/Manage', [
             'roles' => $roles,
             'responsibles' => $responsibles,
         ]);

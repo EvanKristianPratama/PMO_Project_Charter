@@ -93,7 +93,6 @@
                     <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between border-b border-slate-200 dark:border-white/10 pb-4 mb-4 gap-4 print:hidden">
                         <div>
                             <h3 class="text-lg font-extrabold text-[#821f44] dark:text-[#a83262] uppercase tracking-wide">1. RACI Analisis Internal</h3>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pemetaan Peran dan Tanggung Jawab Internal</p>
                         </div>
                         
                         <!-- Local Filters for Internal Table -->
@@ -148,7 +147,7 @@
                             <thead>
                                 <tr class="bg-[#d2e4df] dark:bg-[#1b3a32] text-slate-800 dark:text-slate-200 divide-x divide-[#b2cfc7] dark:divide-[#255246] border-b border-[#b2cfc7] dark:border-[#255246]">
                                     <th class="sticky left-0 z-20 bg-[#d2e4df] dark:bg-[#1b3a32] p-2 text-left w-[180px] min-w-[180px] max-w-[180px] border-r border-[#b2cfc7] dark:border-[#255246] select-none">
-                                        <div class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">Governance Processes</div>
+                                        <div class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">Kebijakan & Butir Kebijakan</div>
                                     </th>
                                     <th 
                                         v-for="role in filteredRoles" 
@@ -241,7 +240,6 @@
                     <div class="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-200 dark:border-white/10 pb-4 mb-4 gap-4 print:hidden">
                         <div>
                             <h3 class="text-lg font-extrabold text-[#821f44] dark:text-[#a83262] uppercase tracking-wide">2. Referensi COBIT 2019</h3>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Komponen Struktur Organisasi Resmi COBIT 2019 (Live API)</p>
                         </div>
                         
                         <!-- Local Filters for COBIT Reference Table -->
@@ -269,12 +267,27 @@
                                     </option>
                                 </select>
                             </div>
+
+                            <!-- Hide Empty Columns Switch -->
+                            <div class="flex items-center h-[38px] pt-4 select-none">
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input 
+                                        type="checkbox" 
+                                        v-model="hideEmptyColumnsCobit" 
+                                        class="sr-only peer"
+                                    >
+                                    <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-[#2c2c2c] peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:after:bg-zinc-500 peer-checked:bg-[#821f44]"></div>
+                                    <span class="ml-2 text-xs font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">
+                                        Sembunyikan Kolom Kosong
+                                    </span>
+                                </label>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Print Title (Only shows in print layout) -->
                     <h3 class="hidden print:block text-base font-extrabold text-[#821f44] uppercase tracking-wide border-b border-black pb-1 mb-3">
-                        2. Referensi COBIT 2019 (Live API)
+                        2. Referensi COBIT 2019
                     </h3>
 
                     <!-- Loading State -->
@@ -319,9 +332,10 @@
                             <thead>
                                 <tr class="bg-[#d2e4df] dark:bg-[#1b3a32] text-slate-800 dark:text-slate-200 divide-x divide-[#b2cfc7] dark:divide-[#255246] border-b border-[#b2cfc7] dark:border-[#255246]">
                                     <th class="sticky left-0 z-20 bg-[#d2e4df] dark:bg-[#1b3a32] p-2 text-left w-[240px] min-w-[240px] max-w-[240px] border-r border-[#b2cfc7] dark:border-[#255246] select-none">
-                                        <div class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">Key Management Practice</div>
+                                        <div class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300"> Management Practice Of Governance and Management Objectives</div>
                                     </th>
                                     <th 
+                                    
                                         v-for="role in filteredCobitRoles" 
                                         :key="role.role_id" 
                                         class="p-0.5 text-center w-[18px] min-w-[18px] max-w-[18px] align-bottom pb-2 select-none"
@@ -343,9 +357,9 @@
                                 >
                                     <td class="sticky left-0 z-10 bg-white dark:bg-[#1a1a1a] border-r border-slate-200 dark:border-white/10 p-1.5 text-left shadow-[2px_0_5px_rgba(0,0,0,0.02)] select-none">
                                         <div class="flex items-start gap-1">
-                                            <span class="text-[9px] font-bold text-slate-900 dark:text-white whitespace-nowrap">{{ row.practice_id }}</span>
-                                            <span class="text-[9px] font-bold text-slate-900 dark:text-white" :title="row.practice_name">
-                                                {{ row.practice_name }}
+                                            <span class="text-[9px] font-bold text-slate-900 dark:text-white whitespace-nowrap">{{ cleanPracticeName(row.practice_id) }}</span>
+                                            <span class="text-[9px] font-bold text-slate-900 dark:text-white" :title="cleanPracticeName(row.practice_name)">
+                                                {{ cleanPracticeName(row.practice_name) }}
                                             </span>
                                         </div>
                                     </td>
@@ -354,18 +368,18 @@
                                         :key="role.role_id" 
                                         class="p-0 text-center w-[18px] min-w-[18px] max-w-[18px] align-middle h-[20px]"
                                     >
-                                        <template v-if="row.role_assignments[role.role_id]">
+                                        <template v-if="cleanPracticeName(row.role_assignments[role.role_id])">
                                             <span 
-                                                v-if="row.role_assignments[role.role_id].toUpperCase() === 'I'"
+                                                v-if="cleanPracticeName(row.role_assignments[role.role_id]).toUpperCase() === 'I'"
                                                 class="inline-block w-[2.5px] h-[10px] bg-[#1e293b] dark:bg-slate-200 rounded-[0.5px] align-middle"
-                                                :title="`${row.practice_id} - ${cleanRoleName(role.role_name)}: Informed`"
+                                                :title="`${cleanPracticeName(row.practice_id)} - ${cleanRoleName(role.role_name)}: Informed`"
                                             ></span>
                                             <span 
                                                 v-else
-                                                :class="getRaciTextClass(row.role_assignments[role.role_id])"
-                                                :title="`${row.practice_id} - ${cleanRoleName(role.role_name)}: ${getRaciLabel(row.role_assignments[role.role_id])}`"
+                                                :class="getRaciTextClass(cleanPracticeName(row.role_assignments[role.role_id]))"
+                                                :title="`${cleanPracticeName(row.practice_id)} - ${cleanRoleName(role.role_name)}: ${getRaciLabel(cleanPracticeName(row.role_assignments[role.role_id]))}`"
                                             >
-                                                {{ row.role_assignments[role.role_id] }}
+                                                {{ cleanPracticeName(row.role_assignments[role.role_id]) }}
                                             </span>
                                         </template>
                                     </td>
@@ -427,6 +441,7 @@ const selectedGamoCobit = ref('');
 const selectedRole = ref('');
 const selectedRoleCobit = ref('');
 const hideEmptyColumns = ref(true); // Hide columns with no data by default
+const hideEmptyColumnsCobit = ref(true);
 
 // Official COBIT 2019 Governance and Management Objectives (GAMO) list grouped by domain
 const cobitObjectives = [
@@ -506,6 +521,12 @@ const cobitData = ref({ roles: [], matrix: [] });
 function cleanRoleName(name) {
     if (!name) return '';
     return name.replace(/^["'\\\s]+|["'\\\s]+$/g, '').replace(/\\"/g, '"');
+}
+
+// Clean escaped quotes from API practice names (e.g. "\"Managed Risk\"" -> "Managed Risk")
+function cleanPracticeName(name) {
+    if (!name) return '';
+    return String(name).replace(/^["'\\\s]+|["'\\\s]+$/g, '').replace(/\\"/g, '"');
 }
 
 async function fetchCobitMatrix() {
@@ -598,6 +619,15 @@ const filteredCobitRoles = computed(() => {
     let list = cobitData.value.roles || [];
     if (selectedRoleCobit.value) {
         list = list.filter(r => String(r.role_id) === String(selectedRoleCobit.value));
+    }
+    if (hideEmptyColumnsCobit.value) {
+        const matrix = cobitData.value.matrix || [];
+        list = list.filter(role => {
+            return matrix.some(row => {
+                const val = row.role_assignments && row.role_assignments[role.role_id];
+                return val && val !== '';
+            });
+        });
     }
     return list;
 });

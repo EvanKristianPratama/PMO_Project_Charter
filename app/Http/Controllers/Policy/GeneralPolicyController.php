@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Policy;
 
 use App\Http\Controllers\Controller;
 use App\Models\MstGeneralPolicy;
+use App\Models\MstObjective;
 use App\Models\MstRegulation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -161,8 +162,25 @@ class GeneralPolicyController extends Controller
             $selectedRegulation = null;
         }
 
-        return Inertia::render('Policy/General/Index', [
+        $objectives = MstObjective::with(['practices' => function($query) {
+            $query->orderBy('practice_id', 'asc');
+        }])
+        ->orderByRaw("
+            CASE 
+                WHEN objective_id LIKE 'EDM%' THEN 1
+                WHEN objective_id LIKE 'APO%' THEN 2
+                WHEN objective_id LIKE 'BAI%' THEN 3
+                WHEN objective_id LIKE 'DSS%' THEN 4
+                WHEN objective_id LIKE 'MEA%' THEN 5
+                ELSE 6
+            END ASC
+        ")
+        ->orderBy('objective_id', 'asc')
+        ->get();
+
+        return Inertia::render('Policy/Guidance/General/Index', [
             'policies' => $policies,
+            'objectives' => $objectives,
             'regulations' => $regulations,
             'selectedRegulationId' => $selectedRegulation?->id,
         ]);
@@ -192,8 +210,25 @@ class GeneralPolicyController extends Controller
             ? $selectedRegulation->generalPolicies->sortBy('number')->values()
             : collect([]);
 
-        return Inertia::render('Policy/General/Manage', [
+        $objectives = MstObjective::with(['practices' => function($query) {
+            $query->orderBy('practice_id', 'asc');
+        }])
+        ->orderByRaw("
+            CASE 
+                WHEN objective_id LIKE 'EDM%' THEN 1
+                WHEN objective_id LIKE 'APO%' THEN 2
+                WHEN objective_id LIKE 'BAI%' THEN 3
+                WHEN objective_id LIKE 'DSS%' THEN 4
+                WHEN objective_id LIKE 'MEA%' THEN 5
+                ELSE 6
+            END ASC
+        ")
+        ->orderBy('objective_id', 'asc')
+        ->get();
+
+        return Inertia::render('Policy/Guidance/General/Manage', [
             'policies' => $policies,
+            'objectives' => $objectives,
             'regulations' => $regulations,
             'selectedRegulationId' => $selectedRegulation?->id,
         ]);
@@ -259,5 +294,51 @@ class GeneralPolicyController extends Controller
         return redirect()
             ->route('policy.general.manage', ['regulation_id' => $regulationId])
             ->with('success', 'Kebijakan Umum berhasil dihapus.');
+    }
+
+    /**
+     * Display the Introduction chapter (Bab I).
+     */
+    public function introduction(): Response
+    {
+        try {
+            $regulations = MstRegulation::orderBy('id', 'desc')->get();
+            // Prioritize regulation with "PEDOMAN TATA KELOLA" title
+            $pedoman = $regulations->first(function ($r) {
+                return str_contains(strtoupper($r->judul ?? ''), 'PEDOMAN TATA KELOLA');
+            });
+            $selectedRegulation = $pedoman ?? $regulations->first();
+        } catch (\Exception $e) {
+            $regulations = collect([]);
+            $selectedRegulation = null;
+        }
+
+        return Inertia::render('Policy/Guidance/Introduction/Index', [
+            'regulations' => $regulations,
+            'selectedRegulationId' => $selectedRegulation?->id,
+        ]);
+    }
+
+    /**
+     * Display the Closing chapter (Bab V).
+     */
+    public function closing(): Response
+    {
+        try {
+            $regulations = MstRegulation::orderBy('id', 'desc')->get();
+            // Prioritize regulation with "PEDOMAN TATA KELOLA" title
+            $pedoman = $regulations->first(function ($r) {
+                return str_contains(strtoupper($r->judul ?? ''), 'PEDOMAN TATA KELOLA');
+            });
+            $selectedRegulation = $pedoman ?? $regulations->first();
+        } catch (\Exception $e) {
+            $regulations = collect([]);
+            $selectedRegulation = null;
+        }
+
+        return Inertia::render('Policy/Guidance/Closing', [
+            'regulations' => $regulations,
+            'selectedRegulationId' => $selectedRegulation?->id,
+        ]);
     }
 }

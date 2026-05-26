@@ -287,6 +287,10 @@ Route::middleware(['auth', 'approved'])->group(function () {
             return redirect()->route('policy.general.index');
         })->name('index');
 
+        // Guidance Intro & Outro chapters (Bab I & Bab V)
+        Route::get('/guidance/introduction', [GeneralPolicyController::class, 'introduction'])->name('guidance.introduction');
+        Route::get('/guidance/closing', [GeneralPolicyController::class, 'closing'])->name('guidance.closing');
+
         // Kebijakan Umum (General Policy) CRUD
         Route::get('/general', [GeneralPolicyController::class, 'index'])->name('general.index');
         Route::get('/general/manage', [GeneralPolicyController::class, 'manage'])->name('general.manage');
@@ -295,7 +299,9 @@ Route::middleware(['auth', 'approved'])->group(function () {
         Route::delete('/general/{id}', [GeneralPolicyController::class, 'destroy'])->name('general.destroy');
 
         // Kebijakan Khusus (Specific Policy) CRUD
-        Route::get('/specific', [PolicyController::class, 'index'])->name('specific.index');
+        Route::get('/specific', function () {
+            return redirect()->route('policy.general.index');
+        })->name('specific.index');
         Route::get('/specific/manage', [PolicyController::class, 'manage'])->name('specific.manage');
         Route::post('/objective', [PolicyController::class, 'storeObjective'])->name('objective.store');
         Route::put('/objective/{objective}', [PolicyController::class, 'updateObjective'])->name('objective.update');

@@ -39,8 +39,17 @@ class PolicyController extends Controller
             \Illuminate\Support\Facades\Log::warning('[PolicyController] DB error loading regulations: ' . $e->getMessage());
             $regulations = collect([]);
         }
+        // Prioritize regulation with "PEDOMAN TATA KELOLA" title
+        $pedoman = $regulations->first(function ($r) {
+            return str_contains(strtoupper($r->judul ?? ''), 'PEDOMAN TATA KELOLA');
+        });
+        if ($pedoman) {
+            $regulations = collect([$pedoman])->merge(
+                $regulations->where('id', '!=', $pedoman->id)->values()
+            );
+        }
 
-        return Inertia::render('Policy/Specific/Index', [
+        return Inertia::render('Policy/Guidance/Specific/Index', [
             'objectives' => $objectives,
             'regulations' => $regulations,
         ]);
@@ -71,7 +80,7 @@ class PolicyController extends Controller
         
         $selectedRegulationId = $request->integer('regulation_id');
 
-        return Inertia::render('Policy/Specific/Manage', [
+        return Inertia::render('Policy/Guidance/Specific/Manage', [
             'objectives' => $objectives,
             'regulations' => $regulations,
             'selectedRegulationId' => $selectedRegulationId,
