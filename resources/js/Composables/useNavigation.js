@@ -262,10 +262,10 @@ export function useNavigation() {
                 active: (url) => (url || '').startsWith("/service-portofolio"),
             },
             {
-                label: "Regulation",
+                label: "IT Operation Model",
                 href: safeRoute("policy.regulation.index"),
                 icon: DocumentTextIcon,
-                active: (url) => (url || '').startsWith("/policy"),
+                active: (url) => (url || '').startsWith("/policy") || (url || '').startsWith("/bpmn-workflow"),
                 children: [
                     {
                         label: "Regulation",
@@ -304,10 +304,10 @@ export function useNavigation() {
                         active: (url) => (url || '').startsWith("/policy/raci"),
                     },
                     {
-                        label: "Procedure",
-                        href: safeRoute("policy.procedure.index"),
-                        icon: DocumentTextIcon,
-                        active: (url) => (url || '').startsWith("/policy/procedure"),
+                        label: "BPMN",
+                        href: safeRoute("bpmn-workflow.index"),
+                        icon: CogIcon,
+                        active: (url) => (url || '').startsWith("/bpmn-workflow"),
                     },
                 ],
             },
@@ -316,12 +316,6 @@ export function useNavigation() {
                 href: safeRoute("master-data.index"),
                 icon: TableCellsIcon,
                 active: (url) => (url || '').startsWith("/master-data"),
-            },
-            {
-                label: "BPMN Controller",
-                href: safeRoute("bpmn-workflow.index"),
-                icon: CogIcon,
-                active: (url) => (url || '').startsWith("/bpmn-workflow"),
             },
             {
                 label: "Sinkronisasi Data",

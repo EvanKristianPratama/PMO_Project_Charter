@@ -24,13 +24,13 @@ const showArchitectureChildren = computed(() => {
 });
 
 const policyItem = computed(() => {
-    return navItems.value.find((item) => item.label === 'Regulation') ?? null;
+    return navItems.value.find((item) => item.label === 'IT Operation Model') ?? null;
 });
 
 const policyChildren = computed(() => {
     const children = policyItem.value?.children || [];
     return children
-        .filter(item => item.label === 'Regulation' || item.label === 'Matriks RACI' || item.label === 'Procedure')
+        .filter(item => item.label === 'Regulation' || item.label === 'Matriks RACI' || item.label === 'BPMN')
         .map(item => {
             if (item.label === 'Matriks RACI') {
                 return { ...item, label: 'RACI' };
@@ -45,10 +45,6 @@ const showPolicyChildren = computed(() => {
     }
 
     return policyChildren.value.some((item) => item.active(currentUrl.value));
-});
-
-const bpmnItem = computed(() => {
-    return navItems.value.find((item) => item.label === 'BPMN Controller') ?? null;
 });
 
 const adminItem = computed(() => {
@@ -95,29 +91,6 @@ const adminItem = computed(() => {
             >
                 <component :is="policyItem.icon" v-if="policyItem.icon" class="h-3.5 w-3.5 shrink-0" />
                 <span>{{ policyItem.label }}</span>
-            </Link>
-
-            <!-- Separation Dot -->
-            <span
-                v-if="bpmnItem"
-                class="select-none px-0.5 text-indigo-200 dark:text-indigo-900"
-            >
-                &middot;
-            </span>
-
-            <!-- BPMN Controller Link -->
-            <Link
-                v-if="bpmnItem"
-                :href="bpmnItem.href"
-                class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
-                :class="[
-                    bpmnItem.active(currentUrl.value)
-                        ? 'bg-indigo-500 text-white shadow-sm'
-                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
-                ]"
-            >
-                <component :is="bpmnItem.icon" v-if="bpmnItem.icon" class="h-3.5 w-3.5 shrink-0" />
-                <span>{{ bpmnItem.label }}</span>
             </Link>
 
             <!-- Separation Dot -->
