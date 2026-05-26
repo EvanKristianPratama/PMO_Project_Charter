@@ -24,13 +24,13 @@ const showArchitectureChildren = computed(() => {
 });
 
 const policyItem = computed(() => {
-    return navItems.value.find((item) => item.label === 'Regulation') ?? null;
+    return navItems.value.find((item) => item.label === 'IT Operation Model') ?? null;
 });
 
 const policyChildren = computed(() => {
     const children = policyItem.value?.children || [];
     return children
-        .filter(item => item.label === 'Regulation' || item.label === 'Matriks RACI')
+        .filter(item => item.label === 'Regulation' || item.label === 'Matriks RACI' || item.label === 'BPMN')
         .map(item => {
             if (item.label === 'Matriks RACI') {
                 return { ...item, label: 'RACI' };

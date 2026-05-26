@@ -37,7 +37,12 @@
                 </div>
             </section>
 
-            <section ref="actorSection" class="space-y-4">
+            <!-- 👇 Section Navigation -->
+            <section class="print:hidden">
+                <ProcedureSectionNavigation />
+            </section>
+
+            <section id="procedure-section-fungsi" ref="actorSection" class="space-y-4 scroll-mt-24">
                 <div class="flex items-center justify-between gap-4 px-1">
                     <div class="flex items-center gap-2">
                         <div class="h-5 w-1 rounded-full bg-[#821f44]"></div>
@@ -112,7 +117,7 @@
                 </div>
             </section>
 
-            <section class="space-y-4">
+            <section id="procedure-section-prosedur" class="space-y-4 scroll-mt-24">
                 <div class="flex items-center justify-between gap-4 px-1">
                     <div class="flex items-center gap-2">
                         <div class="h-5 w-1 rounded-full bg-blue-600"></div>
@@ -240,7 +245,7 @@
                 </div>
             </section>
 
-            <section class="space-y-4">
+            <section id="procedure-section-diagram" class="space-y-4 scroll-mt-24">
                 <div class="flex items-center gap-2 px-1">
                     <div class="h-5 w-1 rounded-full bg-emerald-600"></div>
                     <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
@@ -363,6 +368,7 @@ import UserLayout from '@/Layouts/UserLayout.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import FlowChart from '@/Components/Procedure/FlowChart.vue';
 import PertaminaDocumentHeader from '@/Components/Regulation/PertaminaDocumentHeader.vue';
+import ProcedureSectionNavigation from '@/Components/Regulation/ProcedureSectionNavigation.vue';
 import Swal from 'sweetalert2';
 
 const props = defineProps({
