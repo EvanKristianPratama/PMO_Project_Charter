@@ -258,38 +258,38 @@ export function useNavigation() {
                 href: safeRoute("policy.regulation.index"),
                 icon: DocumentTextIcon,
                 active: (url) => (url || '').startsWith("/policy") && !(url || '').startsWith("/policy/procedure"),
-                // children: [
-                //     {
-                //         label: "Regulasi",
-                //         href: safeRoute("policy.regulation.index"),
-                //         icon: DocumentTextIcon,
-                //         active: (url) => url.startsWith("/policy/regulation"),
-                //     },
-                //     {
-                //         label: "Kebijakan Umum",
-                //         href: safeRoute("policy.general.index"),
-                //         icon: DocumentTextIcon,
-                //         active: (url) => (url || '').startsWith("/policy/general"),
-                //     },
-                //     {
-                //         label: "Kebijakan Khusus",
-                //         href: safeRoute("policy.specific.index"),
-                //         icon: DocumentTextIcon,
-                //         active: (url) => (url || '').startsWith("/policy/specific"),
-                //     },
-                //     {
-                //         label: "Peran & Tanggung Jawab",
-                //         href: safeRoute("policy.roles.index"),
-                //         icon: DocumentTextIcon,
-                //         active: (url) => (url || '').startsWith("/policy/roles"),
-                //     },
-                //     {
-                //         label: "Matriks RACI",
-                //         href: safeRoute("policy.raci.index"),
-                //         icon: DocumentTextIcon,
-                //         active: (url) => (url || '').startsWith("/policy/raci"),
-                //     },
-                // ],
+                children: [
+                    {
+                        label: "Regulation",
+                        href: safeRoute("policy.regulation.index"),
+                        icon: DocumentTextIcon,
+                        active: (url) => (url || '').startsWith("/policy/regulation"),
+                    },
+                    {
+                        label: "Kebijakan Umum",
+                        href: safeRoute("policy.general.index"),
+                        icon: DocumentTextIcon,
+                        active: (url) => (url || '').startsWith("/policy/general"),
+                    },
+                    {
+                        label: "Kebijakan Khusus",
+                        href: safeRoute("policy.specific.index"),
+                        icon: DocumentTextIcon,
+                        active: (url) => (url || '').startsWith("/policy/specific"),
+                    },
+                    {
+                        label: "Peran & Tanggung Jawab",
+                        href: safeRoute("policy.roles.index"),
+                        icon: DocumentTextIcon,
+                        active: (url) => (url || '').startsWith("/policy/roles"),
+                    },
+                    {
+                        label: "Matriks RACI",
+                        href: safeRoute("policy.raci.index"),
+                        icon: DocumentTextIcon,
+                        active: (url) => (url || '').startsWith("/policy/raci"),
+                    },
+                ],
             },
             {
                 label: "Master Data",

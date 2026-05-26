@@ -1,6 +1,6 @@
 <script setup>
 import { Link, usePage } from '@inertiajs/vue3';
-import { computed, watch } from 'vue';
+import { computed } from 'vue';
 import { useNavigation } from '@/Composables/useNavigation';
 
 const { navItems } = useNavigation();
@@ -29,7 +29,14 @@ const policyItem = computed(() => {
 
 const policyChildren = computed(() => {
     const children = policyItem.value?.children || [];
-    return children.filter(item => item.label !== 'Kebijakan Umum' && item.label !== 'Kebijakan Khusus');
+    return children
+        .filter(item => item.label === 'Regulation' || item.label === 'Matriks RACI')
+        .map(item => {
+            if (item.label === 'Matriks RACI') {
+                return { ...item, label: 'RACI' };
+            }
+            return item;
+        });
 });
 
 const showPolicyChildren = computed(() => {
@@ -40,10 +47,6 @@ const showPolicyChildren = computed(() => {
     return policyChildren.value.some((item) => item.active(currentUrl.value));
 });
 
-const procedureItem = computed(() => {
-    return navItems.value.find((item) => item.label === 'Procedure') ?? null;
-});
-
 const adminItem = computed(() => {
     return navItems.value.find((item) => item.label === 'Admin') ?? null;
 });
@@ -52,6 +55,7 @@ const adminItem = computed(() => {
 <template>
     <div class="inline-flex flex-col gap-1.5">
         <div class="inline-flex flex-wrap items-center gap-0.5">
+            <!-- Architecture Link -->
             <Link
                 v-if="architectureItem"
                 :href="architectureItem.href"
@@ -66,6 +70,7 @@ const adminItem = computed(() => {
                 <span>{{ architectureItem.label }}</span>
             </Link>
 
+            <!-- Separation Dot -->
             <span
                 v-if="policyItem"
                 class="select-none px-0.5 text-indigo-200 dark:text-indigo-900"
@@ -73,6 +78,7 @@ const adminItem = computed(() => {
                 &middot;
             </span>
 
+            <!-- Regulation Link -->
             <Link
                 v-if="policyItem"
                 :href="policyItem.href"
@@ -87,27 +93,7 @@ const adminItem = computed(() => {
                 <span>{{ policyItem.label }}</span>
             </Link>
 
-            <span
-                v-if="procedureItem"
-                class="select-none px-0.5 text-indigo-200 dark:text-indigo-900"
-            >
-                &middot;
-            </span>
-
-            <Link
-                v-if="procedureItem"
-                :href="procedureItem.href"
-                class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
-                :class="[
-                    procedureItem.active(currentUrl)
-                        ? 'bg-indigo-500 text-white shadow-sm'
-                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
-                ]"
-            >
-                <component :is="procedureItem.icon" v-if="procedureItem.icon" class="h-3.5 w-3.5 shrink-0" />
-                <span>{{ procedureItem.label }}</span>
-            </Link>
-
+            <!-- Separation Dot -->
             <span
                 v-if="adminItem"
                 class="select-none px-0.5 text-indigo-200 dark:text-indigo-900"
@@ -115,12 +101,13 @@ const adminItem = computed(() => {
                 &middot;
             </span>
 
+            <!-- Admin Link -->
             <Link
                 v-if="adminItem"
                 :href="adminItem.href"
                 class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
                 :class="[
-                    adminItem.active(currentUrl)
+                    adminItem.active(currentUrl.value)
                         ? 'bg-indigo-500 text-white shadow-sm'
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
@@ -130,6 +117,7 @@ const adminItem = computed(() => {
             </Link>
         </div>
 
+        <!-- Architecture Sub-menus -->
         <div v-if="showArchitectureChildren" class="ml-2 inline-flex flex-wrap items-center gap-1">
             <Link
                 v-for="item in architectureChildren"
@@ -137,7 +125,7 @@ const adminItem = computed(() => {
                 :href="item.href"
                 class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all duration-150"
                 :class="[
-                    item.active(currentUrl)
+                    item.active(currentUrl.value)
                         ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300'
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
@@ -147,6 +135,7 @@ const adminItem = computed(() => {
             </Link>
         </div>
 
+        <!-- Regulation Sub-menus (Regulasi and RACI) -->
         <div v-if="showPolicyChildren" class="ml-2 inline-flex flex-wrap items-center gap-1">
             <Link
                 v-for="item in policyChildren"
@@ -154,7 +143,7 @@ const adminItem = computed(() => {
                 :href="item.href"
                 class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all duration-150"
                 :class="[
-                    item.active(currentUrl)
+                    item.active(currentUrl.value)
                         ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300'
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
