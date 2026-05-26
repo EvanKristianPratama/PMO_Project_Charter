@@ -260,7 +260,7 @@ export function useNavigation() {
                 active: (url) => (url || '').startsWith("/policy") && !(url || '').startsWith("/policy/procedure"),
                 children: [
                     {
-                        label: "Regulasi",
+                        label: "Regulation",
                         href: safeRoute("policy.regulation.index"),
                         icon: DocumentTextIcon,
                         active: (url) => (url || '').startsWith("/policy/regulation"),

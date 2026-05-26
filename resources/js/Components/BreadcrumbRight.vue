@@ -30,7 +30,7 @@ const policyItem = computed(() => {
 const policyChildren = computed(() => {
     const children = policyItem.value?.children || [];
     return children
-        .filter(item => item.label === 'Regulasi' || item.label === 'Matriks RACI')
+        .filter(item => item.label === 'Regulation' || item.label === 'Matriks RACI')
         .map(item => {
             if (item.label === 'Matriks RACI') {
                 return { ...item, label: 'RACI' };
