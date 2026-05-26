@@ -64,12 +64,18 @@ class ProjectCharterService
 
         // Cross Function mapping at Project level (pc_id = project_id)
         if (isset($payload['pic_cross_function_ids']) && is_array($payload['pic_cross_function_ids'])) {
-            \App\Models\TrsMapCrossFunction::where('pc_id', $charter->project_id)->delete();
-            
-            $mappings = array_map(function($orgId) use ($charter) {
+            $crossFunctionStatus = $this->crossFunctionStatusForCharter($charter);
+
+            \App\Models\TrsMapCrossFunction::query()
+                ->where('pc_id', $charter->project_id)
+                ->where('status', $crossFunctionStatus)
+                ->delete();
+
+            $mappings = array_map(function ($orgId) use ($charter, $crossFunctionStatus) {
                 return [
                     'pc_id' => $charter->project_id,
                     'organization_id' => $orgId,
+                    'status' => $crossFunctionStatus,
                 ];
             }, array_filter($payload['pic_cross_function_ids']));
 
@@ -77,6 +83,11 @@ class ProjectCharterService
                 \App\Models\TrsMapCrossFunction::insert($mappings);
             }
         }
+    }
+
+    private function crossFunctionStatusForCharter(TrsProjectCharter $charter): int
+    {
+        return (int) $charter->status === 4 ? 2 : 1;
     }
 
     private function syncProjectSummaryFields(TrsProject $project, array $payload): void

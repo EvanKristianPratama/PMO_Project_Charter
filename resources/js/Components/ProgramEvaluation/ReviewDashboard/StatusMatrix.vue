@@ -19,6 +19,9 @@
                         <th v-for="status in statuses" :key="status" colspan="2" class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20">
                             {{ status }}
                         </th>
+                        <th rowspan="2" class="border-b border-l border-slate-900 px-4 py-3 text-center dark:border-white/20">
+                            Total All
+                        </th>
                     </tr>
                     <tr class="bg-slate-50/50 text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:bg-white/5 dark:text-slate-500">
                         <template v-for="status in statuses" :key="'sub-' + status">
@@ -51,6 +54,9 @@
                                 </div>
                             </td>
                         </template>
+                        <td class="border-l border-slate-900 px-4 py-4 text-center font-black text-slate-900 dark:border-white/20 dark:text-white">
+                            {{ row.totalCount }}
+                        </td>
                     </tr>
                 </tbody>
                 <tfoot>
@@ -75,9 +81,12 @@
                                 </div>
                             </td>
                         </template>
+                        <td class="border-t border-l border-slate-900 px-4 py-3 text-center dark:border-white/20">
+                            {{ grandTotalSum }}
+                        </td>
                     </tr>
                     <tr class="bg-slate-100/80 text-slate-900 dark:bg-white/10 dark:text-white font-black uppercase text-[11px] border-t border-slate-900 dark:border-white/40">
-                        <td :colspan="1 + (statuses.length * 2) - 1" class="px-4 py-2.5 text-right border-r border-slate-900 dark:border-white/20">
+                        <td :colspan="1 + (statuses.length * 2)" class="px-4 py-2.5 text-right border-r border-slate-900 dark:border-white/20">
                             Total Keseluruhan Inisiatif ({{ statuses.join(' + ') }})
                         </td>
                         <td class="px-4 py-2.5 text-center text-[13px]">
@@ -122,9 +131,23 @@ const statuses = [
 const matrixData = computed(() => {
     const breakdown = {};
     const fieldKey = viewMode.value === 'original' ? props.groupBy : `${props.groupBy}_restructure`;
+    const sortFieldKey = `${fieldKey}_code`;
+
+    const normalizeCode = (value) => String(value ?? '').trim();
+    const compareSortCode = (leftCode, rightCode) => {
+        const left = normalizeCode(leftCode);
+        const right = normalizeCode(rightCode);
+
+        if (left === '' && right === '') return 0;
+        if (left === '') return 1;
+        if (right === '') return -1;
+
+        return left.localeCompare(right, undefined, { numeric: false, sensitivity: 'base' });
+    };
 
     props.rows.forEach((row) => {
         const key = row[fieldKey] || "Unknown";
+        const sortCode = normalizeCode(row[sortFieldKey]);
         // Normalize status to match our array
         let status = String(row.latest_review_status || "").trim().toLowerCase();
         
@@ -137,9 +160,12 @@ const matrixData = computed(() => {
         if (!breakdown[key]) {
             breakdown[key] = {
                 name: key,
+                sortCode,
                 statusGroups: {}
             };
             statuses.forEach(s => breakdown[key].statusGroups[s] = []);
+        } else if (breakdown[key].sortCode === '' && sortCode !== '') {
+            breakdown[key].sortCode = sortCode;
         }
 
         // Find match in statuses array (case-insensitive)
@@ -153,7 +179,15 @@ const matrixData = computed(() => {
         }
     });
 
-    return Object.values(breakdown).sort((a, b) => a.name.localeCompare(b.name));
+    return Object.values(breakdown).sort((a, b) => {
+        const codeCompare = compareSortCode(a.sortCode, b.sortCode);
+        if (codeCompare !== 0) return codeCompare;
+
+        return a.name.localeCompare(b.name);
+    }).map((row) => ({
+        ...row,
+        totalCount: statuses.reduce((sum, status) => sum + (row.statusGroups[status]?.length || 0), 0),
+    }));
 });
 
 const columnTotals = computed(() => {

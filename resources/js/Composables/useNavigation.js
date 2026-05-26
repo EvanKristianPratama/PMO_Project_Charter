@@ -80,7 +80,8 @@ export function useNavigation() {
                     (url || '').startsWith("/program-evalution/review") &&
                     !(url || '').startsWith("/program-evalution/review-timeline") &&
                     !(url || '').startsWith("/program-evalution/review-dashboard") &&
-                    !(url || '').startsWith("/program-evalution/review-summary"),
+                    !(url || '').startsWith("/program-evalution/review-summary") &&
+                    !(url || '').startsWith("/program-evalution/review-analysis"),
             },
             {
                 label: "Review Approval",
@@ -102,6 +103,13 @@ export function useNavigation() {
                 icon: ClipboardDocumentCheckIcon,
                 active: (url) =>
                     (url || '').startsWith("/program-evalution/review-summary"),
+            },
+            {
+                label: "Review Anylisis",
+                href: safeRoute("program-evaluation.review-analysis"),
+                icon: ClipboardDocumentCheckIcon,
+                active: (url) =>
+                    (url || '').startsWith("/program-evalution/review-analysis"),
             },
         ];
 

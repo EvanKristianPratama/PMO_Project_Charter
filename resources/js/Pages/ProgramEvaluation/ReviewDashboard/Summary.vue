@@ -19,11 +19,11 @@
             />
 
             <!-- Project Leader Breakdown Table -->
-            <LeaderBreakdownTable
-                :originalData="leaderBreakdown.original"
-                :restructureData="leaderBreakdown.restructure"
-                :getCircleColor="getCircleColor"
-            />
+                <LeaderBreakdownTable
+                    :originalData="leaderBreakdown.original"
+                    :restructureData="leaderBreakdown.restructure"
+                    :getCircleColor="getCircleColor"
+                />
 
             <!-- Status Matrix - Project Owner -->
             <StatusMatrix
@@ -145,16 +145,34 @@ const durationStats = computed(() => {
 });
 
 const ownerBreakdown = computed(() => {
+    const normalizeCode = (value) => String(value ?? '').trim();
+    const compareSortCode = (leftCode, rightCode) => {
+        const left = normalizeCode(leftCode);
+        const right = normalizeCode(rightCode);
+
+        if (left === '' && right === '') return 0;
+        if (left === '') return 1;
+        if (right === '') return -1;
+
+        return left.localeCompare(right, undefined, { numeric: false, sensitivity: 'base' });
+    };
+
     const getBreakdown = (field) => {
         const breakdown = {};
+        const sortField = `${field}_code`;
         props.rows.forEach((row) => {
             const owner = row[field] || "Unknown Owner";
+            const ownerCode = normalizeCode(row[sortField]);
             if (!breakdown[owner]) {
                 breakdown[owner] = {
                     owner,
+                    sortCode: ownerCode,
+                    totalCount: 0,
                     approved: [],
                     notApproved: [],
                 };
+            } else if (breakdown[owner].sortCode === '' && ownerCode !== '') {
+                breakdown[owner].sortCode = ownerCode;
             }
 
             const isApproved =
@@ -167,13 +185,19 @@ const ownerBreakdown = computed(() => {
                 status: row.latest_review_status,
             };
 
+            breakdown[owner].totalCount += 1;
+
             if (isApproved) {
                 breakdown[owner].approved.push(data);
             } else {
                 breakdown[owner].notApproved.push(data);
             }
         });
-        return Object.values(breakdown).sort((a, b) => a.owner.localeCompare(b.owner));
+        return Object.values(breakdown).sort((a, b) => {
+            const codeCompare = compareSortCode(a.sortCode, b.sortCode);
+            if (codeCompare !== 0) return codeCompare;
+            return a.owner.localeCompare(b.owner);
+        });
     };
 
     return {
@@ -183,16 +207,34 @@ const ownerBreakdown = computed(() => {
 });
 
 const leaderBreakdown = computed(() => {
+    const normalizeCode = (value) => String(value ?? '').trim();
+    const compareSortCode = (leftCode, rightCode) => {
+        const left = normalizeCode(leftCode);
+        const right = normalizeCode(rightCode);
+
+        if (left === '' && right === '') return 0;
+        if (left === '') return 1;
+        if (right === '') return -1;
+
+        return left.localeCompare(right, undefined, { numeric: false, sensitivity: 'base' });
+    };
+
     const getBreakdown = (field) => {
         const breakdown = {};
+        const sortField = `${field}_code`;
         props.rows.forEach((row) => {
             const leader = row[field] || "Unknown Leader";
+            const leaderCode = normalizeCode(row[sortField]);
             if (!breakdown[leader]) {
                 breakdown[leader] = {
                     leader,
+                    sortCode: leaderCode,
+                    totalCount: 0,
                     approved: [],
                     notApproved: [],
                 };
+            } else if (breakdown[leader].sortCode === '' && leaderCode !== '') {
+                breakdown[leader].sortCode = leaderCode;
             }
 
             const isApproved =
@@ -205,13 +247,19 @@ const leaderBreakdown = computed(() => {
                 status: row.latest_review_status,
             };
 
+            breakdown[leader].totalCount += 1;
+
             if (isApproved) {
                 breakdown[leader].approved.push(data);
             } else {
                 breakdown[leader].notApproved.push(data);
             }
         });
-        return Object.values(breakdown).sort((a, b) => a.leader.localeCompare(b.leader));
+        return Object.values(breakdown).sort((a, b) => {
+            const codeCompare = compareSortCode(a.sortCode, b.sortCode);
+            if (codeCompare !== 0) return codeCompare;
+            return a.leader.localeCompare(b.leader);
+        });
     };
 
     return {

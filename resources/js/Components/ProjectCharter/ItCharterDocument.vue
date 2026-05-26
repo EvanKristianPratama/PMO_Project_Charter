@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps({
     itInitiative: { type: Object, required: true },
@@ -13,9 +13,40 @@ const filteredOrgs = computed(() => {
     return props.allOrganizations.filter(org => org.jabatan && String(org.jabatan).trim() !== '');
 });
 
+const selectedNewCrossFunctionId = ref('');
+
+const addCrossFunctionUnit = () => {
+    if (!selectedNewCrossFunctionId.value) return;
+
+    if (!Array.isArray(props.form.pic_cross_function_ids)) {
+        props.form.pic_cross_function_ids = [];
+    }
+
+    const id = parseInt(selectedNewCrossFunctionId.value, 10);
+    if (!props.form.pic_cross_function_ids.includes(id)) {
+        props.form.pic_cross_function_ids.push(id);
+    }
+
+    selectedNewCrossFunctionId.value = '';
+};
+
+const removeCrossFunctionUnit = (id) => {
+    props.form.pic_cross_function_ids = props.form.pic_cross_function_ids.filter(
+        (existingId) => parseInt(existingId, 10) !== parseInt(id, 10)
+    );
+};
+
 const getOrgName = (id) => {
     const org = props.allOrganizations.find(o => o.id === parseInt(id));
     return org ? org.jabatan : null;
+};
+
+const getOrgNames = (ids) => {
+    if (!Array.isArray(ids)) return [];
+
+    return ids
+        .map(id => getOrgName(id))
+        .filter(Boolean);
 };
 
 const lineItems = (value) => String(value || '')
@@ -209,6 +240,50 @@ const displayOwner = (value) => {
                                 </li>
                             </ul>
                             <p v-else class="empty">-</p>
+
+                            <div class="mt-3">
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">Pemetaan organisasi formal:</label>
+                                <div v-if="editable" class="mt-1 flex flex-col gap-2">
+                                    <div class="flex gap-1">
+                                        <select v-model="selectedNewCrossFunctionId" class="info-select flex-1">
+                                            <option value="">-- Pilih Unit untuk Ditambahkan --</option>
+                                            <option v-for="org in filteredOrgs" :key="org.id" :value="org.id"
+                                                :disabled="form.pic_cross_function_ids?.includes(org.id)">
+                                                {{ org.jabatan }}
+                                            </option>
+                                        </select>
+                                        <button type="button" @click="addCrossFunctionUnit"
+                                            class="px-2 py-1 bg-blue-600 text-white text-[10px] font-bold rounded hover:bg-blue-700 transition-colors">
+                                            Add
+                                        </button>
+                                    </div>
+
+                                    <div v-if="form.pic_cross_function_ids?.length" class="space-y-1">
+                                        <div v-for="id in form.pic_cross_function_ids" :key="id"
+                                            class="flex items-center justify-between gap-2 px-2 py-1 bg-slate-50 border border-slate-100 rounded">
+                                            <span class="text-[11px] text-slate-700 font-medium">{{ getOrgName(id) }}</span>
+                                            <button type="button" @click="removeCrossFunctionUnit(id)"
+                                                class="text-rose-500 hover:text-rose-700 p-0.5" title="Hapus Unit">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                    stroke-width="2.5" stroke="currentColor" class="w-3 h-3">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p v-else class="text-[9px] text-slate-400 italic">Belum ada unit terpilih.</p>
+                                </div>
+                                <template v-else>
+                                    <div v-if="getOrgNames(form.pic_cross_function_ids).length" class="mt-2 pt-2 border-t border-slate-100">
+                                        <ul class="list-disc list-inside text-[11px] text-slate-500 font-semibold italic">
+                                            <li v-for="name in getOrgNames(form.pic_cross_function_ids)" :key="name">
+                                                {{ name }}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </template>
+                            </div>
                         </div>
                     </div>
 

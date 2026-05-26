@@ -17,6 +17,11 @@ class TrsMapCrossFunction extends Model
     protected $fillable = [
         'pc_id',
         'organization_id',
+        'status',
+    ];
+
+    protected $casts = [
+        'status' => 'integer',
     ];
 
     /**
