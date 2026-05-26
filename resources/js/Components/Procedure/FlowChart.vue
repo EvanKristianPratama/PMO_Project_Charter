@@ -1,95 +1,97 @@
 <template>
     <section class="space-y-4">
-        <div class="flex flex-wrap items-center justify-between gap-3 px-1">
-            <div class="inline-flex overflow-hidden rounded-lg border border-slate-200 bg-white text-xs font-semibold shadow-sm dark:border-white/10 dark:bg-[#171717]">
+        <template v-if="!readonly">
+            <div class="flex flex-wrap items-center justify-between gap-3 px-1">
+                <div class="inline-flex overflow-hidden rounded-lg border border-slate-200 bg-white text-xs font-semibold shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                    <button
+                        v-for="category in flowCategories"
+                        :key="category.value"
+                        type="button"
+                        class="px-3 py-2 transition-colors"
+                        :class="activeFlowType === category.value
+                            ? 'bg-[#821f44] text-white'
+                            : 'text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-white/5'"
+                        @click="setActiveFlowType(category.value)"
+                    >
+                        {{ category.shortLabel }}
+                    </button>
+                </div>
+
                 <button
-                    v-for="category in flowCategories"
-                    :key="category.value"
-                    type="button"
-                    class="px-3 py-2 transition-colors"
-                    :class="activeFlowType === category.value
-                        ? 'bg-[#821f44] text-white'
-                        : 'text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-white/5'"
-                    @click="setActiveFlowType(category.value)"
+                    @click="openAddDiagramModal"
+                    class="inline-flex items-center gap-1.5 rounded-lg bg-[#821f44] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#9c2552] active:scale-95"
                 >
-                    {{ category.shortLabel }}
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add Mapping
                 </button>
             </div>
 
-            <button
-                @click="openAddDiagramModal"
-                class="inline-flex items-center gap-1.5 rounded-lg bg-[#821f44] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#9c2552] active:scale-95"
-            >
-                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-                Add Mapping
-            </button>
-        </div>
-
-        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-            <div class="border-b border-slate-200 px-5 py-3 dark:border-white/10">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">
-                    Diagram Alir {{ activeCategory?.label }}
-                </h3>
+            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                <div class="border-b border-slate-200 px-5 py-3 dark:border-white/10">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">
+                        Diagram Alir {{ activeCategory?.label }}
+                    </h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse text-left text-[11px] text-slate-500 dark:text-slate-400">
+                        <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
+                            <tr>
+                                <th scope="col" class="w-16 px-5 py-3 text-center">No</th>
+                                <th scope="col" class="px-5 py-3">Aktivitas SOP</th>
+                                <th scope="col" class="px-5 py-3">Aktor</th>
+                                <th scope="col" class="w-32 px-5 py-3 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 dark:divide-white/10">
+                            <tr v-if="activeDiagramMappings.length === 0">
+                                <td colspan="4" class="px-6 py-7 text-center text-slate-400 dark:text-slate-500">
+                                    Belum ada mapping diagram untuk kategori ini.
+                                </td>
+                            </tr>
+                            <tr
+                                v-for="(mapping, index) in activeDiagramMappings"
+                                :key="mapping.id ?? `${mapping.sop_id}-${mapping.actor_id}-${mapping.tipe}-${index}`"
+                                class="hover:bg-slate-50/50 dark:hover:bg-white/5"
+                            >
+                                <td class="px-5 py-2 text-center font-medium">
+                                    {{ index + 1 }}
+                                </td>
+                                <td class="px-5 py-2 text-slate-900 dark:text-white">
+                                    <div class="line-clamp-2 leading-snug">
+                                        {{ mapping.sopDescription }}
+                                    </div>
+                                </td>
+                                <td class="px-5 py-2 text-slate-700 dark:text-slate-300">
+                                    {{ mapping.actorName }}
+                                </td>
+                                <td class="px-5 py-2 text-center">
+                                    <div class="flex items-center justify-center gap-3">
+                                        <button
+                                            type="button"
+                                            class="text-[9px] font-bold uppercase tracking-wider text-blue-600 transition-colors hover:text-blue-800 disabled:cursor-not-allowed disabled:text-slate-400"
+                                            :disabled="!mapping.id"
+                                            @click="openEditDiagramModal(mapping)"
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            type="button"
+                                            class="text-[9px] font-bold uppercase tracking-wider text-rose-600 transition-colors hover:text-rose-800 disabled:cursor-not-allowed disabled:text-slate-400"
+                                            :disabled="!mapping.id"
+                                            @click="openDeleteDiagramModal(mapping)"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full border-collapse text-left text-[11px] text-slate-500 dark:text-slate-400">
-                    <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
-                        <tr>
-                            <th scope="col" class="w-16 px-5 py-3 text-center">No</th>
-                            <th scope="col" class="px-5 py-3">Aktivitas SOP</th>
-                            <th scope="col" class="px-5 py-3">Aktor</th>
-                            <th scope="col" class="w-32 px-5 py-3 text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-200 dark:divide-white/10">
-                        <tr v-if="activeDiagramMappings.length === 0">
-                            <td colspan="4" class="px-6 py-7 text-center text-slate-400 dark:text-slate-500">
-                                Belum ada mapping diagram untuk kategori ini.
-                            </td>
-                        </tr>
-                        <tr
-                            v-for="(mapping, index) in activeDiagramMappings"
-                            :key="mapping.id ?? `${mapping.sop_id}-${mapping.actor_id}-${mapping.tipe}-${index}`"
-                            class="hover:bg-slate-50/50 dark:hover:bg-white/5"
-                        >
-                            <td class="px-5 py-2 text-center font-medium">
-                                {{ index + 1 }}
-                            </td>
-                            <td class="px-5 py-2 text-slate-900 dark:text-white">
-                                <div class="line-clamp-2 leading-snug">
-                                    {{ mapping.sopDescription }}
-                                </div>
-                            </td>
-                            <td class="px-5 py-2 text-slate-700 dark:text-slate-300">
-                                {{ mapping.actorName }}
-                            </td>
-                            <td class="px-5 py-2 text-center">
-                                <div class="flex items-center justify-center gap-3">
-                                    <button
-                                        type="button"
-                                        class="text-[9px] font-bold uppercase tracking-wider text-blue-600 transition-colors hover:text-blue-800 disabled:cursor-not-allowed disabled:text-slate-400"
-                                        :disabled="!mapping.id"
-                                        @click="openEditDiagramModal(mapping)"
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        type="button"
-                                        class="text-[9px] font-bold uppercase tracking-wider text-rose-600 transition-colors hover:text-rose-800 disabled:cursor-not-allowed disabled:text-slate-400"
-                                        :disabled="!mapping.id"
-                                        @click="openDeleteDiagramModal(mapping)"
-                                    >
-                                        Delete
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        </template>
 
         <div v-if="rows.length === 0" class="rounded-2xl border border-slate-200 bg-white px-6 py-8 text-sm text-slate-400 shadow-sm dark:border-white/10 dark:bg-[#171717] dark:text-slate-500">
             Procedure Not Available
@@ -190,76 +192,78 @@
             </div>
         </div>
 
-        <ConfirmationModal
-            :show="isDiagramModalOpen"
-            :title="editingDiagramId ? 'Edit Mapping Diagram' : 'Tambah Mapping Diagram'"
-            :message="editingDiagramId ? 'Silakan sesuaikan kategori, aktivitas SOP, dan aktor.' : 'Pilih kategori diagram, aktivitas SOP, dan aktor yang menjalankan aktivitas.'"
-            confirm-text="Simpan"
-            cancel-text="Batal"
-            type="info"
-            max-width="lg"
-            :loading="diagramForm.processing"
-            @close="closeDiagramModal"
-            @confirm="submitDiagramForm"
-        >
-            <div class="mt-4 space-y-4">
-                <div class="grid gap-4 md:grid-cols-2">
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Kategori Diagram</label>
-                        <select
-                            v-model="diagramForm.tipe"
-                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-black/20 dark:text-white"
-                            @change="handleDiagramTypeChange"
-                        >
-                            <option v-for="category in flowCategories" :key="category.value" :value="category.value">
-                                {{ category.label }}
-                            </option>
-                        </select>
-                        <p v-if="diagramForm.errors.tipe" class="mt-0.5 text-xs text-rose-500">{{ diagramForm.errors.tipe }}</p>
+        <template v-if="!readonly">
+            <ConfirmationModal
+                :show="isDiagramModalOpen"
+                :title="editingDiagramId ? 'Edit Mapping Diagram' : 'Tambah Mapping Diagram'"
+                :message="editingDiagramId ? 'Silakan sesuaikan kategori, aktivitas SOP, dan aktor.' : 'Pilih kategori diagram, aktivitas SOP, dan aktor yang menjalankan aktivitas.'"
+                confirm-text="Simpan"
+                cancel-text="Batal"
+                type="info"
+                max-width="lg"
+                :loading="diagramForm.processing"
+                @close="closeDiagramModal"
+                @confirm="submitDiagramForm"
+            >
+                <div class="mt-4 space-y-4">
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Kategori Diagram</label>
+                            <select
+                                v-model="diagramForm.tipe"
+                                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-black/20 dark:text-white"
+                                @change="handleDiagramTypeChange"
+                            >
+                                <option v-for="category in flowCategories" :key="category.value" :value="category.value">
+                                    {{ category.label }}
+                                </option>
+                            </select>
+                            <p v-if="diagramForm.errors.tipe" class="mt-0.5 text-xs text-rose-500">{{ diagramForm.errors.tipe }}</p>
+                        </div>
+
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Aktor</label>
+                            <select
+                                v-model="diagramForm.actor_id"
+                                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-black/20 dark:text-white"
+                            >
+                                <option value="" disabled>-- Pilih Aktor --</option>
+                                <option v-for="actor in actors" :key="actor.id" :value="actor.id">
+                                    {{ actor.name }}
+                                </option>
+                            </select>
+                            <p v-if="diagramForm.errors.actor_id" class="mt-0.5 text-xs text-rose-500">{{ diagramForm.errors.actor_id }}</p>
+                        </div>
                     </div>
 
                     <div class="flex flex-col gap-1.5">
-                        <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Aktor</label>
+                        <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Aktivitas SOP</label>
                         <select
-                            v-model="diagramForm.actor_id"
+                            v-model="diagramForm.sop_id"
                             class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-black/20 dark:text-white"
                         >
-                            <option value="" disabled>-- Pilih Aktor --</option>
-                            <option v-for="actor in actors" :key="actor.id" :value="actor.id">
-                                {{ actor.name }}
+                            <option value="" disabled>-- Pilih Aktivitas SOP --</option>
+                            <option v-for="sop in diagramSopOptions" :key="sop.id" :value="sop.id">
+                                {{ shortText(sop.description, 110) }}
                             </option>
                         </select>
-                        <p v-if="diagramForm.errors.actor_id" class="mt-0.5 text-xs text-rose-500">{{ diagramForm.errors.actor_id }}</p>
+                        <p v-if="diagramForm.errors.sop_id" class="mt-0.5 text-xs text-rose-500">{{ diagramForm.errors.sop_id }}</p>
                     </div>
                 </div>
+            </ConfirmationModal>
 
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Aktivitas SOP</label>
-                    <select
-                        v-model="diagramForm.sop_id"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-black/20 dark:text-white"
-                    >
-                        <option value="" disabled>-- Pilih Aktivitas SOP --</option>
-                        <option v-for="sop in diagramSopOptions" :key="sop.id" :value="sop.id">
-                            {{ shortText(sop.description, 110) }}
-                        </option>
-                    </select>
-                    <p v-if="diagramForm.errors.sop_id" class="mt-0.5 text-xs text-rose-500">{{ diagramForm.errors.sop_id }}</p>
-                </div>
-            </div>
-        </ConfirmationModal>
-
-        <ConfirmationModal
-            :show="isDeleteDiagramModalOpen"
-            title="Hapus Mapping Diagram"
-            :message="`Apakah Anda yakin ingin menghapus mapping '${selectedDiagramMapping?.actorName || '-'}' dari SOP '${shortText(selectedDiagramMapping?.sopDescription, 80)}'?`"
-            confirm-text="Hapus"
-            cancel-text="Batal"
-            type="danger"
-            :loading="diagramForm.processing"
-            @close="isDeleteDiagramModalOpen = false"
-            @confirm="submitDeleteDiagram"
-        />
+            <ConfirmationModal
+                :show="isDeleteDiagramModalOpen"
+                title="Hapus Mapping Diagram"
+                :message="`Apakah Anda yakin ingin menghapus mapping '${selectedDiagramMapping?.actorName || '-'}' dari SOP '${shortText(selectedDiagramMapping?.sopDescription, 80)}'?`"
+                confirm-text="Hapus"
+                cancel-text="Batal"
+                type="danger"
+                :loading="diagramForm.processing"
+                @close="isDeleteDiagramModalOpen = false"
+                @confirm="submitDeleteDiagram"
+            />
+        </template>
     </section>
 </template>
 
@@ -278,6 +282,14 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    readonly: {
+        type: Boolean,
+        default: false,
+    },
+    flowType: {
+        type: String,
+        default: null,
+    },
 });
 
 const flowCategories = [
@@ -293,7 +305,7 @@ const roleDefinitions = [
 ];
 
 const rowHeight = 140;
-const activeFlowType = ref('A');
+const activeFlowType = ref(props.flowType || 'A');
 
 const activeCategory = computed(() => {
     return flowCategories.find((category) => category.value === activeFlowType.value) ?? flowCategories[0];
@@ -402,6 +414,7 @@ function mappedRoleIndexes(row) {
 }
 
 function setActiveFlowType(tipe) {
+    if (props.readonly) return;
     activeFlowType.value = tipe;
     setTimeout(updatePaths, 0);
 }

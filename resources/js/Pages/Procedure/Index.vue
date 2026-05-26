@@ -287,19 +287,14 @@
 
         <template v-else>
             <div class="animate-fade-in-up space-y-6">
-                <!-- Page Header -->
                 <section class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717]">
                     <div class="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full bg-[#821f44]/10 blur-2xl"></div>
                     <div class="pointer-events-none absolute -bottom-16 -left-12 h-40 w-40 rounded-full bg-blue-500/5 blur-2xl"></div>
 
                     <div class="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#821f44] dark:text-[#a83262]">
-                                {{ activeRegulation?.judul }}
-                            </p>
-                            <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                                Procedure
-                            </h1>
+                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#821f44] dark:text-[#a83262]">{{ activeRegulation?.judul }}</p>
+                            <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Procedure</h1>
                         </div>
                         <div class="flex items-center gap-3">
                             <button
@@ -325,9 +320,7 @@
                     </div>
                 </section>
 
-                <div
-                    class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 md:p-16 rounded-2xl relative font-sans text-slate-800 dark:text-slate-200 print:shadow-none print:border-none print:p-0 print:m-0"
-                >
+                <div class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 md:p-16 rounded-2xl relative font-sans text-slate-800 dark:text-slate-200 print:shadow-none print:border-none print:p-0 print:m-0">
                     <PertaminaDocumentHeader :activeRegulation="activeRegulation" class="flex-1" />
 
                     <div class="mt-8 text-center space-y-2 relative z-10">
@@ -341,7 +334,7 @@
 
                     <div class="mt-10 relative z-10">
                         <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide border-b border-slate-900/10 pb-2 dark:border-white/10">
-                            IV. FUNGSI/ UNIT ORGANISASI/ JABATAN TERKAIT 
+                            IV. FUNGSI/ UNIT ORGANISASI/ JABATAN TERKAIT
                         </h3>
                     </div>
 
@@ -383,7 +376,7 @@
 
                     <div class="mt-10 relative z-10">
                         <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide border-b border-slate-900/10 pb-2 dark:border-white/10">
-                            V. PROSEDUR 
+                            V. PROSEDUR
                         </h3>
                     </div>
 
@@ -392,12 +385,8 @@
                             <h4 class="mb-3 font-bold text-slate-950 dark:text-white">A. Penyusunan RSTI</h4>
                             <div class="space-y-3">
                                 <div v-for="(item, index) in sopA" :key="item.id" class="flex gap-3 items-start">
-                                    <span class="font-bold min-w-[20px] text-right select-none">
-                                        {{ index + 1 }}.
-                                    </span>
-                                    <p class="whitespace-pre-line text-justify">
-                                        {{ item.description }}
-                                    </p>
+                                    <span class="font-bold min-w-[20px] text-right select-none">{{ index + 1 }}.</span>
+                                    <p class="whitespace-pre-line text-justify">{{ item.description }}</p>
                                 </div>
                                 <div v-if="sopA.length === 0" class="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-center text-slate-400 dark:border-white/10 dark:text-slate-500">
                                     Belum ada data SOP untuk kategori ini.
@@ -409,12 +398,8 @@
                             <h4 class="mb-3 font-bold text-slate-950 dark:text-white">B. Reviu & Pembaruan Berkala RSTI</h4>
                             <div class="space-y-3">
                                 <div v-for="(item, index) in sopB" :key="item.id" class="flex gap-3 items-start">
-                                    <span class="font-bold min-w-[20px] text-right select-none">
-                                        {{ index + 1 }}.
-                                    </span>
-                                    <p class="whitespace-pre-line text-justify">
-                                        {{ tightSopText(item.description) }}
-                                    </p>
+                                    <span class="font-bold min-w-[20px] text-right select-none">{{ index + 1 }}.</span>
+                                    <p class="whitespace-pre-line text-justify">{{ tightSopText(item.description) }}</p>
                                 </div>
                                 <div v-if="sopB.length === 0" class="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-center text-slate-400 dark:border-white/10 dark:text-slate-500">
                                     Belum ada data SOP untuk kategori ini.
@@ -422,17 +407,40 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="mt-10 relative z-10">
-                        <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide border-b border-slate-900/10 pb-2 dark:border-white/10">
-                            C. Diagram Alir
-                        </h3>
-                    </div>
-
-                    <div class="mt-6">
-                        <FlowChart :actors="actors" :sops="flowChartSops" />
-                    </div>
                 </div>
+
+                <section class="mt-4 space-y-6">
+                    <div class="flex items-center gap-2 px-1">
+                        <div class="h-5 w-1 rounded-full bg-emerald-600"></div>
+                        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+                            VI. DIAGRAM ALIR
+                        </h2>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div
+                            v-for="diagram in procedureDiagramSections"
+                            :key="diagram.value"
+                            class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]"
+                        >
+                            <div class="border-b border-slate-200 px-5 py-3 dark:border-white/10">
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">
+                                    {{ diagram.label }}
+                                </h3>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <div class="min-w-[1200px] p-4">
+                                    <FlowChart
+                                        :actors="actors"
+                                        :sops="flowChartSops"
+                                        readonly
+                                        :flow-type="diagram.value"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
         </template>
     </UserLayout>
@@ -607,6 +615,11 @@ const activeSopTitle = computed(() => {
         ? 'B. Reviu & Pembaruan Berkala RSTI'
         : 'A. Penyusunan RSTI';
 });
+
+const procedureDiagramSections = [
+    { value: 'A', label: 'A. Penyusunan RSTI' },
+    { value: 'B', label: 'B. Reviu & Pembaruan Berkala RSTI' },
+];
 
 function openAddSopModal(tipe) {
     activeSopType.value = tipe;
