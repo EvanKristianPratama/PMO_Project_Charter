@@ -1,5 +1,0 @@
-<<<<<<<< HEAD:public/build/assets/InitiativeRelation-sODWaoL5.js
-import{_ as e}from"./_plugin-vue_export-helper-DlAUqK2U.js";import{e as t,o as r}from"./app-Dt2NlquP.js";/* empty css            */const o={},a={class:"rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600 dark:border-white/10 dark:bg-[#171717] dark:text-slate-300"};function i(s,n){return r(),t("section",a," Initiative relation detail belum tersedia. ")}const _=e(o,[["render",i]]);export{_ as default};
-========
-import{_ as e}from"./_plugin-vue_export-helper-DlAUqK2U.js";import{e as t,o as r}from"./app-BjH5vCLr.js";/* empty css            */const o={},a={class:"rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600 dark:border-white/10 dark:bg-[#171717] dark:text-slate-300"};function i(s,n){return r(),t("section",a," Initiative relation detail belum tersedia. ")}const _=e(o,[["render",i]]);export{_ as default};
->>>>>>>> dev:public/build/assets/InitiativeRelation-BacbFOuB.js
