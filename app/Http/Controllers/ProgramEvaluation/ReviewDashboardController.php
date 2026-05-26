@@ -39,6 +39,13 @@ class ReviewDashboardController extends Controller
         'Desember',
     ];
     
+    public function index(): Response
+    {
+        $data = $this->getDashboardData();
+
+        return inertia('ProgramEvaluation/ReviewApproval/Index', $data);
+    }
+
     public function summary(): Response
     {
         $data = $this->getDashboardData();
