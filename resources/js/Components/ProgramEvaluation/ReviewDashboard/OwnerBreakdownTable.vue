@@ -17,7 +17,10 @@
                             </div>
                         </th>
                         <th colspan="2" class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20">Aproval</th>
-                        <th colspan="2" class="border-b border-slate-900 px-4 py-2 text-center dark:border-white/20">no aprove</th>
+                        <th colspan="2" class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20">no aprove</th>
+                        <th rowspan="2" class="border-b border-l border-slate-900 px-4 py-3 text-center dark:border-white/20">
+                            Total All
+                        </th>
                     </tr>
                     <tr class="bg-slate-50/50 text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:bg-white/5 dark:text-slate-500">
                         <th class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20">Total</th>
@@ -65,6 +68,9 @@
                                 <span v-if="row.notApproved.length === 0" class="text-slate-400">-</span>
                             </div>
                         </td>
+                        <td class="border-l border-slate-900 px-4 py-4 text-center font-black text-slate-900 dark:border-white/20 dark:text-white">
+                            {{ row.totalCount }}
+                        </td>
                     </tr>
                 </tbody>
                 <tfoot>
@@ -104,13 +110,16 @@
                                 </span>
                             </div>
                         </td>
+                        <td class="border-t border-l border-slate-900 px-4 py-3 text-center dark:border-white/20">
+                            {{ totals.totalCount }}
+                        </td>
                     </tr>
                     <tr class="bg-slate-100/80 text-slate-900 dark:bg-white/10 dark:text-white font-black uppercase text-[11px] border-t-1 border-slate-900 dark:border-white/40">
-                        <td colspan="4" class="px-4 py-2.5 text-right border-r border-slate-900 dark:border-white/20">
+                        <td colspan="5" class="px-4 py-2.5 text-right border-r border-slate-900 dark:border-white/20">
                             Total Keseluruhan Inisiatif (Approved + No Approved)
                         </td>
                         <td class="px-4 py-2.5 text-center text-[13px]">
-                            {{ totals.approvedCount + totals.notApprovedCount }}
+                            {{ totals.totalCount }}
                         </td>
                     </tr>
                 </tfoot>
@@ -138,10 +147,11 @@ const totals = computed(() => {
     const agg = displayData.value.reduce((acc, row) => {
         acc.approvedCount += row.approved.length;
         acc.notApprovedCount += row.notApproved.length;
+        acc.totalCount += row.totalCount ?? (row.approved.length + row.notApproved.length);
         acc.approvedItems.push(...row.approved);
         acc.notApprovedItems.push(...row.notApproved);
         return acc;
-    }, { approvedCount: 0, notApprovedCount: 0, approvedItems: [], notApprovedItems: [] });
+    }, { totalCount: 0, approvedCount: 0, notApprovedCount: 0, approvedItems: [], notApprovedItems: [] });
 
     // Sort by no to keep capsules ordered
     agg.approvedItems.sort((a, b) => (Number(a.no) || 0) - (Number(b.no) || 0));

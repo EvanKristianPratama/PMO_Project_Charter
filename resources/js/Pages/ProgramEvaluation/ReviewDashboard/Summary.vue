@@ -19,11 +19,11 @@
             />
 
             <!-- Project Leader Breakdown Table -->
-            <LeaderBreakdownTable
-                :originalData="leaderBreakdown.original"
-                :restructureData="leaderBreakdown.restructure"
-                :getCircleColor="getCircleColor"
-            />
+                <LeaderBreakdownTable
+                    :originalData="leaderBreakdown.original"
+                    :restructureData="leaderBreakdown.restructure"
+                    :getCircleColor="getCircleColor"
+                />
 
             <!-- Status Matrix - Project Owner -->
             <StatusMatrix
@@ -167,6 +167,7 @@ const ownerBreakdown = computed(() => {
                 breakdown[owner] = {
                     owner,
                     sortCode: ownerCode,
+                    totalCount: 0,
                     approved: [],
                     notApproved: [],
                 };
@@ -183,6 +184,8 @@ const ownerBreakdown = computed(() => {
                 no: row.no,
                 status: row.latest_review_status,
             };
+
+            breakdown[owner].totalCount += 1;
 
             if (isApproved) {
                 breakdown[owner].approved.push(data);
@@ -226,6 +229,7 @@ const leaderBreakdown = computed(() => {
                 breakdown[leader] = {
                     leader,
                     sortCode: leaderCode,
+                    totalCount: 0,
                     approved: [],
                     notApproved: [],
                 };
@@ -242,6 +246,8 @@ const leaderBreakdown = computed(() => {
                 no: row.no,
                 status: row.latest_review_status,
             };
+
+            breakdown[leader].totalCount += 1;
 
             if (isApproved) {
                 breakdown[leader].approved.push(data);
