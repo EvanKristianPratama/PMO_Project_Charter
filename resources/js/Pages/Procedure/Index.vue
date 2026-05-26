@@ -294,7 +294,7 @@
                     <div class="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#821f44] dark:text-[#a83262]">{{ activeRegulation?.judul }}</p>
-                            <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Procedure</h1>
+                            <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Kebijakan Dokumen</h1>
                         </div>
                         <div class="flex items-center gap-3">
                             <button
@@ -322,15 +322,6 @@
 
                 <div class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 md:p-16 rounded-2xl relative font-sans text-slate-800 dark:text-slate-200 print:shadow-none print:border-none print:p-0 print:m-0">
                     <PertaminaDocumentHeader :activeRegulation="activeRegulation" class="flex-1" />
-
-                    <div class="mt-8 text-center space-y-2 relative z-10">
-                        <h2 class="text-lg sm:text-xl font-extrabold tracking-[0.15em] text-slate-950 dark:text-white uppercase">
-                            PROCEDURE
-                        </h2>
-                        <h2 class="text-xl sm:text-2xl font-extrabold tracking-[0.2em] text-slate-950 dark:text-white uppercase">
-                            {{ activeRegulation?.judul || 'Dokumen Prosedur' }}
-                        </h2>
-                    </div>
 
                     <div class="mt-10 relative z-10">
                         <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide border-b border-slate-900/10 pb-2 dark:border-white/10">
