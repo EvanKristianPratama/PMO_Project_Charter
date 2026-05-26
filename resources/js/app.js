@@ -9,52 +9,48 @@ const appName = import.meta.env.VITE_APP_NAME || 'Review ITSPS';
 const pages = import.meta.glob('./Pages/**/*.vue');
 
 function normalizePagePath(path) {
-    return path.replace(/\\/g, '/').replace(/^\.\/+/, './').toLowerCase();
-}
-
-function normalizeRequestedPage(name) {
-    return name
+    return String(path ?? '')
         .replace(/\\/g, '/')
-        .replace(/^\.\/Pages\//i, '')
-        .replace(/^Pages\//i, '')
         .replace(/^\.\/+/, '')
+        .replace(/^\/+/, '')
+        .replace(/^@resources\/js\//i, '')
+        .replace(/^resources\/js\//i, '')
+        .replace(/^pages\//i, '')
+        .replace(/^\.?\/?pages\//i, '')
         .replace(/\.vue$/i, '')
         .replace(/\/+$/, '')
         .toLowerCase();
 }
 
 function resolvePage(name) {
-    const requested = normalizeRequestedPage(name);
+    const requested = normalizePagePath(name);
     const requestedWithoutIndex = requested.replace(/\/index$/, '');
     const candidates = [
-        `./Pages/${name}.vue`,
-        `./Pages/${name}/Index.vue`,
-        `./Pages/${requested}.vue`,
-        `./Pages/${requested}/Index.vue`,
-        `./Pages/${requestedWithoutIndex}.vue`,
-        `./Pages/${requestedWithoutIndex}/Index.vue`,
-    ];
+        requested,
+        `${requested}/index`,
+        requestedWithoutIndex,
+        `${requestedWithoutIndex}/index`,
+    ].filter(Boolean);
+
+    const normalizedPages = Object.entries(pages).reduce((carry, [key, loader]) => {
+        const normalizedKey = normalizePagePath(key);
+
+        if (!carry[normalizedKey]) {
+            carry[normalizedKey] = loader;
+        }
+
+        return carry;
+    }, {});
 
     for (const candidate of candidates) {
-        const exact = pages[candidate];
-        if (exact) {
-            return exact();
+        if (normalizedPages[candidate]) {
+            return normalizedPages[candidate]();
         }
 
-        const normalizedCandidate = normalizePagePath(candidate);
-        const foundKey = Object.keys(pages).find((key) => normalizePagePath(key).toLowerCase() === normalizedCandidate);
-
-        if (foundKey) {
-            return pages[foundKey]();
-        }
-
-        const suffixMatch = Object.keys(pages).find((key) => {
-            const normalizedKey = normalizePagePath(key);
-            return normalizedKey.endsWith(normalizedCandidate);
-        });
+        const suffixMatch = Object.entries(normalizedPages).find(([key]) => key.endsWith(candidate));
 
         if (suffixMatch) {
-            return pages[suffixMatch]();
+            return suffixMatch[1]();
         }
     }
 

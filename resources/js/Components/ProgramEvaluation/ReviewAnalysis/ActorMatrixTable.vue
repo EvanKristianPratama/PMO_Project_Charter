@@ -5,8 +5,6 @@
                 <thead>
                     <tr class="bg-slate-50 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:bg-white/5 dark:text-slate-400">
                         <th class="border-b border-r border-slate-900 px-4 py-3 dark:border-white/20">Aktor</th>
-                        <th class="border-b border-r border-slate-900 px-4 py-3 dark:border-white/20">IT Building Block</th>
-                        <th class="border-b border-r border-slate-900 px-4 py-3 dark:border-white/20">Initiative</th>
                         <th class="border-b border-r border-slate-900 px-4 py-3 dark:border-white/20">Project Sponsor</th>
                         <th class="border-b border-r border-slate-900 px-4 py-3 dark:border-white/20">Project Owner</th>
                         <th class="border-b border-r border-slate-900 px-4 py-3 dark:border-white/20">Project Leader</th>
@@ -16,143 +14,102 @@
                 </thead>
 
                 <tbody class="bg-white dark:bg-[#171717]">
-                    <template v-for="row in expandedRows" :key="row.organization_id">
-                        <tr
-                            v-for="(blockRow, index) in row.blockRows"
-                            :key="`${row.organization_id}-${blockRow.building_block}-${blockRow.initiative_id}`"
-                            class="align-top transition-colors hover:bg-slate-50 dark:hover:bg-white/5"
-                        >
-                            <td
-                                v-if="index === 0"
-                                :rowspan="row.blockRows.length"
-                                class="border-b border-r border-slate-900 px-4 py-4 font-black text-slate-900 dark:border-b-white/20 dark:border-r-white/20 dark:text-white"
-                            >
-                                <div class="flex flex-col gap-1">
-                                    <span>{{ row.actor || '-' }}</span>
-                                    <span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                                        {{ row.organization_code || '-' }}
-                                    </span>
-                                    <span v-if="row.organization_name" class="text-[10px] font-semibold text-slate-500">
-                                        {{ row.organization_name }}
-                                    </span>
-                                </div>
-                            </td>
+                    <tr
+                        v-for="row in rows"
+                        :key="row.organization_id"
+                        class="align-top transition-colors hover:bg-slate-50 dark:hover:bg-white/5"
+                    >
+                        <td class="border-b border-r border-slate-900 px-4 py-4 font-black text-slate-900 dark:border-b-white/20 dark:border-r-white/20 dark:text-white">
+                            <div class="flex flex-col gap-1">
+                                <span>{{ row.actor || '-' }}</span>
+                                <span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                                    {{ row.organization_code || '-' }}
+                                </span>
+                                <span v-if="row.organization_name" class="text-[10px] font-semibold text-slate-500">
+                                    {{ row.organization_name }}
+                                </span>
+                            </div>
+                        </td>
 
-                            <td class="border-b border-r border-slate-900 px-4 py-3 dark:border-b-white/20 dark:border-r-white/20">
-                                <div class="flex flex-col gap-1.5 rounded-lg border border-slate-300 px-2.5 py-2 dark:border-white/10">
-                                    <div class="flex items-start justify-between gap-2 text-[10px] font-semibold text-slate-700 dark:text-slate-200">
-                                        <span class="leading-snug">{{ blockRow.building_block }}</span>
-                                        <span class="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold text-slate-500 dark:bg-white/5 dark:text-slate-400">
-                                            #{{ blockRow.no }}
-                                        </span>
-                                    </div>
-                                    <div class="text-[9px] font-medium uppercase tracking-[0.12em] text-slate-400">
-                                        Initiative row
-                                    </div>
-                                </div>
-                            </td>
+                        <td class="border-b border-r border-slate-900 px-4 py-3 dark:border-b-white/20 dark:border-r-white/20">
+                            <div class="flex flex-wrap gap-1.5">
+                                <span
+                                    v-for="item in row.project_sponsors"
+                                    :key="`sp-${row.organization_id}-${item.initiative_id}`"
+                                    class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
+                                    :class="statusColor(item.status)"
+                                    :title="item.name"
+                                >
+                                    {{ item.no }}
+                                </span>
+                                <span v-if="!row.project_sponsors?.length" class="text-slate-400">-</span>
+                            </div>
+                        </td>
 
-                            <td class="border-b border-r border-slate-900 px-4 py-3 dark:border-b-white/20 dark:border-r-white/20">
-                                <div class="flex flex-wrap gap-1.5">
-                                    <span
-                                        v-for="item in blockRow.initiatives"
-                                        :key="`init-${row.organization_id}-${blockRow.initiative_id}-${item.initiative_id}`"
-                                        class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
-                                        :class="statusColor(item.status)"
-                                        :title="item.name"
-                                    >
-                                        {{ item.no }}
-                                    </span>
-                                    <span v-if="!blockRow.initiatives?.length" class="text-slate-400">-</span>
-                                </div>
-                            </td>
+                        <td class="border-b border-r border-slate-900 px-4 py-3 dark:border-b-white/20 dark:border-r-white/20">
+                            <div class="flex flex-wrap gap-1.5">
+                                <span
+                                    v-for="item in row.project_owners"
+                                    :key="`ow-${row.organization_id}-${item.initiative_id}`"
+                                    class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
+                                    :class="statusColor(item.status)"
+                                    :title="item.name"
+                                >
+                                    {{ item.no }}
+                                </span>
+                                <span v-if="!row.project_owners?.length" class="text-slate-400">-</span>
+                            </div>
+                        </td>
 
-                            <td class="border-b border-r border-slate-900 px-4 py-3 dark:border-b-white/20 dark:border-r-white/20">
-                                <div class="flex flex-wrap gap-1.5">
-                                    <span
-                                        v-for="item in blockRow.project_sponsors"
-                                        :key="`sp-${row.organization_id}-${blockRow.initiative_id}-${item.initiative_id}`"
-                                        class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
-                                        :class="statusColor(item.status)"
-                                        :title="item.name"
-                                    >
-                                        {{ item.no }}
-                                    </span>
-                                    <span v-if="!blockRow.project_sponsors?.length" class="text-slate-400">-</span>
-                                </div>
-                            </td>
+                        <td class="border-b border-r border-slate-900 px-4 py-3 dark:border-b-white/20 dark:border-r-white/20">
+                            <div class="flex flex-wrap gap-1.5">
+                                <span
+                                    v-for="item in row.project_leaders"
+                                    :key="`ld-${row.organization_id}-${item.initiative_id}`"
+                                    class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
+                                    :class="statusColor(item.status)"
+                                    :title="item.name"
+                                >
+                                    {{ item.no }}
+                                </span>
+                                <span v-if="!row.project_leaders?.length" class="text-slate-400">-</span>
+                            </div>
+                        </td>
 
-                            <td class="border-b border-r border-slate-900 px-4 py-3 dark:border-b-white/20 dark:border-r-white/20">
-                                <div class="flex flex-wrap gap-1.5">
-                                    <span
-                                        v-for="item in blockRow.project_owners"
-                                        :key="`ow-${row.organization_id}-${blockRow.initiative_id}-${item.initiative_id}`"
-                                        class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
-                                        :class="statusColor(item.status)"
-                                        :title="item.name"
-                                    >
-                                        {{ item.no }}
-                                    </span>
-                                    <span v-if="!blockRow.project_owners?.length" class="text-slate-400">-</span>
-                                </div>
-                            </td>
+                        <td class="border-b border-r border-slate-900 px-4 py-3 dark:border-b-white/20 dark:border-r-white/20">
+                            <div class="flex flex-wrap gap-1.5">
+                                <span
+                                    v-for="item in row.cross_function_involvements"
+                                    :key="`cf-${row.organization_id}-${item.initiative_id}`"
+                                    class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
+                                    :class="statusColor(item.status)"
+                                    :title="item.name"
+                                >
+                                    {{ item.no }}
+                                </span>
+                                <span v-if="!row.cross_function_involvements?.length" class="text-slate-400">-</span>
+                            </div>
+                        </td>
 
-                            <td class="border-b border-r border-slate-900 px-4 py-3 dark:border-b-white/20 dark:border-r-white/20">
-                                <div class="flex flex-wrap gap-1.5">
-                                    <span
-                                        v-for="item in blockRow.project_leaders"
-                                        :key="`ld-${row.organization_id}-${blockRow.initiative_id}-${item.initiative_id}`"
-                                        class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
-                                        :class="statusColor(item.status)"
-                                        :title="item.name"
-                                    >
-                                        {{ item.no }}
-                                    </span>
-                                    <span v-if="!blockRow.project_leaders?.length" class="text-slate-400">-</span>
-                                </div>
-                            </td>
-
-                            <td class="border-b border-r border-slate-900 px-4 py-3 dark:border-b-white/20 dark:border-r-white/20">
-                                <div class="flex flex-wrap gap-1.5">
-                                    <span
-                                        v-for="item in blockRow.cross_function_involvements"
-                                        :key="`cf-${row.organization_id}-${blockRow.initiative_id}-${item.initiative_id}`"
-                                        class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
-                                        :class="statusColor(item.status)"
-                                        :title="item.name"
-                                    >
-                                        {{ item.no }}
-                                    </span>
-                                    <span v-if="!blockRow.cross_function_involvements?.length" class="text-slate-400">-</span>
-                                </div>
-                            </td>
-
-                            <td class="border-b px-4 py-3 dark:border-b-white/20">
-                                <div class="flex flex-wrap gap-1.5">
-                                    <span
-                                        v-for="item in blockRow.personel_utama"
-                                        :key="`kp-${row.organization_id}-${blockRow.initiative_id}-${item.label}`"
-                                        class="inline-flex rounded-full border border-slate-300 bg-white px-2 py-0.5 text-[10px] font-bold text-slate-700 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-200"
-                                        :title="item.note || item.label"
-                                    >
-                                        {{ item.label }}
-                                    </span>
-                                    <span v-if="!blockRow.personel_utama?.length" class="text-slate-400">-</span>
-                                </div>
-                            </td>
-                        </tr>
-                    </template>
+                        <td class="border-b px-4 py-3 dark:border-b-white/20">
+                            <div class="flex flex-wrap gap-1.5">
+                                <span
+                                    v-for="item in row.personel_utama"
+                                    :key="`kp-${row.organization_id}-${item.label}`"
+                                    class="inline-flex rounded-full border border-slate-300 bg-white px-2 py-0.5 text-[10px] font-bold text-slate-700 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-200"
+                                    :title="item.note || item.label"
+                                >
+                                    {{ item.label }}
+                                </span>
+                                <span v-if="!row.personel_utama?.length" class="text-slate-400">-</span>
+                            </div>
+                        </td>
+                    </tr>
                 </tbody>
 
                 <tfoot>
                     <tr class="bg-slate-50 font-black text-slate-900 dark:bg-white/5 dark:text-white uppercase text-[10px]">
                         <td class="border-t border-r border-slate-900 px-4 py-3 dark:border-white/20">Grand Total</td>
-                        <td class="border-t border-r border-slate-900 px-4 py-3 dark:border-white/20">
-                            {{ totals.itBuildingBlocks }}
-                        </td>
-                        <td class="border-t border-r border-slate-900 px-4 py-3 dark:border-white/20">
-                            {{ totals.initiatives }}
-                        </td>
                         <td class="border-t border-r border-slate-900 px-4 py-3 dark:border-white/20">
                             {{ totals.projectSponsors }}
                         </td>
@@ -193,8 +150,6 @@ const props = defineProps({
 });
 
 const totals = computed(() => props.rows.reduce((acc, row) => {
-    acc.itBuildingBlocks += row.it_building_blocks?.length ?? 0;
-    acc.initiatives += row.initiatives?.length ?? 0;
     acc.projectSponsors += row.project_sponsors?.length ?? 0;
     acc.projectOwners += row.project_owners?.length ?? 0;
     acc.projectLeaders += row.project_leaders?.length ?? 0;
@@ -202,40 +157,11 @@ const totals = computed(() => props.rows.reduce((acc, row) => {
     acc.personelUtama += row.personel_utama?.length ?? 0;
     return acc;
 }, {
-    itBuildingBlocks: 0,
-    initiatives: 0,
     projectSponsors: 0,
     projectOwners: 0,
     projectLeaders: 0,
     crossFunctionInvolvements: 0,
     personelUtama: 0,
-}));
-
-const expandedRows = computed(() => props.rows.map((row) => {
-    const blockRows = (row.it_building_blocks?.length ? row.it_building_blocks : [{
-        building_block: '-',
-        no: '-',
-        initiative_id: null,
-    }]).map((block) => {
-        const initiativeId = block.initiative_id ?? null;
-        const matchByInitiative = (items) => (items ?? []).filter((item) => initiativeId === null || Number(item.initiative_id) === Number(initiativeId));
-        const matchPersonel = (items) => (items ?? []).filter((item) => initiativeId === null || Number(item.initiative_id) === Number(initiativeId));
-
-        return {
-            ...block,
-            initiatives: matchByInitiative(row.initiatives),
-            project_sponsors: matchByInitiative(row.project_sponsors),
-            project_owners: matchByInitiative(row.project_owners),
-            project_leaders: matchByInitiative(row.project_leaders),
-            cross_function_involvements: matchByInitiative(row.cross_function_involvements),
-            personel_utama: matchPersonel(row.personel_utama),
-        };
-    });
-
-    return {
-        ...row,
-        blockRows,
-    };
 }));
 
 const statusColor = (status) => {

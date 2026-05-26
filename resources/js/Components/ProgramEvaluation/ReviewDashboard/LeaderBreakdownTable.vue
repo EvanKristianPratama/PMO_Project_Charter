@@ -6,13 +6,13 @@
                     <tr
                         class="bg-slate-50 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:bg-white/5 dark:text-slate-400">
                         <th rowspan="2" class="border-b border-r border-slate-900 px-4 py-3 dark:border-white/20">
-                            Parent Level 2
+                            Groub by
                         </th>
                         <th rowspan="2" class="border-b border-r border-slate-900 px-4 py-3 dark:border-white/20">
-                            Parent Level 3
+                            Groub by
                         </th>
                         <th rowspan="2" class="border-b border-r border-slate-900 px-4 py-3 dark:border-white/20">
-                            Parent Level 4
+                            Groub by
                         </th>
                         <th rowspan="2" class="border-b border-r border-slate-900 px-4 py-3 dark:border-white/20">
                             <div class="flex items-center justify-between gap-4">
@@ -26,9 +26,9 @@
                         </th>
                         <th colspan="2"
                             class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20">
-                            Aproval</th>
+                            Approved</th>
                         <th colspan="2"
-                            class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20">No
+                            class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20">Not
                             Approved</th>
                         <th rowspan="2"
                             class="border-b border-l border-slate-900 px-4 py-3 text-center dark:border-white/20">
@@ -50,19 +50,31 @@
                         class="border-b border-slate-200 hover:bg-slate-50 dark:border-white/10 dark:hover:bg-white/5 transition-colors">
                         <td v-if="row.showParentLevel2Cell" :rowspan="row.parentLevel2RowSpan"
                             class="border-r border-slate-900 px-4 py-4 align-top font-black text-slate-900 dark:border-white/20 dark:text-white">
-                            {{ row.parentLevel2 }}
+                            <span>{{ parseName(row.parentLevel2).title }}</span>
+                            <span v-if="parseName(row.parentLevel2).subtitle" class="font-normal italic text-slate-500 dark:text-slate-400">
+                                - {{ parseName(row.parentLevel2).subtitle }}
+                            </span>
                         </td>
                         <td v-if="row.showParentLevel3Cell" :rowspan="row.parentLevel3RowSpan"
                             class="border-r border-slate-900 px-4 py-4 align-top font-black text-slate-900 dark:border-white/20 dark:text-white">
-                            {{ row.parentLevel3 }}
+                            <span>{{ parseName(row.parentLevel3).title }}</span>
+                            <span v-if="parseName(row.parentLevel3).subtitle" class="font-normal italic text-slate-500 dark:text-slate-400">
+                                - {{ parseName(row.parentLevel3).subtitle }}
+                            </span>
                         </td>
                         <td v-if="row.showParentLevel4Cell" :rowspan="row.parentLevel4RowSpan"
                             class="border-r border-slate-900 px-4 py-4 align-top font-black text-slate-900 dark:border-white/20 dark:text-white">
-                            {{ row.parentLevel4 }}
+                            <span>{{ parseName(row.parentLevel4).title }}</span>
+                            <span v-if="parseName(row.parentLevel4).subtitle" class="font-normal italic text-slate-500 dark:text-slate-400">
+                                - {{ parseName(row.parentLevel4).subtitle }}
+                            </span>
                         </td>
                         <td
                             class="border-r border-slate-900 px-4 py-4 font-black text-slate-900 dark:border-white/20 dark:text-white">
-                            {{ row.leader }}
+                            <span>{{ parseName(row.leader).title }}</span>
+                            <span v-if="parseName(row.leader).subtitle" class="font-normal italic text-slate-500 dark:text-slate-400">
+                                - {{ parseName(row.leader).subtitle }}
+                            </span>
                         </td>
                         <td
                             class="border-r border-slate-900 px-4 py-4 text-center font-black text-slate-900 dark:border-white/20 dark:text-white">
@@ -72,7 +84,8 @@
                             <div class="flex flex-wrap gap-1.5">
                                 <span v-for="init in row.approved" :key="init.no"
                                     class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
-                                    :class="getCircleColor(init.status)" :title="init.projectCharterName || init.status">
+                                    :class="getCircleColor(init.status)"
+                                    :title="init.projectCharterName || init.status">
                                     {{ init.no }}
                                 </span>
                                 <span v-if="row.approved.length === 0" class="text-slate-400">-</span>
@@ -86,7 +99,8 @@
                             <div class="flex flex-wrap gap-1.5">
                                 <span v-for="init in row.notApproved" :key="init.no"
                                     class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
-                                    :class="getCircleColor(init.status)" :title="init.projectCharterName || init.status">
+                                    :class="getCircleColor(init.status)"
+                                    :title="init.projectCharterName || init.status">
                                     {{ init.no }}
                                 </span>
                                 <span v-if="row.notApproved.length === 0" class="text-slate-400">-</span>
@@ -115,7 +129,8 @@
                             <div class="flex flex-wrap gap-1.5">
                                 <span v-for="init in totals.approvedItems" :key="`total-app-${init.no}`"
                                     class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
-                                    :class="getCircleColor(init.status)" :title="init.projectCharterName || init.status">
+                                    :class="getCircleColor(init.status)"
+                                    :title="init.projectCharterName || init.status">
                                     {{ init.no }}
                                 </span>
                             </div>
@@ -127,7 +142,8 @@
                             <div class="flex flex-wrap gap-1.5">
                                 <span v-for="init in totals.notApprovedItems" :key="`total-notapp-${init.no}`"
                                     class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
-                                    :class="getCircleColor(init.status)" :title="init.projectCharterName || init.status">
+                                    :class="getCircleColor(init.status)"
+                                    :title="init.projectCharterName || init.status">
                                     {{ init.no }}
                                 </span>
                             </div>
@@ -139,7 +155,7 @@
                     <tr
                         class="border-t border-slate-900 bg-slate-100/80 text-slate-900 dark:border-white/40 dark:bg-white/10 dark:text-white font-black uppercase text-[11px]">
                         <td colspan="8" class="px-4 py-2.5 text-right border-r border-slate-900 dark:border-white/20">
-                            Total Keseluruhan Inisiatif (Approved + No Approved)
+                            Total Keseluruhan Inisiatif (Approved + Not Approved)
                         </td>
                         <td class="px-4 py-2.5 text-center text-[13px]">
                             {{ totals.totalCount }}
@@ -161,6 +177,19 @@ const props = defineProps({
 });
 
 const viewMode = ref('original'); // 'original' or 'restructure'
+
+const parseName = (val) => {
+    const str = String(val ?? '').trim();
+    if (!str || str === '-') return { title: '-', subtitle: '' };
+    const parts = str.split(' - ');
+    if (parts.length > 1) {
+        return {
+            title: parts[0],
+            subtitle: parts.slice(1).join(' - ')
+        };
+    }
+    return { title: str, subtitle: '' };
+};
 
 const displayData = computed(() => {
     return viewMode.value === 'original' ? props.originalData : props.restructureData;

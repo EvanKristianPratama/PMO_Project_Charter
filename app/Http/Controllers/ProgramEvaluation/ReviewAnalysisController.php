@@ -4,6 +4,7 @@ namespace App\Http\Controllers\ProgramEvaluation;
 
 use App\Http\Controllers\Controller;
 use App\Models\MstInitiative;
+use App\Models\TrsMapPicProject;
 use App\Models\TrsOrganization;
 use Inertia\Response;
 
@@ -69,9 +70,15 @@ class ReviewAnalysisController extends Controller
 
     private function buildOrganizationRows(): array
     {
+        $sponsorIds = TrsMapPicProject::query()->whereNotNull('project_sponsor')->where('project_sponsor', '>', 0)->pluck('project_sponsor')->unique()->toArray();
+        $ownerIds = TrsMapPicProject::query()->whereNotNull('project_owner')->where('project_owner', '>', 0)->pluck('project_owner')->unique()->toArray();
+        $leaderIds = TrsMapPicProject::query()->whereNotNull('project_leader')->where('project_leader', '>', 0)->pluck('project_leader')->unique()->toArray();
+        $picOrgIds = array_values(array_unique(array_merge($sponsorIds, $ownerIds, $leaderIds)));
+
         return TrsOrganization::query()
             ->select(['id', 'groub_id', 'code', 'name', 'alias', 'jabatan', 'pejabat'])
             ->with(['picProjects:id,organization_id,name'])
+            ->whereIn('id', $picOrgIds)
             ->get()
             ->map(function (TrsOrganization $organization): array {
                 $code = trim((string) ($organization->code ?? ''));

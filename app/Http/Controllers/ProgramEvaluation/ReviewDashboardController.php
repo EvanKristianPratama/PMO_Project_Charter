@@ -43,7 +43,7 @@ class ReviewDashboardController extends Controller
     {
         $data = $this->getDashboardData();
 
-        return inertia('ProgramEvaluation/ReviewApproval', $data);
+        return inertia('ProgramEvaluation/ReviewApproval/Index', $data);
     }
 
     public function summary(): Response
@@ -111,6 +111,12 @@ class ReviewDashboardController extends Controller
                 $projectLeader = $latestCharter?->leader ?? '-';
                 $projectOwnerCode = $this->resolveOrganizationCode($projectOwner, $organizationCodeLookup);
                 $projectLeaderCode = $this->resolveOrganizationCode($projectLeader, $organizationCodeLookup);
+                
+                $projectLeaderDisplay = $projectLeader;
+                if ($projectLeaderCode && isset($organizationDisplayLookup[$projectLeaderCode])) {
+                    $projectLeaderDisplay = $organizationDisplayLookup[$projectLeaderCode];
+                }
+
                 [$projectLeaderParentCode, $projectLeaderParent] = $this->resolveParentOrganization(
                     $projectLeaderCode,
                     $organizationDisplayLookup,
@@ -130,6 +136,12 @@ class ReviewDashboardController extends Controller
                 $projectLeaderRestructure = $latestProjectWithMap?->mapPicProject?->leaderOrganization?->jabatan ?? '-';
                 $projectOwnerRestructureCode = trim((string) ($latestProjectWithMap?->mapPicProject?->ownerOrganization?->code ?? '')) ?: null;
                 $projectLeaderRestructureCode = trim((string) ($latestProjectWithMap?->mapPicProject?->leaderOrganization?->code ?? '')) ?: null;
+
+                $projectLeaderRestructureDisplay = $projectLeaderRestructure;
+                if ($projectLeaderRestructureCode && isset($organizationDisplayLookup[$projectLeaderRestructureCode])) {
+                    $projectLeaderRestructureDisplay = $organizationDisplayLookup[$projectLeaderRestructureCode];
+                }
+
                 [$projectLeaderRestructureParentCode, $projectLeaderRestructureParent] = $this->resolveParentOrganization(
                     $projectLeaderRestructureCode,
                     $organizationDisplayLookup,
@@ -152,7 +164,7 @@ class ReviewDashboardController extends Controller
                     'latest_review_status' => $latestReviewState['status'],
                     'latest_review_period' => $latestReviewState['period'],
                     'project_owner' => $projectOwner,
-                    'project_leader' => $projectLeader,
+                    'project_leader' => $projectLeaderDisplay,
                     'project_owner_code' => $projectOwnerCode,
                     'project_leader_code' => $projectLeaderCode,
                     'project_leader_parent_code' => $projectLeaderParentCode,
@@ -163,7 +175,7 @@ class ReviewDashboardController extends Controller
                     'project_leader_parent_level5' => $projectLeaderParents[5],
                     'project_leader_parent_level6' => $projectLeaderParents[6],
                     'project_owner_restructure' => $projectOwnerRestructure,
-                    'project_leader_restructure' => $projectLeaderRestructure,
+                    'project_leader_restructure' => $projectLeaderRestructureDisplay,
                     'project_owner_restructure_code' => $projectOwnerRestructureCode,
                     'project_leader_restructure_code' => $projectLeaderRestructureCode,
                     'project_leader_restructure_parent_code' => $projectLeaderRestructureParentCode,
@@ -227,7 +239,7 @@ class ReviewDashboardController extends Controller
     private function buildOrganizationDisplayLookup(): array
     {
         return TrsOrganization::query()
-            ->select(['code', 'jabatan', 'name', 'alias'])
+            ->select(['code', 'jabatan', 'name', 'alias', 'pejabat'])
             ->get()
             ->mapWithKeys(function (TrsOrganization $organization): array {
                 $code = trim((string) ($organization->code ?? ''));
@@ -248,6 +260,11 @@ class ReviewDashboardController extends Controller
 
                 if ($displayName === '') {
                     $displayName = $code;
+                }
+
+                $pejabat = trim((string) ($organization->pejabat ?? ''));
+                if ($pejabat !== '' && $pejabat !== '-') {
+                    $displayName = $displayName . ' - ' . $pejabat;
                 }
 
                 return [$code => $displayName];
