@@ -56,4 +56,12 @@ class MstRegulation extends Model
     {
         return $this->hasMany(MstGeneralPolicy::class, 'regulation_id');
     }
+
+    /**
+     * Relasi ke MstObjective
+     */
+    public function objectives(): HasMany
+    {
+        return $this->hasMany(MstObjective::class, 'regulation_id');
+    }
 }

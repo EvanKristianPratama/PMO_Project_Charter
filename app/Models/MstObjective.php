@@ -15,11 +15,20 @@ class MstObjective extends Model
 
     protected $fillable = [
         'objective_id',
+        'regulation_id',
         'domain',
         'objective',
         'objective_description',
         'objective_purpose',
     ];
+
+    /**
+     * Relasi ke MstRegulation
+     */
+    public function regulation(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(MstRegulation::class, 'regulation_id');
+    }
 
     public function practices(): HasMany
     {

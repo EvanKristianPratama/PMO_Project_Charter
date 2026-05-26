@@ -1,46 +1,44 @@
 <template>
     <UserLayout title="Dokumen Kebijakan Umum">
         <div class="animate-fade-in-up space-y-6">
-            <!-- Sleek Action Bar at Top (print:hidden) -->
-            <section
-                class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717] print:hidden">
-                <div
-                    class="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full bg-[#821f44]/10 blur-2xl">
-                </div>
-                <div
-                    class="pointer-events-none absolute -bottom-16 -left-12 h-40 w-40 rounded-full bg-blue-500/5 blur-2xl">
+            <!-- Page Header -->
+            <section class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                <div class="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full bg-[#821f44]/10 blur-2xl"></div>
+                <div class="pointer-events-none absolute -bottom-16 -left-12 h-40 w-40 rounded-full bg-blue-500/5 blur-2xl"></div>
+
+                <div class="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#821f44] dark:text-[#a83262]">{{ activeRegulation?.judul }}</p>
+                        <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Kelola Dokumen</h1>
+                    </div>
+                    <div class="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                        <!-- Document Type Switch Menu (Horizontal) -->
+                        <nav class="flex shrink-0 flex-row gap-1 rounded-xl bg-slate-100 p-1 dark:bg-white/5">
+                            <Link :href="route('policy.general.index')"
+                                class="flex items-center justify-center rounded-lg px-6 py-2 text-center text-xs font-bold transition-all"
+                                :class="route().current('policy.general.index') ? 'bg-white text-[#821f44] shadow-sm dark:bg-[#1a1a1a] dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
+                                Kebijakan Umum
+                            </Link>
+                            <Link :href="route('policy.specific.index')"
+                                class="flex items-center justify-center rounded-lg px-6 py-2 text-center text-xs font-bold transition-all"
+                                :class="route().current('policy.specific.index') ? 'bg-white text-[#821f44] shadow-sm dark:bg-[#1a1a1a] dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
+                                Kebijakan Khusus
+                            </Link>
+                        </nav>
+                    </div>
                 </div>
 
-                <div class="relative flex flex-col gap-4 lg:flex-row lg:items-stretch lg:justify-between">
-                    <!-- Formal Pertamina Document Grid Header -->
-                    <PertaminaDocumentHeader :activeRegulation="activeRegulation" class="flex-1" />
-
-                    <!-- Document Type Switch Menu (Vertical) -->
-                    <nav class="flex shrink-0 flex-col gap-1 rounded-xl bg-slate-100 p-1 dark:bg-white/5 lg:w-48">
-                        <Link :href="route('policy.general.index')"
-                            class="flex flex-1 items-center justify-center rounded-lg px-4 py-2 text-center text-xs font-bold transition-all"
-                            :class="route().current('policy.general.index') ? 'bg-white text-[#821f44] shadow-sm dark:bg-[#1a1a1a] dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
-                            Kebijakan Umum
-                        </Link>
-                        <Link :href="route('policy.specific.index')"
-                            class="flex flex-1 items-center justify-center rounded-lg px-4 py-2 text-center text-xs font-bold transition-all"
-                            :class="route().current('policy.specific.index') ? 'bg-white text-[#821f44] shadow-sm dark:bg-[#1a1a1a] dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
-                            Kebijakan Khusus
-                        </Link>
-                        <Link :href="route('policy.procedure.index')"
-                            class="flex flex-1 items-center justify-center rounded-lg px-4 py-2 text-center text-xs font-bold transition-all"
-                            :class="route().current('policy.procedure.index') ? 'bg-white text-[#821f44] shadow-sm dark:bg-[#1a1a1a] dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
-                            Procedure
-                        </Link>
-                    </nav>
-                </div>
             </section>
+
 
             <!-- A4 Document Page Preview -->
             <div
-                class="bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 md:p-16 rounded-2xl relative font-sans text-slate-800 dark:text-slate-200 print:shadow-none print:border-none print:p-0 print:m-0">
+                class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 md:p-16 rounded-2xl relative font-sans text-slate-800 dark:text-slate-200 print:shadow-none print:border-none print:p-0 print:m-0">
+                <!-- Formal Pertamina Document Grid Header -->
+                <PertaminaDocumentHeader :activeRegulation="activeRegulation" class="flex-1" />
+
                 <!-- 2. Document Title Section -->
-                <div class="text-center space-y-2 relative z-10">
+                <div class="mt-8 text-center space-y-2 relative z-10">
                     <h2
                         class="text-lg sm:text-xl font-extrabold tracking-[0.15em] text-slate-950 dark:text-white uppercase">
                         BAB II

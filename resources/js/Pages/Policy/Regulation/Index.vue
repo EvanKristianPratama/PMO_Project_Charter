@@ -140,7 +140,11 @@ defineProps({
 });
 
 function handleDetailClick(reg) {
-    router.visit(route('policy.general.index', { regulation_id: reg.id }));
+    const targetRoute = String(reg.tipe || '').toLowerCase() === 'procedure'
+        ? 'policy.procedure.index'
+        : 'policy.general.index';
+
+    router.visit(route(targetRoute, { regulation_id: reg.id }));
 }
 
 // ---------------------------------------------------

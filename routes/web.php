@@ -327,6 +327,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
 
         // Prosedur (Procedure) placeholder
         Route::get('/procedure', [ProcedureController::class, 'index'])->name('procedure.index');
+        Route::get('/procedure/manage', [ProcedureController::class, 'manage'])->name('procedure.manage');
         Route::post('/procedure/actor', [ProcedureController::class, 'storeActor'])->name('procedure.actor.store');
         Route::put('/procedure/actor/{id}', [ProcedureController::class, 'updateActor'])->name('procedure.actor.update');
         Route::delete('/procedure/actor/{id}', [ProcedureController::class, 'destroyActor'])->name('procedure.actor.destroy');

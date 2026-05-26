@@ -19,7 +19,7 @@ class ProcedureController extends Controller
     /**
      * Display a listing of procedures.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $actors = MstActor::with('organization')->get();
         $sop = MstSop::with('regulation.organization')
@@ -34,12 +34,63 @@ class ProcedureController extends Controller
         $regulations = MstRegulation::with('organization')->orderBy('id', 'desc')->get();
         $organizations = TrsOrganization::orderBy('name')->get();
 
+        $selectedRegulationId = $request->integer('regulation_id');
+        $selectedRegulation = null;
+
+        if ($selectedRegulationId) {
+            $selectedRegulation = $regulations->firstWhere('id', $selectedRegulationId);
+        }
+
+        if (!$selectedRegulation) {
+            $selectedRegulation = $regulations->first();
+        }
+
         return Inertia::render('Procedure/Index', [
             'actors' => $actors,
             'sop' => $sop,
             'flowChartSops' => $flowChartSops,
             'regulations' => $regulations,
             'organizations' => $organizations,
+            'selectedRegulationId' => $selectedRegulation?->id,
+        ]);
+    }
+
+    /**
+     * Display the procedure management CRUD view.
+     */
+    public function manage(Request $request): Response
+    {
+        $actors = MstActor::with('organization')->get();
+        $sop = MstSop::with('regulation.organization')
+            ->orderBy('tipe')
+            ->orderBy('id')
+            ->get();
+        $flowChartSops = MstSop::with(['mapActorSops.actor.organization'])
+            ->whereIn('tipe', ['A', 'B'])
+            ->orderBy('tipe')
+            ->orderBy('id')
+            ->get();
+        $regulations = MstRegulation::with('organization')->orderBy('id', 'desc')->get();
+        $organizations = TrsOrganization::orderBy('name')->get();
+
+        $selectedRegulationId = $request->integer('regulation_id');
+        $selectedRegulation = null;
+
+        if ($selectedRegulationId) {
+            $selectedRegulation = $regulations->firstWhere('id', $selectedRegulationId);
+        }
+
+        if (!$selectedRegulation) {
+            $selectedRegulation = $regulations->first();
+        }
+
+        return Inertia::render('Procedure/Manage', [
+            'actors' => $actors,
+            'sop' => $sop,
+            'flowChartSops' => $flowChartSops,
+            'regulations' => $regulations,
+            'organizations' => $organizations,
+            'selectedRegulationId' => $selectedRegulation?->id,
         ]);
     }
 

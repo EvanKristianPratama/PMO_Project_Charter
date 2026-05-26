@@ -1,414 +1,450 @@
 <template>
     <UserLayout title="Procedure">
-        <div class="animate-fade-in-up space-y-8">
-            <div class="flex flex-col gap-4 lg:flex-row lg:items-stretch lg:justify-between print:hidden">
-                <div class="flex-1 bg-white dark:bg-[#1a1a1a] shadow-md border border-slate-900 dark:border-white p-0 rounded-none relative font-sans text-slate-800 dark:text-slate-200 print:shadow-none print:border-none print:p-0 print:m-0">
-                    <!-- Formal Pertamina Document Grid Header -->
-                        <div class="grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-slate-900 dark:divide-white h-full">
-                            <div class="md:col-span-7 flex flex-col divide-y divide-slate-900 dark:divide-white">
-                                <div class="px-1.5 py-1 flex items-start gap-1 min-h-[26px] flex-1">
-                                    <span class="font-bold shrink-0 text-[9px] leading-none pt-[1px]">FUNGSI :</span>
-                                    <span class="font-bold text-[9px] leading-tight text-slate-900 dark:text-white">{{ activeRegulation?.owner }}</span>
-                                </div>
-                                <div class="px-1.5 py-1 flex items-start gap-1 min-h-[26px] flex-1">
-                                    <span class="font-bold shrink-0 text-[9px] leading-none pt-[1px]">JUDUL :</span>
-                                    <span class="font-bold text-[9px] leading-tight text-slate-900 dark:text-white">{{ activeRegulation?.judul }}</span>
-                                </div>
-                            </div>
-                            <div class="md:col-span-5 flex flex-col divide-y divide-slate-900 dark:divide-white">
-                                <div class="px-1.5 py-1 flex items-center gap-1 min-h-[22px] flex-1">
-                                    <span class="font-bold shrink-0 text-[9px] leading-none">NOMOR :</span>
-                                    <span class="font-mono font-bold text-[9px] leading-none text-slate-900 dark:text-white">{{ activeRegulation?.nomor || '-' }}</span>
-                                </div>
-                                <div class="px-1.5 py-1 flex items-center min-h-[22px] flex-1">
-                                    <div class="flex items-center gap-1 flex-wrap leading-none">
-                                        <span class="font-bold shrink-0 text-[9px] leading-none">REVISI KE :</span>
-                                        <template v-if="[0, 1, 2, 3, 4].includes(parseInt(activeRegulation?.revisi))">
-                                            <span v-for="num in [0, 1, 2, 3, 4]" :key="num" class="inline-flex items-center gap-0.5 mr-0.5">
-                                                <span class="w-2.5 h-2.5 border border-slate-900 dark:border-white flex items-center justify-center bg-transparent select-none animate-none leading-none">
-                                                    <svg v-if="parseInt(activeRegulation?.revisi) === num" class="h-2 w-2 text-slate-900 dark:text-white" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                                                        <path d="M2.25 6.25L4.75 8.75L9.75 3.75" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-                                                    </svg>
-                                                </span>
-                                                <span class="font-mono text-[9px] leading-none">{{ num }}</span>
-                                            </span>
-                                        </template>
-                                        <template v-else>
-                                            <span class="w-2.5 h-2.5 border border-slate-900 dark:border-white flex items-center justify-center text-[8px] font-black bg-transparent select-none mr-0.5 leading-none">-</span>
-                                            <span class="font-bold text-[9px] leading-none text-slate-900 dark:text-white mr-1">{{ activeRegulation?.revisi || '0' }}</span>
-                                        </template>
-                                    </div>
-                                </div>
-                                <div class="px-1.5 py-1 flex items-center gap-1 min-h-[22px] flex-1">
-                                    <span class="font-bold shrink-0 text-[9px] leading-none">BERLAKU TMT :</span>
-                                    <span class="font-bold text-[9px] leading-none text-slate-900 dark:text-white">{{ activeRegulation?.berlaku ? formatDate(activeRegulation.berlaku) : '-' }}</span>
-                                </div>
-                            </div>
-                        </div>
-                </div>
-
-                <!-- Document Type Switch Menu (Vertical) -->
-                <nav class="flex shrink-0 flex-col gap-1 rounded-xl bg-slate-100 p-1 dark:bg-white/5 lg:w-48">
-                    <Link :href="route('policy.general.index')"
-                        class="flex flex-1 items-center justify-center rounded-lg px-4 py-1 text-center text-[10px] font-bold transition-all"
-                        :class="route().current('policy.general.index') ? 'bg-white text-[#821f44] shadow-sm dark:bg-[#1a1a1a] dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
-                        Kebijakan Umum
-                    </Link>
-                    <Link :href="route('policy.specific.index')"
-                        class="flex flex-1 items-center justify-center rounded-lg px-4 py-1 text-center text-[10px] font-bold transition-all"
-                        :class="route().current('policy.specific.index') ? 'bg-white text-[#821f44] shadow-sm dark:bg-[#1a1a1a] dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
-                        Kebijakan Khusus
-                    </Link>
-                    <Link :href="route('policy.procedure.index')"
-                        class="flex flex-1 items-center justify-center rounded-lg px-4 py-1 text-center text-[10px] font-bold transition-all"
-                        :class="route().current('policy.procedure.index') ? 'bg-white text-[#821f44] shadow-sm dark:bg-[#1a1a1a] dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
-                        Procedure
-                    </Link>
-                </nav>
+        <template v-if="isManagePage">
+            <div class="animate-fade-in-up space-y-8">
+            <div class="print:hidden">
+                <PertaminaDocumentHeader :activeRegulation="activeRegulation" />
             </div>
-
-            <!-- Actors Section -->
-            <section class="space-y-4">
-                <div class="flex items-center justify-between px-1">
-                    <div class="flex items-center gap-2">
-                        <div class="h-5 w-1 rounded-full bg-[#821f44]"></div>
-                        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                            FUNGSI/ UNIT ORGANISASI/ JABATAN TERKAIT
-                        </h2>
-                    </div>
-                    <button
-                        @click="openAddActorModal"
-                        class="inline-flex items-center gap-1.5 rounded-lg bg-[#821f44] hover:bg-[#9c2552] text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-all active:scale-95"
-                    >
-                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Add Actor
-                    </button>
-                </div>
-                
-                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                    <div class="overflow-x-auto">
-                        <table class="w-full border-collapse text-left text-[11px] text-slate-500 dark:text-slate-400">
-                            <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 w-20 text-center">No</th>
-                                    <th scope="col" class="px-6 py-3">Fungsi/ Unit Organisasi/Jabatan terkait</th>
-                                    <th scope="col" class="px-6 py-3">Jabatan</th>
-                                    <th scope="col" class="px-6 py-3 w-32 text-center">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-200 dark:divide-white/10 dark:bg-transparent">
-                                <tr v-if="actors.length === 0" class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
-                                    <td colspan="4" class="px-6 py-7 text-center text-slate-400 dark:text-slate-500">
-                                        Belum ada data unit organisasi terkait.
-                                    </td>
-                                </tr>
-                                <tr
-                                    v-for="(actor, index) in actors"
-                                    :key="actor.id"
-                                    class="group hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150"
-                                >
-                                    <td class="px-6 py-2 w-20 text-center font-medium text-slate-500 dark:text-slate-400">
-                                        <span class="inline-block pl-2">{{ index + 1 }}</span>
-                                    </td>
-                                    <td class="px-6 py-2 text-slate-900 dark:text-white font-medium leading-snug">
-                                        {{ actor.name }}
-                                    </td>
-                                    <td class="px-6 py-2 text-slate-700 dark:text-slate-300 leading-snug">
-                                        <template v-if="actor.organization">
-                                            <div v-if="actor.organization.jabatan" class="font-medium text-slate-900 dark:text-white">
-                                                {{ actor.organization.jabatan }}
-                                            </div>
-                                            <span v-else class="text-slate-400 dark:text-slate-500">-</span>
-                                        </template>
-                                        <span v-else class="text-slate-400 dark:text-slate-500">-</span>
-                                    </td>
-                                    <td class="px-6 py-2 text-center">
-                                        <div class="flex items-center justify-center gap-3">
-                                            <button
-                                                @click="openEditActorModal(actor)"
-                                                class="text-[9px] font-bold uppercase tracking-wider text-blue-600 hover:text-blue-800 transition-colors"
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                @click="openDeleteActorModal(actor)"
-                                                class="text-[9px] font-bold uppercase tracking-wider text-rose-600 hover:text-rose-800 transition-colors"
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SOP Section A -->
-            <section class="space-y-4">
-                <div class="flex items-center justify-between px-1">
-                    <div class="flex items-center gap-2">
-                        <div class="h-5 w-1 rounded-full bg-blue-600"></div>
-                        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                            A. Penyusunan RSTI
-                        </h2>
-                    </div>
-                    <button
-                        @click="openAddSopModal('A')"
-                        class="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-all active:scale-95"
-                    >
-                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Add SOP
-                    </button>
-                </div>
-                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                    <div class="overflow-x-auto">
-                        <table class="w-full border-collapse text-left text-[11px] text-slate-500 dark:text-slate-400">
-                            <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
-                                <tr>
-                                    <th scope="col" class="px-3 py-3 w-10 text-right align-middle">No</th>
-                                    <th scope="col" class="px-6 py-3">Deskripsi</th>
-                                    <th scope="col" class="px-6 py-3 w-32 text-center">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-200 dark:divide-white/10 dark:bg-transparent">
-                                <tr v-if="sopA.length === 0" class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
-                                    <td colspan="3" class="px-6 py-7 text-center text-slate-400 dark:text-slate-500">
-                                        Belum ada data SOP untuk kategori ini.
-                                    </td>
-                                </tr>
-                                <tr
-                                    v-for="(item, index) in sopA"
-                                    :key="item.id"
-                                    class="group hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150"
-                                >
-                                    <td class="px-3 py-2 w-10 text-right align-middle font-medium">
-                                        {{ index + 1 }}
-                                    </td>
-                                    <td class="px-6 py-2 text-slate-900 dark:text-white leading-[1.15] whitespace-pre-line break-words">
-                                        {{ item.description }}
-                                    </td>
-                                    <td class="px-6 py-2 text-center">
-                                        <div class="flex items-center justify-center gap-3">
-                                            <button
-                                                @click="openEditSopModal(item)"
-                                                class="text-[9px] font-bold uppercase tracking-wider text-blue-600 hover:text-blue-800 transition-colors"
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                @click="openDeleteSopModal(item)"
-                                                class="text-[9px] font-bold uppercase tracking-wider text-rose-600 hover:text-rose-800 transition-colors"
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SOP Section B -->
-            <section class="space-y-4">
-                <div class="flex items-center justify-between px-1">
-                    <div class="flex items-center gap-2">
-                        <div class="h-5 w-1 rounded-full bg-emerald-600"></div>
-                        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                            B. Reviu & Pembaruan Berkala RSTI
-                        </h2>
-                    </div>
-                    <button
-                        @click="openAddSopModal('B')"
-                        class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-all active:scale-95"
-                    >
-                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Add SOP
-                    </button>
-                </div>
-                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                    <div class="overflow-x-auto">
-                        <table class="w-full border-collapse text-left text-[11px] text-slate-500 dark:text-slate-400">
-                            <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
-                                <tr>
-                                    <th scope="col" class="px-3 py-3 w-10 text-right align-middle">No</th>
-                                    <th scope="col" class="px-6 py-3">Deskripsi</th>
-                                    <th scope="col" class="px-6 py-3 w-32 text-center">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-200 dark:divide-white/10 dark:bg-transparent">
-                                <tr v-if="sopB.length === 0" class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
-                                    <td colspan="3" class="px-6 py-7 text-center text-slate-400 dark:text-slate-500">
-                                        Belum ada data SOP untuk kategori ini.
-                                    </td>
-                                </tr>
-                                <tr
-                                    v-for="(item, index) in sopB"
-                                    :key="item.id"
-                                    class="group hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150"
-                                >
-                                    <td class="px-3 py-2 w-10 text-right align-middle font-medium">
-                                        {{ index + 1 }}
-                                    </td>
-                                    <td class="px-6 py-2 text-slate-900 dark:text-white leading-[1.15] whitespace-pre-line break-words">
-                                        {{ tightSopText(item.description) }}
-                                    </td>
-                                    <td class="px-6 py-2 text-center">
-                                        <div class="flex items-center justify-center gap-3">
-                                            <button
-                                                @click="openEditSopModal(item)"
-                                                class="text-[9px] font-bold uppercase tracking-wider text-blue-600 hover:text-blue-800 transition-colors"
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                @click="openDeleteSopModal(item)"
-                                                class="text-[9px] font-bold uppercase tracking-wider text-rose-600 hover:text-rose-800 transition-colors"
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <section class="space-y-4">
-                <div class="flex items-center gap-2 px-1">
-                    <div class="h-5 w-1 rounded-full bg-emerald-600"></div>
-                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                        DIAGRAM ALIR RSTI
-                    </h2>
-                </div>
-                <FlowChart
-                    :actors="actors"
-                    :sops="flowChartSops"
-                />
-            </section>
         </div>
 
+        <!-- Actors Section -->
+        <section class="space-y-4">
+            <div class="flex items-center justify-between px-1">
+                <div class="flex items-center gap-2">
+                    <div class="h-5 w-1 rounded-full bg-[#821f44]"></div>
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+                        FUNGSI/ UNIT ORGANISASI/ JABATAN TERKAIT
+                    </h2>
+                </div>
+                <button @click="openAddActorModal"
+                    class="inline-flex items-center gap-1.5 rounded-lg bg-[#821f44] hover:bg-[#9c2552] text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-all active:scale-95">
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add Actor
+                </button>
+            </div>
+
+            <div
+                class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse text-left text-[11px] text-slate-500 dark:text-slate-400">
+                        <thead
+                            class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 w-20 text-center">No</th>
+                                <th scope="col" class="px-6 py-3">Fungsi/ Unit Organisasi/Jabatan terkait</th>
+                                <th scope="col" class="px-6 py-3">Jabatan</th>
+                                <th scope="col" class="px-6 py-3 w-32 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 dark:divide-white/10 dark:bg-transparent">
+                            <tr v-if="actors.length === 0"
+                                class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
+                                <td colspan="4" class="px-6 py-7 text-center text-slate-400 dark:text-slate-500">
+                                    Belum ada data unit organisasi terkait.
+                                </td>
+                            </tr>
+                            <tr v-for="(actor, index) in actors" :key="actor.id"
+                                class="group hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
+                                <td class="px-6 py-2 w-20 text-center font-medium text-slate-500 dark:text-slate-400">
+                                    <span class="inline-block pl-2">{{ index + 1 }}</span>
+                                </td>
+                                <td class="px-6 py-2 text-slate-900 dark:text-white font-medium leading-snug">
+                                    {{ actor.name }}
+                                </td>
+                                <td class="px-6 py-2 text-slate-700 dark:text-slate-300 leading-snug">
+                                    <template v-if="actor.organization">
+                                        <div v-if="actor.organization.jabatan"
+                                            class="font-medium text-slate-900 dark:text-white">
+                                            {{ actor.organization.jabatan }}
+                                        </div>
+                                        <span v-else class="text-slate-400 dark:text-slate-500">-</span>
+                                    </template>
+                                    <span v-else class="text-slate-400 dark:text-slate-500">-</span>
+                                </td>
+                                <td class="px-6 py-2 text-center">
+                                    <div class="flex items-center justify-center gap-3">
+                                        <button @click="openEditActorModal(actor)"
+                                            class="text-[9px] font-bold uppercase tracking-wider text-blue-600 hover:text-blue-800 transition-colors">
+                                            Edit
+                                        </button>
+                                        <button @click="openDeleteActorModal(actor)"
+                                            class="text-[9px] font-bold uppercase tracking-wider text-rose-600 hover:text-rose-800 transition-colors">
+                                            Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SOP Section A -->
+        <section class="space-y-4">
+            <div class="flex items-center justify-between px-1">
+                <div class="flex items-center gap-2">
+                    <div class="h-5 w-1 rounded-full bg-blue-600"></div>
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+                        A. Penyusunan RSTI
+                    </h2>
+                </div>
+                <button @click="openAddSopModal('A')"
+                    class="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-all active:scale-95">
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add SOP
+                </button>
+            </div>
+            <div
+                class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse text-left text-[11px] text-slate-500 dark:text-slate-400">
+                        <thead
+                            class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
+                            <tr>
+                                <th scope="col" class="px-3 py-3 w-10 text-right align-middle">No</th>
+                                <th scope="col" class="px-6 py-3">Deskripsi</th>
+                                <th scope="col" class="px-6 py-3 w-32 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 dark:divide-white/10 dark:bg-transparent">
+                            <tr v-if="sopA.length === 0"
+                                class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
+                                <td colspan="3" class="px-6 py-7 text-center text-slate-400 dark:text-slate-500">
+                                    Belum ada data SOP untuk kategori ini.
+                                </td>
+                            </tr>
+                            <tr v-for="(item, index) in sopA" :key="item.id"
+                                class="group hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
+                                <td class="px-3 py-2 w-10 text-right align-middle font-medium">
+                                    {{ index + 1 }}
+                                </td>
+                                <td
+                                    class="px-6 py-2 text-slate-900 dark:text-white leading-[1.15] whitespace-pre-line break-words">
+                                    {{ item.description }}
+                                </td>
+                                <td class="px-6 py-2 text-center">
+                                    <div class="flex items-center justify-center gap-3">
+                                        <button @click="openEditSopModal(item)"
+                                            class="text-[9px] font-bold uppercase tracking-wider text-blue-600 hover:text-blue-800 transition-colors">
+                                            Edit
+                                        </button>
+                                        <button @click="openDeleteSopModal(item)"
+                                            class="text-[9px] font-bold uppercase tracking-wider text-rose-600 hover:text-rose-800 transition-colors">
+                                            Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SOP Section B -->
+        <section class="space-y-4">
+            <div class="flex items-center justify-between px-1">
+                <div class="flex items-center gap-2">
+                    <div class="h-5 w-1 rounded-full bg-emerald-600"></div>
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+                        B. Reviu & Pembaruan Berkala RSTI
+                    </h2>
+                </div>
+                <button @click="openAddSopModal('B')"
+                    class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-all active:scale-95">
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add SOP
+                </button>
+            </div>
+            <div
+                class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse text-left text-[11px] text-slate-500 dark:text-slate-400">
+                        <thead
+                            class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
+                            <tr>
+                                <th scope="col" class="px-3 py-3 w-10 text-right align-middle">No</th>
+                                <th scope="col" class="px-6 py-3">Deskripsi</th>
+                                <th scope="col" class="px-6 py-3 w-32 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 dark:divide-white/10 dark:bg-transparent">
+                            <tr v-if="sopB.length === 0"
+                                class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
+                                <td colspan="3" class="px-6 py-7 text-center text-slate-400 dark:text-slate-500">
+                                    Belum ada data SOP untuk kategori ini.
+                                </td>
+                            </tr>
+                            <tr v-for="(item, index) in sopB" :key="item.id"
+                                class="group hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
+                                <td class="px-3 py-2 w-10 text-right align-middle font-medium">
+                                    {{ index + 1 }}
+                                </td>
+                                <td
+                                    class="px-6 py-2 text-slate-900 dark:text-white leading-[1.15] whitespace-pre-line break-words">
+                                    {{ tightSopText(item.description) }}
+                                </td>
+                                <td class="px-6 py-2 text-center">
+                                    <div class="flex items-center justify-center gap-3">
+                                        <button @click="openEditSopModal(item)"
+                                            class="text-[9px] font-bold uppercase tracking-wider text-blue-600 hover:text-blue-800 transition-colors">
+                                            Edit
+                                        </button>
+                                        <button @click="openDeleteSopModal(item)"
+                                            class="text-[9px] font-bold uppercase tracking-wider text-rose-600 hover:text-rose-800 transition-colors">
+                                            Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="space-y-4">
+            <div class="flex items-center gap-2 px-1">
+                <div class="h-5 w-1 rounded-full bg-emerald-600"></div>
+                <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+                    DIAGRAM ALIR RSTI
+                </h2>
+            </div>
+            <FlowChart :actors="actors" :sops="flowChartSops" />
+        </section>
+
         <!-- Actor Form Modal -->
-        <ConfirmationModal
-            :show="isActorModalOpen"
-            :title="editingActorId ? 'Edit Aktor' : 'Tambah Aktor Baru'"
+        <ConfirmationModal :show="isActorModalOpen" :title="editingActorId ? 'Edit Aktor' : 'Tambah Aktor Baru'"
             :message="editingActorId ? 'Silakan sesuaikan data aktor di bawah ini.' : 'Silakan isi formulir di bawah ini untuk menambahkan aktor baru.'"
-            confirm-text="Simpan"
-            cancel-text="Batal"
-            type="info"
-            :loading="actorForm.processing"
-            @close="closeActorModal"
-            @confirm="submitActorForm"
-        >
+            confirm-text="Simpan" cancel-text="Batal" type="info" :loading="actorForm.processing"
+            @close="closeActorModal" @confirm="submitActorForm">
             <div class="mt-4 space-y-4">
                 <div class="flex flex-col gap-1.5">
                     <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Nama Aktor / Jabatan</label>
-                    <input 
-                        v-model="actorForm.name"
-                        type="text"
+                    <input v-model="actorForm.name" type="text"
                         class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-black/20 dark:text-white"
-                        placeholder="Contoh: Manager IT"
-                    />
+                        placeholder="Contoh: Manager IT" />
                     <p v-if="actorForm.errors.name" class="text-xs text-rose-500 mt-0.5">{{ actorForm.errors.name }}</p>
                 </div>
                 <div class="flex flex-col gap-1.5">
                     <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Organisasi Terkait</label>
-                    <select 
-                        v-model="actorForm.organization_id"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-black/20 dark:text-white"
-                    >
+                    <select v-model="actorForm.organization_id"
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-black/20 dark:text-white">
                         <option value="" disabled>-- Pilih Organisasi --</option>
                         <option v-for="org in filteredOrganizations" :key="org.id" :value="org.id">
                             {{ org.jabatan }} ({{ org.name }})
                         </option>
                     </select>
-                    <p v-if="actorForm.errors.organization_id" class="text-xs text-rose-500 mt-0.5">{{ actorForm.errors.organization_id }}</p>
+                    <p v-if="actorForm.errors.organization_id" class="text-xs text-rose-500 mt-0.5">{{
+                        actorForm.errors.organization_id }}</p>
                 </div>
             </div>
         </ConfirmationModal>
 
         <!-- Delete Actor Modal -->
-        <ConfirmationModal
-            :show="isDeleteActorModalOpen"
-            title="Hapus Aktor"
+        <ConfirmationModal :show="isDeleteActorModalOpen" title="Hapus Aktor"
             :message="`Apakah Anda yakin ingin menghapus aktor '${selectedActor?.name}'? Tindakan ini tidak dapat dibatalkan.`"
-            confirm-text="Hapus"
-            cancel-text="Batal"
-            type="danger"
-            :loading="actorForm.processing"
-            @close="isDeleteActorModalOpen = false"
-            @confirm="submitDeleteActor"
-        />
+            confirm-text="Hapus" cancel-text="Batal" type="danger" :loading="actorForm.processing"
+            @close="isDeleteActorModalOpen = false" @confirm="submitDeleteActor" />
 
         <!-- SOP Form Modal -->
-        <ConfirmationModal
-            :show="isSopModalOpen"
-            :title="editingSopId ? 'Edit SOP' : `Tambah SOP ${activeSopTitle}`"
+        <ConfirmationModal :show="isSopModalOpen" :title="editingSopId ? 'Edit SOP' : `Tambah SOP ${activeSopTitle}`"
             :message="editingSopId ? 'Silakan sesuaikan deskripsi SOP di bawah ini.' : `Silakan isi deskripsi untuk ${activeSopTitle}.`"
-            confirm-text="Simpan"
-            cancel-text="Batal"
-            type="info"
-            max-width="lg"
-            :loading="sopForm.processing"
-            @close="closeSopModal"
-            @confirm="submitSopForm"
-        >
+            confirm-text="Simpan" cancel-text="Batal" type="info" max-width="lg" :loading="sopForm.processing"
+            @close="closeSopModal" @confirm="submitSopForm">
             <div class="mt-4 space-y-4">
                 <div class="flex flex-col gap-1.5">
                     <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Kategori</label>
-                    <input
-                        :value="activeSopTitle"
-                        type="text"
-                        disabled
-                        class="w-full rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-300"
-                    />
+                    <input :value="activeSopTitle" type="text" disabled
+                        class="w-full rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-300" />
                     <p v-if="sopForm.errors.tipe" class="text-xs text-rose-500 mt-0.5">{{ sopForm.errors.tipe }}</p>
                 </div>
                 <div class="flex flex-col gap-1.5">
                     <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Deskripsi SOP</label>
-                    <textarea
-                        v-model="sopForm.description"
-                        rows="6"
+                    <textarea v-model="sopForm.description" rows="6"
                         class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-black/20 dark:text-white"
-                        placeholder="Tuliskan deskripsi aktivitas SOP"
-                    ></textarea>
-                    <p v-if="sopForm.errors.description" class="text-xs text-rose-500 mt-0.5">{{ sopForm.errors.description }}</p>
+                        placeholder="Tuliskan deskripsi aktivitas SOP"></textarea>
+                    <p v-if="sopForm.errors.description" class="text-xs text-rose-500 mt-0.5">{{
+                        sopForm.errors.description }}
+                    </p>
                 </div>
             </div>
         </ConfirmationModal>
 
         <!-- Delete SOP Modal -->
-        <ConfirmationModal
-            :show="isDeleteSopModalOpen"
-            title="Hapus SOP"
+        <ConfirmationModal :show="isDeleteSopModalOpen" title="Hapus SOP"
             :message="`Apakah Anda yakin ingin menghapus SOP '${shortSopDescription(selectedSop?.description)}'? Tindakan ini tidak dapat dibatalkan.`"
-            confirm-text="Hapus"
-            cancel-text="Batal"
-            type="danger"
-            :loading="sopForm.processing"
-            @close="isDeleteSopModalOpen = false"
-            @confirm="submitDeleteSop"
-        />
+            confirm-text="Hapus" cancel-text="Batal" type="danger" :loading="sopForm.processing"
+            @close="isDeleteSopModalOpen = false" @confirm="submitDeleteSop" />
+        </template>
+
+        <template v-else>
+            <div class="animate-fade-in-up space-y-6">
+                <!-- Page Header -->
+                <section class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                    <div class="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full bg-[#821f44]/10 blur-2xl"></div>
+                    <div class="pointer-events-none absolute -bottom-16 -left-12 h-40 w-40 rounded-full bg-blue-500/5 blur-2xl"></div>
+
+                    <div class="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#821f44] dark:text-[#a83262]">
+                                {{ activeRegulation?.judul }}
+                            </p>
+                            <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                                Procedure
+                            </h1>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button
+                                @click="printDocument"
+                                class="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-slate-900/15 transition-all hover:bg-slate-800 focus:ring-2 focus:ring-slate-900/20 active:scale-95 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.897l-1.2-6.82a2.25 2.25 0 012.23-2.64h9.5c1.12 0 2.07.82 2.23 1.94l.8 4.54a2.25 2.25 0 01-2.23 2.64H6.72z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15m15 0a2.25 2.25 0 012.25 2.25v3a2.25 2.25 0 01-2.25 2.25h-15A2.25 2.25 0 013 17.25v-3A2.25 2.25 0 015.25 12h14.25z" />
+                                </svg>
+                                Cetak
+                            </button>
+                            <Link
+                                :href="route('policy.procedure.manage', activeRegulation ? { regulation_id: activeRegulation.id } : {})"
+                                class="inline-flex items-center gap-2 rounded-xl bg-[#821f44] px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#821f44]/25 transition-all hover:bg-[#9c2552] hover:shadow-[#821f44]/40 focus:ring-2 focus:ring-[#821f44]/20 active:scale-95"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.83 20.013a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                </svg>
+                                Kelola Procedure
+                            </Link>
+                        </div>
+                    </div>
+                </section>
+
+                <div
+                    class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 md:p-16 rounded-2xl relative font-sans text-slate-800 dark:text-slate-200 print:shadow-none print:border-none print:p-0 print:m-0"
+                >
+                    <PertaminaDocumentHeader :activeRegulation="activeRegulation" class="flex-1" />
+
+                    <div class="mt-8 text-center space-y-2 relative z-10">
+                        <h2 class="text-lg sm:text-xl font-extrabold tracking-[0.15em] text-slate-950 dark:text-white uppercase">
+                            PROCEDURE
+                        </h2>
+                        <h2 class="text-xl sm:text-2xl font-extrabold tracking-[0.2em] text-slate-950 dark:text-white uppercase">
+                            {{ activeRegulation?.judul || 'Dokumen Prosedur' }}
+                        </h2>
+                    </div>
+
+                    <div class="mt-10 relative z-10">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide border-b border-slate-900/10 pb-2 dark:border-white/10">
+                            IV. FUNGSI/ UNIT ORGANISASI/ JABATAN TERKAIT 
+                        </h3>
+                    </div>
+
+                    <div class="mt-6 overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10">
+                        <div class="overflow-x-auto">
+                            <table class="w-full border-collapse text-left text-[11px] text-slate-500 dark:text-slate-400">
+                                <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 w-20 text-center">No</th>
+                                        <th scope="col" class="px-6 py-3">Fungsi / Unit Organisasi / Jabatan</th>
+                                        <th scope="col" class="px-6 py-3">Jabatan</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-200 dark:divide-white/10">
+                                    <tr v-if="actors.length === 0">
+                                        <td colspan="3" class="px-6 py-8 text-center text-slate-400 dark:text-slate-500">
+                                            Belum ada data aktor terkait.
+                                        </td>
+                                    </tr>
+                                    <tr v-for="(actor, index) in actors" :key="actor.id">
+                                        <td class="px-6 py-3 text-center font-medium text-slate-700 dark:text-slate-300">
+                                            {{ index + 1 }}
+                                        </td>
+                                        <td class="px-6 py-3 font-medium text-slate-900 dark:text-white">
+                                            {{ actor.name }}
+                                        </td>
+                                        <td class="px-6 py-3 text-slate-700 dark:text-slate-300">
+                                            <template v-if="actor.organization">
+                                                <span v-if="actor.organization.jabatan">{{ actor.organization.jabatan }}</span>
+                                                <span v-else>-</span>
+                                            </template>
+                                            <span v-else>-</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="mt-10 relative z-10">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide border-b border-slate-900/10 pb-2 dark:border-white/10">
+                            V. PROSEDUR 
+                        </h3>
+                    </div>
+
+                    <div class="mt-6 space-y-8 font-serif text-[15px] leading-relaxed text-slate-900 dark:text-slate-100">
+                        <div>
+                            <h4 class="mb-3 font-bold text-slate-950 dark:text-white">A. Penyusunan RSTI</h4>
+                            <div class="space-y-3">
+                                <div v-for="(item, index) in sopA" :key="item.id" class="flex gap-3 items-start">
+                                    <span class="font-bold min-w-[20px] text-right select-none">
+                                        {{ index + 1 }}.
+                                    </span>
+                                    <p class="whitespace-pre-line text-justify">
+                                        {{ item.description }}
+                                    </p>
+                                </div>
+                                <div v-if="sopA.length === 0" class="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-center text-slate-400 dark:border-white/10 dark:text-slate-500">
+                                    Belum ada data SOP untuk kategori ini.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="mb-3 font-bold text-slate-950 dark:text-white">B. Reviu & Pembaruan Berkala RSTI</h4>
+                            <div class="space-y-3">
+                                <div v-for="(item, index) in sopB" :key="item.id" class="flex gap-3 items-start">
+                                    <span class="font-bold min-w-[20px] text-right select-none">
+                                        {{ index + 1 }}.
+                                    </span>
+                                    <p class="whitespace-pre-line text-justify">
+                                        {{ tightSopText(item.description) }}
+                                    </p>
+                                </div>
+                                <div v-if="sopB.length === 0" class="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-center text-slate-400 dark:border-white/10 dark:text-slate-500">
+                                    Belum ada data SOP untuk kategori ini.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-10 relative z-10">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide border-b border-slate-900/10 pb-2 dark:border-white/10">
+                            C. Diagram Alir
+                        </h3>
+                    </div>
+
+                    <div class="mt-6">
+                        <FlowChart :actors="actors" :sops="flowChartSops" />
+                    </div>
+                </div>
+            </div>
+        </template>
     </UserLayout>
 </template>
 
 <script setup>
 import { computed, ref } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { Link, useForm } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import FlowChart from '@/Components/Procedure/FlowChart.vue';
+import PertaminaDocumentHeader from '@/Components/Regulation/PertaminaDocumentHeader.vue';
 import Swal from 'sweetalert2';
 
 const props = defineProps({
@@ -432,7 +468,14 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    selectedRegulationId: {
+        type: Number,
+        default: null,
+    },
 });
+
+const selectedRegulationId = ref(props.selectedRegulationId);
+const isManagePage = computed(() => route().current('policy.procedure.manage'));
 
 const sopA = computed(() => {
     if (!props.sop) return [];
@@ -445,14 +488,10 @@ const sopB = computed(() => {
 });
 
 const activeRegulation = computed(() => {
-    if (props.regulations && props.regulations.length > 0) {
-        return props.regulations[0];
+    if (!selectedRegulationId.value || props.regulations.length === 0) {
+        return props.regulations[0] || null;
     }
-
-    if (!props.sop || props.sop.length === 0) return null;
-
-    const sopWithRegulation = props.sop.find(item => item.regulation);
-    return sopWithRegulation?.regulation || null;
+    return props.regulations.find(r => r.id === selectedRegulationId.value) || props.regulations[0] || null;
 });
 
 const filteredOrganizations = computed(() => {
@@ -682,6 +721,10 @@ function shortSopDescription(text) {
     return normalized.length > 80 ? `${normalized.slice(0, 80)}...` : normalized;
 }
 
+function printDocument() {
+    window.print();
+}
+
 </script>
 
 <style scoped>
@@ -694,6 +737,7 @@ function shortSopDescription(text) {
         opacity: 0;
         transform: translateY(12px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);

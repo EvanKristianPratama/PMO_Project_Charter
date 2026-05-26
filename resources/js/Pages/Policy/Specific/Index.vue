@@ -1,52 +1,56 @@
 <template>
     <UserLayout title="Kebijakan Khusus">
         <div class="space-y-6 animate-fade-in-up print:m-0 print:p-0">
-            <!-- Sleek Action Bar at Top (print:hidden) -->
-            <section class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717] print:hidden">
+            <!-- Page Header -->
+            <section class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full bg-[#821f44]/10 blur-2xl"></div>
                 <div class="pointer-events-none absolute -bottom-16 -left-12 h-40 w-40 rounded-full bg-blue-500/5 blur-2xl"></div>
 
-                <div class="relative flex flex-col gap-4 lg:flex-row lg:items-stretch lg:justify-between">
-                    <!-- Formal Pertamina Document Grid Header -->
-                    <PertaminaDocumentHeader :activeRegulation="activeRegulation" class="flex-1" />
-
-                    <!-- Document Type Switch Menu (Vertical) -->
-                    <nav class="flex shrink-0 flex-col gap-1 rounded-xl bg-slate-100 p-1 dark:bg-white/5 lg:w-48">
-                        <Link :href="route('policy.general.index')"
-                            class="flex flex-1 items-center justify-center rounded-lg px-4 py-2 text-center text-xs font-bold transition-all"
-                            :class="route().current('policy.general.index') ? 'bg-white text-[#821f44] shadow-sm dark:bg-[#1a1a1a] dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
-                            Kebijakan Umum
-                        </Link>
-                        <Link :href="route('policy.specific.index')"
-                            class="flex flex-1 items-center justify-center rounded-lg px-4 py-2 text-center text-xs font-bold transition-all"
-                            :class="route().current('policy.specific.index') ? 'bg-white text-[#821f44] shadow-sm dark:bg-[#1a1a1a] dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
-                            Kebijakan Khusus
-                        </Link>
-                        <Link :href="route('policy.procedure.index')"
-                            class="flex flex-1 items-center justify-center rounded-lg px-4 py-2 text-center text-xs font-bold transition-all"
-                            :class="route().current('policy.procedure.index') ? 'bg-white text-[#821f44] shadow-sm dark:bg-[#1a1a1a] dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
-                            Procedure
-                        </Link>
-                    </nav>
+                <div class="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#821f44] dark:text-[#a83262]">{{ activeRegulation?.judul }}</p>
+                        <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Kelola Dokumen</h1>
+                    </div>
+                    <div class="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                        <!-- Document Type Switch Menu (Horizontal) -->
+                        <nav class="flex shrink-0 flex-row gap-1 rounded-xl bg-slate-100 p-1 dark:bg-white/5">
+                            <Link :href="route('policy.general.index')"
+                                class="flex items-center justify-center rounded-lg px-6 py-2 text-center text-xs font-bold transition-all"
+                                :class="route().current('policy.general.index') ? 'bg-white text-[#821f44] shadow-sm dark:bg-[#1a1a1a] dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
+                                Kebijakan Umum
+                            </Link>
+                            <Link :href="route('policy.specific.index')"
+                                class="flex items-center justify-center rounded-lg px-6 py-2 text-center text-xs font-bold transition-all"
+                                :class="route().current('policy.specific.index') ? 'bg-white text-[#821f44] shadow-sm dark:bg-[#1a1a1a] dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
+                                Kebijakan Khusus
+                            </Link>
+                        </nav>
+                    </div>
                 </div>
             </section>
 
             <!-- A4 Document Page Preview (Pure Word Style Document, NO watermark) -->
-            <div class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 md:p-16 rounded-2xl relative font-sans text-slate-800 dark:text-slate-200 print:shadow-none print:border-none print:p-0 print:m-0">
-                
+            <div
+                class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 md:p-16 rounded-2xl relative font-sans text-slate-800 dark:text-slate-200 print:shadow-none print:border-none print:p-0 print:m-0">
+                <!-- Formal Pertamina Document Grid Header -->
+                <PertaminaDocumentHeader :activeRegulation="activeRegulation" class="flex-1" />
+
                 <!-- 2. Document Title Section -->
-                <div class="mt-16 text-center space-y-2 relative z-10">
-                    <h2 class="text-lg sm:text-xl font-extrabold tracking-[0.15em] text-slate-950 dark:text-white uppercase">
+                <div class="mt-8 text-center space-y-2 relative z-10">
+                    <h2
+                        class="text-lg sm:text-xl font-extrabold tracking-[0.15em] text-slate-950 dark:text-white uppercase">
                         BAB II
                     </h2>
-                    <h2 class="text-xl sm:text-2xl font-extrabold tracking-[0.2em] text-slate-950 dark:text-white uppercase">
+                    <h2
+                        class="text-xl sm:text-2xl font-extrabold tracking-[0.2em] text-slate-950 dark:text-white uppercase">
                         KEBIJAKAN
                     </h2>
                 </div>
 
                 <!-- 3. Specific Policy Subtitle -->
                 <div class="mt-10 relative z-10">
-                    <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide border-b border-slate-900/10 pb-2 dark:border-white/10">
+                    <h3
+                        class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide border-b border-slate-900/10 pb-2 dark:border-white/10">
                         B. Kebijakan Khusus
                     </h3>
                 </div>
@@ -55,14 +59,16 @@
                 <div class="mt-8 space-y-8 text-[15px] leading-relaxed text-slate-900 dark:text-slate-100 font-serif">
 
                     <!-- Loop through Domains -->
-                    <div v-for="(objectivesInDomain, domainName, domainIdx) in groupedObjectives" :key="domainName" class="space-y-6">
+                    <div v-for="(objectivesInDomain, domainName, domainIdx) in groupedObjectives" :key="domainName"
+                        class="space-y-6">
                         <!-- Domain Heading (e.g. 1. Evaluasi, Arahkan, dan Pantau) -->
                         <div class="space-y-2">
                             <h3 class="text-[16px] font-bold text-slate-950 dark:text-white">
                                 {{ domainIdx + 1 }}. {{ cleanDomainTitle(domainName) }}
                             </h3>
                             <!-- Domain Description -->
-                            <p class="text-slate-700 dark:text-slate-300 italic text-justify pl-4 font-sans text-[14px]">
+                            <p
+                                class="text-slate-700 dark:text-slate-300 italic text-justify pl-4 font-sans text-[14px]">
                                 {{ getDomainDescriptionByObjectives(objectivesInDomain) }}
                             </p>
                         </div>
@@ -76,12 +82,15 @@
 
                             <!-- Description / Deskripsi -->
                             <div v-if="obj.objective_description" class="pl-6">
-                                <span class="font-bold text-slate-950 dark:text-white block text-sm font-serif">a. Deskripsi</span>
-                                <div v-if="getListItems(obj.objective_description).length === 1" class="text-justify font-sans text-[14px] mt-1 pl-4">
+                                <span class="font-bold text-slate-950 dark:text-white block text-sm font-serif">a.
+                                    Deskripsi</span>
+                                <div v-if="getListItems(obj.objective_description).length === 1"
+                                    class="text-justify font-sans text-[14px] mt-1 pl-4">
                                     {{ getListItems(obj.objective_description)[0] }}
                                 </div>
                                 <ol v-else class="list-none pl-4 mt-1 space-y-1 font-sans text-[14px]">
-                                    <li v-for="(item, itemIdx) in getListItems(obj.objective_description)" :key="itemIdx" class="flex gap-2 text-justify">
+                                    <li v-for="(item, itemIdx) in getListItems(obj.objective_description)"
+                                        :key="itemIdx" class="flex gap-2 text-justify">
                                         <span class="shrink-0 font-bold">{{ getLetterNumbering(itemIdx) }})</span>
                                         <span>{{ item }}</span>
                                     </li>
@@ -90,12 +99,15 @@
 
                             <!-- Purpose / Tujuan -->
                             <div v-if="obj.objective_purpose" class="pl-6">
-                                <span class="font-bold text-slate-950 dark:text-white block text-sm font-serif">b. Tujuan</span>
-                                <div v-if="getListItems(obj.objective_purpose).length === 1" class="text-justify font-sans text-[14px] mt-1 pl-4">
+                                <span class="font-bold text-slate-950 dark:text-white block text-sm font-serif">b.
+                                    Tujuan</span>
+                                <div v-if="getListItems(obj.objective_purpose).length === 1"
+                                    class="text-justify font-sans text-[14px] mt-1 pl-4">
                                     {{ getListItems(obj.objective_purpose)[0] }}
                                 </div>
                                 <ol v-else class="list-none pl-4 mt-1 space-y-1 font-sans text-[14px]">
-                                    <li v-for="(item, itemIdx) in getListItems(obj.objective_purpose)" :key="itemIdx" class="flex gap-2 text-justify">
+                                    <li v-for="(item, itemIdx) in getListItems(obj.objective_purpose)" :key="itemIdx"
+                                        class="flex gap-2 text-justify">
                                         <span class="shrink-0 font-bold">{{ getLetterNumbering(itemIdx) }})</span>
                                         <span>{{ item }}</span>
                                     </li>
@@ -104,13 +116,16 @@
 
                             <!-- Butir Kebijakan / Practices -->
                             <div v-if="obj.practices && obj.practices.length > 0" class="pl-6">
-                                <span class="font-bold text-slate-950 dark:text-white block text-sm font-serif">c. Butir Kebijakan</span>
+                                <span class="font-bold text-slate-950 dark:text-white block text-sm font-serif">c. Butir
+                                    Kebijakan</span>
                                 <ol class="list-none pl-4 mt-1 space-y-1 font-sans text-[14px]">
-                                    <li v-for="(prac, pracIdx) in obj.practices" :key="prac.practice_id" class="flex gap-2 text-justify">
+                                    <li v-for="(prac, pracIdx) in obj.practices" :key="prac.practice_id"
+                                        class="flex gap-2 text-justify">
                                         <span class="shrink-0 font-bold">{{ getLetterNumbering(pracIdx) }})</span>
                                         <span>
                                             {{ prac.practice_name }}
-                                            <span v-if="prac.practice_description"> — {{ prac.practice_description }}</span>
+                                            <span v-if="prac.practice_description"> — {{ prac.practice_description
+                                                }}</span>
                                         </span>
                                     </li>
                                 </ol>
@@ -120,25 +135,37 @@
                 </div>
             </div>
 
-            <!-- Floating Controls (Scroll to Top, print:hidden) -->
-            <div class="fixed right-6 bottom-24 z-[9999] flex flex-col gap-3 pointer-events-none print:hidden">
-                <button 
-                    @click="scrollToTop" 
-                    class="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg border border-slate-200/80 transition-all hover:bg-slate-50 active:scale-90 hover:shadow-xl dark:bg-[#1a1a1a] dark:border-white/10"
-                    title="Kembali ke Atas"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 text-[#0a2540] dark:text-white">
+            <!-- Floating Action Buttons (Fixed Bottom Right) -->
+            <div class="fixed bottom-8 right-8 z-50 flex flex-col gap-4 print:hidden">
+                <!-- Scroll to Top Button -->
+                <button @click="scrollToTop" title="Kembali ke Atas"
+                    class="group flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white/90 shadow-2xl backdrop-blur-md transition-all hover:bg-white hover:text-[#821f44] dark:border-white/10 dark:bg-[#1a1a1a]/90 dark:text-slate-300 dark:hover:bg-[#1a1a1a] active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                        stroke="currentColor" class="w-5 h-5 transition-transform group-hover:-translate-y-0.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" />
                     </svg>
                 </button>
 
-                <Link 
-                    :href="route('dashboard')" 
-                    class="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg border border-slate-200/80 transition-all hover:bg-slate-50 active:scale-90 hover:shadow-xl dark:bg-[#1a1a1a] dark:border-white/10"
-                    title="Kembali ke Beranda"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-5 h-5 text-[#0a2540] dark:text-white">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                <!-- Print Button -->
+                <button @click="printDocument" title="Cetak PDF"
+                    class="group flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white/90 shadow-2xl backdrop-blur-md transition-all hover:bg-white hover:text-[#821f44] dark:border-white/10 dark:bg-[#1a1a1a]/90 dark:text-slate-300 dark:hover:bg-[#1a1a1a] active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor" class="w-5 h-5 transition-transform group-hover:-translate-y-0.5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M6.72 13.897l-1.2-6.82a2.25 2.25 0 012.23-2.64h9.5c1.12 0 2.07.82 2.23 1.94l.8 4.54a2.25 2.25 0 01-2.23 2.64H6.72z" />
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M19.5 12h-15m15 0a2.25 2.25 0 012.25 2.25v3a2.25 2.25 0 01-2.25 2.25h-15A2.25 2.25 0 013 17.25v-3A2.25 2.25 0 015.25 12h14.25z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 16.5h6m-6 3h6m-6-10.5h6m-6-3h6" />
+                    </svg>
+                </button>
+
+                <!-- Go to Management CRUD page -->
+                <Link :href="route('policy.specific.manage')" title="Kelola Kebijakan"
+                    class="group flex h-12 w-12 items-center justify-center rounded-full bg-[#821f44] text-white shadow-2xl shadow-[#821f44]/30 transition-all hover:bg-[#9c2552] hover:shadow-[#821f44]/40 active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2"
+                        stroke="currentColor" class="w-5 h-5 transition-transform group-hover:rotate-12">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.83 20.013a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
                     </svg>
                 </Link>
             </div>

@@ -171,12 +171,31 @@ class GeneralPolicyController extends Controller
     /**
      * Display a listing of general policies for CRUD management.
      */
-    public function manage(): Response
+    public function manage(Request $request): Response
     {
-        $policies = MstGeneralPolicy::orderBy('number', 'asc')->get();
+        $regulations = MstRegulation::with('generalPolicies')
+            ->orderBy('id', 'asc')
+            ->get();
+
+        $selectedRegulationId = $request->integer('regulation_id');
+        $selectedRegulation = null;
+
+        if ($selectedRegulationId) {
+            $selectedRegulation = $regulations->firstWhere('id', $selectedRegulationId);
+        }
+
+        if (!$selectedRegulation) {
+            $selectedRegulation = $regulations->first();
+        }
+
+        $policies = $selectedRegulation
+            ? $selectedRegulation->generalPolicies->sortBy('number')->values()
+            : collect([]);
 
         return Inertia::render('Policy/General/Manage', [
             'policies' => $policies,
+            'regulations' => $regulations,
+            'selectedRegulationId' => $selectedRegulation?->id,
         ]);
     }
 
@@ -186,9 +205,11 @@ class GeneralPolicyController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
+            'regulation_id' => 'required|integer|exists:mst_regulation,id',
             'number' => 'required|integer',
             'description' => 'required|string',
         ], [
+            'regulation_id.required' => 'Regulasi wajib dipilih.',
             'number.required' => 'Nomor Kebijakan wajib diisi.',
             'number.integer' => 'Nomor Kebijakan harus berupa angka.',
             'description.required' => 'Deskripsi Kebijakan wajib diisi.',
@@ -197,7 +218,7 @@ class GeneralPolicyController extends Controller
         MstGeneralPolicy::create($validated);
 
         return redirect()
-            ->route('policy.general.index')
+            ->route('policy.general.manage', ['regulation_id' => $request->regulation_id])
             ->with('success', 'Kebijakan Umum berhasil ditambahkan.');
     }
 
@@ -209,9 +230,11 @@ class GeneralPolicyController extends Controller
         $policy = MstGeneralPolicy::findOrFail($id);
 
         $validated = $request->validate([
+            'regulation_id' => 'required|integer|exists:mst_regulation,id',
             'number' => 'required|integer',
             'description' => 'required|string',
         ], [
+            'regulation_id.required' => 'Regulasi wajib dipilih.',
             'number.required' => 'Nomor Kebijakan wajib diisi.',
             'number.integer' => 'Nomor Kebijakan harus berupa angka.',
             'description.required' => 'Deskripsi Kebijakan wajib diisi.',
@@ -220,7 +243,7 @@ class GeneralPolicyController extends Controller
         $policy->update($validated);
 
         return redirect()
-            ->route('policy.general.index')
+            ->route('policy.general.manage', ['regulation_id' => $request->regulation_id])
             ->with('success', 'Kebijakan Umum berhasil diperbarui.');
     }
 
@@ -230,10 +253,11 @@ class GeneralPolicyController extends Controller
     public function destroy(int $id): RedirectResponse
     {
         $policy = MstGeneralPolicy::findOrFail($id);
+        $regulationId = $policy->regulation_id;
         $policy->delete();
 
         return redirect()
-            ->route('policy.general.index')
+            ->route('policy.general.manage', ['regulation_id' => $regulationId])
             ->with('success', 'Kebijakan Umum berhasil dihapus.');
     }
 }

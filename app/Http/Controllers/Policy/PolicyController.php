@@ -49,7 +49,7 @@ class PolicyController extends Controller
     /**
      * Display the specific policy management CRUD view.
      */
-    public function manage(): Response
+    public function manage(Request $request): Response
     {
         $objectives = MstObjective::with(['practices' => function($query) {
             $query->orderBy('practice_id', 'asc');
@@ -67,8 +67,14 @@ class PolicyController extends Controller
         ->orderBy('objective_id', 'asc')
         ->get();
 
+        $regulations = \App\Models\MstRegulation::orderBy('judul', 'asc')->get();
+        
+        $selectedRegulationId = $request->integer('regulation_id');
+
         return Inertia::render('Policy/Specific/Manage', [
             'objectives' => $objectives,
+            'regulations' => $regulations,
+            'selectedRegulationId' => $selectedRegulationId,
         ]);
     }
 
@@ -79,6 +85,7 @@ class PolicyController extends Controller
     {
         $validated = $request->validate([
             'objective_id' => 'required|string|max:255|unique:mst_objective,objective_id',
+            'regulation_id' => 'nullable|integer|exists:mst_regulation,id',
             'domain' => 'nullable|string|max:255',
             'objective' => 'required|string|max:255',
             'objective_description' => 'nullable|string',
@@ -87,6 +94,7 @@ class PolicyController extends Controller
             'objective_id.required' => 'Objective ID (e.g. EDM01) wajib diisi.',
             'objective_id.unique' => 'Objective ID sudah digunakan.',
             'objective.required' => 'Nama Objective wajib diisi.',
+            'regulation_id.exists' => 'Regulasi tidak valid.',
         ]);
 
         MstObjective::create($validated);
@@ -104,12 +112,14 @@ class PolicyController extends Controller
         $objective = MstObjective::findOrFail($id);
 
         $validated = $request->validate([
+            'regulation_id' => 'nullable|integer|exists:mst_regulation,id',
             'domain' => 'nullable|string|max:255',
             'objective' => 'required|string|max:255',
             'objective_description' => 'nullable|string',
             'objective_purpose' => 'nullable|string',
         ], [
             'objective.required' => 'Nama Objective wajib diisi.',
+            'regulation_id.exists' => 'Regulasi tidak valid.',
         ]);
 
         if ($request->filled('objective_id') && $request->input('objective_id') !== $id) {
@@ -128,6 +138,7 @@ class PolicyController extends Controller
                     ->where('objective_id', $id)
                     ->update([
                         'objective_id' => $newId,
+                        'regulation_id' => $request->input('regulation_id'),
                         'domain' => $request->input('domain'),
                         'objective' => $request->input('objective'),
                         'objective_description' => $request->input('objective_description'),

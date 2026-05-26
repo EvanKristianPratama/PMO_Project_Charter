@@ -8,8 +8,8 @@
 
                 <div class="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#821f44] dark:text-[#a83262]">Pedoman Tata Kelola Teknologi Informasi Pertamina (Persero)</p>
-                        <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Kelola Kebijakan Umum</h1>
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#821f44] dark:text-[#a83262]">{{ activeRegulation?.judul }}</p>
+                        <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Kelola Dokumen</h1>
                     </div>
                     <div class="flex items-center gap-3">
                         <Link
@@ -199,7 +199,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { usePage, useForm, router, Link } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import Swal from 'sweetalert2';
@@ -209,6 +209,19 @@ const props = defineProps({
         type: Array,
         required: true,
     },
+    regulations: {
+        type: Array,
+        required: true,
+    },
+    selectedRegulationId: {
+        type: [Number, String],
+        default: null
+    }
+});
+
+const activeRegulation = computed(() => {
+    if (!props.selectedRegulationId) return props.regulations[0] || null;
+    return props.regulations.find(r => r.id === props.selectedRegulationId) || null;
 });
 
 const page = usePage();
