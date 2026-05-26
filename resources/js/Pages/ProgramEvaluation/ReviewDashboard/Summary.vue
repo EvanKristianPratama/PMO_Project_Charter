@@ -66,6 +66,17 @@ const props = defineProps({
     },
 });
 
+const getInitiativeTooltip = (row) => {
+    const projectName = String(row.project_charter_name || row.initiative_name || '').trim();
+    const status = String(row.latest_review_status || '').trim();
+
+    if (projectName !== '' && status !== '') {
+        return `${projectName} - ${status}`;
+    }
+
+    return projectName || status;
+};
+
 const durationStats = computed(() => {
     const approvedRows = props.rows.filter(
         (row) =>
@@ -101,7 +112,11 @@ const durationStats = computed(() => {
     const getInitsForVal = (val) =>
         approvedRows
             .filter((r) => Number(r.process_month_value) === val)
-            .map((r) => ({ no: r.no, status: r.latest_review_status }));
+            .map((r) => ({
+                no: r.no,
+                status: r.latest_review_status,
+                projectCharterName: getInitiativeTooltip(r),
+            }));
 
     return {
         totalApproved: approvedRows.length,
@@ -109,6 +124,7 @@ const durationStats = computed(() => {
         notApprovedInitiatives: notApprovedRows.map((r) => ({
             no: r.no,
             status: r.latest_review_status,
+            projectCharterName: getInitiativeTooltip(r),
         })),
         stats: [
             {
@@ -183,6 +199,7 @@ const ownerBreakdown = computed(() => {
             const data = {
                 no: row.no,
                 status: row.latest_review_status,
+                projectCharterName: getInitiativeTooltip(row),
             };
 
             breakdown[owner].totalCount += 1;
@@ -229,12 +246,23 @@ const leaderBreakdown = computed(() => {
             const leaderCode = normalizeCode(row[sortField]);
             const parentLabel = normalizeCode(row[parentField]);
             const parentCode = normalizeCode(row[parentCodeField]);
+            const parentLevel2 = normalizeCode(row[`${field}_parent_level2`]);
+            const parentLevel3 = normalizeCode(row[`${field}_parent_level3`]);
+            const parentLevel4 = normalizeCode(row[`${field}_parent_level4`]);
+            const parentLevel5 = normalizeCode(row[`${field}_parent_level5`]);
+            const parentLevel6 = normalizeCode(row[`${field}_parent_level6`]);
+
             if (!breakdown[leader]) {
                 breakdown[leader] = {
                     leader,
                     sortCode: leaderCode,
                     parent: parentLabel,
                     parentCode,
+                    parentLevel2,
+                    parentLevel3,
+                    parentLevel4,
+                    parentLevel5,
+                    parentLevel6,
                     totalCount: 0,
                     approved: [],
                     notApproved: [],
@@ -248,6 +276,21 @@ const leaderBreakdown = computed(() => {
                 }
                 if ((breakdown[leader].parent === '' || breakdown[leader].parent === '-') && parentLabel !== '') {
                     breakdown[leader].parent = parentLabel;
+                }
+                if (breakdown[leader].parentLevel2 === '' && parentLevel2 !== '') {
+                    breakdown[leader].parentLevel2 = parentLevel2;
+                }
+                if (breakdown[leader].parentLevel3 === '' && parentLevel3 !== '') {
+                    breakdown[leader].parentLevel3 = parentLevel3;
+                }
+                if (breakdown[leader].parentLevel4 === '' && parentLevel4 !== '') {
+                    breakdown[leader].parentLevel4 = parentLevel4;
+                }
+                if (breakdown[leader].parentLevel5 === '' && parentLevel5 !== '') {
+                    breakdown[leader].parentLevel5 = parentLevel5;
+                }
+                if (breakdown[leader].parentLevel6 === '' && parentLevel6 !== '') {
+                    breakdown[leader].parentLevel6 = parentLevel6;
                 }
             }
 
@@ -269,6 +312,7 @@ const leaderBreakdown = computed(() => {
             const data = {
                 no: row.no,
                 status: row.latest_review_status,
+                projectCharterName: getInitiativeTooltip(row),
             };
 
             breakdown[leader].totalCount += 1;

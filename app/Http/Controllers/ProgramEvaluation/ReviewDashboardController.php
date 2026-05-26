@@ -103,12 +103,19 @@ class ReviewDashboardController extends Controller
                     ->flatMap(fn ($p) => $p->projectCharters ?? collect())
                     ->sortByDesc('id')
                     ->first();
+                $latestCharterProject = $latestCharter
+                    ? $projects->firstWhere('id', (int) $latestCharter->project_id)
+                    : null;
 
                 $projectOwner = $latestCharter?->owner ?? '-';
                 $projectLeader = $latestCharter?->leader ?? '-';
                 $projectOwnerCode = $this->resolveOrganizationCode($projectOwner, $organizationCodeLookup);
                 $projectLeaderCode = $this->resolveOrganizationCode($projectLeader, $organizationCodeLookup);
                 [$projectLeaderParentCode, $projectLeaderParent] = $this->resolveParentOrganization(
+                    $projectLeaderCode,
+                    $organizationDisplayLookup,
+                );
+                $projectLeaderParents = $this->resolveParentOrganizationsByLevel(
                     $projectLeaderCode,
                     $organizationDisplayLookup,
                 );
@@ -127,12 +134,17 @@ class ReviewDashboardController extends Controller
                     $projectLeaderRestructureCode,
                     $organizationDisplayLookup,
                 );
+                $projectLeaderRestructureParents = $this->resolveParentOrganizationsByLevel(
+                    $projectLeaderRestructureCode,
+                    $organizationDisplayLookup,
+                );
 
                 return [
                     'no' => $index + 1,
                     'initiative_id' => (int) $initiative->id,
                     'building_block_type' => trim((string) ($initiative->coe?->name ?? '')) !== '' ? $initiative->coe->name : '-',
                     'initiative_name' => trim((string) $initiative->name) !== '' ? $initiative->name : '-',
+                    'project_charter_name' => trim((string) ($latestCharterProject?->name ?? '')) !== '' ? $latestCharterProject->name : null,
                     'baseline_date' => $this->formatDate($baselineDate),
                     'approve_date' => $this->formatDate($approveDate),
                     'process_month_value' => $processMonthValue,
@@ -145,12 +157,22 @@ class ReviewDashboardController extends Controller
                     'project_leader_code' => $projectLeaderCode,
                     'project_leader_parent_code' => $projectLeaderParentCode,
                     'project_leader_parent' => $projectLeaderParent,
+                    'project_leader_parent_level2' => $projectLeaderParents[2],
+                    'project_leader_parent_level3' => $projectLeaderParents[3],
+                    'project_leader_parent_level4' => $projectLeaderParents[4],
+                    'project_leader_parent_level5' => $projectLeaderParents[5],
+                    'project_leader_parent_level6' => $projectLeaderParents[6],
                     'project_owner_restructure' => $projectOwnerRestructure,
                     'project_leader_restructure' => $projectLeaderRestructure,
                     'project_owner_restructure_code' => $projectOwnerRestructureCode,
                     'project_leader_restructure_code' => $projectLeaderRestructureCode,
                     'project_leader_restructure_parent_code' => $projectLeaderRestructureParentCode,
                     'project_leader_restructure_parent' => $projectLeaderRestructureParent,
+                    'project_leader_restructure_parent_level2' => $projectLeaderRestructureParents[2],
+                    'project_leader_restructure_parent_level3' => $projectLeaderRestructureParents[3],
+                    'project_leader_restructure_parent_level4' => $projectLeaderRestructureParents[4],
+                    'project_leader_restructure_parent_level5' => $projectLeaderRestructureParents[5],
+                    'project_leader_restructure_parent_level6' => $projectLeaderRestructureParents[6],
                 ];
             })
             ->values();
@@ -275,6 +297,49 @@ class ReviewDashboardController extends Controller
         $parentLabel = $organizationDisplayLookup[$parentCode] ?? null;
 
         return [$parentCode, $parentLabel];
+    }
+
+    private function resolveParentOrganizationsByLevel(?string $code, array $organizationDisplayLookup): array
+    {
+        $normalizedCode = trim((string) $code);
+        $parents = [
+            2 => null,
+            3 => null,
+            4 => null,
+            5 => null,
+            6 => null,
+        ];
+
+        if ($normalizedCode === '' || strlen($normalizedCode) !== 7) {
+            return $parents;
+        }
+
+        $digits = str_split($normalizedCode);
+        $lastNonZeroIndex = null;
+
+        for ($index = count($digits) - 1; $index >= 0; $index--) {
+            if ($digits[$index] !== '0') {
+                $lastNonZeroIndex = $index;
+                break;
+            }
+        }
+
+        if ($lastNonZeroIndex === null) {
+            return $parents;
+        }
+
+        for ($level = 2; $level <= 6; $level++) {
+            if ($level < $lastNonZeroIndex) {
+                $parentDigits = $digits;
+                for ($index = $level + 1; $index < count($digits); $index++) {
+                    $parentDigits[$index] = '0';
+                }
+                $parentCode = implode('', $parentDigits);
+                $parents[$level] = $organizationDisplayLookup[$parentCode] ?? null;
+            }
+        }
+
+        return $parents;
     }
 
     private function resolveLatestReviewState(MstInitiative $initiative, Collection $projects): array

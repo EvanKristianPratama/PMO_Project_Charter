@@ -128,6 +128,17 @@ const statuses = [
     'Done'
 ];
 
+const getInitiativeTooltip = (row) => {
+    const projectName = String(row.project_charter_name || row.initiative_name || '').trim();
+    const status = String(row.latest_review_status || '').trim();
+
+    if (projectName !== '' && status !== '') {
+        return `${projectName} - ${status}`;
+    }
+
+    return projectName || status;
+};
+
 const matrixData = computed(() => {
     const breakdown = {};
     const fieldKey = viewMode.value === 'original' ? props.groupBy : `${props.groupBy}_restructure`;
@@ -174,7 +185,7 @@ const matrixData = computed(() => {
         if (matchedStatus && breakdown[key].statusGroups[matchedStatus]) {
             breakdown[key].statusGroups[matchedStatus].push({
                 no: row.no,
-                name: row.initiative_name
+                name: getInitiativeTooltip(row)
             });
         }
     });

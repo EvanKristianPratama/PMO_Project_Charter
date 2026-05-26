@@ -44,7 +44,7 @@
                                     :key="init.no"
                                     class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
                                     :class="getCircleColor(init.status)"
-                                    :title="init.status"
+                                    :title="init.projectCharterName || init.status"
                                 >
                                     {{ init.no }}
                                 </span>
@@ -61,7 +61,7 @@
                                     :key="init.no"
                                     class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
                                     :class="getCircleColor(init.status)"
-                                    :title="init.status"
+                                    :title="init.projectCharterName || init.status"
                                 >
                                     {{ init.no }}
                                 </span>
@@ -88,7 +88,7 @@
                                     :key="`total-app-${init.no}`"
                                     class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
                                     :class="getCircleColor(init.status)"
-                                    :title="init.status"
+                                    :title="init.projectCharterName || init.status"
                                 >
                                     {{ init.no }}
                                 </span>
@@ -104,7 +104,7 @@
                                     :key="`total-notapp-${init.no}`"
                                     class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
                                     :class="getCircleColor(init.status)"
-                                    :title="init.status"
+                                    :title="init.projectCharterName || init.status"
                                 >
                                     {{ init.no }}
                                 </span>
