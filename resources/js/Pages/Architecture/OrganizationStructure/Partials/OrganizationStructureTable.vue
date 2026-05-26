@@ -19,6 +19,7 @@
                     <tr>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">No</th>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Group</th>
+                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">ID</th>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Code</th>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Organization</th>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Alias</th>
@@ -36,6 +37,9 @@
                         <td class="px-4 py-3 text-slate-500 dark:text-slate-400">{{ index + 1 }}</td>
                         <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
                             {{ displayValue(organizationStructureRow.groub_name) }}
+                        </td>
+                        <td class="px-4 py-3 text-slate-500 dark:text-slate-400 font-mono text-xs">
+                            {{ displayValue(organizationStructureRow.organization_id) }}
                         </td>
                         <td class="px-4 py-3 text-slate-500 dark:text-slate-400 font-mono text-xs">
                             {{ displayValue(organizationStructureRow.code) }}
@@ -68,7 +72,7 @@
                         </td>
                     </tr>
                     <tr v-if="organizationStructureRows.length === 0">
-                        <td colspan="6" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+                        <td colspan="9" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
                             Data organization tidak ditemukan.
                         </td>
                     </tr>

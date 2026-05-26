@@ -1,49 +1,70 @@
 <template>
     <UserLayout title="Procedure">
         <div class="animate-fade-in-up space-y-8">
-            <div class="max-w-2xl mr-auto ml-0 bg-white dark:bg-[#1a1a1a] shadow-md border border-slate-900 dark:border-white p-0 rounded-none relative font-sans text-slate-800 dark:text-slate-200 print:shadow-none print:border-none print:p-0 print:m-0">
-                <!-- Formal Pertamina Document Grid Header -->
-                    <div class="grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-slate-900 dark:divide-white">
-                        <div class="md:col-span-7 flex flex-col divide-y divide-slate-900 dark:divide-white">
-                            <div class="px-1.5 py-1 flex items-start gap-1 min-h-[26px]">
-                                <span class="font-bold shrink-0 text-[9px] leading-none pt-[1px]">FUNGSI :</span>
-                                <span class="font-bold text-[9px] leading-tight text-slate-900 dark:text-white">{{ activeRegulation?.owner }}</span>
-                            </div>
-                            <div class="px-1.5 py-1 flex items-start gap-1 min-h-[26px]">
-                                <span class="font-bold shrink-0 text-[9px] leading-none pt-[1px]">JUDUL :</span>
-                                <span class="font-bold text-[9px] leading-tight text-slate-900 dark:text-white">{{ activeRegulation?.judul }}</span>
-                            </div>
-                        </div>
-                        <div class="md:col-span-5 flex flex-col divide-y divide-slate-900 dark:divide-white">
-                            <div class="px-1.5 py-1 flex items-center gap-1 min-h-[22px]">
-                                <span class="font-bold shrink-0 text-[9px] leading-none">NOMOR :</span>
-                                <span class="font-mono font-bold text-[9px] leading-none text-slate-900 dark:text-white">{{ activeRegulation?.nomor || '-' }}</span>
-                            </div>
-                            <div class="px-1.5 py-1 flex items-center min-h-[22px]">
-                                <div class="flex items-center gap-1 flex-wrap leading-none">
-                                    <span class="font-bold shrink-0 text-[9px] leading-none">REVISI KE :</span>
-                                    <template v-if="[0, 1, 2, 3, 4].includes(parseInt(activeRegulation?.revisi))">
-                                        <span v-for="num in [0, 1, 2, 3, 4]" :key="num" class="inline-flex items-center gap-0.5 mr-0.5">
-                                            <span class="w-2.5 h-2.5 border border-slate-900 dark:border-white flex items-center justify-center bg-transparent select-none animate-none leading-none">
-                                                <svg v-if="parseInt(activeRegulation?.revisi) === num" class="h-2 w-2 text-slate-900 dark:text-white" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                                                    <path d="M2.25 6.25L4.75 8.75L9.75 3.75" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-                                                </svg>
-                                            </span>
-                                            <span class="font-mono text-[9px] leading-none">{{ num }}</span>
-                                        </span>
-                                    </template>
-                                    <template v-else>
-                                        <span class="w-2.5 h-2.5 border border-slate-900 dark:border-white flex items-center justify-center text-[8px] font-black bg-transparent select-none mr-0.5 leading-none">-</span>
-                                        <span class="font-bold text-[9px] leading-none text-slate-900 dark:text-white mr-1">{{ activeRegulation?.revisi || '0' }}</span>
-                                    </template>
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-stretch lg:justify-between print:hidden">
+                <div class="flex-1 bg-white dark:bg-[#1a1a1a] shadow-md border border-slate-900 dark:border-white p-0 rounded-none relative font-sans text-slate-800 dark:text-slate-200 print:shadow-none print:border-none print:p-0 print:m-0">
+                    <!-- Formal Pertamina Document Grid Header -->
+                        <div class="grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-slate-900 dark:divide-white h-full">
+                            <div class="md:col-span-7 flex flex-col divide-y divide-slate-900 dark:divide-white">
+                                <div class="px-1.5 py-1 flex items-start gap-1 min-h-[26px] flex-1">
+                                    <span class="font-bold shrink-0 text-[9px] leading-none pt-[1px]">FUNGSI :</span>
+                                    <span class="font-bold text-[9px] leading-tight text-slate-900 dark:text-white">{{ activeRegulation?.owner }}</span>
+                                </div>
+                                <div class="px-1.5 py-1 flex items-start gap-1 min-h-[26px] flex-1">
+                                    <span class="font-bold shrink-0 text-[9px] leading-none pt-[1px]">JUDUL :</span>
+                                    <span class="font-bold text-[9px] leading-tight text-slate-900 dark:text-white">{{ activeRegulation?.judul }}</span>
                                 </div>
                             </div>
-                            <div class="px-1.5 py-1 flex items-center gap-1 min-h-[22px]">
-                                <span class="font-bold shrink-0 text-[9px] leading-none">BERLAKU TMT :</span>
-                                <span class="font-bold text-[9px] leading-none text-slate-900 dark:text-white">{{ activeRegulation?.berlaku ? formatDate(activeRegulation.berlaku) : '-' }}</span>
+                            <div class="md:col-span-5 flex flex-col divide-y divide-slate-900 dark:divide-white">
+                                <div class="px-1.5 py-1 flex items-center gap-1 min-h-[22px] flex-1">
+                                    <span class="font-bold shrink-0 text-[9px] leading-none">NOMOR :</span>
+                                    <span class="font-mono font-bold text-[9px] leading-none text-slate-900 dark:text-white">{{ activeRegulation?.nomor || '-' }}</span>
+                                </div>
+                                <div class="px-1.5 py-1 flex items-center min-h-[22px] flex-1">
+                                    <div class="flex items-center gap-1 flex-wrap leading-none">
+                                        <span class="font-bold shrink-0 text-[9px] leading-none">REVISI KE :</span>
+                                        <template v-if="[0, 1, 2, 3, 4].includes(parseInt(activeRegulation?.revisi))">
+                                            <span v-for="num in [0, 1, 2, 3, 4]" :key="num" class="inline-flex items-center gap-0.5 mr-0.5">
+                                                <span class="w-2.5 h-2.5 border border-slate-900 dark:border-white flex items-center justify-center bg-transparent select-none animate-none leading-none">
+                                                    <svg v-if="parseInt(activeRegulation?.revisi) === num" class="h-2 w-2 text-slate-900 dark:text-white" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                                                        <path d="M2.25 6.25L4.75 8.75L9.75 3.75" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                                                    </svg>
+                                                </span>
+                                                <span class="font-mono text-[9px] leading-none">{{ num }}</span>
+                                            </span>
+                                        </template>
+                                        <template v-else>
+                                            <span class="w-2.5 h-2.5 border border-slate-900 dark:border-white flex items-center justify-center text-[8px] font-black bg-transparent select-none mr-0.5 leading-none">-</span>
+                                            <span class="font-bold text-[9px] leading-none text-slate-900 dark:text-white mr-1">{{ activeRegulation?.revisi || '0' }}</span>
+                                        </template>
+                                    </div>
+                                </div>
+                                <div class="px-1.5 py-1 flex items-center gap-1 min-h-[22px] flex-1">
+                                    <span class="font-bold shrink-0 text-[9px] leading-none">BERLAKU TMT :</span>
+                                    <span class="font-bold text-[9px] leading-none text-slate-900 dark:text-white">{{ activeRegulation?.berlaku ? formatDate(activeRegulation.berlaku) : '-' }}</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                </div>
+
+                <!-- Document Type Switch Menu (Vertical) -->
+                <nav class="flex shrink-0 flex-col gap-1 rounded-xl bg-slate-100 p-1 dark:bg-white/5 lg:w-48">
+                    <Link :href="route('policy.general.index')"
+                        class="flex flex-1 items-center justify-center rounded-lg px-4 py-1 text-center text-[10px] font-bold transition-all"
+                        :class="route().current('policy.general.index') ? 'bg-white text-[#821f44] shadow-sm dark:bg-[#1a1a1a] dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
+                        Kebijakan Umum
+                    </Link>
+                    <Link :href="route('policy.specific.index')"
+                        class="flex flex-1 items-center justify-center rounded-lg px-4 py-1 text-center text-[10px] font-bold transition-all"
+                        :class="route().current('policy.specific.index') ? 'bg-white text-[#821f44] shadow-sm dark:bg-[#1a1a1a] dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
+                        Kebijakan Khusus
+                    </Link>
+                    <Link :href="route('policy.procedure.index')"
+                        class="flex flex-1 items-center justify-center rounded-lg px-4 py-1 text-center text-[10px] font-bold transition-all"
+                        :class="route().current('policy.procedure.index') ? 'bg-white text-[#821f44] shadow-sm dark:bg-[#1a1a1a] dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
+                        Procedure
+                    </Link>
+                </nav>
             </div>
 
             <!-- Actors Section -->

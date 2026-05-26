@@ -11,37 +11,30 @@
                     class="pointer-events-none absolute -bottom-16 -left-12 h-40 w-40 rounded-full bg-blue-500/5 blur-2xl">
                 </div>
 
-                <div class="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div class="relative flex flex-col gap-4 lg:flex-row lg:items-stretch lg:justify-between">
                     <!-- Formal Pertamina Document Grid Header -->
-                    <PertaminaDocumentHeader :activeRegulation="activeRegulation" />
+                    <PertaminaDocumentHeader :activeRegulation="activeRegulation" class="flex-1" />
+
+                    <!-- Document Type Switch Menu (Vertical) -->
+                    <nav class="flex shrink-0 flex-col gap-1 rounded-xl bg-slate-100 p-1 dark:bg-white/5 lg:w-48">
+                        <Link :href="route('policy.general.index')"
+                            class="flex flex-1 items-center justify-center rounded-lg px-4 py-2 text-center text-xs font-bold transition-all"
+                            :class="route().current('policy.general.index') ? 'bg-white text-[#821f44] shadow-sm dark:bg-[#1a1a1a] dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
+                            Kebijakan Umum
+                        </Link>
+                        <Link :href="route('policy.specific.index')"
+                            class="flex flex-1 items-center justify-center rounded-lg px-4 py-2 text-center text-xs font-bold transition-all"
+                            :class="route().current('policy.specific.index') ? 'bg-white text-[#821f44] shadow-sm dark:bg-[#1a1a1a] dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
+                            Kebijakan Khusus
+                        </Link>
+                        <Link :href="route('policy.procedure.index')"
+                            class="flex flex-1 items-center justify-center rounded-lg px-4 py-2 text-center text-xs font-bold transition-all"
+                            :class="route().current('policy.procedure.index') ? 'bg-white text-[#821f44] shadow-sm dark:bg-[#1a1a1a] dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
+                            Procedure
+                        </Link>
+                    </nav>
                 </div>
             </section>
-
-            <!-- Floating Action Buttons (Fixed Bottom Right) -->
-            <div class="fixed bottom-8 right-8 z-50 flex flex-col gap-4 print:hidden">
-                <!-- Print Button -->
-                <button @click="printDocument" title="Cetak PDF"
-                    class="group flex h-14 w-14 items-center justify-center rounded-full border border-slate-200 bg-white/90 shadow-2xl backdrop-blur-md transition-all hover:bg-white hover:text-[#821f44] dark:border-white/10 dark:bg-[#1a1a1a]/90 dark:text-slate-300 dark:hover:bg-[#1a1a1a] active:scale-95">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                        stroke="currentColor" class="w-6 h-6 transition-transform group-hover:-translate-y-0.5">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M6.72 13.897l-1.2-6.82a2.25 2.25 0 012.23-2.64h9.5c1.12 0 2.07.82 2.23 1.94l.8 4.54a2.25 2.25 0 01-2.23 2.64H6.72z" />
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M19.5 12h-15m15 0a2.25 2.25 0 012.25 2.25v3a2.25 2.25 0 01-2.25 2.25h-15A2.25 2.25 0 013 17.25v-3A2.25 2.25 0 015.25 12h14.25z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 16.5h6m-6 3h6m-6-10.5h6m-6-3h6" />
-                    </svg>
-                </button>
-
-                <!-- Go to Management CRUD page -->
-                <Link :href="route('policy.general.manage')" title="Kelola Kebijakan"
-                    class="group flex h-14 w-14 items-center justify-center rounded-full bg-[#821f44] text-white shadow-2xl shadow-[#821f44]/30 transition-all hover:bg-[#9c2552] hover:shadow-[#821f44]/40 active:scale-95">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2"
-                        stroke="currentColor" class="w-6 h-6 transition-transform group-hover:rotate-12">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.83 20.013a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                    </svg>
-                </Link>
-            </div>
 
             <!-- A4 Document Page Preview -->
             <div
@@ -86,6 +79,32 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Floating Action Buttons (Fixed Bottom Right) -->
+        <div class="fixed bottom-8 right-8 z-50 flex flex-col gap-4 print:hidden">
+            <!-- Print Button -->
+            <button @click="printDocument" title="Cetak PDF"
+                class="group flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white/90 shadow-2xl backdrop-blur-md transition-all hover:bg-white hover:text-[#821f44] dark:border-white/10 dark:bg-[#1a1a1a]/90 dark:text-slate-300 dark:hover:bg-[#1a1a1a] active:scale-95">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor" class="w-5 h-5 transition-transform group-hover:-translate-y-0.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M6.72 13.897l-1.2-6.82a2.25 2.25 0 012.23-2.64h9.5c1.12 0 2.07.82 2.23 1.94l.8 4.54a2.25 2.25 0 01-2.23 2.64H6.72z" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19.5 12h-15m15 0a2.25 2.25 0 012.25 2.25v3a2.25 2.25 0 01-2.25 2.25h-15A2.25 2.25 0 013 17.25v-3A2.25 2.25 0 015.25 12h14.25z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 16.5h6m-6 3h6m-6-10.5h6m-6-3h6" />
+                </svg>
+            </button>
+
+            <!-- Go to Management CRUD page -->
+            <Link :href="route('policy.general.manage')" title="Kelola Kebijakan"
+                class="group flex h-12 w-12 items-center justify-center rounded-full bg-[#821f44] text-white shadow-2xl shadow-[#821f44]/30 transition-all hover:bg-[#9c2552] hover:shadow-[#821f44]/40 active:scale-95">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2"
+                    stroke="currentColor" class="w-5 h-5 transition-transform group-hover:rotate-12">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.83 20.013a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                </svg>
+            </Link>
         </div>
     </UserLayout>
 </template>
