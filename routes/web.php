@@ -284,7 +284,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     // Policy CRUD (mst_general_policy, mst_objective & mst_practice)
     Route::prefix('/policy')->name('policy.')->group(function () {
         Route::get('/', function () {
-            return redirect()->route('policy.general.index');
+            return redirect()->route('policy.regulation.index');
         })->name('index');
 
         // Kebijakan Umum (General Policy) CRUD
