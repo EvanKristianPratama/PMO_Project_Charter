@@ -13,6 +13,10 @@ class MstPicProject extends Model
     use LogsActivity;
     protected $table = 'mst_pic_project';
 
+    protected $casts = [
+        'organization_id' => 'integer',
+    ];
+
     protected $fillable = [
         'organization_id',
         'name',

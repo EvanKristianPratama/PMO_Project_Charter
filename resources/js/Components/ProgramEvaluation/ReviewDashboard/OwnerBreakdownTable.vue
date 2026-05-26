@@ -17,7 +17,7 @@
                             </div>
                         </th>
                         <th colspan="2" class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20">Aproval</th>
-                        <th colspan="2" class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20">no aprove</th>
+                        <th colspan="2" class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20">No Approved</th>
                         <th rowspan="2" class="border-b border-l border-slate-900 px-4 py-3 text-center dark:border-white/20">
                             Total All
                         </th>

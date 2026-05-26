@@ -28,101 +28,116 @@
                 </div>
             </div>
 
-            <!-- Dropdown Filters Row 1 -->
-            <div class="review-filter-switch mb-3">
-                <label for="bb-filter" class="text-xs font-medium text-slate-700 dark:text-slate-200">IT Building Blocks</label>
-                <select
-                    id="bb-filter"
-                    v-model="selectedBuildingBlock"
-                    class="review-filter-select dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-200"
-                >
-                    <option value="all">All IT Building Blocks</option>
-                    <option
-                        v-for="bb in buildingBlockOptions"
-                        :key="`bb-filter-${bb}`"
-                        :value="bb"
+            <!-- Dropdown Filters (Consolidated in 1 line) -->
+            <div class="review-filter-switch flex flex-wrap items-center gap-x-4 gap-y-2">
+                <!-- IT Building Blocks -->
+                <div class="flex items-center gap-2">
+                    <label for="bb-filter" class="text-xs font-medium text-slate-700 dark:text-slate-200">IT Building Blocks</label>
+                    <select
+                        id="bb-filter"
+                        v-model="selectedBuildingBlock"
+                        class="review-filter-select dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-200"
                     >
-                        {{ bb }}
-                    </option>
-                </select>
+                        <option value="all">All IT Building Blocks</option>
+                        <option
+                            v-for="bb in buildingBlockOptions"
+                            :key="`bb-filter-${bb}`"
+                            :value="bb"
+                        >
+                            {{ bb }}
+                        </option>
+                    </select>
+                </div>
 
-                <label for="period-filter" class="text-xs font-medium text-slate-700 dark:text-slate-200">Periode</label>
-                <select
-                    id="period-filter"
-                    v-model="selectedPeriod"
-                    class="review-filter-select dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-200"
-                >
-                    <option value="all">All Month</option>
-                    <option
-                        v-for="period in periodOptions"
-                        :key="`period-filter-${period}`"
-                        :value="period"
+                <!-- Periode -->
+                <div class="flex items-center gap-2">
+                    <label for="period-filter" class="text-xs font-medium text-slate-700 dark:text-slate-200">Periode</label>
+                    <select
+                        id="period-filter"
+                        v-model="selectedPeriod"
+                        class="review-filter-select dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-200"
                     >
-                        {{ period }}
-                    </option>
-                </select>
+                        <option value="all">All Month</option>
+                        <option
+                            v-for="period in periodOptions"
+                            :key="`period-filter-${period}`"
+                            :value="period"
+                        >
+                            {{ period }}
+                        </option>
+                    </select>
+                </div>
 
-                <label for="owner-filter" class="text-xs font-medium text-slate-700 dark:text-slate-200">Project Owner</label>
-                <select
-                    id="owner-filter"
-                    v-model="selectedProjectOwner"
-                    class="review-filter-select dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-200"
-                >
-                    <option value="all">All Project Owner</option>
-                    <option
-                        v-for="owner in ownerOptions"
-                        :key="`owner-filter-${owner}`"
-                        :value="owner"
+                <!-- Project Owner -->
+                <div class="flex items-center gap-2">
+                    <label for="owner-filter" class="text-xs font-medium text-slate-700 dark:text-slate-200">Project Owner</label>
+                    <select
+                        id="owner-filter"
+                        v-model="selectedProjectOwner"
+                        class="review-filter-select dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-200"
                     >
-                        {{ owner }}
-                    </option>
-                </select>
+                        <option value="all">All Project Owner</option>
+                        <option
+                            v-for="owner in ownerOptions"
+                            :key="`owner-filter-${owner}`"
+                            :value="owner"
+                        >
+                            {{ owner }}
+                        </option>
+                    </select>
+                </div>
 
-                <label for="leader-filter" class="text-xs font-medium text-slate-700 dark:text-slate-200">Project Leader</label>
-                <select
-                    id="leader-filter"
-                    v-model="selectedProjectLeader"
-                    class="review-filter-select dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-200"
-                >
-                    <option value="all">All Project Leader</option>
-                    <option
-                        v-for="leader in leaderOptions"
-                        :key="`leader-filter-${leader}`"
-                        :value="leader"
+                <!-- Project Leader -->
+                <div class="flex items-center gap-2">
+                    <label for="leader-filter" class="text-xs font-medium text-slate-700 dark:text-slate-200">Project Leader</label>
+                    <select
+                        id="leader-filter"
+                        v-model="selectedProjectLeader"
+                        class="review-filter-select dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-200"
                     >
-                        {{ leader }}
-                    </option>
-                </select>
-            </div>
+                        <option value="all">All Project Leader</option>
+                        <option
+                            v-for="leader in leaderOptions"
+                            :key="`leader-filter-${leader}`"
+                            :value="leader"
+                        >
+                            {{ leader }}
+                        </option>
+                    </select>
+                </div>
 
-            <!-- Dropdown Filters Row 2 -->
-            <div class="review-filter-switch">
-                <label for="initiative-filter" class="text-xs font-medium text-slate-700 dark:text-slate-200">IT Initiatives</label>
-                <select
-                    id="initiative-filter"
-                    v-model="selectedInitiativeId"
-                    class="review-filter-select review-filter-select--wide dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-200 mr-4"
-                >
-                    <option value="all">All IT Initiatives</option>
-                    <option
-                        v-for="initiative in initiativeOptions"
-                        :key="`init-filter-${initiative.id}`"
-                        :value="String(initiative.id)"
+                <!-- IT Initiatives -->
+                <div class="flex items-center gap-2">
+                    <label for="initiative-filter" class="text-xs font-medium text-slate-700 dark:text-slate-200">IT Initiatives</label>
+                    <select
+                        id="initiative-filter"
+                        v-model="selectedInitiativeId"
+                        class="review-filter-select review-filter-select--wide dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-200"
                     >
-                        {{ initiative.name }}
-                    </option>
-                </select>
+                        <option value="all">All IT Initiatives</option>
+                        <option
+                            v-for="initiative in initiativeOptions"
+                            :key="`init-filter-${initiative.id}`"
+                            :value="String(initiative.id)"
+                        >
+                            {{ initiative.name }}
+                        </option>
+                    </select>
+                </div>
 
-                <label for="sort-duration" class="text-xs font-medium text-slate-700 dark:text-slate-200">Sort Duration</label>
-                <select
-                    id="sort-duration"
-                    v-model="sortDuration"
-                    class="review-filter-select dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-200"
-                >
-                    <option value="none">Default (No)</option>
-                    <option value="asc">Duration (Shortest)</option>
-                    <option value="desc">Duration (Longest)</option>
-                </select>
+                <!-- Sort Duration -->
+                <div class="flex items-center gap-2">
+                    <label for="sort-duration" class="text-xs font-medium text-slate-700 dark:text-slate-200">Sort Duration</label>
+                    <select
+                        id="sort-duration"
+                        v-model="sortDuration"
+                        class="review-filter-select dark:border-white/20 dark:bg-[#1f1f1f] dark:text-slate-200"
+                    >
+                        <option value="none">Default (No)</option>
+                        <option value="asc">Duration (Shortest)</option>
+                        <option value="desc">Duration (Longest)</option>
+                    </select>
+                </div>
             </div>
         </div>
 

@@ -18,6 +18,13 @@ class TrsMapPicProject extends Model
 
     public $timestamps = false;
 
+    protected $casts = [
+        'project_id' => 'integer',
+        'project_sponsor' => 'integer',
+        'project_owner' => 'integer',
+        'project_leader' => 'integer',
+    ];
+
     protected $fillable = [
         'project_id',
         'project_sponsor',

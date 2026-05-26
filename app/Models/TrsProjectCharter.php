@@ -41,6 +41,7 @@ class TrsProjectCharter extends Model
     protected function casts(): array
     {
         return [
+            'project_id' => 'integer',
             'metadata' => 'array',
             'status' => 'integer',
         ];

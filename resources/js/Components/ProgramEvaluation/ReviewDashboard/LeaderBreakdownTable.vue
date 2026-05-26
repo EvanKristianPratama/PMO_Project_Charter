@@ -16,8 +16,11 @@
                                 </select>
                             </div>
                         </th>
+                        <th rowspan="2" class="border-b border-r border-slate-900 px-4 py-3 dark:border-white/20">
+                            Parent
+                        </th>
                         <th colspan="2" class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20">Aproval</th>
-                        <th colspan="2" class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20">no aprove</th>
+                        <th colspan="2" class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20">No Approved</th>
                         <th rowspan="2" class="border-b border-l border-slate-900 px-4 py-3 text-center dark:border-white/20">
                             Total All
                         </th>
@@ -33,6 +36,9 @@
                     <tr v-for="row in displayData" :key="row.leader" class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                         <td class="border-r border-slate-900 px-4 py-4 font-black text-slate-900 dark:border-white/20 dark:text-white">
                             {{ row.leader }}
+                        </td>
+                        <td class="border-r border-slate-900 px-4 py-4 text-slate-700 dark:border-white/20 dark:text-slate-300">
+                            {{ row.parent || row.parentCode || '-' }}
                         </td>
                         <td class="border-r border-slate-900 px-4 py-4 text-center font-black text-slate-900 dark:border-white/20 dark:text-white">
                             {{ row.approved.length }}
@@ -78,6 +84,9 @@
                         <td class="border-t border-r border-slate-900 px-4 py-3 dark:border-white/20">
                             Grand Total
                         </td>
+                        <td class="border-t border-r border-slate-900 px-4 py-3 dark:border-white/20 text-slate-700 dark:text-slate-300">
+                            -
+                        </td>
                         <td class="border-t border-r border-slate-900 px-4 py-3 text-center dark:border-white/20">
                             {{ totals.approvedCount }}
                         </td>
@@ -115,7 +124,7 @@
                         </td>
                     </tr>
                     <tr class="bg-slate-100/80 text-slate-900 dark:bg-white/10 dark:text-white font-black uppercase text-[11px] border-t border-slate-900 dark:border-white/40">
-                        <td colspan="5" class="px-4 py-2.5 text-right border-r border-slate-900 dark:border-white/20">
+                        <td colspan="6" class="px-4 py-2.5 text-right border-r border-slate-900 dark:border-white/20">
                             Total Keseluruhan Inisiatif (Approved + No Approved)
                         </td>
                         <td class="px-4 py-2.5 text-center text-[13px]">

@@ -56,6 +56,7 @@ class ReviewDashboardController extends Controller
     private function getDashboardData(): array
     {
         $organizationCodeLookup = $this->buildOrganizationCodeLookup();
+        $organizationDisplayLookup = $this->buildOrganizationDisplayLookup();
 
         $rows = MstInitiative::query()
             ->select(['id', 'code', 'name', 'tipe_initiative', 'coe_id'])
@@ -90,7 +91,7 @@ class ReviewDashboardController extends Controller
             ->orderBy('code')
             ->orderBy('name')
             ->get()
-            ->map(function (MstInitiative $initiative, int $index) use ($organizationCodeLookup): array {
+            ->map(function (MstInitiative $initiative, int $index) use ($organizationCodeLookup, $organizationDisplayLookup): array {
                 $projects = $initiative->mappedProjects ?? collect();
                 $baselineDate = $this->resolveStatusDate($projects, InitiativeStatus::BASELINE);
                 $approveDate = $this->resolveStatusDate($projects, InitiativeStatus::APPROVE);
@@ -107,6 +108,10 @@ class ReviewDashboardController extends Controller
                 $projectLeader = $latestCharter?->leader ?? '-';
                 $projectOwnerCode = $this->resolveOrganizationCode($projectOwner, $organizationCodeLookup);
                 $projectLeaderCode = $this->resolveOrganizationCode($projectLeader, $organizationCodeLookup);
+                [$projectLeaderParentCode, $projectLeaderParent] = $this->resolveParentOrganization(
+                    $projectLeaderCode,
+                    $organizationDisplayLookup,
+                );
 
                 // Restructured data (from TrsMapPicProject)
                 $latestProjectWithMap = $projects
@@ -118,6 +123,10 @@ class ReviewDashboardController extends Controller
                 $projectLeaderRestructure = $latestProjectWithMap?->mapPicProject?->leaderOrganization?->jabatan ?? '-';
                 $projectOwnerRestructureCode = trim((string) ($latestProjectWithMap?->mapPicProject?->ownerOrganization?->code ?? '')) ?: null;
                 $projectLeaderRestructureCode = trim((string) ($latestProjectWithMap?->mapPicProject?->leaderOrganization?->code ?? '')) ?: null;
+                [$projectLeaderRestructureParentCode, $projectLeaderRestructureParent] = $this->resolveParentOrganization(
+                    $projectLeaderRestructureCode,
+                    $organizationDisplayLookup,
+                );
 
                 return [
                     'no' => $index + 1,
@@ -134,10 +143,14 @@ class ReviewDashboardController extends Controller
                     'project_leader' => $projectLeader,
                     'project_owner_code' => $projectOwnerCode,
                     'project_leader_code' => $projectLeaderCode,
+                    'project_leader_parent_code' => $projectLeaderParentCode,
+                    'project_leader_parent' => $projectLeaderParent,
                     'project_owner_restructure' => $projectOwnerRestructure,
                     'project_leader_restructure' => $projectLeaderRestructure,
                     'project_owner_restructure_code' => $projectOwnerRestructureCode,
                     'project_leader_restructure_code' => $projectLeaderRestructureCode,
+                    'project_leader_restructure_parent_code' => $projectLeaderRestructureParentCode,
+                    'project_leader_restructure_parent' => $projectLeaderRestructureParent,
                 ];
             })
             ->values();
@@ -189,6 +202,37 @@ class ReviewDashboardController extends Controller
             ->all();
     }
 
+    private function buildOrganizationDisplayLookup(): array
+    {
+        return TrsOrganization::query()
+            ->select(['code', 'jabatan', 'name', 'alias'])
+            ->get()
+            ->mapWithKeys(function (TrsOrganization $organization): array {
+                $code = trim((string) ($organization->code ?? ''));
+
+                if ($code === '') {
+                    return [];
+                }
+
+                $displayName = trim((string) ($organization->jabatan ?? ''));
+
+                if ($displayName === '') {
+                    $displayName = trim((string) ($organization->name ?? ''));
+                }
+
+                if ($displayName === '') {
+                    $displayName = trim((string) ($organization->alias ?? ''));
+                }
+
+                if ($displayName === '') {
+                    $displayName = $code;
+                }
+
+                return [$code => $displayName];
+            })
+            ->all();
+    }
+
     private function resolveOrganizationCode(?string $label, array $organizationCodeLookup): ?string
     {
         $normalizedLabel = mb_strtolower(trim((string) $label));
@@ -198,6 +242,39 @@ class ReviewDashboardController extends Controller
         }
 
         return $organizationCodeLookup[$normalizedLabel] ?? null;
+    }
+
+    private function resolveParentOrganization(?string $code, array $organizationDisplayLookup): array
+    {
+        $normalizedCode = trim((string) $code);
+
+        if ($normalizedCode === '') {
+            return [null, null];
+        }
+
+        $digits = str_split($normalizedCode);
+        $lastNonZeroIndex = null;
+
+        for ($index = count($digits) - 1; $index >= 0; $index--) {
+            if ($digits[$index] !== '0') {
+                $lastNonZeroIndex = $index;
+                break;
+            }
+        }
+
+        if ($lastNonZeroIndex === null || $lastNonZeroIndex === 0) {
+            return [null, null];
+        }
+
+        $digits[$lastNonZeroIndex] = '0';
+        for ($index = $lastNonZeroIndex + 1; $index < count($digits); $index++) {
+            $digits[$index] = '0';
+        }
+
+        $parentCode = implode('', $digits);
+        $parentLabel = $organizationDisplayLookup[$parentCode] ?? null;
+
+        return [$parentCode, $parentLabel];
     }
 
     private function resolveLatestReviewState(MstInitiative $initiative, Collection $projects): array

@@ -23,6 +23,7 @@ use App\Http\Controllers\Architecture\ProsesBisnis\ProsesBisnisController as Arc
 use App\Http\Controllers\Policy\RegulationController;
 use App\Http\Controllers\Policy\RoleController;
 use App\Http\Controllers\ProgramEvaluation\ReviewDashboardController;
+use App\Http\Controllers\ProgramEvaluation\ReviewAnalysisController;
 use App\Http\Controllers\ProgramEvaluation\ReviewTimelineController;
 use App\Http\Controllers\ProgramEvaluation\TrsReviewPCController;
 use App\Http\Controllers\ProgramEvaluation\TrsReviewScController;
@@ -369,7 +370,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/program-evalution/review-timeline', [ReviewTimelineController::class, 'index'])->name('program-evaluation.review-timeline');
     Route::get('/program-evalution/review-dashboard', [ReviewDashboardController::class, 'index'])->name('program-evaluation.review-dashboard');
     Route::get('/program-evalution/review-summary', [ReviewDashboardController::class, 'summary'])->name('program-evaluation.review-summary');
-    Route::get('/program-evalution/review-analysis', fn () => Inertia::render('ProgramEvaluation/ReviewAnylisis/Index'))->name('program-evaluation.review-analysis');
+    Route::get('/program-evalution/review-analysis', [ReviewAnalysisController::class, 'index'])->name('program-evaluation.review-analysis');
     Route::post('/program-evalution/review-timeline/review-status-implementation/{statusId}', [ReviewTimelineController::class, 'updateReviewStatusImplementation'])->name('program-evaluation.review-timeline.review-status.update');
 
     // Summary Review Notes (TrsReviewSc)

@@ -47,6 +47,11 @@ class TrsOrganization extends Model
         return $this->hasMany(MstPicProject::class, 'organization_id');
     }
 
+    public function picProjects(): HasMany
+    {
+        return $this->hasMany(MstPicProject::class, 'organization_id');
+    }
+
     public function prosesBisnis(): HasMany
     {
         return $this->hasMany(TrsProsesBisnis::class, 'organization_id');

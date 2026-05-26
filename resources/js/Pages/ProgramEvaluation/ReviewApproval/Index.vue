@@ -1,26 +1,6 @@
 <template>
     <UserLayout title="Review Approval">
         <div class="space-y-6 animate-fade-in-up">
-            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Review Approval Project Charter</h1>    
-                    </div>
-                    <div class="flex flex-wrap items-center gap-2">
-                        <label class="text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
-                            Sort Bulan Proses
-                        </label>
-                        <select
-                            v-model="sortOrder"
-                            class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-2 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#101826] dark:text-slate-100"  
-                        >
-                            <option value="desc">Terlama ke Tercepat</option>
-                            <option value="asc">Tercepat ke Terlama</option>
-                        </select>
-                    </div>
-                </div>
-            </section>
-
             <InitiativesTimelineTable :items="sortedRows" />
         </div>
     </UserLayout>

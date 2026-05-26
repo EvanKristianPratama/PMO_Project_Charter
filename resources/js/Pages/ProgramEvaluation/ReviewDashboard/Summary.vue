@@ -222,18 +222,42 @@ const leaderBreakdown = computed(() => {
     const getBreakdown = (field) => {
         const breakdown = {};
         const sortField = `${field}_code`;
+        const parentField = `${field}_parent`;
+        const parentCodeField = `${field}_parent_code`;
         props.rows.forEach((row) => {
             const leader = row[field] || "Unknown Leader";
             const leaderCode = normalizeCode(row[sortField]);
+            const parentLabel = normalizeCode(row[parentField]);
+            const parentCode = normalizeCode(row[parentCodeField]);
             if (!breakdown[leader]) {
                 breakdown[leader] = {
                     leader,
                     sortCode: leaderCode,
+                    parent: parentLabel,
+                    parentCode,
                     totalCount: 0,
                     approved: [],
                     notApproved: [],
                 };
-            } else if (breakdown[leader].sortCode === '' && leaderCode !== '') {
+            } else {
+                if (breakdown[leader].sortCode === '' && leaderCode !== '') {
+                    breakdown[leader].sortCode = leaderCode;
+                }
+                if (breakdown[leader].parentCode === '' && parentCode !== '') {
+                    breakdown[leader].parentCode = parentCode;
+                }
+                if ((breakdown[leader].parent === '' || breakdown[leader].parent === '-') && parentLabel !== '') {
+                    breakdown[leader].parent = parentLabel;
+                }
+            }
+
+            if (breakdown[leader].parent === '' && parentCode !== '') {
+                breakdown[leader].parent = parentCode;
+            }
+            if (breakdown[leader].parentCode === '' && parentCode !== '') {
+                breakdown[leader].parentCode = parentCode;
+            }
+            if (breakdown[leader].sortCode === '' && leaderCode !== '') {
                 breakdown[leader].sortCode = leaderCode;
             }
 
