@@ -8,7 +8,7 @@
 
                 <div class="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#821f44] dark:text-[#a83262]">Pedoman Tata Kelola Teknologi Informasi Pertamina (Persero)</p>
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#821f44] dark:text-[#a83262]">{{ activeRegulation?.judul }}</p>
                         <div class="flex flex-col sm:flex-row sm:items-center gap-4 mt-2">
                             <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Kelola Dokumen</h1>
                             
