@@ -24,6 +24,11 @@
                                 :class="route().current('policy.specific.index') ? 'bg-white text-[#821f44] shadow-sm dark:bg-[#1a1a1a] dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
                                 Kebijakan Khusus
                             </Link>
+                            <Link :href="route('policy.roles.index')"
+                                class="flex items-center justify-center rounded-lg px-6 py-2 text-center text-xs font-bold transition-all"
+                                :class="route().current('policy.roles.index') ? 'bg-white text-[#821f44] shadow-sm dark:bg-[#1a1a1a] dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
+                                Tanggung Jawab
+                            </Link>
                         </nav>
                     </div>
                 </div>
