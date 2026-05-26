@@ -45,7 +45,7 @@ class ProcedureController extends Controller
             $selectedRegulation = $regulations->first();
         }
 
-        return Inertia::render('Procedure/Index', [
+        return Inertia::render('Policy/Procedure/Index', [
             'actors' => $actors,
             'sop' => $sop,
             'flowChartSops' => $flowChartSops,
@@ -84,7 +84,7 @@ class ProcedureController extends Controller
             $selectedRegulation = $regulations->first();
         }
 
-        return Inertia::render('Procedure/Manage', [
+        return Inertia::render('Policy/Procedure/Manage', [
             'actors' => $actors,
             'sop' => $sop,
             'flowChartSops' => $flowChartSops,
