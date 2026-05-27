@@ -4,6 +4,7 @@ namespace App\Http\Controllers\ProgramEvaluation;
 
 use App\Http\Controllers\Controller;
 use App\Models\MstInitiative;
+use App\Models\TrsPcStatusImplementation;
 use App\Models\TrsMapPicProject;
 use App\Models\TrsOrganization;
 use Inertia\Response;
@@ -12,7 +13,7 @@ class ReviewAnalysisController extends Controller
 {
     public function index(): Response
     {
-        return inertia('ProgramEvaluation/ReviewAnylisis/Index', $this->buildAnalysisProps());
+        return inertia('ProgramEvaluation/ReviewAnalysis/Index', $this->buildAnalysisProps());
     }
 
     private function buildAnalysisProps(): array
@@ -176,6 +177,17 @@ class ReviewAnalysisController extends Controller
                         'mapPicProject',
                         'mapCrossFunctions.organization',
                         'latestPcStatusImplementation',
+                        'pcStatusImplementations' => static fn ($statusQuery) => $statusQuery
+                            ->select([
+                                'trs_pc_status_implementation.id',
+                                'trs_pc_status_implementation.project_id',
+                                'trs_pc_status_implementation.status',
+                                'trs_pc_status_implementation.year',
+                                'trs_pc_status_implementation.created_at',
+                                'trs_pc_status_implementation.updated_at',
+                            ])
+                            ->orderByDesc('year')
+                            ->orderByDesc('id'),
                         'projectCharters' => static fn ($charterQuery) => $charterQuery
                             ->select([
                                 'trs_project_charters.id',
@@ -208,11 +220,12 @@ class ReviewAnalysisController extends Controller
                 ->sortByDesc('id')
                 ->first();
 
-            $latestReviewStatus = $this->resolveLatestReviewStatus($latestProject?->latestPcStatusImplementation?->review_status ?? null);
+            $latestReviewStatus = $this->resolveLatestReviewStatus($latestProject?->latestPcStatusImplementation?->status ?? null);
             $buildingBlock = trim((string) ($initiative->coe?->name ?? ''));
             $initiativeItem = [
                 'initiative_id' => (int) $initiative->id,
                 'no' => $index + 1,
+                'code' => trim((string) ($initiative->code ?? '')) !== '' ? trim((string) $initiative->code) : '-',
                 'name' => trim((string) ($initiative->name ?? '')) !== '' ? trim((string) $initiative->name) : '-',
                 'building_block' => $buildingBlock !== '' ? $buildingBlock : '-',
                 'status' => $latestReviewStatus,
@@ -221,19 +234,16 @@ class ReviewAnalysisController extends Controller
             $sponsorId = (int) ($latestProject?->mapPicProject?->project_sponsor ?? 0);
             $ownerId = (int) ($latestProject?->mapPicProject?->project_owner ?? 0);
             $leaderId = (int) ($latestProject?->mapPicProject?->project_leader ?? 0);
-            $crossFunctions = $projects
-                ->flatMap(static fn ($project) => $project->mapCrossFunctions ?? collect())
-                ->values();
-            $personelUtamaIds = $crossFunctions
-                ->filter(static fn ($map) => (int) ($map->status ?? 0) === 1)
+            $personelUtamaItems = $this->buildCrossFunctionDisplayItems($projects, 1);
+            $crossFunctionItems = $this->buildCrossFunctionDisplayItems($projects, 2);
+            $personelUtamaIds = collect($personelUtamaItems)
                 ->pluck('organization_id')
                 ->filter()
                 ->map(static fn ($id): int => (int) $id)
                 ->unique()
                 ->values()
                 ->all();
-            $crossFunctionIds = $crossFunctions
-                ->filter(static fn ($map) => (int) ($map->status ?? 0) === 2)
+            $crossFunctionIds = collect($crossFunctionItems)
                 ->pluck('organization_id')
                 ->filter()
                 ->map(static fn ($id): int => (int) $id)
@@ -288,12 +298,111 @@ class ReviewAnalysisController extends Controller
                 }
 
                 if (in_array($organizationId, $personelUtamaIds, true)) {
-                    $this->pushUnique($rows[$organizationId]['personel_utama_map'], $initiativeItem, 'initiative_id');
+                    foreach ($personelUtamaItems as $personelUtamaItem) {
+                        $this->pushUnique($rows[$organizationId]['personel_utama_map'], $personelUtamaItem, 'pc_id');
+                    }
                 }
             }
         }
 
         return $rows;
+    }
+
+    /**
+     * Build display items for the cross-function columns from `trs_map_cross_function`.
+     *
+     * Status `1` is used for Personel Utama and status `2` for Cross Function Involvement.
+     * The label shown in the matrix is the `pc_id` from `trs_map_cross_function`, with
+     * the project name and charter version kept in the tooltip for context.
+     */
+    private function buildCrossFunctionDisplayItems(iterable $projects, int $status): array
+    {
+        $items = [];
+        $uniqueKeys = [];
+
+        foreach ($projects as $project) {
+            $projectId = (int) ($project->id ?? 0);
+            $projectName = trim((string) ($project->name ?? ''));
+            $latestCharter = collect($project->projectCharters ?? [])->first();
+            $latestStatusImplementation = $this->resolveLatestProjectStatusImplementation($project);
+            $charterVersion = trim((string) ($latestCharter?->version_label ?? ''));
+            $displayName = $projectName !== '' ? $projectName : sprintf('Project #%d', $projectId);
+            $noteParts = array_values(array_filter([
+                $projectName !== '' ? 'Project ' . $projectName : '',
+                $charterVersion !== '' ? 'Charter ' . $charterVersion : '',
+            ]));
+            $note = $noteParts !== [] ? implode(' | ', $noteParts) : null;
+
+            foreach (($project->mapCrossFunctions ?? collect()) as $mapCrossFunction) {
+                if ((int) ($mapCrossFunction->status ?? 0) !== $status) {
+                    continue;
+                }
+
+                $organizationId = (int) ($mapCrossFunction->organization_id ?? 0);
+
+                if ($organizationId <= 0) {
+                    continue;
+                }
+
+                $pcId = $projectId > 0 ? $projectId : null;
+                $uniqueKey = sprintf('%d|%d|%d', $organizationId, $pcId ?? 0, $status);
+
+                if (isset($uniqueKeys[$uniqueKey])) {
+                    continue;
+                }
+
+                $uniqueKeys[$uniqueKey] = true;
+
+                $items[] = [
+                    'organization_id' => $organizationId,
+                    'initiative_id' => $pcId,
+                    'project_id' => $pcId,
+                    'pc_id' => $pcId,
+                    'personel_key' => sprintf('%d|%d|%d', $organizationId, $pcId ?? 0, $status),
+                    'no' => $pcId ?? '-',
+                    'name' => $displayName,
+                    'note' => $note,
+                    'code' => $pcId ?? '-',
+                    'implementation_status' => trim((string) ($latestStatusImplementation?->status ?? '')),
+                    'status' => (int) ($mapCrossFunction->status ?? 0),
+                ];
+            }
+        }
+
+        return $items;
+    }
+
+    private function resolveLatestProjectStatusImplementation(mixed $project): mixed
+    {
+        $statusImplementations = collect($project?->pcStatusImplementations ?? [])
+            ->sortBy([
+                ['year', 'desc'],
+                ['id', 'desc'],
+            ])
+            ->values();
+
+        if ($statusImplementations->isNotEmpty()) {
+            return $statusImplementations->first();
+        }
+
+        $latest = $project?->latestPcStatusImplementation ?? null;
+
+        if ($latest) {
+            return $latest;
+        }
+
+        $projectId = (int) ($project?->id ?? 0);
+
+        if ($projectId <= 0) {
+            return null;
+        }
+
+        return TrsPcStatusImplementation::query()
+            ->select(['id', 'project_id', 'status', 'year'])
+            ->where('project_id', $projectId)
+            ->orderByDesc('year')
+            ->orderByDesc('id')
+            ->first();
     }
 
     private function pushUnique(array &$target, array $item, string $uniqueKey): void
