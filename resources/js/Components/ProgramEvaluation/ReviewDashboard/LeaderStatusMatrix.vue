@@ -225,12 +225,14 @@ const normalizeStatus = (value) => {
 const getInitiativeTooltip = (row) => {
     const projectName = String(row.project_charter_name || row.initiative_name || '').trim();
     const status = String(row.latest_review_status || '').trim();
+    const periodLabel = String(row.latest_review_period || '').trim();
 
-    if (projectName !== '' && status !== '') {
-        return `${projectName} - ${status}`;
-    }
+    const nameParts = [];
+    if (projectName !== '') nameParts.push(projectName);
+    if (status !== '') nameParts.push(status);
+    if (periodLabel !== '') nameParts.push(`(${periodLabel})`);
 
-    return projectName || status;
+    return nameParts.join(' - ') || projectName || status || periodLabel;
 };
 
 const compareSortCode = (leftCode, rightCode) => {
