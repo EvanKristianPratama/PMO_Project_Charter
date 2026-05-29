@@ -4,10 +4,10 @@
             <!-- HEADER TOOLBAR -->
             <div class="bpmn-toolbar border-b border-slate-200 dark:border-white/10 bg-white dark:bg-[#141414]">
                 <div class="toolbar-left">
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-1.5">
                         <select 
                             v-model="selectedWorkflowId" 
-                            class="workflow-selector rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200"
+                            class="workflow-selector h-[34px] rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 shadow-sm transition dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200"
                             @change="loadWorkflow"
                         >
                             <option :value="null">-- Pilih Workflow --</option>
@@ -16,7 +16,7 @@
                         
                         <button 
                             type="button" 
-                            class="btn btn-secondary" 
+                            class="btn btn-secondary h-[34px]" 
                             @click="createNewWorkflow"
                             title="Buat Workflow Baru"
                         >
@@ -29,53 +29,79 @@
                 </div>
 
                 <div class="toolbar-center">
-                    <div class="workflow-info" v-if="activeWorkflow">
+                    <div class="workflow-info flex items-center gap-2" v-if="activeWorkflow">
                         <input 
                             v-model="activeWorkflow.name" 
-                            class="workflow-name-input"
+                            class="workflow-name-input h-[34px]"
                             placeholder="Nama Alur Kerja..."
                             @blur="autoSaveName"
                         />
+                        <select
+                            v-model="activeWorkflow.sop_type"
+                            class="h-[34px] rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 shadow-sm transition dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200"
+                        >
+                            <option :value="null">Tanpa Asosiasi SOP</option>
+                            <option value="A">SOP A (Penyusunan RSTI)</option>
+                            <option value="B">SOP B (Reviu RSTI)</option>
+                        </select>
                         <span class="workflow-badge">BPMN 2.0</span>
                     </div>
                 </div>
 
                 <div class="toolbar-right">
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-1.5">
                         <button 
                             type="button" 
-                            class="btn btn-secondary" 
+                            class="btn btn-secondary h-[34px]" 
                             @click="exportBpmn"
                             title="Ekspor Desain ke File BPMN 2.0 XML"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 mr-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 mr-1">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
                             </svg>
-                            Ekspor BPMN
+                            Ekspor
                         </button>
                         
-                        <label class="btn btn-secondary cursor-pointer" title="Impor Desain dari File BPMN 2.0 XML">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 mr-1 inline">
+                        <label class="btn btn-secondary h-[34px] cursor-pointer" title="Impor Desain dari File BPMN 2.0 XML">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 mr-1 inline">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
                             </svg>
-                            Impor BPMN
+                            Impor
                             <input type="file" class="hidden" accept=".bpmn,.xml" @change="importBpmn" />
                         </label>
 
                         <button 
+                            v-if="activeWorkflow.sop_type && activeWorkflow.id"
                             type="button" 
-                            class="btn btn-primary" 
-                            @click="saveWorkflowToDb"
-                            :disabled="isSaving"
+                            class="btn h-[34px] border-sky-500/50 hover:bg-sky-50 text-sky-700 dark:border-sky-500/30 dark:hover:bg-sky-500/10 dark:text-sky-400 font-semibold"
+                            @click="syncFromSop"
+                            :disabled="isSyncing"
+                            title="Sinkronkan diagram BPMN dari Database SOP saat ini"
                         >
-                            <svg v-if="isSaving" class="h-4 w-4 animate-spin mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <svg v-if="isSyncing" class="h-3.5 w-3.5 animate-spin mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 mr-1">
+                            <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5 mr-1">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                            </svg>
+                            Sync dari SOP
+                        </button>
+
+                        <button 
+                            type="button" 
+                            class="btn btn-primary h-[34px]" 
+                            @click="saveWorkflowToDb"
+                            :disabled="isSaving"
+                        >
+                            <svg v-if="isSaving" class="h-3.5 w-3.5 animate-spin mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 mr-1">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                             </svg>
-                            Simpan ke DB
+                            {{ activeWorkflow && activeWorkflow.sop_type ? 'Simpan & Sync SOP' : 'Simpan ke DB' }}
                         </button>
 
                         <button 
@@ -541,6 +567,7 @@ const activeWorkflow = ref({
     id: null,
     name: 'Workflow Approval Standard',
     description: 'Workflow persetujuan inisiatif default',
+    sop_type: null,
 });
 
 // UI states
@@ -1068,6 +1095,7 @@ const createNewWorkflow = () => {
         id: null,
         name: 'Workflow Baru ' + new Date().toLocaleDateString(),
         description: 'Tulis deskripsi workflow di sini...',
+        sop_type: null,
     };
 
     currentXml.value = EMPTY_BPMN_TEMPLATE;
@@ -1089,6 +1117,7 @@ const loadWorkflow = () => {
             id: workflow.id,
             name: workflow.name,
             description: workflow.description || '',
+            sop_type: workflow.sop_type || null,
         };
         
         // Parse node custom action configurations from flow_data
@@ -1134,6 +1163,7 @@ const saveWorkflowToDb = async () => {
         id: activeWorkflow.value.id,
         name: activeWorkflow.value.name,
         description: activeWorkflow.value.description,
+        sop_type: activeWorkflow.value.sop_type,
         bpmn_xml: xmlData,
         flow_data: {
             actionConfigs: actionConfigs.value,
@@ -1143,11 +1173,14 @@ const saveWorkflowToDb = async () => {
         preserveScroll: true,
         onSuccess: () => {
             isSaving.value = false;
+            const hasSop = activeWorkflow.value && activeWorkflow.value.sop_type;
             Swal.fire({
                 icon: 'success',
                 title: 'Tersimpan!',
-                text: 'Diagram alur kerja BPMN berhasil disimpan ke database.',
-                timer: 2000,
+                text: hasSop 
+                    ? 'Diagram BPMN berhasil disimpan & disinkronisasikan ke dokumen SOP.' 
+                    : 'Diagram alur kerja BPMN berhasil disimpan ke database.',
+                timer: 2500,
                 showConfirmButton: false,
             });
             addLog(`Workflow "${activeWorkflow.value.name}" successfully saved.`, 'success', 'DB_SAVE', '0.820 sec');
@@ -1172,6 +1205,85 @@ const saveWorkflowToDb = async () => {
 const autoSaveName = () => {
     if (activeWorkflow.value.id) {
         addLog(`Alur name changed to: "${activeWorkflow.value.name}"`, 'info', 'CONFIG_CHANGE', '0.010 sec');
+    }
+};
+
+const isSyncing = ref(false);
+
+const syncFromSop = async () => {
+    const id = activeWorkflow.value.id;
+    if (!id) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Gagal',
+            text: 'Silakan simpan workflow terlebih dahulu sebelum melakukan sinkronisasi.',
+            confirmButtonColor: '#3b82f6'
+        });
+        return;
+    }
+
+    const sopType = activeWorkflow.value.sop_type;
+    if (!sopType) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Gagal',
+            text: 'Workflow ini tidak memiliki Tipe SOP Asosiasi.',
+            confirmButtonColor: '#3b82f6'
+        });
+        return;
+    }
+
+    const result = await Swal.fire({
+        title: 'Apakah Anda yakin?',
+        text: "Sinkronisasi dari SOP akan memperbarui diagram BPMN sesuai data langkah SOP saat ini. Desain manual Anda di kanvas mungkin akan digantikan.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3b82f6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, Sinkronkan!',
+        cancelButtonText: 'Batal'
+    });
+
+    if (!result.isConfirmed) return;
+
+    isSyncing.value = true;
+    try {
+        const response = await axios.post(route('bpmn-workflow.sync-from-sop', id));
+        if (response.data.success && response.data.bpmn_xml) {
+            currentXml.value = response.data.bpmn_xml;
+            if (modelerRef.value) {
+                await modelerRef.value.importXml(response.data.bpmn_xml);
+            }
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: response.data.message,
+                timer: 2000,
+                showConfirmButton: false
+            });
+            addLog("BPMN synchronized from SOP database successfully.", "success", "SOP_SYNC", "0.450 sec");
+            
+            // Reload page to refresh workflows list props
+            setTimeout(() => {
+                router.reload();
+            }, 100);
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: response.data.message || 'Gagal menyinkronkan data.',
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.response?.data?.message || 'Gagal terhubung ke server.',
+        });
+    } finally {
+        isSyncing.value = false;
     }
 };
 
@@ -1511,31 +1623,32 @@ onMounted(() => {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 20px;
-    height: 58px;
+    padding: 6px 16px;
+    height: 54px;
 }
 
 .toolbar-left, .toolbar-right {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 }
 
 .workflow-info {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 }
 
 .workflow-name-input {
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 700;
     color: #0f172a;
     background: transparent;
     border: none;
     border-bottom: 1px dashed #cbd5e1;
     padding: 2px 4px;
-    width: 250px;
+    width: 170px;
+    height: 30px;
     transition: all 0.2s;
     text-align: center;
 }
@@ -1716,13 +1829,16 @@ onMounted(() => {
 .btn {
     display: inline-flex;
     align-items: center;
-    padding: 7px 14px;
-    border-radius: 8px;
-    font-size: 12px;
+    justify-content: center;
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 6px;
+    font-size: 11px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
     border: 1px solid transparent;
+    white-space: nowrap;
 }
 
 .btn-primary {
