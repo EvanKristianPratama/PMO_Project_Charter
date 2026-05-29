@@ -19,11 +19,11 @@
             />
 
             <!-- Project Leader Breakdown Table -->
-                <LeaderBreakdownTable
-                    :originalData="leaderBreakdown.original"
-                    :restructureData="leaderBreakdown.restructure"
-                    :getCircleColor="getCircleColor"
-                />
+            <LeaderBreakdownTable
+                :originalData="leaderBreakdown.original"
+                :restructureData="leaderBreakdown.restructure"
+                :getCircleColor="getCircleColor"
+            />
 
             <!-- Status Matrix - Project Owner -->
             <StatusMatrix
@@ -34,7 +34,7 @@
             />
 
             <!-- Status Matrix - Project Leader -->
-            <StatusMatrix
+            <LeaderStatusMatrix
                 v-if="rows.length > 0"
                 :rows="rows"
                 groupBy="project_leader"
@@ -56,6 +56,7 @@ import { computed } from 'vue';
 import DurationStatsTable from '@/Components/ProgramEvaluation/ReviewDashboard/DurationStatsTable.vue';
 import OwnerBreakdownTable from '@/Components/ProgramEvaluation/ReviewDashboard/OwnerBreakdownTable.vue';
 import LeaderBreakdownTable from '@/Components/ProgramEvaluation/ReviewDashboard/LeaderBreakdownTable.vue';
+import LeaderStatusMatrix from '@/Components/ProgramEvaluation/ReviewDashboard/LeaderStatusMatrix.vue';
 import StatusMatrix from '@/Components/ProgramEvaluation/ReviewDashboard/StatusMatrix.vue';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
