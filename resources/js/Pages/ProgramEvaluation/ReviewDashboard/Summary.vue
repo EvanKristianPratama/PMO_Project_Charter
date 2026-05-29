@@ -339,7 +339,7 @@ const leaderBreakdown = computed(() => {
 const getCircleColor = (status) => {
     const s = String(status ?? "").trim().toLowerCase();
     if (["on track", "on-track"].includes(s)) return "bg-emerald-500";
-    if (["at risk", "at-risk"].includes(s)) return "bg-orange-500";
+    if (["at risk", "at-risk"].includes(s)) return "bg-amber-500";
     if (["delayed"].includes(s)) return "bg-orange-600";
     if (["on progress", "on-progress", "on progres", "in progress"].includes(s)) return "bg-sky-500";
     if (["not started", "not-started"].includes(s)) return "bg-blue-500";
