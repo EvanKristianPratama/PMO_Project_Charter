@@ -1,6 +1,54 @@
 <template>
     <section v-if="displayRows.length > 0" class="mt-8 overflow-hidden animate-fade-in-up delay-150">
         <div class="overflow-hidden rounded-2xl border border-slate-900 shadow-sm dark:border-white/20">
+            <div class="border-b border-slate-900 px-2 py-2 dark:border-white/20">
+                <div class="flex flex-wrap items-center justify-start gap-2">
+                    <button
+                        type="button"
+                        class="rounded border px-1.5 py-0.5 text-[7px] font-bold uppercase tracking-[0.08em] transition-all"
+                        :class="showInitiativeColumns
+                            ? 'border-slate-400 bg-slate-100 text-slate-700 hover:bg-slate-200 dark:border-white/20 dark:bg-white/10 dark:text-slate-200 dark:hover:bg-white/15'
+                            : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5'"
+                        @click="showInitiativeColumns = !showInitiativeColumns"
+                    >
+                        {{ showInitiativeColumns ? 'Hide Inisiatif' : 'Show Inisiatif' }}
+                    </button>
+                    <label for="parent-level-3-filter" class="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
+                        Groub by VP
+                    </label>
+                    <select
+                        id="parent-level-3-filter"
+                        v-model="selectedParentLevel3"
+                        class="cursor-pointer rounded border border-slate-300 bg-white px-2 py-0.5 text-[9px] font-bold outline-none transition-all focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                    >
+                        <option value="all">All VP</option>
+                        <option
+                            v-for="item in parentLevel3Options"
+                            :key="`${viewMode}-pl3-${item.value}`"
+                            :value="item.value"
+                        >
+                            {{ item.label }}
+                        </option>
+                    </select>
+                    <label for="period-filter" class="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
+                        Periode
+                    </label>
+                    <select
+                        id="period-filter"
+                        v-model="selectedPeriod"
+                        class="cursor-pointer rounded border border-slate-300 bg-white px-2 py-0.5 text-[9px] font-bold outline-none transition-all focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                    >
+                        <option value="all">All Period</option>
+                        <option
+                            v-for="period in periodOptions"
+                            :key="`${viewMode}-period-${period.value}`"
+                            :value="period.value"
+                        >
+                            {{ period.label }}
+                        </option>
+                    </select>
+                </div>
+            </div>
             <table class="w-full table-fixed border-collapse text-left text-[10px]">
                 <thead>
                     <tr class="bg-slate-50 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500 dark:bg-white/5 dark:text-slate-400">
@@ -28,7 +76,7 @@
                         <th
                             v-for="status in statuses"
                             :key="status"
-                            colspan="2"
+                            :colspan="statusColspan"
                             class="border-b border-r border-slate-900 px-2 py-1.5 text-center dark:border-white/20"
                         >
                             {{ status }}
@@ -42,7 +90,10 @@
                             <th class="border-b border-r border-slate-900 px-2 py-1.5 text-center dark:border-white/20">
                                 Total
                             </th>
-                            <th class="border-b border-r border-slate-900 px-2 py-1.5 dark:border-white/20">
+                            <th
+                                v-if="showInitiativeColumns"
+                                class="border-b border-r border-slate-900 px-2 py-1.5 dark:border-white/20"
+                            >
                                 Inisiatif
                             </th>
                         </template>
@@ -54,9 +105,9 @@
                         :key="row.leader"
                         class="border-b border-slate-200 transition-colors hover:bg-slate-50 dark:border-white/10 dark:hover:bg-white/5"
                     >
-                    <td
-                        v-if="row.showParentLevel2Cell"
-                        :rowspan="row.parentLevel2RowSpan"
+                        <td
+                            v-if="row.showParentLevel2Cell"
+                            :rowspan="row.parentLevel2RowSpan"
                             class="border-r border-slate-900 px-2 py-1.5 align-top font-black leading-tight text-slate-900 dark:border-white/20 dark:text-white break-words"
                         >
                             <span>{{ parseName(row.parentLevel2).title }}</span>
@@ -106,7 +157,7 @@
                             <td class="border-r border-slate-900 px-2 py-1.5 text-center font-black text-slate-900 dark:border-white/20 dark:text-white">
                                 {{ row.statusGroups[status]?.length || 0 }}
                             </td>
-                            <td class="border-r border-slate-900 px-2 py-1.5 dark:border-white/20">
+                            <td v-if="showInitiativeColumns" class="border-r border-slate-900 px-2 py-1.5 dark:border-white/20">
                                 <div class="flex flex-wrap gap-1">
                                     <span
                                         v-for="init in row.statusGroups[status]"
@@ -140,7 +191,7 @@
                             <td class="border-t border-r border-slate-900 px-2 py-1.5 text-center dark:border-white/20">
                                 {{ columnTotals[status].count }}
                             </td>
-                            <td class="border-t border-r border-slate-900 px-2 py-1.5 dark:border-white/20">
+                            <td v-if="showInitiativeColumns" class="border-t border-r border-slate-900 px-2 py-1.5 dark:border-white/20">
                                 <div class="flex flex-wrap gap-1">
                                     <span
                                         v-for="init in columnTotals[status].items"
@@ -160,7 +211,7 @@
                         </td>
                     </tr>
                     <tr class="border-t border-slate-900 bg-slate-100/80 text-[9px] font-black uppercase tracking-[0.12em] text-slate-900 dark:border-white/40 dark:bg-white/10 dark:text-white">
-                        <td :colspan="4 + (statuses.length * 2)" class="border-r border-slate-900 px-2 py-1.5 text-right dark:border-white/20">
+                        <td :colspan="footerColspan" class="border-r border-slate-900 px-2 py-1.5 text-right dark:border-white/20">
                             Total Keseluruhan Inisiatif ({{ statuses.join(' + ') }})
                         </td>
                         <td class="px-2 py-1.5 text-center text-[12px]">
@@ -174,7 +225,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 const props = defineProps({
     rows: {
@@ -192,8 +243,105 @@ const props = defineProps({
 });
 
 const viewMode = ref('original');
+const showInitiativeColumns = ref(true);
+const selectedParentLevel3 = ref('all');
+const selectedPeriod = ref('all');
 
 const statuses = ['On Track', 'At Risk', 'Not Signed', 'Not Started', 'Done'];
+
+const statusColspan = computed(() => (showInitiativeColumns.value ? 2 : 1));
+const footerColspan = computed(() => 4 + (statuses.length * statusColspan.value));
+const activeFieldKey = computed(() => (viewMode.value === 'original' ? props.groupBy : `${props.groupBy}_restructure`));
+const activeParentLevel3Key = computed(() => `${activeFieldKey.value}_parent_level3`);
+const activePeriodKey = computed(() => 'project_status_periods');
+
+const parentLevel3Options = computed(() => {
+    const map = new Map();
+
+    props.rows.forEach((row) => {
+        const value = String(row[activeParentLevel3Key.value] ?? '').trim();
+        if (!value || value === '-') return;
+
+        const sortCode = String(row[`${activeFieldKey.value}_parent_code`] ?? '').trim();
+
+        if (!map.has(value)) {
+            map.set(value, { value, label: value, sortCode });
+            return;
+        }
+
+        const existing = map.get(value);
+        if ((existing.sortCode ?? '') === '' && sortCode !== '') {
+            existing.sortCode = sortCode;
+        }
+    });
+
+    return Array.from(map.values()).sort((a, b) => {
+        const left = String(a.sortCode ?? '').trim();
+        const right = String(b.sortCode ?? '').trim();
+
+        if (left === '' && right === '') return a.label.localeCompare(b.label);
+        if (left === '') return 1;
+        if (right === '') return -1;
+
+        return left.localeCompare(right, undefined, { numeric: false, sensitivity: 'base' });
+    });
+});
+
+const monthOrderValue = (month) => {
+    const normalized = String(month ?? '').trim();
+
+    return {
+        Januari: 1,
+        Februari: 2,
+        Maret: 3,
+        April: 4,
+        Mei: 5,
+        Juni: 6,
+        Juli: 7,
+        Agustus: 8,
+        September: 9,
+        Oktober: 10,
+        November: 11,
+        Desember: 12,
+    }[normalized] ?? 0;
+};
+
+const periodSortValue = (periodLabel) => {
+    const normalized = String(periodLabel ?? '').trim();
+    if (!normalized) return 0;
+
+    const parts = normalized.split(/\s+/);
+    const year = Number(parts[parts.length - 1]);
+    const monthName = parts.slice(0, -1).join(' ').trim();
+    const month = monthOrderValue(monthName);
+
+    if (!Number.isFinite(year)) {
+        return month;
+    }
+
+    return (year * 100) + month;
+};
+
+const periodOptions = computed(() => {
+    const map = new Map();
+
+    props.rows.forEach((row) => {
+        const periods = Array.isArray(row[activePeriodKey.value]) && row[activePeriodKey.value].length > 0
+            ? row[activePeriodKey.value]
+            : (String(row.latest_project_status_period ?? '').trim() ? [row.latest_project_status_period] : []);
+
+        periods.forEach((period) => {
+            const value = String(period ?? '').trim();
+            if (!value) return;
+
+            if (!map.has(value)) {
+                map.set(value, { value, label: value });
+            }
+        });
+    });
+
+    return Array.from(map.values()).sort((a, b) => periodSortValue(b.value) - periodSortValue(a.value));
+});
 
 const parseName = (val) => {
     const str = String(val ?? '').trim();
@@ -222,10 +370,30 @@ const normalizeStatus = (value) => {
     return status;
 };
 
-const getInitiativeTooltip = (row) => {
+const getProjectStatusEntry = (row, period) => {
+    if (period === 'all') {
+        return {
+            status: String(row.latest_project_status ?? '').trim(),
+            period: String(row.latest_project_status_period ?? '').trim(),
+        };
+    }
+
+    const logs = Array.isArray(row.project_status_logs) ? row.project_status_logs : [];
+
+    for (let index = logs.length - 1; index >= 0; index -= 1) {
+        const log = logs[index];
+        if (String(log?.period ?? '').trim() === period) {
+            return log;
+        }
+    }
+
+    return null;
+};
+
+const getInitiativeTooltip = (row, statusEntry = null) => {
     const projectName = String(row.project_charter_name || row.initiative_name || '').trim();
-    const status = String(row.latest_review_status || '').trim();
-    const periodLabel = String(row.latest_review_period || '').trim();
+    const status = String(statusEntry?.status ?? row.latest_project_status ?? '').trim();
+    const periodLabel = String(statusEntry?.period ?? row.latest_project_status_period ?? '').trim();
 
     const nameParts = [];
     if (projectName !== '') nameParts.push(projectName);
@@ -246,13 +414,13 @@ const compareSortCode = (leftCode, rightCode) => {
     return left.localeCompare(right, undefined, { numeric: false, sensitivity: 'base' });
 };
 
-const buildGroupedRows = (fieldKey) => {
+const buildGroupedRows = (fieldKey, sourceRows = props.rows) => {
     const breakdown = {};
     const sortFieldKey = `${fieldKey}_code`;
     const parentFieldKey = `${fieldKey}_parent`;
     const parentCodeFieldKey = `${fieldKey}_parent_code`;
 
-    props.rows.forEach((row) => {
+    sourceRows.forEach((row) => {
         const leader = row[fieldKey] || 'Unknown Leader';
         const leaderCode = String(row[sortFieldKey] ?? '').trim();
         const parent = String(row[parentFieldKey] ?? '').trim();
@@ -296,13 +464,16 @@ const buildGroupedRows = (fieldKey) => {
             }
         }
 
-        const matchedStatus = statuses.find((status) => normalizeStatus(status) === normalizeStatus(row.latest_review_status));
+        const statusEntry = getProjectStatusEntry(row, selectedPeriod.value);
+        if (!statusEntry || !String(statusEntry.status ?? '').trim()) return;
+
+        const matchedStatus = statuses.find((status) => normalizeStatus(status) === normalizeStatus(statusEntry.status));
         if (!matchedStatus) return;
 
         breakdown[leader].statusGroups[matchedStatus].push({
             no: row.no,
-            status: row.latest_review_status,
-            projectCharterName: getInitiativeTooltip(row),
+            status: statusEntry.status,
+            projectCharterName: getInitiativeTooltip(row, statusEntry),
         });
     });
 
@@ -321,7 +492,17 @@ const buildGroupedRows = (fieldKey) => {
 
 const displayRows = computed(() => {
     const fieldKey = viewMode.value === 'original' ? props.groupBy : `${props.groupBy}_restructure`;
-    const rows = buildGroupedRows(fieldKey).map((row) => ({
+    const filteredRows = props.rows.filter((row) => {
+        const parentLevel3 = String(row[`${fieldKey}_parent_level3`] ?? '').trim();
+        const statusEntry = getProjectStatusEntry(row, selectedPeriod.value);
+
+        return (
+            (selectedParentLevel3.value === 'all' || parentLevel3 === selectedParentLevel3.value)
+            && (selectedPeriod.value === 'all' || !!statusEntry)
+        );
+    });
+
+    const rows = buildGroupedRows(fieldKey, filteredRows).map((row) => ({
         ...row,
         showParentLevel2Cell: false,
         showParentLevel3Cell: false,
@@ -406,4 +587,9 @@ const getCircleColor = (status) => {
     if (normalized === 'done') return 'bg-slate-500';
     return 'bg-slate-400';
 };
+
+watch(viewMode, () => {
+    selectedParentLevel3.value = 'all';
+    selectedPeriod.value = 'all';
+});
 </script>

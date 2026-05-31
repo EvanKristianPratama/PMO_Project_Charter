@@ -130,7 +130,7 @@ const statuses = [
 
 const getInitiativeTooltip = (row) => {
     const projectName = String(row.project_charter_name || row.initiative_name || '').trim();
-    const status = String(row.latest_review_status || '').trim();
+    const status = String(row.latest_project_status || '').trim();
 
     if (projectName !== '' && status !== '') {
         return `${projectName} - ${status}`;
@@ -160,7 +160,7 @@ const matrixData = computed(() => {
         const key = row[fieldKey] || "Unknown";
         const sortCode = normalizeCode(row[sortFieldKey]);
         // Normalize status to match our array
-        let status = String(row.latest_review_status || "").trim().toLowerCase();
+        let status = String(row.latest_project_status || "").trim().toLowerCase();
         
         if (status === 'on-track') status = 'on track';
         if (status === 'at-risk') status = 'at risk';

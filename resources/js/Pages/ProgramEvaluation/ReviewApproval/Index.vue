@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Review Approval">
+    <UserLayout title="Project Status Approval">
         <div class="space-y-6 animate-fade-in-up">
             <InitiativesTimelineTable :items="sortedRows" />
         </div>
@@ -21,8 +21,8 @@ const props = defineProps({
         default: () => ({
             total: 0,
             buildingBlock: 0,
-            withReviewStatus: 0,
-            withoutReviewStatus: 0,
+            withProjectStatus: 0,
+            withoutProjectStatus: 0,
             statusBreakdown: [],
         }),
     },
