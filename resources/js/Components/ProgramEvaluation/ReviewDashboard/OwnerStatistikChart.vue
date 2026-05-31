@@ -4,10 +4,10 @@
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-12">
             <!-- LEFT: Chart.js Stacked Bar Chart (Owner Breakdown) - 6/12 Width -->
             <div class="rounded-2xl border border-slate-900 bg-white p-5 dark:border-white/20 dark:bg-[#171717] lg:col-span-6">
-                <h3 class="mb-4 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500 dark:text-slate-400 text-center">
-                    Jumlah Inisiatif per Project Owner
+                <h3 class="mb-4 text-[10px] font-bold tracking-[0.15em] text-slate-500 dark:text-slate-400 text-center">
+                    Total Inisiatif {{ selectedOwnerLabel }}
                 </h3>
-                <div class="relative w-full h-[290px]">
+                <div class="relative w-full h-[260px]">
                     <canvas ref="leftChartCanvas" class="w-full h-full"></canvas>
                 </div>
             </div>
@@ -15,8 +15,8 @@
             <!-- RIGHT: Chart.js Grouped Bar / Line Chart (Period Breakdown) - 6/12 Width -->
             <div class="rounded-2xl border border-slate-900 bg-white p-5 dark:border-white/20 dark:bg-[#171717] lg:col-span-6">
                 <div class="flex items-center justify-between mb-4 flex-shrink-0">
-                    <h3 class="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500 dark:text-slate-400">
-                        Peforma Status Implementasi per Periode
+                    <h3 class="text-[10px] font-bold tracking-[0.15em] text-slate-500 dark:text-slate-400">
+                        Progress {{ selectedOwnerLabel }}
                     </h3>
                     <!-- Chart Type Segmented Toggle -->
                     <div class="flex items-center gap-1 bg-slate-100 dark:bg-white/5 p-0.5 rounded-lg border border-slate-200 dark:border-white/10 select-none">
@@ -64,6 +64,10 @@ const props = defineProps({
     periodChartData: {
         type: Array,
         required: true
+    },
+    selectedOwnerLabel: {
+        type: String,
+        default: 'All Project Owner'
     }
 });
 

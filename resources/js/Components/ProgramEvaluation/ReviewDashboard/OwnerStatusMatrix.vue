@@ -1,7 +1,11 @@
 <template>
     <section v-if="matrixData.length > 0" class="mt-8 overflow-hidden animate-fade-in-up delay-150">
         <!-- Bar Chart Statistik -->
-        <OwnerStatistikChart :matrixData="matrixData" :periodChartData="periodChartData" />
+        <OwnerStatistikChart 
+            :matrixData="matrixData" 
+            :periodChartData="periodChartData"
+            :selectedOwnerLabel="selectedOwnerLabel"
+        />
 
         <div class="overflow-x-auto rounded-2xl border border-slate-900 shadow-sm dark:border-white/20 mt-6">
             <div class="border-b border-slate-900 px-2 py-2 dark:border-white/20">
@@ -53,7 +57,7 @@
                         v-model="selectedPeriod"
                         class="cursor-pointer rounded border border-slate-300 bg-white px-2 py-0.5 text-[9px] font-bold outline-none transition-all focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
                     >
-                        <option value="all">All Period</option>
+                        <option value="all">All (Latest)</option>
                         <option
                             v-for="period in periodOptions"
                             :key="`${viewMode}-period-${period.value}`"
@@ -196,6 +200,11 @@ const statuses = [
     'Done'
 ];
 
+const selectedOwnerLabel = computed(() => {
+    if (selectedOwner.value === 'all') return 'All Project Owner';
+    return selectedOwner.value;
+});
+
 const statusColspan = computed(() => (showInitiativeColumns.value ? 2 : 1));
 const footerColspan = computed(() => 1 + (statuses.length * statusColspan.value));
 
@@ -327,14 +336,29 @@ const periodOptions = computed(() => {
 });
 
 const getProjectStatusEntry = (row, period) => {
+    const logs = Array.isArray(row.project_status_logs) ? row.project_status_logs : [];
+
     if (period === 'all') {
+        if (logs.length > 0) {
+            // Find the chronologically latest log using periodOrderValue
+            let latestLog = logs[0];
+            let maxOrder = periodOrderValue(latestLog.period);
+
+            for (let i = 1; i < logs.length; i++) {
+                const currentOrder = periodOrderValue(logs[i].period);
+                if (currentOrder > maxOrder) {
+                    maxOrder = currentOrder;
+                    latestLog = logs[i];
+                }
+            }
+            return latestLog;
+        }
+
         return {
             status: String(row.latest_project_status ?? '').trim(),
             period: String(row.latest_project_status_period ?? '').trim(),
         };
     }
-
-    const logs = Array.isArray(row.project_status_logs) ? row.project_status_logs : [];
 
     for (let index = logs.length - 1; index >= 0; index -= 1) {
         const log = logs[index];
