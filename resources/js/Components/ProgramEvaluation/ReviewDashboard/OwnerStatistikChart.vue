@@ -42,7 +42,7 @@
                         </button>
                     </div>
                 </div>
-                <div class="relative w-full h-[400px]">
+                <div class="relative w-full h-[280px]">
                     <canvas ref="rightChartCanvas" class="w-full h-full"></canvas>
                 </div>
             </div>
@@ -371,7 +371,7 @@ const updateRightChart = () => {
             pointBorderWidth: 1.5,
             pointRadius: 4.5,
             pointHoverRadius: 6,
-            tension: 0.35,
+            tension: 0,
             fill: false
         }));
     } else {
