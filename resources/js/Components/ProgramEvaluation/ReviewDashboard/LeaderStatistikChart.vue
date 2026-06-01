@@ -2,21 +2,22 @@
     <div class="animate-fade-in-up delay-150">
         <!-- ═══ CHART PANEL (Adjusted Proportions) ═══ -->
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-12">
-            <!-- LEFT: Chart.js Stacked Bar Chart (Owner Breakdown) - 6/12 Width -->
+            <!-- LEFT: Chart.js Stacked Bar Chart (Leader Breakdown) - 6/12 Width -->
             <div class="rounded-2xl border border-slate-900 bg-white p-5 dark:border-white/20 dark:bg-[#171717] lg:col-span-6">
                 <h3 class="mb-4 text-[10px] font-bold tracking-[0.15em] text-slate-500 dark:text-slate-400 text-center">
-                    Total Inisiatif {{ selectedOwnerLabel }}
+                    Total Inisiatif {{ selectedLeaderLabel }}
                 </h3>
                 <div class="relative w-full" :style="{ height: leftChartHeight }">
                     <canvas ref="leftChartCanvas" class="w-full h-full"></canvas>
                 </div>
+
             </div>
 
             <!-- RIGHT: Chart.js Grouped Bar / Line Chart (Period Breakdown) - 6/12 Width -->
             <div class="rounded-2xl border border-slate-900 bg-white p-5 dark:border-white/20 dark:bg-[#171717] lg:col-span-6">
                 <div class="flex items-center justify-between mb-4 flex-shrink-0">
                     <h3 class="text-[10px] font-bold tracking-[0.15em] text-slate-500 dark:text-slate-400">
-                        Progress {{ selectedOwnerLabel }}
+                        Progress {{ selectedLeaderLabel }}
                     </h3>
                     <!-- Chart Type Segmented Toggle -->
                     <div class="flex items-center gap-1 bg-slate-100 dark:bg-white/5 p-0.5 rounded-lg border border-slate-200 dark:border-white/10 select-none">
@@ -65,9 +66,9 @@ const props = defineProps({
         type: Array,
         required: true
     },
-    selectedOwnerLabel: {
+    selectedLeaderLabel: {
         type: String,
-        default: 'All Project Owner'
+        default: 'All Project Leader'
     }
 });
 
@@ -104,8 +105,8 @@ const leftChartHeight = computed(() => {
     return `${Math.max(260, (rowCount * 35) + 80)}px`;
 });
 
-// Konfigurasi untuk Area Kiri (Project Owner)
-const OWNER_CHART_CONFIG = computed(() => {
+// Konfigurasi untuk Area Kiri (Project Leader)
+const LEADER_CHART_CONFIG = computed(() => {
     const rowCount = props.matrixData.length;
     return {
         barPercentage: rowCount <= 2 ? 0.4 : 0.8,
@@ -119,9 +120,13 @@ const PERIOD_CHART_CONFIG = {
     barThickness: 16
 };
 
-// ─── Format VP Labels (X-Axis) ───
+// ─── Format Labels (X-Axis) ───
 const formatLabel = (name) => {
     const str = String(name ?? '').trim();
+    if (str.includes(' - ')) {
+        const parts = str.split(' - ');
+        return [parts[0], parts.slice(1).join(' - ')];
+    }
     if (str.includes(' & ')) {
         const parts = str.split(' & ');
         return [parts[0], `& ${parts[1]}`];
@@ -157,7 +162,6 @@ const stackedDataLabelsPlugin = {
     id: 'stackedDataLabels',
     afterDatasetsDraw(chart) {
         if (chart.options.indexAxis !== 'y') {
-            // Original vertical logic
             const { ctx } = chart;
             ctx.save();
             ctx.font = 'bold 10px Inter, sans-serif';
@@ -185,7 +189,6 @@ const stackedDataLabelsPlugin = {
             return;
         }
 
-        // Horizontal logic
         const { ctx } = chart;
         ctx.save();
         ctx.font = 'bold 10px Inter, sans-serif';
@@ -222,7 +225,6 @@ const groupedDataLabelsPlugin = {
         ctx.save();
         ctx.font = 'bold 9px Inter, sans-serif';
         
-        // Detect dark mode dynamically to match grid text color
         const isDark = document.documentElement.classList.contains('dark') || chart.canvas.closest('.dark') !== null;
         ctx.fillStyle = isDark ? '#94a3b8' : '#475569';
         
@@ -280,9 +282,8 @@ const lineDataLabelsPlugin = {
 const updateLeftChart = () => {
     if (!leftChartCanvas.value) return;
 
-    const labels = props.matrixData.map(r => formatLabel(r.name));
+    const labels = props.matrixData.map(r => formatLabel(r.leader || r.name));
     
-    // Calculate max stacked value for dynamic X-axis
     const maxStackedValue = Math.max(...props.matrixData.map(r => 
         statuses.reduce((sum, status) => sum + (r.statusGroups[status]?.length || 0), 0)
     ), 1);
@@ -293,7 +294,7 @@ const updateLeftChart = () => {
         backgroundColor: statusColors[status],
         borderColor: 'transparent',
         borderWidth: 0,
-        ...OWNER_CHART_CONFIG.value
+        ...LEADER_CHART_CONFIG.value
     }));
 
     if (leftChartInstance) {
@@ -359,7 +360,6 @@ const updateLeftChart = () => {
 const updateRightChart = () => {
     if (!rightChartCanvas.value || !props.periodChartData) return;
 
-    // Destroy existing instance to switch smoothly between 'bar' and 'line' types
     if (rightChartInstance) {
         rightChartInstance.destroy();
         rightChartInstance = null;
@@ -368,7 +368,6 @@ const updateRightChart = () => {
     const labels = props.periodChartData.map(d => formatPeriodLabel(d.period));
     const isLine = rightChartViewMode.value === 'line';
 
-    // Calculate maximum value to determine safe suggestedMax headroom dynamically
     const maxVal = Math.max(...props.periodChartData.flatMap(d => statuses.map(s => d[s] || 0)), 1);
     const dynamicSuggestedMax = maxVal;
 
@@ -391,11 +390,6 @@ const updateRightChart = () => {
             fill: false
         }));
     } else {
-        // ── Slot-based dataset approach for truly gapless bars ──
-        // For each period, collect only the statuses that have count > 0.
-        // Assign them to consecutive "slots" (slot0, slot1, slot2, ...).
-        // This ensures bars always touch each other with no empty gaps.
-
         const periodActiveStatuses = props.periodChartData.map(d => {
             return statuses.filter(s => (d[s] || 0) > 0);
         });
@@ -407,7 +401,7 @@ const updateRightChart = () => {
             const data = [];
             const bgColors = [];
             const borderColors = [];
-            const statusLabels = []; // for tooltip
+            const statusLabels = [];
 
             props.periodChartData.forEach((d, periodIdx) => {
                 const activeList = periodActiveStatuses[periodIdx];
@@ -433,7 +427,6 @@ const updateRightChart = () => {
                 borderWidth: 0,
                 ...PERIOD_CHART_CONFIG,
                 skipNull: true,
-                // Store status labels for tooltip resolution
                 _statusLabels: statusLabels
             });
         }
@@ -463,7 +456,6 @@ const updateRightChart = () => {
                         font: { family: 'Inter, sans-serif', size: 9, weight: 'bold' },
                         color: '#64748b'
                     } : {
-                        // Custom legend: show status colors instead of slot labels
                         boxWidth: 8,
                         boxHeight: 8,
                         padding: 15,

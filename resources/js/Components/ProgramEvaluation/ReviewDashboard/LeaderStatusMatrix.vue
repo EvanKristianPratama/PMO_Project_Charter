@@ -1,6 +1,13 @@
 <template>
     <section v-if="displayRows.length > 0" class="mt-8 overflow-hidden animate-fade-in-up delay-150">
-        <div class="overflow-hidden rounded-2xl border border-slate-900 shadow-sm dark:border-white/20">
+        <!-- Bar Chart Statistik -->
+        <LeaderStatistikChart 
+            :matrixData="displayRows" 
+            :periodChartData="periodChartData"
+            :selectedLeaderLabel="selectedLeaderLabel"
+        />
+
+        <div class="overflow-hidden rounded-2xl border border-slate-900 shadow-sm dark:border-white/20 mt-6">
             <div class="border-b border-slate-900 px-2 py-2 dark:border-white/20">
                 <div class="flex flex-wrap items-center justify-start gap-2">
                     <button
@@ -226,6 +233,7 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue';
+import LeaderStatistikChart from './LeaderStatistikChart.vue';
 
 const props = defineProps({
     rows: {
@@ -248,6 +256,11 @@ const selectedParentLevel3 = ref('all');
 const selectedPeriod = ref('all');
 
 const statuses = ['On Track', 'At Risk', 'Not Signed', 'Not Started', 'Done'];
+
+const selectedLeaderLabel = computed(() => {
+    if (selectedParentLevel3.value === 'all') return 'All VP';
+    return selectedParentLevel3.value;
+});
 
 const statusColspan = computed(() => (showInitiativeColumns.value ? 2 : 1));
 const footerColspan = computed(() => 4 + (statuses.length * statusColspan.value));
@@ -341,6 +354,56 @@ const periodOptions = computed(() => {
     });
 
     return Array.from(map.values()).sort((a, b) => periodSortValue(b.value) - periodSortValue(a.value));
+});
+
+const periodChartData = computed(() => {
+    const map = new Map();
+    props.rows.forEach((row) => {
+        const periods = Array.isArray(row[activePeriodKey.value]) && row[activePeriodKey.value].length > 0
+            ? row[activePeriodKey.value]
+            : (String(row.latest_project_status_period ?? '').trim() ? [row.latest_project_status_period] : []);
+
+        periods.forEach((period) => {
+            const value = String(period ?? '').trim();
+            if (value) map.set(value, true);
+        });
+    });
+
+    const sortedPeriods = Array.from(map.keys()).sort((a, b) => periodSortValue(a) - periodSortValue(b));
+
+    const fieldKey = activeFieldKey.value;
+
+    return sortedPeriods.map((period) => {
+        const counts = {
+            period,
+            'On Track': 0,
+            'At Risk': 0,
+            'Not Signed': 0,
+            'Not Started': 0,
+            Done: 0,
+        };
+
+        props.rows.forEach((row) => {
+            const parentLevel3 = String(row[`${fieldKey}_parent_level3`] ?? '').trim();
+            if (selectedParentLevel3.value !== 'all' && parentLevel3 !== selectedParentLevel3.value) {
+                return;
+            }
+
+            const statusEntry = getProjectStatusEntry(row, period);
+            if (!statusEntry || !String(statusEntry.status ?? '').trim()) {
+                return;
+            }
+
+            const status = normalizeStatus(statusEntry.status);
+
+            const matchedStatus = statuses.find((s) => normalizeStatus(s) === status);
+            if (matchedStatus && counts[matchedStatus] !== undefined) {
+                counts[matchedStatus] += 1;
+            }
+        });
+
+        return counts;
+    });
 });
 
 const parseName = (val) => {
