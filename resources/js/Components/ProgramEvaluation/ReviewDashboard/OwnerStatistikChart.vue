@@ -435,6 +435,11 @@ const updateRightChart = () => {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    top: 15
+                }
+            },
             plugins: {
                 legend: {
                     display: true,
