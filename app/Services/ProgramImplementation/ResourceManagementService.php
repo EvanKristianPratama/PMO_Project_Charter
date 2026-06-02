@@ -2,7 +2,6 @@
 
 namespace App\Services\ProgramImplementation;
 
-use App\Models\InitiativeStatus;
 use App\Models\TrsProject;
 
 class ResourceManagementService
@@ -34,6 +33,17 @@ class ResourceManagementService
                     $query->oldest('trs_project_charters.id');
                 },
                 'projectCharters.statusRef:id,name',
+                'pcStatusImplementations' => function ($query) {
+                    $query->select([
+                        'trs_pc_status_implementation.id',
+                        'trs_pc_status_implementation.project_id',
+                        'trs_pc_status_implementation.status',
+                        'trs_pc_status_implementation.month',
+                        'trs_pc_status_implementation.year',
+                        'trs_pc_status_implementation.created_at',
+                        'trs_pc_status_implementation.updated_at',
+                    ]);
+                },
                 'mapCrossFunctions.organization:id,name',
                 'mappedInitiatives.coe:id,name',
             ])
@@ -46,11 +56,14 @@ class ResourceManagementService
         return [
             'resourceProjects' => $resourceRows,
             'resourceSummary' => $this->buildResourceSummary($resourceRows),
-            'filters' => [
-                'status' => (string) InitiativeStatus::APPROVE,
+            'resourceManagementFilters' => [
+                'project' => 'all',
+                'status' => 'all',
+                'version' => 'all',
             ],
-            'filterOptions' => [
-                'statuses' => $this->statusOptions(),
+            'resourceManagementFilterOptions' => [
+                'statuses' => $this->implementationStatusOptions(),
+                'versions' => $this->versionOptions(),
             ],
         ];
     }
@@ -73,7 +86,11 @@ class ResourceManagementService
                 'project_type_label' => $this->typeLabel($project->tipe_inisiative),
                 'coe_name' => $coeName,
                 'status_id' => null,
+                'version_status' => null,
+                'version_status_label' => null,
                 'status' => '-',
+                'latest_implementation_status' => null,
+                'latest_implementation_status_label' => null,
                 'budget' => null,
                 'key_personnel' => null,
                 'key_personnel_display' => null,
@@ -97,10 +114,16 @@ class ResourceManagementService
                     'status_id' => $charter->status !== null && $charter->status !== ''
                         ? (int) $charter->status
                         : null,
+                    'version_status' => $charter->status !== null && $charter->status !== ''
+                        ? (int) $charter->status
+                        : null,
+                    'version_status_label' => $this->versionStatusLabel($charter->status),
                     'status' => $this->normalizeStatusLabel(
                         $charter->statusRef?->name,
                         $charter->status,
                     ),
+                    'latest_implementation_status' => $this->latestImplementationStatus($project),
+                    'latest_implementation_status_label' => $this->latestImplementationStatusLabel($project),
                     'budget' => $this->normalizeText($charter->budget),
                     'key_personnel' => $this->normalizeText($charter->key_personnel),
                     'key_personnel_display' => $this->buildKeyPersonnelDisplay(
@@ -154,6 +177,71 @@ class ResourceManagementService
         return $statusId !== null && $statusId !== ''
             ? sprintf('Status %s', $statusId)
             : '-';
+    }
+
+    private function latestImplementationStatus(TrsProject $project): ?string
+    {
+        $latest = collect($project->pcStatusImplementations ?? [])
+            ->filter(static fn ($log) => trim((string) ($log->status ?? '')) !== '')
+            ->last();
+
+        $status = trim((string) ($latest?->status ?? ''));
+
+        return $status !== '' ? $status : null;
+    }
+
+    private function latestImplementationStatusLabel(TrsProject $project): ?string
+    {
+        $status = $this->latestImplementationStatus($project);
+        if ($status === null) {
+            return null;
+        }
+
+        return $this->normalizeImplementationStatus($status);
+    }
+
+    private function normalizeImplementationStatus(string $status): string
+    {
+        $normalized = strtolower(trim($status));
+
+        return match (true) {
+            str_contains($normalized, 'on track') => 'On Track',
+            str_contains($normalized, 'at risk') => 'At Risk',
+            str_contains($normalized, 'not signed') => 'Not Signed',
+            str_contains($normalized, 'not started') => 'Not Started',
+            str_contains($normalized, 'done') || str_contains($normalized, 'complete') => 'Done',
+            default => ucwords($normalized),
+        };
+    }
+
+    private function versionStatusLabel(mixed $status): ?string
+    {
+        $statusId = (int) ($status ?? 0);
+
+        return match ($statusId) {
+            4 => 'Approved',
+            5 => 'Baseline',
+            default => $statusId > 0 ? (string) $statusId : null,
+        };
+    }
+
+    private function implementationStatusOptions(): array
+    {
+        return [
+            ['value' => 'On Track', 'label' => 'On Track'],
+            ['value' => 'At Risk', 'label' => 'At Risk'],
+            ['value' => 'Not Signed', 'label' => 'Not Signed'],
+            ['value' => 'Not Started', 'label' => 'Not Started'],
+            ['value' => 'Done', 'label' => 'Done'],
+        ];
+    }
+
+    private function versionOptions(): array
+    {
+        return [
+            ['value' => '4', 'label' => 'Approved'],
+            ['value' => '5', 'label' => 'Baseline'],
+        ];
     }
 
     private function buildKeyPersonnelDisplay(mixed $keyPersonnel, TrsProject $project, mixed $charterStatus): ?string
@@ -220,17 +308,6 @@ class ResourceManagementService
                 'label' => $this->typeLabel(self::TYPE_IT_INITIATIVE),
             ],
         ];
-    }
-
-    private function statusOptions(): array
-    {
-        return InitiativeStatus::ordered()
-            ->map(fn (InitiativeStatus $status): array => [
-                'value' => (string) $status->id,
-                'label' => $this->normalizeStatusLabel($status->name, $status->id),
-            ])
-            ->values()
-            ->all();
     }
 
     private function typeLabel(mixed $type): string

@@ -4,32 +4,60 @@
             class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]"
         >
             <div
+                v-if="statusLegendItems.length > 0"
+                class="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-slate-200 px-4 py-3 dark:border-white/10"
+            >
+                <span
+                    class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500"
+                >
+                    Status Implementation:
+                </span>
+
+                <button
+                    v-for="status in statusLegendItems"
+                    :key="`resource-status-${status.value}`"
+                    type="button"
+                    class="flex items-center gap-1.5 transition-opacity"
+                    :class="{ 'opacity-40': selectedImplementationStatus !== 'all' && selectedImplementationStatus !== status.value }"
+                    :title="`Filter: ${status.label}`"
+                    @click="toggleStatusFilter(status.value)"
+                >
+                    <span
+                        class="h-3 w-3 rounded-sm shadow-sm"
+                        :class="status.class"
+                    ></span>
+                    <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                        {{ status.label }}
+                        <span class="font-medium text-slate-400 dark:text-slate-500">
+                            ({{ status.count }})
+                        </span>
+                    </span>
+                </button>
+
+                <div
+                    class="flex items-center gap-1.5 border-l border-slate-200 pl-4 dark:border-white/10"
+                >
+                    <span
+                        class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500"
+                    >
+                        Total Project:
+                    </span>
+                    <span class="text-[10px] font-bold text-slate-700 dark:text-slate-200">
+                        {{ totalProjectsCount }}
+                    </span>
+                </div>
+            </div>
+
+            <div
                 class="flex flex-wrap items-center gap-2 border-b border-slate-200 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:border-white/10 dark:text-slate-400"
             >
-                <div class="flex items-center gap-1.5">
-                    <label class="text-[10px]">Code</label>
-                    <select
-                        v-model="selectedCode"
-                        class="min-w-[124px] rounded border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700 shadow-sm transition focus:border-slate-300 focus:outline-none dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200"
-                    >
-                        <option value="all">Semua</option>
-                        <option
-                            v-for="option in codeOptions"
-                            :key="`code-filter-${option}`"
-                            :value="option"
-                        >
-                            {{ option }}
-                        </option>
-                    </select>
-                </div>
-
                 <div class="flex items-center gap-1.5">
                     <label class="text-[10px]">Project</label>
                     <select
                         v-model="selectedProjectName"
                         class="min-w-[144px] rounded border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700 shadow-sm transition focus:border-slate-300 focus:outline-none dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200"
                     >
-                        <option value="all">Semua</option>
+                        <option value="all">All</option>
                         <option
                             v-for="option in projectNameOptions"
                             :key="`project-filter-${option}`"
@@ -43,13 +71,30 @@
                 <div class="flex items-center gap-1.5">
                     <label class="text-[10px]">Status</label>
                     <select
-                        v-model="selectedStatus"
+                        v-model="selectedImplementationStatus"
                         class="min-w-[124px] rounded border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700 shadow-sm transition focus:border-slate-300 focus:outline-none dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200"
                     >
-                        <option value="all">Semua</option>
+                        <option value="all">All</option>
                         <option
-                            v-for="option in statusOptions"
-                            :key="`status-filter-${option.value}`"
+                            v-for="option in statusFilterOptions"
+                            :key="`resource-status-filter-${option.value}`"
+                            :value="option.value"
+                        >
+                            {{ option.label }}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="flex items-center gap-1.5">
+                    <label class="text-[10px]">Version</label>
+                    <select
+                        v-model="selectedVersion"
+                        class="min-w-[124px] rounded border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700 shadow-sm transition focus:border-slate-300 focus:outline-none dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200"
+                    >
+                        <option value="all">All</option>
+                        <option
+                            v-for="option in versionFilterOptions"
+                            :key="`resource-version-filter-${option.value}`"
                             :value="option.value"
                         >
                             {{ option.label }}
@@ -59,9 +104,7 @@
             </div>
 
             <div class="overflow-x-auto">
-                <table
-                    class="w-full border-collapse text-left text-sm"
-                >
+                <table class="w-full border-collapse text-left text-sm">
                     <thead class="bg-slate-50 dark:bg-white/5">
                         <tr class="border-b border-slate-200 dark:border-white/10">
                             <th
@@ -98,64 +141,60 @@
                             :key="item.row_key"
                             class="group transition-colors hover:bg-slate-50/50 dark:hover:bg-white/5"
                         >
-                            <!-- IT Architecture Building Block -->
                             <td
                                 v-if="item.rowspan > 0"
                                 :rowspan="item.rowspan"
                                 class="w-[160px] border-r border-slate-200 px-6 py-4 align-top dark:border-white/5"
                             >
                                 <div class="flex flex-col">
-                                    <span
-                                        class="text-xs font-bold text-slate-700 dark:text-slate-200"
-                                    >
+                                    <span class="text-xs font-bold text-slate-700 dark:text-slate-200">
                                         {{ item.coe_name || "-" }}
                                     </span>
                                 </div>
                             </td>
 
-                            <!-- List of IT Initiatives -->
-                            <td class="px-6 py-4 align-top border-r border-slate-200 dark:border-white/5">
+                            <td class="border-r border-slate-200 px-6 py-4 align-top dark:border-white/5">
                                 <div class="flex flex-col gap-1">
                                     <div class="flex items-start gap-2">
                                         <span
-                                            class="inline-flex shrink-0 items-center justify-center rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                                            class="inline-flex shrink-0 items-center justify-center rounded px-1.5 py-0.5 text-[9px] font-bold ring-1 ring-inset"
+                                            :class="projectCodeStatusClass(item.latest_implementation_status_label)"
                                         >
                                             {{ formatProjectCode(item.code || item.project_code) }}
                                         </span>
-                                        <span
-                                            class="text-xs font-medium text-slate-700 dark:text-slate-200"
-                                        >
+                                        <span class="text-xs font-medium text-slate-700 dark:text-slate-200">
                                             {{ item.name || item.project_name || "-" }}
                                         </span>
                                     </div>
                                     <span
-                                        :class="statusBadgeClass(item.status_id)"
+                                        v-if="item.version_status_label"
                                         class="inline-flex w-fit items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold"
+                                        :class="versionStatusClass(item.version_status)"
                                     >
-                                        {{ item.status || "-" }}
+                                        {{ item.version_status_label }}
                                     </span>
                                 </div>
                             </td>
 
-                            <!-- Budget -->
-                            <td class="px-4 py-4 align-top border-r border-slate-200 dark:border-white/5">
-                                <span class="text-xs text-slate-600 dark:text-slate-300 whitespace-pre-line break-words">
+                            <td class="border-r border-slate-200 px-4 py-4 align-top dark:border-white/5">
+                                <span class="whitespace-pre-line break-words text-xs text-slate-600 dark:text-slate-300">
                                     {{ item.budget || "-" }}
                                 </span>
                             </td>
 
-                            <!-- Key Personnel -->
                             <td class="px-4 py-4 align-top">
-                                <span class="text-xs text-slate-600 dark:text-slate-300 whitespace-pre-line break-words">
+                                <span class="whitespace-pre-line break-words text-xs text-slate-600 dark:text-slate-300">
                                     {{ item.key_personnel_display || item.key_personnel || "-" }}
                                 </span>
                             </td>
-                            <td class="px-4 py-4 align-top border-l border-slate-200 dark:border-white/5">
-                                <span class="text-xs text-slate-600 dark:text-slate-300 whitespace-pre-line break-words">
+
+                            <td class="border-l border-slate-200 px-4 py-4 align-top dark:border-white/5">
+                                <span class="whitespace-pre-line break-words text-xs text-slate-600 dark:text-slate-300">
                                     {{ item.impact_value || "-" }}
                                 </span>
                             </td>
                         </tr>
+
                         <tr v-if="filteredRows.length === 0">
                             <td
                                 colspan="5"
@@ -182,13 +221,16 @@ const props = defineProps({
     filters: {
         type: Object,
         default: () => ({
-            status: "4",
+            project: "all",
+            status: "all",
+            version: "all",
         }),
     },
     filterOptions: {
         type: Object,
         default: () => ({
             statuses: [],
+            versions: [],
         }),
     },
 });
@@ -203,6 +245,65 @@ const coeOrder = [
     "People, Process and Technology",
     "Overall Architecture",
 ];
+
+const normalizeStatus = (status) => String(status ?? "").trim();
+const normalizeStatusKey = (status) => normalizeStatus(status).toLowerCase();
+const canonicalStatus = (status) => {
+    const raw = normalizeStatus(status);
+    const key = normalizeStatusKey(raw);
+
+    if (!key) {
+        return "";
+    }
+
+    if (key.includes("on track")) return "On Track";
+    if (key.includes("at risk")) return "At Risk";
+    if (key.includes("not signed")) return "Not Signed";
+    if (key.includes("not started")) return "Not Started";
+    if (key.includes("done") || key.includes("complete")) return "Done";
+
+    return raw;
+};
+
+const implementationStatusClasses = {
+    "On Track": "bg-emerald-500",
+    "At Risk": "bg-amber-500",
+    "Not Signed": "bg-rose-500",
+    "Not Started": "bg-blue-500",
+    "Done": "bg-slate-500",
+};
+
+const implementationStatusClass = (status) => {
+    const normalized = canonicalStatus(status);
+
+    return implementationStatusClasses[normalized] ?? "bg-slate-400";
+};
+
+const versionStatusClasses = {
+    4: "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-300",
+    5: "bg-purple-100 text-purple-700 ring-1 ring-purple-300",
+};
+
+const versionStatusClass = (status) => {
+    const key = Number(status);
+
+    return versionStatusClasses[key] ?? "bg-blue-100 text-blue-700 ring-1 ring-blue-300";
+};
+
+const projectCodeStatusClasses = {
+    "On Track": "bg-emerald-500 text-white ring-emerald-500 dark:bg-emerald-500 dark:text-white dark:ring-emerald-400/60",
+    "At Risk": "bg-amber-500 text-white ring-amber-500 dark:bg-amber-500 dark:text-white dark:ring-amber-400/60",
+    "Not Signed": "bg-rose-500 text-white ring-rose-500 dark:bg-rose-500 dark:text-white dark:ring-rose-400/60",
+    "Not Started": "bg-blue-500 text-white ring-blue-500 dark:bg-blue-500 dark:text-white dark:ring-blue-400/60",
+    "Done": "bg-slate-500 text-white ring-slate-500 dark:bg-slate-500 dark:text-white dark:ring-slate-400/60",
+};
+
+const projectCodeStatusClass = (status) => {
+    const normalized = normalizeStatus(status);
+
+    return projectCodeStatusClasses[normalized] ??
+        "bg-slate-100 text-slate-700 ring-slate-300 dark:bg-white/10 dark:text-slate-200 dark:ring-white/15";
+};
 
 const uniquePreserveOrder = (values) => {
     const seen = new Set();
@@ -238,40 +339,41 @@ const formatProjectCode = (value) => {
 const rows = computed(() =>
     Array.isArray(props.resourceProjects) ? props.resourceProjects : [],
 );
-const statusOptions = computed(() =>
-    Array.isArray(props.filterOptions?.statuses)
+
+const statusFilterOptions = computed(() =>
+    Array.isArray(props.filterOptions?.statuses) && props.filterOptions.statuses.length > 0
         ? props.filterOptions.statuses
-        : [],
+        : [
+            { value: "On Track", label: "On Track" },
+            { value: "At Risk", label: "At Risk" },
+            { value: "Not Signed", label: "Not Signed" },
+            { value: "Not Started", label: "Not Started" },
+            { value: "Done", label: "Done" },
+        ],
 );
-const codeOptions = computed(() =>
-    uniquePreserveOrder(rows.value.map((item) => item?.project_code)),
+
+const versionFilterOptions = computed(() =>
+    Array.isArray(props.filterOptions?.versions) && props.filterOptions.versions.length > 0
+        ? props.filterOptions.versions
+        : [
+            { value: "4", label: "Approved" },
+            { value: "5", label: "Baseline" },
+        ],
 );
+
 const projectNameOptions = computed(() =>
     uniquePreserveOrder(rows.value.map((item) => item?.project_name)),
 );
-const selectedCode = ref("all");
-const selectedProjectName = ref("all");
-const selectedStatus = ref(String(props.filters?.status ?? "4"));
 
-const filteredRows = computed(() => {
+const selectedProjectName = ref(String(props.filters?.project ?? "all"));
+const selectedImplementationStatus = ref(String(props.filters?.status ?? "all"));
+const selectedVersion = ref(String(props.filters?.version ?? "all"));
+
+const baseFilteredRows = computed(() => {
     return rows.value.filter((item) => {
-        if (
-            selectedCode.value !== "all" &&
-            String(item?.project_code ?? "") !== selectedCode.value
-        ) {
-            return false;
-        }
-
         if (
             selectedProjectName.value !== "all" &&
             String(item?.project_name ?? "") !== selectedProjectName.value
-        ) {
-            return false;
-        }
-
-        if (
-            selectedStatus.value !== "all" &&
-            String(item?.status_id ?? "") !== selectedStatus.value
         ) {
             return false;
         }
@@ -280,11 +382,70 @@ const filteredRows = computed(() => {
     });
 });
 
+const filteredRows = computed(() =>
+    baseFilteredRows.value.filter((item) => {
+        if (
+            selectedImplementationStatus.value !== "all" &&
+            canonicalStatus(item?.latest_implementation_status) !== selectedImplementationStatus.value
+        ) {
+            return false;
+        }
+
+        if (
+            selectedVersion.value !== "all" &&
+            String(item?.version_status ?? "") !== selectedVersion.value
+        ) {
+            return false;
+        }
+
+        return true;
+    }),
+);
+
+const toggleStatusFilter = (statusValue) => {
+    const nextValue = String(statusValue ?? "");
+
+    selectedImplementationStatus.value =
+        selectedImplementationStatus.value === nextValue ? "all" : nextValue;
+};
+
+const statusLegendItems = computed(() => {
+    const counts = Object.fromEntries(
+        statusFilterOptions.value.map((item) => [String(item.value ?? "").trim(), 0]),
+    );
+
+    const seenProjects = new Set();
+
+    baseFilteredRows.value.forEach((item) => {
+        const projectKey = String(item?.project_code || item?.project_name || item?.name || "").trim();
+        if (!projectKey || seenProjects.has(projectKey)) {
+            return;
+        }
+
+        const key = canonicalStatus(item?.latest_implementation_status);
+        if (!key || !(key in counts)) {
+            return;
+        }
+
+        counts[key] += 1;
+        seenProjects.add(projectKey);
+    });
+
+    return statusFilterOptions.value.map((item) => ({
+        ...item,
+        count: counts[String(item.value ?? "").trim()] ?? 0,
+        class: implementationStatusClass(item.value),
+    }));
+});
+
+const totalProjectsCount = computed(() => {
+    return statusLegendItems.value.reduce((acc, item) => acc + item.count, 0);
+});
+
 const initiativesWithRowspan = computed(() => {
     const initiatives = filteredRows.value;
     const result = [];
 
-    // Sort by coe_name using the predefined coeOrder, then by code
     const sorted = [...initiatives].sort((a, b) => {
         const coeA = String(a.coe_name || "Unassigned");
         const coeB = String(b.coe_name || "Unassigned");
@@ -305,7 +466,11 @@ const initiativesWithRowspan = computed(() => {
 
         const codeA = String(a.project_code || "");
         const codeB = String(b.project_code || "");
-        return codeA.localeCompare(codeB);
+        if (codeA !== codeB) {
+            return codeA.localeCompare(codeB);
+        }
+
+        return Number(b.id || 0) - Number(a.id || 0);
     });
 
     for (let i = 0; i < sorted.length; i++) {
@@ -326,20 +491,7 @@ const initiativesWithRowspan = computed(() => {
             result.push({ ...currentIni, rowspan: 0 });
         }
     }
+
     return result;
 });
-
-const statusMap = {
-    1: "bg-slate-100 text-slate-600 ring-1 ring-slate-300",
-    2: "bg-blue-100 text-blue-700 ring-1 ring-blue-300",
-    3: "bg-amber-100 text-amber-700 ring-1 ring-amber-300",
-    5: "bg-purple-100 text-purple-700 ring-1 ring-purple-300",
-    4: "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-300",
-};
-
-const statusBadgeClass = (statusId) => {
-    const key = Number(statusId);
-
-    return statusMap[key] ?? "bg-blue-100 text-blue-700 ring-1 ring-blue-300";
-};
 </script>

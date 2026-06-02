@@ -401,7 +401,10 @@ initiative, initiativeIndex
                     hasTableSelection && tableMode === TABLE_MODE.VALUE_CREATION
                 "
             >
-                <ValueCreation :items="valueCreationData" />
+                <ValueCreation
+                    :items="valueCreationData"
+                    :version-legend="valueCreationVersionOptions"
+                />
             </section>
 
             <section
@@ -411,7 +414,8 @@ initiative, initiativeIndex
             >
                 <ResourceManagement 
                     :resource-projects="resourceProjects" 
-                    :filter-options="filterOptions"
+                    :filters="resourceManagementFilters"
+                    :filter-options="resourceManagementFilterOptions"
                 />
             </section>
             </div>
@@ -446,15 +450,28 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    valueCreationVersionOptions: {
+        type: Array,
+        default: () => [],
+    },
     resourceProjects: {
         type: Array,
         default: () => [],
     },
-    filterOptions: {
+    resourceManagementFilters: {
+        type: Object,
+        default: () => ({
+            project: "all",
+            status: "all",
+            version: "all",
+        }),
+    },
+    resourceManagementFilterOptions: {
         type: Object,
         default: () => ({
             types: [],
             statuses: [],
+            versions: [],
         }),
     },
     statusOptions: {

@@ -182,11 +182,29 @@ class ReviewAnalysisController extends Controller
                                 'trs_pc_status_implementation.id',
                                 'trs_pc_status_implementation.project_id',
                                 'trs_pc_status_implementation.status',
+                                'trs_pc_status_implementation.month',
                                 'trs_pc_status_implementation.year',
                                 'trs_pc_status_implementation.created_at',
                                 'trs_pc_status_implementation.updated_at',
                             ])
                             ->orderByDesc('year')
+                            ->orderByRaw(
+                                "CASE LOWER(TRIM(COALESCE(trs_pc_status_implementation.month, '')))
+                                    WHEN 'januari' THEN 1
+                                    WHEN 'februari' THEN 2
+                                    WHEN 'maret' THEN 3
+                                    WHEN 'april' THEN 4
+                                    WHEN 'mei' THEN 5
+                                    WHEN 'juni' THEN 6
+                                    WHEN 'juli' THEN 7
+                                    WHEN 'agustus' THEN 8
+                                    WHEN 'september' THEN 9
+                                    WHEN 'oktober' THEN 10
+                                    WHEN 'november' THEN 11
+                                    WHEN 'desember' THEN 12
+                                    ELSE 0
+                                END DESC"
+                            )
                             ->orderByDesc('id'),
                         'projectCharters' => static fn ($charterQuery) => $charterQuery
                             ->select([
@@ -375,10 +393,7 @@ class ReviewAnalysisController extends Controller
     private function resolveLatestProjectStatusImplementation(mixed $project): mixed
     {
         $statusImplementations = collect($project?->pcStatusImplementations ?? [])
-            ->sortBy([
-                ['year', 'desc'],
-                ['id', 'desc'],
-            ])
+            ->sort(fn ($left, $right) => $this->compareImplementationStatus($right, $left))
             ->values();
 
         if ($statusImplementations->isNotEmpty()) {
@@ -398,11 +413,88 @@ class ReviewAnalysisController extends Controller
         }
 
         return TrsPcStatusImplementation::query()
-            ->select(['id', 'project_id', 'status', 'year'])
+            ->select(['id', 'project_id', 'status', 'month', 'year'])
             ->where('project_id', $projectId)
             ->orderByDesc('year')
+            ->orderByRaw(
+                "CASE LOWER(TRIM(COALESCE(month, '')))
+                    WHEN 'januari' THEN 1
+                    WHEN 'februari' THEN 2
+                    WHEN 'maret' THEN 3
+                    WHEN 'april' THEN 4
+                    WHEN 'mei' THEN 5
+                    WHEN 'juni' THEN 6
+                    WHEN 'juli' THEN 7
+                    WHEN 'agustus' THEN 8
+                    WHEN 'september' THEN 9
+                    WHEN 'oktober' THEN 10
+                    WHEN 'november' THEN 11
+                    WHEN 'desember' THEN 12
+                    ELSE 0
+                END DESC"
+            )
             ->orderByDesc('id')
             ->first();
+    }
+
+    private function compareImplementationStatus(mixed $left, mixed $right): int
+    {
+        return $this->implementationStatusSortKey($left) <=> $this->implementationStatusSortKey($right);
+    }
+
+    private function implementationStatusSortKey(mixed $log): array
+    {
+        return [
+            $this->normalizeImplementationYear($log?->year ?? null),
+            $this->normalizeImplementationMonth($log?->month ?? null),
+            $this->normalizeImplementationTimestamp($log?->created_at ?? null, $log?->updated_at ?? null),
+            (int) ($log?->id ?? 0),
+        ];
+    }
+
+    private function normalizeImplementationYear(mixed $value): int
+    {
+        $parsed = (int) trim((string) ($value ?? ''));
+
+        return $parsed > 0 ? $parsed : PHP_INT_MIN;
+    }
+
+    private function normalizeImplementationMonth(mixed $value): int
+    {
+        static $monthOrder = [
+            'januari' => 1,
+            'februari' => 2,
+            'maret' => 3,
+            'april' => 4,
+            'mei' => 5,
+            'juni' => 6,
+            'juli' => 7,
+            'agustus' => 8,
+            'september' => 9,
+            'oktober' => 10,
+            'november' => 11,
+            'desember' => 12,
+        ];
+
+        $normalized = strtolower(trim((string) ($value ?? '')));
+
+        return $monthOrder[$normalized] ?? 0;
+    }
+
+    private function normalizeImplementationTimestamp(mixed $createdAt, mixed $updatedAt): int
+    {
+        foreach ([$createdAt, $updatedAt] as $candidate) {
+            if ($candidate === null || $candidate === '') {
+                continue;
+            }
+
+            $parsed = strtotime((string) $candidate);
+            if ($parsed !== false) {
+                return $parsed;
+            }
+        }
+
+        return PHP_INT_MIN;
     }
 
     private function pushUnique(array &$target, array $item, string $uniqueKey): void
