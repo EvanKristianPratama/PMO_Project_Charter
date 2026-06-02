@@ -34,6 +34,7 @@ class ResourceManagementService
                     $query->oldest('trs_project_charters.id');
                 },
                 'projectCharters.statusRef:id,name',
+                'mapCrossFunctions.organization:id,name',
                 'mappedInitiatives.coe:id,name',
             ])
             ->oldest('trs_projects.id')
@@ -75,6 +76,7 @@ class ResourceManagementService
                 'status' => '-',
                 'budget' => null,
                 'key_personnel' => null,
+                'key_personnel_display' => null,
                 'impact_value' => null,
             ]];
         }
@@ -101,6 +103,11 @@ class ResourceManagementService
                     ),
                     'budget' => $this->normalizeText($charter->budget),
                     'key_personnel' => $this->normalizeText($charter->key_personnel),
+                    'key_personnel_display' => $this->buildKeyPersonnelDisplay(
+                        $charter->key_personnel,
+                        $project,
+                        $charter->status,
+                    ),
                     'impact_value' => $this->normalizeText($charter->impact_value),
                 ];
             })
@@ -147,6 +154,58 @@ class ResourceManagementService
         return $statusId !== null && $statusId !== ''
             ? sprintf('Status %s', $statusId)
             : '-';
+    }
+
+    private function buildKeyPersonnelDisplay(mixed $keyPersonnel, TrsProject $project, mixed $charterStatus): ?string
+    {
+        $normalizedKeyPersonnel = $this->normalizeText($keyPersonnel);
+        $crossFunctionStatus = $this->crossFunctionStatusForCharter($charterStatus);
+        $crossFunctionNames = $this->crossFunctionOrganizationNames($project, $crossFunctionStatus);
+
+        $sections = [];
+
+        if ($normalizedKeyPersonnel !== null) {
+            $sections[] = $normalizedKeyPersonnel;
+        }
+
+        if ($crossFunctionNames !== []) {
+            if ($sections !== []) {
+                $sections[] = '';
+            }
+
+            $sections[] = sprintf(
+                'Mapping (%s):',
+                $this->crossFunctionStatusLabel($crossFunctionStatus),
+            );
+            $sections[] = implode("\n", array_map(
+                static fn (string $name): string => sprintf('• %s', $name),
+                $crossFunctionNames,
+            ));
+        }
+
+        return $sections !== [] ? implode("\n", $sections) : null;
+    }
+
+    private function crossFunctionStatusForCharter(mixed $charterStatus): int
+    {
+        return (int) $charterStatus === 4 ? 2 : 1;
+    }
+
+    private function crossFunctionStatusLabel(int $crossFunctionStatus): string
+    {
+        return $crossFunctionStatus === 2 ? 'Approved' : 'Baseline';
+    }
+
+    private function crossFunctionOrganizationNames(TrsProject $project, int $crossFunctionStatus): array
+    {
+        return collect($project->mapCrossFunctions ?? [])
+            ->filter(static fn ($map) => (int) ($map->status ?? 0) === $crossFunctionStatus)
+            ->map(static fn ($map) => trim((string) ($map->organization?->name ?? '')))
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values()
+            ->all();
     }
 
     private function typeOptions(): array

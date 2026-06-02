@@ -147,7 +147,7 @@
                             <!-- Key Personnel -->
                             <td class="px-4 py-4 align-top">
                                 <span class="text-xs text-slate-600 dark:text-slate-300 whitespace-pre-line break-words">
-                                    {{ item.key_personnel || "-" }}
+                                    {{ item.key_personnel_display || item.key_personnel || "-" }}
                                 </span>
                             </td>
                             <td class="px-4 py-4 align-top border-l border-slate-200 dark:border-white/5">
@@ -161,8 +161,7 @@
                                 colspan="5"
                                 class="px-6 py-12 text-center text-sm text-slate-500 dark:text-slate-400"
                             >
-                                Belum ada data project charter yang dapat
-                                ditampilkan.
+                                Project Charter Not Available
                             </td>
                         </tr>
                     </tbody>
