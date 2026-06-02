@@ -364,14 +364,11 @@
                                 <th class="p-3.5 text-center w-16 border-r border-[#b2cfc7] dark:border-[#255246]">
                                     No
                                 </th>
-                                <th class="p-3.5 text-center w-28 border-r border-[#b2cfc7] dark:border-[#255246]">
-                                    Nomor Kebijakan
-                                </th>
-                                <th class="p-3.5 text-left border-r border-[#b2cfc7] dark:border-[#255246] w-96 min-w-[240px]">
+                                <th class="p-3.5 text-left border-r border-[#b2cfc7] dark:border-[#255246] w-[450px] min-w-[300px]">
                                     Kebijakan
                                 </th>
                                 <th class="p-3.5 text-left min-w-[320px]">
-                                    Mapping Tanggung Jawab
+                                    Tugas & Tanggung Jawab
                                 </th>
                             </tr>
                         </thead>
@@ -382,14 +379,9 @@
                                     {{ oIdx + 1 }}
                                 </td>
 
-                                <!-- Nomor Kebijakan -->
-                                <td class="p-3.5 border-r border-slate-200 dark:border-white/10 text-center font-mono font-bold text-[#821f44] dark:text-pink-400 text-xs align-top">
-                                    {{ obj.objective_id }}
-                                </td>
-
                                 <!-- Kebijakan -->
                                 <td class="p-3.5 border-r border-slate-200 dark:border-white/10 text-left font-sans text-xs leading-relaxed text-slate-900 dark:text-slate-100 font-bold align-top">
-                                    {{ obj.objective }}
+                                    {{ obj.objective_id }} {{ obj.objective }}
                                 </td>
 
                                 <!-- Selected Responsibilities Dropdown & Cards (Mapping Tanggung Jawab) -->
@@ -488,7 +480,7 @@
                                 </td>
                             </tr>
                             <tr v-if="filteredObjectivesForMap.length === 0">
-                                <td colspan="4" class="p-8 text-center text-slate-400 dark:text-slate-500 font-sans text-xs">
+                                <td colspan="3" class="p-8 text-center text-slate-400 dark:text-slate-500 font-sans text-xs">
                                     Tidak ada data butir kebijakan untuk ditampilkan.
                                 </td>
                             </tr>
