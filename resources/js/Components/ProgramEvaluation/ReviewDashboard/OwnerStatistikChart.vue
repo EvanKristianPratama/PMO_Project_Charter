@@ -213,6 +213,51 @@ const stackedDataLabelsPlugin = {
     }
 };
 
+// ─── Left Chart Plugin: Draw total number at the end of stacked bar ───
+const stackedTotalLabelsPlugin = {
+    id: 'stackedTotalLabels',
+    afterDatasetsDraw(chart) {
+        if (chart.options.indexAxis !== 'y') return;
+
+        const { ctx, data } = chart;
+        ctx.save();
+        ctx.font = 'bold 10px Inter, sans-serif';
+        
+        const isDark = document.documentElement.classList.contains('dark') || chart.canvas.closest('.dark') !== null;
+        ctx.fillStyle = isDark ? '#94a3b8' : '#475569';
+        
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+
+        const rowCount = data.labels.length;
+        const totals = new Array(rowCount).fill(0);
+        const endXPositions = new Array(rowCount).fill(0);
+
+        data.datasets.forEach((dataset, datasetIndex) => {
+            const meta = chart.getDatasetMeta(datasetIndex);
+            if (meta.hidden) return;
+
+            meta.data.forEach((bar, index) => {
+                const val = dataset.data[index];
+                if (val !== null) {
+                    totals[index] += val;
+                    // In stacked charts, the x of each segment is the cumulative value
+                    endXPositions[index] = Math.max(endXPositions[index], bar.x);
+                }
+            });
+        });
+
+        totals.forEach((total, index) => {
+            if (total > 0) {
+                const x = endXPositions[index];
+                const y = chart.getDatasetMeta(0).data[index].y;
+                ctx.fillText(String(total), x + 8, y);
+            }
+        });
+        ctx.restore();
+    }
+};
+
 // ─── Right Chart Plugin (Bar): Draw numbers on top of grouped bars ───
 const groupedDataLabelsPlugin = {
     id: 'groupedDataLabels',
@@ -286,6 +331,7 @@ const updateLeftChart = () => {
     const maxStackedValue = Math.max(...props.matrixData.map(r => 
         statuses.reduce((sum, status) => sum + (r.statusGroups[status]?.length || 0), 0)
     ), 1);
+    const dynamicSuggestedMax = Math.ceil(maxStackedValue * 1.15); // Add headroom for total labels
 
     const datasets = statuses.map(status => ({
         label: status,
@@ -299,14 +345,14 @@ const updateLeftChart = () => {
     if (leftChartInstance) {
         leftChartInstance.data.labels = labels;
         leftChartInstance.data.datasets = datasets;
-        leftChartInstance.options.scales.x.suggestedMax = maxStackedValue;
+        leftChartInstance.options.scales.x.suggestedMax = dynamicSuggestedMax;
         leftChartInstance.update();
     } else {
         const ctx = leftChartCanvas.value.getContext('2d');
         leftChartInstance = new Chart(ctx, {
             type: 'bar',
             data: { labels, datasets },
-            plugins: [stackedDataLabelsPlugin],
+            plugins: [stackedDataLabelsPlugin, stackedTotalLabelsPlugin],
             options: {
                 indexAxis: 'y',
                 responsive: true,
@@ -333,7 +379,7 @@ const updateLeftChart = () => {
                 scales: {
                     x: {
                         stacked: true,
-                        suggestedMax: maxStackedValue,
+                        suggestedMax: dynamicSuggestedMax,
                         ticks: {
                             stepSize: 2,
                             font: { family: 'Inter, sans-serif', size: 9, weight: 'bold' },

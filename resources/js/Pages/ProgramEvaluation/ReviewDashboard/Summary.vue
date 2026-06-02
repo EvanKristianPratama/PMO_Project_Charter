@@ -2,28 +2,28 @@
     <UserLayout title="Project Status Summary">
         <div class="space-y-6 animate-fade-in-up">
             <!-- Duration Statistics Table -->
-            <DurationStatsTable
+            <!-- <DurationStatsTable
                 v-if="durationStats"
                 :stats="durationStats.stats"
                 :totalApproved="durationStats.totalApproved"
                 :totalNotApproved="durationStats.totalNotApproved"
                 :notApprovedInitiatives="durationStats.notApprovedInitiatives"
                 :getCircleColor="getCircleColor"
-            />
+            /> -->
 
             <!-- Project Owner Breakdown Table -->
-            <OwnerBreakdownTable
+            <!-- <OwnerBreakdownTable
                 :originalData="ownerBreakdown.original"
                 :restructureData="ownerBreakdown.restructure"
                 :getCircleColor="getCircleColor"
-            />
+            /> -->
 
             <!-- Project Leader Breakdown Table -->
-            <LeaderBreakdownTable
+            <!-- <LeaderBreakdownTable
                 :originalData="leaderBreakdown.original"
                 :restructureData="leaderBreakdown.restructure"
                 :getCircleColor="getCircleColor"
-            />
+            /> -->
 
             <!-- Status Matrix - Project Owner -->
             <OwnerStatusMatrix

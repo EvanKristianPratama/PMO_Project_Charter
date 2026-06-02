@@ -250,7 +250,7 @@ export function useNavigation() {
                 active: (url) => (url || '').startsWith("/service-portofolio"),
             },
             {
-                label: "IT Operation Model",
+                label: "IT Operating",
                 href: safeRoute("policy.regulation.index"),
                 icon: DocumentTextIcon,
                 active: (url) => (url || '').startsWith("/policy") || (url || '').startsWith("/bpmn-workflow"),
