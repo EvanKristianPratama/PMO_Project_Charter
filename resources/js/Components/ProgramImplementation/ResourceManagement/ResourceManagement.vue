@@ -75,19 +75,19 @@
                                 List of IT Initiatives
                             </th>
                             <th
-                                class="w-[15%] px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
-                            >
-                                Status
-                            </th>
-                            <th
-                                class="w-[18%] px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
+                                class="w-[10%] px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
                             >
                                 Budget
                             </th>
                             <th
-                                class="w-[20%] px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
+                                class="w-[24%] px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
                             >
                                 Key Personnel
+                            </th>
+                            <th
+                                class="w-[30%] px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
+                            >
+                                Value Creation
                             </th>
                         </tr>
                     </thead>
@@ -115,28 +115,26 @@
 
                             <!-- List of IT Initiatives -->
                             <td class="px-6 py-4 align-top border-r border-slate-200 dark:border-white/5">
-                                <div class="flex items-start gap-2">
+                                <div class="flex flex-col gap-1">
+                                    <div class="flex items-start gap-2">
+                                        <span
+                                            class="inline-flex shrink-0 items-center justify-center rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                                        >
+                                            {{ formatProjectCode(item.code || item.project_code) }}
+                                        </span>
+                                        <span
+                                            class="text-xs font-medium text-slate-700 dark:text-slate-200"
+                                        >
+                                            {{ item.name || item.project_name || "-" }}
+                                        </span>
+                                    </div>
                                     <span
-                                        class="inline-flex shrink-0 items-center justify-center rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                                        :class="statusBadgeClass(item.status_id)"
+                                        class="inline-flex w-fit items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold"
                                     >
-                                        {{ item.project_code || "-" }}
-                                    </span>
-                                    <span
-                                        class="text-xs font-medium text-slate-700 dark:text-slate-200"
-                                    >
-                                        {{ item.project_name || "-" }}
+                                        {{ item.status || "-" }}
                                     </span>
                                 </div>
-                            </td>
-
-                            <!-- Status -->
-                            <td class="px-4 py-4 align-top border-r border-slate-200 dark:border-white/5">
-                                <span
-                                    :class="statusBadgeClass(item.status_id)"
-                                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold"
-                                >
-                                    {{ item.status || "-" }}
-                                </span>
                             </td>
 
                             <!-- Budget -->
@@ -150,6 +148,11 @@
                             <td class="px-4 py-4 align-top">
                                 <span class="text-xs text-slate-600 dark:text-slate-300 whitespace-pre-line break-words">
                                     {{ item.key_personnel || "-" }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-4 align-top border-l border-slate-200 dark:border-white/5">
+                                <span class="text-xs text-slate-600 dark:text-slate-300 whitespace-pre-line break-words">
+                                    {{ item.impact_value || "-" }}
                                 </span>
                             </td>
                         </tr>
@@ -180,7 +183,7 @@ const props = defineProps({
     filters: {
         type: Object,
         default: () => ({
-            status: "all",
+            status: "4",
         }),
     },
     filterOptions: {
@@ -217,6 +220,22 @@ const uniquePreserveOrder = (values) => {
     });
 };
 
+const formatProjectCode = (value) => {
+    const raw = String(value ?? "").trim();
+
+    if (!raw) {
+        return "-";
+    }
+
+    const digits = raw.match(/\d+/g)?.join("") ?? "";
+
+    if (!digits) {
+        return raw;
+    }
+
+    return String(Number(digits));
+};
+
 const rows = computed(() =>
     Array.isArray(props.resourceProjects) ? props.resourceProjects : [],
 );
@@ -233,7 +252,7 @@ const projectNameOptions = computed(() =>
 );
 const selectedCode = ref("all");
 const selectedProjectName = ref("all");
-const selectedStatus = ref(String(props.filters?.status ?? "all"));
+const selectedStatus = ref(String(props.filters?.status ?? "4"));
 
 const filteredRows = computed(() => {
     return rows.value.filter((item) => {

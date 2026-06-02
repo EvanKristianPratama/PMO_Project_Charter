@@ -28,6 +28,7 @@ class ResourceManagementService
                         'trs_project_charters.status',
                         'trs_project_charters.budget',
                         'trs_project_charters.key_personnel',
+                        'trs_project_charters.impact_value',
                     ]);
 
                     $query->oldest('trs_project_charters.id');
@@ -45,7 +46,7 @@ class ResourceManagementService
             'resourceProjects' => $resourceRows,
             'resourceSummary' => $this->buildResourceSummary($resourceRows),
             'filters' => [
-                'status' => 'all',
+                'status' => (string) InitiativeStatus::APPROVE,
             ],
             'filterOptions' => [
                 'statuses' => $this->statusOptions(),
@@ -63,6 +64,8 @@ class ResourceManagementService
                 'id' => null,
                 'row_key' => sprintf('project-%d', $project->id),
                 'project_id' => (int) $project->id,
+                'code' => $this->normalizeText($project->getAttribute('code')),
+                'name' => $this->normalizeProjectName($project),
                 'project_code' => $this->normalizeText($project->getAttribute('code')),
                 'project_name' => $this->normalizeProjectName($project),
                 'project_type' => (int) ($project->tipe_inisiative ?? 0),
@@ -72,6 +75,7 @@ class ResourceManagementService
                 'status' => '-',
                 'budget' => null,
                 'key_personnel' => null,
+                'impact_value' => null,
             ]];
         }
 
@@ -81,6 +85,8 @@ class ResourceManagementService
                     'id' => (int) $charter->id,
                     'row_key' => sprintf('charter-%d', $charter->id),
                     'project_id' => (int) $project->id,
+                    'code' => $this->normalizeText($project->getAttribute('code')),
+                    'name' => $this->normalizeProjectName($project),
                     'project_code' => $this->normalizeText($project->getAttribute('code')),
                     'project_name' => $this->normalizeProjectName($project),
                     'project_type' => (int) ($project->tipe_inisiative ?? 0),
@@ -95,6 +101,7 @@ class ResourceManagementService
                     ),
                     'budget' => $this->normalizeText($charter->budget),
                     'key_personnel' => $this->normalizeText($charter->key_personnel),
+                    'impact_value' => $this->normalizeText($charter->impact_value),
                 ];
             })
             ->values()

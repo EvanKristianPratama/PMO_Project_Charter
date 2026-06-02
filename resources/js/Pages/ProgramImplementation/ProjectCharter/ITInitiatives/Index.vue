@@ -134,7 +134,9 @@
 
             <section v-if="
                 tableMode !== TABLE_MODE.ROADMAP &&
-                tableMode !== TABLE_MODE.IMPLEMENTATION
+                tableMode !== TABLE_MODE.IMPLEMENTATION &&
+                tableMode !== TABLE_MODE.VALUE_CREATION &&
+                tableMode !== TABLE_MODE.RESOURCE_MANAGEMENT
             " class="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
                 <article
                     class="relative flex cursor-pointer flex-col justify-center rounded-2xl border border-[#A7C942] bg-[#A7C942] p-4 shadow-[0_4px_16px_rgba(167,201,66,0.3)]"
@@ -347,8 +349,7 @@ initiative, initiativeIndex
                         roadmapProjectsFor(initiative).length > 0
                     "
                         class="mt-5 flex flex-col overflow-hidden rounded-xl border border-[#d0dce8] shadow-sm dark:border-white/10">
-                        <template v-for="(
-roadmapProject, roadmapIndex
+                        <template v-for="(roadmapProject, roadmapIndex
                             ) in roadmapProjectsFor(initiative)" :key="roadmapEntryKey(initiative, roadmapProject)">
                             <ProjectRoadmapSummary :project="roadmapProject" :sequence="roadmapIndex + 1"
                                 :year-start="roadmapYearStart" :year-end="roadmapYearEnd" :expanded="isImplementationRoadmapExpanded(
