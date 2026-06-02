@@ -221,7 +221,7 @@
                                         No
                                     </th>
                                     <th class="p-2.5 text-left w-[360px] min-w-[360px] border-r border-[#b2cfc7] dark:border-[#255246] select-none text-[9.5px] font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                                        Butir tanggung jawab
+                                        Tugas & Tanggung Jawab berdasarkan kebijakan
                                     </th>
                                     <th 
                                         v-for="role in filteredRoles" 
