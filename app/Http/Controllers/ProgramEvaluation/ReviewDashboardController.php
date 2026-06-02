@@ -6,13 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\InitiativeStatus;
 use App\Models\MstInitiative;
 use App\Models\TrsOrganization;
+use App\Models\TrsProjectCharter;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Inertia\Response;
 
 class ReviewDashboardController extends Controller
 {
-    private const REVIEW_STATUS_ORDER = [
+    private const PROJECT_STATUS_ORDER = [
         'On Track',
         'At Risk',
         'Delayed',
@@ -64,12 +65,6 @@ class ReviewDashboardController extends Controller
             ->whereHas('mappedProjects')
             ->with([
                 'coe:id,name',
-                'latestStatusImplementation' => static fn ($query) => $query
-                    ->select([
-                        'trs_status_implementation.id',
-                        'trs_status_implementation.initiative_id',
-                        'trs_status_implementation.review_status',
-                    ]),
                 'mappedProjects' => static fn ($query) => $query
                     ->with([
                         'mapPicProject.ownerOrganization',
@@ -79,9 +74,31 @@ class ReviewDashboardController extends Controller
                         'projectStatusHistories' => static fn ($historyQuery) => $historyQuery
                             ->orderByDesc('tanggal')
                             ->orderByDesc('id'),
-                        'reviewPcStatusImplementations' => static fn ($reviewQuery) => $reviewQuery
+                        'pcStatusImplementations' => static fn ($statusQuery) => $statusQuery
+                            ->select([
+                                'trs_pc_status_implementation.id',
+                                'trs_pc_status_implementation.project_id',
+                                'trs_pc_status_implementation.month',
+                                'trs_pc_status_implementation.year',
+                                'trs_pc_status_implementation.status',
+                                'trs_pc_status_implementation.created_at',
+                                'trs_pc_status_implementation.updated_at',
+                            ])
                             ->orderByDesc('year')
-                            ->orderByDesc('updated_at')
+                            ->orderByRaw("CASE
+                                WHEN trs_pc_status_implementation.month = 'Desember' THEN 12
+                                WHEN trs_pc_status_implementation.month = 'November' THEN 11
+                                WHEN trs_pc_status_implementation.month = 'Oktober' THEN 10
+                                WHEN trs_pc_status_implementation.month = 'September' THEN 9
+                                WHEN trs_pc_status_implementation.month = 'Agustus' THEN 8
+                                WHEN trs_pc_status_implementation.month = 'Juli' THEN 7
+                                WHEN trs_pc_status_implementation.month = 'Juni' THEN 6
+                                WHEN trs_pc_status_implementation.month = 'Mei' THEN 5
+                                WHEN trs_pc_status_implementation.month = 'April' THEN 4
+                                WHEN trs_pc_status_implementation.month = 'Maret' THEN 3
+                                WHEN trs_pc_status_implementation.month = 'Februari' THEN 2
+                                WHEN trs_pc_status_implementation.month = 'Januari' THEN 1
+                                ELSE 0 END DESC")
                             ->orderByDesc('id'),
                     ])
                     ->orderBy('trs_projects.code')
@@ -96,7 +113,16 @@ class ReviewDashboardController extends Controller
                 $baselineDate = $this->resolveStatusDate($projects, InitiativeStatus::BASELINE);
                 $approveDate = $this->resolveStatusDate($projects, InitiativeStatus::APPROVE);
                 $processMonthValue = $this->resolveProcessMonthValue($baselineDate, $approveDate);
-                $latestReviewState = $this->resolveLatestReviewState($initiative, $projects);
+                $projectStatusLogs = $this->resolveProjectStatusLogs($projects);
+                $projectStatusPeriods = collect($projectStatusLogs)
+                    ->pluck('period')
+                    ->filter(static fn ($period) => trim((string) $period) !== '')
+                    ->unique()
+                    ->values()
+                    ->all();
+                $latestProjectStatus = $this->resolveLatestProjectStatusState($projectStatusLogs);
+                $baselineCharter = $this->resolveLatestProjectCharterByStatus($projects, 5);
+                $approvedCharter = $this->resolveLatestProjectCharterByStatus($projects, 4);
 
                 // Get owner and leader from the latest project charter of any mapped project
                 $latestCharter = $projects
@@ -123,6 +149,19 @@ class ReviewDashboardController extends Controller
                 );
                 $projectLeaderParents = $this->resolveParentOrganizationsByLevel(
                     $projectLeaderCode,
+                    $organizationDisplayLookup,
+                );
+
+                $baselineCharterData = $this->buildProjectCharterVersionData(
+                    $baselineCharter,
+                    $latestCharterProject?->name,
+                    $organizationCodeLookup,
+                    $organizationDisplayLookup,
+                );
+                $approvedCharterData = $this->buildProjectCharterVersionData(
+                    $approvedCharter,
+                    $latestCharterProject?->name,
+                    $organizationCodeLookup,
                     $organizationDisplayLookup,
                 );
 
@@ -157,12 +196,26 @@ class ReviewDashboardController extends Controller
                     'building_block_type' => trim((string) ($initiative->coe?->name ?? '')) !== '' ? $initiative->coe->name : '-',
                     'initiative_name' => trim((string) $initiative->name) !== '' ? $initiative->name : '-',
                     'project_charter_name' => trim((string) ($latestCharterProject?->name ?? '')) !== '' ? $latestCharterProject->name : null,
+                    'project_charter_name_baseline' => $baselineCharterData['project_charter_name'],
+                    'project_charter_name_approved' => $approvedCharterData['project_charter_name'],
+                    'project_owner_baseline' => $baselineCharterData['project_owner'],
+                    'project_owner_baseline_code' => $baselineCharterData['project_owner_code'],
+                    'project_leader_baseline' => $baselineCharterData['project_leader'],
+                    'project_leader_baseline_code' => $baselineCharterData['project_leader_code'],
+                    'project_owner_approved' => $approvedCharterData['project_owner'],
+                    'project_owner_approved_code' => $approvedCharterData['project_owner_code'],
+                    'project_leader_approved' => $approvedCharterData['project_leader'],
+                    'project_leader_approved_code' => $approvedCharterData['project_leader_code'],
+                    'has_baseline' => $baselineCharter !== null,
+                    'has_approved' => $approvedCharter !== null,
                     'baseline_date' => $this->formatDate($baselineDate),
                     'approve_date' => $this->formatDate($approveDate),
                     'process_month_value' => $processMonthValue,
                     'process_month' => $this->formatProcessMonth($processMonthValue),
-                    'latest_review_status' => $latestReviewState['status'],
-                    'latest_review_period' => $latestReviewState['period'],
+                    'latest_project_status' => $latestProjectStatus['status'],
+                    'latest_project_status_period' => $latestProjectStatus['period'],
+                    'project_status_logs' => $projectStatusLogs,
+                    'project_status_periods' => $projectStatusPeriods,
                     'project_owner' => $projectOwner,
                     'project_leader' => $projectLeaderDisplay,
                     'project_owner_code' => $projectOwnerCode,
@@ -189,8 +242,8 @@ class ReviewDashboardController extends Controller
             })
             ->values();
 
-        $withReviewStatus = $rows->filter(
-            static fn (array $row): bool => ($row['latest_review_status'] ?? null) !== 'Belum Ada Status',
+        $withProjectStatus = $rows->filter(
+            static fn (array $row): bool => ($row['latest_project_status'] ?? null) !== 'Belum Ada Status',
         )->count();
         $statusBreakdown = $this->buildStatusBreakdown($rows);
 
@@ -199,8 +252,8 @@ class ReviewDashboardController extends Controller
             'summary' => [
                 'total' => $rows->count(),
                 'buildingBlock' => $rows->count(),
-                'withReviewStatus' => $withReviewStatus,
-                'withoutReviewStatus' => $rows->count() - $withReviewStatus,
+                'withProjectStatus' => $withProjectStatus,
+                'withoutProjectStatus' => $rows->count() - $withProjectStatus,
                 'statusBreakdown' => $statusBreakdown,
             ],
         ];
@@ -359,27 +412,87 @@ class ReviewDashboardController extends Controller
         return $parents;
     }
 
-    private function resolveLatestReviewState(MstInitiative $initiative, Collection $projects): array
+    private function resolveProjectStatusLogs(Collection $projects): array
     {
-        $latestReviewLog = $projects
-            ->flatMap(static fn ($project) => $project->reviewPcStatusImplementations ?? collect())
-            ->filter(static fn ($history) => trim((string) ($history->review_status ?? '')) !== '')
-            ->sort(fn ($left, $right) => $this->compareReviewLogs($left, $right))
-            ->last();
+        return $projects
+            ->flatMap(static fn ($project) => $project->pcStatusImplementations ?? collect())
+            ->filter(static fn ($history) => trim((string) ($history->status ?? '')) !== '')
+            ->sort(fn ($left, $right) => $this->compareProjectStatusLogs($left, $right))
+            ->map(function ($history): array {
+                return [
+                    'status' => $this->normalizeProjectStatus((string) ($history->status ?? '')),
+                    'period' => $this->resolveProjectStatusPeriodLabel($history),
+                    'month' => trim((string) ($history->month ?? '')),
+                    'year' => trim((string) ($history->year ?? '')),
+                    'project_id' => (int) ($history->project_id ?? 0),
+                    'id' => (int) ($history->id ?? 0),
+                ];
+            })
+            ->filter(static fn (array $history): bool => $history['status'] !== null && trim((string) ($history['period'] ?? '')) !== '')
+            ->values()
+            ->all();
+    }
 
-        if ($latestReviewLog) {
+    private function resolveLatestProjectCharterByStatus(Collection $projects, int $status): ?TrsProjectCharter
+    {
+        return $projects
+            ->flatMap(static fn ($project) => $project->projectCharters ?? collect())
+            ->filter(static fn ($charter) => (int) ($charter->status ?? 0) === $status)
+            ->sortByDesc('id')
+            ->first();
+    }
+
+    private function buildProjectCharterVersionData(
+        ?TrsProjectCharter $charter,
+        ?string $fallbackProjectName,
+        array $organizationCodeLookup,
+        array $organizationDisplayLookup,
+    ): array {
+        $projectName = trim((string) ($fallbackProjectName ?? ''));
+        if (! $charter) {
             return [
-                'status' => $this->normalizeReviewStatus((string) ($latestReviewLog->review_status ?? '')),
-                'period' => $this->resolveReviewPeriodLabel($latestReviewLog),
+                'project_charter_name' => $projectName !== '' ? $projectName : null,
+                'project_owner' => null,
+                'project_owner_code' => null,
+                'project_leader' => null,
+                'project_leader_code' => null,
             ];
         }
 
-        $fallbackStatus = $this->normalizeReviewStatus(
-            (string) ($initiative->latestStatusImplementation?->review_status ?? ''),
-        );
+        $owner = trim((string) ($charter?->owner ?? '')) ?: '-';
+        $leader = trim((string) ($charter?->leader ?? '')) ?: '-';
+        $ownerCode = $this->resolveOrganizationCode($owner, $organizationCodeLookup);
+        $leaderCode = $this->resolveOrganizationCode($leader, $organizationCodeLookup);
+
+        $leaderDisplay = $leader;
+        if ($leaderCode && isset($organizationDisplayLookup[$leaderCode])) {
+            $leaderDisplay = $organizationDisplayLookup[$leaderCode];
+        }
 
         return [
-            'status' => $fallbackStatus ?? 'Belum Ada Status',
+            'project_charter_name' => $projectName !== '' ? $projectName : null,
+            'project_owner' => $owner,
+            'project_owner_code' => $ownerCode,
+            'project_leader' => $leaderDisplay,
+            'project_leader_code' => $leaderCode,
+        ];
+    }
+
+    private function resolveLatestProjectStatusState(array $projectStatusLogs): array
+    {
+        $latestStatusLog = ! empty($projectStatusLogs)
+            ? $projectStatusLogs[array_key_last($projectStatusLogs)]
+            : null;
+
+        if ($latestStatusLog) {
+            return [
+                'status' => $latestStatusLog['status'],
+                'period' => $latestStatusLog['period'],
+            ];
+        }
+
+        return [
+            'status' => 'Belum Ada Status',
             'period' => null,
         ];
     }
@@ -387,7 +500,7 @@ class ReviewDashboardController extends Controller
     private function buildStatusBreakdown(Collection $rows): array
     {
         $counts = $rows->reduce(function (array $carry, array $row): array {
-            $status = $this->normalizeReviewStatus((string) ($row['latest_review_status'] ?? ''))
+            $status = $this->normalizeProjectStatus((string) ($row['latest_project_status'] ?? ''))
                 ?? 'Belum Ada Status';
 
             $carry[$status] = ($carry[$status] ?? 0) + 1;
@@ -397,7 +510,7 @@ class ReviewDashboardController extends Controller
 
         $total = max(1, $rows->count());
 
-        $orderedRows = collect(self::REVIEW_STATUS_ORDER)
+        $orderedRows = collect(self::PROJECT_STATUS_ORDER)
             ->map(fn (string $status): ?array => isset($counts[$status])
                 ? [
                     'status' => $status,
@@ -408,7 +521,7 @@ class ReviewDashboardController extends Controller
             ->filter();
 
         $remainingRows = collect($counts)
-            ->except(self::REVIEW_STATUS_ORDER)
+            ->except(self::PROJECT_STATUS_ORDER)
             ->map(fn (int $count, string $status): array => [
                 'status' => $status,
                 'count' => $count,
@@ -466,7 +579,7 @@ class ReviewDashboardController extends Controller
         return (string) $months;
     }
 
-    private function normalizeReviewStatus(?string $rawStatus): ?string
+    private function normalizeProjectStatus(?string $rawStatus): ?string
     {
         $value = strtolower(trim((string) $rawStatus));
 
@@ -487,7 +600,7 @@ class ReviewDashboardController extends Controller
         };
     }
 
-    private function compareReviewLogs(mixed $left, mixed $right): int
+    private function compareProjectStatusLogs(mixed $left, mixed $right): int
     {
         $leftYear = (int) ($left->year ?? 0);
         $rightYear = (int) ($right->year ?? 0);
@@ -534,29 +647,37 @@ class ReviewDashboardController extends Controller
             return 0;
         }
 
+        if (is_numeric($normalized)) {
+            $monthNumber = (int) $normalized;
+
+            return $monthNumber >= 1 && $monthNumber <= 12 ? $monthNumber : 0;
+        }
+
         $index = array_search($normalized, self::MONTHS_ORDER, true);
 
         return $index === false ? 0 : $index + 1;
     }
 
-    private function resolveReviewPeriodLabel(mixed $reviewLog): ?string
+    private function resolveProjectStatusPeriodLabel(mixed $statusLog): ?string
     {
-        $start = trim((string) ($reviewLog->start ?? ''));
-        $end = trim((string) ($reviewLog->end ?? ''));
-        $year = trim((string) ($reviewLog->year ?? ''));
+        $month = trim((string) ($statusLog->month ?? ''));
+        $year = trim((string) ($statusLog->year ?? ''));
 
-        if ($start === '') {
+        if ($month === '') {
             return null;
         }
 
-        if ($end !== '' && $year !== '') {
-            return sprintf('%s - %s %s', $start, $end, $year);
+        if (is_numeric($month)) {
+            $monthNumber = (int) $month;
+            $month = $monthNumber >= 1 && $monthNumber <= 12
+                ? self::MONTHS_ORDER[$monthNumber - 1]
+                : (string) $monthNumber;
         }
 
         if ($year !== '') {
-            return sprintf('%s %s', $start, $year);
+            return sprintf('%s %s', $month, $year);
         }
 
-        return $start;
+        return $month;
     }
 }

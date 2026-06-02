@@ -179,7 +179,7 @@
                         <td class="border border-slate-900 px-2 py-2 text-center font-medium text-slate-800 dark:border-white/20 dark:text-slate-200">
                              <span
                                 class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
-                                :class="statusCapsuleClass(row.latest_review_status)"
+                                :class="statusCapsuleClass(row.latest_project_status)"
                             >
                                 {{ row.no }}
                             </span>
@@ -243,7 +243,7 @@ const buildingBlockOptions = computed(() => {
 });
 
 const periodOptions = computed(() => {
-    return Array.from(new Set(props.items.map(i => i.latest_review_period).filter(Boolean))).sort();
+        return Array.from(new Set(props.items.map(i => i.latest_project_status_period).filter(Boolean))).sort();
 });
 
 const ownerOptions = computed(() => {
@@ -270,7 +270,7 @@ const normalizeStatus = (value) => String(value ?? '').trim().toLowerCase();
 const baseFilteredItems = computed(() => {
     return props.items.filter(item => {
         const matchesBB = selectedBuildingBlock.value === 'all' || item.building_block_type === selectedBuildingBlock.value;
-        const matchesPeriod = selectedPeriod.value === 'all' || item.latest_review_period === selectedPeriod.value;
+        const matchesPeriod = selectedPeriod.value === 'all' || item.latest_project_status_period === selectedPeriod.value;
         const matchesOwner = selectedProjectOwner.value === 'all' || item.project_owner === selectedProjectOwner.value;
         const matchesLeader = selectedProjectLeader.value === 'all' || item.project_leader === selectedProjectLeader.value;
         const matchesInitiative = selectedInitiativeId.value === 'all' || String(item.initiative_id) === String(selectedInitiativeId.value);
@@ -281,7 +281,7 @@ const baseFilteredItems = computed(() => {
 
 const filteredItems = computed(() => {
     return baseFilteredItems.value.filter(item => {
-        return !selectedStatus.value || normalizeStatus(item.latest_review_status) === normalizeStatus(selectedStatus.value);
+        return !selectedStatus.value || normalizeStatus(item.latest_project_status) === normalizeStatus(selectedStatus.value);
     });
 });
 
@@ -289,7 +289,7 @@ const filteredItems = computed(() => {
 const statusLegend = computed(() => {
     const counts = Object.fromEntries(statusDesiredOrder.map(s => [s, 0]));
     baseFilteredItems.value.forEach(item => {
-        const rawStatus = item.latest_review_status || '';
+        const rawStatus = item.latest_project_status || '';
         const matched = statusDesiredOrder.find(s => normalizeStatus(s) === normalizeStatus(rawStatus));
         if (matched) counts[matched]++;
     });

@@ -8,7 +8,7 @@
                 />
             </section>
 
-            <StatusMatrix
+            <!-- <StatusMatrix
                 v-if="trsReviewPCs.length > 0"
                 :rows="matrixRows"
                 groupBy="project_owner"
@@ -20,7 +20,7 @@
                 :rows="matrixRows"
                 groupBy="project_leader"
                 label="Project Leader"
-            />
+            /> -->
 
             <!-- Footer Note -->
             <footer class="mt-12 mb-8 flex justify-center border-t border-slate-100 pt-8 dark:border-white/5">

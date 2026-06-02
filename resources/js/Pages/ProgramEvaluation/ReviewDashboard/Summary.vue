@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Review Summary">
+    <UserLayout title="Project Status Summary">
         <div class="space-y-6 animate-fade-in-up">
             <!-- Duration Statistics Table -->
             <DurationStatsTable
@@ -19,14 +19,14 @@
             />
 
             <!-- Project Leader Breakdown Table -->
-                <LeaderBreakdownTable
-                    :originalData="leaderBreakdown.original"
-                    :restructureData="leaderBreakdown.restructure"
-                    :getCircleColor="getCircleColor"
-                />
+            <LeaderBreakdownTable
+                :originalData="leaderBreakdown.original"
+                :restructureData="leaderBreakdown.restructure"
+                :getCircleColor="getCircleColor"
+            />
 
             <!-- Status Matrix - Project Owner -->
-            <StatusMatrix
+            <OwnerStatusMatrix
                 v-if="rows.length > 0"
                 :rows="rows"
                 groupBy="project_owner"
@@ -34,7 +34,7 @@
             />
 
             <!-- Status Matrix - Project Leader -->
-            <StatusMatrix
+            <LeaderStatusMatrix
                 v-if="rows.length > 0"
                 :rows="rows"
                 groupBy="project_leader"
@@ -56,7 +56,8 @@ import { computed } from 'vue';
 import DurationStatsTable from '@/Components/ProgramEvaluation/ReviewDashboard/DurationStatsTable.vue';
 import OwnerBreakdownTable from '@/Components/ProgramEvaluation/ReviewDashboard/OwnerBreakdownTable.vue';
 import LeaderBreakdownTable from '@/Components/ProgramEvaluation/ReviewDashboard/LeaderBreakdownTable.vue';
-import StatusMatrix from '@/Components/ProgramEvaluation/ReviewDashboard/StatusMatrix.vue';
+import OwnerStatusMatrix from '@/Components/ProgramEvaluation/ReviewDashboard/OwnerStatusMatrix.vue';
+import LeaderStatusMatrix from '@/Components/ProgramEvaluation/ReviewDashboard/LeaderStatusMatrix.vue';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
 const props = defineProps({
@@ -68,7 +69,7 @@ const props = defineProps({
 
 const getInitiativeTooltip = (row) => {
     const projectName = String(row.project_charter_name || row.initiative_name || '').trim();
-    const status = String(row.latest_review_status || '').trim();
+    const status = String(row.latest_project_status || '').trim();
 
     if (projectName !== '' && status !== '') {
         return `${projectName} - ${status}`;
@@ -114,7 +115,7 @@ const durationStats = computed(() => {
             .filter((r) => Number(r.process_month_value) === val)
             .map((r) => ({
                 no: r.no,
-                status: r.latest_review_status,
+                status: r.latest_project_status,
                 projectCharterName: getInitiativeTooltip(r),
             }));
 
@@ -123,7 +124,7 @@ const durationStats = computed(() => {
         totalNotApproved: notApprovedRows.length,
         notApprovedInitiatives: notApprovedRows.map((r) => ({
             no: r.no,
-            status: r.latest_review_status,
+            status: r.latest_project_status,
             projectCharterName: getInitiativeTooltip(r),
         })),
         stats: [
@@ -198,7 +199,7 @@ const ownerBreakdown = computed(() => {
 
             const data = {
                 no: row.no,
-                status: row.latest_review_status,
+                status: row.latest_project_status,
                 projectCharterName: getInitiativeTooltip(row),
             };
 
@@ -311,7 +312,7 @@ const leaderBreakdown = computed(() => {
 
             const data = {
                 no: row.no,
-                status: row.latest_review_status,
+                status: row.latest_project_status,
                 projectCharterName: getInitiativeTooltip(row),
             };
 
