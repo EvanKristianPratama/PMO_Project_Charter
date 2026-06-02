@@ -362,17 +362,8 @@
                                 <td class="p-3.5 align-top relative">
                                     <!-- 1. Read Mode -->
                                     <div v-if="editingObjectiveId !== obj.objective_id" class="space-y-3">
-                                        <ul v-if="getMappedResponsiblesList(obj.objective_id).length > 0" class="list-disc pl-4 space-y-1.5 text-xs text-slate-800 dark:text-slate-200">
-                                            <li v-for="resp in getMappedResponsiblesList(obj.objective_id)" :key="resp.id" class="text-justify font-serif leading-relaxed">
-                                                {{ resp.responsible }}
-                                            </li>
-                                        </ul>
-                                        <p v-else class="text-xs text-slate-400 dark:text-slate-500 italic">
-                                            Belum ada pemetaan tanggung jawab.
-                                        </p>
-
                                         <!-- Edit Trigger Button -->
-                                        <div class="print:hidden mt-2">
+                                        <div class="print:hidden">
                                             <button 
                                                 @click="startEditing(obj)"
                                                 class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 hover:border-[#821f44]/30 hover:bg-[#821f44]/5 text-slate-600 hover:text-[#821f44] dark:border-white/10 dark:text-slate-400 dark:hover:text-pink-400 px-3 py-1.5 text-[11px] font-bold transition active:scale-95 shadow-sm"
@@ -383,6 +374,15 @@
                                                 Edit Pemetaan
                                             </button>
                                         </div>
+
+                                        <ul v-if="getMappedResponsiblesList(obj.objective_id).length > 0" class="list-disc pl-4 space-y-1.5 text-xs text-slate-800 dark:text-slate-200">
+                                            <li v-for="resp in getMappedResponsiblesList(obj.objective_id)" :key="resp.id" class="text-justify font-serif leading-relaxed">
+                                                {{ resp.responsible }}
+                                            </li>
+                                        </ul>
+                                        <p v-else class="text-xs text-slate-400 dark:text-slate-500 italic">
+                                            Belum ada pemetaan tanggung jawab.
+                                        </p>
                                     </div>
 
                                     <!-- 2. Edit Mode -->
