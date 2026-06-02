@@ -101,6 +101,23 @@
                         </option>
                     </select>
                 </div>
+
+                <div class="flex items-center gap-1.5">
+                    <label class="text-[10px]">Period</label>
+                    <select
+                        v-model="selectedPeriod"
+                        class="min-w-[124px] rounded border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700 shadow-sm transition focus:border-slate-300 focus:outline-none dark:border-white/10 dark:bg-[#1f1f1f] dark:text-slate-200"
+                    >
+                        <option value="all">All (Latest)</option>
+                        <option
+                            v-for="period in periodOptions"
+                            :key="`resource-period-filter-${period}`"
+                            :value="period"
+                        >
+                            {{ period }}
+                        </option>
+                    </select>
+                </div>
             </div>
 
             <div class="overflow-x-auto">
@@ -116,6 +133,11 @@
                                 class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
                             >
                                 List of IT Initiatives
+                            </th>
+                            <th
+                                class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
+                            >
+                                Periode Status
                             </th>
                             <th
                                 class="w-[10%] px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
@@ -158,7 +180,7 @@
                                     <div class="flex items-start gap-2">
                                         <span
                                             class="inline-flex shrink-0 items-center justify-center rounded px-1.5 py-0.5 text-[9px] font-bold ring-1 ring-inset"
-                                            :class="projectCodeStatusClass(item.latest_implementation_status_label)"
+                                            :class="projectCodeStatusClass(getProjectStatusEntry(item, selectedPeriod).status)"
                                         >
                                             {{ formatProjectCode(item.code || item.project_code) }}
                                         </span>
@@ -173,6 +195,12 @@
                                     >
                                         {{ item.version_status_label }}
                                     </span>
+                                </div>
+                            </td>
+
+                            <td class="border-r border-slate-200 px-6 py-4 align-top dark:border-white/5">
+                                <div class="text-xs text-slate-700 dark:text-slate-200">
+                                    {{ getProjectStatusEntry(item, selectedPeriod).period || "-" }}
                                 </div>
                             </td>
 
@@ -197,7 +225,7 @@
 
                         <tr v-if="filteredRows.length === 0">
                             <td
-                                colspan="5"
+                                colspan="6"
                                 class="px-6 py-12 text-center text-sm text-slate-500 dark:text-slate-400"
                             >
                                 Project Charter Not Available
@@ -368,6 +396,94 @@ const projectNameOptions = computed(() =>
 const selectedProjectName = ref(String(props.filters?.project ?? "all"));
 const selectedImplementationStatus = ref(String(props.filters?.status ?? "all"));
 const selectedVersion = ref(String(props.filters?.version ?? "all"));
+const selectedPeriod = ref("all");
+
+const periodOrderValue = (periodLabel) => {
+    const normalized = String(periodLabel ?? "").trim();
+    if (!normalized) return 0;
+
+    const parts = normalized.split(/\s+/);
+    const year = Number(parts[parts.length - 1]);
+    const monthName = parts.slice(0, -1).join(" ").trim();
+
+    const monthOrderMap = {
+        Januari: 1,
+        Februari: 2,
+        Maret: 3,
+        April: 4,
+        Mei: 5,
+        Juni: 6,
+        Juli: 7,
+        Agustus: 8,
+        September: 9,
+        Oktober: 10,
+        November: 11,
+        Desember: 12,
+    };
+
+    const monthOrder = monthOrderMap[monthName] ?? 0;
+
+    if (!Number.isFinite(year)) {
+        return monthOrder;
+    }
+
+    return year * 100 + monthOrder;
+};
+
+const periodOptions = computed(() => {
+    const map = new Map();
+
+    rows.value.forEach((row) => {
+        const logs = Array.isArray(row.status_logs) ? row.status_logs : [];
+        logs.forEach((log) => {
+            const value = String(log.period ?? "").trim();
+            if (value && !map.has(value)) {
+                map.set(value, value);
+            }
+        });
+    });
+
+    return Array.from(map.values()).sort((a, b) => periodOrderValue(b) - periodOrderValue(a));
+});
+
+const getProjectStatusEntry = (item, period) => {
+    const logs = Array.isArray(item.status_logs) ? item.status_logs : [];
+
+    if (period === "all") {
+        if (logs.length > 0) {
+            let latestLog = logs[0];
+            let maxOrder = periodOrderValue(latestLog.period);
+
+            for (let i = 1; i < logs.length; i++) {
+                const currentOrder = periodOrderValue(logs[i].period);
+                if (currentOrder > maxOrder) {
+                    maxOrder = currentOrder;
+                    latestLog = logs[i];
+                }
+            }
+            return latestLog;
+        }
+
+        return {
+            status: item.latest_implementation_status,
+            month: item.latest_pc_month,
+            year: item.latest_pc_year,
+            period:
+                item.latest_pc_month && item.latest_pc_year
+                    ? `${item.latest_pc_month} ${item.latest_pc_year}`
+                    : null,
+        };
+    }
+
+    for (let index = logs.length - 1; index >= 0; index -= 1) {
+        const log = logs[index];
+        if (String(log?.period ?? "").trim() === period) {
+            return log;
+        }
+    }
+
+    return null;
+};
 
 const baseFilteredRows = computed(() => {
     return rows.value.filter((item) => {
@@ -384,9 +500,15 @@ const baseFilteredRows = computed(() => {
 
 const filteredRows = computed(() =>
     baseFilteredRows.value.filter((item) => {
+        const statusEntry = getProjectStatusEntry(item, selectedPeriod.value);
+
+        if (selectedPeriod.value !== "all" && !statusEntry) {
+            return false;
+        }
+
         if (
             selectedImplementationStatus.value !== "all" &&
-            canonicalStatus(item?.latest_implementation_status) !== selectedImplementationStatus.value
+            canonicalStatus(statusEntry?.status) !== selectedImplementationStatus.value
         ) {
             return false;
         }
@@ -422,7 +544,10 @@ const statusLegendItems = computed(() => {
             return;
         }
 
-        const key = canonicalStatus(item?.latest_implementation_status);
+        const statusEntry = getProjectStatusEntry(item, selectedPeriod.value);
+        if (!statusEntry) return;
+
+        const key = canonicalStatus(statusEntry.status);
         if (!key || !(key in counts)) {
             return;
         }

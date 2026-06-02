@@ -100,6 +100,9 @@ class ResourceManagementService
 
         return $project->projectCharters
             ->map(function ($charter) use ($project, $coeName): array {
+                $latestLog = $this->latestPcLog($project);
+                $earliestLog = $this->earliestPcLog($project);
+
                 return [
                     'id' => (int) $charter->id,
                     'row_key' => sprintf('charter-%d', $charter->id),
@@ -124,6 +127,19 @@ class ResourceManagementService
                     ),
                     'latest_implementation_status' => $this->latestImplementationStatus($project),
                     'latest_implementation_status_label' => $this->latestImplementationStatusLabel($project),
+                    'latest_pc_month' => $latestLog?->month,
+                    'latest_pc_year' => $latestLog?->year,
+                    'earliest_pc_month' => $earliestLog?->month,
+                    'earliest_pc_year' => $earliestLog?->year,
+                    'status_logs' => collect($project->pcStatusImplementations ?? [])
+                        ->map(fn($log) => [
+                            'status' => $log->status,
+                            'month' => $log->month,
+                            'year' => $log->year,
+                            'period' => trim("{$log->month} {$log->year}"),
+                        ])
+                        ->values()
+                        ->toArray(),
                     'budget' => $this->normalizeText($charter->budget),
                     'key_personnel' => $this->normalizeText($charter->key_personnel),
                     'key_personnel_display' => $this->buildKeyPersonnelDisplay(
@@ -136,6 +152,85 @@ class ResourceManagementService
             })
             ->values()
             ->all();
+    }
+
+    private function latestPcLog(TrsProject $project): ?object
+    {
+        return collect($project->pcStatusImplementations ?? [])
+            ->sort(fn ($left, $right) => $this->compareImplementationStatus($left, $right))
+            ->last();
+    }
+
+    private function earliestPcLog(TrsProject $project): ?object
+    {
+        return collect($project->pcStatusImplementations ?? [])
+            ->sort(fn ($left, $right) => $this->compareImplementationStatus($left, $right))
+            ->first();
+    }
+
+    private function compareImplementationStatus(mixed $left, mixed $right): int
+    {
+        $leftKey = $this->implementationStatusSortKey($left);
+        $rightKey = $this->implementationStatusSortKey($right);
+
+        return $leftKey <=> $rightKey;
+    }
+
+    private function implementationStatusSortKey(mixed $log): array
+    {
+        return [
+            $this->normalizeYear($log?->year ?? null),
+            $this->normalizeMonth($log?->month ?? null),
+            $this->normalizeTimestamp($log?->created_at ?? null, $log?->updated_at ?? null),
+            (int) ($log?->id ?? 0),
+        ];
+    }
+
+    private function normalizeYear(mixed $value): int
+    {
+        $parsed = (int) trim((string) ($value ?? ''));
+
+        return $parsed > 0 ? $parsed : PHP_INT_MIN;
+    }
+
+    private function normalizeMonth(mixed $value): int
+    {
+        static $monthOrder = [
+            'januari' => 1,
+            'februari' => 2,
+            'maret' => 3,
+            'april' => 4,
+            'mei' => 5,
+            'juni' => 6,
+            'juli' => 7,
+            'agustus' => 8,
+            'september' => 9,
+            'oktober' => 10,
+            'november' => 11,
+            'desember' => 12,
+        ];
+
+        $normalized = strtolower(trim((string) ($value ?? '')));
+
+        return $monthOrder[$normalized] ?? 0;
+    }
+
+    private function normalizeTimestamp(mixed $createdAt, mixed $updatedAt): int
+    {
+        $candidates = [$createdAt, $updatedAt];
+
+        foreach ($candidates as $candidate) {
+            if ($candidate === null || $candidate === '') {
+                continue;
+            }
+
+            $parsed = strtotime((string) $candidate);
+            if ($parsed !== false) {
+                return $parsed;
+            }
+        }
+
+        return PHP_INT_MIN;
     }
 
     private function buildResourceSummary(array $resourceRows): array

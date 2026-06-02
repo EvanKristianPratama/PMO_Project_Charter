@@ -82,7 +82,15 @@ class ValueCreationController extends Controller
             ->flatMap(function ($initiative) {
                 $coeName = $initiative->coe?->name ?? 'Unassigned';
                 $latestReviewStatus = $this->latestReviewStatus($initiative);
-                $latestPcStatus = $this->latestPcStatus($initiative);
+                $latestPcLog = $this->latestPcLog($initiative);
+                $latestPcStatus = $latestPcLog?->status;
+                $latestPcMonth = $latestPcLog?->month;
+                $latestPcYear = $latestPcLog?->year;
+
+                $earliestPcLog = $this->earliestPcLog($initiative);
+                $earliestPcMonth = $earliestPcLog?->month;
+                $earliestPcYear = $earliestPcLog?->year;
+
                 $projects = collect($initiative->mappedProjects ?? []);
 
                 if ($projects->isEmpty()) {
@@ -100,10 +108,25 @@ class ValueCreationController extends Controller
                         'coe_name' => $coeName,
                         'latest_review_status' => $latestReviewStatus,
                         'latest_pc_status' => $latestPcStatus,
+                        'latest_pc_month' => $latestPcMonth,
+                        'latest_pc_year' => $latestPcYear,
+                        'earliest_pc_month' => $earliestPcMonth,
+                        'earliest_pc_year' => $earliestPcYear,
+                        'status_logs' => [],
                     ]];
                 }
 
-                return $projects->flatMap(function ($project) use ($initiative, $coeName, $latestReviewStatus, $latestPcStatus) {
+                return $projects->flatMap(function ($project) use ($initiative, $coeName, $latestReviewStatus, $latestPcStatus, $latestPcMonth, $latestPcYear, $earliestPcMonth, $earliestPcYear) {
+                    $statusLogs = collect($project->pcStatusImplementations ?? [])
+                        ->map(fn($log) => [
+                            'status' => $log->status,
+                            'month' => $log->month,
+                            'year' => $log->year,
+                            'period' => trim("{$log->month} {$log->year}"),
+                        ])
+                        ->values()
+                        ->toArray();
+
                     $charters = collect($project->charters ?? [])
                         ->filter()
                         ->sortByDesc('id')
@@ -133,10 +156,15 @@ class ValueCreationController extends Controller
                                 'coe_name' => $coeName,
                                 'latest_review_status' => $latestReviewStatus,
                                 'latest_pc_status' => $latestPcStatus,
+                                'latest_pc_month' => $latestPcMonth,
+                                'latest_pc_year' => $latestPcYear,
+                                'earliest_pc_month' => $earliestPcMonth,
+                                'earliest_pc_year' => $earliestPcYear,
+                                'status_logs' => $statusLogs,
                         ]];
                     }
 
-                    return $charters->map(function ($charter) use ($initiative, $project, $coeName, $latestReviewStatus, $latestPcStatus) {
+                    return $charters->map(function ($charter) use ($initiative, $project, $coeName, $latestReviewStatus, $latestPcStatus, $latestPcMonth, $latestPcYear, $earliestPcMonth, $earliestPcYear, $statusLogs) {
                         return [
                             'id' => $charter->id ?? $initiative->id,
                             'row_key' => sprintf(
@@ -158,6 +186,11 @@ class ValueCreationController extends Controller
                             'coe_name' => $coeName,
                             'latest_review_status' => $latestReviewStatus,
                             'latest_pc_status' => $latestPcStatus,
+                            'latest_pc_month' => $latestPcMonth,
+                            'latest_pc_year' => $latestPcYear,
+                            'earliest_pc_month' => $earliestPcMonth,
+                            'earliest_pc_year' => $earliestPcYear,
+                            'status_logs' => $statusLogs,
                         ];
                     });
                 });
@@ -181,12 +214,25 @@ class ValueCreationController extends Controller
             ->first()?->review_status;
     }
 
-    private function latestPcStatus(MstInitiative $initiative): ?string
+    private function latestPcLog(MstInitiative $initiative): ?object
     {
         return collect($initiative->mappedProjects ?? [])
             ->flatMap(static fn ($project) => $project->pcStatusImplementations ?? collect())
             ->sort(fn ($left, $right) => $this->compareImplementationStatus($left, $right))
-            ->last()?->status;
+            ->last();
+    }
+
+    private function earliestPcLog(MstInitiative $initiative): ?object
+    {
+        return collect($initiative->mappedProjects ?? [])
+            ->flatMap(static fn ($project) => $project->pcStatusImplementations ?? collect())
+            ->sort(fn ($left, $right) => $this->compareImplementationStatus($left, $right))
+            ->first();
+    }
+
+    private function latestPcStatus(MstInitiative $initiative): ?string
+    {
+        return $this->latestPcLog($initiative)?->status;
     }
 
     private function versionLegend(iterable $rows): array
