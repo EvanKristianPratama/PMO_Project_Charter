@@ -9,33 +9,31 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('trs_map_actor_sop', function (Blueprint $table) {
-            if (!Schema::hasColumn('trs_map_actor_sop', 'id')) {
-                $table->id()->first();
-            }
+        // Backup data lama
+        $oldData = DB::table('trs_map_actor_sop')->get()->map(function ($row) {
+            return (array) $row;
+        })->toArray();
 
-            if (!Schema::hasColumn('trs_map_actor_sop', 'tipe')) {
-                $table->string('tipe', 1)->nullable()->after('sop_id');
-            }
-
-            if (!Schema::hasColumn('trs_map_actor_sop', 'created_at')) {
-                $table->timestamps();
-            }
+        // Recreate table secara aman
+        Schema::dropIfExists('trs_map_actor_sop');
+        Schema::create('trs_map_actor_sop', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('actor_id');
+            $table->unsignedBigInteger('sop_id');
+            $table->string('tipe', 255)->nullable();
+            $table->timestamps();
         });
 
-        if (Schema::hasColumn('trs_map_actor_sop', 'tipe')) {
-            DB::table('trs_map_actor_sop')
-                ->whereNull('trs_map_actor_sop.tipe')
-                ->get(['id', 'sop_id'])
-                ->each(function ($mapping) {
-                    $tipe = DB::table('mst_sop')->where('id', $mapping->sop_id)->value('tipe');
-
-                    if ($tipe) {
-                        DB::table('trs_map_actor_sop')
-                            ->where('id', $mapping->id)
-                            ->update(['tipe' => $tipe]);
-                    }
-                });
+        // Masukkan kembali data lama dengan tipe yang dihitung
+        foreach ($oldData as $row) {
+            $tipe = $row['tipe'] ?? DB::table('mst_sop')->where('id', $row['sop_id'])->value('tipe');
+            DB::table('trs_map_actor_sop')->insert([
+                'actor_id' => $row['actor_id'],
+                'sop_id' => $row['sop_id'],
+                'tipe' => $tipe ?: 'A',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
     }
 

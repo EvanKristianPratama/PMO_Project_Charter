@@ -12,13 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('mst_general_policy', function (Blueprint $table) {
-            $table->unsignedBigInteger('regulation_id')->nullable()->after('id');
-            $table->foreign('regulation_id')->references('id')->on('mst_regulation')->onDelete('cascade');
+            if (!Schema::hasColumn('mst_general_policy', 'regulation_id')) {
+                $table->unsignedInteger('regulation_id')->nullable()->after('id');
+            }
         });
 
         Schema::table('mst_objective', function (Blueprint $table) {
-            $table->unsignedBigInteger('regulation_id')->nullable()->after('objective_id');
-            $table->foreign('regulation_id')->references('id')->on('mst_regulation')->onDelete('cascade');
+            if (!Schema::hasColumn('mst_objective', 'regulation_id')) {
+                $table->unsignedInteger('regulation_id')->nullable()->after('objective_id');
+            }
         });
     }
 

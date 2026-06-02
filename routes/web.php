@@ -324,6 +324,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
         // Mapped Responsibles from Master Data
         Route::post('/roles/mapped-responsible', [RoleController::class, 'storeMappedResponsible'])->name('roles.mapped-responsible.store');
         Route::delete('/roles/mapped-responsible/{roleId}/{responsibleId}', [RoleController::class, 'destroyMappedResponsible'])->name('roles.mapped-responsible.destroy');
+        Route::post('/roles/responsible-practice', [RoleController::class, 'updateResponsiblePractice'])->name('roles.responsible-practice.update');
 
         // Regulasi (Regulation) CRUD
         Route::get('/regulation', [RegulationController::class, 'index'])->name('regulation.index');
@@ -478,6 +479,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
         Route::post('/', [BpmnWorkflowController::class, 'store'])->name('store');
         Route::delete('/{bpmnWorkflow}', [BpmnWorkflowController::class, 'destroy'])->name('destroy');
         Route::post('/trigger-action', [BpmnWorkflowController::class, 'triggerAction'])->name('trigger-action');
+        Route::post('/{id}/sync-from-sop', [BpmnWorkflowController::class, 'syncFromSop'])->name('sync-from-sop');
     });
 });
 

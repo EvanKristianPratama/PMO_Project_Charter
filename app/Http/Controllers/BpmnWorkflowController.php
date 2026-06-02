@@ -47,6 +47,7 @@ class BpmnWorkflowController extends Controller
             'id' => 'nullable|integer|exists:bpmn_workflows,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'sop_type' => 'nullable|string|in:A,B',
             'flow_data' => 'nullable|array',
             'bpmn_xml' => 'nullable|string',
             'is_active' => 'boolean',
@@ -57,11 +58,17 @@ class BpmnWorkflowController extends Controller
             [
                 'name' => $validated['name'],
                 'description' => $validated['description'] ?? '',
+                'sop_type' => $validated['sop_type'] ?? null,
                 'flow_data' => $validated['flow_data'] ?? null,
                 'bpmn_xml' => $validated['bpmn_xml'] ?? null,
                 'is_active' => $validated['is_active'] ?? true,
             ]
         );
+
+        // Jika workflow terasosiasi dengan tipe SOP, lakukan sinkronisasi otomatis ke database SOP
+        if ($workflow->sop_type && $workflow->bpmn_xml) {
+            \App\Services\BpmnSopSyncService::syncBpmnToSop($workflow);
+        }
 
         ActivityLogService::log(
             event: isset($validated['id']) ? 'updated' : 'created',
@@ -170,6 +177,45 @@ class BpmnWorkflowController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal memproses aksi BPMN: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function syncFromSop(int $id): JsonResponse
+    {
+        $bpmnWorkflow = BpmnWorkflow::findOrFail($id);
+        $sopType = $bpmnWorkflow->sop_type;
+        if (!$sopType || !in_array($sopType, ['A', 'B'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Workflow ini tidak terasosiasi dengan tipe SOP apa pun.',
+            ], 400);
+        }
+
+        try {
+            $generatedXml = \App\Services\BpmnSopSyncService::generateXmlFromSop($sopType);
+            
+            if ($generatedXml) {
+                $bpmnWorkflow->update([
+                    'bpmn_xml' => $generatedXml
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Berhasil menyinkronkan diagram BPMN dari Database SOP!',
+                    'bpmn_xml' => $generatedXml,
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak ada data langkah SOP untuk tipe ini.',
+            ], 404);
+
+        } catch (Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyinkronkan data: ' . $e->getMessage(),
             ], 500);
         }
     }

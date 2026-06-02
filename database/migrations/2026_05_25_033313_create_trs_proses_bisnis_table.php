@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::dropIfExists('trs_proses_bisnis');
         Schema::create('trs_proses_bisnis', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->constrained('trs_organization')->onDelete('cascade');
+            $table->unsignedInteger('organization_id');
             $table->string('no');
             $table->text('proses_bisnis');
             $table->text('tugas');

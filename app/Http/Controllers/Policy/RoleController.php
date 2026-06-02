@@ -79,6 +79,8 @@ class RoleController extends Controller
                 $query->orderBy('id', 'asc');
             }, 'mappedResponsibles'])->orderBy('id', 'asc')->get();
 
+            $responsibles = MstResponsible::with('objectives')->orderBy('responsible', 'asc')->get();
+
             $regulations = MstRegulation::orderBy('id', 'desc')->get();
             // Filter to prioritize regulation with "PEDOMAN TATA KELOLA" title
             $pedoman = $regulations->first(function ($r) {
@@ -89,15 +91,20 @@ class RoleController extends Controller
                     $regulations->where('id', '!=', $pedoman->id)->values()
                 );
             }
+            $objectives = \App\Models\MstObjective::with('practices')->orderBy('objective_id', 'asc')->get();
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::warning('[RoleController] DB error loading roles: ' . $e->getMessage());
             $roles = collect([]);
+            $responsibles = collect([]);
             $regulations = collect([]);
+            $objectives = collect([]);
         }
 
         return Inertia::render('Policy/Guidance/Role/Index', [
             'roles' => $roles,
             'regulations' => $regulations,
+            'responsibles' => $responsibles,
+            'objectives' => $objectives,
         ]);
     }
 
@@ -291,5 +298,36 @@ class RoleController extends Controller
         return redirect()
             ->route('policy.roles.manage')
             ->with('success', 'Pemetaan Master Responsible berhasil dihapus.');
+    }
+
+    /**
+     * Update mapping between responsibilities (Bab 3) and policies/objectives (Bab 2).
+     */
+    public function updateResponsiblePractice(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'mappings' => 'required|array',
+            'mappings.*.responsible_id' => 'required|integer|exists:mst_responsible,id',
+            'mappings.*.objective_ids' => 'present|array',
+            'mappings.*.objective_ids.*' => 'string|exists:mst_objective,objective_id',
+        ]);
+
+        try {
+            \DB::transaction(function () use ($validated) {
+                foreach ($validated['mappings'] as $map) {
+                    $responsible = MstResponsible::findOrFail($map['responsible_id']);
+                    $responsible->objectives()->sync($map['objective_ids']);
+                }
+            });
+
+            return redirect()
+                ->route('policy.roles.index')
+                ->with('success', 'Pemetaan Tanggung Jawab vs Kebijakan berhasil diperbarui.');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('[RoleController] Error updating responsible objective mapping: ' . $e->getMessage());
+            return redirect()
+                ->route('policy.roles.index')
+                ->with('error', 'Gagal memperbarui pemetaan Tanggung Jawab vs Kebijakan.');
+        }
     }
 }

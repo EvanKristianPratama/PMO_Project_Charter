@@ -11,6 +11,7 @@ class BpmnWorkflow extends Model
     protected $fillable = [
         'name',
         'description',
+        'sop_type',
         'flow_data',
         'bpmn_xml',
         'is_active',
