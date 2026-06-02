@@ -19,6 +19,7 @@ class ResourceManagementService
                 'trs_projects.name',
                 'trs_projects.tipe_inisiative',
             ])
+            ->where('trs_projects.tipe_inisiative', self::TYPE_IT_INITIATIVE)
             ->with([
                 'projectCharters' => function ($query) {
                     $query->select([
@@ -43,11 +44,9 @@ class ResourceManagementService
             'resourceProjects' => $resourceRows,
             'resourceSummary' => $this->buildResourceSummary($resourceRows),
             'filters' => [
-                'type' => 'all',
                 'status' => 'all',
             ],
             'filterOptions' => [
-                'types' => $this->typeOptions(),
                 'statuses' => $this->statusOptions(),
             ],
         ];

@@ -15,9 +15,12 @@ class ResourceManagementController extends Controller
 
     public function __invoke(): Response
     {
+        $props = $this->resourceManagementService->getIndexProps();
+        $props['tableMode'] = 'resource_management';
+
         return Inertia::render(
-            'ProgramImplementation/ResourceManagement/Index',
-            $this->resourceManagementService->getIndexProps(),
+            'ProgramImplementation/ProjectCharter/ITInitiatives/Index',
+            $props
         );
     }
 }
