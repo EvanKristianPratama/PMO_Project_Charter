@@ -330,4 +330,29 @@ class RoleController extends Controller
                 ->with('error', 'Gagal memperbarui pemetaan Tanggung Jawab vs Kebijakan.');
         }
     }
+
+    /**
+     * Update mapping of responsibilities for a single objective (row-by-row).
+     */
+    public function updateObjectiveResponsibles(Request $request, string $objectiveId): RedirectResponse
+    {
+        $validated = $request->validate([
+            'responsible_ids' => 'present|array',
+            'responsible_ids.*' => 'integer|exists:mst_responsible,id',
+        ]);
+
+        try {
+            $objective = \App\Models\MstObjective::findOrFail($objectiveId);
+            $objective->responsibles()->sync($validated['responsible_ids']);
+
+            return redirect()
+                ->route('policy.roles.index')
+                ->with('success', 'Pemetaan Tanggung Jawab berhasil diperbarui.');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('[RoleController] Error updating single objective responsibles mapping: ' . $e->getMessage());
+            return redirect()
+                ->route('policy.roles.index')
+                ->with('error', 'Gagal memperbarui pemetaan Tanggung Jawab.');
+        }
+    }
 }

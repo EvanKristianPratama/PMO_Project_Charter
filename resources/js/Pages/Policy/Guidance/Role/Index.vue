@@ -320,18 +320,6 @@
                             />
                         </div>
                     </div>
-
-                    <!-- Action Save Button -->
-                    <div>
-                        <button 
-                            @click="submitMapping"
-                            class="inline-flex items-center gap-2 rounded-xl bg-[#821f44] px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-[#821f44]/25 transition hover:bg-[#9c2552] disabled:opacity-60 active:scale-95"
-                            :disabled="mappingForm.processing || isSavingMapping"
-                        >
-                            <span v-if="mappingForm.processing || isSavingMapping" class="inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></span>
-                            Simpan Perubahan Pemetaan
-                        </button>
-                    </div>
                 </div>
 
                 <!-- Mapping Grid Table -->
@@ -345,14 +333,11 @@
                                 <th class="p-3.5 text-center w-28 border-r border-[#b2cfc7] dark:border-[#255246]">
                                     Nomor Kebijakan
                                 </th>
-                                <th class="p-3.5 text-left border-r border-[#b2cfc7] dark:border-[#255246] w-80 min-w-[200px]">
+                                <th class="p-3.5 text-left border-r border-[#b2cfc7] dark:border-[#255246] w-96 min-w-[240px]">
                                     Kebijakan
                                 </th>
-                                <th class="p-3.5 text-left border-r border-[#b2cfc7] dark:border-[#255246] w-96 min-w-[240px]">
-                                    Deskripsi
-                                </th>
                                 <th class="p-3.5 text-left min-w-[320px]">
-                                    Mapping Kebijakan
+                                    Mapping Tanggung Jawab
                                 </th>
                             </tr>
                         </thead>
@@ -373,21 +358,42 @@
                                     {{ obj.objective }}
                                 </td>
 
-                                <!-- Deskripsi -->
-                                <td class="p-3.5 border-r border-slate-200 dark:border-white/10 text-left font-sans text-[11px] leading-relaxed text-slate-500 dark:text-slate-400 italic align-top">
-                                    {{ obj.objective_description || '-' }}
-                                </td>
-
-                                <!-- Selected Responsibilities Dropdown & Cards -->
+                                <!-- Selected Responsibilities Dropdown & Cards (Mapping Tanggung Jawab) -->
                                 <td class="p-3.5 align-top relative">
-                                    <div class="flex flex-col gap-2">
+                                    <!-- 1. Read Mode -->
+                                    <div v-if="editingObjectiveId !== obj.objective_id" class="space-y-3">
+                                        <ul v-if="getMappedResponsiblesList(obj.objective_id).length > 0" class="list-disc pl-4 space-y-1.5 text-xs text-slate-800 dark:text-slate-200">
+                                            <li v-for="resp in getMappedResponsiblesList(obj.objective_id)" :key="resp.id" class="text-justify font-serif leading-relaxed">
+                                                {{ resp.responsible }}
+                                            </li>
+                                        </ul>
+                                        <p v-else class="text-xs text-slate-400 dark:text-slate-500 italic">
+                                            Belum ada pemetaan tanggung jawab.
+                                        </p>
+
+                                        <!-- Edit Trigger Button -->
+                                        <div class="print:hidden mt-2">
+                                            <button 
+                                                @click="startEditing(obj)"
+                                                class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 hover:border-[#821f44]/30 hover:bg-[#821f44]/5 text-slate-600 hover:text-[#821f44] dark:border-white/10 dark:text-slate-400 dark:hover:text-pink-400 px-3 py-1.5 text-[11px] font-bold transition active:scale-95 shadow-sm"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-3.5 h-3.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.83 20.013a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                                </svg>
+                                                Edit Pemetaan
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- 2. Edit Mode -->
+                                    <div v-else class="flex flex-col gap-2.5">
                                         <!-- Trigger Dropdown button -->
                                         <div class="relative">
                                             <button 
-                                                @click="toggleAddResponsibilityDropdown(obj.objective_id)"
+                                                @click.stop="toggleAddResponsibilityDropdown(obj.objective_id)"
                                                 class="w-full text-left inline-flex items-center justify-between gap-2 rounded-xl border border-slate-300 dark:border-white/10 bg-white hover:bg-slate-50 dark:bg-[#1a1a1a] dark:hover:bg-white/5 px-3 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm active:scale-95 transition-all"
                                             >
-                                                <span class="truncate">
+                                                <span class="truncate font-semibold">
                                                     {{ getSelectedResponsiblesCountText(obj.objective_id) }}
                                                 </span>
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-4 h-4 text-slate-400 shrink-0">
@@ -440,8 +446,8 @@
                                             </div>
                                         </div>
 
-                                        <!-- Selected Cards display -->
-                                        <div class="flex flex-col gap-1.5 mt-2">
+                                        <!-- Selected Cards display (only while editing) -->
+                                        <div class="flex flex-col gap-1.5">
                                             <div 
                                                 v-for="resp in getMappedResponsiblesList(obj.objective_id)" 
                                                 :key="resp.id"
@@ -457,28 +463,34 @@
                                                 </button>
                                             </div>
                                         </div>
+
+                                        <!-- Row-level buttons (Simpan / Batal) -->
+                                        <div class="flex items-center gap-2 mt-1 border-t border-slate-100 dark:border-white/5 pt-2.5">
+                                            <button 
+                                                @click="saveRowMapping(obj.objective_id)"
+                                                class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 text-xs font-bold shadow-sm transition active:scale-95 disabled:opacity-60"
+                                                :disabled="isSavingRow === obj.objective_id"
+                                            >
+                                                <span v-if="isSavingRow === obj.objective_id" class="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                                                Simpan
+                                            </button>
+                                            <button 
+                                                @click="cancelEditing"
+                                                class="rounded-lg border border-slate-300 dark:border-white/10 bg-white hover:bg-slate-50 dark:bg-[#1a1a1a] dark:hover:bg-white/5 px-3.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 transition active:scale-95"
+                                            >
+                                                Batal
+                                            </button>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
                             <tr v-if="filteredObjectivesForMap.length === 0">
-                                <td colspan="5" class="p-8 text-center text-slate-400 dark:text-slate-500 font-sans text-xs">
+                                <td colspan="4" class="p-8 text-center text-slate-400 dark:text-slate-500 font-sans text-xs">
                                     Tidak ada data butir kebijakan untuk ditampilkan.
                                 </td>
                             </tr>
                         </tbody>
                     </table>
-                </div>
-
-                <!-- Sticky bottom save action bar -->
-                <div class="mt-8 flex justify-end gap-3 border-t border-slate-100 dark:border-white/5 pt-6 print:hidden">
-                    <button 
-                        @click="submitMapping"
-                        class="rounded-xl bg-[#821f44] px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#821f44]/25 transition hover:bg-[#9c2552] disabled:opacity-60"
-                        :disabled="mappingForm.processing || isSavingMapping"
-                    >
-                        <span v-if="mappingForm.processing || isSavingMapping" class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></span>
-                        Simpan Pemetaan
-                    </button>
                 </div>
             </div>
 
@@ -695,15 +707,59 @@ function scrollToTop() {
 
 // Mapping Logic for Tab 3 (Responsibility vs Practice/Kebijakan - Swapped)
 const mappingState = ref({});
-const isSavingMapping = ref(false);
 const localSuccess = ref('');
 const localError = ref('');
 const activeAddDropdownPracId = ref(null);
 const responsibilityDropdownSearch = ref('');
 
-const mappingForm = useForm({
-    mappings: []
-});
+// Row-based editing state
+const editingObjectiveId = ref(null);
+const tempSelectedResponsibles = ref([]);
+const isSavingRow = ref(null);
+
+function startEditing(obj) {
+    editingObjectiveId.value = obj.objective_id;
+    // Collect currently mapped responsible IDs for this objective
+    const mapped = [];
+    props.responsibles.forEach(resp => {
+        if (!!(mappingState.value[resp.id] && mappingState.value[resp.id][obj.objective_id])) {
+            mapped.push(resp.id);
+        }
+    });
+    tempSelectedResponsibles.value = mapped;
+    activeAddDropdownPracId.value = null;
+}
+
+function cancelEditing() {
+    editingObjectiveId.value = null;
+    tempSelectedResponsibles.value = [];
+    activeAddDropdownPracId.value = null;
+}
+
+function saveRowMapping(objectiveId) {
+    isSavingRow.value = objectiveId;
+    
+    useForm({
+        responsible_ids: tempSelectedResponsibles.value
+    }).post(route('policy.roles.objective-responsible.update', objectiveId), {
+        preserveScroll: true,
+        onSuccess: () => {
+            isSavingRow.value = null;
+            editingObjectiveId.value = null;
+            localSuccess.value = 'Pemetaan Tanggung Jawab berhasil diperbarui!';
+            setTimeout(() => {
+                localSuccess.value = '';
+            }, 3000);
+        },
+        onError: () => {
+            isSavingRow.value = null;
+            localError.value = 'Gagal memperbarui pemetaan Tanggung Jawab.';
+            setTimeout(() => {
+                localError.value = '';
+            }, 4000);
+        }
+    });
+}
 
 const initMappingState = () => {
     const state = {};
@@ -763,15 +819,27 @@ const filteredResponsiblesForDropdown = computed(() => {
 
 // Check if a practice/objective is mapped to a master responsible ID
 function isPracticeMapped(responsibleId, objectiveId) {
+    if (editingObjectiveId.value === objectiveId) {
+        return tempSelectedResponsibles.value.includes(responsibleId);
+    }
     return !!(mappingState.value[responsibleId] && mappingState.value[responsibleId][objectiveId]);
 }
 
 // Toggle mapping of an objective to a master responsible ID
 function toggleMapping(responsibleId, objectiveId) {
-    if (!mappingState.value[responsibleId]) {
-        mappingState.value[responsibleId] = {};
+    if (editingObjectiveId.value === objectiveId) {
+        const idx = tempSelectedResponsibles.value.indexOf(responsibleId);
+        if (idx > -1) {
+            tempSelectedResponsibles.value.splice(idx, 1);
+        } else {
+            tempSelectedResponsibles.value.push(responsibleId);
+        }
+    } else {
+        if (!mappingState.value[responsibleId]) {
+            mappingState.value[responsibleId] = {};
+        }
+        mappingState.value[responsibleId][objectiveId] = !mappingState.value[responsibleId][objectiveId];
     }
-    mappingState.value[responsibleId][objectiveId] = !mappingState.value[responsibleId][objectiveId];
 }
 
 // Get the list of mapped responsibilities for an objective ID
@@ -799,48 +867,6 @@ function toggleAddResponsibilityDropdown(objectiveId) {
         activeAddDropdownPracId.value = objectiveId;
         responsibilityDropdownSearch.value = '';
     }
-}
-
-// Submit mapping to the backend
-function submitMapping() {
-    isSavingMapping.value = true;
-    localSuccess.value = '';
-    localError.value = '';
-
-    const mappings = [];
-    props.responsibles.forEach(resp => {
-        const objectiveIds = [];
-        const respState = mappingState.value[resp.id] || {};
-        Object.keys(respState).forEach(objId => {
-            if (respState[objId]) {
-                objectiveIds.push(objId);
-            }
-        });
-        mappings.push({
-            responsible_id: resp.id,
-            objective_ids: objectiveIds
-        });
-    });
-
-    mappingForm.mappings = mappings;
-
-    mappingForm.post(route('policy.roles.responsible-practice.update'), {
-        preserveScroll: true,
-        onSuccess: () => {
-            isSavingMapping.value = false;
-            localSuccess.value = 'Pemetaan Tanggung Jawab vs Kebijakan berhasil diperbarui!';
-            setTimeout(() => {
-                localSuccess.value = '';
-            }, 3000);
-        },
-        onError: (err) => {
-            isSavingMapping.value = false;
-            localError.value = 'Gagal memperbarui pemetaan Tanggung Jawab vs Kebijakan.';
-            setTimeout(() => {
-                localError.value = '';
-            }, 4000);
-        }
-    });
 }
 </script>
 

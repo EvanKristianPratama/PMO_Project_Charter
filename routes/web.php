@@ -325,6 +325,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
         Route::post('/roles/mapped-responsible', [RoleController::class, 'storeMappedResponsible'])->name('roles.mapped-responsible.store');
         Route::delete('/roles/mapped-responsible/{roleId}/{responsibleId}', [RoleController::class, 'destroyMappedResponsible'])->name('roles.mapped-responsible.destroy');
         Route::post('/roles/responsible-practice', [RoleController::class, 'updateResponsiblePractice'])->name('roles.responsible-practice.update');
+        Route::post('/roles/objective-responsible/{objectiveId}', [RoleController::class, 'updateObjectiveResponsibles'])->name('roles.objective-responsible.update');
 
         // Regulasi (Regulation) CRUD
         Route::get('/regulation', [RegulationController::class, 'index'])->name('regulation.index');
