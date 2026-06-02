@@ -446,6 +446,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::delete('/digital-initiatives/{digital_initiative}/project-status-history/{history}', [DigitalInitiativeController::class, 'destroyProjectStatusHistory'])->name('digital-initiatives.project-status-history.destroy');
 
     // IT Initiatives & Charters
+    Route::get('/it-initiatives/value-creation', \App\Http\Controllers\ProgramImplementation\ValueCreationController::class . '@index')->name('it-initiatives.value-creation');
     // Roadmap — dedicated controller (all programs & per-program views)
     Route::get('/roadmap', [RoadmapController::class, 'index'])->name('roadmap.index');
     Route::get('/roadmap/add', [RoadmapController::class, 'add'])->name('roadmap.add');

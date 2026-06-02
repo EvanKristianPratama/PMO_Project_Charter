@@ -1,76 +1,75 @@
 <template>
     <UserLayout title="IT Initiatives">
         <div class="animate-fade-in">
-            <div
-                class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-                :class="
-                    tableMode === TABLE_MODE.ROADMAP ||
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between" :class="tableMode === TABLE_MODE.ROADMAP ||
                     tableMode === TABLE_MODE.IMPLEMENTATION
-                        ? 'mb-3'
-                        : 'mb-4'
-                "
-            >
+                    ? 'mb-3'
+                    : 'mb-4'
+                ">
                 <div>
-                    <h2
-                        class="text-2xl font-bold text-slate-900 dark:text-white"
-                    >
+                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white">
                         IT Initiatives
                     </h2>
                     <div class="mt-2 flex flex-wrap items-center gap-2">
-                        <button
-                            type="button"
+                        <button type="button"
                             class="inline-flex items-center rounded-full border border-[#1C75BC]/45 bg-[#1C75BC]/10 px-3 py-1.5 text-xs font-semibold text-[#1C75BC] transition hover:bg-[#1C75BC]/20 dark:text-[#7FC0F2]"
-                            @click="showAllProjectCharter"
-                        >
+                            @click="showAllProjectCharter">
                             Project Charter
                         </button>
-                        <button
-                            type="button"
+                        <button type="button"
                             class="inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition"
-                            :class="
-                                tableMode === TABLE_MODE.ROADMAP
+                            :class="tableMode === TABLE_MODE.ROADMAP
                                     ? 'border-[#1C75BC] bg-[#1C75BC] text-white hover:bg-[#0f63b5]'
                                     : 'border-[#1C75BC]/45 bg-[#1C75BC]/10 text-[#1C75BC] hover:bg-[#1C75BC]/20 dark:text-[#7FC0F2]'
-                            "
-                            @click="showRoadmapView"
-                        >
+                                " @click="showRoadmapView">
                             Roadmap Project Charter
+                        </button>
+                        <button type="button"
+                            class="inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition"
+                            :class="tableMode === TABLE_MODE.IMPLEMENTATION
+                                    ? 'border-[#1C75BC] bg-[#1C75BC] text-white hover:bg-[#0f63b5]'
+                                    : 'border-[#1C75BC]/45 bg-[#1C75BC]/10 text-[#1C75BC] hover:bg-[#1C75BC]/20 dark:text-[#7FC0F2]'
+                                " @click="showImplementationView">
+                            Status Implementation
                         </button>
                         <button
                             type="button"
                             class="inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition"
                             :class="
-                                tableMode === TABLE_MODE.IMPLEMENTATION
+                                tableMode === TABLE_MODE.VALUE_CREATION
                                     ? 'border-[#1C75BC] bg-[#1C75BC] text-white hover:bg-[#0f63b5]'
                                     : 'border-[#1C75BC]/45 bg-[#1C75BC]/10 text-[#1C75BC] hover:bg-[#1C75BC]/20 dark:text-[#7FC0F2]'
                             "
-                            @click="showImplementationView"
+                            @click="showValueCreationView"
                         >
-                            Status Implementation
+                            Value Creation
+                        </button>
+                        <button
+                            type="button"
+                            class="inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition"
+                            :class="
+                                tableMode === TABLE_MODE.RESOURCE_MANAGEMENT
+                                    ? 'border-[#1C75BC] bg-[#1C75BC] text-white hover:bg-[#0f63b5]'
+                                    : 'border-[#1C75BC]/45 bg-[#1C75BC]/10 text-[#1C75BC] hover:bg-[#1C75BC]/20 dark:text-[#7FC0F2]'
+                            "
+                            @click="showResourceManagementView"
+                        >
+                            Resource Management
                         </button>
                     </div>
                 </div>
-
-                <div
-                    v-if="tableMode === TABLE_MODE.IMPLEMENTATION"
-                    class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end"
-                >
+                <div v-if="tableMode === TABLE_MODE.IMPLEMENTATION"
+                    class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end">
                     <div class="w-full sm:w-[220px]">
                         <label
-                            class="mb-1 block text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400"
-                        >
+                            class="mb-1 block text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
                             Filter Initiative
                         </label>
-                        <select
-                            v-model="selectedImplementationInitiativeId"
-                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-2 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#101826] dark:text-slate-100"
-                        >
+                        <select v-model="selectedImplementationInitiativeId"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-2 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#101826] dark:text-slate-100">
                             <option value="all">Semua Initiative</option>
-                            <option
-                                v-for="initiative in masterItInitiatives"
-                                :key="`initiative-filter-${initiative.id}`"
-                                :value="String(initiative.id)"
-                            >
+                            <option v-for="initiative in masterItInitiatives"
+                                :key="`initiative-filter-${initiative.id}`" :value="String(initiative.id)">
                                 {{ implementationInitiativeLabel(initiative) }}
                             </option>
                         </select>
@@ -78,14 +77,11 @@
 
                     <div class="w-full sm:w-[160px]">
                         <label
-                            class="mb-1 block text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400"
-                        >
+                            class="mb-1 block text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
                             Filter Progres Status
                         </label>
-                        <select
-                            v-model="selectedProgresStatus"
-                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-2 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#101826] dark:text-slate-100"
-                        >
+                        <select v-model="selectedProgresStatus"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-2 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#101826] dark:text-slate-100">
                             <option value="all">Semua Status</option>
                             <option value="Not Started">Not Started</option>
                             <option value="On Track">On Track</option>
@@ -96,48 +92,36 @@
                     </div>
 
                     <div class="flex flex-row items-center gap-1.5">
-                        <button
-                            type="button"
+                        <button type="button"
                             class="inline-flex h-[26px] items-center justify-center rounded-full border px-3 text-[10px] font-semibold shadow-none transition-all focus:outline-none focus:ring-1 focus:ring-offset-1"
-                            :class="
-                                showInitiativeLabel
+                            :class="showInitiativeLabel
                                     ? 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-700/40 dark:bg-amber-900/30 dark:text-amber-300 dark:hover:bg-amber-900/50'
                                     : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700/40 dark:bg-emerald-900/30 dark:text-emerald-300 dark:hover:bg-emerald-900/50'
-                            "
-                            @click="showInitiativeLabel = !showInitiativeLabel"
-                        >
+                                " @click="showInitiativeLabel = !showInitiativeLabel">
                             {{
                                 showInitiativeLabel
                                     ? "Hide Label"
                                     : "Show Label"
                             }}
                         </button>
-                        <button
-                            type="button"
+                        <button type="button"
                             class="inline-flex h-[26px] items-center justify-center rounded-full border px-3 text-[10px] font-semibold shadow-none transition-all focus:outline-none focus:ring-1 focus:ring-offset-1"
-                            :class="
-                                showTimelineHistory
+                            :class="showTimelineHistory
                                     ? 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-700/40 dark:bg-amber-900/30 dark:text-amber-300 dark:hover:bg-amber-900/50'
                                     : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700/40 dark:bg-emerald-900/30 dark:text-emerald-300 dark:hover:bg-emerald-900/50'
-                            "
-                            @click="showTimelineHistory = !showTimelineHistory"
-                        >
+                                " @click="showTimelineHistory = !showTimelineHistory">
                             {{
                                 showTimelineHistory
                                     ? "Hide Timeline"
                                     : "Show Timeline"
                             }}
                         </button>
-                        <button
-                            type="button"
+                        <button type="button"
                             class="inline-flex h-[26px] items-center justify-center rounded-full border px-3 text-[10px] font-semibold shadow-none transition-all focus:outline-none focus:ring-1 focus:ring-offset-1"
-                            :class="
-                                showImplementationRoadmap
+                            :class="showImplementationRoadmap
                                     ? 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-700/40 dark:bg-amber-900/30 dark:text-amber-300 dark:hover:bg-amber-900/50'
                                     : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700/40 dark:bg-emerald-900/30 dark:text-emerald-300 dark:hover:bg-emerald-900/50'
-                            "
-                            @click="toggleImplementationRoadmapVisibility"
-                        >
+                                " @click="toggleImplementationRoadmapVisibility">
                             {{
                                 showImplementationRoadmap
                                     ? "Hide Roadmap"
@@ -148,45 +132,32 @@
                 </div>
             </div>
 
-            <section
-                v-if="
-                    tableMode !== TABLE_MODE.ROADMAP &&
-                    tableMode !== TABLE_MODE.IMPLEMENTATION
-                "
-                class="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-3"
-            >
+            <section v-if="
+                tableMode !== TABLE_MODE.ROADMAP &&
+                tableMode !== TABLE_MODE.IMPLEMENTATION &&
+                tableMode !== TABLE_MODE.VALUE_CREATION &&
+                tableMode !== TABLE_MODE.RESOURCE_MANAGEMENT
+            " class="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
                 <article
                     class="relative flex cursor-pointer flex-col justify-center rounded-2xl border border-[#A7C942] bg-[#A7C942] p-4 shadow-[0_4px_16px_rgba(167,201,66,0.3)]"
-                    role="button"
-                    tabindex="0"
-                    @click="showMasterItInitiatives"
-                    @keydown.enter.prevent="showMasterItInitiatives"
-                    @keydown.space.prevent="showMasterItInitiatives"
-                >
-                    <p
-                        class="text-xs font-semibold uppercase tracking-[0.08em] text-white"
-                        style="text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3)"
-                    >
+                    role="button" tabindex="0" @click="showMasterItInitiatives"
+                    @keydown.enter.prevent="showMasterItInitiatives" @keydown.space.prevent="showMasterItInitiatives">
+                    <p class="text-xs font-semibold uppercase tracking-[0.08em] text-white"
+                        style="text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3)">
                         Total IT Inisiatif Disetujui
                     </p>
-                    <p
-                        class="mt-2 flex items-center justify-between text-3xl font-bold text-white"
-                        style="text-shadow: 0 2px 6px rgba(0, 0, 0, 0.35)"
-                    >
+                    <p class="mt-2 flex items-center justify-between text-3xl font-bold text-white"
+                        style="text-shadow: 0 2px 6px rgba(0, 0, 0, 0.35)">
                         <span>{{ totalItApproved }}</span>
                     </p>
                 </article>
 
                 <article
-                    class="space-y-4 rounded-2xl border border-slate-200 bg-white px-5 py-3 shadow-[0_4px_16px_rgba(0,0,0,0.05)] dark:border-white/10 dark:bg-[#171717] lg:col-span-2"
-                >
+                    class="space-y-4 rounded-2xl border border-slate-200 bg-white px-5 py-3 shadow-[0_4px_16px_rgba(0,0,0,0.05)] dark:border-white/10 dark:bg-[#171717] lg:col-span-2">
                     <div id="project-charter-it-section">
-                        <div
-                            class="mb-2 flex items-center justify-between gap-2"
-                        >
+                        <div class="mb-2 flex items-center justify-between gap-2">
                             <h2
-                                class="text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400"
-                            >
+                                class="text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
                                 IT Initiatives Implementation Timelines Status
                                 (Project Charter)
                             </h2>
@@ -194,44 +165,30 @@
 
                         <div>
                             <div class="grid" :style="gridStyle(digitalSteps)">
-                                <div
-                                    v-for="(step, index) in digitalSteps"
-                                    :key="`step-${step.key}`"
+                                <div v-for="(step, index) in digitalSteps" :key="`step-${step.key}`"
                                     class="group relative flex cursor-pointer justify-center"
-                                    @click="handleFlowFilter(step.statusId)"
-                                >
+                                    @click="handleFlowFilter(step.statusId)">
                                     <span
                                         class="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold transition-all group-hover:ring-2 group-hover:ring-offset-1 group-hover:ring-slate-300"
                                         :class="[
                                             step.circleClass,
                                             activeFlowFilter ===
                                                 step.statusId &&
-                                            tableMode === TABLE_MODE.FLOW
+                                                tableMode === TABLE_MODE.FLOW
                                                 ? 'ring-2 ring-offset-2 ring-blue-500 shadow-md transform scale-110'
                                                 : '',
-                                        ]"
-                                    >
+                                        ]">
                                         {{ step.count }}
                                     </span>
-                                    <span
-                                        v-if="index < digitalSteps.length - 1"
+                                    <span v-if="index < digitalSteps.length - 1"
                                         class="absolute left-1/2 top-1/2 ml-[0.75rem] h-0.5 w-[calc(100%_-_1.5rem)] -translate-y-1/2 rounded-full"
-                                        :class="step.lineClass"
-                                    ></span>
+                                        :class="step.lineClass"></span>
                                 </div>
                             </div>
 
-                            <div
-                                class="mt-2 grid gap-1 text-center"
-                                :style="gridStyle(digitalSteps)"
-                            >
-                                <div
-                                    v-for="step in digitalSteps"
-                                    :key="`label-${step.key}`"
-                                >
-                                    <p
-                                        class="text-[9px] font-semibold text-slate-700 dark:text-slate-200"
-                                    >
+                            <div class="mt-2 grid gap-1 text-center" :style="gridStyle(digitalSteps)">
+                                <div v-for="step in digitalSteps" :key="`label-${step.key}`">
+                                    <p class="text-[9px] font-semibold text-slate-700 dark:text-slate-200">
                                         {{ step.label }}
                                     </p>
                                 </div>
@@ -241,316 +198,229 @@
                 </article>
             </section>
 
-            <FlowStatusTable
-                v-if="hasTableSelection && tableMode === TABLE_MODE.FLOW"
-                :items="flowItems"
-                :status-options="statusOptions"
-                :active-flow-filter="activeFlowFilter"
-            />
+            <FlowStatusTable v-if="hasTableSelection && tableMode === TABLE_MODE.FLOW" :items="flowItems"
+                :status-options="statusOptions" :active-flow-filter="activeFlowFilter" />
 
-            <MasterInitiativeTable
-                v-else-if="hasTableSelection && tableMode === TABLE_MODE.MASTER"
-                :items="masterItems"
-            />
+            <MasterInitiativeTable v-else-if="hasTableSelection && tableMode === TABLE_MODE.MASTER"
+                :items="masterItems" />
 
-            <section
-                v-else-if="
-                    hasTableSelection && tableMode === TABLE_MODE.ROADMAP
-                "
-                class="space-y-6"
-            >
+            <section v-else-if="
+                hasTableSelection && tableMode === TABLE_MODE.ROADMAP
+            " class="space-y-6">
                 <div
-                    class="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm dark:border-white/10 dark:bg-[#171717]"
-                >
-                    <div
-                        class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-                    >
+                    class="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                            <h3
-                                class="text-base font-bold text-slate-800 dark:text-slate-100"
-                            >
+                            <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">
                                 Roadmap Project Charter IT Initiatives
                             </h3>
                         </div>
 
-                        <div
-                            class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end"
-                        >
+                        <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end">
                             <div class="w-full sm:w-72">
                                 <label
-                                    class="mb-1 block text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400"
-                                >
+                                    class="mb-1 block text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
                                     Filter Project
                                 </label>
-                                <select
-                                    v-model="selectedRoadmapProjectId"
-                                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-2 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#101826] dark:text-slate-100"
-                                >
+                                <select v-model="selectedRoadmapProjectId"
+                                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-[#1C75BC] focus:outline-none focus:ring-2 focus:ring-[#1C75BC]/20 dark:border-white/10 dark:bg-[#101826] dark:text-slate-100">
                                     <option value="all">Semua Project</option>
-                                    <option
-                                        v-for="project in roadmapSourceItems"
-                                        :key="`roadmap-filter-${project.id}`"
-                                        :value="String(project.id)"
-                                    >
+                                    <option v-for="project in roadmapSourceItems" :key="`roadmap-filter-${project.id}`"
+                                        :value="String(project.id)">
                                         {{
                                             project.code
-                                                ? `${project.code} - ${project.name}${
-                                                      project.charter
-                                                          ?.version_label
-                                                          ? `
+                                                ? `${project.code} - ${project.name}${project.charter
+                                                    ?.version_label
+                                                    ? `
                                         (${project.charter.version_label})`
-                                                          : ""
-                                                  }`
-                                                : `${project.name}${
-                                                      project.charter
-                                                          ?.version_label
-                                                          ? `
+                                                    : ""
+                                                }`
+                                                : `${project.name}${project.charter
+                                                    ?.version_label
+                                                    ? `
                                         (${project.charter.version_label})`
-                                                          : ""
-                                                  }`
+                                                    : ""
+                                                }`
                                         }}
                                     </option>
                                 </select>
                             </div>
-                            <button
-                                type="button"
+                            <button type="button"
                                 class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#171717] dark:text-slate-300 dark:hover:bg-white/5"
-                                @click="toggleAllProjects"
-                            >
+                                @click="toggleAllProjects">
                                 {{
                                     allExpanded ? "Collapse All" : "Expand All"
                                 }}
                             </button>
-                            <Link
-                                :href="addRoadmapHref"
-                                class="inline-flex items-center justify-center rounded-lg bg-[#0B2A8A] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#102f95]"
-                            >
+                            <Link :href="addRoadmapHref"
+                                class="inline-flex items-center justify-center rounded-lg bg-[#0B2A8A] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#102f95]">
                                 Add Roadmap
                             </Link>
                         </div>
                     </div>
                 </div>
 
-                <div
-                    v-for="(projectGroup, roadmapIndex) in roadmapItems"
-                    :key="`it-roadmap-group-${projectGroup.id}`"
-                    class="space-y-3"
-                >
+                <div v-for="(projectGroup, roadmapIndex) in roadmapItems" :key="`it-roadmap-group-${projectGroup.id}`"
+                    class="space-y-3">
                     <!-- Project Group Header -->
                     <div class="flex items-center gap-3 px-1">
                         <span
-                            class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-600 dark:bg-white/10 dark:text-slate-400"
-                        >
+                            class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-600 dark:bg-white/10 dark:text-slate-400">
                             {{ roadmapIndex + 1 }}
                         </span>
-                        <h4
-                            class="text-base font-bold text-slate-800 dark:text-slate-200"
-                        >
+                        <h4 class="text-base font-bold text-slate-800 dark:text-slate-200">
                             {{ projectGroup.name }}
                         </h4>
                     </div>
 
                     <!-- Version Rows Container -->
                     <div
-                        class="flex flex-col overflow-hidden rounded-xl border border-[#d0dce8] shadow-sm dark:border-white/10"
-                    >
-                        <template
-                            v-for="(
-                                versionProject, versionIndex
-                            ) in projectGroup.versions"
-                            :key="`version-${versionProject.uniqueId}`"
-                        >
+                        class="flex flex-col overflow-hidden rounded-xl border border-[#d0dce8] shadow-sm dark:border-white/10">
+                        <template v-for="(
+versionProject, versionIndex
+                            ) in projectGroup.versions" :key="`version-${versionProject.uniqueId}`">
                             <!-- Summary Row -->
-                            <ProjectRoadmapSummary
-                                :project="versionProject"
-                                :sequence="versionIndex + 1"
-                                :year-start="roadmapYearStart"
-                                :year-end="roadmapYearEnd"
-                                :expanded="
-                                    expandedProjects.has(
-                                        versionProject.uniqueId,
-                                    )
-                                "
-                                :show-date="true"
-                                @toggle="
+                            <ProjectRoadmapSummary :project="versionProject" :sequence="versionIndex + 1"
+                                :year-start="roadmapYearStart" :year-end="roadmapYearEnd" :expanded="expandedProjects.has(
+                                    versionProject.uniqueId,
+                                )
+                                    " :show-date="true" @toggle="
                                     toggleProjectExpand(versionProject.uniqueId)
-                                "
-                            />
+                                    " />
 
                             <!-- Detail content (ProjectRoadmap) -->
-                            <div
-                                v-if="
-                                    expandedProjects.has(
-                                        versionProject.uniqueId,
-                                    )
-                                "
-                                class="border-b border-[#d0dce8] bg-slate-50/50 p-4 dark:border-white/10 dark:bg-white/5"
-                            >
-                                <ProjectRoadmap
-                                    :project="versionProject"
-                                    :form="{
-                                        objectives:
-                                            versionProject.charter
-                                                ?.objectives ?? '',
-                                        duration:
-                                            versionProject.charter?.duration ??
-                                            '',
-                                    }"
-                                    :selected-roadmap-version-id="
-                                        versionProject.charter?.id
-                                    "
-                                    :sequence="versionIndex + 1"
-                                    :year-start="roadmapYearStart"
-                                    :year-end="roadmapYearEnd"
-                                />
+                            <div v-if="
+                                expandedProjects.has(
+                                    versionProject.uniqueId,
+                                )
+                            "
+                                class="border-b border-[#d0dce8] bg-slate-50/50 p-4 dark:border-white/10 dark:bg-white/5">
+                                <ProjectRoadmap :project="versionProject" :form="{
+                                    objectives:
+                                        versionProject.charter
+                                            ?.objectives ?? '',
+                                    duration:
+                                        versionProject.charter?.duration ??
+                                        '',
+                                }" :selected-roadmap-version-id="versionProject.charter?.id
+                                        " :sequence="versionIndex + 1" :year-start="roadmapYearStart"
+                                    :year-end="roadmapYearEnd" />
                             </div>
                         </template>
                     </div>
                 </div>
 
-                <section
-                    v-if="roadmapItems.length === 0"
-                    class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-white/15 dark:bg-[#171717]"
-                >
-                    <p
-                        class="text-sm font-medium text-slate-600 dark:text-slate-300"
-                    >
+                <section v-if="roadmapItems.length === 0"
+                    class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-white/15 dark:bg-[#171717]">
+                    <p class="text-sm font-medium text-slate-600 dark:text-slate-300">
                         Belum ada data roadmap untuk filter ini.
+                    </p>
+                </section>
+            </section>
+
+            <section v-else-if="
+                hasTableSelection && tableMode === TABLE_MODE.IMPLEMENTATION
+            " class="space-y-4">
+                <article v-for="(
+initiative, initiativeIndex
+                    ) in filteredImplementationInitiativeItems" :key="`initiative-${initiative.id}`"
+                    class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                    <div v-if="showInitiativeLabel" class="mb-3 flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <h2 class="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                                {{ implementationInitiativeLabel(initiative) }}
+                            </h2>
+                        </div>
+                        <span
+                            class="inline-flex items-center rounded-full border border-slate-300 bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-700 dark:border-white/15 dark:bg-white/5 dark:text-slate-300">
+                            {{ projectCountLabel(initiative.projects) }}
+                        </span>
+                    </div>
+
+                    <div v-for="(project, projectIndex) in initiative.projects" :key="`project-impl-${project.id}`"
+                        class="mb-8 last:mb-0">
+                        <StatusImplementationTable :project="project" :showTimelineHistory="showTimelineHistory"
+                            :showHeader="initiativeIndex === 0 && projectIndex === 0
+                                " />
+                    </div>
+
+                    <div v-if="
+                        showImplementationRoadmap &&
+                        roadmapProjectsFor(initiative).length > 0
+                    "
+                        class="mt-5 flex flex-col overflow-hidden rounded-xl border border-[#d0dce8] shadow-sm dark:border-white/10">
+                        <template v-for="(roadmapProject, roadmapIndex
+                            ) in roadmapProjectsFor(initiative)" :key="roadmapEntryKey(initiative, roadmapProject)">
+                            <ProjectRoadmapSummary :project="roadmapProject" :sequence="roadmapIndex + 1"
+                                :year-start="roadmapYearStart" :year-end="roadmapYearEnd" :expanded="isImplementationRoadmapExpanded(
+                                    initiative.id,
+                                    roadmapProject.roadmap_key,
+                                )
+                                    " :display-version-label="roadmapProject.roadmap_version_label ?? null
+                                    " @toggle="
+                                    toggleImplementationRoadmapExpand(
+                                        initiative.id,
+                                        roadmapProject.roadmap_key,
+                                    )
+                                    " />
+
+                            <!-- Detail content (ProjectRoadmap) -->
+                            <div v-if="
+                                isImplementationRoadmapExpanded(
+                                    initiative.id,
+                                    roadmapProject.roadmap_key,
+                                )
+                            "
+                                class="border-b border-[#d0dce8] bg-slate-50/50 p-4 dark:border-white/10 dark:bg-white/5">
+                                <ProjectRoadmap :project="roadmapProject" :form="{
+                                    objectives:
+                                        roadmapProject.charter
+                                            ?.objectives ?? '',
+                                    duration:
+                                        roadmapProject.charter?.duration ??
+                                        '',
+                                }" :selected-roadmap-version-id="roadmapProject.roadmap_version_label ??
+                                        null
+                                        " :sequence="roadmapIndex + 1" :year-start="roadmapYearStart"
+                                    :year-end="roadmapYearEnd" />
+                            </div>
+                        </template>
+                    </div>
+                </article>
+
+                <section v-if="filteredImplementationInitiativeItems.length === 0"
+                    class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-white/15 dark:bg-[#171717]">
+                    <p class="text-sm font-medium text-slate-600 dark:text-slate-300">
+                        Belum ada data project untuk ditampilkan.
                     </p>
                 </section>
             </section>
 
             <section
                 v-else-if="
-                    hasTableSelection && tableMode === TABLE_MODE.IMPLEMENTATION
+                    hasTableSelection && tableMode === TABLE_MODE.VALUE_CREATION
                 "
-                class="space-y-4"
             >
-                <article
-                    v-for="(
-                        initiative, initiativeIndex
-                    ) in filteredImplementationInitiativeItems"
-                    :key="`initiative-${initiative.id}`"
-                    class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#171717]"
-                >
-                    <div
-                        v-if="showInitiativeLabel"
-                        class="mb-3 flex flex-wrap items-center justify-between gap-2"
-                    >
-                        <div>
-                            <h2
-                                class="text-sm font-semibold text-slate-800 dark:text-slate-100"
-                            >
-                                {{ implementationInitiativeLabel(initiative) }}
-                            </h2>
-                        </div>
-                        <span
-                            class="inline-flex items-center rounded-full border border-slate-300 bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-700 dark:border-white/15 dark:bg-white/5 dark:text-slate-300"
-                        >
-                            {{ projectCountLabel(initiative.projects) }}
-                        </span>
-                    </div>
-
-                    <div
-                        v-for="(project, projectIndex) in initiative.projects"
-                        :key="`project-impl-${project.id}`"
-                        class="mb-8 last:mb-0"
-                    >
-                        <StatusImplementationTable
-                            :project="project"
-                            :showTimelineHistory="showTimelineHistory"
-                            :showHeader="
-                                initiativeIndex === 0 && projectIndex === 0
-                            "
-                        />
-                    </div>
-
-                    <div
-                        v-if="
-                            showImplementationRoadmap &&
-                            roadmapProjectsFor(initiative).length > 0
-                        "
-                        class="mt-5 flex flex-col overflow-hidden rounded-xl border border-[#d0dce8] shadow-sm dark:border-white/10"
-                    >
-                        <template
-                            v-for="(
-                                roadmapProject, roadmapIndex
-                            ) in roadmapProjectsFor(initiative)"
-                            :key="roadmapEntryKey(initiative, roadmapProject)"
-                        >
-                            <ProjectRoadmapSummary
-                                :project="roadmapProject"
-                                :sequence="roadmapIndex + 1"
-                                :year-start="roadmapYearStart"
-                                :year-end="roadmapYearEnd"
-                                :expanded="
-                                    isImplementationRoadmapExpanded(
-                                        initiative.id,
-                                        roadmapProject.roadmap_key,
-                                    )
-                                "
-                                :display-version-label="
-                                    roadmapProject.roadmap_version_label ?? null
-                                "
-                                @toggle="
-                                    toggleImplementationRoadmapExpand(
-                                        initiative.id,
-                                        roadmapProject.roadmap_key,
-                                    )
-                                "
-                            />
-
-                            <!-- Detail content (ProjectRoadmap) -->
-                            <div
-                                v-if="
-                                    isImplementationRoadmapExpanded(
-                                        initiative.id,
-                                        roadmapProject.roadmap_key,
-                                    )
-                                "
-                                class="border-b border-[#d0dce8] bg-slate-50/50 p-4 dark:border-white/10 dark:bg-white/5"
-                            >
-                                <ProjectRoadmap
-                                    :project="roadmapProject"
-                                    :form="{
-                                        objectives:
-                                            roadmapProject.charter
-                                                ?.objectives ?? '',
-                                        duration:
-                                            roadmapProject.charter?.duration ??
-                                            '',
-                                    }"
-                                    :selected-roadmap-version-id="
-                                        roadmapProject.roadmap_version_label ??
-                                        null
-                                    "
-                                    :sequence="roadmapIndex + 1"
-                                    :year-start="roadmapYearStart"
-                                    :year-end="roadmapYearEnd"
-                                />
-                            </div>
-                        </template>
-                    </div>
-                </article>
-
-                <section
-                    v-if="filteredImplementationInitiativeItems.length === 0"
-                    class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-white/15 dark:bg-[#171717]"
-                >
-                    <p
-                        class="text-sm font-medium text-slate-600 dark:text-slate-300"
-                    >
-                        Belum ada data project untuk ditampilkan.
-                    </p>
-                </section>
+                <ValueCreation :items="valueCreationData" />
             </section>
-        </div>
-    </UserLayout>
+
+            <section
+                v-else-if="
+                    hasTableSelection && tableMode === TABLE_MODE.RESOURCE_MANAGEMENT
+                "
+            >
+                <ResourceManagement 
+                    :resource-projects="resourceProjects" 
+                    :filter-options="filterOptions"
+                />
+            </section>
+            </div>
+            </UserLayout>
 </template>
 
 <script setup>
 import { computed, ref, reactive, onMounted } from "vue";
-import { Link, usePage } from "@inertiajs/vue3";
+import { Link, usePage, router } from "@inertiajs/vue3";
 import { useRouteHelper } from "@/Composables/useRouteHelper";
 import UserLayout from "@/Layouts/UserLayout.vue";
 import { statusFlowClassByIndex } from "@/Composables/initiativeStatus";
@@ -560,6 +430,8 @@ import MasterInitiativeTable from "@/Components/ITInitiative/MasterInitiativeTab
 import StatusImplementationTable from "@/Components/ITInitiative/StatusImplementationTable.vue";
 import ProjectRoadmap from "@/Components/Roadmap/ProjectRoadmap.vue";
 import ProjectRoadmapSummary from "@/Components/Roadmap/ProjectRoadmapSummary.vue";
+import ValueCreation from "@/Components/ProgramImplementation/ValueCreation/ValueCreation.vue";
+import ResourceManagement from "@/Components/ProgramImplementation/ResourceManagement/ResourceManagement.vue";
 
 const props = defineProps({
     itInitiatives: {
@@ -570,7 +442,21 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
-
+    valueCreationData: {
+        type: Array,
+        default: () => [],
+    },
+    resourceProjects: {
+        type: Array,
+        default: () => [],
+    },
+    filterOptions: {
+        type: Object,
+        default: () => ({
+            types: [],
+            statuses: [],
+        }),
+    },
     statusOptions: {
         type: Array,
         default: () => [],
@@ -587,11 +473,15 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
-});
+    tableMode: {
+        type: String,
+        default: null,
+    },
+    });
 
-const route = useRouteHelper();
+    const route = useRouteHelper();
 
-const asList = (value) => {
+    const asList = (value) => {
     if (Array.isArray(value)) {
         return value;
     }
@@ -601,44 +491,44 @@ const asList = (value) => {
     }
 
     return [];
-};
+    };
 
-const TYPE_IT_INITIATIVE = 2;
+    const TYPE_IT_INITIATIVE = 2;
 
-const isItProject = (item) =>
+    const isItProject = (item) =>
     Number(item?.tipe_inisiative) === TYPE_IT_INITIATIVE;
 
-const itProjectItems = computed(() =>
+    const itProjectItems = computed(() =>
     asList(props.itInitiatives).filter(isItProject),
-);
+    );
 
-const FLOW_NOT_YET_ID = 0;
-const FLOW_STATUS_STEPS = [
+    const FLOW_NOT_YET_ID = 0;
+    const FLOW_STATUS_STEPS = [
     { id: FLOW_NOT_YET_ID, name: "not_start", label: "Not Start" },
     { id: 1, name: "drafting", label: "Drafting" },
     { id: 2, name: "propose", label: "Propose" },
     { id: 3, name: "review", label: "Review" },
     { id: 5, name: "baseline", label: "Baseline" },
     { id: 4, name: "approved", label: "Approved" },
-];
+    ];
 
-const normalizeProjectStatusId = (value) => {
+    const normalizeProjectStatusId = (value) => {
     if (value === null || value === "" || value === undefined) {
         return FLOW_NOT_YET_ID;
     }
     const parsed = Number(value);
     return Number.isInteger(parsed) && parsed >= 0 ? parsed : FLOW_NOT_YET_ID;
-};
+    };
 
-const latestProjectStatusHistory = (item) => {
+    const latestProjectStatusHistory = (item) => {
     const histories =
         item?.project_status_histories ?? item?.projectStatusHistories ?? [];
     return Array.isArray(histories) && histories.length > 0
         ? histories[0]
         : null;
-};
+    };
 
-const resolvedProjectStatusId = (item) => {
+    const resolvedProjectStatusId = (item) => {
     // 1. Check history first (most accurate for transitioned projects)
     const historyStatus = latestProjectStatusHistory(item)?.status;
     if (
@@ -655,23 +545,25 @@ const resolvedProjectStatusId = (item) => {
     }
 
     return FLOW_NOT_YET_ID;
-};
+    };
 
-const { activeFlowFilter, filteredItems, toggleFilter } = useFlowFilter(
+    const { activeFlowFilter, filteredItems, toggleFilter } = useFlowFilter(
     () => itProjectItems.value,
     (item) => resolvedProjectStatusId(item),
-);
+    );
 
-const TABLE_MODE = {
+    const TABLE_MODE = {
     FLOW: "flow",
     MASTER: "master",
     ROADMAP: "roadmap",
     IMPLEMENTATION: "implementation",
-};
+    VALUE_CREATION: "value_creation",
+    RESOURCE_MANAGEMENT: "resource_management",
+    };
 
-const tableMode = ref(TABLE_MODE.FLOW);
-const hasTableSelection = ref(false);
-const showAllCharter = ref(false);
+    const tableMode = ref(props.tableMode || TABLE_MODE.FLOW);
+    const hasTableSelection = ref(!!props.tableMode);
+    const showAllCharter = ref(false);
 const selectedRoadmapProjectId = ref("all");
 const roadmapYearStart = 2025;
 const roadmapYearEnd = 2029;
@@ -818,11 +710,11 @@ const roadmapProjectsFor = (initiative) => {
         const charters =
             Array.isArray(project?.charters) && project.charters.length > 0
                 ? [...project.charters].sort(
-                      (a, b) => Number(b?.id || 0) - Number(a?.id || 0),
-                  )
+                    (a, b) => Number(b?.id || 0) - Number(a?.id || 0),
+                )
                 : project?.charter
-                  ? [project.charter]
-                  : [];
+                    ? [project.charter]
+                    : [];
 
         if (charters.length === 0) {
             return [
@@ -923,28 +815,54 @@ const toggleAllProjects = () => {
 };
 
 const showAllProjectCharter = () => {
-    hasTableSelection.value = true;
-    tableMode.value = TABLE_MODE.FLOW;
-    activeFlowFilter.value = null;
-    showAllCharter.value = true;
+    if (props.tableMode === "value_creation") {
+        router.get(route("it-initiatives.index"), { tableMode: "flow" });
+    } else {
+        hasTableSelection.value = true;
+        tableMode.value = TABLE_MODE.FLOW;
+        activeFlowFilter.value = null;
+        showAllCharter.value = true;
+    }
 };
 
 const showMasterItInitiatives = () => {
-    hasTableSelection.value = true;
-    tableMode.value = TABLE_MODE.MASTER;
-    activeFlowFilter.value = null;
+    if (props.tableMode === "value_creation") {
+        router.get(route("it-initiatives.index"), { tableMode: "master" });
+    } else {
+        hasTableSelection.value = true;
+        tableMode.value = TABLE_MODE.MASTER;
+        activeFlowFilter.value = null;
+    }
 };
 
 const showRoadmapView = () => {
-    hasTableSelection.value = true;
-    tableMode.value = TABLE_MODE.ROADMAP;
-    activeFlowFilter.value = null;
+    if (props.tableMode === "value_creation") {
+        router.get(route("it-initiatives.index"), { tableMode: "roadmap" });
+    } else {
+        hasTableSelection.value = true;
+        tableMode.value = TABLE_MODE.ROADMAP;
+        activeFlowFilter.value = null;
+    }
 };
 
 const showImplementationView = () => {
-    hasTableSelection.value = true;
-    tableMode.value = TABLE_MODE.IMPLEMENTATION;
-    activeFlowFilter.value = null;
+    if (props.tableMode === "value_creation") {
+        router.get(route("it-initiatives.index"), {
+            tableMode: "implementation",
+        });
+    } else {
+        hasTableSelection.value = true;
+        tableMode.value = TABLE_MODE.IMPLEMENTATION;
+        activeFlowFilter.value = null;
+    }
+};
+
+const showValueCreationView = () => {
+    router.get(route("it-initiatives.value-creation"));
+};
+
+const showResourceManagementView = () => {
+    router.get(route("program-implementation.resources-management.index"));
 };
 
 const handleFlowFilter = (statusId) => {
@@ -981,11 +899,11 @@ const roadmapItems = computed(() => {
         const charters =
             Array.isArray(project?.charters) && project.charters.length > 0
                 ? [...project.charters].sort(
-                      (a, b) => Number(b.id || 0) - Number(a.id || 0),
-                  )
+                    (a, b) => Number(b.id || 0) - Number(a.id || 0),
+                )
                 : project?.charter
-                  ? [project.charter]
-                  : [];
+                    ? [project.charter]
+                    : [];
 
         const versions = charters.map((charter) => {
             const versionLabel = String(charter?.version_label ?? "").trim();

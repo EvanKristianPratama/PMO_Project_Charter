@@ -165,18 +165,6 @@ export function useNavigation() {
                     },
                 ],
             },
-
-            {
-                label: "Resource Management",
-                href: safeRoute(
-                    "program-implementation.resources-management.index",
-                ),
-                icon: CircleStackIcon,
-                active: (url) =>
-                    (url || '').startsWith(
-                        "/program-implementation/resources-management",
-                    ),
-            },
         ];
 
         const architectureChildren = [
