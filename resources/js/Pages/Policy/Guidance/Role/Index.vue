@@ -288,23 +288,24 @@
 
                 <!-- Toolbar and Filter section (print:hidden) -->
                 <div class="print:hidden flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200/60 dark:border-white/10 shadow-sm mb-6">
-                    <div class="flex flex-wrap items-center gap-4">
-                        <!-- Domain Filter -->
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs font-black uppercase tracking-wider text-[#821f44] dark:text-[#db588c]">Domain Kebijakan:</span>
-                            <select 
-                                v-model="selectedDomainFilter"
-                                class="text-xs font-semibold bg-white border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-[#1a1a1a] dark:border-white/10 dark:text-white shadow-sm cursor-pointer"
-                            >
-                                <option value="all">Semua Domain</option>
-                                <option value="EDM">EDM (Evaluate, Direct & Monitor)</option>
-                                <option value="APO">APO (Align, Plan & Organize)</option>
-                                <option value="BAI">BAI (Build, Acquire & Implement)</option>
-                                <option value="DSS">DSS (Deliver, Service & Support)</option>
-                                <option value="MEA">MEA (Monitor, Evaluate & Assess)</option>
-                            </select>
-                        </div>
+                    <!-- Left: Domain Filter -->
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-black uppercase tracking-wider text-[#821f44] dark:text-[#db588c]">Domain Kebijakan:</span>
+                        <select 
+                            v-model="selectedDomainFilter"
+                            class="text-xs font-semibold bg-white border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-[#1a1a1a] dark:border-white/10 dark:text-white shadow-sm cursor-pointer"
+                        >
+                            <option value="all">Semua Domain</option>
+                            <option value="EDM">EDM (Evaluate, Direct & Monitor)</option>
+                            <option value="APO">APO (Align, Plan & Organize)</option>
+                            <option value="BAI">BAI (Build, Acquire & Implement)</option>
+                            <option value="DSS">DSS (Deliver, Service & Support)</option>
+                            <option value="MEA">MEA (Monitor, Evaluate & Assess)</option>
+                        </select>
+                    </div>
 
+                    <!-- Right: Search Input + Edit Button Group next to it -->
+                    <div class="flex items-center gap-3">
                         <!-- Search input for policies -->
                         <div class="relative w-64">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
@@ -318,6 +319,39 @@
                                 placeholder="Cari butir kebijakan..."
                                 class="w-full pl-9 pr-4 py-2 text-xs font-semibold rounded-lg border border-slate-200 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:border-[#821f44] dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white shadow-sm"
                             />
+                        </div>
+
+                        <!-- Single Edit / Save & Cancel Button Group -->
+                        <div class="flex items-center gap-2">
+                            <!-- If not editing -->
+                            <button 
+                                v-if="!isEditing"
+                                @click="startEditingGlobal"
+                                class="inline-flex items-center gap-1.5 rounded-xl bg-[#821f44] px-4 py-2 text-xs font-bold text-white shadow-lg shadow-[#821f44]/20 hover:bg-[#9c2552] transition active:scale-95 whitespace-nowrap"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.83 20.013a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                </svg>
+                                Edit Pemetaan
+                            </button>
+
+                            <!-- If editing -->
+                            <template v-else>
+                                <button 
+                                    @click="submitMappingGlobal"
+                                    class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-emerald-700 transition active:scale-95 disabled:opacity-60 whitespace-nowrap"
+                                    :disabled="isSavingGlobal"
+                                >
+                                    <span v-if="isSavingGlobal" class="inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></span>
+                                    Simpan
+                                </button>
+                                <button 
+                                    @click="cancelEditingGlobal"
+                                    class="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:hover:bg-white/5 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 transition active:scale-95 whitespace-nowrap"
+                                >
+                                    Batal
+                                </button>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -361,20 +395,7 @@
                                 <!-- Selected Responsibilities Dropdown & Cards (Mapping Tanggung Jawab) -->
                                 <td class="p-3.5 align-top relative">
                                     <!-- 1. Read Mode -->
-                                    <div v-if="editingObjectiveId !== obj.objective_id" class="space-y-3">
-                                        <!-- Edit Trigger Button -->
-                                        <div class="print:hidden">
-                                            <button 
-                                                @click="startEditing(obj)"
-                                                class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 hover:border-[#821f44]/30 hover:bg-[#821f44]/5 text-slate-600 hover:text-[#821f44] dark:border-white/10 dark:text-slate-400 dark:hover:text-pink-400 px-3 py-1.5 text-[11px] font-bold transition active:scale-95 shadow-sm"
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-3.5 h-3.5">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.83 20.013a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                                                </svg>
-                                                Edit Pemetaan
-                                            </button>
-                                        </div>
-
+                                    <div v-if="!isEditing" class="space-y-3">
                                         <ul v-if="getMappedResponsiblesList(obj.objective_id).length > 0" class="list-disc pl-4 space-y-1.5 text-xs text-slate-800 dark:text-slate-200">
                                             <li v-for="resp in getMappedResponsiblesList(obj.objective_id)" :key="resp.id" class="text-justify font-serif leading-relaxed">
                                                 {{ resp.responsible }}
@@ -462,24 +483,6 @@
                                                     ×
                                                 </button>
                                             </div>
-                                        </div>
-
-                                        <!-- Row-level buttons (Simpan / Batal) -->
-                                        <div class="flex items-center gap-2 mt-1 border-t border-slate-100 dark:border-white/5 pt-2.5">
-                                            <button 
-                                                @click="saveRowMapping(obj.objective_id)"
-                                                class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 text-xs font-bold shadow-sm transition active:scale-95 disabled:opacity-60"
-                                                :disabled="isSavingRow === obj.objective_id"
-                                            >
-                                                <span v-if="isSavingRow === obj.objective_id" class="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                                                Simpan
-                                            </button>
-                                            <button 
-                                                @click="cancelEditing"
-                                                class="rounded-lg border border-slate-300 dark:border-white/10 bg-white hover:bg-slate-50 dark:bg-[#1a1a1a] dark:hover:bg-white/5 px-3.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 transition active:scale-95"
-                                            >
-                                                Batal
-                                            </button>
                                         </div>
                                     </div>
                                 </td>
@@ -712,47 +715,58 @@ const localError = ref('');
 const activeAddDropdownPracId = ref(null);
 const responsibilityDropdownSearch = ref('');
 
-// Row-based editing state
-const editingObjectiveId = ref(null);
-const tempSelectedResponsibles = ref([]);
-const isSavingRow = ref(null);
+// Global editing state
+const isEditing = ref(false);
+const tempMappingState = ref({});
+const isSavingGlobal = ref(false);
 
-function startEditing(obj) {
-    editingObjectiveId.value = obj.objective_id;
-    // Collect currently mapped responsible IDs for this objective
-    const mapped = [];
+function startEditingGlobal() {
+    isEditing.value = true;
+    // Deep clone mappingState to tempMappingState
+    tempMappingState.value = JSON.parse(JSON.stringify(mappingState.value));
+    activeAddDropdownPracId.value = null;
+}
+
+function cancelEditingGlobal() {
+    isEditing.value = false;
+    tempMappingState.value = {};
+    activeAddDropdownPracId.value = null;
+}
+
+function submitMappingGlobal() {
+    isSavingGlobal.value = true;
+    localSuccess.value = '';
+    localError.value = '';
+
+    const mappings = [];
     props.responsibles.forEach(resp => {
-        if (!!(mappingState.value[resp.id] && mappingState.value[resp.id][obj.objective_id])) {
-            mapped.push(resp.id);
-        }
+        const objectiveIds = [];
+        const respState = tempMappingState.value[resp.id] || {};
+        Object.keys(respState).forEach(objId => {
+            if (respState[objId]) {
+                objectiveIds.push(objId);
+            }
+        });
+        mappings.push({
+            responsible_id: resp.id,
+            objective_ids: objectiveIds
+        });
     });
-    tempSelectedResponsibles.value = mapped;
-    activeAddDropdownPracId.value = null;
-}
 
-function cancelEditing() {
-    editingObjectiveId.value = null;
-    tempSelectedResponsibles.value = [];
-    activeAddDropdownPracId.value = null;
-}
-
-function saveRowMapping(objectiveId) {
-    isSavingRow.value = objectiveId;
-    
     useForm({
-        responsible_ids: tempSelectedResponsibles.value
-    }).post(route('policy.roles.objective-responsible.update', objectiveId), {
+        mappings: mappings
+    }).post(route('policy.roles.responsible-practice.update'), {
         preserveScroll: true,
         onSuccess: () => {
-            isSavingRow.value = null;
-            editingObjectiveId.value = null;
+            isSavingGlobal.value = false;
+            isEditing.value = false;
             localSuccess.value = 'Pemetaan Tanggung Jawab berhasil diperbarui!';
             setTimeout(() => {
                 localSuccess.value = '';
             }, 3000);
         },
         onError: () => {
-            isSavingRow.value = null;
+            isSavingGlobal.value = false;
             localError.value = 'Gagal memperbarui pemetaan Tanggung Jawab.';
             setTimeout(() => {
                 localError.value = '';
@@ -819,21 +833,19 @@ const filteredResponsiblesForDropdown = computed(() => {
 
 // Check if a practice/objective is mapped to a master responsible ID
 function isPracticeMapped(responsibleId, objectiveId) {
-    if (editingObjectiveId.value === objectiveId) {
-        return tempSelectedResponsibles.value.includes(responsibleId);
+    if (isEditing.value) {
+        return !!(tempMappingState.value[responsibleId] && tempMappingState.value[responsibleId][objectiveId]);
     }
     return !!(mappingState.value[responsibleId] && mappingState.value[responsibleId][objectiveId]);
 }
 
 // Toggle mapping of an objective to a master responsible ID
 function toggleMapping(responsibleId, objectiveId) {
-    if (editingObjectiveId.value === objectiveId) {
-        const idx = tempSelectedResponsibles.value.indexOf(responsibleId);
-        if (idx > -1) {
-            tempSelectedResponsibles.value.splice(idx, 1);
-        } else {
-            tempSelectedResponsibles.value.push(responsibleId);
+    if (isEditing.value) {
+        if (!tempMappingState.value[responsibleId]) {
+            tempMappingState.value[responsibleId] = {};
         }
+        tempMappingState.value[responsibleId][objectiveId] = !tempMappingState.value[responsibleId][objectiveId];
     } else {
         if (!mappingState.value[responsibleId]) {
             mappingState.value[responsibleId] = {};
