@@ -2,6 +2,7 @@
     <section v-if="matrixData.length > 0" class="mt-8 overflow-hidden animate-fade-in-up delay-150">
         <!-- Bar Chart Statistik -->
         <OwnerStatistikChart 
+            v-if="showChart"
             :matrixData="matrixData" 
             :periodChartData="periodChartData"
             :selectedOwnerLabel="selectedOwnerLabel"
@@ -20,13 +21,23 @@
                     >
                         {{ showInitiativeColumns ? 'Hide Inisiatif' : 'Show Inisiatif' }}
                     </button>
+                    <button
+                        type="button"
+                        class="rounded border px-1.5 py-0.5 text-[7px] font-bold uppercase tracking-[0.08em] transition-all"
+                        :class="showChart
+                            ? 'border-slate-400 bg-slate-100 text-slate-700 hover:bg-slate-200 dark:border-white/20 dark:bg-white/10 dark:text-slate-200 dark:hover:bg-white/15'
+                            : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5'"
+                        @click="showChart = !showChart"
+                    >
+                        {{ showChart ? 'Hide Chart' : 'Show Chart' }}
+                    </button>
                     <label for="owner-filter" class="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
                         Project Owner
                     </label>
                     <select
                         id="owner-filter"
                         v-model="selectedOwner"
-                        class="cursor-pointer rounded border border-slate-300 bg-white px-2 py-0.5 text-[9px] font-bold outline-none transition-all focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                        class="max-w-[150px] truncate cursor-pointer rounded border border-slate-300 bg-white px-2 py-0.5 text-[9px] font-bold outline-none transition-all focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
                     >
                         <option value="all">All Project Owner</option>
                         <option
@@ -187,6 +198,7 @@ const props = defineProps({
 
 const viewMode = ref('original'); // 'original' or 'restructure'
 const showInitiativeColumns = ref(true);
+const showChart = ref(true);
 const selectedOwner = ref('all');
 const selectedCharterVersion = ref('all');
 const selectedPeriod = ref('all');

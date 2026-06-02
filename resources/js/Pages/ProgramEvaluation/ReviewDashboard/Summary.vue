@@ -12,18 +12,18 @@
             />
 
             <!-- Project Owner Breakdown Table -->
-            <!-- <OwnerBreakdownTable
+            <OwnerBreakdownTable
                 :originalData="ownerBreakdown.original"
                 :restructureData="ownerBreakdown.restructure"
                 :getCircleColor="getCircleColor"
-            /> -->
+            />
 
             <!-- Project Leader Breakdown Table -->
-            <!-- <LeaderBreakdownTable
+            <LeaderBreakdownTable
                 :originalData="leaderBreakdown.original"
                 :restructureData="leaderBreakdown.restructure"
                 :getCircleColor="getCircleColor"
-            /> -->
+            />
 
             <!-- Status Matrix - Project Owner -->
             <OwnerStatusMatrix

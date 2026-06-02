@@ -2,6 +2,7 @@
     <section v-if="displayRows.length > 0" class="mt-8 overflow-hidden animate-fade-in-up delay-150">
         <!-- Bar Chart Statistik -->
         <LeaderStatistikChart 
+            v-if="showChart"
             :matrixData="displayRows" 
             :periodChartData="periodChartData"
             :selectedLeaderLabel="selectedLeaderLabel"
@@ -20,18 +21,45 @@
                     >
                         {{ showInitiativeColumns ? 'Hide Inisiatif' : 'Show Inisiatif' }}
                     </button>
+                    <button
+                        type="button"
+                        class="rounded border px-1.5 py-0.5 text-[7px] font-bold uppercase tracking-[0.08em] transition-all"
+                        :class="showChart
+                            ? 'border-slate-400 bg-slate-100 text-slate-700 hover:bg-slate-200 dark:border-white/20 dark:bg-white/10 dark:text-slate-200 dark:hover:bg-white/15'
+                            : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5'"
+                        @click="showChart = !showChart"
+                    >
+                        {{ showChart ? 'Hide Chart' : 'Show Chart' }}
+                    </button>
                     <label for="parent-level-3-filter" class="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
                         Groub by VP
                     </label>
                     <select
                         id="parent-level-3-filter"
                         v-model="selectedParentLevel3"
-                        class="cursor-pointer rounded border border-slate-300 bg-white px-2 py-0.5 text-[9px] font-bold outline-none transition-all focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                        class="max-w-[150px] truncate cursor-pointer rounded border border-slate-300 bg-white px-2 py-0.5 text-[9px] font-bold outline-none transition-all focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
                     >
                         <option value="all">All VP</option>
                         <option
                             v-for="item in parentLevel3Options"
                             :key="`${viewMode}-pl3-${item.value}`"
+                            :value="item.value"
+                        >
+                            {{ item.label }}
+                        </option>
+                    </select>
+                    <label for="leader-filter" class="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
+                        {{ label }}
+                    </label>
+                    <select
+                        id="leader-filter"
+                        v-model="selectedLeader"
+                        class="max-w-[150px] truncate cursor-pointer rounded border border-slate-300 bg-white px-2 py-0.5 text-[9px] font-bold outline-none transition-all focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
+                    >
+                        <option value="all">All {{ label }}</option>
+                        <option
+                            v-for="item in leaderOptions"
+                            :key="`${viewMode}-leader-${item.value}`"
                             :value="item.value"
                         >
                             {{ item.label }}
@@ -252,12 +280,15 @@ const props = defineProps({
 
 const viewMode = ref('original');
 const showInitiativeColumns = ref(true);
+const showChart = ref(true);
 const selectedParentLevel3 = ref('all');
+const selectedLeader = ref('all');
 const selectedPeriod = ref('all');
 
 const statuses = ['On Track', 'At Risk', 'Not Signed', 'Not Started', 'Done'];
 
 const selectedLeaderLabel = computed(() => {
+    if (selectedLeader.value !== 'all') return selectedLeader.value;
     if (selectedParentLevel3.value === 'all') return 'All VP';
     return selectedParentLevel3.value;
 });
@@ -276,6 +307,45 @@ const parentLevel3Options = computed(() => {
         if (!value || value === '-') return;
 
         const sortCode = String(row[`${activeFieldKey.value}_parent_code`] ?? '').trim();
+
+        if (!map.has(value)) {
+            map.set(value, { value, label: value, sortCode });
+            return;
+        }
+
+        const existing = map.get(value);
+        if ((existing.sortCode ?? '') === '' && sortCode !== '') {
+            existing.sortCode = sortCode;
+        }
+    });
+
+    return Array.from(map.values()).sort((a, b) => {
+        const left = String(a.sortCode ?? '').trim();
+        const right = String(b.sortCode ?? '').trim();
+
+        if (left === '' && right === '') return a.label.localeCompare(b.label);
+        if (left === '') return 1;
+        if (right === '') return -1;
+
+        return left.localeCompare(right, undefined, { numeric: false, sensitivity: 'base' });
+    });
+});
+
+const leaderOptions = computed(() => {
+    const map = new Map();
+    const fieldKey = activeFieldKey.value;
+    const parentLevel3Key = activeParentLevel3Key.value;
+
+    props.rows.forEach((row) => {
+        const parentLevel3 = String(row[parentLevel3Key] ?? '').trim();
+        if (selectedParentLevel3.value !== 'all' && parentLevel3 !== selectedParentLevel3.value) {
+            return;
+        }
+
+        const value = String(row[fieldKey] ?? '').trim();
+        if (!value || value === '-') return;
+
+        const sortCode = String(row[`${fieldKey}_code`] ?? '').trim();
 
         if (!map.has(value)) {
             map.set(value, { value, label: value, sortCode });
@@ -385,7 +455,13 @@ const periodChartData = computed(() => {
 
         props.rows.forEach((row) => {
             const parentLevel3 = String(row[`${fieldKey}_parent_level3`] ?? '').trim();
+            const leader = String(row[fieldKey] ?? '').trim();
+
             if (selectedParentLevel3.value !== 'all' && parentLevel3 !== selectedParentLevel3.value) {
+                return;
+            }
+
+            if (selectedLeader.value !== 'all' && leader !== selectedLeader.value) {
                 return;
             }
 
@@ -572,10 +648,12 @@ const displayRows = computed(() => {
     const fieldKey = viewMode.value === 'original' ? props.groupBy : `${props.groupBy}_restructure`;
     const filteredRows = props.rows.filter((row) => {
         const parentLevel3 = String(row[`${fieldKey}_parent_level3`] ?? '').trim();
+        const leader = String(row[fieldKey] ?? '').trim();
         const statusEntry = getProjectStatusEntry(row, selectedPeriod.value);
 
         return (
             (selectedParentLevel3.value === 'all' || parentLevel3 === selectedParentLevel3.value)
+            && (selectedLeader.value === 'all' || leader === selectedLeader.value)
             && (selectedPeriod.value === 'all' || !!statusEntry)
         );
     });
@@ -666,8 +744,13 @@ const getCircleColor = (status) => {
     return 'bg-slate-400';
 };
 
+watch(selectedParentLevel3, () => {
+    selectedLeader.value = 'all';
+});
+
 watch(viewMode, () => {
     selectedParentLevel3.value = 'all';
+    selectedLeader.value = 'all';
     selectedPeriod.value = 'all';
 });
 </script>
