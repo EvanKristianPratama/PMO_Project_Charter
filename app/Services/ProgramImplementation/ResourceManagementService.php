@@ -33,6 +33,7 @@ class ResourceManagementService
                     $query->oldest('trs_project_charters.id');
                 },
                 'projectCharters.statusRef:id,name',
+                'mappedInitiatives.coe:id,name',
             ])
             ->oldest('trs_projects.id')
             ->get()
@@ -54,6 +55,9 @@ class ResourceManagementService
 
     private function mapProjectResources(TrsProject $project): array
     {
+        $coe = $project->mappedInitiatives->first()?->coe;
+        $coeName = $coe?->name ?? 'Unassigned';
+
         if ($project->projectCharters->isEmpty()) {
             return [[
                 'id' => null,
@@ -63,6 +67,7 @@ class ResourceManagementService
                 'project_name' => $this->normalizeProjectName($project),
                 'project_type' => (int) ($project->tipe_inisiative ?? 0),
                 'project_type_label' => $this->typeLabel($project->tipe_inisiative),
+                'coe_name' => $coeName,
                 'status_id' => null,
                 'status' => '-',
                 'budget' => null,
@@ -71,7 +76,7 @@ class ResourceManagementService
         }
 
         return $project->projectCharters
-            ->map(function ($charter) use ($project): array {
+            ->map(function ($charter) use ($project, $coeName): array {
                 return [
                     'id' => (int) $charter->id,
                     'row_key' => sprintf('charter-%d', $charter->id),
@@ -80,6 +85,7 @@ class ResourceManagementService
                     'project_name' => $this->normalizeProjectName($project),
                     'project_type' => (int) ($project->tipe_inisiative ?? 0),
                     'project_type_label' => $this->typeLabel($project->tipe_inisiative),
+                    'coe_name' => $coeName,
                     'status_id' => $charter->status !== null && $charter->status !== ''
                         ? (int) $charter->status
                         : null,

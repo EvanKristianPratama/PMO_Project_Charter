@@ -60,87 +60,106 @@
 
             <div class="overflow-x-auto">
                 <table
-                    class="w-full min-w-[980px] divide-y divide-slate-200 text-sm dark:divide-white/10"
+                    class="w-full border-collapse text-left text-sm"
                 >
                     <thead class="bg-slate-50 dark:bg-white/5">
-                        <tr>
+                        <tr class="border-b border-slate-200 dark:border-white/10">
                             <th
-                                class="w-[16%] px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400"
+                                class="w-[160px] px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
                             >
-                                Code
+                                IT Architecture Building Block
                             </th>
                             <th
-                                class="w-[24%] px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400"
+                                class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
                             >
-                                Project Name
+                                List of IT Initiatives
                             </th>
                             <th
-                                class="w-[16%] px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400"
+                                class="w-[15%] px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
                             >
                                 Status
                             </th>
                             <th
-                                class="w-[18%] px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400"
+                                class="w-[18%] px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
                             >
                                 Budget
                             </th>
                             <th
-                                class="w-[26%] px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400"
+                                class="w-[20%] px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
                             >
                                 Key Personnel
                             </th>
                         </tr>
                     </thead>
 
-                    <tbody class="divide-y divide-slate-100 dark:divide-white/5">
-                        <tr v-if="filteredRows.length === 0">
-                            <td
-                                colspan="5"
-                                class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400"
-                            >
-                                Belum ada data project charter yang dapat
-                                ditampilkan.
-                            </td>
-                        </tr>
-
+                    <tbody class="divide-y divide-slate-200 dark:divide-white/5">
                         <tr
-                            v-for="item in filteredRows"
+                            v-for="item in initiativesWithRowspan"
                             :key="item.row_key"
-                            class="align-top"
+                            class="group transition-colors hover:bg-slate-50/50 dark:hover:bg-white/5"
                         >
+                            <!-- IT Architecture Building Block -->
                             <td
-                                class="px-4 py-4 text-sm font-medium text-slate-700 dark:text-slate-200"
+                                v-if="item.rowspan > 0"
+                                :rowspan="item.rowspan"
+                                class="w-[160px] border-r border-slate-200 px-6 py-4 align-top dark:border-white/5"
                             >
-                                {{ item.project_code || "-" }}
+                                <div class="flex flex-col">
+                                    <span
+                                        class="text-xs font-bold text-slate-700 dark:text-slate-200"
+                                    >
+                                        {{ item.coe_name || "-" }}
+                                    </span>
+                                </div>
                             </td>
-                            <td
-                                class="px-4 py-4 text-sm text-slate-800 dark:text-slate-100"
-                            >
-                                {{ item.project_name || "-" }}
+
+                            <!-- List of IT Initiatives -->
+                            <td class="px-6 py-4 align-top border-r border-slate-200 dark:border-white/5">
+                                <div class="flex items-start gap-2">
+                                    <span
+                                        class="inline-flex shrink-0 items-center justify-center rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                                    >
+                                        {{ item.project_code || "-" }}
+                                    </span>
+                                    <span
+                                        class="text-xs font-medium text-slate-700 dark:text-slate-200"
+                                    >
+                                        {{ item.project_name || "-" }}
+                                    </span>
+                                </div>
                             </td>
-                            <td
-                                class="px-4 py-4 text-sm text-slate-700 dark:text-slate-200"
-                            >
+
+                            <!-- Status -->
+                            <td class="px-4 py-4 align-top border-r border-slate-200 dark:border-white/5">
                                 <span
                                     :class="statusBadgeClass(item.status_id)"
-                                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+                                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold"
                                 >
                                     {{ item.status || "-" }}
                                 </span>
                             </td>
-                            <td
-                                class="px-4 py-4 text-sm text-slate-600 dark:text-slate-300"
-                            >
-                                <span class="whitespace-pre-line break-words">
+
+                            <!-- Budget -->
+                            <td class="px-4 py-4 align-top border-r border-slate-200 dark:border-white/5">
+                                <span class="text-xs text-slate-600 dark:text-slate-300 whitespace-pre-line break-words">
                                     {{ item.budget || "-" }}
                                 </span>
                             </td>
-                            <td
-                                class="px-4 py-4 text-sm text-slate-600 dark:text-slate-300"
-                            >
-                                <span class="whitespace-pre-line break-words">
+
+                            <!-- Key Personnel -->
+                            <td class="px-4 py-4 align-top">
+                                <span class="text-xs text-slate-600 dark:text-slate-300 whitespace-pre-line break-words">
                                     {{ item.key_personnel || "-" }}
                                 </span>
+                            </td>
+                        </tr>
+                        <tr v-if="filteredRows.length === 0">
+                            <td
+                                colspan="5"
+                                class="px-6 py-12 text-center text-sm text-slate-500 dark:text-slate-400"
+                            >
+                                Belum ada data project charter yang dapat
+                                ditampilkan.
                             </td>
                         </tr>
                     </tbody>
@@ -161,18 +180,27 @@ const props = defineProps({
     filters: {
         type: Object,
         default: () => ({
-            type: "all",
             status: "all",
         }),
     },
     filterOptions: {
         type: Object,
         default: () => ({
-            types: [],
             statuses: [],
         }),
     },
 });
+
+const coeOrder = [
+    "User Interface and Experience",
+    "Integration and Automation",
+    "Business Application System",
+    "Infrastructure",
+    "Data and Analytics",
+    "Cybersecurity",
+    "People, Process and Technology",
+    "Overall Architecture",
+];
 
 const uniquePreserveOrder = (values) => {
     const seen = new Set();
@@ -192,9 +220,6 @@ const uniquePreserveOrder = (values) => {
 const rows = computed(() =>
     Array.isArray(props.resourceProjects) ? props.resourceProjects : [],
 );
-const typeOptions = computed(() =>
-    Array.isArray(props.filterOptions?.types) ? props.filterOptions.types : [],
-);
 const statusOptions = computed(() =>
     Array.isArray(props.filterOptions?.statuses)
         ? props.filterOptions.statuses
@@ -208,7 +233,6 @@ const projectNameOptions = computed(() =>
 );
 const selectedCode = ref("all");
 const selectedProjectName = ref("all");
-const selectedType = ref(String(props.filters?.type ?? "all"));
 const selectedStatus = ref(String(props.filters?.status ?? "all"));
 
 const filteredRows = computed(() => {
@@ -228,13 +252,6 @@ const filteredRows = computed(() => {
         }
 
         if (
-            selectedType.value !== "all" &&
-            String(item?.project_type ?? "") !== selectedType.value
-        ) {
-            return false;
-        }
-
-        if (
             selectedStatus.value !== "all" &&
             String(item?.status_id ?? "") !== selectedStatus.value
         ) {
@@ -243,6 +260,55 @@ const filteredRows = computed(() => {
 
         return true;
     });
+});
+
+const initiativesWithRowspan = computed(() => {
+    const initiatives = filteredRows.value;
+    const result = [];
+
+    // Sort by coe_name using the predefined coeOrder, then by code
+    const sorted = [...initiatives].sort((a, b) => {
+        const coeA = String(a.coe_name || "Unassigned");
+        const coeB = String(b.coe_name || "Unassigned");
+
+        if (coeA !== coeB) {
+            const indexA = coeOrder.indexOf(coeA);
+            const indexB = coeOrder.indexOf(coeB);
+
+            if (indexA !== -1 && indexB !== -1) {
+                return indexA - indexB;
+            }
+
+            if (indexA !== -1) return -1;
+            if (indexB !== -1) return 1;
+
+            return coeA.localeCompare(coeB);
+        }
+
+        const codeA = String(a.project_code || "");
+        const codeB = String(b.project_code || "");
+        return codeA.localeCompare(codeB);
+    });
+
+    for (let i = 0; i < sorted.length; i++) {
+        const currentIni = sorted[i];
+        const currentCoe = String(currentIni.coe_name || "Unassigned");
+
+        if (i === 0 || String(sorted[i - 1].coe_name || "Unassigned") !== currentCoe) {
+            let rowspan = 1;
+            for (let j = i + 1; j < sorted.length; j++) {
+                if (String(sorted[j].coe_name || "Unassigned") === currentCoe) {
+                    rowspan++;
+                } else {
+                    break;
+                }
+            }
+            result.push({ ...currentIni, rowspan });
+        } else {
+            result.push({ ...currentIni, rowspan: 0 });
+        }
+    }
+    return result;
 });
 
 const statusMap = {
