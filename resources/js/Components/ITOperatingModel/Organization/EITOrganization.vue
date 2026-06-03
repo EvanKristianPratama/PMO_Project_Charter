@@ -3,38 +3,18 @@
         <section
             class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
             <div class="border-b border-slate-200 px-3 py-2 dark:border-white/10">
-                <h2 class="text-xs font-semibold uppercase text-slate-800 dark:text-white">Struktur Organisasi Holding
+                <h2 class="text-xs font-semibold uppercase text-slate-800 dark:text-white">Struktur Organisasi EIT
                 </h2>
             </div>
 
             <div class="px-2 py-3">
-                <div v-if="holdingTree.length === 0"
+                <div v-if="organizationTree.length === 0"
                     class="rounded-md border border-dashed border-slate-200 py-8 text-center text-xs text-slate-500 dark:border-white/10 dark:text-slate-400">
-                    Data holding tidak ditemukan.
+                    Data organisasi tidak ditemukan.
                 </div>
 
                 <div v-else class="grid grid-cols-[repeat(auto-fit,minmax(12rem,1fr))] gap-3">
-                    <ThreeView v-for="item in holdingTree" :key="item.organization_id" :node="item" :is-root="false"
-                        :depth="0" />
-                </div>
-            </div>
-        </section>
-
-        <section
-            class="mt-4 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-            <div class="border-b border-slate-200 px-3 py-2 dark:border-white/10">
-                <h2 class="text-xs font-semibold uppercase text-slate-800 dark:text-white">Struktur Organisasi Sub
-                    Holding</h2>
-            </div>
-
-            <div class="px-2 py-3">
-                <div v-if="subHoldingTree.length === 0"
-                    class="rounded-md border border-dashed border-slate-200 py-8 text-center text-xs text-slate-500 dark:border-white/10 dark:text-slate-400">
-                    Data sub holding tidak ditemukan.
-                </div>
-
-                <div v-else class="grid grid-cols-[repeat(auto-fit,minmax(12rem,1fr))] gap-3">
-                    <ThreeView v-for="item in subHoldingTree" :key="item.organization_id" :node="item" :is-root="false"
+                    <ThreeView v-for="item in organizationTree" :key="item.organization_id" :node="item" :is-root="false"
                         :depth="0" />
                 </div>
             </div>
@@ -320,36 +300,6 @@ const buildFullHierarchy = (items) => {
 };
 
 const organizationTree = computed(() => buildFullHierarchy(props.organizationStructureRows));
-const holdingTree = computed(() => {
-    return organizationTree.value
-        .map((companyNode) => {
-            const holdingGroups = (companyNode.children ?? []).filter((groupNode) => {
-                const name = String(groupNode.organization_name).toLowerCase();
-                const isSubHolding = name.includes('sub') || groupNode.organization_id.endsWith('-2');
-                return !isSubHolding;
-            });
-            return {
-                ...companyNode,
-                children: holdingGroups,
-            };
-        })
-        .filter((companyNode) => companyNode.children.length > 0);
-});
-const subHoldingTree = computed(() => {
-    return organizationTree.value
-        .map((companyNode) => {
-            const subHoldingGroups = (companyNode.children ?? []).filter((groupNode) => {
-                const name = String(groupNode.organization_name).toLowerCase();
-                const isSubHolding = name.includes('sub') || groupNode.organization_id.endsWith('-2');
-                return isSubHolding;
-            });
-            return {
-                ...companyNode,
-                children: subHoldingGroups,
-            };
-        })
-        .filter((companyNode) => companyNode.children.length > 0);
-});
 
 const nodeSizeClass = computed(() => {
     if (props.node?.type === 'holding' || props.node?.type === 'sub_holding') {
