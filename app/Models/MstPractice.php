@@ -31,4 +31,14 @@ class MstPractice extends Model
             ->withPivot('r_a')
             ->withTimestamps();
     }
+
+    public function itspInputs(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(TrsItspInfoflowInput::class, 'practice_id', 'practice_id');
+    }
+
+    public function itspOutputs(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(TrsItspInfoflowOutput::class, 'practice_id', 'practice_id');
+    }
 }

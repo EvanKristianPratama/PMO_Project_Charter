@@ -37,9 +37,6 @@
                     <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#821f44] dark:text-[#a83262] uppercase">
                         GAMO Information Flow Analysis
                     </h2>
-                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">
-                        Aliran Informasi Masuk (Input) ➔ Management Practice (RACI) ➔ Keluar (Output)
-                    </p>
                 </div>
 
                 <!-- Selector & General Filters (print:hidden) -->
@@ -188,199 +185,123 @@
                         </div>
                     </div>
 
-                    <!-- Flow Rows (Per Practice) -->
-                    <div v-if="filteredPractices.length > 0" class="space-y-16">
-                        <div 
-                            v-for="(practice, idx) in filteredPractices" 
-                            :key="practice.practice_id"
-                            class="relative flex flex-col xl:grid xl:grid-cols-[1fr_60px_1.2fr_60px_1fr] items-center gap-4 xl:gap-0"
-                        >
-                            <!-- 1. Input Card Column -->
-                            <div class="w-full xl:w-auto h-full flex flex-col">
-                                <div class="flex-1 flex flex-col rounded-2xl border border-blue-200 dark:border-blue-900/40 bg-blue-50/10 dark:bg-blue-950/5 p-4 shadow-sm hover:shadow transition duration-200">
-                                    <div class="flex items-center gap-2 border-b border-blue-100 dark:border-blue-900/30 pb-2 mb-3">
-                                        <div class="p-1 rounded bg-blue-500 text-white">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
-                                            </svg>
+                    <!-- Flow Table (Compact RACI Matrix style) -->
+                    <div v-if="filteredPractices.length > 0" class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                        <table class="min-w-[1200px] w-full border-collapse text-left text-[11px] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10">
+                            <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-700 dark:bg-white/5 dark:text-slate-300">
+                                <tr class="divide-x divide-slate-200 dark:divide-white/10 border-b border-slate-200 dark:border-white/10">
+                                    <th scope="col" class="w-12 px-3 py-3 text-center border-r border-slate-200 dark:border-white/10">No</th>
+                                    <th scope="col" class="w-[28%] px-4 py-3 border-r border-slate-200 dark:border-white/10">Butir Kebijakan</th>
+                                    <th scope="col" class="w-[24%] px-4 py-3 border-r border-slate-200 dark:border-white/10">Input</th>
+                                    
+                                    <!-- Dynamic Role Columns -->
+                                    <th 
+                                        v-for="role in activeRoles" 
+                                        :key="role.id" 
+                                        class="p-0.5 text-center w-[24px] min-w-[24px] max-w-[24px] align-bottom pb-2 select-none bg-[#d2e4df] dark:bg-[#1b3a32] text-slate-800 dark:text-slate-200 border-r border-[#b2cfc7] dark:border-[#255246]"
+                                        :title="role.name"
+                                    >
+                                        <div class="inline-flex items-center justify-center h-36 w-[14px] mx-auto">
+                                            <span class="[writing-mode:vertical-lr] rotate-180 text-[8px] font-black uppercase tracking-tight whitespace-nowrap text-left leading-tight py-0.5">
+                                                {{ role.name }}
+                                            </span>
                                         </div>
-                                        <h4 class="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-wider">
-                                            Information Inputs
-                                        </h4>
-                                    </div>
+                                    </th>
 
-                                    <!-- Inputs list -->
-                                    <div v-if="practice.inputs && practice.inputs.length > 0" class="space-y-3 flex-1 flex flex-col justify-center">
-                                        <div 
-                                            v-for="input in practice.inputs" 
-                                            :key="input.input_id"
-                                            class="text-left bg-white dark:bg-[#202020] border border-slate-200 dark:border-white/10 p-2.5 rounded-xl text-xs space-y-1.5 shadow-sm"
-                                        >
-                                            <div class="flex items-center gap-1.5">
-                                                <span 
-                                                    class="inline-block px-1.5 py-0.5 rounded-[4px] text-[9px] font-bold"
-                                                    :class="cleanText(input.from) === 'Outside COBIT' 
-                                                        ? 'bg-slate-100 text-slate-600 dark:bg-zinc-800 dark:text-slate-400' 
-                                                        : 'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 border border-blue-200/50 dark:border-blue-900/30'"
+                                    <th scope="col" class="w-[24%] px-4 py-3">Output</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 dark:divide-white/10">
+                                <tr
+                                    v-for="(practice, idx) in filteredPractices"
+                                    :key="practice.practice_id"
+                                    class="align-top hover:bg-slate-50/40 dark:hover:bg-white/5 divide-x divide-slate-200 dark:divide-white/10"
+                                >
+                                    <!-- No -->
+                                    <td class="px-3 py-4 text-center font-medium text-slate-700 dark:text-slate-300 border-r border-slate-200 dark:border-white/10">
+                                        {{ idx + 1 }}
+                                    </td>
+                                    
+                                    <!-- Butir Kebijakan -->
+                                    <td class="px-4 py-4 border-r border-slate-200 dark:border-white/10">
+                                        <div class="space-y-1.5">
+                                            <div class="flex items-center gap-2">
+                                                <span class="rounded bg-purple-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-purple-700 dark:bg-purple-950/50 dark:text-purple-300">
+                                                    {{ cleanText(practice.practice_id) }}
+                                                </span>
+                                                <h4 class="text-[12px] font-extrabold text-slate-900 dark:text-white leading-tight">
+                                                    {{ cleanText(practice.practice_name) }}
+                                                </h4>
+                                            </div>
+                                            <p v-if="practice.practice_description" class="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+                                                {{ cleanText(practice.practice_description) }}
+                                            </p>
+                                        </div>
+                                    </td>
+                                    
+                                    <!-- Input -->
+                                    <td class="px-4 py-4 border-r border-slate-200 dark:border-white/10">
+                                        <div class="space-y-3">
+                                            <div v-for="input in practice.inputs" :key="input.input_id" class="space-y-1 bg-slate-50/50 dark:bg-white/5 p-2 rounded-lg border border-slate-100/50 dark:border-white/5">
+                                                <span
+                                                    class="inline-block rounded px-1.5 py-0.5 text-[9px] font-bold"
+                                                    :class="cleanText(input.from) === 'Outside COBIT'
+                                                        ? 'bg-slate-200 text-slate-700 dark:bg-zinc-700 dark:text-slate-300'
+                                                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'"
                                                 >
                                                     Dari: {{ cleanText(input.from) }}
                                                 </span>
+                                                <p class="whitespace-pre-line text-[11px] leading-relaxed text-slate-700 dark:text-slate-300 font-semibold">
+                                                    {{ cleanText(input.description) }}
+                                                </p>
                                             </div>
-                                            <p class="text-slate-600 dark:text-slate-300 font-sans leading-relaxed text-[11px] whitespace-pre-line">
-                                                {{ cleanText(input.description) }}
-                                            </p>
+                                            <div v-if="!practice.inputs || practice.inputs.length === 0" class="text-[11px] italic text-slate-400 dark:text-slate-600">
+                                                Tidak ada input
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div v-else class="flex-1 flex items-center justify-center text-slate-400 dark:text-slate-600 text-xs italic py-6">
-                                        Tidak ada input khusus
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 2. Dash Connector 1 (Input -> Practice) -->
-                            <div class="h-10 xl:h-auto w-full xl:w-auto flex items-center justify-center select-none">
-                                <!-- Desktop Arrow (Rightwards) -->
-                                <svg class="hidden xl:block w-full h-8" viewBox="0 0 60 20">
-                                    <path 
-                                        d="M5,10 H52" 
-                                        fill="none" 
-                                        stroke="#94a3b8" 
-                                        stroke-width="2.5" 
-                                        class="animate-flow-right"
-                                    />
-                                    <polygon points="51,5 58,10 51,15" fill="#94a3b8" />
-                                </svg>
-
-                                <!-- Mobile Arrow (Downwards) -->
-                                <svg class="xl:hidden w-8 h-10" viewBox="0 0 20 40">
-                                    <path 
-                                        d="M10,5 V32" 
-                                        fill="none" 
-                                        stroke="#94a3b8" 
-                                        stroke-width="2.5" 
-                                        class="animate-flow-down"
-                                    />
-                                    <polygon points="5,31 10,38 15,31" fill="#94a3b8" />
-                                </svg>
-                            </div>
-
-                            <!-- 3. Practice Card Column -->
-                            <div class="w-full xl:w-auto h-full flex flex-col">
-                                <div class="flex-1 flex flex-col rounded-2xl border border-purple-200 dark:border-purple-900/40 bg-purple-50/10 dark:bg-purple-950/5 p-5 shadow-sm hover:shadow transition duration-200">
-                                                                     <!-- Practice Header -->
-                                    <div class="space-y-1">
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 tracking-wider">
-                                            Practice: {{ cleanText(practice.practice_id) }}
-                                        </span>
-                                        <h4 class="text-sm font-extrabold text-slate-900 dark:text-white mt-1.5 leading-snug">
-                                            {{ cleanText(practice.practice_name) }}
-                                        </h4>
-                                    </div>
- 
-                                    <!-- Practice Description -->
-                                    <p class="text-[11.5px] text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
-                                        {{ cleanText(practice.practice_description) }}
-                                    </p>
-
-                                    <!-- RACI Assignment Panel -->
-                                    <div class="mt-4 pt-3 border-t border-purple-100 dark:border-purple-900/30 space-y-2">
-                                        <h5 class="text-[10px] font-extrabold text-purple-500 uppercase tracking-widest">
-                                            RACI Role Assignments
-                                        </h5>
-                                        <div 
-                                            v-if="practice.role_assignments && Object.keys(practice.role_assignments).length > 0"
-                                            class="flex flex-wrap gap-2"
-                                        >
-                                            <div 
-                                                v-for="(assign, roleId) in practice.role_assignments" 
-                                                :key="roleId"
-                                                class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10.5px] border font-bold"
-                                                :class="getRaciRoleContainerClass(assign.raci)"
+                                    </td>
+                                    
+                                    <!-- Dynamic Role RACI badges -->
+                                    <td 
+                                        v-for="role in activeRoles" 
+                                        :key="role.id" 
+                                        class="p-0 text-center w-[24px] min-w-[24px] max-w-[24px] align-middle h-[20px] border-r border-slate-200 dark:border-white/10 bg-[#fbfdfb] dark:bg-[#14231b]"
+                                    >
+                                        <template v-if="getPracticeRaciValue(practice, role.id)">
+                                            <span 
+                                                v-if="getPracticeRaciValue(practice, role.id).toUpperCase() === 'I'"
+                                                class="inline-block w-[3px] h-[12px] bg-[#1e293b] dark:bg-slate-200 rounded-[0.5px] align-middle"
+                                                :title="`${practice.practice_id} - ${role.name}: Informed`"
+                                            ></span>
+                                            <span 
+                                                v-else
+                                                :class="getRaciTextClass(getPracticeRaciValue(practice, role.id))"
+                                                :title="`${practice.practice_id} - ${role.name}: ${getRaciLabel(getPracticeRaciValue(practice, role.id))}`"
                                             >
-                                                <span class="text-slate-700 dark:text-slate-200 font-bold truncate max-w-[120px]" :title="cleanText(assign.role_name)">
-                                                    {{ cleanText(assign.role_name) }}
-                                                </span>
-                                                <span 
-                                                    class="w-5 h-5 flex items-center justify-center rounded-md font-black text-center text-[10px]"
-                                                    :class="getRaciBadgeClass(assign.raci)"
-                                                >
-                                                    {{ cleanText(assign.raci) }}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div v-else class="text-[10px] italic text-slate-400 dark:text-slate-600">
-                                            Belum ada pemetaan RACI
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 4. Dash Connector 2 (Practice -> Output) -->
-                            <div class="h-10 xl:h-auto w-full xl:w-auto flex items-center justify-center select-none">
-                                <!-- Desktop Arrow (Rightwards) -->
-                                <svg class="hidden xl:block w-full h-8" viewBox="0 0 60 20">
-                                    <path 
-                                        d="M5,10 H52" 
-                                        fill="none" 
-                                        stroke="#94a3b8" 
-                                        stroke-width="2.5" 
-                                        class="animate-flow-right"
-                                    />
-                                    <polygon points="51,5 58,10 51,15" fill="#94a3b8" />
-                                </svg>
-
-                                <!-- Mobile Arrow (Downwards) -->
-                                <svg class="xl:hidden w-8 h-10" viewBox="0 0 20 40">
-                                    <path 
-                                        d="M10,5 V32" 
-                                        fill="none" 
-                                        stroke="#94a3b8" 
-                                        stroke-width="2.5" 
-                                        class="animate-flow-down"
-                                    />
-                                    <polygon points="5,31 10,38 15,31" fill="#94a3b8" />
-                                </svg>
-                            </div>
-
-                            <!-- 5. Output Card Column -->
-                            <div class="w-full xl:w-auto h-full flex flex-col">
-                                <div class="flex-1 flex flex-col rounded-2xl border border-pink-200 dark:border-pink-900/40 bg-pink-50/10 dark:bg-pink-950/5 p-4 shadow-sm hover:shadow transition duration-200">
-                                    <div class="flex items-center gap-2 border-b border-pink-100 dark:border-pink-900/30 pb-2 mb-3">
-                                        <div class="p-1 rounded bg-pink-500 text-white">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" />
-                                            </svg>
-                                        </div>
-                                        <h4 class="text-xs font-black text-pink-600 dark:text-pink-400 uppercase tracking-wider">
-                                            Information Outputs
-                                        </h4>
-                                    </div>
-
-                                    <!-- Outputs list -->
-                                    <div v-if="practice.outputs && practice.outputs.length > 0" class="space-y-3 flex-1 flex flex-col justify-center">
-                                        <div 
-                                            v-for="output in practice.outputs" 
-                                            :key="output.output_id"
-                                            class="text-left bg-white dark:bg-[#202020] border border-slate-200 dark:border-white/10 p-2.5 rounded-xl text-xs space-y-1.5 shadow-sm"
-                                        >
-                                            <div class="flex items-center gap-1.5">
-                                                <span 
-                                                    class="inline-block px-1.5 py-0.5 rounded-[4px] text-[9px] font-bold bg-pink-100 text-pink-700 dark:bg-pink-950/50 dark:text-pink-300 border border-pink-200/50 dark:border-pink-900/30"
-                                                >
+                                                {{ getPracticeRaciValue(practice, role.id) }}
+                                            </span>
+                                        </template>
+                                    </td>
+                                    
+                                    <!-- Output -->
+                                    <td class="px-4 py-4">
+                                        <div class="space-y-3">
+                                            <div v-for="output in practice.outputs" :key="output.output_id" class="space-y-1 bg-slate-50/50 dark:bg-white/5 p-2 rounded-lg border border-slate-100/50 dark:border-white/5">
+                                                <span class="inline-block rounded bg-pink-100 px-1.5 py-0.5 text-[9px] font-bold text-pink-700 dark:bg-pink-900/50 dark:text-pink-300">
                                                     Ke: {{ cleanText(output.to) }}
                                                 </span>
+                                                <p class="whitespace-pre-line text-[11px] leading-relaxed text-slate-700 dark:text-slate-300 font-semibold">
+                                                    {{ cleanText(output.description) }}
+                                                </p>
                                             </div>
-                                            <p class="text-slate-600 dark:text-slate-300 font-sans leading-relaxed text-[11px] whitespace-pre-line">
-                                                {{ cleanText(output.description) }}
-                                            </p>
+                                            <div v-if="!practice.outputs || practice.outputs.length === 0" class="text-[11px] italic text-slate-400 dark:text-slate-600">
+                                                Tidak ada output
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div v-else class="flex-1 flex items-center justify-center text-slate-400 dark:text-slate-600 text-xs italic py-6">
-                                        Tidak ada output khusus
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                     <div v-else class="p-12 border border-slate-200 dark:border-white/10 rounded-2xl bg-slate-50/50 dark:bg-white/5 text-center flex flex-col items-center">
                         <div class="h-10 w-10 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-400 dark:text-slate-500 mb-3 border border-slate-200 dark:border-white/10">
@@ -424,6 +345,30 @@ const filteredPractices = computed(() => {
     return (objectiveData.value.practices || []).filter(
         p => p.practice_id === selectedPracticeId.value
     );
+});
+
+const activeRoles = computed(() => {
+    const rolesMap = {};
+    filteredPractices.value.forEach(practice => {
+        if (practice.role_assignments) {
+            Object.entries(practice.role_assignments).forEach(([roleId, assign]) => {
+                if (assign && assign.raci) {
+                    rolesMap[roleId] = {
+                        id: roleId,
+                        name: cleanText(assign.role_name)
+                    };
+                }
+            });
+        }
+    });
+    return Object.values(rolesMap).sort((a, b) => {
+        const idA = parseInt(a.id, 10);
+        const idB = parseInt(b.id, 10);
+        if (!isNaN(idA) && !isNaN(idB)) {
+            return idA - idB;
+        }
+        return String(a.id).localeCompare(String(b.id));
+    });
 });
 
 // Grouped GAMO objectives for selector dropdown
@@ -589,6 +534,39 @@ function getRaciBadgeClass(raci) {
         return 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300';
     }
     return 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300';
+}
+
+function getPracticeRaciValue(practice, roleId) {
+    if (practice.role_assignments && practice.role_assignments[roleId]) {
+        return practice.role_assignments[roleId].raci || '';
+    }
+    return '';
+}
+
+function getRaciLabel(val) {
+    if (!val) return '';
+    const labels = {
+        'A': 'Accountable',
+        'R': 'Responsible',
+        'C': 'Consulted',
+        'I': 'Informed',
+    };
+    return labels[val.toUpperCase()] || '';
+}
+
+function getRaciTextClass(val) {
+    if (!val) return '';
+    const cleanVal = val.toUpperCase();
+    if (cleanVal === 'A') {
+        return "text-[#d9383a] dark:text-[#f87171] font-black text-[11px] select-none";
+    }
+    if (cleanVal === 'R') {
+        return "text-[#2d9a68] dark:text-[#34d399] font-black text-[11px] select-none";
+    }
+    if (cleanVal === 'C') {
+        return "text-[#dd7d36] dark:text-[#fbbf24] font-black text-[11px] select-none";
+    }
+    return "text-slate-800 dark:text-slate-200 font-bold text-[10.5px] select-none";
 }
 
 // Clean escaped double quotes and extra spacing/escapes from text

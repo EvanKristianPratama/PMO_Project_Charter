@@ -958,18 +958,39 @@ function submitMappingGlobal() {
 
     const mappings = [];
     props.responsibles.forEach(resp => {
-        const objectiveIds = [];
-        const respState = tempMappingState.value[resp.id] || {};
-        Object.keys(respState).forEach(objId => {
-            if (respState[objId]) {
-                objectiveIds.push(objId);
+        const originalState = mappingState.value[resp.id] || {};
+        const newState = tempMappingState.value[resp.id] || {};
+        
+        const originalIds = Object.keys(originalState).filter(k => originalState[k]);
+        const newIds = Object.keys(newState).filter(k => newState[k]);
+        
+        let isChanged = false;
+        if (originalIds.length !== newIds.length) {
+            isChanged = true;
+        } else {
+            for (let id of newIds) {
+                if (!originalIds.includes(id)) {
+                    isChanged = true;
+                    break;
+                }
             }
-        });
-        mappings.push({
-            responsible_id: resp.id,
-            objective_ids: objectiveIds
-        });
+        }
+
+        if (isChanged) {
+            mappings.push({
+                responsible_id: resp.id,
+                objective_ids: newIds
+            });
+        }
     });
+
+    if (mappings.length === 0) {
+        isSavingGlobal.value = false;
+        isEditing.value = false;
+        localSuccess.value = 'Tidak ada perubahan untuk disimpan.';
+        setTimeout(() => { localSuccess.value = ''; }, 3000);
+        return;
+    }
 
     useForm({
         mappings: mappings

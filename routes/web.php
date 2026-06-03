@@ -24,6 +24,7 @@ use App\Http\Controllers\Policy\EITOrganizationController;
 use App\Http\Controllers\Policy\GeneralPolicyController;
 use App\Http\Controllers\Policy\PolicyController;
 use App\Http\Controllers\Policy\InfoflowController;
+use App\Http\Controllers\Policy\ItspInfoflowController;
 use App\Http\Controllers\Policy\PracticeRoleController;
 use App\Http\Controllers\Policy\ProcedureController;
 use App\Http\Controllers\Policy\RegulationController;
@@ -363,6 +364,19 @@ Route::middleware(['auth', 'approved'])->group(function () {
 
         // GAMO Information Flow
         Route::get('/infoflow', [InfoflowController::class, 'index'])->name('infoflow.index');
+
+        // ITSP Information Flow
+        Route::get('/itsp-infoflow', [ItspInfoflowController::class, 'index'])->name('itsp-infoflow.index');
+        Route::get('/itsp-infoflow/data', [ItspInfoflowController::class, 'getData'])->name('itsp-infoflow.data');
+        Route::post('/itsp-infoflow/save', [ItspInfoflowController::class, 'saveData'])->name('itsp-infoflow.save');
+        Route::get('/itsp-infoflow/manage', [ItspInfoflowController::class, 'manage'])->name('itsp-infoflow.manage');
+        Route::post('/itsp-infoflow/sync', [ItspInfoflowController::class, 'syncFromCobit'])->name('itsp-infoflow.sync');
+        Route::post('/itsp-infoflow/inputs', [ItspInfoflowController::class, 'storeInput'])->name('itsp-infoflow.input.store');
+        Route::put('/itsp-infoflow/inputs/{id}', [ItspInfoflowController::class, 'updateInput'])->name('itsp-infoflow.input.update');
+        Route::delete('/itsp-infoflow/inputs/{id}', [ItspInfoflowController::class, 'destroyInput'])->name('itsp-infoflow.input.destroy');
+        Route::post('/itsp-infoflow/outputs', [ItspInfoflowController::class, 'storeOutput'])->name('itsp-infoflow.output.store');
+        Route::put('/itsp-infoflow/outputs/{id}', [ItspInfoflowController::class, 'updateOutput'])->name('itsp-infoflow.output.update');
+        Route::delete('/itsp-infoflow/outputs/{id}', [ItspInfoflowController::class, 'destroyOutput'])->name('itsp-infoflow.output.destroy');
 
         // Master Responsible CRUD
         Route::get('/responsible', [ResponsibleController::class, 'manage'])->name('responsible.manage');
