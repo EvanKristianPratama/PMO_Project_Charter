@@ -24,7 +24,11 @@ const showArchitectureChildren = computed(() => {
 });
 
 const policyItem = computed(() => {
-    return navItems.value.find((item) => item.label === 'IT Operating') ?? null;
+    return navItems.value.find((item) => item.label === 'IT Operating Model') ?? null;
+});
+
+const libraryItem = computed(() => {
+    return navItems.value.find((item) => item.label === 'Library') ?? null;
 });
 
 const policyChildren = computed(() => {
@@ -91,6 +95,29 @@ const adminItem = computed(() => {
             >
                 <component :is="policyItem.icon" v-if="policyItem.icon" class="h-3.5 w-3.5 shrink-0" />
                 <span>{{ policyItem.label }}</span>
+            </Link>
+
+            <!-- Separation Dot -->
+            <span
+                v-if="libraryItem"
+                class="select-none px-0.5 text-indigo-200 dark:text-indigo-900"
+            >
+                &middot;
+            </span>
+
+            <!-- Library Link -->
+            <Link
+                v-if="libraryItem"
+                :href="libraryItem.href"
+                class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
+                :class="[
+                    libraryItem.active(currentUrl.value)
+                        ? 'bg-indigo-500 text-white shadow-sm'
+                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
+                ]"
+            >
+                <component :is="libraryItem.icon" v-if="libraryItem.icon" class="h-3.5 w-3.5 shrink-0" />
+                <span>{{ libraryItem.label }}</span>
             </Link>
 
             <!-- Separation Dot -->

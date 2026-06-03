@@ -111,6 +111,13 @@ export function useNavigation() {
                 active: (url) =>
                     (url || '').startsWith("/program-evalution/review-analysis"),
             },
+            {
+                label: "Report",
+                href: safeRoute("program-evaluation.report"),
+                icon: DocumentTextIcon,
+                active: (url) =>
+                    (url || '').startsWith("/program-evalution/report"),
+            },
         ];
 
         const programImplementationChildren = [
@@ -250,7 +257,7 @@ export function useNavigation() {
                 active: (url) => (url || '').startsWith("/service-portofolio"),
             },
             {
-                label: "IT Operating",
+                label: "IT Operating Model",
                 href: safeRoute("policy.regulation.index"),
                 icon: DocumentTextIcon,
                 active: (url) => (url || '').startsWith("/policy") || (url || '').startsWith("/bpmn-workflow"),
@@ -298,6 +305,12 @@ export function useNavigation() {
                         active: (url) => (url || '').startsWith("/bpmn-workflow"),
                     },
                 ],
+            },
+            {
+                label: "Library",
+                href: safeRoute("library.index"),
+                icon: FolderIcon,
+                active: (url) => (url || '').startsWith("/library"),
             },
             {
                 label: "Master Data",

@@ -373,6 +373,9 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/program-evalution/review-dashboard', [ReviewDashboardController::class, 'index'])->name('program-evaluation.review-dashboard');
     Route::get('/program-evalution/review-summary', [ReviewDashboardController::class, 'summary'])->name('program-evaluation.review-summary');
     Route::get('/program-evalution/review-analysis', [ReviewAnalysisController::class, 'index'])->name('program-evaluation.review-analysis');
+    Route::get('/program-evalution/report', fn () => Inertia::render('Placeholder/Index', [
+        'title' => 'Program Evaluation Report',
+    ]))->name('program-evaluation.report');
     Route::post('/program-evalution/review-timeline/review-status-implementation/{statusId}', [ReviewTimelineController::class, 'updateReviewStatusImplementation'])->name('program-evaluation.review-timeline.review-status.update');
 
     // Summary Review Notes (TrsReviewSc)
@@ -474,6 +477,10 @@ Route::middleware(['auth', 'approved'])->group(function () {
     // Cloud Data Synchronization (Accessible for all validated app instances)
     Route::get('/sync', [SyncController::class, 'index'])->name('sync.index');
     Route::post('/sync/pull', [SyncController::class, 'pull'])->name('sync.pull');
+
+    Route::get('/library', fn () => Inertia::render('Placeholder/Index', [
+        'title' => 'Library',
+    ]))->name('library.index');
 
     // BPMN Workflow Controller (Proof of Concept)
     Route::prefix('/bpmn-workflow')->name('bpmn-workflow.')->group(function () {
