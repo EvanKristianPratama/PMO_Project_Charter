@@ -11,12 +11,11 @@ const pages = import.meta.glob('./Pages/**/*.vue');
 function normalizePagePath(path) {
     return String(path ?? '')
         .replace(/\\/g, '/')
-        .replace(/^\.\/+/, '')
-        .replace(/^\/+/, '')
-        .replace(/^@resources\/js\//i, '')
+        .replace(/^\.\//, '')
+        .replace(/^\//, '')
+        .replace(/^@\//, '')
         .replace(/^resources\/js\//i, '')
         .replace(/^pages\//i, '')
-        .replace(/^\.?\/?pages\//i, '')
         .replace(/\.vue$/i, '')
         .replace(/\/+$/, '')
         .toLowerCase();
