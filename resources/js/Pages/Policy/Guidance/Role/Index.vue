@@ -277,7 +277,7 @@
                 style="font-family: Arial, sans-serif; font-size: 10pt; line-height: 1.5; color: #1e293b;">
                 
                 <!-- Transparent click overlay to close dropdown when clicking outside -->
-                <div v-if="activeAddDropdownPracId !== null" class="fixed inset-0 z-30" @click="activeAddDropdownPracId = null"></div>
+                <div v-if="activeAddDropdownPracId !== null || activeAddDropdownObjId !== null" class="fixed inset-0 z-30" @click="activeAddDropdownPracId = null; activeAddDropdownObjId = null"></div>
 
                 <!-- Title Section -->
                 <div class="text-center space-y-2 relative z-10 mb-6">
@@ -286,21 +286,52 @@
                     </h2>
                 </div>
 
+                <!-- Sub-mode switcher inside policy_mapping -->
+                <div class="print:hidden flex justify-center mb-6">
+                    <div class="inline-flex rounded-xl bg-slate-100 p-1 dark:bg-white/5 border border-slate-200/55 dark:border-white/10 shadow-sm">
+                        <button
+                            @click="policyMappingMode = 'kebijakan'"
+                            class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-200"
+                            :class="policyMappingMode === 'kebijakan'
+                                ? 'bg-white text-[#821f44] shadow-md shadow-[#821f44]/5 dark:bg-[#262626] dark:text-white'
+                                : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
+                            </svg>
+                            <span>Dari Butir Kebijakan</span>
+                            <span class="ml-1 rounded-full bg-[#821f44]/10 px-1.5 py-0.5 text-[10px] font-extrabold text-[#821f44] dark:bg-[#821f44]/20 dark:text-pink-300">{{ filteredObjectivesForMap.length }}</span>
+                        </button>
+                        <button
+                            @click="policyMappingMode = 'tanggung_jawab'"
+                            class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-200"
+                            :class="policyMappingMode === 'tanggung_jawab'
+                                ? 'bg-white text-emerald-700 shadow-md shadow-emerald-500/5 dark:bg-[#262626] dark:text-emerald-300'
+                                : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                            </svg>
+                            <span>Dari Tanggung Jawab</span>
+                            <span class="ml-1 rounded-full bg-emerald-600/10 px-1.5 py-0.5 text-[10px] font-extrabold text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">{{ props.responsibles.length }}</span>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Toolbar and Filter section (print:hidden) -->
+                <div v-show="policyMappingMode === 'kebijakan'">
                 <div class="print:hidden flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200/60 dark:border-white/10 shadow-sm mb-6">
                     <!-- Left: Domain Filter -->
                     <div class="flex items-center gap-2">
-                        <span class="text-xs font-black uppercase tracking-wider text-[#821f44] dark:text-[#db588c]">Domain Kebijakan:</span>
+                        <span class="text-xs font-black uppercase tracking-wider text-[#821f44] dark:text-[#db588c]">1. Kebijakan Khusus:</span>
                         <select 
                             v-model="selectedDomainFilter"
                             class="text-xs font-semibold bg-white border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-[#1a1a1a] dark:border-white/10 dark:text-white shadow-sm cursor-pointer"
                         >
-                            <option value="all">Semua Domain</option>
-                            <option value="EDM">EDM (Evaluate, Direct & Monitor)</option>
-                            <option value="APO">APO (Align, Plan & Organize)</option>
-                            <option value="BAI">BAI (Build, Acquire & Implement)</option>
-                            <option value="DSS">DSS (Deliver, Service & Support)</option>
-                            <option value="MEA">MEA (Monitor, Evaluate & Assess)</option>
+                            <option value="all">Semua Kebijakan Khusus</option>
+                            <option v-for="(d, idx) in availableDomains" :key="d.value" :value="d.value">
+                                {{ idx + 1 }}. {{ d.label }}
+                            </option>
                         </select>
                     </div>
 
@@ -487,9 +518,199 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
+                </div><!-- end v-show kebijakan -->
+
+                <!-- =============================================
+                     MODE DARI TANGGUNG JAWAB (reversed view)
+                     ============================================= -->
+                <div v-show="policyMappingMode === 'tanggung_jawab'">
+
+                    <!-- Search filter and Edit Button for responsibilities -->
+                    <div class="print:hidden flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200/60 dark:border-white/10 shadow-sm mb-6">
+                        <div class="relative w-full md:w-96">
+                            <input
+                                type="text"
+                                v-model="respListSearchQuery"
+                                placeholder="Cari tanggung jawab..."
+                                class="w-full bg-white text-slate-800 border border-slate-300 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 dark:bg-[#1a1a1a] dark:text-white dark:border-white/10 shadow-sm font-semibold"
+                            />
+                            <div class="absolute left-3.5 top-2.5 text-slate-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.637 10.637Z" />
+                                </svg>
+                            </div>
+                            <span class="absolute right-3.5 top-2.5 text-xs text-slate-400 font-semibold">{{ filteredAllResponsibilities.length }} item</span>
+                        </div>
+
+                        <!-- Single Edit / Save & Cancel Button Group -->
+                        <div class="flex items-center gap-2 shrink-0">
+                            <!-- If not editing -->
+                            <button 
+                                v-if="!isEditing"
+                                @click="startEditingGlobal"
+                                class="inline-flex items-center gap-1.5 rounded-xl bg-[#821f44] px-4 py-2 text-xs font-bold text-white shadow-lg shadow-[#821f44]/20 hover:bg-[#9c2552] transition active:scale-95 whitespace-nowrap"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.83 20.013a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                </svg>
+                                Edit Pemetaan
+                            </button>
+
+                            <!-- If editing -->
+                            <template v-else>
+                                <button 
+                                    @click="submitMappingGlobal"
+                                    class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-emerald-700 transition active:scale-95 disabled:opacity-60 whitespace-nowrap"
+                                    :disabled="isSavingGlobal"
+                                >
+                                    <span v-if="isSavingGlobal" class="inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></span>
+                                    Simpan
+                                </button>
+                                <button 
+                                    @click="cancelEditingGlobal"
+                                    class="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:hover:bg-white/5 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 transition active:scale-95 whitespace-nowrap"
+                                >
+                                    Batal
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Tanggung Jawab Table -->
+                    <div class="overflow-visible border border-slate-300 dark:border-white/10 rounded-xl shadow-sm max-w-full bg-white dark:bg-[#1a1a1a] print:border-slate-300 print:shadow-none">
+                        <table class="min-w-full border-collapse text-left">
+                            <thead>
+                                <tr class="bg-[#d6ede8] dark:bg-[#1b3a32] text-slate-800 dark:text-slate-200 divide-x divide-[#b2cfc7] dark:divide-[#255246] border-b border-[#b2cfc7] dark:border-[#255246] text-xs uppercase tracking-wider font-bold">
+                                    <th class="p-3.5 text-center w-16 border-r border-[#b2cfc7] dark:border-[#255246]">No</th>
+                                    <th class="p-3.5 text-left border-r border-[#b2cfc7] dark:border-[#255246] w-[450px] min-w-[300px]">Tugas &amp; Tanggung Jawab</th>
+                                    <th class="p-3.5 text-left min-w-[320px]">Butir Kebijakan yang Dipetakan</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 dark:divide-white/10 text-slate-800 dark:text-slate-200">
+                                <tr
+                                    v-for="(item, idx) in filteredAllResponsibilities"
+                                    :key="item.id"
+                                    class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors print:hover:bg-transparent"
+                                >
+                                    <!-- No -->
+                                    <td class="p-3.5 border-r border-slate-200 dark:border-white/10 text-center font-mono font-bold text-slate-500 dark:text-slate-400 text-xs bg-slate-50/40 dark:bg-white/5 select-none">{{ idx + 1 }}</td>
+                                    <!-- Tugas & Tanggung Jawab -->
+                                    <td class="p-3.5 border-r border-slate-200 dark:border-white/10 text-[12px] font-serif leading-relaxed text-slate-900 dark:text-slate-100 text-justify align-top">
+                                        {{ item.responsible }}
+                                    </td>
+                                    <!-- Kebijakan yang dipetakan -->
+                                    <td class="p-3.5 align-top relative">
+                                        <!-- 1. Read Mode -->
+                                        <div v-if="!isEditing" class="space-y-1">
+                                            <div v-if="getMappedObjectivesList(item.id).length > 0">
+                                                <div
+                                                    v-for="obj in getMappedObjectivesList(item.id)"
+                                                    :key="obj.objective_id"
+                                                    class="text-[11px] text-slate-700 dark:text-slate-300 leading-snug font-sans mb-1"
+                                                >
+                                                    <span class="font-bold text-slate-500 dark:text-slate-400 mr-1">{{ obj.objective_id }}</span>{{ obj.objective }}
+                                                </div>
+                                            </div>
+                                            <p v-else class="text-[11px] text-slate-400 italic">Belum ada kebijakan yang terpetakan untuk tanggung jawab ini.</p>
+                                        </div>
+
+                                        <!-- 2. Edit Mode -->
+                                        <div v-else class="flex flex-col gap-2.5">
+                                            <!-- Trigger Dropdown button -->
+                                            <div class="relative">
+                                                <button 
+                                                    @click.stop="toggleAddObjectiveDropdown(item.id)"
+                                                    class="w-full text-left inline-flex items-center justify-between gap-2 rounded-xl border border-slate-300 dark:border-white/10 bg-white hover:bg-slate-50 dark:bg-[#1a1a1a] dark:hover:bg-white/5 px-3 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm active:scale-95 transition-all"
+                                                >
+                                                    <span class="truncate font-semibold">
+                                                        {{ getSelectedObjectivesCountText(item.id) }}
+                                                    </span>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-4 h-4 text-slate-400 shrink-0">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                                    </svg>
+                                                </button>
+                                                
+                                                <!-- Dropdown Menu -->
+                                                <div 
+                                                    v-if="activeAddDropdownObjId === item.id" 
+                                                    class="absolute right-0 mt-1.5 z-40 w-[340px] max-h-72 overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#222] p-2 divide-y divide-slate-100 dark:divide-white/5 space-y-2"
+                                                >
+                                                    <div class="px-2.5 py-1.5 flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider select-none">
+                                                        <span>Pilih Kebijakan</span>
+                                                        <span class="text-emerald-700 dark:text-emerald-400 font-extrabold">{{ getMappedObjectivesList(item.id).length }} Terpilih</span>
+                                                    </div>
+                                                    
+                                                    <!-- Search Input inside Dropdown -->
+                                                    <div class="p-1">
+                                                        <input 
+                                                            v-model="objectiveDropdownSearch"
+                                                            type="text"
+                                                            placeholder="Cari kebijakan..."
+                                                            class="w-full px-2.5 py-1 text-[11px] rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white shadow-inner"
+                                                            @click.stop
+                                                        />
+                                                    </div>
+                                                    
+                                                    <div class="py-1 max-h-48 overflow-y-auto space-y-0.5" @click.stop>
+                                                        <div 
+                                                            v-for="obj in filteredObjectivesForDropdown"
+                                                            :key="obj.objective_id"
+                                                            @click="toggleMapping(item.id, obj.objective_id)"
+                                                            class="w-full text-left px-2.5 py-2 text-xs font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 transition flex items-start gap-2.5 cursor-pointer text-slate-700 dark:text-slate-300"
+                                                        >
+                                                            <span 
+                                                                class="w-3.5 h-3.5 rounded border flex items-center justify-center text-[10px] font-black transition-all select-none shrink-0 mt-0.5"
+                                                                :class="isPracticeMapped(item.id, obj.objective_id)
+                                                                    ? 'bg-emerald-600 border-emerald-600 text-white shadow shadow-emerald-600/30 dark:bg-emerald-500 dark:border-emerald-500' 
+                                                                    : 'border-slate-300 bg-white text-transparent dark:border-white/20 dark:bg-transparent'"
+                                                            >
+                                                                ✓
+                                                            </span>
+                                                            <span class="font-sans leading-snug flex-1 text-[11px]">
+                                                                <span class="font-bold text-slate-500 dark:text-slate-400 mr-1">{{ obj.objective_id }}</span>{{ obj.objective }}
+                                                            </span>
+                                                        </div>
+                                                        <div v-if="filteredObjectivesForDropdown.length === 0" class="text-center py-4 text-xs text-slate-400 italic">
+                                                            Kebijakan tidak ditemukan.
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Selected Cards display (only while editing) -->
+                                            <div class="flex flex-col gap-1.5">
+                                                <div 
+                                                    v-for="obj in getMappedObjectivesList(item.id)" 
+                                                    :key="obj.objective_id"
+                                                    class="flex items-start justify-between gap-2.5 rounded-xl bg-slate-50/80 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-3 text-xs text-slate-800 dark:text-slate-200 shadow-sm"
+                                                >
+                                                    <span class="font-sans leading-snug text-[11px]">
+                                                        <span class="font-bold text-slate-500 dark:text-slate-400 mr-1">{{ obj.objective_id }}</span>{{ obj.objective }}
+                                                    </span>
+                                                    <button 
+                                                        @click.stop="toggleMapping(item.id, obj.objective_id)"
+                                                        class="hover:text-rose-600 text-slate-400 dark:hover:text-rose-400 focus:outline-none shrink-0 font-extrabold text-sm"
+                                                        title="Hapus Pemetaan"
+                                                    >
+                                                        ×
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr v-if="filteredAllResponsibilities.length === 0">
+                                    <td colspan="3" class="p-8 text-center text-slate-400 dark:text-slate-500 font-sans text-xs">Tidak ada tanggung jawab yang ditemukan.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div><!-- end mode tanggung_jawab -->
+
+            </div><!-- end policy_mapping card -->
 
             <!-- Print Floating Control Bar for Easy Navigation (print:hidden) -->
+
             <div class="fixed bottom-6 right-6 flex flex-col gap-3 z-30 print:hidden">
                 <button 
                     @click="scrollToTop"
@@ -585,21 +806,21 @@ const selectedRoleFilter = ref('all');
 const selectedDomainFilter = ref('all');
 const practiceSearchQuery = ref('');
 
-// Flattened list of all responsibilities across all roles
-const allResponsibilities = computed(() => {
-    const list = [];
-    props.roles.forEach(role => {
-        (role.responsibilities || []).forEach(resp => {
-            list.push({
-                id: resp.id,
-                content: resp.content,
-                roleId: role.id,
-                roleName: role.name
-            });
-        });
-    });
-    return list;
+// Sub-mode inside policy_mapping tab: 'kebijakan' (default) | 'tanggung_jawab' (reversed)
+const policyMappingMode = ref('kebijakan');
+
+// Search filter for the reversed tanggung_jawab view
+const respListSearchQuery = ref('');
+
+// Filtered responsibilities based on search query (for reversed view)
+const filteredAllResponsibilities = computed(() => {
+    if (!respListSearchQuery.value) return props.responsibles;
+    const q = respListSearchQuery.value.toLowerCase();
+    return props.responsibles.filter(item =>
+        item.responsible.toLowerCase().includes(q)
+    );
 });
+
 
 // Filtered list of responsibles (blue box) based on active role filter selection
 const filteredResponsibles = computed(() => {
@@ -707,6 +928,9 @@ const localError = ref('');
 const activeAddDropdownPracId = ref(null);
 const responsibilityDropdownSearch = ref('');
 
+const activeAddDropdownObjId = ref(null);
+const objectiveDropdownSearch = ref('');
+
 // Global editing state
 const isEditing = ref(false);
 const tempMappingState = ref({});
@@ -717,12 +941,14 @@ function startEditingGlobal() {
     // Deep clone mappingState to tempMappingState
     tempMappingState.value = JSON.parse(JSON.stringify(mappingState.value));
     activeAddDropdownPracId.value = null;
+    activeAddDropdownObjId.value = null;
 }
 
 function cancelEditingGlobal() {
     isEditing.value = false;
     tempMappingState.value = {};
     activeAddDropdownPracId.value = null;
+    activeAddDropdownObjId.value = null;
 }
 
 function submitMappingGlobal() {
@@ -788,13 +1014,65 @@ watch(() => props.responsibles, () => {
     initMappingState();
 }, { deep: true });
 
+// Available domains derived dynamically from props.objectives (MstObjective)
+const availableDomains = computed(() => {
+    const list = [];
+    const seen = new Set();
+    
+    props.objectives.forEach(obj => {
+        let prefix = '';
+        if (obj.objective_id) {
+            const match = obj.objective_id.match(/^(EDM|APO|BAI|DSS|MEA)/i);
+            if (match) {
+                prefix = match[1].toUpperCase();
+            }
+        }
+        
+        let val = '';
+        let label = '';
+        
+        if (prefix) {
+            val = prefix;
+            if (prefix === 'EDM') label = 'EDM (Evaluasi, Arahkan, dan Pantau)';
+            else if (prefix === 'APO') label = 'APO (Penyelarasan, Perencanaan, dan Pengorganisasian)';
+            else if (prefix === 'BAI') label = 'BAI (Pembangunan, Akuisisi, dan Implementasi)';
+            else if (prefix === 'DSS') label = 'DSS (Penyerahan, Pemberian Layanan dan Dukungan)';
+            else if (prefix === 'MEA') label = 'MEA (Pengawasan, Evaluasi, dan Penilaian)';
+            else label = prefix;
+        } else if (obj.domain) {
+            val = obj.domain;
+            label = obj.domain;
+        } else {
+            val = 'Lainnya';
+            label = 'Lainnya';
+        }
+        
+        if (val && !seen.has(val)) {
+            seen.add(val);
+            list.push({ value: val, label: label });
+        }
+    });
+    
+    const order = ['EDM', 'APO', 'BAI', 'DSS', 'MEA'];
+    list.sort((a, b) => {
+        const idxA = order.indexOf(a.value);
+        const idxB = order.indexOf(b.value);
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        return a.label.localeCompare(b.label);
+    });
+    
+    return list;
+});
+
 // Filtered objectives for the Y-axis rows based on search and selected domain filter
 const filteredObjectivesForMap = computed(() => {
     const list = [];
     props.objectives.forEach(obj => {
         const domainMatch = selectedDomainFilter.value === 'all' || 
             (obj.domain && obj.domain.includes(selectedDomainFilter.value)) ||
-            (obj.objective_id && obj.objective_id.startsWith(selectedDomainFilter.value));
+            (obj.objective_id && obj.objective_id.toUpperCase().startsWith(selectedDomainFilter.value.toUpperCase()));
         if (domainMatch) {
             list.push(obj);
         }
@@ -872,6 +1150,46 @@ function toggleAddResponsibilityDropdown(objectiveId) {
         responsibilityDropdownSearch.value = '';
     }
 }
+
+// Get the list of mapped objectives for a responsible ID
+function getMappedObjectivesList(responsibleId) {
+    const list = [];
+    props.objectives.forEach(obj => {
+        if (isPracticeMapped(responsibleId, obj.objective_id)) {
+            list.push(obj);
+        }
+    });
+    return list;
+}
+
+// Get button label for selected objectives count
+function getSelectedObjectivesCountText(responsibleId) {
+    const count = getMappedObjectivesList(responsibleId).length;
+    return count > 0 ? `${count} Kebijakan Terhubung` : 'Pilih Kebijakan';
+}
+
+// Toggle add objective dropdown visibility
+function toggleAddObjectiveDropdown(responsibleId) {
+    if (activeAddDropdownObjId.value === responsibleId) {
+        activeAddDropdownObjId.value = null;
+    } else {
+        activeAddDropdownObjId.value = responsibleId;
+        objectiveDropdownSearch.value = '';
+    }
+}
+
+// Filtered objectives for dropdown
+const filteredObjectivesForDropdown = computed(() => {
+    let list = [...props.objectives];
+    if (objectiveDropdownSearch.value.trim()) {
+        const query = objectiveDropdownSearch.value.toLowerCase();
+        list = list.filter(obj => 
+            obj.objective_id.toLowerCase().includes(query) || 
+            (obj.objective && obj.objective.toLowerCase().includes(query))
+        );
+    }
+    return list;
+});
 </script>
 
 <style scoped>

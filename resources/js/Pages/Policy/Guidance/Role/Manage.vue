@@ -46,6 +46,43 @@
                 </div>
             </section>
 
+            <!-- Mode Switcher -->
+            <div class="flex justify-center">
+                <div class="inline-flex rounded-xl bg-slate-100 p-1 dark:bg-white/5 border border-slate-200/55 dark:border-white/10 shadow-sm">
+                    <button
+                        @click="activeInputMode = 'role'"
+                        class="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-200"
+                        :class="[
+                            activeInputMode === 'role'
+                                ? 'bg-white text-[#821f44] shadow-md shadow-[#821f44]/5 dark:bg-[#262626] dark:text-white'
+                                : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                        ]"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-4 h-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                        </svg>
+                        <span>Mode Role</span>
+                    </button>
+                    <button
+                        @click="activeInputMode = 'responsible'"
+                        class="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-200"
+                        :class="[
+                            activeInputMode === 'responsible'
+                                ? 'bg-white text-blue-700 shadow-md shadow-blue-500/5 dark:bg-[#262626] dark:text-blue-300'
+                                : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                        ]"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-4 h-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z" />
+                        </svg>
+                        <span>Mode Butir Kebijakan</span>
+                        <span class="ml-1 rounded-full bg-blue-600/10 px-1.5 py-0.5 text-[10px] font-extrabold text-blue-700 dark:bg-blue-500/20 dark:text-blue-300">
+                            {{ responsibles.length }}
+                        </span>
+                    </button>
+                </div>
+            </div>
+
             <!-- Floating Alerts / Feedback at Bottom-Left -->
             <div class="fixed bottom-6 left-6 z-[9999] max-w-sm space-y-3 pointer-events-none">
                 <transition name="fade">
@@ -147,7 +184,7 @@
             </transition>
 
             <!-- Roles List & Responsibilities CRUD -->
-            <div class="space-y-8">
+            <div v-show="activeInputMode === 'role'" class="space-y-8">
                 <!-- If empty -->
                 <div v-if="roles.length === 0 && !isCreatingRole" class="rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center shadow-sm dark:border-white/10 dark:bg-[#171717]">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 text-slate-400 mx-auto mb-4">
@@ -519,6 +556,127 @@
                 </div>
             </div>
 
+            <!-- =============================================
+                 MODE BUTIR KEBIJAKAN (REVERSED INPUT MODE)
+                 ============================================= -->
+            <div v-show="activeInputMode === 'responsible'" class="space-y-4">
+
+                <!-- Info Banner -->
+                <div class="rounded-2xl bg-blue-500/5 p-5 border border-blue-500/20 dark:bg-blue-500/10 dark:border-blue-500/30 flex items-start gap-3.5 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 3M21 7.5H7.5" />
+                    </svg>
+                    <div class="text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <p class="font-extrabold uppercase tracking-wider text-blue-700 dark:text-blue-300">Mode Input Terbalik — dari Butir Kebijakan</p>
+                        <p>Pilih satu butir kebijakan/tanggung jawab, lalu centang role-role mana saja yang bertanggung jawab atas butir tersebut. Perubahan langsung tersimpan ke database.</p>
+                    </div>
+                </div>
+
+                <!-- Search Bar for Responsibles -->
+                <div class="relative">
+                    <input
+                        type="text"
+                        v-model="respSearchQuery"
+                        placeholder="Cari butir kebijakan / tanggung jawab..."
+                        class="w-full bg-white text-slate-800 border border-slate-300 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:bg-[#1a1a1a] dark:text-white dark:border-white/10 shadow-sm"
+                    />
+                    <div class="absolute left-3.5 top-3.5 text-slate-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.637 10.637Z" />
+                        </svg>
+                    </div>
+                    <div class="absolute right-3.5 top-3 text-xs text-slate-400 font-semibold">
+                        {{ filteredResponsiblesForMode.length }} butir
+                    </div>
+                </div>
+
+                <!-- Responsibles List -->
+                <div class="space-y-3">
+                    <div v-if="filteredResponsiblesForMode.length === 0" class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-white/10 dark:bg-[#171717]">
+                        <p class="text-sm text-slate-400">Tidak ada butir kebijakan yang ditemukan.</p>
+                    </div>
+
+                    <div
+                        v-for="(resp, rIdx) in filteredResponsiblesForMode"
+                        :key="resp.id"
+                        class="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 dark:border-white/10 dark:bg-[#1a1a1a] overflow-hidden"
+                    >
+                        <!-- Header row: butir number + text + expand btn -->
+                        <button
+                            type="button"
+                            @click="toggleExpandResp(resp.id)"
+                            class="w-full text-left flex items-start gap-4 px-5 py-4 hover:bg-slate-50/70 dark:hover:bg-white/5 transition"
+                        >
+                            <!-- Index number -->
+                            <div class="shrink-0 w-8 h-8 rounded-lg bg-blue-600/10 dark:bg-blue-500/20 flex items-center justify-center font-extrabold text-blue-700 dark:text-blue-300 text-xs mt-0.5">
+                                {{ rIdx + 1 }}
+                            </div>
+
+                            <!-- Responsible text -->
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-semibold text-slate-900 dark:text-white leading-relaxed">
+                                    {{ resp.responsible }}
+                                </p>
+                                <!-- Mapped role badges -->
+                                <div class="flex flex-wrap gap-1.5 mt-2" v-if="resp.mapped_roles && resp.mapped_roles.length > 0">
+                                    <span
+                                        v-for="mr in resp.mapped_roles"
+                                        :key="mr.id"
+                                        class="inline-flex items-center rounded-full bg-blue-600/10 dark:bg-blue-500/20 px-2.5 py-0.5 text-[10px] font-bold text-blue-700 dark:text-blue-300"
+                                    >
+                                        {{ mr.name }}
+                                    </span>
+                                </div>
+                                <p v-else class="text-[11px] text-slate-400 dark:text-slate-500 mt-1 italic">Belum ada role yang dipetakan</p>
+                            </div>
+
+                            <!-- Toggle chevron -->
+                            <div class="shrink-0 flex items-center gap-2 self-center">
+                                <span class="text-[10px] font-bold rounded-full px-2 py-0.5" :class="(resp.mapped_roles || []).length > 0 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300' : 'bg-slate-100 text-slate-400 dark:bg-white/5 dark:text-slate-500'">
+                                    {{ (resp.mapped_roles || []).length }} role
+                                </span>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-slate-400 transition-transform duration-200" :class="expandedRespId === resp.id ? 'rotate-180' : ''">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                </svg>
+                            </div>
+                        </button>
+
+                        <!-- Expanded: Role checkboxes -->
+                        <div v-show="expandedRespId === resp.id" class="border-t border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-black/20">
+                            <div class="p-5">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-300 mb-3">
+                                    Pilih Role yang Bertanggung Jawab:
+                                </p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                                    <button
+                                        v-for="role in roles"
+                                        :key="role.id"
+                                        type="button"
+                                        @click="toggleRoleMappingForResp(resp, role)"
+                                        :disabled="reverseMappingLoading === `${resp.id}-${role.id}`"
+                                        class="flex items-center gap-3 rounded-xl border px-3 py-2.5 text-xs text-left transition-all duration-150 hover:shadow-sm active:scale-95 disabled:opacity-50"
+                                        :class="isRoleMappedToResp(resp, role.id)
+                                            ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-600/20 dark:bg-blue-600 dark:border-blue-600'
+                                            : 'bg-white border-slate-200 text-slate-700 hover:border-blue-300 hover:bg-blue-50/50 dark:bg-[#1a1a1a] dark:border-white/10 dark:text-slate-300'"
+                                    >
+                                        <!-- Spinner or check icon -->
+                                        <span v-if="reverseMappingLoading === `${resp.id}-${role.id}`" class="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin shrink-0"></span>
+                                        <span v-else class="w-4 h-4 rounded border flex items-center justify-center shrink-0 transition"
+                                            :class="isRoleMappedToResp(resp, role.id) ? 'bg-white/20 border-white/50' : 'border-slate-300 dark:border-white/20'"
+                                        >
+                                            <svg v-if="isRoleMappedToResp(resp, role.id)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3">
+                                                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143z" clip-rule="evenodd" />
+                                            </svg>
+                                        </span>
+                                        <span class="font-semibold leading-snug">{{ role.name }}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Floating Navigation Controls on the Right Side -->
             <div class="fixed right-6 bottom-24 z-[9999] flex flex-col gap-3 pointer-events-none">
                 <button 
@@ -566,7 +724,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { usePage, useForm, router, Link } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
@@ -596,6 +754,71 @@ const props = defineProps({
 });
 
 const page = usePage();
+
+// Active input mode: 'role' (normal) | 'responsible' (reversed)
+const activeInputMode = ref('role');
+
+// Reversed mode: which responsible item is expanded
+const expandedRespId = ref(null);
+
+// Reversed mode: search filter for responsibles
+const respSearchQuery = ref('');
+
+// Reversed mode: loading state key (e.g. "respId-roleId")
+const reverseMappingLoading = ref(null);
+
+// Filtered responsibles list for reversed mode
+const filteredResponsiblesForMode = computed(() => {
+    if (!respSearchQuery.value) return props.responsibles;
+    const q = respSearchQuery.value.toLowerCase();
+    return props.responsibles.filter(r => r.responsible.toLowerCase().includes(q));
+});
+
+function toggleExpandResp(respId) {
+    expandedRespId.value = expandedRespId.value === respId ? null : respId;
+}
+
+function isRoleMappedToResp(resp, roleId) {
+    if (!resp.mapped_roles) return false;
+    return resp.mapped_roles.some(r => r.id === roleId);
+}
+
+function toggleRoleMappingForResp(resp, role) {
+    const alreadyMapped = isRoleMappedToResp(resp, role.id);
+    const loadingKey = `${resp.id}-${role.id}`;
+    reverseMappingLoading.value = loadingKey;
+
+    if (alreadyMapped) {
+        // Remove mapping
+        router.delete(route('policy.roles.mapped-responsible.destroy', { roleId: role.id, responsibleId: resp.id }), {
+            preserveScroll: true,
+            onSuccess: () => {
+                reverseMappingLoading.value = null;
+                localSuccess.value = `Pemetaan "${role.name}" → "${resp.responsible}" berhasil dihapus.`;
+            },
+            onError: () => {
+                reverseMappingLoading.value = null;
+                localError.value = 'Gagal menghapus pemetaan.';
+            }
+        });
+    } else {
+        // Add mapping
+        router.post(route('policy.roles.mapped-responsible.store'), {
+            role_id: role.id,
+            responsible_ids: [resp.id],
+        }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                reverseMappingLoading.value = null;
+                localSuccess.value = `Pemetaan "${role.name}" → "${resp.responsible}" berhasil ditambahkan.`;
+            },
+            onError: () => {
+                reverseMappingLoading.value = null;
+                localError.value = 'Gagal menambahkan pemetaan.';
+            }
+        });
+    }
+}
 
 // Alert notifications
 const localSuccess = ref(page.props.flash?.success || null);

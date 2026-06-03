@@ -117,7 +117,7 @@ class RoleController extends Controller
             $query->orderBy('id', 'asc');
         }, 'mappedResponsibles'])->orderBy('id', 'asc')->get();
 
-        $responsibles = MstResponsible::orderBy('responsible', 'asc')->get();
+        $responsibles = MstResponsible::with(['mappedRoles'])->orderBy('responsible', 'asc')->get();
 
         return Inertia::render('Policy/Guidance/Role/Manage', [
             'roles' => $roles,
@@ -314,9 +314,40 @@ class RoleController extends Controller
 
         try {
             \DB::transaction(function () use ($validated) {
-                foreach ($validated['mappings'] as $map) {
-                    $responsible = MstResponsible::findOrFail($map['responsible_id']);
-                    $responsible->objectives()->sync($map['objective_ids']);
+                $mappings = collect($validated['mappings']);
+                $responsibleIds = $mappings->pluck('responsible_id')->toArray();
+
+                if (empty($responsibleIds)) {
+                    return;
+                }
+
+                // 1. Bulk delete existing mappings for all submitted responsibilities
+                \DB::table('trs_responsible_objective')
+                    ->whereIn('responsible_id', $responsibleIds)
+                    ->delete();
+
+                // 2. Prepare bulk insert payload
+                $insertData = [];
+                $now = now();
+                
+                foreach ($mappings as $map) {
+                    if (!empty($map['objective_ids'])) {
+                        foreach ($map['objective_ids'] as $objId) {
+                            $insertData[] = [
+                                'responsible_id' => $map['responsible_id'],
+                                'objective_id' => $objId,
+                                'created_at' => $now,
+                                'updated_at' => $now,
+                            ];
+                        }
+                    }
+                }
+
+                // 3. Bulk insert in chunks to avoid query length limits
+                if (!empty($insertData)) {
+                    foreach (array_chunk($insertData, 500) as $chunk) {
+                        \DB::table('trs_responsible_objective')->insert($chunk);
+                    }
                 }
             });
 

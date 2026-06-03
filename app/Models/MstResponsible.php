@@ -14,6 +14,15 @@ class MstResponsible extends Model
     ];
 
     /**
+     * Roles that are mapped to this responsible item (via trs_responsible pivot).
+     */
+    public function mappedRoles(): BelongsToMany
+    {
+        return $this->belongsToMany(MstRole::class, 'trs_responsible', 'responsible_id', 'role_id')
+            ->withTimestamps();
+    }
+
+    /**
      * Relasi ke MstObjective (Kebijakan Khusus Bab 2)
      */
     public function objectives(): BelongsToMany
