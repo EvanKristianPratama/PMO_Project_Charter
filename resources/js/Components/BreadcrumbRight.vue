@@ -27,7 +27,7 @@ const policyItem = computed(() => {
     return navItems.value.find((item) => item.label === 'IT Operating Model') ?? null;
 });
 
-const libraryItem = computed(() => {
+const libaryItem = computed(() => {
     return navItems.value.find((item) => item.label === 'Libary') ?? null;
 });
 
@@ -99,7 +99,7 @@ const adminItem = computed(() => {
 
             <!-- Separation Dot -->
             <span
-                v-if="libraryItem"
+                v-if="libaryItem"
                 class="select-none px-0.5 text-indigo-200 dark:text-indigo-900"
             >
                 &middot;
@@ -107,17 +107,17 @@ const adminItem = computed(() => {
 
             <!-- Library Link -->
             <Link
-                v-if="libraryItem"
-                :href="libraryItem.href"
+                v-if="libaryItem"
+                :href="libaryItem.href"
                 class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
                 :class="[
-                    libraryItem.active(currentUrl)
+                    libaryItem.active(currentUrl)
                         ? 'bg-indigo-500 text-white shadow-sm'
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
             >
-                <component :is="libraryItem.icon" v-if="libraryItem.icon" class="h-3.5 w-3.5 shrink-0" />
-                <span>{{ libraryItem.label }}</span>
+                <component :is="libaryItem.icon" v-if="libaryItem.icon" class="h-3.5 w-3.5 shrink-0" />
+                <span>{{ libaryItem.label }}</span>
             </Link>
 
             <!-- Separation Dot -->

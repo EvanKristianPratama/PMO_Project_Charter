@@ -9,6 +9,7 @@ import {
     Squares2X2Icon,
     BuildingOffice2Icon,
     CubeIcon,
+    PresentationChartBarIcon,
     DocumentTextIcon,
     TableCellsIcon,
     ClipboardDocumentCheckIcon,
@@ -315,9 +316,9 @@ export function useNavigation() {
             },
             {
                 label: "Libary",
-                href: safeRoute("library.index"),
+                href: safeRoute("libary.index"),
                 icon: FolderIcon,
-                active: (url) => (url || '').startsWith("/library"),
+                active: (url) => (url || '').startsWith("/libary"),
             },
             {
                 label: "Master Data",

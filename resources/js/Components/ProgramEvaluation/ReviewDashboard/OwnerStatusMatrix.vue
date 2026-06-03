@@ -283,8 +283,16 @@ const ownerOptions = computed(() => {
     });
 
     return Array.from(map.values()).sort((a, b) => {
-        const left = String(a.code ?? '').trim();
-        const right = String(b.code ?? '').trim();
+        const padCode = (val) => {
+            let str = String(val ?? '').trim();
+            if (!str) return '';
+            while (str.length < 7) {
+                str += '0';
+            }
+            return str;
+        };
+        const left = padCode(a.code);
+        const right = padCode(b.code);
 
         if (left === '' && right === '') return a.label.localeCompare(b.label);
         if (left === '') return 1;
@@ -402,8 +410,16 @@ const matrixData = computed(() => {
 
     const normalizeCode = (value) => String(value ?? '').trim();
     const compareSortCode = (leftCode, rightCode) => {
-        const left = normalizeCode(leftCode);
-        const right = normalizeCode(rightCode);
+        const padCode = (val) => {
+            let str = normalizeCode(val);
+            if (!str) return '';
+            while (str.length < 7) {
+                str += '0';
+            }
+            return str;
+        };
+        const left = padCode(leftCode);
+        const right = padCode(rightCode);
 
         if (left === '' && right === '') return 0;
         if (left === '') return 1;

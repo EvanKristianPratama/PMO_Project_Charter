@@ -320,8 +320,16 @@ const parentLevel3Options = computed(() => {
     });
 
     return Array.from(map.values()).sort((a, b) => {
-        const left = String(a.sortCode ?? '').trim();
-        const right = String(b.sortCode ?? '').trim();
+        const padCode = (val) => {
+            let str = String(val ?? '').trim();
+            if (!str) return '';
+            while (str.length < 7) {
+                str += '0';
+            }
+            return str;
+        };
+        const left = padCode(a.sortCode);
+        const right = padCode(b.sortCode);
 
         if (left === '' && right === '') return a.label.localeCompare(b.label);
         if (left === '') return 1;
@@ -359,8 +367,16 @@ const leaderOptions = computed(() => {
     });
 
     return Array.from(map.values()).sort((a, b) => {
-        const left = String(a.sortCode ?? '').trim();
-        const right = String(b.sortCode ?? '').trim();
+        const padCode = (val) => {
+            let str = String(val ?? '').trim();
+            if (!str) return '';
+            while (str.length < 7) {
+                str += '0';
+            }
+            return str;
+        };
+        const left = padCode(a.sortCode);
+        const right = padCode(b.sortCode);
 
         if (left === '' && right === '') return a.label.localeCompare(b.label);
         if (left === '') return 1;
@@ -558,8 +574,16 @@ const getInitiativeTooltip = (row, statusEntry = null) => {
 };
 
 const compareSortCode = (leftCode, rightCode) => {
-    const left = String(leftCode ?? '').trim();
-    const right = String(rightCode ?? '').trim();
+    const padCode = (val) => {
+        let str = String(val ?? '').trim();
+        if (!str) return '';
+        while (str.length < 7) {
+            str += '0';
+        }
+        return str;
+    };
+    const left = padCode(leftCode);
+    const right = padCode(rightCode);
 
     if (left === '' && right === '') return 0;
     if (left === '') return 1;

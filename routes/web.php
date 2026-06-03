@@ -13,12 +13,14 @@ use App\Http\Controllers\Architecture\ProsesBisnis\ProsesBisnisController as Arc
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\SsoController;
 use App\Http\Controllers\BpmnWorkflowController;
+use App\Http\Controllers\LibaryController;
 use App\Http\Controllers\MasterData\ActivityLogController as MasterDataActivityLogController;
 use App\Http\Controllers\MasterData\MasterDataController;
 use App\Http\Controllers\MasterData\MstInitiative\MstInitiativeController;
 use App\Http\Controllers\MasterData\MstPicProject\MstPicProjectController;
 use App\Http\Controllers\MasterData\ProjectCharter\ProjectCharterController as MasterDataProjectCharterController;
 use App\Http\Controllers\MasterData\ScopeCharter\ScopeCharterController;
+use App\Http\Controllers\Policy\EITOrganizationController;
 use App\Http\Controllers\Policy\GeneralPolicyController;
 use App\Http\Controllers\Policy\PolicyController;
 use App\Http\Controllers\Policy\PracticeRoleController;
@@ -351,9 +353,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
         Route::put('/procedure/diagram/{id}', [ProcedureController::class, 'updateDiagram'])->name('procedure.diagram.update');
         Route::delete('/procedure/diagram/{id}', [ProcedureController::class, 'destroyDiagram'])->name('procedure.diagram.destroy');
 
-        Route::get('/organization', fn () => Inertia::render('Placeholder/Index', [
-            'title' => 'Organization',
-        ]))->name('organization.index');
+        Route::get('/organization', [EITOrganizationController::class, 'index'])->name('organization.index');
 
         // Matriks RACI (RACI Matrix) mapping
         Route::get('/raci', [PracticeRoleController::class, 'index'])->name('raci.index');
@@ -486,9 +486,9 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/sync', [SyncController::class, 'index'])->name('sync.index');
     Route::post('/sync/pull', [SyncController::class, 'pull'])->name('sync.pull');
 
-    Route::get('/libary', fn () => Inertia::render('Placeholder/Index', [
-        'title' => 'Libary',
-    ]))->name('libary.index');
+    Route::get('/libary', [LibaryController::class, 'index'])->name('libary.index');
+    Route::get('/libary/{filename}', [LibaryController::class, 'show'])->name('libary.show');
+    Route::get('/libary/render/{filename}', [LibaryController::class, 'viewHtml'])->name('libary.render');
 
     // BPMN Workflow Controller (Proof of Concept)
     Route::prefix('/bpmn-workflow')->name('bpmn-workflow.')->group(function () {

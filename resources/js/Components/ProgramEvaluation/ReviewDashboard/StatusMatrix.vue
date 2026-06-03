@@ -146,8 +146,16 @@ const matrixData = computed(() => {
 
     const normalizeCode = (value) => String(value ?? '').trim();
     const compareSortCode = (leftCode, rightCode) => {
-        const left = normalizeCode(leftCode);
-        const right = normalizeCode(rightCode);
+        const padCode = (val) => {
+            let str = normalizeCode(val);
+            if (!str) return '';
+            while (str.length < 7) {
+                str += '0';
+            }
+            return str;
+        };
+        const left = padCode(leftCode);
+        const right = padCode(rightCode);
 
         if (left === '' && right === '') return 0;
         if (left === '') return 1;

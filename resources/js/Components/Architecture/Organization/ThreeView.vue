@@ -44,21 +44,21 @@
     <!-- Non-root: depth 0 = holding/sub-holding level (horizontal grid), depth 1 = first org child (horizontal grid) -->
     <!-- depth >= 2 = vertical command line layout -->
     <div v-else class="relative w-full min-w-0">
-        <!-- Horizontal line (for grid-based sibling connectors at depth 1 and 2) -->
-        <div v-if="depth >= 1 && depth <= 2 && (!isFirstChild || !isLastChild)"
+        <!-- Horizontal line (for grid-based sibling connectors at depth 1, 2 and 3) -->
+        <div v-if="depth >= 1 && depth <= 3 && (!isFirstChild || !isLastChild)"
             class="absolute top-[-8px] h-px bg-slate-300 dark:bg-white/20" :class="[
                 isFirstChild ? 'left-1/2 -right-1' : '',
                 isLastChild ? '-left-1 right-1/2' : '',
                 !isFirstChild && !isLastChild ? '-left-1 -right-1' : '',
             ]" aria-hidden="true" />
-        <!-- Vertical line going up (for grid-based sibling connectors at depth 1 and 2) -->
-        <div v-if="depth >= 1 && depth <= 2"
+        <!-- Vertical line going up (for grid-based sibling connectors at depth 1, 2 and 3) -->
+        <div v-if="depth >= 1 && depth <= 3"
             class="absolute left-1/2 top-[-8px] h-[8px] w-px -translate-x-1/2 bg-slate-300 dark:bg-white/20"
             aria-hidden="true" />
 
-        <div class="flex w-full min-w-0" :class="depth >= 3 ? 'flex-row items-start' : 'flex-col items-center'">
-            <!-- For depth >= 3: vertical command line connector (left side) -->
-            <div v-if="depth >= 3" class="flex flex-col items-center shrink-0" style="width: 24px;">
+        <div class="flex w-full min-w-0" :class="depth >= 4 ? 'flex-row items-start' : 'flex-col items-center'">
+            <!-- For depth >= 4: vertical command line connector (left side) -->
+            <div v-if="depth >= 4" class="flex flex-col items-center shrink-0" style="width: 24px;">
                 <!-- Vertical line from parent down to this node -->
                 <div class="w-px bg-slate-300 dark:bg-white/20" style="height: 18px;" aria-hidden="true"></div>
                 <!-- Horizontal line turning right to node -->
@@ -67,7 +67,7 @@
             </div>
 
             <!-- Node content + children wrapper -->
-            <div class="flex flex-col min-w-0" :class="depth >= 3 ? 'flex-1' : 'items-center w-full'">
+            <div class="flex flex-col min-w-0" :class="depth >= 4 ? 'flex-1' : 'items-center w-full'">
                 <!-- The node box -->
                 <div
                     class="relative flex flex-col items-center justify-center rounded border px-1 text-center font-semibold leading-tight shadow-sm transition duration-200"
@@ -83,8 +83,8 @@
                         {{ node.organization_name }}
                     </span>
 
-                    <!-- Expand/collapse indicator for nodes with children at depth >= 2 -->
-                    <span v-if="hasChildren && depth >= 2"
+                    <!-- Expand/collapse indicator for nodes with children at depth >= 3 -->
+                    <span v-if="hasChildren && depth >= 3"
                         class="absolute -bottom-1.5 left-1/2 -translate-x-1/2 flex items-center justify-center w-3 h-3 rounded-full text-[6px] font-bold leading-none transition-colors duration-200"
                         :class="isExpanded
                             ? 'bg-blue-500 text-white'
@@ -94,27 +94,11 @@
                         {{ isExpanded ? '−' : '+' }}
                     </span>
 
-                    <!-- PIC section -->
-                    <div v-if="node.pic_projects && node.pic_projects.length > 0 && showPics" class="mt-1 w-full border-t border-slate-200 dark:border-white/10 pt-1 text-left px-0.5">
-                        <div class="text-[7px] text-slate-400 dark:text-slate-500 font-semibold mb-0.5 uppercase tracking-wider">
-                            PIC:
-                        </div>
-                        <div class="space-y-0.5">
-                            <div
-                                v-for="pic in node.pic_projects"
-                                :key="pic.id"
-                                class="text-[7px] text-slate-500 dark:text-slate-400 font-normal break-words whitespace-normal max-w-full flex items-start"
-                                :title="pic.name"
-                            >
-                                <span class="mr-0.5 select-none text-[6px] text-slate-400">•</span>
-                                <span class="flex-1 min-w-0 leading-[1.1]">{{ pic.name }}</span>
-                            </div>
-                        </div>
-                    </div>
+
                 </div>
 
-                <!-- Children: depth 0 and 1 use horizontal grid layout for their children -->
-                <div v-if="hasChildren && isExpanded && depth < 2" class="relative mt-2 w-full min-w-0 pt-2">
+                <!-- Children: depth 0, 1, and 2 use horizontal grid layout for their children -->
+                <div v-if="hasChildren && isExpanded && depth < 3" class="relative mt-2 w-full min-w-0 pt-2">
                     <div class="absolute left-1/2 top-[-8px] h-[8px] w-px -translate-x-1/2 bg-slate-300 dark:bg-white/20"
                         aria-hidden="true" />
 
@@ -125,8 +109,8 @@
                     </div>
                 </div>
 
-                <!-- Children: depth >= 2 use vertical command line layout -->
-                <div v-if="hasChildren && isExpanded && depth >= 2" class="relative mt-3 ml-3">
+                <!-- Children: depth >= 3 use vertical command line layout -->
+                <div v-if="hasChildren && isExpanded && depth >= 3" class="relative mt-3 ml-3">
                     <!-- Continuous vertical line for all children -->
                     <div class="absolute left-0 top-0 w-px bg-slate-300 dark:bg-white/20"
                         :style="{ height: 'calc(100% - 12px)' }"
@@ -177,33 +161,25 @@ const props = defineProps({
     },
 });
 
-// depth 0 and 1 auto-expand, depth >= 2 collapsed by default (show on click)
-const isExpanded = ref(props.depth < 2);
-const showPics = ref(false);
+// depth 0, 1, and 2 auto-expand, depth >= 3 collapsed by default (show on click)
+const isExpanded = ref(props.depth < 3);
 
 const hasChildren = computed(() => Array.isArray(props.node?.children) && props.node.children.length > 0);
 
 const isClickable = computed(() => {
-    return hasChildren.value || (props.node?.pic_projects && props.node.pic_projects.length > 0);
+    return hasChildren.value;
 });
 
 const nodeTitle = computed(() => {
-    const parts = [];
     if (hasChildren.value) {
-        parts.push(`Klik untuk ${isExpanded.value ? 'menyembunyikan' : 'menampilkan'} anak organisasi`);
+        return `${props.node?.organization_name} (Klik untuk ${isExpanded.value ? 'menyembunyikan' : 'menampilkan'} anak organisasi)`;
     }
-    if (props.node?.pic_projects && props.node.pic_projects.length > 0) {
-        parts.push(`${showPics.value ? 'Sembunyikan' : 'Tampilkan'} PIC`);
-    }
-    return parts.length > 0 ? `${props.node?.organization_name} (${parts.join(' | ')})` : props.node?.organization_name;
+    return props.node?.organization_name;
 });
 
 const handleNodeClick = () => {
-    if (hasChildren.value && props.depth >= 2) {
+    if (hasChildren.value && props.depth >= 3) {
         isExpanded.value = !isExpanded.value;
-    }
-    if (props.node?.pic_projects && props.node.pic_projects.length > 0) {
-        showPics.value = !showPics.value;
     }
 };
 
@@ -218,6 +194,34 @@ const compareCodes = (left, right) => {
     }
 
     return leftCode.localeCompare(rightCode);
+};
+
+const getParentCode = (code) => {
+    const norm = String(code ?? '').trim();
+    if (!norm) return null;
+
+    if (norm.length === 7) {
+        const digits = norm.split('');
+        let lastNonZeroIndex = null;
+        for (let i = digits.length - 1; i >= 0; i--) {
+            if (digits[i] !== '0') {
+                lastNonZeroIndex = i;
+                break;
+            }
+        }
+        if (lastNonZeroIndex === null || lastNonZeroIndex === 0) {
+            return null;
+        }
+
+        digits[lastNonZeroIndex] = '0';
+        for (let i = lastNonZeroIndex + 1; i < digits.length; i++) {
+            digits[i] = '0';
+        }
+        return digits.join('');
+    }
+
+    if (norm.length <= 2) return null;
+    return norm.slice(0, -2);
 };
 
 const buildCodeHierarchy = (items) => {
@@ -244,16 +248,15 @@ const buildCodeHierarchy = (items) => {
     const roots = [];
 
     sorted.forEach((item) => {
-        if (!item.code || item.code.length === 2) {
-            roots.push(item);
-            return;
-        }
+        const parentCode = getParentCode(item.code);
 
-        const parentCode = item.code.slice(0, -2);
-        const parentNode = nodeByCode.get(parentCode);
-
-        if (parentNode) {
-            parentNode.children.push(item);
+        if (parentCode) {
+            const parentNode = nodeByCode.get(parentCode);
+            if (parentNode) {
+                parentNode.children.push(item);
+            } else {
+                roots.push(item);
+            }
         } else {
             roots.push(item);
         }
@@ -353,10 +356,6 @@ const subHoldingTree = computed(() => {
 const nodeSizeClass = computed(() => {
     if (props.node?.type === 'holding' || props.node?.type === 'sub_holding') {
         return 'h-8 w-28 text-[10px]';
-    }
-
-    if (showPics.value && props.node?.pic_projects?.length > 0) {
-        return 'min-h-[3rem] w-20 text-[8px] py-1.5';
     }
 
     return 'min-h-[1.5rem] w-20 text-[8px] py-1';
