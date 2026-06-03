@@ -197,7 +197,7 @@ export function useNavigation() {
                     (url || '').startsWith("/architecture/organization-structure"),
             },
             {
-                label: "Informatin System",
+                label: "Information System",
                 href: safeRoute("architecture.informatic-system"),
                 icon: BuildingOffice2Icon,
                 active: (url) =>
