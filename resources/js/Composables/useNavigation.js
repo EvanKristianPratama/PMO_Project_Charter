@@ -183,24 +183,24 @@ export function useNavigation() {
                     (url || '').startsWith("/master-data/business-capabilities"),
             },
             {
-                label: "Organization Structure",
+                label: "Business Process",
+                href: safeRoute("architecture.proses-bisnis.index"),
+                icon: DocumentTextIcon,
+                active: (url) => (url || '').startsWith("/architecture/proses-bisnis"),
+            },
+            {
+                label: "Organization",
                 href: safeRoute("architecture.organization-structure"),
                 icon: BuildingOffice2Icon,
                 active: (url) =>
                     (url || '').startsWith("/architecture/organization-structure"),
             },
             {
-                label: "Informatic System",
+                label: "Informatin System",
                 href: safeRoute("architecture.informatic-system"),
                 icon: BuildingOffice2Icon,
                 active: (url) =>
                     (url || '').startsWith("/architecture/informatic-system"),
-            },
-            {
-                label: "Proses Bisnis",
-                href: safeRoute("architecture.proses-bisnis.index"),
-                icon: DocumentTextIcon,
-                active: (url) => (url || '').startsWith("/architecture/proses-bisnis"),
             },
         ];
 
@@ -269,6 +269,12 @@ export function useNavigation() {
                         active: (url) => (url || '').startsWith("/policy/regulation"),
                     },
                     {
+                        label: "Organization",
+                        href: safeRoute("policy.organization.index"),
+                        icon: BuildingOffice2Icon,
+                        active: (url) => (url || '').startsWith("/policy/organization"),
+                    },
+                    {
                         label: "Bab I: Pendahuluan",
                         href: safeRoute("policy.guidance.introduction"),
                         icon: DocumentTextIcon,
@@ -304,10 +310,11 @@ export function useNavigation() {
                         icon: CogIcon,
                         active: (url) => (url || '').startsWith("/bpmn-workflow"),
                     },
+
                 ],
             },
             {
-                label: "Library",
+                label: "Libary",
                 href: safeRoute("library.index"),
                 icon: FolderIcon,
                 active: (url) => (url || '').startsWith("/library"),

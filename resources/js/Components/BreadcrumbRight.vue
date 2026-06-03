@@ -28,13 +28,13 @@ const policyItem = computed(() => {
 });
 
 const libraryItem = computed(() => {
-    return navItems.value.find((item) => item.label === 'Library') ?? null;
+    return navItems.value.find((item) => item.label === 'Libary') ?? null;
 });
 
 const policyChildren = computed(() => {
     const children = policyItem.value?.children || [];
     return children
-        .filter(item => item.label === 'Regulation' || item.label === 'Matriks RACI' || item.label === 'BPMN')
+        .filter(item => item.label === 'Regulation' || item.label === 'Organization' || item.label === 'Matriks RACI' || item.label === 'BPMN')
         .map(item => {
             if (item.label === 'Matriks RACI') {
                 return { ...item, label: 'RACI' };
@@ -111,7 +111,7 @@ const adminItem = computed(() => {
                 :href="libraryItem.href"
                 class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
                 :class="[
-                    libraryItem.active(currentUrl.value)
+                    libraryItem.active(currentUrl)
                         ? 'bg-indigo-500 text-white shadow-sm'
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
@@ -134,7 +134,7 @@ const adminItem = computed(() => {
                 :href="adminItem.href"
                 class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
                 :class="[
-                    adminItem.active(currentUrl.value)
+                    adminItem.active(currentUrl)
                         ? 'bg-indigo-500 text-white shadow-sm'
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
@@ -152,7 +152,7 @@ const adminItem = computed(() => {
                 :href="item.href"
                 class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all duration-150"
                 :class="[
-                    item.active(currentUrl.value)
+                    item.active(currentUrl)
                         ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300'
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
@@ -170,7 +170,7 @@ const adminItem = computed(() => {
                 :href="item.href"
                 class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all duration-150"
                 :class="[
-                    item.active(currentUrl.value)
+                    item.active(currentUrl)
                         ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300'
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"

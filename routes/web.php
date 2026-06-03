@@ -9,21 +9,25 @@ use App\Http\Controllers\Admin\DatabaseSwitcherController;
 use App\Http\Controllers\Admin\SyncController;
 use App\Http\Controllers\Architecture\BusinessCapability\BusinessCapabilityController;
 use App\Http\Controllers\Architecture\OrganizationStructure\OrganizationController as ArchitectureOrganizationStructureController;
+use App\Http\Controllers\Architecture\ProsesBisnis\ProsesBisnisController as ArchitectureProsesBisnisController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\SsoController;
+use App\Http\Controllers\BpmnWorkflowController;
 use App\Http\Controllers\MasterData\ActivityLogController as MasterDataActivityLogController;
 use App\Http\Controllers\MasterData\MasterDataController;
 use App\Http\Controllers\MasterData\MstInitiative\MstInitiativeController;
+use App\Http\Controllers\MasterData\MstPicProject\MstPicProjectController;
 use App\Http\Controllers\MasterData\ProjectCharter\ProjectCharterController as MasterDataProjectCharterController;
 use App\Http\Controllers\MasterData\ScopeCharter\ScopeCharterController;
 use App\Http\Controllers\Policy\GeneralPolicyController;
 use App\Http\Controllers\Policy\PolicyController;
+use App\Http\Controllers\Policy\PracticeRoleController;
 use App\Http\Controllers\Policy\ProcedureController;
-use App\Http\Controllers\Architecture\ProsesBisnis\ProsesBisnisController as ArchitectureProsesBisnisController;
 use App\Http\Controllers\Policy\RegulationController;
+use App\Http\Controllers\Policy\ResponsibleController;
 use App\Http\Controllers\Policy\RoleController;
-use App\Http\Controllers\ProgramEvaluation\ReviewDashboardController;
 use App\Http\Controllers\ProgramEvaluation\ReviewAnalysisController;
+use App\Http\Controllers\ProgramEvaluation\ReviewDashboardController;
 use App\Http\Controllers\ProgramEvaluation\ReviewTimelineController;
 use App\Http\Controllers\ProgramEvaluation\TrsReviewPCController;
 use App\Http\Controllers\ProgramEvaluation\TrsReviewScController;
@@ -36,6 +40,7 @@ use App\Http\Controllers\ProgramImplementation\ProjectCharter\ITInitiatives\Mile
 use App\Http\Controllers\ProgramImplementation\ProjectCharter\ITInitiatives\VersionAnalysisController;
 use App\Http\Controllers\ProgramImplementation\ResourceManagementController;
 use App\Http\Controllers\ProgramImplementation\Roadmap\RoadmapController;
+use App\Http\Controllers\ProgramImplementation\ValueCreationController;
 use App\Http\Controllers\ProgramPlanning\BusinessStrategy\IndexController as ProgramPlanningBusinessStrategyIndexController;
 use App\Http\Controllers\ProgramPlanning\DashboardController as PlanningDashboardController;
 use App\Http\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Appendix\CreateController as ProgramDefinitionDigitalInitiativesAppendixCreateController;
@@ -75,7 +80,6 @@ use App\Http\Controllers\StrategicHouse\StrategicPillars\GoalController as Strat
 use App\Http\Controllers\StrategicHouse\StrategicPillars\IndexController as StrategicHouseStrategicPillarsIndexController;
 use App\Http\Controllers\StrategicHouse\StrategicPillars\InitiativeTaggingController as StrategicHouseInitiativeTaggingController;
 use App\Http\Controllers\StrategicHouse\StrategicPillars\ThemeController as StrategicHouseStrategicPillarThemeController;
-use App\Http\Controllers\BpmnWorkflowController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -201,10 +205,10 @@ Route::middleware(['auth', 'approved'])->group(function () {
 
     // Master Data → PIC Project CRUD
     Route::prefix('/master-data/pic-projects')->name('master-data.pic-projects.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\MasterData\MstPicProject\MstPicProjectController::class, 'index'])->name('index');
-        Route::post('/', [\App\Http\Controllers\MasterData\MstPicProject\MstPicProjectController::class, 'store'])->name('store');
-        Route::put('/{picProject}', [\App\Http\Controllers\MasterData\MstPicProject\MstPicProjectController::class, 'update'])->name('update');
-        Route::delete('/{picProject}', [\App\Http\Controllers\MasterData\MstPicProject\MstPicProjectController::class, 'destroy'])->name('destroy');
+        Route::get('/', [MstPicProjectController::class, 'index'])->name('index');
+        Route::post('/', [MstPicProjectController::class, 'store'])->name('store');
+        Route::put('/{picProject}', [MstPicProjectController::class, 'update'])->name('update');
+        Route::delete('/{picProject}', [MstPicProjectController::class, 'destroy'])->name('destroy');
     });
 
     Route::get('/program-planning/program-definition/it-initiatives', ProgramDefinitionITInitiativesController::class)->name('program-planning.program-definition.it-initiatives');
@@ -281,7 +285,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/service-portofolio', fn () => Inertia::render('Placeholder/Index', [
         'title' => 'Service Portofolio',
     ]))->name('service-portofolio.index');
-    
+
     // Policy CRUD (mst_general_policy, mst_objective & mst_practice)
     Route::prefix('/policy')->name('policy.')->group(function () {
         Route::get('/', function () {
@@ -319,7 +323,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
         Route::delete('/roles/role/{role}', [RoleController::class, 'destroyRole'])->name('roles.role.destroy');
         Route::post('/roles/responsibility', [RoleController::class, 'storeResponsibility'])->name('roles.responsibility.store');
         Route::put('/roles/responsibility/{responsibility}', [RoleController::class, 'updateResponsibility'])->name('roles.responsibility.update');
-        Route::delete('/roles/responsibility/{responsibility}', [\App\Http\Controllers\Policy\RoleController::class, 'destroyResponsibility'])->name('roles.responsibility.destroy');
+        Route::delete('/roles/responsibility/{responsibility}', [RoleController::class, 'destroyResponsibility'])->name('roles.responsibility.destroy');
 
         // Mapped Responsibles from Master Data
         Route::post('/roles/mapped-responsible', [RoleController::class, 'storeMappedResponsible'])->name('roles.mapped-responsible.store');
@@ -347,16 +351,20 @@ Route::middleware(['auth', 'approved'])->group(function () {
         Route::put('/procedure/diagram/{id}', [ProcedureController::class, 'updateDiagram'])->name('procedure.diagram.update');
         Route::delete('/procedure/diagram/{id}', [ProcedureController::class, 'destroyDiagram'])->name('procedure.diagram.destroy');
 
+        Route::get('/organization', fn () => Inertia::render('Placeholder/Index', [
+            'title' => 'Organization',
+        ]))->name('organization.index');
+
         // Matriks RACI (RACI Matrix) mapping
-        Route::get('/raci', [\App\Http\Controllers\Policy\PracticeRoleController::class, 'index'])->name('raci.index');
-        Route::get('/raci/manage', [\App\Http\Controllers\Policy\PracticeRoleController::class, 'manage'])->name('raci.manage');
-        Route::post('/raci', [\App\Http\Controllers\Policy\PracticeRoleController::class, 'update'])->name('raci.update');
+        Route::get('/raci', [PracticeRoleController::class, 'index'])->name('raci.index');
+        Route::get('/raci/manage', [PracticeRoleController::class, 'manage'])->name('raci.manage');
+        Route::post('/raci', [PracticeRoleController::class, 'update'])->name('raci.update');
 
         // Master Responsible CRUD
-        Route::get('/responsible', [\App\Http\Controllers\Policy\ResponsibleController::class, 'manage'])->name('responsible.manage');
-        Route::post('/responsible', [\App\Http\Controllers\Policy\ResponsibleController::class, 'store'])->name('responsible.store');
-        Route::put('/responsible/{id}', [\App\Http\Controllers\Policy\ResponsibleController::class, 'update'])->name('responsible.update');
-        Route::delete('/responsible/{id}', [\App\Http\Controllers\Policy\ResponsibleController::class, 'destroy'])->name('responsible.destroy');
+        Route::get('/responsible', [ResponsibleController::class, 'manage'])->name('responsible.manage');
+        Route::post('/responsible', [ResponsibleController::class, 'store'])->name('responsible.store');
+        Route::put('/responsible/{id}', [ResponsibleController::class, 'update'])->name('responsible.update');
+        Route::delete('/responsible/{id}', [ResponsibleController::class, 'destroy'])->name('responsible.destroy');
     });
 
     Route::get('/program-information', fn () => Inertia::render('Placeholder/Index', [
@@ -449,7 +457,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::delete('/digital-initiatives/{digital_initiative}/project-status-history/{history}', [DigitalInitiativeController::class, 'destroyProjectStatusHistory'])->name('digital-initiatives.project-status-history.destroy');
 
     // IT Initiatives & Charters
-    Route::get('/it-initiatives/value-creation', \App\Http\Controllers\ProgramImplementation\ValueCreationController::class . '@index')->name('it-initiatives.value-creation');
+    Route::get('/it-initiatives/value-creation', ValueCreationController::class.'@index')->name('it-initiatives.value-creation');
     // Roadmap — dedicated controller (all programs & per-program views)
     Route::get('/roadmap', [RoadmapController::class, 'index'])->name('roadmap.index');
     Route::get('/roadmap/add', [RoadmapController::class, 'add'])->name('roadmap.add');
@@ -478,9 +486,9 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/sync', [SyncController::class, 'index'])->name('sync.index');
     Route::post('/sync/pull', [SyncController::class, 'pull'])->name('sync.pull');
 
-    Route::get('/library', fn () => Inertia::render('Placeholder/Index', [
-        'title' => 'Library',
-    ]))->name('library.index');
+    Route::get('/libary', fn () => Inertia::render('Placeholder/Index', [
+        'title' => 'Libary',
+    ]))->name('libary.index');
 
     // BPMN Workflow Controller (Proof of Concept)
     Route::prefix('/bpmn-workflow')->name('bpmn-workflow.')->group(function () {
