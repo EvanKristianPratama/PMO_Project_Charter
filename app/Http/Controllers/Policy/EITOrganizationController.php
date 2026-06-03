@@ -66,6 +66,40 @@ class EITOrganizationController extends Controller
         return Inertia::render('Policy/Organization/Index', [
             'organizationStructureRows' => $rows,
             'steeringRows' => $steeringRows,
+            'organizationOptions' => TrsOrganization::orderBy('name')->get(['id', 'name', 'jabatan']),
         ]);
+    }
+
+    public function storeSteering(\Illuminate\Http\Request $request)
+    {
+        $validated = $request->validate([
+            'organization_id' => 'required|exists:trs_organization,id',
+            'code' => 'required|string|size:8',
+        ]);
+
+        MstItSteeringCommitte::create($validated);
+
+        return redirect()->back()->with('success', 'Data Steering Committee berhasil ditambahkan.');
+    }
+
+    public function updateSteering(\Illuminate\Http\Request $request, $id)
+    {
+        $validated = $request->validate([
+            'organization_id' => 'required|exists:trs_organization,id',
+            'code' => 'required|string|size:8',
+        ]);
+
+        $item = MstItSteeringCommitte::findOrFail($id);
+        $item->update($validated);
+
+        return redirect()->back()->with('success', 'Data Steering Committee berhasil diperbarui.');
+    }
+
+    public function destroySteering($id)
+    {
+        $item = MstItSteeringCommitte::findOrFail($id);
+        $item->delete();
+
+        return redirect()->back()->with('success', 'Data Steering Committee berhasil dihapus.');
     }
 }

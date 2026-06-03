@@ -355,6 +355,9 @@ Route::middleware(['auth', 'approved'])->group(function () {
         Route::delete('/procedure/diagram/{id}', [ProcedureController::class, 'destroyDiagram'])->name('procedure.diagram.destroy');
 
         Route::get('/organization', [EITOrganizationController::class, 'index'])->name('organization.index');
+        Route::post('/organization/steering', [EITOrganizationController::class, 'storeSteering'])->name('organization.steering.store');
+        Route::put('/organization/steering/{id}', [EITOrganizationController::class, 'updateSteering'])->name('organization.steering.update');
+        Route::delete('/organization/steering/{id}', [EITOrganizationController::class, 'destroySteering'])->name('organization.steering.destroy');
 
         // Matriks RACI (RACI Matrix) mapping
         Route::get('/raci', [PracticeRoleController::class, 'index'])->name('raci.index');

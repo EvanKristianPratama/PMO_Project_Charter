@@ -29,7 +29,7 @@
                 <div class=" overflow-hidden">
                     <EITOrganization v-if="activeTab === 'eit'"
                         :organization-structure-rows="organizationStructureRows" />
-                    <ITSteeringComittee v-else-if="activeTab === 'steering'" :steering-rows="steeringRows" />
+                    <ITSteeringComittee v-else-if="activeTab === 'steering'" :steering-rows="steeringRows" :organization-options="organizationOptions" />
                 </div>
             </div>
         </div>
@@ -48,6 +48,10 @@ const props = defineProps({
         default: () => [],
     },
     steeringRows: {
+        type: Array,
+        default: () => [],
+    },
+    organizationOptions: {
         type: Array,
         default: () => [],
     },
