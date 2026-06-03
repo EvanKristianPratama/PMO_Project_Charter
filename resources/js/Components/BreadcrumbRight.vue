@@ -34,7 +34,7 @@ const libaryItem = computed(() => {
 const policyChildren = computed(() => {
     const children = policyItem.value?.children || [];
     return children
-        .filter(item => item.label === 'Regulation' || item.label === 'Organization' || item.label === 'Matriks RACI' || item.label === 'BPMN')
+        .filter(item => item.label === 'Regulation' || item.label === 'Organization' || item.label === 'Matriks RACI' || item.label === 'Information Flow' || item.label === 'BPMN')
         .map(item => {
             if (item.label === 'Matriks RACI') {
                 return { ...item, label: 'RACI' };

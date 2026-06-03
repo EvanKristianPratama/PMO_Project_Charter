@@ -306,6 +306,12 @@ export function useNavigation() {
                         active: (url) => (url || '').startsWith("/policy/raci"),
                     },
                     {
+                        label: "Information Flow",
+                        href: safeRoute("policy.infoflow.index"),
+                        icon: DocumentTextIcon,
+                        active: (url) => (url || '').startsWith("/policy/infoflow"),
+                    },
+                    {
                         label: "BPMN",
                         href: safeRoute("bpmn-workflow.index"),
                         icon: CogIcon,

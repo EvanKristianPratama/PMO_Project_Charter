@@ -239,13 +239,12 @@ class RoleController extends Controller
     {
         $validated = $request->validate([
             'role_id' => 'required|integer|exists:mst_roles,id',
-            'responsible_id' => 'nullable|integer|exists:mst_responsible,id',
+            'responsible_id' => 'nullable|integer',
             'responsible_ids' => 'nullable|array',
-            'responsible_ids.*' => 'integer|exists:mst_responsible,id',
+            'responsible_ids.*' => 'integer',
         ], [
             'role_id.required' => 'Role wajib dipilih.',
             'role_id.exists' => 'Role tidak valid.',
-            'responsible_id.exists' => 'Master Responsible tidak valid.',
             'responsible_ids.array' => 'Daftar Master Responsible tidak valid.',
         ]);
 
@@ -260,6 +259,17 @@ class RoleController extends Controller
             return redirect()
                 ->route('policy.roles.manage')
                 ->with('error', 'Silakan pilih minimal satu Master Responsible.');
+        }
+
+        // Bulk validate exists to avoid N+1 queries on remote DB
+        $uniqueIds = array_unique($ids);
+        $validResponsiblesCount = \DB::table('mst_responsible')
+            ->whereIn('id', $uniqueIds)
+            ->count();
+        if ($validResponsiblesCount !== count($uniqueIds)) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'responsible_id' => ['Master Responsible tidak valid.']
+            ]);
         }
 
         // Check which IDs are already mapped to prevent duplicate entries
@@ -307,10 +317,49 @@ class RoleController extends Controller
     {
         $validated = $request->validate([
             'mappings' => 'required|array',
-            'mappings.*.responsible_id' => 'required|integer|exists:mst_responsible,id',
+            'mappings.*.responsible_id' => 'required|integer',
             'mappings.*.objective_ids' => 'present|array',
-            'mappings.*.objective_ids.*' => 'string|exists:mst_objective,objective_id',
+            'mappings.*.objective_ids.*' => 'string',
         ]);
+
+        // Bulk validate to avoid N+1 exists queries on remote DB
+        $mappings = $validated['mappings'];
+        $responsibleIds = [];
+        $objectiveIds = [];
+
+        foreach ($mappings as $map) {
+            $responsibleIds[] = $map['responsible_id'];
+            if (!empty($map['objective_ids'])) {
+                foreach ($map['objective_ids'] as $objId) {
+                    $objectiveIds[] = $objId;
+                }
+            }
+        }
+
+        $responsibleIds = array_unique($responsibleIds);
+        $objectiveIds = array_unique($objectiveIds);
+
+        if (!empty($responsibleIds)) {
+            $validResponsiblesCount = \DB::table('mst_responsible')
+                ->whereIn('id', $responsibleIds)
+                ->count();
+            if ($validResponsiblesCount !== count($responsibleIds)) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'mappings' => ['Beberapa ID Master Responsible tidak valid.']
+                ]);
+            }
+        }
+
+        if (!empty($objectiveIds)) {
+            $validObjectivesCount = \DB::table('mst_objective')
+                ->whereIn('objective_id', $objectiveIds)
+                ->count();
+            if ($validObjectivesCount !== count($objectiveIds)) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'mappings' => ['Beberapa ID Kebijakan tidak valid.']
+                ]);
+            }
+        }
 
         try {
             \DB::transaction(function () use ($validated) {
@@ -369,8 +418,21 @@ class RoleController extends Controller
     {
         $validated = $request->validate([
             'responsible_ids' => 'present|array',
-            'responsible_ids.*' => 'integer|exists:mst_responsible,id',
+            'responsible_ids.*' => 'integer',
         ]);
+
+        $ids = $validated['responsible_ids'] ?? [];
+        if (!empty($ids)) {
+            $uniqueIds = array_unique($ids);
+            $validResponsiblesCount = \DB::table('mst_responsible')
+                ->whereIn('id', $uniqueIds)
+                ->count();
+            if ($validResponsiblesCount !== count($uniqueIds)) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'responsible_ids' => ['Beberapa ID Master Responsible tidak valid.']
+                ]);
+            }
+        }
 
         try {
             $objective = \App\Models\MstObjective::findOrFail($objectiveId);

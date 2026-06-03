@@ -23,6 +23,7 @@ use App\Http\Controllers\MasterData\ScopeCharter\ScopeCharterController;
 use App\Http\Controllers\Policy\EITOrganizationController;
 use App\Http\Controllers\Policy\GeneralPolicyController;
 use App\Http\Controllers\Policy\PolicyController;
+use App\Http\Controllers\Policy\InfoflowController;
 use App\Http\Controllers\Policy\PracticeRoleController;
 use App\Http\Controllers\Policy\ProcedureController;
 use App\Http\Controllers\Policy\RegulationController;
@@ -359,6 +360,9 @@ Route::middleware(['auth', 'approved'])->group(function () {
         Route::get('/raci', [PracticeRoleController::class, 'index'])->name('raci.index');
         Route::get('/raci/manage', [PracticeRoleController::class, 'manage'])->name('raci.manage');
         Route::post('/raci', [PracticeRoleController::class, 'update'])->name('raci.update');
+
+        // GAMO Information Flow
+        Route::get('/infoflow', [InfoflowController::class, 'index'])->name('infoflow.index');
 
         // Master Responsible CRUD
         Route::get('/responsible', [ResponsibleController::class, 'manage'])->name('responsible.manage');
