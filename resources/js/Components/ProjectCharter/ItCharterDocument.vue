@@ -149,7 +149,7 @@ const displayOwner = (value) => {
                 </span>
             </div>
             <div class="info-cell info-cell-last">
-                <span class="info-label info-label-dark">Project Owner Unit</span>
+                <span class="info-label info-label-dark">Project Owner</span>
                 <span class="info-sep"></span>
                 <span class="info-value">
                     <div v-if="editable" class="flex flex-col gap-1 w-full">
@@ -317,7 +317,7 @@ const displayOwner = (value) => {
 
             <div class="grid-2col">
                 <article class="panel">
-                    <div class="bar-sub">Risiko teridentifikasi</div>
+                    <div class="bar-sub">Resiko teridentifikasi</div>
                     <div class="panel-body min-h-[120px]">
                         <textarea v-if="editable" v-model="form.risks_identified" class="field-area"
                             placeholder="Satu poin per baris..."></textarea>

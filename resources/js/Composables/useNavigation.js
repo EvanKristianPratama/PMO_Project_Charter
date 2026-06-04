@@ -89,6 +89,8 @@ export function useNavigation() {
                     !(url || '').startsWith("/program-evalution/review-timeline") &&
                     !(url || '').startsWith("/program-evalution/review-dashboard") &&
                     !(url || '').startsWith("/program-evalution/review-summary") &&
+                    !(url || '').startsWith("/program-evalution/review-aktor") &&
+                    !(url || '').startsWith("/program-evalution/review-document") &&
                     !(url || '').startsWith("/program-evalution/review-analysis"),
             },
             {
@@ -110,7 +112,7 @@ export function useNavigation() {
                 href: safeRoute("program-evaluation.review-aktor"),
                 icon: ClipboardDocumentCheckIcon,
                 active: (url) =>
-                    (url || '').startsWith("/program-evalution/review-analysis"),
+                    (url || '').startsWith("/program-evalution/review-aktor"),
             },
             {
                 label: "Report",
@@ -121,10 +123,10 @@ export function useNavigation() {
             },
             {
                 label: "Review Document",
-                href: safeRoute("program-evaluation.review-summary"),
+                href: safeRoute("program-evaluation.review-document"),
                 icon: ClipboardDocumentCheckIcon,
                 active: (url) =>
-                    (url || '').startsWith("/program-evalution/review-summary"),
+                    (url || '').startsWith("/program-evalution/review-document"),
             },
         ];
 

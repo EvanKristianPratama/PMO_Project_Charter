@@ -32,6 +32,7 @@ use App\Http\Controllers\Policy\ResponsibleController;
 use App\Http\Controllers\Policy\RoleController;
 use App\Http\Controllers\ProgramEvaluation\ReviewAktorController;
 use App\Http\Controllers\ProgramEvaluation\ReviewDashboardController;
+use App\Http\Controllers\ProgramEvaluation\ReviewDocumentController;
 use App\Http\Controllers\ProgramEvaluation\ReviewTimelineController;
 use App\Http\Controllers\ProgramEvaluation\TrsReviewPCController;
 use App\Http\Controllers\ProgramEvaluation\TrsReviewScController;
@@ -401,6 +402,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/program-evalution/review-timeline', [ReviewTimelineController::class, 'index'])->name('program-evaluation.review-timeline');
     Route::get('/program-evalution/review-dashboard', [ReviewDashboardController::class, 'index'])->name('program-evaluation.review-dashboard');
     Route::get('/program-evalution/review-summary', [ReviewDashboardController::class, 'summary'])->name('program-evaluation.review-summary');
+    Route::get('/program-evalution/review-document', [ReviewDocumentController::class, 'index'])->name('program-evaluation.review-document');
     Route::get('/program-evalution/review-analysis', [ReviewAktorController::class, 'index'])->name('program-evaluation.review-aktor');
     Route::get('/program-evalution/report', fn () => Inertia::render('Placeholder/Index', [
         'title' => 'Program Evaluation Report',
