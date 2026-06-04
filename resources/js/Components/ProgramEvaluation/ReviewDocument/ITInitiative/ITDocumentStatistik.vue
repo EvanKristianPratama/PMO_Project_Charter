@@ -141,16 +141,11 @@ const getInitiativeTooltip = (project) => {
 <template>
     <!-- CoE Document Completeness Table -->
     <div class="rounded-2xl border border-slate-900 bg-white shadow-sm dark:border-white/20 dark:bg-[#171717]">
-        <div class="border-b border-slate-900 px-4 py-3 dark:border-white/20">
-            <h3 class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
-                Document Completeness by CoE
-            </h3>
-        </div>
         <div class="overflow-x-auto">
             <table class="w-full border-collapse text-left text-[11px]">
                 <thead class="bg-slate-50 text-[9px] font-bold uppercase tracking-widest text-slate-500 dark:bg-white/5 dark:text-slate-400">
                     <tr>
-                        <th rowspan="2" class="border-b border-r border-slate-900 px-4 py-2 dark:border-white/20 align-middle">Category</th>
+                        <th rowspan="2" class="border-b border-r border-slate-900 px-4 py-2 dark:border-white/20 align-middle">IT Building Block</th>
                         <th colspan="2" class="border-b border-r border-slate-900 px-4 py-1 text-center dark:border-white/20">Complete</th>
                         <th colspan="2" class="border-b border-r border-slate-900 px-4 py-1 text-center dark:border-white/20">Incomplete</th>
                         <th rowspan="2" class="border-b border-slate-900 px-4 py-2 text-center dark:border-white/20 align-middle">Total</th>

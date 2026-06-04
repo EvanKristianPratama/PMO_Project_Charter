@@ -3,7 +3,7 @@
         <div>
             <div class="border-b border-slate-100 pb-3 mb-4 dark:border-white/5 flex items-center justify-between">
                 <h3 class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
-                    Penyebab Ketidaklengkapan Dokumen
+                    Ketidaklengkapan Dokumen
                 </h3>
                 <span class="inline-flex items-center rounded bg-rose-50 px-1.5 py-0.5 text-[9px] font-bold text-rose-600 dark:bg-rose-500/10 dark:text-rose-400">
                     {{ chartData.total }} Isian Kosong
@@ -24,23 +24,14 @@
             </div>
 
             <!-- Chart & Legend Content -->
-            <div v-else class="space-y-4">
-                <!-- Doughnut Canvas -->
-                <div class="relative flex justify-center h-[180px] w-full">
+            <div v-else class="flex flex-col sm:flex-row items-center gap-6 mt-2">
+                <!-- Pie Canvas -->
+                <div class="relative flex-shrink-0 h-[170px] w-[170px] flex justify-center items-center">
                     <canvas ref="chartCanvas"></canvas>
-                    <!-- Center Summary Metric -->
-                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                        <span class="text-2xl font-black text-slate-900 dark:text-white leading-none">
-                            {{ chartData.items.length }}
-                        </span>
-                        <span class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                            Bagian Bermasalah
-                        </span>
-                    </div>
                 </div>
 
                 <!-- Custom Legend with scrollbar if items are many -->
-                <div class="max-h-[160px] overflow-y-auto pr-1 space-y-1.5 custom-scrollbar">
+                <div class="flex-grow w-full max-h-[170px] overflow-y-auto pr-1 space-y-1.5 custom-scrollbar">
                     <div 
                         v-for="(item, idx) in chartData.items" 
                         :key="item.key"
@@ -193,6 +184,47 @@ const chartData = computed(() => {
     };
 });
 
+const pieLabelsPlugin = {
+    id: 'pieLabels',
+    afterDraw(chart) {
+        if (chart.config.type !== 'pie') return;
+        const { ctx } = chart;
+        ctx.save();
+        ctx.font = 'bold 15px Inter, sans-serif';
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        chart.data.datasets.forEach((dataset, datasetIndex) => {
+            const meta = chart.getDatasetMeta(datasetIndex);
+            if (meta.hidden) return;
+
+            meta.data.forEach((element, index) => {
+                const value = dataset.data[index];
+                if (value === 0 || value === null) return;
+
+                const total = dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = Math.round((value / total) * 100);
+                
+                // Show label only if slice has enough space (>= 4%)
+                if (percentage < 4) return;
+
+                const centerAngle = element.startAngle + (element.endAngle - element.startAngle) / 2;
+                const avgRadius = element.outerRadius * 0.62;
+                const x = element.x + Math.cos(centerAngle) * avgRadius;
+                const y = element.y + Math.sin(centerAngle) * avgRadius;
+
+                // Subtle text outline for absolute legibility on bright colors
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+                ctx.lineWidth = 2.5;
+                ctx.strokeText(`${percentage}%`, x, y);
+                ctx.fillText(`${percentage}%`, x, y);
+            });
+        });
+        ctx.restore();
+    }
+};
+
 const updateChart = () => {
     if (!chartCanvas.value || chartData.value.total === 0) {
         if (chartInstance) {
@@ -206,24 +238,30 @@ const updateChart = () => {
     const dataValues = chartData.value.items.map(item => item.count);
     const backgroundColors = chartData.value.items.map((_, idx) => colors[idx % colors.length]);
 
+    const isDark = document.documentElement.classList.contains('dark') || chartCanvas.value.closest('.dark') !== null;
+    const borderColor = isDark ? '#171717' : '#ffffff';
+
     if (chartInstance) {
         chartInstance.data.labels = labels;
         chartInstance.data.datasets[0].data = dataValues;
         chartInstance.data.datasets[0].backgroundColor = backgroundColors;
+        chartInstance.data.datasets[0].borderColor = borderColor;
         chartInstance.update();
     } else {
         const ctx = chartCanvas.value.getContext('2d');
         chartInstance = new Chart(ctx, {
-            type: 'doughnut',
+            type: 'pie',
             data: {
                 labels,
                 datasets: [{
                     data: dataValues,
                     backgroundColor: backgroundColors,
-                    borderWidth: 0,
+                    borderWidth: 1.5,
+                    borderColor: borderColor,
                     hoverOffset: 6
                 }]
             },
+            plugins: [pieLabelsPlugin],
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -245,9 +283,7 @@ const updateChart = () => {
                             }
                         }
                     }
-                },
-                cutout: '72%',
-                spacing: 2
+                }
             }
         });
     }
