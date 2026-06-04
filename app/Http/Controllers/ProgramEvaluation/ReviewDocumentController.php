@@ -19,6 +19,8 @@ class ReviewDocumentController extends Controller
                 'owner:id,name',
                 'mapPicProject',
                 'mapCrossFunctions',
+                'mappedInitiatives.coe',
+                'latestPcStatusImplementation',
             ])
             ->get()
             ->map(function ($project) {
@@ -101,6 +103,11 @@ class ReviewDocumentController extends Controller
                     'status_name' => $statusMap[$status] ?? $charter->statusRef?->name ?? $project->statusRef?->name ?? '-',
                     'charter_version' => $charter->version_label ?? '-',
                     'completeness_score' => $completenessScore,
+                    'coe_name' => $project->mappedInitiatives->first()?->coe?->name ?? 'Uncategorized',
+                    'implementation_status' => $project->latestPcStatusImplementation?->status ?? 'Belum Ada Status',
+                    'implementation_period' => $project->latestPcStatusImplementation 
+                        ? trim($project->latestPcStatusImplementation->month . ' ' . $project->latestPcStatusImplementation->year)
+                        : null,
                     'details' => $details,
                     'updated_at' => $charter->updated_at->toISOString(),
                 ];

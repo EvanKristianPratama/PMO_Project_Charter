@@ -1,23 +1,22 @@
 <template>
     <div class="space-y-6">
-        <!-- Statistik Component -->
-        <ITDocumentStatistik 
-            :projects="projects"
-            :calculate-score="calculateCompletenessScore"
-            v-model:selected-completeness="completenessFilter"
-        />
+        <!-- Statistik & Chart Grid -->
+
+        <ITDocumentStatistik :projects="projects" :calculate-score="calculateCompletenessScore"
+            v-model:selected-completeness="completenessFilter" />
+            
+        <ITCompletenessChart :projects="filteredProjects" />
 
         <div class="rounded-2xl border border-slate-900 bg-white shadow-sm dark:border-white/20 dark:bg-[#171717]">
             <div class="border-b border-slate-900 px-3 py-2 dark:border-white/20">
-                <div class="flex flex-wrap items-center justify-start gap-4">                
+                <div class="flex flex-wrap items-center justify-start gap-4">
                     <div class="flex items-center gap-2">
-                        <label class="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
+                        <label
+                            class="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
                             Status
                         </label>
-                        <select 
-                            v-model="statusFilter"
-                            class="cursor-pointer rounded border border-slate-300 bg-white px-2 py-0.5 text-[9px] font-bold outline-none transition-all focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
-                        >
+                        <select v-model="statusFilter"
+                            class="cursor-pointer rounded border border-slate-300 bg-white px-2 py-0.5 text-[9px] font-bold outline-none transition-all focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200">
                             <option value="">All Status</option>
                             <option v-for="status in availableStatuses" :key="status" :value="status">
                                 {{ status }}
@@ -26,13 +25,12 @@
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <label class="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
+                        <label
+                            class="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
                             Version
                         </label>
-                        <select 
-                            v-model="versionFilter"
-                            class="cursor-pointer rounded border border-slate-300 bg-white px-2 py-0.5 text-[9px] font-bold outline-none transition-all focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
-                        >
+                        <select v-model="versionFilter"
+                            class="cursor-pointer rounded border border-slate-300 bg-white px-2 py-0.5 text-[9px] font-bold outline-none transition-all focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200">
                             <option value="">All Version</option>
                             <option v-for="version in availableVersions" :key="version" :value="version">
                                 {{ version }}
@@ -41,13 +39,12 @@
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <label class="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
+                        <label
+                            class="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
                             Completeness
                         </label>
-                        <select 
-                            v-model="completenessSort"
-                            class="cursor-pointer rounded border border-slate-300 bg-white px-2 py-0.5 text-[9px] font-bold outline-none transition-all focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200"
-                        >
+                        <select v-model="completenessSort"
+                            class="cursor-pointer rounded border border-slate-300 bg-white px-2 py-0.5 text-[9px] font-bold outline-none transition-all focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200">
                             <option value="">Default</option>
                             <option value="desc">Terlengkap</option>
                             <option value="asc">Skor Terendah</option>
@@ -58,11 +55,15 @@
 
             <div class="overflow-x-auto">
                 <table class="w-full border-collapse text-left text-[11px]">
-                    <thead class="bg-slate-50 text-[9px] font-bold uppercase tracking-widest text-slate-500 dark:bg-white/5 dark:text-slate-400">
+                    <thead
+                        class="bg-slate-50 text-[9px] font-bold uppercase tracking-widest text-slate-500 dark:bg-white/5 dark:text-slate-400">
                         <tr>
-                            <th class="border-b border-r border-slate-900 px-4 py-2 dark:border-white/20">Initiatives</th>
-                            <th class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20">Status</th>
-                            <th class="border-b border-r border-slate-900 px-4 py-2 dark:border-white/20">Document Completeness</th>
+                            <th class="border-b border-r border-slate-900 px-4 py-2 dark:border-white/20">Initiatives
+                            </th>
+                            <th class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20">
+                                Status</th>
+                            <th class="border-b border-r border-slate-900 px-4 py-2 dark:border-white/20">Document
+                                Completeness</th>
                             <th class="border-b border-slate-900 px-4 py-2 text-right dark:border-white/20">Aksi</th>
                         </tr>
                     </thead>
@@ -71,58 +72,69 @@
                             <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                                 <td class="border-r border-slate-900 px-4 py-4 dark:border-white/20">
                                     <div class="flex flex-col">
-                                        <span class="font-black text-slate-900 dark:text-white uppercase">{{ project.code }}</span>
+                                        <span class="font-black text-slate-900 dark:text-white uppercase">{{
+                                            project.code }}</span>
                                         <span class="text-[10px] text-slate-500 font-medium">{{ project.name }}</span>
                                     </div>
                                 </td>
                                 <td class="border-r border-slate-900 px-4 py-4 text-center dark:border-white/20">
-                                    <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-tight text-slate-600 dark:bg-white/10 dark:text-slate-300">
+                                    <span
+                                        class="inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-tight text-slate-600 dark:bg-white/10 dark:text-slate-300">
                                         {{ project.status_name }}
                                     </span>
                                 </td>
                                 <td class="border-r border-slate-900 px-4 py-4 dark:border-white/20">
                                     <div class="flex items-center gap-3">
-                                        <div class="h-2 w-24 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-white/10">
-                                            <div 
-                                                class="h-full transition-all duration-500"
+                                        <div
+                                            class="h-2 w-24 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-white/10">
+                                            <div class="h-full transition-all duration-500"
                                                 :class="getProgressBarColor(calculateCompletenessScore(project))"
-                                                :style="{ width: `${calculateCompletenessScore(project)}%` }"
-                                            ></div>
+                                                :style="{ width: `${calculateCompletenessScore(project)}%` }"></div>
                                         </div>
-                                        <span class="text-[10px] font-black" :class="getScoreColor(calculateCompletenessScore(project))">
+                                        <span class="text-[10px] font-black"
+                                            :class="getScoreColor(calculateCompletenessScore(project))">
                                             {{ calculateCompletenessScore(project) }}%
                                         </span>
                                     </div>
                                 </td>
                                 <td class="border-slate-900 px-4 py-4 text-right dark:border-white/20">
-                                    <button 
-                                        @click="toggleRow(project.id)"
-                                        class="rounded border border-slate-300 px-2 py-1 text-[8px] font-bold uppercase tracking-wider text-slate-600 transition-all hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5"
-                                    >
+                                    <button @click="toggleRow(project.id)"
+                                        class="rounded border border-slate-300 px-2 py-1 text-[8px] font-bold uppercase tracking-wider text-slate-600 transition-all hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5">
                                         {{ expandedRows.has(project.id) ? 'Tutup Detail' : 'Buka Detail' }}
                                     </button>
                                 </td>
                             </tr>
-                            <tr v-if="expandedRows.has(project.id)" class="bg-slate-50/30 dark:bg-white/5 border-b border-slate-900 dark:border-white/20">
+                            <tr v-if="expandedRows.has(project.id)"
+                                class="bg-slate-50/30 dark:bg-white/5 border-b border-slate-900 dark:border-white/20">
                                 <td colspan="4" class="px-6 py-6 border-r border-slate-900 dark:border-white/20">
                                     <!-- Categorized Detail Tables -->
                                     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                                        <div v-for="cat in getFieldCategories(project)" :key="'table-' + cat.name" class="overflow-hidden rounded-xl border border-slate-900 shadow-sm dark:border-white/20">
+                                        <div v-for="cat in getFieldCategories(project)" :key="'table-' + cat.name"
+                                            class="overflow-hidden rounded-xl border border-slate-900 shadow-sm dark:border-white/20">
                                             <table class="w-full border-collapse text-left text-[11px]">
-                                                <thead class="bg-slate-50 text-[9px] font-black uppercase tracking-widest text-slate-600 dark:bg-white/5 dark:text-slate-400">
+                                                <thead
+                                                    class="bg-slate-50 text-[9px] font-black uppercase tracking-widest text-slate-600 dark:bg-white/5 dark:text-slate-400">
                                                     <tr>
-                                                        <th class="border-b border-r border-slate-900 px-4 py-2 dark:border-white/20">{{ cat.name }}</th>
-                                                        <th class="border-b border-slate-900 px-4 py-2 text-center dark:border-white/20 w-32">Status</th>
+                                                        <th
+                                                            class="border-b border-r border-slate-900 px-4 py-2 dark:border-white/20">
+                                                            {{ cat.name }}</th>
+                                                        <th
+                                                            class="border-b border-slate-900 px-4 py-2 text-center dark:border-white/20 w-32">
+                                                            Status</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody class="bg-white dark:bg-[#1c1c1c]">
-                                                    <tr v-for="field in cat.fields" :key="field" class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-                                                        <td class="border-b border-r border-slate-900 px-4 py-2 font-bold text-slate-700 dark:border-white/20 dark:text-slate-300">
+                                                    <tr v-for="field in cat.fields" :key="field"
+                                                        class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                                                        <td
+                                                            class="border-b border-r border-slate-900 px-4 py-2 font-bold text-slate-700 dark:border-white/20 dark:text-slate-300">
                                                             {{ getFieldLabel(field, project) }}
                                                         </td>
-                                                        <td class="border-b border-slate-900 px-4 py-2 text-center dark:border-white/20">
+                                                        <td
+                                                            class="border-b border-slate-900 px-4 py-2 text-center dark:border-white/20">
                                                             <div class="flex items-center justify-center gap-2">
-                                                                <CheckCircleIcon v-if="project.details[field]" class="h-4 w-4 text-emerald-500" />
+                                                                <CheckCircleIcon v-if="project.details[field]"
+                                                                    class="h-4 w-4 text-emerald-500" />
                                                                 <XCircleIcon v-else class="h-4 w-4 text-rose-500" />
                                                             </div>
                                                         </td>
@@ -135,7 +147,8 @@
                             </tr>
                         </template>
                         <tr v-if="filteredProjects.length === 0">
-                            <td colspan="4" class="border-slate-900 px-6 py-12 text-center text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:border-white/20">
+                            <td colspan="4"
+                                class="border-slate-900 px-6 py-12 text-center text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:border-white/20">
                                 Tidak ada data yang ditemukan.
                             </td>
                         </tr>
@@ -148,14 +161,15 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { 
-    CheckCircleIcon, 
-    XCircleIcon, 
-    ChevronDownIcon, 
+import {
+    CheckCircleIcon,
+    XCircleIcon,
+    ChevronDownIcon,
     ChevronUpIcon,
     InformationCircleIcon
 } from '@heroicons/vue/24/solid';
 import ITDocumentStatistik from './ITDocumentStatistik.vue';
+import ITCompletenessChart from './ITCompletenessChart.vue';
 
 const props = defineProps({
     projects: {
@@ -258,7 +272,7 @@ const getVersionKey = (project) => {
     if (status.includes('approved') || status.includes('review') || status.includes('propose')) {
         return 'approved';
     }
-    
+
     // Fallback to charter_version if status is not decisive
     const version = String(project.charter_version || '').toLowerCase();
     if (version.includes('approved')) {
@@ -331,7 +345,7 @@ const filteredProjects = computed(() => {
     let list = props.projects.filter(p => {
         const matchStatus = !statusFilter.value || p.status_name === statusFilter.value;
         const matchVersion = !versionFilter.value || p.charter_version === versionFilter.value;
-        
+
         let matchCompleteness = true;
         const score = calculateCompletenessScore(p);
         if (completenessFilter.value === 'lengkap') {

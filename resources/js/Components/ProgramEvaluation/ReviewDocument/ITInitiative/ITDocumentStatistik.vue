@@ -56,71 +56,206 @@ const toggleFilter = (id) => {
     const newValue = props.selectedCompleteness === id ? '' : id;
     emit('update:selectedCompleteness', newValue);
 };
+
+const groupedData = computed(() => {
+    const allCoEs = [...new Set(props.projects.map(p => p.coe_name || 'Uncategorized'))].sort((a, b) => {
+        if (a === 'Uncategorized') return 1;
+        if (b === 'Uncategorized') return -1;
+        return a.localeCompare(b);
+    });
+
+    return allCoEs.map(coeName => {
+        const projectsInCoe = props.projects.filter(p => (p.coe_name || 'Uncategorized') === coeName);
+        const total = projectsInCoe.length;
+        const completeProjects = projectsInCoe.filter(p => props.calculateScore(p) === 100);
+        const incompleteProjects = projectsInCoe.filter(p => props.calculateScore(p) < 100);
+
+        return {
+            category: coeName,
+            total,
+            completeProjects,
+            incompleteProjects
+        };
+    });
+});
+
+const grandTotals = computed(() => {
+    let total = 0;
+    let completeCount = 0;
+    let incompleteCount = 0;
+    const allCompleteProjects = [];
+    const allIncompleteProjects = [];
+
+    groupedData.value.forEach(coe => {
+        total += coe.total;
+        completeCount += coe.completeProjects.length;
+        incompleteCount += coe.incompleteProjects.length;
+        allCompleteProjects.push(...coe.completeProjects);
+        allIncompleteProjects.push(...coe.incompleteProjects);
+    });
+
+    return {
+        total,
+        completeCount,
+        incompleteCount,
+        completeProjects: allCompleteProjects,
+        incompleteProjects: allIncompleteProjects
+    };
+});
+
+const getProjectNumber = (project) => {
+    if (!project.code) return '?';
+    const parts = project.code.split('-');
+    const lastPart = parts[parts.length - 1];
+    const num = parseInt(lastPart, 10);
+    return isNaN(num) ? lastPart : num;
+};
+
+const getCircleColor = (status) => {
+    const normalized = String(status ?? '').trim().toLowerCase();
+    if (normalized === 'on track' || normalized === 'on-track') return 'bg-emerald-500';
+    if (normalized === 'at risk' || normalized === 'at-risk') return 'bg-amber-500';
+    if (normalized === 'delayed') return 'bg-orange-500';
+    if (normalized === 'done' || normalized === 'completed') return 'bg-slate-500';
+    if (normalized === 'on progress' || normalized === 'on-progress' || normalized === 'in progress' || normalized === 'in-progress') return 'bg-blue-500';
+    if (normalized === 'on review' || normalized === 'on-review') return 'bg-purple-500';
+    if (normalized === 'not started' || normalized === 'not-started' || normalized === 'not start') return 'bg-blue-500';
+    if (normalized === 'not signed' || normalized === 'not-signed') return 'bg-rose-500';
+    return 'bg-slate-400';
+};
+
+const getInitiativeTooltip = (project) => {
+    const projectName = String(project.name || '').trim();
+    const status = String(project.implementation_status || '').trim();
+    const periodLabel = String(project.implementation_period || '').trim();
+
+    const nameParts = [];
+    if (projectName !== '') nameParts.push(projectName);
+    if (status !== '') nameParts.push(status);
+    if (periodLabel !== '') nameParts.push(`(${periodLabel})`);
+
+    return nameParts.join(' - ') || projectName || status || periodLabel;
+};
 </script>
 
 <template>
-    <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <!-- Summary Cards -->
-        <div 
-            v-for="stat in stats" 
-            :key="stat.id"
-            @click="toggleFilter(stat.id)"
-            :class="[
-                'group relative cursor-pointer overflow-hidden rounded-2xl border p-4 transition-all duration-300',
-                selectedCompleteness === stat.id 
-                    ? 'border-slate-900 bg-slate-50 dark:border-white/40 dark:bg-white/5 ring-1 ring-slate-900 dark:ring-white/40' 
-                    : 'border-slate-200 bg-white hover:border-slate-400 dark:border-white/10 dark:bg-[#171717] dark:hover:border-white/30'
-            ]"
-        >
-            <div class="flex items-center justify-between">
-                <div class="flex flex-col gap-1">
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                        {{ stat.label }}
-                    </span>
-                    <div class="flex items-baseline gap-2">
-                        <span class="text-2xl font-black text-slate-900 dark:text-white">
-                            {{ stat.count }}
-                        </span>
-                        <span class="text-[10px] font-bold text-slate-400 uppercase">Inisiatif</span>
-                    </div>
-                </div>
-                <div :class="['flex h-10 w-10 items-center justify-center rounded-xl shadow-lg transition-transform group-hover:scale-110', stat.cls]">
-                    <svg v-if="stat.id === 'lengkap'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6 text-white">
-                        <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clip-rule="evenodd" />
-                    </svg>
-                    <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6 text-white">
-                        <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z" clip-rule="evenodd" />
-                    </svg>
-                </div>
-            </div>
-            
-            <!-- Progress Bar Mini -->
-            <div class="mt-4 h-1 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-white/10">
-                <div 
-                    :class="['h-full transition-all duration-700', stat.cls]" 
-                    :style="{ width: totalCount > 0 ? (stat.count / totalCount * 100) + '%' : '0%' }"
-                ></div>
-            </div>
+    <!-- CoE Document Completeness Table -->
+    <div class="rounded-2xl border border-slate-900 bg-white shadow-sm dark:border-white/20 dark:bg-[#171717]">
+        <div class="border-b border-slate-900 px-4 py-3 dark:border-white/20">
+            <h3 class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
+                Document Completeness by CoE
+            </h3>
         </div>
-
-        <!-- Total Card -->
-        <div class="flex items-center justify-between rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-4 dark:border-white/20 dark:bg-white/5">
-            <div class="flex flex-col gap-1">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                    Total Overview
-                </span>
-                <div class="flex items-baseline gap-2">
-                    <span class="text-2xl font-black text-slate-900 dark:text-white">
-                        {{ totalCount }}
-                    </span>
-                    <span class="text-[10px] font-bold text-slate-400 uppercase">Project Charter</span>
-                </div>
-            </div>
-            <div class="h-10 w-10 rounded-xl bg-slate-100 p-2 text-slate-400 dark:bg-white/10">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-full w-full">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
-                </svg>
-            </div>
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse text-left text-[11px]">
+                <thead class="bg-slate-50 text-[9px] font-bold uppercase tracking-widest text-slate-500 dark:bg-white/5 dark:text-slate-400">
+                    <tr>
+                        <th rowspan="2" class="border-b border-r border-slate-900 px-4 py-2 dark:border-white/20 align-middle">Category</th>
+                        <th colspan="2" class="border-b border-r border-slate-900 px-4 py-1 text-center dark:border-white/20">Complete</th>
+                        <th colspan="2" class="border-b border-r border-slate-900 px-4 py-1 text-center dark:border-white/20">Incomplete</th>
+                        <th rowspan="2" class="border-b border-slate-900 px-4 py-2 text-center dark:border-white/20 align-middle">Total</th>
+                    </tr>
+                    <tr>
+                        <th class="border-b border-r border-slate-900 px-4 py-1 text-center dark:border-white/20">Total</th>
+                        <th class="border-b border-r border-slate-900 px-4 py-1 text-center dark:border-white/20">Complete</th>
+                        <th class="border-b border-r border-slate-900 px-4 py-1 text-center dark:border-white/20">Total</th>
+                        <th class="border-b border-r border-slate-900 px-4 py-1 text-center dark:border-white/20">Incomplete</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-[#171717] divide-y divide-slate-100 dark:divide-white/5">
+                    <tr v-for="coe in groupedData" :key="coe.category" class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                        <td class="border-r border-slate-900 px-4 py-3 dark:border-white/20 font-bold text-slate-900 dark:text-white">
+                            {{ coe.category }}
+                        </td>
+                        <td class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20 font-bold text-slate-700 dark:text-slate-300">
+                            {{ coe.completeProjects.length }}
+                        </td>
+                        <td class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20 font-black text-emerald-600 dark:text-emerald-400">
+                            <div class="flex flex-wrap items-center justify-center gap-1">
+                                <span
+                                    v-for="project in coe.completeProjects"
+                                    :key="project.id"
+                                    class="inline-flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm cursor-pointer hover:scale-110 transition-transform"
+                                    :class="getCircleColor(project.implementation_status)"
+                                    :title="getInitiativeTooltip(project)"
+                                >
+                                    {{ getProjectNumber(project) }}
+                                </span>
+                                <span v-if="!coe.completeProjects.length" class="text-slate-400">-</span>
+                            </div>
+                        </td>
+                        <td class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20 font-bold text-slate-700 dark:text-slate-300">
+                            {{ coe.incompleteProjects.length }}
+                        </td>
+                        <td class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20 font-black text-rose-600 dark:text-rose-400">
+                            <div class="flex flex-wrap items-center justify-center gap-1">
+                                <span
+                                    v-for="project in coe.incompleteProjects"
+                                    :key="project.id"
+                                    class="inline-flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm cursor-pointer hover:scale-110 transition-transform"
+                                    :class="getCircleColor(project.implementation_status)"
+                                    :title="getInitiativeTooltip(project)"
+                                >
+                                    {{ getProjectNumber(project) }}
+                                </span>
+                                <span v-if="!coe.incompleteProjects.length" class="text-slate-400">-</span>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 text-center font-bold text-slate-700 dark:text-slate-300">
+                            {{ coe.total }}
+                        </td>
+                    </tr>
+                    <tr v-if="groupedData.length === 0">
+                        <td colspan="6" class="px-6 py-8 text-center text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                            Tidak ada data yang ditemukan.
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr class="bg-slate-50/80 font-black text-slate-900 dark:bg-white/5 dark:text-white uppercase text-[10px] border-t border-slate-900 dark:border-white/40">
+                        <td class="border-r border-slate-900 px-4 py-3 dark:border-white/20">
+                            Grand Total
+                        </td>
+                        <td class="border-r border-slate-900 px-4 py-3 text-center font-black text-[11px] text-slate-700 dark:text-slate-300">
+                            {{ grandTotals.completeCount }}
+                        </td>
+                        <td class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20">
+                            <div class="flex flex-wrap items-center justify-center gap-1">
+                                <span
+                                    v-for="project in grandTotals.completeProjects"
+                                    :key="'gt-complete-' + project.id"
+                                    class="inline-flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm cursor-pointer hover:scale-110 transition-transform"
+                                    :class="getCircleColor(project.implementation_status)"
+                                    :title="getInitiativeTooltip(project)"
+                                >
+                                    {{ getProjectNumber(project) }}
+                                </span>
+                                <span v-if="!grandTotals.completeProjects.length" class="text-slate-400">-</span>
+                            </div>
+                        </td>
+                        <td class="border-r border-slate-900 px-4 py-3 text-center font-black text-[11px] text-slate-700 dark:text-slate-300">
+                            {{ grandTotals.incompleteCount }}
+                        </td>
+                        <td class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20">
+                            <div class="flex flex-wrap items-center justify-center gap-1">
+                                <span
+                                    v-for="project in grandTotals.incompleteProjects"
+                                    :key="'gt-incomplete-' + project.id"
+                                    class="inline-flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm cursor-pointer hover:scale-110 transition-transform"
+                                    :class="getCircleColor(project.implementation_status)"
+                                    :title="getInitiativeTooltip(project)"
+                                >
+                                    {{ getProjectNumber(project) }}
+                                </span>
+                                <span v-if="!grandTotals.incompleteProjects.length" class="text-slate-400">-</span>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 text-center font-black text-[11px]">
+                            {{ grandTotals.total }}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
         </div>
     </div>
 </template>
