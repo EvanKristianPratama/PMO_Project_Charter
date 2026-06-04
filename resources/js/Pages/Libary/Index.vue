@@ -1,14 +1,6 @@
 <template>
     <UserLayout title="Libary PPT">
         <div class="space-y-6 animate-fade-in-up">
-            <header class="rounded-xl bg-gradient-to-r from-red-600 to-rose-700 p-6 shadow-md dark:from-[#8C1D13] dark:to-[#A42518] dark:border dark:border-white/10">
-                <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                    <div>
-                        <h1 class="text-2xl font-black text-white tracking-tight">Presentation <span class="font-bold">Libary</span></h1>
-                        <p class="text-red-100/80 text-sm mt-1">Kelola dan lihat dokumen presentasi (PPT/PPTX)</p>
-                    </div>
-                </div>
-            </header>
 
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-4">
                 <!-- Sidebar: List of PPTs -->
@@ -20,19 +12,7 @@
                                 Available Files
                             </h2>
                             <span class="px-2 py-0.5 bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 rounded text-xs font-bold">{{ pptFiles.length }}</span>
-                        </div>
-                        
-                        <div class="p-4">
-                            <div class="relative">
-                                <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                <input 
-                                    v-model="searchQuery"
-                                    type="text" 
-                                    placeholder="Search files..." 
-                                    class="w-full pl-9 pr-4 py-2 bg-slate-100 dark:bg-white/5 border-none rounded-lg text-sm focus:ring-2 focus:ring-red-600 transition-all"
-                                />
-                            </div>
-                        </div>
+                        </div>  
 
                         <ul class="divide-y divide-slate-100 dark:divide-white/5 overflow-y-auto flex-1">
                             <li v-for="file in filteredFiles" :key="file.name" 
@@ -78,7 +58,7 @@
                 <!-- Main Content: Viewer -->
                 <div class="lg:col-span-3">
                     <div v-if="selectedPpt" class="space-y-6 animate-fade-in">
-                        <LibaryDetail :ppt="selectedPpt" />
+                        <LibaryClientViewer :ppt="selectedPpt" />
                     </div>
                     
                     <div v-else class="flex flex-col items-center justify-center min-h-[600px] bg-white dark:bg-[#171717] rounded-xl border border-slate-200 dark:border-white/10 shadow-sm text-center p-12">
@@ -103,7 +83,7 @@
 import UserLayout from '@/Layouts/UserLayout.vue';
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
-import LibaryDetail from '@/Components/Libary/Libary.vue';
+import LibaryClientViewer from '@/Components/Libary/LibaryClientViewer.vue';
 import { 
     PresentationChartBarIcon, 
     ChevronRightIcon, 
