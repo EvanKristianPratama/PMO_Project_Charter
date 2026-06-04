@@ -188,6 +188,7 @@
                                         :it-initiative="group.project"
                                         :form="charterFormFor(group.project, charter)"
                                         :status-timeline="getProjectReviewStatus(group.project, charter)"
+                                        :all-organizations="allOrganizations"
                                         :editable="false" />
                                 </template>
                             </div>
@@ -308,6 +309,10 @@ const props = defineProps({
         default: () => [],
     },
     mstInitiatives: {
+        type: Array,
+        default: () => [],
+    },
+    allOrganizations: {
         type: Array,
         default: () => [],
     },
@@ -667,6 +672,7 @@ const CHARTER_FIELDS = [
     'sponsor', 'leader', 'category', 'duration', 'start_year', 'end_year',
     'background', 'objectives', 'impact_value', 'key_personnel', 'key_items',
     'budget', 'key_milestone', 'risks_identified', 'risk_mitigation', 'notes',
+    'pic_sponsor_id', 'pic_owner_id', 'pic_leader_id', 'pic_cross_function_ids',
 ];
 
 const charterFormFor = (proj, charterOverride = null) => {

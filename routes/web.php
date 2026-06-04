@@ -30,7 +30,7 @@ use App\Http\Controllers\Policy\ProcedureController;
 use App\Http\Controllers\Policy\RegulationController;
 use App\Http\Controllers\Policy\ResponsibleController;
 use App\Http\Controllers\Policy\RoleController;
-use App\Http\Controllers\ProgramEvaluation\ReviewAnalysisController;
+use App\Http\Controllers\ProgramEvaluation\ReviewAktorController;
 use App\Http\Controllers\ProgramEvaluation\ReviewDashboardController;
 use App\Http\Controllers\ProgramEvaluation\ReviewTimelineController;
 use App\Http\Controllers\ProgramEvaluation\TrsReviewPCController;
@@ -393,7 +393,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     ]))->name('program-information.index');
 
     // Program Evaluation
-    Route::redirect('/program-evalution', '/program-evalution/review');
+    Route::redirect('/program-evalution', '/program-evalution/review-summary');
     Route::get('/program-evalution/review', [TrsReviewPCController::class, 'index'])->name('program-evaluation.index');
     Route::post('/program-evalution/review', [TrsReviewPCController::class, 'store'])->name('program-evaluation.store');
     Route::get('/program-evalution/review/{trsReviewPC}', [TrsReviewPCController::class, 'show'])->name('program-evaluation.show');
@@ -401,7 +401,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/program-evalution/review-timeline', [ReviewTimelineController::class, 'index'])->name('program-evaluation.review-timeline');
     Route::get('/program-evalution/review-dashboard', [ReviewDashboardController::class, 'index'])->name('program-evaluation.review-dashboard');
     Route::get('/program-evalution/review-summary', [ReviewDashboardController::class, 'summary'])->name('program-evaluation.review-summary');
-    Route::get('/program-evalution/review-analysis', [ReviewAnalysisController::class, 'index'])->name('program-evaluation.review-analysis');
+    Route::get('/program-evalution/review-analysis', [ReviewAktorController::class, 'index'])->name('program-evaluation.review-aktor');
     Route::get('/program-evalution/report', fn () => Inertia::render('Placeholder/Index', [
         'title' => 'Program Evaluation Report',
     ]))->name('program-evaluation.report');

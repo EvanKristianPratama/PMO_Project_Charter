@@ -9,11 +9,11 @@ use App\Models\TrsMapPicProject;
 use App\Models\TrsOrganization;
 use Inertia\Response;
 
-class ReviewAnalysisController extends Controller
+class ReviewAktorController extends Controller
 {
     public function index(): Response
     {
-        return inertia('ProgramEvaluation/ReviewAnalysis/Index', $this->buildAnalysisProps());
+        return inertia('ProgramEvaluation/ReviewAktor/Index', $this->buildAnalysisProps());
     }
 
     private function buildAnalysisProps(): array

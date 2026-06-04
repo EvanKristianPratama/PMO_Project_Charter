@@ -19,7 +19,7 @@
                 <thead>
                     <tr class="bg-slate-50 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:bg-white/5 dark:text-slate-400">
                         <th rowspan="2" class="border-b border-r border-slate-900 px-4 py-3 dark:border-white/20">
-                            Aktor
+                            Pelaksana
                         </th>
                         <th colspan="2" class="border-b border-r border-slate-900 px-4 py-3 text-center dark:border-white/20">
                             Project Sponsor

@@ -74,6 +74,13 @@ export function useNavigation() {
 
         const programEvaluationChildren = [
             {
+                label: "Dashboard Summary",
+                href: safeRoute("program-evaluation.review-summary"),
+                icon: ClipboardDocumentCheckIcon,
+                active: (url) =>
+                    (url || '').startsWith("/program-evalution/review-summary"),
+            },
+            {
                 label: "Review PC",
                 href: safeRoute("program-evaluation.index"),
                 icon: ClipboardDocumentCheckIcon,
@@ -99,15 +106,8 @@ export function useNavigation() {
                     (url || '').startsWith("/program-evalution/review-timeline"),
             },
             {
-                label: "Dashboard Summary",
-                href: safeRoute("program-evaluation.review-summary"),
-                icon: ClipboardDocumentCheckIcon,
-                active: (url) =>
-                    (url || '').startsWith("/program-evalution/review-summary"),
-            },
-            {
-                label: "Review Anylisis",
-                href: safeRoute("program-evaluation.review-analysis"),
+                label: "Review Aktor",
+                href: safeRoute("program-evaluation.review-aktor"),
                 icon: ClipboardDocumentCheckIcon,
                 active: (url) =>
                     (url || '').startsWith("/program-evalution/review-analysis"),
@@ -118,6 +118,13 @@ export function useNavigation() {
                 icon: DocumentTextIcon,
                 active: (url) =>
                     (url || '').startsWith("/program-evalution/report"),
+            },
+            {
+                label: "Review Document",
+                href: safeRoute("program-evaluation.review-summary"),
+                icon: ClipboardDocumentCheckIcon,
+                active: (url) =>
+                    (url || '').startsWith("/program-evalution/review-summary"),
             },
         ];
 
@@ -225,7 +232,7 @@ export function useNavigation() {
             },
             {
                 label: "Program Evaluation",
-                href: safeRoute("program-evaluation.index"),
+                href: safeRoute("program-evaluation.review-summary"),
                 icon: DocumentTextIcon,
                 active: (url) => (url || '').startsWith("/program-evalution"),
                 children: programEvaluationChildren,

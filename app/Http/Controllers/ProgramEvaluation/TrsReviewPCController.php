@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MstInitiative;
 use App\Models\TrsProject;
 use App\Models\TrsReviewPC;
+use App\Models\TrsOrganization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -291,16 +292,54 @@ class TrsReviewPCController extends Controller
                     $mappedProjects = TrsProject::query()
                         ->with([
                             'charters' => static fn ($q) => $q
-                                ->select('trs_project_charters.id', 'trs_project_charters.project_id', 'trs_project_charters.version_label', 'trs_project_charters.status', 'trs_project_charters.category', 'trs_project_charters.owner', 'trs_project_charters.tgl_dokumen', 'trs_project_charters.duration', 'trs_project_charters.background', 'trs_project_charters.objectives', 'trs_project_charters.impact_value', 'trs_project_charters.key_personnel', 'trs_project_charters.key_items', 'trs_project_charters.budget', 'trs_project_charters.risks_identified', 'trs_project_charters.risk_mitigation')
+                                ->select(
+                                    'trs_project_charters.id',
+                                    'trs_project_charters.project_id',
+                                    'trs_project_charters.version_label',
+                                    'trs_project_charters.status',
+                                    'trs_project_charters.category',
+                                    'trs_project_charters.owner',
+                                    'trs_project_charters.tgl_dokumen',
+                                    'trs_project_charters.duration',
+                                    'trs_project_charters.background',
+                                    'trs_project_charters.objectives',
+                                    'trs_project_charters.impact_value',
+                                    'trs_project_charters.key_personnel',
+                                    'trs_project_charters.key_items',
+                                    'trs_project_charters.budget',
+                                    'trs_project_charters.risks_identified',
+                                    'trs_project_charters.risk_mitigation',
+                                    'trs_project_charters.sponsor',
+                                    'trs_project_charters.leader',
+                                    'trs_project_charters.notes',
+                                    'trs_project_charters.metadata',
+                                    'trs_project_charters.target_kpi'
+                                )
                                 ->latest()
                                 ->with('milestones'),
                             'owner',
                             'statusRef:id,name',
                             'reviewPcStatusImplementations',
+                            'mapPicProject',
+                            'mapCrossFunctions',
                         ])
                         ->whereIn('id', $mappedProjectIds)
                         ->get()
                         ->map(static function (TrsProject $project): TrsProject {
+                            foreach ($project->charters as $charter) {
+                                $charter->pic_sponsor_id = $project->mapPicProject?->project_sponsor;
+                                $charter->pic_owner_id = $project->mapPicProject?->project_owner;
+                                $charter->pic_leader_id = $project->mapPicProject?->project_leader;
+
+                                $crossFunctionStatus = (int) $charter->status === 4 ? 2 : 1;
+                                $charter->pic_cross_function_ids = $project->mapCrossFunctions
+                                    ? $project->mapCrossFunctions
+                                        ->where('status', $crossFunctionStatus)
+                                        ->pluck('organization_id')
+                                        ->toArray()
+                                    : [];
+                            }
+
                             $charter = $project->charters->first() ?? null;
 
                             if ($charter) {
@@ -344,12 +383,17 @@ class TrsReviewPCController extends Controller
             ])
             ->values();
 
+        $allOrganizations = TrsOrganization::query()
+            ->select(['id', 'jabatan', 'parent_id'])
+            ->get();
+
         return inertia('ProgramEvaluation/ReviewPC/Show', [
             'trsReviewPC' => $trsReviewPC,
             'initiativeReviews' => $initiativeReviews,
             'reviewOptions' => $reviewOptions,
             'mappedProject' => $mappedProject,
             'mappedProjects' => $mappedProjects,
+            'allOrganizations' => $allOrganizations,
         ]);
     }
 
