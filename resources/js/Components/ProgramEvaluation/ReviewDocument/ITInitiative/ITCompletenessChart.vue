@@ -1,9 +1,62 @@
 <template>
-    <div class="rounded-2xl border border-slate-900 bg-white p-5 dark:border-white/20 dark:bg-[#171717] h-full flex flex-col justify-between">
-        <div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Card 2: Sebaran Skor Kelengkapan Dokumen (Pie Chart) -->
+        <div class="rounded-2xl border border-slate-900 bg-white p-5 dark:border-white/20 dark:bg-[#171717]">
             <div class="border-b border-slate-100 pb-3 mb-4 dark:border-white/5 flex items-center justify-between">
                 <h3 class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
-                    Ketidaklengkapan Dokumen
+                    Sebaran Skor Kelengkapan Dokumen
+                </h3>
+                <span class="inline-flex items-center rounded bg-blue-50 px-1.5 py-0.5 text-[9px] font-bold text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+                    {{ projects.length }} Proyek
+                </span>
+            </div>
+
+            <!-- Empty State -->
+            <div v-if="projects.length === 0" class="flex flex-col items-center justify-center py-12 text-center text-slate-400">
+                Tidak ada data proyek yang ditampilkan.
+            </div>
+
+            <!-- Chart & Legend Content -->
+            <div v-else class="flex flex-col sm:flex-row items-center gap-6 mt-2">
+                <!-- Pie Canvas -->
+                <div class="relative flex-shrink-0 h-[170px] w-[170px] flex justify-center items-center">
+                    <canvas ref="scorePieChartCanvas"></canvas>
+                </div>
+
+                <!-- Custom Legend with scrollbar if items are many -->
+                <div class="flex-grow w-full max-h-[170px] overflow-y-auto pr-1 space-y-1.5 custom-scrollbar">
+                    <div 
+                        v-for="item in scoreDistribution" 
+                        :key="item.label"
+                        class="flex items-center justify-between text-[10px] p-1.5 rounded hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+                    >
+                        <div class="flex items-center gap-2 truncate pr-4">
+                            <span 
+                                class="h-2 w-2 rounded-full flex-shrink-0"
+                                :style="{ backgroundColor: getBarColorForScore(item.value) }"
+                            ></span>
+                            <span class="font-bold text-slate-700 dark:text-slate-300 truncate">
+                                Skor {{ item.label }}
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <span class="font-black text-slate-900 dark:text-white">
+                                {{ item.count }} Proyek
+                            </span>
+                            <span class="text-[8px] font-bold text-slate-400">
+                                ({{ Math.round((item.count / projects.length) * 100) }}%)
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Card 1: Penyebab Ketidaklengkapan Dokumen (Pie Chart) -->
+        <div class="rounded-2xl border border-slate-900 bg-white p-5 dark:border-white/20 dark:bg-[#171717]">
+            <div class="border-b border-slate-100 pb-3 mb-4 dark:border-white/5 flex items-center justify-between">
+                <h3 class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
+                    Penyebab Ketidaklengkapan Dokumen
                 </h3>
                 <span class="inline-flex items-center rounded bg-rose-50 px-1.5 py-0.5 text-[9px] font-bold text-rose-600 dark:bg-rose-500/10 dark:text-rose-400">
                     {{ chartData.total }} Isian Kosong
@@ -76,7 +129,10 @@ const props = defineProps({
 });
 
 const chartCanvas = ref(null);
+const scorePieChartCanvas = ref(null);
+
 let chartInstance = null;
+let scorePieChartInstance = null;
 
 // Premium palette for doughnut slices
 const colors = [
@@ -100,11 +156,11 @@ const fieldLabels = {
     tgl_dokumen: 'Tanggal Dokumen',
     owner: 'Project Owner',
     background: 'Latar Belakang Proyek',
-    objectives: 'Tujuan Bisnis / Sasaran',
+    objectives: 'Tujuan Bisnis',
     impact_value: 'Dampak & Nilai bagi Pertamina',
     key_personnel: 'Keterlibatan Lintas Fungsi',
     key_items: 'Sumber Daya yang Dibutuhkan',
-    budget: 'Estimasi Biaya / Budget',
+    budget: 'Cost',
     risks_identified: 'Risiko Teridentifikasi',
     risk_mitigation: 'Mitigasi Risiko',
     sponsor: 'Project Sponsor',
@@ -143,6 +199,28 @@ const getVersionKey = (project) => {
         return 'approved';
     }
     return 'baseline';
+};
+
+const calculateProjectScore = (project) => {
+    if (!project.details) return 0;
+    const version = getVersionKey(project);
+    const categories = fieldConfigs[version].categories;
+    let totalFields = 0;
+    let filledFields = 0;
+
+    categories.forEach(cat => {
+        totalFields += cat.fields.length;
+        filledFields += cat.fields.filter(f => project.details[f]).length;
+    });
+
+    return totalFields > 0 ? Math.round((filledFields / totalFields) * 100) : 0;
+};
+
+const getBarColorForScore = (score) => {
+    if (score === 100) return '#10b981'; // emerald-500
+    if (score >= 90) return '#84cc16'; // lime-500
+    if (score >= 70) return '#f59e0b'; // amber-500
+    return '#ef4444'; // rose-500
 };
 
 const chartData = computed(() => {
@@ -184,13 +262,34 @@ const chartData = computed(() => {
     };
 });
 
+// Group projects by completeness score
+const scoreDistribution = computed(() => {
+    const counts = {};
+    props.projects.forEach(project => {
+        const score = calculateProjectScore(project);
+        const key = `${score}%`;
+        counts[key] = (counts[key] || 0) + 1;
+    });
+
+    return Object.keys(counts)
+        .map(key => {
+            const scoreVal = parseInt(key, 10);
+            return {
+                label: key,
+                value: scoreVal,
+                count: counts[key]
+            };
+        })
+        .sort((a, b) => b.value - a.value); // Sort descending (100% to lowest)
+});
+
 const pieLabelsPlugin = {
     id: 'pieLabels',
     afterDraw(chart) {
         if (chart.config.type !== 'pie') return;
         const { ctx } = chart;
         ctx.save();
-        ctx.font = 'bold 15px Inter, sans-serif';
+        ctx.font = 'bold 11px Inter, sans-serif';
         ctx.fillStyle = '#ffffff';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -289,21 +388,91 @@ const updateChart = () => {
     }
 };
 
-watch(() => chartData.value.items, () => {
-    // We need to allow DOM to render canvas if we transitioned from total === 0
+const updateScorePieChart = () => {
+    if (!scorePieChartCanvas.value || props.projects.length === 0) {
+        if (scorePieChartInstance) {
+            scorePieChartInstance.destroy();
+            scorePieChartInstance = null;
+        }
+        return;
+    }
+
+    const labels = scoreDistribution.value.map(item => `Skor ${item.label}`);
+    const dataValues = scoreDistribution.value.map(item => item.count);
+    const backgroundColors = scoreDistribution.value.map(item => getBarColorForScore(item.value));
+
+    const isDark = document.documentElement.classList.contains('dark') || scorePieChartCanvas.value.closest('.dark') !== null;
+    const borderColor = isDark ? '#171717' : '#ffffff';
+
+    if (scorePieChartInstance) {
+        scorePieChartInstance.data.labels = labels;
+        scorePieChartInstance.data.datasets[0].data = dataValues;
+        scorePieChartInstance.data.datasets[0].backgroundColor = backgroundColors;
+        scorePieChartInstance.data.datasets[0].borderColor = borderColor;
+        scorePieChartInstance.update();
+    } else {
+        const ctx = scorePieChartCanvas.value.getContext('2d');
+        scorePieChartInstance = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels,
+                datasets: [{
+                    data: dataValues,
+                    backgroundColor: backgroundColors,
+                    borderWidth: 1.5,
+                    borderColor: borderColor,
+                    hoverOffset: 6
+                }]
+            },
+            plugins: [pieLabelsPlugin],
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        padding: 8,
+                        titleFont: { family: 'Inter, sans-serif', size: 10, weight: 'bold' },
+                        bodyFont: { family: 'Inter, sans-serif', size: 9 },
+                        callbacks: {
+                            label: (context) => {
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return ` ${value} Proyek (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+};
+
+watch(() => props.projects, () => {
+    // We need to allow DOM to render canvas if we transitioned from total === 0 or filters change
     setTimeout(() => {
         updateChart();
+        updateScorePieChart();
     }, 0);
 }, { deep: true });
 
 onMounted(() => {
     updateChart();
+    updateScorePieChart();
 });
 
 onBeforeUnmount(() => {
     if (chartInstance) {
         chartInstance.destroy();
         chartInstance = null;
+    }
+    if (scorePieChartInstance) {
+        scorePieChartInstance.destroy();
+        scorePieChartInstance = null;
     }
 });
 </script>

@@ -58,6 +58,7 @@
                     <thead
                         class="bg-slate-50 text-[9px] font-bold uppercase tracking-widest text-slate-500 dark:bg-white/5 dark:text-slate-400">
                         <tr>
+                            <th class="border-b border-r border-slate-900 px-4 py-2 dark:border-white/20">IT Architecture Building Block</th>
                             <th class="border-b border-r border-slate-900 px-4 py-2 dark:border-white/20">Initiatives
                             </th>
                             <th class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20">
@@ -67,14 +68,22 @@
                             <th class="border-b border-slate-900 px-4 py-2 text-right dark:border-white/20">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white dark:bg-[#171717]">
-                        <template v-for="project in filteredProjects" :key="project.id">
+                    <tbody class="bg-white dark:bg-[#171717] divide-y divide-slate-900 dark:divide-white/20">
+                        <template v-for="project in projectsWithRowspan" :key="project.id">
                             <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                                <!-- IT Architecture Building Block -->
+                                <td v-if="project.rowspan > 0" :rowspan="project.rowspan"
+                                    class="border-r border-slate-900 px-4 py-4 align-top dark:border-white/20">
+                                    <span class="text-[10px] font-bold text-slate-700 dark:text-slate-200">
+                                        {{ project.coe_name || 'Unassigned' }}
+                                    </span>
+                                </td>
+
                                 <td class="border-r border-slate-900 px-4 py-4 dark:border-white/20">
                                     <div class="flex flex-col">
-                                        <span class="font-black text-slate-900 dark:text-white uppercase">{{
-                                            project.code }}</span>
-                                        <span class="text-[10px] text-slate-500 font-medium">{{ project.name }}</span>
+                                        <span class="text-[10px] font-bold text-slate-700 dark:text-slate-200">
+                                            {{ project.name }}
+                                        </span>
                                     </div>
                                 </td>
                                 <td class="border-r border-slate-900 px-4 py-4 text-center dark:border-white/20">
@@ -100,13 +109,13 @@
                                 <td class="border-slate-900 px-4 py-4 text-right dark:border-white/20">
                                     <button @click="toggleRow(project.id)"
                                         class="rounded border border-slate-300 px-2 py-1 text-[8px] font-bold uppercase tracking-wider text-slate-600 transition-all hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5">
-                                        {{ expandedRows.has(project.id) ? 'Tutup Detail' : 'Buka Detail' }}
+                                        {{ expandedRows.has(project.id) ? 'Tutup' : 'Detail' }}
                                     </button>
                                 </td>
                             </tr>
                             <tr v-if="expandedRows.has(project.id)"
                                 class="bg-slate-50/30 dark:bg-white/5 border-b border-slate-900 dark:border-white/20">
-                                <td colspan="4" class="px-6 py-6 border-r border-slate-900 dark:border-white/20">
+                                <td colspan="5" class="px-6 py-6 border-r border-slate-900 dark:border-white/20">
                                     <!-- Categorized Detail Tables -->
                                     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                                         <div v-for="cat in getFieldCategories(project)" :key="'table-' + cat.name"
@@ -146,8 +155,8 @@
                                 </td>
                             </tr>
                         </template>
-                        <tr v-if="filteredProjects.length === 0">
-                            <td colspan="4"
+                        <tr v-if="projectsWithRowspan.length === 0">
+                            <td colspan="5"
                                 class="border-slate-900 px-6 py-12 text-center text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:border-white/20">
                                 Tidak ada data yang ditemukan.
                             </td>
@@ -310,19 +319,21 @@ const getCategoryStats = (project, category) => {
 };
 
 const getVerdict = (score) => {
-    if (score >= 90) return { label: 'Sangat Lengkap', cls: 'bg-emerald-500 text-white' };
+    if (score === 100) return { label: 'Sangat Lengkap', cls: 'bg-emerald-500 text-white' };
     if (score >= 70) return { label: 'Cukup Lengkap', cls: 'bg-amber-500 text-white' };
     return { label: 'Butuh Perbaikan', cls: 'bg-rose-500 text-white' };
 };
 
 const getScoreColor = (score) => {
-    if (score >= 90) return 'text-emerald-600 dark:text-emerald-400';
+    if (score === 100) return 'text-emerald-600 dark:text-emerald-400';
+    if (score >= 90) return 'text-lime-600 dark:text-lime-400';
     if (score >= 70) return 'text-amber-600 dark:text-amber-400';
     return 'text-rose-600 dark:text-rose-400';
 };
 
 const getProgressBarColor = (score) => {
-    if (score >= 90) return 'bg-emerald-500';
+    if (score === 100) return 'bg-emerald-500';
+    if (score >= 90) return 'bg-lime-500';
     if (score >= 70) return 'bg-amber-500';
     return 'bg-rose-500';
 };
@@ -341,6 +352,17 @@ const availableVersions = computed(() => {
     return [...new Set(versions)].filter(Boolean).sort();
 });
 
+const coeOrder = [
+    "User Interface and Experience",
+    "Integration and Automation",
+    "Business Application System",
+    "Infrastructure",
+    "Data and Analytics",
+    "Cybersecurity",
+    "People, Process and Technology",
+    "Overall Architecture",
+];
+
 const filteredProjects = computed(() => {
     let list = props.projects.filter(p => {
         const matchStatus = !statusFilter.value || p.status_name === statusFilter.value;
@@ -357,12 +379,58 @@ const filteredProjects = computed(() => {
         return matchStatus && matchVersion && matchCompleteness;
     });
 
-    if (completenessSort.value === 'desc') {
-        list.sort((a, b) => calculateCompletenessScore(b) - calculateCompletenessScore(a));
-    } else if (completenessSort.value === 'asc') {
-        list.sort((a, b) => calculateCompletenessScore(a) - calculateCompletenessScore(b));
-    }
-
     return list;
+});
+
+const projectsWithRowspan = computed(() => {
+    const initiatives = filteredProjects.value;
+    const result = [];
+
+    // Sort by coe_name using the predefined coeOrder, then by code or completeness
+    const sorted = [...initiatives].sort((a, b) => {
+        const coeA = String(a.coe_name || "Unassigned");
+        const coeB = String(b.coe_name || "Unassigned");
+
+        if (coeA !== coeB) {
+            const indexA = coeOrder.indexOf(coeA);
+            const indexB = coeOrder.indexOf(coeB);
+
+            if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+            if (indexA !== -1) return -1;
+            if (indexB !== -1) return 1;
+            return coeA.localeCompare(coeB);
+        }
+
+        // Secondary sort: completeness if requested, otherwise by code
+        if (completenessSort.value === 'desc') {
+            const scoreDiff = calculateCompletenessScore(b) - calculateCompletenessScore(a);
+            if (scoreDiff !== 0) return scoreDiff;
+        } else if (completenessSort.value === 'asc') {
+            const scoreDiff = calculateCompletenessScore(a) - calculateCompletenessScore(b);
+            if (scoreDiff !== 0) return scoreDiff;
+        }
+
+        return String(a.code || "").localeCompare(String(b.code || ""));
+    });
+
+    for (let i = 0; i < sorted.length; i++) {
+        const currentIni = sorted[i];
+        const currentCoe = String(currentIni.coe_name || "Unassigned");
+
+        if (i === 0 || String(sorted[i - 1].coe_name || "Unassigned") !== currentCoe) {
+            let rowspan = 1;
+            for (let j = i + 1; j < sorted.length; j++) {
+                if (String(sorted[j].coe_name || "Unassigned") === currentCoe) {
+                    rowspan++;
+                } else {
+                    break;
+                }
+            }
+            result.push({ ...currentIni, rowspan });
+        } else {
+            result.push({ ...currentIni, rowspan: 0 });
+        }
+    }
+    return result;
 });
 </script>

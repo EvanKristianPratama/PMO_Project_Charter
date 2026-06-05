@@ -57,15 +57,33 @@ const toggleFilter = (id) => {
     emit('update:selectedCompleteness', newValue);
 };
 
+const coeOrder = [
+    "User Interface and Experience",
+    "Integration and Automation",
+    "Business Application System",
+    "Infrastructure",
+    "Data and Analytics",
+    "Cybersecurity",
+    "People, Process and Technology",
+    "Overall Architecture",
+];
+
 const groupedData = computed(() => {
-    const allCoEs = [...new Set(props.projects.map(p => p.coe_name || 'Uncategorized'))].sort((a, b) => {
-        if (a === 'Uncategorized') return 1;
-        if (b === 'Uncategorized') return -1;
+    const allCoEs = [...new Set(props.projects.map(p => p.coe_name || 'Unassigned'))].sort((a, b) => {
+        const indexA = coeOrder.indexOf(a);
+        const indexB = coeOrder.indexOf(b);
+
+        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+        if (indexA !== -1) return -1;
+        if (indexB !== -1) return 1;
+
+        if (a === 'Unassigned') return 1;
+        if (b === 'Unassigned') return -1;
         return a.localeCompare(b);
     });
 
     return allCoEs.map(coeName => {
-        const projectsInCoe = props.projects.filter(p => (p.coe_name || 'Uncategorized') === coeName);
+        const projectsInCoe = props.projects.filter(p => (p.coe_name || 'Unassigned') === coeName);
         const total = projectsInCoe.length;
         const completeProjects = projectsInCoe.filter(p => props.calculateScore(p) === 100);
         const incompleteProjects = projectsInCoe.filter(p => props.calculateScore(p) < 100);
