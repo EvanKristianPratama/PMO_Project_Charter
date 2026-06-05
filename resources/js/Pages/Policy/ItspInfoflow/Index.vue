@@ -1386,8 +1386,12 @@ function mapCobitToLocal(code) {
     if (!code) return '';
     const clean = String(code).toUpperCase().trim();
     
-    // Check if it's already in local format like "2.2.05" or "2.2"
+    // Check if it's already in local format like "2.2.05" or "2.2.5" or "2.2"
     if (/^[1-5]\.\d+(?:\.\d+)?$/.test(clean)) {
+        const parts = clean.split('.');
+        if (parts.length === 3) {
+            return `${parts[0]}.${parts[1]}.${parts[2].padStart(2, '0')}`;
+        }
         return clean;
     }
     
@@ -1433,19 +1437,33 @@ function navigateToCode(code) {
     const parts = localCode.split('.');
     if (parts.length < 2) return;
     
-    const objectiveId = `${parts[0]}.${parts[1]}`; // e.g. "2.2"
-    const practiceId = parts.length === 3 ? localCode : ''; // e.g. "2.2.05"
+    const targetObjDomain = parseInt(parts[0], 10);
+    const targetObjSeq = parseInt(parts[1], 10);
     
-    // Find if this objectiveId exists in objectiveGroups
+    // Find matched objective ID in Props by normalizing segments
     const allObjectiveIds = props.objectiveGroups.flatMap(group => group.items.map(item => item.id));
-    if (allObjectiveIds.includes(objectiveId)) {
-        if (selectedObjectiveId.value === objectiveId) {
+    const matchedObjectiveId = allObjectiveIds.find(id => {
+        const idParts = id.split('.');
+        return idParts.length === 2 && 
+               parseInt(idParts[0], 10) === targetObjDomain && 
+               parseInt(idParts[1], 10) === targetObjSeq;
+    });
+    
+    if (matchedObjectiveId) {
+        let targetPracticeId = '';
+        if (parts.length === 3) {
+            const targetPracSeq = parseInt(parts[2], 10);
+            targetPracticeId = `${matchedObjectiveId}.${String(targetPracSeq).padStart(2, '0')}`;
+        }
+        
+        if (selectedObjectiveId.value === matchedObjectiveId) {
             // Same objective, select practice directly
-            selectedPracticeId.value = practiceId;
+            const hasPractice = objectiveData.value.practices?.some(p => p.practice_id === targetPracticeId);
+            selectedPracticeId.value = hasPractice ? targetPracticeId : '';
         } else {
             // Objective changed, queue the target practice ID
-            pendingPracticeId.value = practiceId;
-            selectedObjectiveId.value = objectiveId;
+            pendingPracticeId.value = targetPracticeId;
+            selectedObjectiveId.value = matchedObjectiveId;
         }
     }
 }
