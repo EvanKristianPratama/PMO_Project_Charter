@@ -15,6 +15,7 @@ class ReviewDocumentController extends Controller
             ->where('tipe_inisiative', 2) // IT Initiatives
             ->with([
                 'projectCharter.statusRef', // latestOfMany
+                'projectCharter.milestones',
                 'statusRef:id,name',
                 'owner:id,name',
                 'mapPicProject',
@@ -39,13 +40,13 @@ class ReviewDocumentController extends Controller
                         'duration', 'tgl_dokumen', 'sponsor', 'owner', 'leader',
                         'background', 'objectives', 'key_milestone', 'target_kpi',
                         'impact_value', 'key_personnel', 'key_items', 'budget',
-                        'risks_identified', 'risk_mitigation', 'notes'
+                        'risks_identified', 'risk_mitigation', 'notes', 'has_roadmap'
                     ];
                 } else {
                     $fields = [
                         'category', 'duration', 'tgl_dokumen', 'owner',
                         'background', 'objectives', 'impact_value', 'key_personnel',
-                        'key_items', 'budget', 'risks_identified', 'risk_mitigation'
+                        'key_items', 'budget', 'risks_identified', 'risk_mitigation', 'has_roadmap'
                     ];
                 }
 
@@ -54,27 +55,31 @@ class ReviewDocumentController extends Controller
                     'category', 'duration', 'tgl_dokumen', 'sponsor', 'owner', 'leader',
                     'background', 'objectives', 'key_milestone', 'target_kpi',
                     'impact_value', 'key_personnel', 'key_items', 'budget',
-                    'risks_identified', 'risk_mitigation', 'notes'
+                    'risks_identified', 'risk_mitigation', 'notes', 'has_roadmap'
                 ];
                 
                 $completedFields = 0;
                 $details = [];
                 
                 foreach ($allFields as $field) {
-                    $value = $charter->{$field};
-                    
-                    // Special handling for target_kpi which might be in metadata
-                    if ($field === 'target_kpi' && (empty($value) || $value === '-')) {
-                        $metadata = $charter->metadata ?? [];
-                        $value = $metadata['target_kpi'] ?? $metadata['targetKpi'] ?? $metadata['kpi_target'] ?? $metadata['kpi'] ?? null;
-                    }
-
-                    $isFilled = false;
-                    if (is_array($value)) {
-                        $isFilled = !empty($value);
+                    if ($field === 'has_roadmap') {
+                        $isFilled = $charter->milestones->count() > 0;
                     } else {
-                        $stringValue = trim((string) ($value ?? ''));
-                        $isFilled = $stringValue !== '' && $stringValue !== '-';
+                        $value = $charter->{$field};
+                        
+                        // Special handling for target_kpi which might be in metadata
+                        if ($field === 'target_kpi' && (empty($value) || $value === '-')) {
+                            $metadata = $charter->metadata ?? [];
+                            $value = $metadata['target_kpi'] ?? $metadata['targetKpi'] ?? $metadata['kpi_target'] ?? $metadata['kpi'] ?? null;
+                        }
+
+                        $isFilled = false;
+                        if (is_array($value)) {
+                            $isFilled = !empty($value);
+                        } else {
+                            $stringValue = trim((string) ($value ?? ''));
+                            $isFilled = $stringValue !== '' && $stringValue !== '-';
+                        }
                     }
 
                     if ($isFilled && in_array($field, $fields)) {

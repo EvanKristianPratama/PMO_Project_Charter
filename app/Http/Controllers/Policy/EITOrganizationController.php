@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Policy;
 use App\Http\Controllers\Controller;
 use App\Models\MstItSteeringComittee;
 use App\Models\TrsOrganization;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -70,26 +71,26 @@ class EITOrganizationController extends Controller
         ]);
     }
 
-    public function storeSteering(\Illuminate\Http\Request $request)
+    public function storeSteering(Request $request)
     {
         $validated = $request->validate([
             'organization_id' => 'required|exists:trs_organization,id',
             'code' => 'required|string|size:8',
         ]);
 
-        MstItSteeringCommitte::create($validated);
+        MstItSteeringComittee::create($validated);
 
         return redirect()->back()->with('success', 'Data Steering Committee berhasil ditambahkan.');
     }
 
-    public function updateSteering(\Illuminate\Http\Request $request, $id)
+    public function updateSteering(Request $request, $id)
     {
         $validated = $request->validate([
             'organization_id' => 'required|exists:trs_organization,id',
             'code' => 'required|string|size:8',
         ]);
 
-        $item = MstItSteeringCommitte::findOrFail($id);
+        $item = MstItSteeringComittee::findOrFail($id);
         $item->update($validated);
 
         return redirect()->back()->with('success', 'Data Steering Committee berhasil diperbarui.');
@@ -97,7 +98,7 @@ class EITOrganizationController extends Controller
 
     public function destroySteering($id)
     {
-        $item = MstItSteeringCommitte::findOrFail($id);
+        $item = MstItSteeringComittee::findOrFail($id);
         $item->delete();
 
         return redirect()->back()->with('success', 'Data Steering Committee berhasil dihapus.');

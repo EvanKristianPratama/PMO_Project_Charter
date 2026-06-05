@@ -230,6 +230,7 @@ const fieldConfigs = {
             owner: 'Project Owner',
             background: 'Latar belakang - Gap/peluang saat ini',
             objectives: 'Tujuan',
+            has_roadmap: 'Roadmap (Milestone)',
             impact_value: 'Dampak dan nilai bagi Pertamina',
             key_personnel: 'Personel utama',
             key_items: 'Item utama',
@@ -244,7 +245,7 @@ const fieldConfigs = {
             },
             {
                 name: 'Informasi Proyek',
-                fields: ['background', 'objectives']
+                fields: ['background', 'objectives', 'has_roadmap']
             },
             {
                 name: 'Dampak & Sumber Daya',
@@ -265,6 +266,7 @@ const fieldConfigs = {
             leader: 'Project Leader',
             background: 'Project Background',
             objectives: 'Business Objectives',
+            has_roadmap: 'Roadmap (Milestone)',
             key_milestone: 'Key Milestone & Due Date',
             target_kpi: 'Target KPI',
             impact_value: 'Impact and Value for Pertamina',
@@ -282,7 +284,7 @@ const fieldConfigs = {
             },
             {
                 name: 'Project Context',
-                fields: ['background', 'objectives', 'key_milestone']
+                fields: ['background', 'objectives', 'has_roadmap', 'key_milestone']
             },
             {
                 name: 'Resources & Impact',

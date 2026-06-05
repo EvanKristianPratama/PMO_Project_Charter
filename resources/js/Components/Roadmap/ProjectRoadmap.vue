@@ -221,36 +221,32 @@ const buildRowsFromMilestones = (milestones) => {
 };
 
 const versionedRoadmaps = computed(() => {
-    return versionsToRender.value.map((version) => {
-        const milestones = getMilestonesForVersion(version.key);
-        let sections = [];
-        const versionObjectives = getObjectivesForVersion(version.key);
+    return versionsToRender.value
+        .map((version) => {
+            const milestones = getMilestonesForVersion(version.key);
+            if (milestones.length === 0) {
+                return null;
+            }
 
-        if (milestones.length > 0) {
-            sections = buildRowsFromMilestones(milestones);
-        } else {
-            const rows = versionObjectives.length
-                ? versionObjectives.map((obj) => ({ activity: obj, output: [obj], hasTimeline: false, start: null, end: null, timelineStyle: 'block' }))
-                : [{ activity: 'Belum ada activity roadmap', output: [], hasTimeline: false, start: null, end: null, timelineStyle: 'block' }];
-            sections = [{ label: versionObjectives.length ? 'Objectives' : 'Roadmap Activity', rows }];
-        }
+            const sections = buildRowsFromMilestones(milestones);
 
-        // Determine status color class for the badge
-        let statusClass = 'bg-slate-100 text-slate-700 border-slate-300';
-        const labelLower = String(version.label).toLowerCase();
-        if (labelLower.includes('draft')) statusClass = 'bg-slate-100 text-slate-600 border-slate-300';
-        else if (labelLower.includes('propose')) statusClass = 'bg-blue-100 text-blue-700 border-blue-300';
-        else if (labelLower.includes('review')) statusClass = 'bg-amber-100 text-amber-700 border-amber-300';
-        else if (labelLower.includes('approve')) statusClass = 'bg-emerald-100 text-emerald-700 border-emerald-300';
-        else if (labelLower.includes('baseline')) statusClass = 'bg-purple-100 text-purple-700 border-purple-300';
+            // Determine status color class for the badge
+            let statusClass = 'bg-slate-100 text-slate-700 border-slate-300';
+            const labelLower = String(version.label).toLowerCase();
+            if (labelLower.includes('draft')) statusClass = 'bg-slate-100 text-slate-600 border-slate-300';
+            else if (labelLower.includes('propose')) statusClass = 'bg-blue-100 text-blue-700 border-blue-300';
+            else if (labelLower.includes('review')) statusClass = 'bg-amber-100 text-amber-700 border-amber-300';
+            else if (labelLower.includes('approve')) statusClass = 'bg-emerald-100 text-emerald-700 border-emerald-300';
+            else if (labelLower.includes('baseline')) statusClass = 'bg-purple-100 text-purple-700 border-purple-300';
 
-        return {
-            versionKey: version.key,
-            versionLabel: version.label,
-            statusClass,
-            sections,
-        };
-    });
+            return {
+                versionKey: version.key,
+                versionLabel: version.label,
+                statusClass,
+                sections,
+            };
+        })
+        .filter(Boolean);
 });
 
 const isActive = (row, idx) => row.hasTimeline && idx >= row.start && idx <= row.end;
@@ -263,7 +259,7 @@ const timelineCellClass = (row, quarterIndex, cell) => ({
 </script>
 
 <template>
-    <div class="roadmap-wrap overflow-x-auto">
+    <div v-if="versionedRoadmaps.length > 0" class="roadmap-wrap overflow-x-auto">
         <div v-for="roadmap in versionedRoadmaps" :key="`rm-v-${roadmap.versionKey}`" class="roadmap-version-block">
             <table class="roadmap-table" :style="{ '--qcount': Math.max(totalCells, 1) }">
                 <colgroup>

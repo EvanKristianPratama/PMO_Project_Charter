@@ -157,6 +157,7 @@ const fieldLabels = {
     owner: 'Project Owner',
     background: 'Latar Belakang Proyek',
     objectives: 'Tujuan Bisnis',
+    has_roadmap: 'Roadmap (Milestone)',
     impact_value: 'Dampak & Nilai bagi Pertamina',
     key_personnel: 'Keterlibatan Lintas Fungsi',
     key_items: 'Sumber Daya yang Dibutuhkan',
@@ -174,7 +175,7 @@ const fieldConfigs = {
     baseline: {
         categories: [
             { fields: ['category', 'duration', 'tgl_dokumen', 'owner'] },
-            { fields: ['background', 'objectives'] },
+            { fields: ['background', 'objectives', 'has_roadmap'] },
             { fields: ['impact_value', 'key_personnel', 'key_items', 'budget'] },
             { fields: ['risks_identified', 'risk_mitigation'] }
         ]
@@ -182,7 +183,7 @@ const fieldConfigs = {
     approved: {
         categories: [
             { fields: ['duration', 'tgl_dokumen', 'sponsor', 'owner', 'leader'] },
-            { fields: ['background', 'objectives', 'key_milestone'] },
+            { fields: ['background', 'objectives', 'has_roadmap', 'key_milestone'] },
             { fields: ['target_kpi', 'impact_value', 'key_personnel', 'key_items', 'budget'] },
             { fields: ['risks_identified', 'risk_mitigation', 'notes'] }
         ]
