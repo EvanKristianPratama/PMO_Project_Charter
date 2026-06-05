@@ -98,6 +98,7 @@ class ReviewDocumentController extends Controller
                 return [
                     'id' => $project->id . '-' . $charter->id,
                     'project_id' => $project->id,
+                    'status' => $project->status,
                     'code' => $project->code,
                     'name' => $project->name,
                     'status_name' => $statusMap[$status] ?? $charter->statusRef?->name ?? $project->statusRef?->name ?? '-',

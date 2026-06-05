@@ -50,6 +50,19 @@
                             <option value="asc">Skor Terendah</option>
                         </select>
                     </div>
+
+                    <div class="flex items-center gap-2 border-l border-slate-900 dark:border-white/20 pl-4 ml-2">
+                        <button
+                            type="button"
+                            class="rounded border px-1.5 py-0.5 text-[7px] font-bold uppercase tracking-[0.08em] transition-all"
+                            :class="showITArchitecture
+                                ? 'border-slate-400 bg-slate-100 text-slate-700 hover:bg-slate-200 dark:border-white/20 dark:bg-white/10 dark:text-slate-200 dark:hover:bg-white/15'
+                                : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5'"
+                            @click="showITArchitecture = !showITArchitecture"
+                        >
+                            {{ showITArchitecture ? 'Hide IT Architecture' : 'Show IT Architecture' }}
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -58,7 +71,8 @@
                     <thead
                         class="bg-slate-50 text-[9px] font-bold uppercase tracking-widest text-slate-500 dark:bg-white/5 dark:text-slate-400">
                         <tr>
-                            <th class="border-b border-r border-slate-900 px-4 py-2 dark:border-white/20">IT Architecture Building Block</th>
+                            <th v-if="showITArchitecture" class="border-b border-r border-slate-900 px-4 py-2 dark:border-white/20">IT Architecture Building Block</th>
+                            <th class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20 w-10">No</th>
                             <th class="border-b border-r border-slate-900 px-4 py-2 dark:border-white/20">Initiatives
                             </th>
                             <th class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20">
@@ -69,13 +83,19 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white dark:bg-[#171717] divide-y divide-slate-900 dark:divide-white/20">
-                        <template v-for="project in projectsWithRowspan" :key="project.id">
+                        <template v-for="(project, index) in projectsWithRowspan" :key="project.id">
                             <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                                 <!-- IT Architecture Building Block -->
-                                <td v-if="project.rowspan > 0" :rowspan="project.rowspan"
+                                <td v-if="showITArchitecture && project.rowspan > 0" :rowspan="project.rowspan"
                                     class="border-r border-slate-900 px-4 py-4 align-top dark:border-white/20">
                                     <span class="text-[10px] font-bold text-slate-700 dark:text-slate-200">
                                         {{ project.coe_name || 'Unassigned' }}
+                                    </span>
+                                </td>
+
+                                <td class="border-r border-slate-900 px-4 py-4 text-center dark:border-white/20">
+                                    <span class="text-[10px] font-bold text-slate-700 dark:text-slate-200">
+                                        {{ index + 1 }}
                                     </span>
                                 </td>
 
@@ -115,7 +135,7 @@
                             </tr>
                             <tr v-if="expandedRows.has(project.id)"
                                 class="bg-slate-50/30 dark:bg-white/5 border-b border-slate-900 dark:border-white/20">
-                                <td colspan="5" class="px-6 py-6 border-r border-slate-900 dark:border-white/20">
+                                <td :colspan="showITArchitecture ? 6 : 5" class="px-6 py-6 border-r border-slate-900 dark:border-white/20">
                                     <!-- Categorized Detail Tables -->
                                     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                                         <div v-for="cat in getFieldCategories(project)" :key="'table-' + cat.name"
@@ -156,7 +176,7 @@
                             </tr>
                         </template>
                         <tr v-if="projectsWithRowspan.length === 0">
-                            <td colspan="5"
+                            <td :colspan="showITArchitecture ? 6 : 5"
                                 class="border-slate-900 px-6 py-12 text-center text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:border-white/20">
                                 Tidak ada data yang ditemukan.
                             </td>
@@ -189,6 +209,7 @@ const props = defineProps({
 
 const expandedRows = ref(new Set());
 const completenessFilter = ref(''); // '', 'lengkap', 'tidak-lengkap'
+const showITArchitecture = ref(false);
 
 const toggleRow = (id) => {
     if (expandedRows.value.has(id)) {
@@ -386,22 +407,24 @@ const projectsWithRowspan = computed(() => {
     const initiatives = filteredProjects.value;
     const result = [];
 
-    // Sort by coe_name using the predefined coeOrder, then by code or completeness
+    // Sort logic
     const sorted = [...initiatives].sort((a, b) => {
-        const coeA = String(a.coe_name || "Unassigned");
-        const coeB = String(b.coe_name || "Unassigned");
+        if (showITArchitecture.value) {
+            const coeA = String(a.coe_name || "Unassigned");
+            const coeB = String(b.coe_name || "Unassigned");
 
-        if (coeA !== coeB) {
-            const indexA = coeOrder.indexOf(coeA);
-            const indexB = coeOrder.indexOf(coeB);
+            if (coeA !== coeB) {
+                const indexA = coeOrder.indexOf(coeA);
+                const indexB = coeOrder.indexOf(coeB);
 
-            if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-            if (indexA !== -1) return -1;
-            if (indexB !== -1) return 1;
-            return coeA.localeCompare(coeB);
+                if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+                if (indexA !== -1) return -1;
+                if (indexB !== -1) return 1;
+                return coeA.localeCompare(coeB);
+            }
         }
 
-        // Secondary sort: completeness if requested, otherwise by code
+        // Secondary sort (or primary if coe hidden): completeness if requested, otherwise by code
         if (completenessSort.value === 'desc') {
             const scoreDiff = calculateCompletenessScore(b) - calculateCompletenessScore(a);
             if (scoreDiff !== 0) return scoreDiff;
@@ -412,6 +435,10 @@ const projectsWithRowspan = computed(() => {
 
         return String(a.code || "").localeCompare(String(b.code || ""));
     });
+
+    if (!showITArchitecture.value) {
+        return sorted.map(item => ({ ...item, rowspan: 1 }));
+    }
 
     for (let i = 0; i < sorted.length; i++) {
         const currentIni = sorted[i];
