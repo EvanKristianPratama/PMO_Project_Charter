@@ -384,7 +384,7 @@ class TrsReviewPCController extends Controller
             ->values();
 
         $allOrganizations = TrsOrganization::query()
-            ->select(['id', 'jabatan', 'parent_id'])
+            ->select(['id', 'jabatan'])
             ->get();
 
         return inertia('ProgramEvaluation/ReviewPC/Show', [

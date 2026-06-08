@@ -115,6 +115,7 @@ const durationStats = computed(() => {
             .filter((r) => Number(r.process_month_value) === val)
             .map((r) => ({
                 no: r.no,
+                project_id: r.project_id,
                 status: r.latest_project_status,
                 projectCharterName: getInitiativeTooltip(r),
             }));
@@ -124,6 +125,7 @@ const durationStats = computed(() => {
         totalNotApproved: notApprovedRows.length,
         notApprovedInitiatives: notApprovedRows.map((r) => ({
             no: r.no,
+            project_id: r.project_id,
             status: r.latest_project_status,
             projectCharterName: getInitiativeTooltip(r),
         })),
@@ -207,6 +209,7 @@ const ownerBreakdown = computed(() => {
 
             const data = {
                 no: row.no,
+                project_id: row.project_id,
                 status: row.latest_project_status,
                 projectCharterName: getInitiativeTooltip(row),
             };
@@ -328,6 +331,7 @@ const leaderBreakdown = computed(() => {
 
             const data = {
                 no: row.no,
+                project_id: row.project_id,
                 status: row.latest_project_status,
                 projectCharterName: getInitiativeTooltip(row),
             };

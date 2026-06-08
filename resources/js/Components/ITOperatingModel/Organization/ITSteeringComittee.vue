@@ -30,84 +30,134 @@
             <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Belum ada data IT Steering Committee.</p>
         </div>
 
-        <!-- 1. VIEW MODE: Diagram Canvas -->
-        <div v-else-if="!isManageMode" class="w-full overflow-x-auto bg-[#e8edf2] dark:bg-[#1e2530] px-4 py-6 flex justify-center">
-            <div class="relative w-[800px] h-[300px] flex-shrink-0 select-none">
+        <!-- 1. VIEW MODE: Grouped Diagram Canvas -->
+        <div v-else-if="!isManageMode" class="w-full bg-[#e8edf2] dark:bg-[#1e2530] px-4 py-8 space-y-8 flex flex-col items-center">
+            <div v-for="group in groupedSteering" :key="group.key" class="w-full max-w-[700px] flex flex-col items-center">
                 
-                <!-- SVG Connector Lines -->
-                <svg class="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Main Vertical Line from Ketua to Anggota Tetap -->
-                    <line x1="210" y1="80" x2="210" y2="180" stroke="#0b3350" stroke-width="2" class="dark:stroke-slate-400" />
-                    
-                    <!-- Horizontal Line to Sekretaris -->
-                    <line x1="210" y1="95" x2="440" y2="95" stroke="#0b3350" stroke-width="2" class="dark:stroke-slate-400" />
-                    
-                    <!-- Dotted Blue Line to Anggota Ad Hoc -->
-                    <path d="M 210,145 L 580,145 L 580,180" stroke="#009fe3" stroke-width="2" stroke-dasharray="3,3" fill="none" />
-                </svg>
+                <!-- Group Title (Only displayed if there are multiple groups) -->
+                <div v-if="groupedSteering.length > 1" class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-4 self-start tracking-wider uppercase border-b pb-1 w-full dark:border-white/10">
+                    Grup Struktur {{ group.key }}
+                </div>
 
-                <!-- 1. Ketua Komite Card -->
-                <div class="absolute left-[115px] top-[20px] w-[190px] h-[60px] bg-gradient-to-b from-[#114e7a] to-[#0b3452] rounded-lg shadow-md flex flex-col justify-center items-center text-white px-2 text-center border border-white/10">
-                    <h3 class="text-[10px] font-bold uppercase tracking-wider mb-0.5">Ketua Komite</h3>
-                    <div class="text-[9.5px] font-light leading-snug">
-                        <div v-for="member in ketuaMembers" :key="member.code">
-                            {{ member.organization_name }}
+                <div v-for="(level, lIdx) in group.levels" :key="level.ll" class="w-full flex flex-col items-center">
+                    <!-- Down Arrow connector between correlated levels in the same group -->
+                    <div v-if="lIdx > 0" class="flex flex-col items-center -my-3 py-1.5 relative z-10">
+                        <svg class="h-10 w-10 text-slate-800 dark:text-slate-200" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M11 3h2v10h4l-5 6-5-6h4V3z"/>
+                        </svg>
+                    </div>
+
+                    <!-- Level Panel Container -->
+                    <div class="w-full rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-[#171717] shadow-md overflow-hidden">
+                        <!-- Level Header Title -->
+                        <div class="bg-[#0b2545] px-4 py-2.5 text-center">
+                            <h3 class="text-xs font-bold tracking-wider text-white uppercase">
+                                {{ level.name }}
+                            </h3>
                         </div>
-                        <div v-if="ketuaMembers.length === 0" class="italic opacity-60">Direktur Utama</div>
-                    </div>
-                </div>
 
-                <!-- 2. Sekretaris Komite Card -->
-                <div class="absolute left-[440px] top-[62px] w-[280px] h-[66px] bg-gradient-to-b from-[#114e7a] to-[#0b3452] rounded-lg shadow-md flex flex-col justify-center items-center text-white px-3 text-center border border-white/10">
-                    <h3 class="text-[10px] font-bold uppercase tracking-wider mb-0.5">Sekretaris Komite</h3>
-                    <div class="text-[9.5px] font-light leading-normal space-y-0.5 w-full">
-                        <template v-if="sekretarisMembers.length > 0">
-                            <div v-for="member in sekretarisMembers" :key="member.code" class="truncate w-full">
-                                {{ member.organization_name }}
-                            </div>
-                        </template>
-                        <template v-else>
-                            <div class="truncate">SVP Enterprise IT</div>
-                            <div class="truncate">VP Enterprise IT SARM</div>
-                        </template>
-                    </div>
-                </div>
+                        <!-- Canvas Diagram -->
+                        <div class="w-full overflow-hidden bg-[#e8edf2] dark:bg-[#1e2530] px-4 py-6 flex justify-center border-t border-slate-200 dark:border-white/10">
+                            <div class="relative w-[680px] flex-shrink-0 select-none transition-all duration-300" :style="{ height: level.hasSekretaris ? '300px' : '260px' }">
+                                
+                                <!-- Layout A: With Sekretaris (Asymmetrical) -->
+                                <template v-if="level.hasSekretaris">
+                                    <!-- SVG Connector Lines -->
+                                    <svg class="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+                                        <!-- Main Vertical Line from Ketua to Anggota Tetap -->
+                                        <line x1="155" y1="80" x2="155" y2="180" stroke="#0b3350" stroke-width="2" class="dark:stroke-slate-400" />
+                                        
+                                        <!-- Horizontal Line to Sekretaris -->
+                                        <line x1="155" y1="95" x2="385" y2="95" stroke="#0b3350" stroke-width="2" class="dark:stroke-slate-400" />
+                                        
+                                        <!-- Dotted Blue Line to Anggota Ad Hoc -->
+                                        <path d="M 155,145 L 525,145 L 525,180" stroke="#009fe3" stroke-width="2" stroke-dasharray="3,3" fill="none" />
+                                    </svg>
 
-                <!-- 3. Anggota Tetap Komite Card -->
-                <div class="absolute left-[65px] top-[180px] w-[290px] min-h-[75px] h-auto bg-gradient-to-b from-[#114e7a] to-[#0b3452] rounded-xl shadow-lg flex flex-col justify-start text-white p-3 border border-white/10">
-                    <h3 class="text-[10px] font-bold uppercase tracking-wider text-center mb-2">Anggota Tetap Komite</h3>
-                    <div class="text-[9.5px] font-light space-y-1">
-                        <template v-if="anggotaTetapMembers.length > 0">
-                            <div v-for="(member, idx) in anggotaTetapMembers" :key="member.code" class="flex items-start gap-1">
-                                <span class="font-semibold">{{ idx + 1 }}.</span>
-                                <span>{{ member.organization_name }}</span>
-                            </div>
-                        </template>
-                        <template v-else>
-                            <div class="flex items-start gap-1"><span class="font-semibold">1.</span> <span>Direktur Penunjang Bisnis</span></div>
-                            <div class="flex items-start gap-1"><span class="font-semibold">2.</span> <span>Direktur Manajemen Risiko</span></div>
-                            <div class="flex items-start gap-1"><span class="font-semibold">3.</span> <span>Direktur Keuangan</span></div>
-                        </template>
-                    </div>
-                </div>
+                                    <!-- 1. Ketua Card -->
+                                    <div v-if="level.ketuaMembers && level.ketuaMembers.length > 0" class="absolute left-[60px] top-[20px] w-[190px] h-[60px] bg-gradient-to-b from-[#114e7a] to-[#0b3452] rounded-lg shadow-md flex flex-col justify-center items-center text-white px-2 text-center border border-white/10">
+                                        <h3 class="text-[10px] font-bold uppercase tracking-wider mb-0.5">Ketua Komite</h3>
+                                        <div class="text-[9.5px] font-light leading-snug">
+                                            <div v-for="member in level.ketuaMembers" :key="member.code">
+                                                {{ member.organization_name }}
+                                            </div>
+                                        </div>
+                                    </div>
 
-                <!-- 4. Anggota Ad Hoc Card -->
-                <div class="absolute left-[435px] top-[180px] w-[290px] min-h-[75px] h-auto bg-gradient-to-b from-[#009fe3] to-[#0082c3] border border-[#009fe3] rounded-xl shadow-lg flex flex-col justify-start text-white p-3">
-                    <h3 class="text-[10px] font-bold uppercase tracking-wider text-center mb-2">
-                        Anggota Ad Hoc <sup class="text-[8px]">1</sup>
-                    </h3>
-                    <div class="text-[9.5px] font-light space-y-1">
-                        <template v-if="anggotaAdHocMembers.length > 0">
-                            <div v-for="(member, idx) in anggotaAdHocMembers" :key="member.code" class="flex items-start gap-1">
-                                <span class="font-semibold">{{ idx + 1 }}.</span>
-                                <span>{{ member.organization_name }}</span>
+                                    <!-- 2. Sekretaris Card -->
+                                    <div v-if="level.sekretarisMembers && level.sekretarisMembers.length > 0" class="absolute left-[385px] top-[62px] w-[280px] h-[66px] bg-gradient-to-b from-[#114e7a] to-[#0b3452] rounded-lg shadow-md flex flex-col justify-center items-center text-white px-3 text-center border border-white/10">
+                                        <h3 class="text-[10px] font-bold uppercase tracking-wider mb-0.5">Sekretaris Komite</h3>
+                                        <div class="text-[9.5px] font-light leading-normal space-y-0.5 w-full">
+                                            <div v-for="member in level.sekretarisMembers" :key="member.code" class="truncate w-full">
+                                                {{ member.organization_name }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 3. Anggota Tetap Card -->
+                                    <div v-if="level.anggotaTetapMembers && level.anggotaTetapMembers.length > 0" class="absolute left-[10px] top-[180px] w-[290px] min-h-[75px] h-auto bg-gradient-to-b from-[#114e7a] to-[#0b3452] rounded-xl shadow-lg flex flex-col justify-start text-white p-3 border border-white/10">
+                                        <h3 class="text-[10px] font-bold uppercase tracking-wider text-center mb-2">Anggota Tetap Komite</h3>
+                                        <div class="text-[9.5px] font-light space-y-1">
+                                            <div v-for="(member, idx) in level.anggotaTetapMembers" :key="member.code" class="flex items-start gap-1">
+                                                <span class="font-semibold">{{ idx + 1 }}.</span>
+                                                <span>{{ member.organization_name }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 4. Anggota Ad Hoc Card -->
+                                    <div v-if="level.anggotaAdHocMembers && level.anggotaAdHocMembers.length > 0" class="absolute left-[380px] top-[180px] w-[290px] min-h-[75px] h-auto bg-gradient-to-b from-[#009fe3] to-[#0082c3] border border-[#009fe3] rounded-xl shadow-lg flex flex-col justify-start text-white p-3">
+                                        <h3 class="text-[10px] font-bold uppercase tracking-wider text-center mb-2">Anggota Ad Hoc</h3>
+                                        <div class="text-[9.5px] font-light space-y-1">
+                                            <div v-for="(member, idx) in level.anggotaAdHocMembers" :key="member.code" class="flex items-start gap-1">
+                                                <span class="font-semibold">{{ idx + 1 }}.</span>
+                                                <span>{{ member.organization_name }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Layout B: Without Sekretaris (Symmetric) -->
+                                <template v-else>
+                                    <!-- SVG Connector Lines -->
+                                    <svg class="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M 340,70 L 340,105 M 155,140 L 155,105 L 525,105 L 525,140" stroke="#0b3350" stroke-width="2" fill="none" stroke-linejoin="miter" class="dark:stroke-slate-400" />
+                                    </svg>
+
+                                    <!-- 1. Ketua / Pimpinan Card -->
+                                    <div v-if="level.ketuaMembers && level.ketuaMembers.length > 0" class="absolute left-[160px] top-[20px] w-[360px] h-[50px] bg-[#009fe3] rounded-lg shadow-md flex flex-col justify-center items-center text-white px-2 text-center border border-white/10">
+                                        <div class="text-[10.5px] font-semibold leading-snug">
+                                            <div v-for="member in level.ketuaMembers" :key="member.code">
+                                                {{ member.organization_name }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 3. Anggota Tetap Card -->
+                                    <div v-if="level.anggotaTetapMembers && level.anggotaTetapMembers.length > 0" class="absolute left-[10px] top-[140px] w-[290px] min-h-[90px] h-auto bg-[#0b2545] rounded-xl shadow-lg flex flex-col justify-start text-white p-3 border border-white/10">
+                                        <h3 class="text-[10px] font-bold uppercase tracking-wider text-center mb-2">Anggota Tetap</h3>
+                                        <div class="text-[9.5px] font-light space-y-1">
+                                            <div v-for="(member, idx) in level.anggotaTetapMembers" :key="member.code" class="flex items-start gap-1">
+                                                <span class="font-semibold">{{ idx + 1 }}.</span>
+                                                <span>{{ member.organization_name }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 4. Anggota Ad Hoc Card -->
+                                    <div v-if="level.anggotaAdHocMembers && level.anggotaAdHocMembers.length > 0" class="absolute left-[380px] top-[140px] w-[290px] min-h-[90px] h-auto bg-[#0b2545] rounded-xl shadow-lg flex flex-col justify-start text-white p-3 border border-white/10">
+                                        <h3 class="text-[10px] font-bold uppercase tracking-wider text-center mb-2">Anggota Ad Hoc</h3>
+                                        <div class="text-[9.5px] font-light space-y-1">
+                                            <div v-for="(member, idx) in level.anggotaAdHocMembers" :key="member.code" class="flex items-start gap-1">
+                                                <span class="font-semibold">{{ idx + 1 }}.</span>
+                                                <span>{{ member.organization_name }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+
                             </div>
-                        </template>
-                        <template v-else>
-                            <div class="flex items-start gap-1"><span class="font-semibold">1.</span> <span>Direktur Holding</span></div>
-                            <div class="flex items-start gap-1"><span class="font-semibold">2.</span> <span>Direktur Utama Subholding</span></div>
-                            <div class="flex items-start gap-1"><span class="font-semibold">3.</span> <span>Direktur Utama APFS</span></div>
-                        </template>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -211,6 +261,40 @@
                     </span>
                 </div>
 
+                <!-- Level Organisasi Dropdown -->
+                <div class="flex flex-col gap-1.5">
+                    <label for="level_org" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        Level Organisasi
+                    </label>
+                    <select
+                        id="level_org"
+                        v-model="selectedLevel"
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-[#0b2545] focus:ring-1 focus:ring-[#0b2545] dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                        required
+                    >
+                        <option value="10">IT Steering Committee (Level 10)</option>
+                        <option value="11">Tim Pelaksana IT Steering Committee (Level 11)</option>
+                        <option value="custom">Lainnya (Input Custom Level)</option>
+                    </select>
+                </div>
+
+                <!-- Custom Level Input (if custom selected) -->
+                <div v-if="selectedLevel === 'custom'" class="flex flex-col gap-1.5">
+                    <label for="custom_level" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        Input Custom Level (2 Digit Angka, Contoh: 12, 20)
+                    </label>
+                    <input
+                        id="custom_level"
+                        v-model="customLevel"
+                        type="text"
+                        maxlength="2"
+                        pattern="[0-9]{2}"
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-[#0b2545] focus:ring-1 focus:ring-[#0b2545] dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white font-mono"
+                        placeholder="12"
+                        required
+                    />
+                </div>
+
                 <!-- Role Selector -->
                 <div class="flex flex-col gap-1.5">
                     <label for="role_prefix" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
@@ -218,14 +302,14 @@
                     </label>
                     <select
                         id="role_prefix"
-                        v-model="selectedRolePrefix"
+                        v-model="selectedRole"
                         class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-[#0b2545] focus:ring-1 focus:ring-[#0b2545] dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
                         required
                     >
-                        <option value="100100">Ketua Komite (100100xx)</option>
-                        <option value="100201">Sekretaris Komite (100201xx)</option>
-                        <option value="100202">Anggota Tetap Komite (100202xx)</option>
-                        <option value="100203">Anggota Ad Hoc (100203xx)</option>
+                        <option value="0100">Ketua / Pimpinan (0100)</option>
+                        <option value="0201">Sekretaris Komite (0201)</option>
+                        <option value="0202">Anggota Tetap (0202)</option>
+                        <option value="0203">Anggota Ad Hoc (0203)</option>
                     </select>
                 </div>
 
@@ -293,42 +377,40 @@ const props = defineProps({
     },
 });
 
-// Manage vs View State
 const isManageMode = ref(false);
 
-// Modal state variables
 const isModalOpen = ref(false);
 const isDeleteModalOpen = ref(false);
-const modalMode = ref('create'); // 'create' or 'edit'
+const modalMode = ref('create'); 
 const selectedItem = ref(null);
 
-// Form prefix controls
-const selectedRolePrefix = ref('100202'); // Default to Anggota Tetap
-const seqNumber = ref('01'); // Default to 01
+const selectedLevel = ref('10'); 
+const customLevel = ref(''); 
+const selectedRole = ref('0202'); 
+const seqNumber = ref('01'); 
 
 const form = useForm({
     organization_id: '',
     code: '',
 });
 
-// Live Preview code combination
-const generatedCode = computed(() => {
-    const rawSeq = seqNumber.value.trim().padEnd(2, '0').substring(0, 2);
-    return `${selectedRolePrefix.value}${rawSeq}`;
+const resolvedLevel = computed(() => {
+    if (selectedLevel.value === 'custom') {
+        const cl = customLevel.value.trim().replace(/[^0-9]/g, '');
+        return cl.padEnd(2, '0').substring(0, 2);
+    }
+    return selectedLevel.value;
 });
 
-// Sync compiled code to form value on change
+const generatedCode = computed(() => {
+    const rawSeq = seqNumber.value.trim().replace(/[^0-9]/g, '').padEnd(2, '0').substring(0, 2);
+    return `${resolvedLevel.value}${selectedRole.value}${rawSeq}`;
+});
+
 watch(generatedCode, (newVal) => {
     form.code = newVal;
 }, { immediate: true });
 
-/**
- * Parse code LLDDSSNN:
- * LL = Level Organisasi (e.g. 10 = Komite IT)
- * DD = Level Ketua/Member (01 = Ketua, 02 = Member)
- * SS = Sub Struktur (01 = Sekretaris, 02 = Anggota Tetap, 03 = Anggota Ad Hoc)
- * NN = Nomor Urut (01-99)
- */
 const parseCode = (code) => {
     const c = String(code ?? '').trim().padEnd(8, '0');
     return {
@@ -337,6 +419,14 @@ const parseCode = (code) => {
         ss: c.substring(4, 6),
         nn: c.substring(6, 8),
     };
+};
+
+const getLevelName = (ll) => {
+    const names = {
+        '10': 'IT Steering Committee',
+        '11': 'Tim Pelaksana Keputusan IT Steering Committee',
+    };
+    return names[ll] || `Organisasi Level ${ll}`;
 };
 
 const sortedRows = computed(() => {
@@ -348,67 +438,109 @@ const sortedRows = computed(() => {
     });
 });
 
-// DD=01 → Ketua
-const ketuaMembers = computed(() => {
-    return sortedRows.value.filter((row) => {
-        const { dd } = parseCode(row.code);
-        return dd === '01';
-    });
-});
-
-// DD=02, SS=01 → Sekretaris
-const sekretarisMembers = computed(() => {
-    return sortedRows.value.filter((row) => {
-        const { dd, ss } = parseCode(row.code);
-        return dd === '02' && ss === '01';
-    });
-});
-
-// DD=02, SS=02 → Anggota Tetap
-const anggotaTetapMembers = computed(() => {
-    return sortedRows.value.filter((row) => {
-        const { dd, ss } = parseCode(row.code);
-        return dd === '02' && ss === '02';
-    });
-});
-
-// DD=02, SS=03 → Anggota Ad Hoc
-const anggotaAdHocMembers = computed(() => {
-    return sortedRows.value.filter((row) => {
-        const { dd, ss } = parseCode(row.code);
-        return dd === '02' && ss === '03';
-    });
-});
-
-// Helpers to get roles info
-const getRoleLabel = (code) => {
-    const { dd, ss } = parseCode(code);
-    if (dd === '01') return 'Ketua Komite';
-    if (dd === '02') {
-        if (ss === '01') return 'Sekretaris Komite';
-        if (ss === '02') return 'Anggota Tetap Komite';
-        if (ss === '03') return 'Anggota Ad Hoc';
+const groupedSteering = computed(() => {
+    if (!props.steeringRows || props.steeringRows.length === 0) {
+        return [];
     }
-    return 'Lainnya';
+
+    const groups = {};
+    
+    props.steeringRows.forEach((row) => {
+        const codeStr = String(row.code ?? '').trim().padEnd(8, '0');
+        const ll = codeStr.substring(0, 2);
+        const groupKey = ll.substring(0, 1);
+        
+        if (!groups[groupKey]) {
+            groups[groupKey] = {
+                key: groupKey,
+                levels: {},
+            };
+        }
+        
+        if (!groups[groupKey].levels[ll]) {
+            groups[groupKey].levels[ll] = {
+                ll: ll,
+                name: getLevelName(ll),
+                rows: [],
+            };
+        }
+        
+        groups[groupKey].levels[ll].rows.push(row);
+    });
+    
+    return Object.values(groups).map((group) => {
+        const levelsArray = Object.values(group.levels).sort((a, b) => a.ll.localeCompare(b.ll));
+        
+        levelsArray.forEach((level) => {
+            const sortedLevelRows = [...level.rows].sort((a, b) => {
+                return String(a.code ?? '').localeCompare(String(b.code ?? ''));
+            });
+            
+            level.ketuaMembers = sortedLevelRows.filter((r) => {
+                const { dd } = parseCode(r.code);
+                return dd === '01';
+            });
+            
+            level.sekretarisMembers = sortedLevelRows.filter((r) => {
+                const { dd, ss } = parseCode(r.code);
+                return dd === '02' && ss === '01';
+            });
+            
+            level.anggotaTetapMembers = sortedLevelRows.filter((r) => {
+                const { dd, ss } = parseCode(r.code);
+                return dd === '02' && ss === '02';
+            });
+            
+            level.anggotaAdHocMembers = sortedLevelRows.filter((r) => {
+                const { dd, ss } = parseCode(r.code);
+                return dd === '02' && ss === '03';
+            });
+            
+            level.hasSekretaris = level.sekretarisMembers.length > 0;
+        });
+        
+        return {
+            key: group.key,
+            levels: levelsArray,
+        };
+    }).sort((a, b) => a.key.localeCompare(b.key));
+});
+
+const getRoleLabel = (code) => {
+    const { ll, dd, ss } = parseCode(code);
+    const levelLabel = getLevelName(ll);
+    let rolePart = 'Lainnya';
+    if (dd === '01') rolePart = 'Ketua/Pimpinan';
+    else if (dd === '02') {
+        if (ss === '01') rolePart = 'Sekretaris';
+        if (ss === '02') rolePart = 'Anggota Tetap';
+        if (ss === '03') rolePart = 'Anggota Ad Hoc';
+    }
+    return `${levelLabel} - ${rolePart}`;
 };
 
 const getRoleBadgeClass = (code) => {
-    const { dd, ss } = parseCode(code);
-    if (dd === '01') return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
-    if (dd === '02') {
+    const { ll, dd, ss } = parseCode(code);
+    if (ll === '10') {
+        if (dd === '01') return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
         if (ss === '01') return 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300';
         if (ss === '02') return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300';
         if (ss === '03') return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300';
+    } else if (ll === '11') {
+        if (dd === '01') return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300';
+        if (ss === '02') return 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300';
+        if (ss === '03') return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300';
     }
     return 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300';
 };
 
-// CRUD handlers
 const openCreateModal = () => {
     modalMode.value = 'create';
     form.clearErrors();
     form.reset();
-    selectedRolePrefix.value = '100202';
+    selectedLevel.value = '10';
+    customLevel.value = '';
+    selectedRole.value = '0202';
     seqNumber.value = '01';
     isModalOpen.value = true;
 };
@@ -419,10 +551,20 @@ const openEditModal = (item) => {
     form.clearErrors();
     form.organization_id = item.organization_id || '';
     
-    // Deconstruct code into prefix and sequence number
     const codeStr = String(item.code ?? '').trim().padEnd(8, '0');
-    selectedRolePrefix.value = codeStr.substring(0, 6);
-    seqNumber.value = codeStr.substring(6, 8);
+    const levelPart = codeStr.substring(0, 2);
+    const rolePart = codeStr.substring(2, 6);
+    const seqPart = codeStr.substring(6, 8);
+    
+    if (['10', '11'].includes(levelPart)) {
+        selectedLevel.value = levelPart;
+        customLevel.value = '';
+    } else {
+        selectedLevel.value = 'custom';
+        customLevel.value = levelPart;
+    }
+    selectedRole.value = rolePart;
+    seqNumber.value = seqPart;
     
     isModalOpen.value = true;
 };

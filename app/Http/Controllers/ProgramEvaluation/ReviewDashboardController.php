@@ -193,6 +193,7 @@ class ReviewDashboardController extends Controller
                 return [
                     'no' => $index + 1,
                     'initiative_id' => (int) $initiative->id,
+                    'project_id' => $latestCharterProject?->id,
                     'building_block_type' => trim((string) ($initiative->coe?->name ?? '')) !== '' ? $initiative->coe->name : '-',
                     'initiative_name' => trim((string) $initiative->name) !== '' ? $initiative->name : '-',
                     'project_charter_name' => trim((string) ($latestCharterProject?->name ?? '')) !== '' ? $latestCharterProject->name : null,

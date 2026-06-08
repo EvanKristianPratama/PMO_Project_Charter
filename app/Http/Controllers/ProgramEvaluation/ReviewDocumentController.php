@@ -11,8 +11,21 @@ class ReviewDocumentController extends Controller
 {
     public function index(): Response
     {
-        $projects = TrsProject::query()
-            ->where('tipe_inisiative', 2) // IT Initiatives
+        $itInitiatives = $this->getInitiatives(2); // IT Initiatives
+        $digitalInitiatives = $this->getInitiatives(1); // Digital Initiatives
+
+        return Inertia::render('ProgramEvaluation/ReviewDocument/Index', [
+            'it_projects' => $itInitiatives,
+            'digital_projects' => $digitalInitiatives,
+            // Keep 'projects' for backward compatibility if needed, defaulting to IT
+            'projects' => $itInitiatives,
+        ]);
+    }
+
+    private function getInitiatives(int $type)
+    {
+        return TrsProject::query()
+            ->where('tipe_inisiative', $type)
             ->with([
                 'projectCharter.statusRef', // latestOfMany
                 'projectCharter.milestones',
@@ -120,9 +133,5 @@ class ReviewDocumentController extends Controller
             })
             ->filter()
             ->values();
-
-        return Inertia::render('ProgramEvaluation/ReviewDocument/Index', [
-            'projects' => $projects,
-        ]);
     }
 }

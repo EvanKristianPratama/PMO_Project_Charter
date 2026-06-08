@@ -60,7 +60,7 @@
                                 : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5'"
                             @click="showITArchitecture = !showITArchitecture"
                         >
-                            {{ showITArchitecture ? 'Hide IT Architecture' : 'Show IT Architecture' }}
+                            {{ showITArchitecture ? 'Hide IT Architecture' : 'Show IT   j Architecture' }}
                         </button>
                     </div>
                 </div>
@@ -79,11 +79,12 @@
                                 Status</th>
                             <th class="border-b border-r border-slate-900 px-4 py-2 dark:border-white/20">Document
                                 Completeness</th>
+                            <th class="border-b border-r border-slate-900 px-4 py-2 dark:border-white/20 w-48">Incomplete</th>
                             <th class="border-b border-slate-900 px-4 py-2 text-right dark:border-white/20">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white dark:bg-[#171717] divide-y divide-slate-900 dark:divide-white/20">
-                        <template v-for="(project, index) in projectsWithRowspan" :key="project.id">
+                        <template v-for="project in projectsWithRowspan" :key="project.id">
                             <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                                 <!-- IT Architecture Building Block -->
                                 <td v-if="showITArchitecture && project.rowspan > 0" :rowspan="project.rowspan"
@@ -95,7 +96,7 @@
 
                                 <td class="border-r border-slate-900 px-4 py-4 text-center dark:border-white/20">
                                     <span class="text-[10px] font-bold text-slate-700 dark:text-slate-200">
-                                        {{ index + 1 }}
+                                        {{ project.project_id }}
                                     </span>
                                 </td>
 
@@ -126,6 +127,17 @@
                                         </span>
                                     </div>
                                 </td>
+                                <td class="border-r border-slate-900 px-4 py-4 dark:border-white/20">
+                                    <div class="flex flex-wrap gap-1">
+                                        <span v-for="label in getIncompleteFields(project)" :key="label"
+                                            class="inline-flex rounded bg-rose-50 px-1.5 py-0.5 text-[8px] font-bold text-rose-600 dark:bg-rose-500/10 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20">
+                                            {{ label }}
+                                        </span>
+                                        <span v-if="getIncompleteFields(project).length === 0" class="text-[9px] text-emerald-600 font-bold italic">
+                                            Complete
+                                        </span>
+                                    </div>
+                                </td>
                                 <td class="border-slate-900 px-4 py-4 text-right dark:border-white/20">
                                     <button @click="toggleRow(project.id)"
                                         class="rounded border border-slate-300 px-2 py-1 text-[8px] font-bold uppercase tracking-wider text-slate-600 transition-all hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5">
@@ -135,7 +147,7 @@
                             </tr>
                             <tr v-if="expandedRows.has(project.id)"
                                 class="bg-slate-50/30 dark:bg-white/5 border-b border-slate-900 dark:border-white/20">
-                                <td :colspan="showITArchitecture ? 6 : 5" class="px-6 py-6 border-r border-slate-900 dark:border-white/20">
+                                <td :colspan="showITArchitecture ? 7 : 6" class="px-6 py-6 border-r border-slate-900 dark:border-white/20">
                                     <!-- Categorized Detail Tables -->
                                     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                                         <div v-for="cat in getFieldCategories(project)" :key="'table-' + cat.name"
@@ -176,7 +188,7 @@
                             </tr>
                         </template>
                         <tr v-if="projectsWithRowspan.length === 0">
-                            <td :colspan="showITArchitecture ? 6 : 5"
+                            <td :colspan="showITArchitecture ? 7 : 6"
                                 class="border-slate-900 px-6 py-12 text-center text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:border-white/20">
                                 Tidak ada data yang ditemukan.
                             </td>
@@ -333,6 +345,19 @@ const calculateCompletenessScore = (project) => {
     });
 
     return totalFields > 0 ? Math.round((filledFields / totalFields) * 100) : 0;
+};
+
+const getIncompleteFields = (project) => {
+    const categories = getFieldCategories(project);
+    const incomplete = [];
+    categories.forEach(cat => {
+        cat.fields.forEach(field => {
+            if (!project.details[field]) {
+                incomplete.push(getFieldLabel(field, project));
+            }
+        });
+    });
+    return incomplete;
 };
 
 const getCategoryStats = (project, category) => {

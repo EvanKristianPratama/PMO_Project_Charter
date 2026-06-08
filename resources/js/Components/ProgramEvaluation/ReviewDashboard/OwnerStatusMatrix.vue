@@ -179,9 +179,11 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
+import { router } from '@inertiajs/vue3';
 import OwnerStatistikChart from './OwnerStatistikChart.vue';
 
 const props = defineProps({
+// ... rest of props
     rows: {
         type: Array,
         required: true

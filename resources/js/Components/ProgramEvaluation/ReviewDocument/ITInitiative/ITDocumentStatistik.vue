@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
+import { router } from '@inertiajs/vue3';
 
 const props = defineProps({
     projects: {
@@ -186,6 +187,11 @@ const getInitiativeTooltip = (project) => {
 
     return nameParts.join(' - ') || projectName || status || periodLabel;
 };
+
+const navigateToProject = (project) => {
+    const id = project.project_id || project.id;
+    router.visit(`/it-initiatives/${id}?tab=Planning`);
+};
 </script>
 
 <template>
@@ -239,6 +245,7 @@ const getInitiativeTooltip = (project) => {
                                     class="inline-flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm cursor-pointer hover:scale-110 transition-transform"
                                     :class="getCircleColor(project.implementation_status)"
                                     :title="getInitiativeTooltip(project)"
+                                    @click="navigateToProject(project)"
                                 >
                                     {{ getProjectNumber(project) }}
                                 </span>
@@ -256,6 +263,7 @@ const getInitiativeTooltip = (project) => {
                                     class="inline-flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm cursor-pointer hover:scale-110 transition-transform"
                                     :class="getCircleColor(project.implementation_status)"
                                     :title="getInitiativeTooltip(project)"
+                                    @click="navigateToProject(project)"
                                 >
                                     {{ getProjectNumber(project) }}
                                 </span>
@@ -289,6 +297,7 @@ const getInitiativeTooltip = (project) => {
                                     class="inline-flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm cursor-pointer hover:scale-110 transition-transform"
                                     :class="getCircleColor(project.implementation_status)"
                                     :title="getInitiativeTooltip(project)"
+                                    @click="navigateToProject(project)"
                                 >
                                     {{ getProjectNumber(project) }}
                                 </span>
@@ -306,6 +315,7 @@ const getInitiativeTooltip = (project) => {
                                     class="inline-flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm cursor-pointer hover:scale-110 transition-transform"
                                     :class="getCircleColor(project.implementation_status)"
                                     :title="getInitiativeTooltip(project)"
+                                    @click="navigateToProject(project)"
                                 >
                                     {{ getProjectNumber(project) }}
                                 </span>
@@ -331,6 +341,7 @@ const getInitiativeTooltip = (project) => {
                                     class="inline-flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm cursor-pointer hover:scale-110 transition-transform"
                                     :class="getCircleColor(project.implementation_status)"
                                     :title="getInitiativeTooltip(project)"
+                                    @click="navigateToProject(project)"
                                 >
                                     {{ getProjectNumber(project) }}
                                 </span>
@@ -364,6 +375,7 @@ const getInitiativeTooltip = (project) => {
                                     class="inline-flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm cursor-pointer hover:scale-110 transition-transform"
                                     :class="getCircleColor(project.implementation_status)"
                                     :title="getInitiativeTooltip(project)"
+                                    @click="navigateToProject(project)"
                                 >
                                     {{ getProjectNumber(project) }}
                                 </span>
@@ -381,6 +393,7 @@ const getInitiativeTooltip = (project) => {
                                     class="inline-flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm cursor-pointer hover:scale-110 transition-transform"
                                     :class="getCircleColor(project.implementation_status)"
                                     :title="getInitiativeTooltip(project)"
+                                    @click="navigateToProject(project)"
                                 >
                                     {{ getProjectNumber(project) }}
                                 </span>
@@ -403,6 +416,7 @@ const getInitiativeTooltip = (project) => {
                                     class="inline-flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm cursor-pointer hover:scale-110 transition-transform"
                                     :class="getCircleColor(project.implementation_status)"
                                     :title="getInitiativeTooltip(project)"
+                                    @click="navigateToProject(project)"
                                 >
                                     {{ getProjectNumber(project) }}
                                 </span>
