@@ -60,7 +60,7 @@
                                 : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5'"
                             @click="showITArchitecture = !showITArchitecture"
                         >
-                            {{ showITArchitecture ? 'Hide IT Architecture' : 'Show IT   j Architecture' }}
+                            {{ showITArchitecture ? 'Hide IT Architecture' : 'Show IT Architecture' }}
                         </button>
                     </div>
                 </div>
@@ -133,8 +133,8 @@
                                             class="inline-flex rounded bg-rose-50 px-1.5 py-0.5 text-[8px] font-bold text-rose-600 dark:bg-rose-500/10 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20">
                                             {{ label }}
                                         </span>
-                                        <span v-if="getIncompleteFields(project).length === 0" class="text-[9px] text-emerald-600 font-bold italic">
-                                            Complete
+                                        <span v-if="getIncompleteFields(project).length === 0" class="text-[18px] text-center text-emerald-600">
+                                            -
                                         </span>
                                     </div>
                                 </td>
