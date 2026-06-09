@@ -17,14 +17,10 @@ return new class extends Migration
                 $table->increments('id');
                 $table->string('name')->nullable();
                 $table->integer('order')->nullable();
-                $table->unsignedInteger('regulation_id')->nullable();
                 $table->timestamps();
             });
         } else {
             Schema::table('trs_tko_sections', function (Blueprint $table) {
-                if (!Schema::hasColumn('trs_tko_sections', 'regulation_id')) {
-                    $table->unsignedInteger('regulation_id')->nullable()->after('order');
-                }
                 if (!Schema::hasColumn('trs_tko_sections', 'name')) {
                     $table->string('name')->nullable()->after('id');
                 }
@@ -63,12 +59,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('trs_tko_sections', function (Blueprint $table) {
-            if (Schema::hasColumn('trs_tko_sections', 'regulation_id')) {
-                $table->dropColumn('regulation_id');
-            }
-        });
-
         Schema::table('trs_tko_content', function (Blueprint $table) {
             if (Schema::hasColumn('trs_tko_content', 'regulation_id')) {
                 $table->dropColumn('regulation_id');

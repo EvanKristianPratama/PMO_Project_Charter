@@ -16,16 +16,7 @@ class TrsTkoSections extends Model
     protected $fillable = [
         'name',
         'order',
-        'regulation_id',
     ];
-
-    /**
-     * Relasi ke MstRegulation
-     */
-    public function regulation()
-    {
-        return $this->belongsTo(MstRegulation::class, 'regulation_id');
-    }
 
     /**
      * Relasi ke TrsTkoContent

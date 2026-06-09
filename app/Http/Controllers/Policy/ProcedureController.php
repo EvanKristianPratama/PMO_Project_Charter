@@ -78,34 +78,13 @@ class ProcedureController extends Controller
             ->orderBy('id')
             ->get();
 
-        if ($selectedRegulation) {
-            $hasCustomSections = TrsTkoSections::where('regulation_id', $selectedRegulation->id)->exists();
-            if (!$hasCustomSections) {
-                $defaultSections = TrsTkoSections::whereNull('regulation_id')->orderBy('order')->get();
-                foreach ($defaultSections as $defSec) {
-                    $newSec = TrsTkoSections::create([
-                        'name' => $defSec->name,
-                        'order' => $defSec->order,
-                        'regulation_id' => $selectedRegulation->id,
-                    ]);
-                    TrsTkoContent::where('section_id', $defSec->id)
-                        ->where('regulation_id', $selectedRegulation->id)
-                        ->update(['section_id' => $newSec->id]);
-                }
-            }
-        }
-
-        $tkoSections = [];
-        if ($selectedRegulation) {
-            $tkoSections = TrsTkoSections::with(['contents' => function ($q) use ($selectedRegulation) {
+        $tkoSections = TrsTkoSections::with(['contents' => function ($q) use ($selectedRegulation) {
+            if ($selectedRegulation) {
                 $q->where('regulation_id', $selectedRegulation->id);
-            }])
-            ->where('regulation_id', $selectedRegulation->id)
-            ->orderBy('order')
-            ->get();
-        } else {
-            $tkoSections = TrsTkoSections::with('contents')->whereNull('regulation_id')->orderBy('order')->get();
-        }
+            }
+        }])
+        ->orderBy('order')
+        ->get();
 
         return Inertia::render('Policy/Procedure/Index', [
             'actors' => $actors,
@@ -178,34 +157,13 @@ class ProcedureController extends Controller
             ->orderBy('id')
             ->get();
 
-        if ($selectedRegulation) {
-            $hasCustomSections = TrsTkoSections::where('regulation_id', $selectedRegulation->id)->exists();
-            if (!$hasCustomSections) {
-                $defaultSections = TrsTkoSections::whereNull('regulation_id')->orderBy('order')->get();
-                foreach ($defaultSections as $defSec) {
-                    $newSec = TrsTkoSections::create([
-                        'name' => $defSec->name,
-                        'order' => $defSec->order,
-                        'regulation_id' => $selectedRegulation->id,
-                    ]);
-                    TrsTkoContent::where('section_id', $defSec->id)
-                        ->where('regulation_id', $selectedRegulation->id)
-                        ->update(['section_id' => $newSec->id]);
-                }
-            }
-        }
-
-        $tkoSections = [];
-        if ($selectedRegulation) {
-            $tkoSections = TrsTkoSections::with(['contents' => function ($q) use ($selectedRegulation) {
+        $tkoSections = TrsTkoSections::with(['contents' => function ($q) use ($selectedRegulation) {
+            if ($selectedRegulation) {
                 $q->where('regulation_id', $selectedRegulation->id);
-            }])
-            ->where('regulation_id', $selectedRegulation->id)
-            ->orderBy('order')
-            ->get();
-        } else {
-            $tkoSections = TrsTkoSections::with('contents')->whereNull('regulation_id')->orderBy('order')->get();
-        }
+            }
+        }])
+        ->orderBy('order')
+        ->get();
 
         return Inertia::render('Policy/Procedure/Manage', [
             'actors' => $actors,
@@ -468,13 +426,9 @@ class ProcedureController extends Controller
         return back()->with('success', 'Konten TKO berhasil disimpan.');
     }
 
-    /**
-     * Store a newly created TKO section.
-     */
     public function storeSection(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'regulation_id' => 'required|exists:mst_regulation,id',
             'name' => 'required|string|max:255',
             'order' => 'required|integer',
         ]);

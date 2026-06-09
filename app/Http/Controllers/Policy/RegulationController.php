@@ -158,26 +158,9 @@ class RegulationController extends Controller
                 ->orderBy('id')
                 ->get();
 
-            // Auto-create default sections if they do not exist
-            $hasCustomSections = \App\Models\TrsTkoSections::where('regulation_id', $regulation->id)->exists();
-            if (!$hasCustomSections) {
-                $defaultSections = \App\Models\TrsTkoSections::whereNull('regulation_id')->orderBy('order')->get();
-                foreach ($defaultSections as $defSec) {
-                    $newSec = \App\Models\TrsTkoSections::create([
-                        'name' => $defSec->name,
-                        'order' => $defSec->order,
-                        'regulation_id' => $regulation->id,
-                    ]);
-                    \App\Models\TrsTkoContent::where('section_id', $defSec->id)
-                        ->where('regulation_id', $regulation->id)
-                        ->update(['section_id' => $newSec->id]);
-                }
-            }
-
             $tkoSections = \App\Models\TrsTkoSections::with(['contents' => function ($q) use ($regulation) {
                 $q->where('regulation_id', $regulation->id);
             }])
-            ->where('regulation_id', $regulation->id)
             ->orderBy('order')
             ->get();
 
