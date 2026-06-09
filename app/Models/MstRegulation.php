@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\MstSop;
 use App\Models\TrsOrganization;
+use App\Models\TrsTkoContent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -77,5 +78,11 @@ class MstRegulation extends Model
         return $this->hasMany(MstObjective::class, 'regulation_id');
     }
 
-
+    /**
+     * Relasi ke TrsTkoContent
+     */
+    public function tkoContents(): HasMany
+    {
+        return $this->hasMany(TrsTkoContent::class, 'regulation_id');
+    }
 }

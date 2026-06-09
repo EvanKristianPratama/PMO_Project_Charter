@@ -2,7 +2,7 @@
     <section class="space-y-4">
         <template v-if="!readonly">
             <div class="flex flex-wrap items-center justify-between gap-3 px-1">
-                <div class="inline-flex overflow-hidden rounded-lg border border-slate-200 bg-white text-xs font-semibold shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                <div v-if="flowCategories.length > 1" class="inline-flex overflow-hidden rounded-lg border border-slate-200 bg-white text-xs font-semibold shadow-sm dark:border-white/10 dark:bg-[#171717]">
                     <button
                         v-for="category in flowCategories"
                         :key="category.value"

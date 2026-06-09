@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class MstSop extends Model
 {
-    protected $table = 'mst_sop';
+    protected $table = 'trs_sop';
 
     protected $fillable = [
         'category_id',

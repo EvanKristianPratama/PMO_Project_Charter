@@ -50,12 +50,52 @@
                         </div>
                     </div>
                     <!-- Tab Switcher (persis seperti GuidanceChapterNavigation) -->
-                    <ProcedureSectionNavigation v-model="activeTab" />
+                    <ProcedureSectionNavigation v-model="activeTab" :sections="allSections" />
                 </div>
             </section>
 
+            <!-- Tab: TKO Content -->
+            <template v-if="activeSection?.type === 'tko'">
+                <div class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 md:p-16 rounded-2xl font-sans">
+                    <PertaminaDocumentHeader :activeRegulation="activeRegulation" />
+
+                    <div class="mt-10">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide border-b border-slate-900/10 pb-2 dark:border-white/10 uppercase">
+                            {{ activeSection.label }}
+                        </h3>
+                    </div>
+
+                    <div class="mt-6 font-serif text-[15px] leading-relaxed text-slate-900 dark:text-slate-100 space-y-2.5">
+                        <template v-if="activeSection.content">
+                            <div 
+                                v-for="(line, idx) in parseContentLines(activeSection.content)" 
+                                :key="idx"
+                                :class="[
+                                    line.type === 'list' ? 'flex gap-2 items-start' : '',
+                                ]"
+                                :style="line.indent > 0 ? { paddingLeft: `${line.indent * 2.25}rem` } : {}"
+                            >
+                                <template v-if="line.type === 'list'">
+                                    <span class="font-bold select-none text-right min-w-[1.75rem] text-slate-950 dark:text-white">{{ line.marker }}</span>
+                                    <span class="flex-1 text-justify whitespace-pre-wrap">{{ line.text }}</span>
+                                </template>
+                                <template v-else-if="line.type === 'empty'">
+                                    <div class="h-3"></div>
+                                </template>
+                                <template v-else>
+                                    <span class="flex-1 text-justify whitespace-pre-wrap">{{ line.text }}</span>
+                                </template>
+                            </div>
+                        </template>
+                        <template v-else>
+                            <div class="text-slate-400 dark:text-slate-500">Belum ada konten.</div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+
             <!-- Tab: FUNGSI -->
-            <template v-if="activeTab === 'fungsi'">
+            <template v-if="activeSection?.id === 'fungsi'">
                 <template v-if="isManagePage">
                     <section class="space-y-4">
                         <div class="flex items-center justify-between gap-4 px-1 print:hidden">
@@ -153,7 +193,7 @@
             </template>
 
             <!-- Tab: PROSEDUR -->
-            <template v-if="activeTab === 'prosedur'">
+            <template v-if="activeSection?.id === 'prosedur'">
                 <template v-if="isManagePage">
                     <section v-for="cat in categories" :key="cat.id" class="space-y-4">
                         <div class="flex items-center justify-between gap-4 px-1 print:hidden">
@@ -211,41 +251,20 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </template>
-            </template>
 
-            <!-- Tab: DIAGRAM ALIR -->
-            <template v-if="activeTab === 'diagram'">
-                <template v-if="isManagePage">
-                    <section class="space-y-4">
-                        <div class="flex items-center gap-2 px-1">
-                            <div class="h-5 w-1 rounded-full bg-emerald-600"></div>
-                            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">DIAGRAM ALIR RSTI</h2>
-                        </div>
-                        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                            <div class="overflow-x-auto">
-                                <div class="min-w-[1200px] p-4">
-                                    <FlowChart :actors="actors" :sops="flowChartSops" :categories="categories" />
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                </template>
-                <template v-else>
-                    <div class="space-y-6">
-                        <div class="flex items-center gap-2 px-1">
+                        <!-- Diagram Alir included under Prosedur section -->
+                        <div class="mt-12 pt-10 border-t border-slate-200 dark:border-white/10">
                             <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide border-b border-slate-900/10 pb-2 dark:border-white/10">VI. DIAGRAM ALIR</h3>
-                        </div>
-                        <div class="space-y-6">
-                            <div v-if="categories.length === 0" class="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-center text-slate-400">Belum ada data diagram untuk regulasi ini.</div>
-                            <div v-for="cat in categories" :key="cat.id" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                                <div class="border-b border-slate-200 px-5 py-3 dark:border-white/10">
-                                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">{{ cat.tipe }}</h3>
-                                </div>
-                                <div class="overflow-x-auto">
-                                    <div class="min-w-[1200px] p-4">
-                                        <FlowChart :actors="actors" :sops="flowChartSops" readonly :flow-type="String(cat.id)" :categories="categories" />
+                            <div class="mt-6 space-y-6">
+                                <div v-if="categories.length === 0" class="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-center text-slate-400">Belum ada data diagram untuk regulasi ini.</div>
+                                <div v-for="cat in categories" :key="cat.id" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                                    <div class="border-b border-slate-200 px-5 py-3 dark:border-white/10">
+                                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">{{ cat.tipe }}</h3>
+                                    </div>
+                                    <div class="overflow-x-auto">
+                                        <div class="min-w-[1200px] p-4">
+                                            <FlowChart :actors="actors" :sops="flowChartSops" readonly :flow-type="String(cat.id)" :categories="categories" />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -329,9 +348,77 @@ const props = defineProps({
     organizations: { type: Array, default: () => [] },
     selectedRegulationId: { type: Number, default: null },
     categories: { type: Array, default: () => [] },
+    tkoSections: { type: Array, default: () => [] },
 });
 
-const activeTab = ref('fungsi');
+const allSections = computed(() => {
+    const list = [];
+    const romanNumerals = {
+        1: 'I',
+        2: 'II',
+        3: 'III',
+        4: 'IV',
+        5: 'V',
+        6: 'VI',
+        7: 'VII',
+        8: 'VIII',
+        9: 'IX'
+    };
+
+    // 1. TKO Sections before Fungsi
+    const tkoBefore = (props.tkoSections || []).filter(s => s.order < 4);
+    tkoBefore.forEach(s => {
+        list.push({
+            id: `tko_${s.id}`,
+            order: s.order,
+            label: `${romanNumerals[s.order] || s.order}. ${s.name.toUpperCase()}`,
+            labelShort: romanNumerals[s.order] || s.order,
+            type: 'tko',
+            name: s.name,
+            content: s.contents?.[0]?.content || ''
+        });
+    });
+
+    // 2. Fungsi (order 4)
+    list.push({
+        id: 'fungsi',
+        order: 4,
+        label: 'IV. FUNGSI/ UNIT ORGANISASI/ JABATAN TERKAIT',
+        labelShort: 'IV',
+        type: 'fungsi'
+    });
+
+    // 3. Prosedur (order 5)
+    list.push({
+        id: 'prosedur',
+        order: 5,
+        label: 'V. PROSEDUR',
+        labelShort: 'V',
+        type: 'prosedur'
+    });
+
+    // 4. TKO Sections after Prosedur
+    const tkoAfter = (props.tkoSections || []).filter(s => s.order > 5);
+    tkoAfter.forEach(s => {
+        list.push({
+            id: `tko_${s.id}`,
+            order: s.order,
+            label: `${romanNumerals[s.order] || s.order}. ${s.name.toUpperCase()}`,
+            labelShort: romanNumerals[s.order] || s.order,
+            type: 'tko',
+            name: s.name,
+            content: s.contents?.[0]?.content || ''
+        });
+    });
+
+    return list.sort((a, b) => a.order - b.order);
+});
+
+const activeTab = ref(allSections.value[0]?.id || 'fungsi');
+
+const activeSection = computed(() => {
+    return allSections.value.find(s => s.id === activeTab.value) || null;
+});
 const selectedRegulationId = ref(props.selectedRegulationId);
 watch(() => props.selectedRegulationId, (newId) => {
     selectedRegulationId.value = newId;
@@ -410,6 +497,92 @@ function shortSopDescription(text) {
     const n = tightSopText(text).replace(/\n/g, ' ');
     return n.length > 80 ? n.slice(0, 80) + '...' : n;
 }
+function parseContentLines(content) {
+    if (!content) return [];
+    const lines = String(content).replace(/\r\n/g, '\n').split('\n');
+    const parsed = [];
+    
+    // Pattern to capture leading spaces, marker, separator, and text content
+    const listPattern = /^(\s*)([0-9]+|[a-zA-Z]|[ivxIVX]+)([\.\)\-])\s+(.*)$/;
+    const bulletPattern = /^(\s*)([\-\•\*\+])\s+(.*)$/;
+    
+    let currentListIndent = 0;
+    
+    lines.forEach((line) => {
+        if (!line.trim()) {
+            parsed.push({ type: 'empty', text: '', indent: 0 });
+            currentListIndent = 0; // reset indentation level on blank lines
+            return;
+        }
+        
+        // 1. Check list pattern (e.g. 1. or a. or I.)
+        const listMatch = line.match(listPattern);
+        if (listMatch) {
+            const [_, spaces, num, separator, text] = listMatch;
+            let listIndent = Math.floor(spaces.length / 2);
+            
+            // Auto-indent alphabetical/roman sub-lists if in a list context
+            const isSubList = /^[a-zA-Z]$/.test(num) || /^[ivxIVX]+$/.test(num);
+            if (listIndent === 0 && currentListIndent > 0 && isSubList) {
+                listIndent = currentListIndent;
+            }
+            
+            parsed.push({
+                type: 'list',
+                marker: `${num}${separator}`,
+                text: text,
+                indent: listIndent
+            });
+            
+            currentListIndent = listIndent + 1;
+            return;
+        }
+        
+        // 2. Check bullet pattern (e.g. - or * or •)
+        const bulletMatch = line.match(bulletPattern);
+        if (bulletMatch) {
+            const [_, spaces, bullet, text] = bulletMatch;
+            let bulletIndent = Math.floor(spaces.length / 2);
+            
+            if (bulletIndent === 0 && currentListIndent > 0) {
+                bulletIndent = currentListIndent;
+            }
+            
+            parsed.push({
+                type: 'list',
+                marker: bullet,
+                text: text,
+                indent: bulletIndent
+            });
+            
+            currentListIndent = bulletIndent + 1;
+            return;
+        }
+        
+        // 3. Check for manually indented continuation lines
+        const spaceMatch = line.match(/^(\s+)(.*)$/);
+        if (spaceMatch) {
+            const [_, spaces, text] = spaceMatch;
+            const indentLevel = Math.min(Math.floor(spaces.length / 2), 6);
+            parsed.push({
+                type: 'text',
+                text: text,
+                indent: indentLevel > 0 ? indentLevel : 1
+            });
+            currentListIndent = indentLevel;
+            return;
+        }
+        
+        // 4. Default plain text line inherits active list context indentation
+        parsed.push({
+            type: 'text',
+            text: line,
+            indent: currentListIndent
+        });
+    });
+    return parsed;
+}
+
 function printDocument() { window.print(); }
 </script>
 

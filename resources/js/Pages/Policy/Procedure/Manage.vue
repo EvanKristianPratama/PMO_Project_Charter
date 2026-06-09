@@ -1,368 +1,428 @@
 <template>
     <UserLayout title="Kelola Procedure">
-        <div class="animate-fade-in-up mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8 print:m-0 print:px-0">
+        <div class="animate-fade-in-up space-y-6">
+            <!-- Page Header (sama untuk manage & view) -->
             <section class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717] print:hidden">
                 <div class="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full bg-[#821f44]/10 blur-2xl"></div>
                 <div class="pointer-events-none absolute -bottom-16 -left-12 h-40 w-40 rounded-full bg-blue-500/5 blur-2xl"></div>
 
-                <div class="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div class="min-w-0">
-                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#821f44] dark:text-[#a83262]">
-                            {{ activeRegulation?.judul || 'Belum ada regulasi aktif' }}
-                        </p>
-                        <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                            Kelola Dokumen
-                        </h1>
+                <div class="relative flex flex-col gap-4">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#821f44] dark:text-[#a83262]">
+                                {{ activeRegulation?.judul || 'Belum ada regulasi aktif' }}
+                            </p>
+                            <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                                Kelola Procedure
+                            </h1>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <Link
+                                :href="route('policy.procedure.index', activeRegulation ? { regulation_id: activeRegulation.id } : {})"
+                                class="inline-flex items-center gap-2 rounded-xl bg-[#821f44] px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#821f44]/25 transition-all hover:bg-[#9c2552] hover:shadow-[#821f44]/40 focus:ring-2 focus:ring-[#821f44]/20 active:scale-95"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                                </svg>
+                                Lihat Dokumen
+                            </Link>
+                        </div>
                     </div>
-                    <div class="flex flex-wrap items-center gap-3">
-                        <Link
-                            :href="route('policy.procedure.index', activeRegulation ? { regulation_id: activeRegulation.id } : {})"
-                            class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="h-4 w-4">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                            </svg>
-                            Lihat Dokumen
-                        </Link>
-                        <button
-                            @click="openAddCategoryModal"
-                            class="inline-flex items-center gap-2 rounded-xl border border-[#821f44] bg-transparent px-4 py-2.5 text-sm font-bold text-[#821f44] hover:bg-[#821f44]/5 transition-all focus:ring-2 focus:ring-[#821f44]/20 active:scale-95 dark:border-[#a83262] dark:text-[#a83262]"
-                        >
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                            </svg>
-                            Tambah Kategori
-                        </button>
-                    </div>
+                    <!-- Tab Switcher (persis seperti GuidanceChapterNavigation) -->
+                    <ProcedureSectionNavigation v-model="activeTab" :sections="allSections" />
                 </div>
             </section>
 
-            <!-- 👇 Section Navigation -->
-            <section class="print:hidden">
-                <ProcedureSectionNavigation />
-            </section>
+            <!-- Tab: TKO Content -->
+            <template v-if="activeSection?.type === 'tko'">
+                <div class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 md:p-16 rounded-2xl font-sans animate-fade-in-up">
+                    <PertaminaDocumentHeader :activeRegulation="activeRegulation" />
 
-            <section id="procedure-section-fungsi" ref="actorSection" class="space-y-4 scroll-mt-24">
-                <div class="flex items-center justify-between gap-4 px-1">
-                    <div class="flex items-center gap-2">
-                        <div class="h-5 w-1 rounded-full bg-[#821f44]"></div>
-                        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                            FUNGSI/ UNIT ORGANISASI/ JABATAN TERKAIT
-                        </h2>
+                    <div class="mt-10 flex items-center justify-between gap-4 border-b border-slate-900/10 pb-2 dark:border-white/10">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide uppercase">
+                            {{ activeSection.label }}
+                        </h3>
+                        <!-- Auto-save status indicator -->
+                        <span class="text-[11px] flex items-center gap-1.5 select-none print:hidden">
+                            <span v-if="saveStatuses[activeSection.id] === 'saving'" class="text-amber-600 dark:text-amber-400 flex items-center gap-1 font-semibold animate-pulse">
+                                <svg class="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Menyimpan otomatis...
+                            </span>
+                            <span v-else-if="saveStatuses[activeSection.id] === 'saved'" class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-bold">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3.5" stroke="currentColor" class="w-3.5 h-3.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                </svg>
+                                Tersimpan
+                            </span>
+                            <span v-else-if="saveStatuses[activeSection.id] === 'error'" class="text-rose-600 dark:text-rose-400 font-bold">
+                                Gagal menyimpan
+                            </span>
+                            <span v-else class="text-slate-400 dark:text-slate-500">
+                                Auto-save aktif
+                            </span>
+                        </span>
                     </div>
-                    <button
-                        @click="openAddActorModal"
-                        class="inline-flex items-center gap-1.5 rounded-lg bg-[#821f44] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#9c2552] active:scale-95"
-                    >
-                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Add Actor
-                    </button>
-                </div>
 
-                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                    <div class="overflow-x-auto">
-                        <table class="w-full border-collapse text-left text-[11px] text-slate-500 dark:text-slate-400">
+                    <div class="mt-6">
+                        <textarea
+                            v-model="tkoInputs[activeSection.id]"
+                            @input="handleTkoInput(activeSection)"
+                            @blur="saveTkoContent(activeSection)"
+                            rows="12"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 focus:border-[#821f44] focus:ring-1 focus:ring-[#821f44] dark:border-white/10 dark:bg-black/20 dark:text-white font-sans leading-relaxed text-justify"
+                            placeholder="Masukkan konten disini..."
+                        ></textarea>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Tab: FUNGSI -->
+            <template v-if="activeSection?.id === 'fungsi'">
+                <div class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 md:p-16 rounded-2xl font-sans animate-fade-in-up">
+                    <PertaminaDocumentHeader :activeRegulation="activeRegulation" />
+
+                    <div class="mt-10 flex items-center justify-between gap-4 border-b border-slate-900/10 pb-2 dark:border-white/10">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide">
+                            IV. FUNGSI/ UNIT ORGANISASI/ JABATAN TERKAIT
+                        </h3>
+                        <div class="flex items-center gap-3">
+                            <!-- Auto-save status indicator -->
+                            <span class="text-[11px] flex items-center gap-1.5 select-none print:hidden mr-2">
+                                <span v-if="hasSavingActor" class="text-amber-600 dark:text-amber-400 flex items-center gap-1 font-semibold animate-pulse">
+                                    <svg class="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Menyimpan otomatis...
+                                </span>
+                                <span v-else-if="hasSavedActor" class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-bold">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3.5" stroke="currentColor" class="w-3.5 h-3.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                    Tersimpan
+                                </span>
+                                <span v-else-if="hasErrorActor" class="text-rose-600 dark:text-rose-400 font-bold">
+                                    Gagal menyimpan
+                                </span>
+                                <span v-else class="text-slate-400 dark:text-slate-500">
+                                    Auto-save aktif
+                                </span>
+                            </span>
+
+                            <button
+                                @click="addActorDirectly"
+                                class="inline-flex items-center gap-1.5 rounded-lg bg-[#821f44] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#9c2552] active:scale-95 print:hidden"
+                            >
+                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                </svg>
+                                Tambah Aktor
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10">
+                        <table class="w-full border-collapse text-left text-[11px]">
                             <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 w-20 text-center">No</th>
-                                    <th scope="col" class="px-6 py-3">Fungsi/ Unit Organisasi/Jabatan terkait</th>
-                                    <th scope="col" class="px-6 py-3">Jabatan</th>
-                                    <th scope="col" class="px-6 py-3 w-32 text-center">Action</th>
+                                    <th class="px-6 py-3 w-20 text-center">No</th>
+                                    <th class="px-6 py-3">Fungsi / Unit Organisasi / Jabatan</th>
+                                    <th class="px-6 py-3">Jabatan</th>
+                                    <th class="px-6 py-3 w-24 text-center print:hidden">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-200 dark:divide-white/10 dark:bg-transparent">
-                                <tr v-if="actors.length === 0" class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
-                                    <td colspan="4" class="px-6 py-7 text-center text-slate-400 dark:text-slate-500">
-                                        Belum ada data unit organisasi terkait.
-                                    </td>
+                            <tbody class="divide-y divide-slate-200 dark:divide-white/10">
+                                <tr v-if="actors.length === 0">
+                                    <td colspan="4" class="px-6 py-8 text-center text-slate-400">Belum ada data aktor terkait.</td>
                                 </tr>
-                                <tr v-for="(actor, index) in actors" :key="actor.id" class="group hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
-                                    <td class="px-6 py-2 w-20 text-center font-medium text-slate-500 dark:text-slate-400">
-                                        <span class="inline-block pl-2">{{ index + 1 }}</span>
+                                <tr v-for="(actor, index) in actors" :key="actor.id" class="group hover:bg-slate-50/50 dark:hover:bg-white/5">
+                                    <td class="px-6 py-3 text-center align-middle font-medium text-slate-500 dark:text-slate-400">{{ index + 1 }}</td>
+                                    <td class="px-6 py-2 align-middle">
+                                        <input
+                                            v-if="actorLocal[actor.id]"
+                                            v-model="actorLocal[actor.id].name"
+                                            @input="handleActorInput(actor)"
+                                            @blur="saveActor(actor)"
+                                            type="text"
+                                            class="w-full bg-transparent px-2 py-1 text-slate-900 dark:text-white border border-transparent rounded focus:border-[#821f44] focus:ring-1 focus:ring-[#821f44] focus:bg-white dark:focus:bg-[#1e1e1e] hover:border-slate-300 dark:hover:border-white/10"
+                                            placeholder="Nama Aktor / Jabatan"
+                                        />
                                     </td>
-                                    <td class="px-6 py-2 font-medium leading-snug text-slate-900 dark:text-white">
-                                        {{ actor.name }}
+                                    <td class="px-6 py-2 align-middle">
+                                        <select
+                                            v-if="actorLocal[actor.id]"
+                                            v-model="actorLocal[actor.id].organization_id"
+                                            @change="saveActor(actor)"
+                                            class="w-full bg-transparent px-2 py-1 text-slate-900 dark:text-white border border-transparent rounded focus:border-[#821f44] focus:ring-1 focus:ring-[#821f44] focus:bg-white dark:focus:bg-[#1e1e1e] hover:border-slate-300 dark:hover:border-white/10"
+                                        >
+                                            <option value="" disabled>-- Pilih Organisasi --</option>
+                                            <option v-for="org in filteredOrganizations" :key="org.id" :value="org.id">
+                                                {{ org.jabatan }} ({{ org.name }})
+                                            </option>
+                                        </select>
                                     </td>
-                                    <td class="px-6 py-2 leading-snug text-slate-700 dark:text-slate-300">
-                                        <template v-if="actor.organization">
-                                            <div v-if="actor.organization.jabatan" class="font-medium text-slate-900 dark:text-white">
-                                                {{ actor.organization.jabatan }}
-                                            </div>
-                                            <span v-else class="text-slate-400 dark:text-slate-500">-</span>
-                                        </template>
-                                        <span v-else class="text-slate-400 dark:text-slate-500">-</span>
-                                    </td>
-                                    <td class="px-6 py-2 text-center">
-                                        <div class="flex items-center justify-center gap-3">
-                                            <button
-                                                @click="openEditActorModal(actor)"
-                                                class="text-[9px] font-bold uppercase tracking-wider text-blue-600 transition-colors hover:text-blue-800"
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                @click="openDeleteActorModal(actor)"
-                                                class="text-[9px] font-bold uppercase tracking-wider text-rose-600 transition-colors hover:text-rose-800"
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
+                                    <td class="px-6 py-2 align-middle text-center print:hidden">
+                                        <button
+                                            @click="deleteActorDirectly(actor)"
+                                            class="text-[9px] font-bold uppercase tracking-wider text-rose-600 transition-colors hover:text-rose-800"
+                                        >
+                                            Hapus
+                                        </button>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
-            </section>
+            </template>
 
-            <!-- 👇 Dynamic Categories List -->
-            <section id="procedure-section-prosedur" class="space-y-6 scroll-mt-24">
-                <div v-if="categories.length === 0" class="rounded-2xl border border-slate-200 bg-white px-6 py-8 text-center text-sm text-slate-400 shadow-sm dark:border-white/10 dark:bg-[#171717] dark:text-slate-500">
-                    Belum ada kategori SOP untuk regulasi ini. Silakan klik "Tambah Kategori" di atas.
-                </div>
+            <!-- Tab: PROSEDUR -->
+            <template v-if="activeSection?.id === 'prosedur'">
+                <div class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 md:p-16 rounded-2xl font-sans animate-fade-in-up">
+                    <PertaminaDocumentHeader :activeRegulation="activeRegulation" />
 
-                <div v-for="cat in categories" :key="cat.id" class="space-y-4">
-                    <div class="flex items-center justify-between gap-4 px-1">
+                    <div class="mt-10 flex items-center justify-between gap-4 border-b border-slate-900/10 pb-2 dark:border-white/10">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide">
+                            V. PROSEDUR
+                        </h3>
                         <div class="flex items-center gap-3">
-                            <div class="h-5 w-1 rounded-full bg-blue-600"></div>
-                            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                                {{ cat.tipe }}
-                            </h2>
-                            <div class="flex items-center gap-2 print:hidden ml-2">
+                            <!-- Auto-save status indicator -->
+                            <span class="text-[11px] flex items-center gap-1.5 select-none print:hidden mr-2">
+                                <span v-if="hasSavingProsedur" class="text-amber-600 dark:text-amber-400 flex items-center gap-1 font-semibold animate-pulse">
+                                    <svg class="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Menyimpan otomatis...
+                                </span>
+                                <span v-else-if="hasSavedProsedur" class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-bold">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3.5" stroke="currentColor" class="w-3.5 h-3.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                    Tersimpan
+                                </span>
+                                <span v-else-if="hasErrorProsedur" class="text-rose-600 dark:text-rose-400 font-bold">
+                                    Gagal menyimpan
+                                </span>
+                                <span v-else class="text-slate-400 dark:text-slate-500">
+                                    Auto-save aktif
+                                </span>
+                            </span>
+
+                            <button
+                                @click="addCategoryDirectly"
+                                class="inline-flex items-center gap-2 rounded-xl border border-[#821f44] bg-transparent px-3 py-1.5 text-xs font-bold text-[#821f44] hover:bg-[#821f44]/5 transition-all focus:ring-2 focus:ring-[#821f44]/20 active:scale-95 dark:border-[#a83262] dark:text-[#a83262] print:hidden"
+                            >
+                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                </svg>
+                                Tambah Kategori
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 space-y-8 font-serif text-[15px] leading-relaxed text-slate-900 dark:text-slate-100">
+                        <div v-if="categories.length === 0" class="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-center text-slate-400">Belum ada data SOP untuk regulasi ini.</div>
+                        <div v-for="cat in categories" :key="cat.id" class="space-y-4">
+                            <!-- Category Title (Editable) -->
+                            <div class="flex items-center justify-between gap-4 group/cat">
+                                <div class="flex-1">
+                                    <input
+                                        v-if="categoryLocal[cat.id]"
+                                        v-model="categoryLocal[cat.id].tipe"
+                                        @input="handleCategoryInput(cat)"
+                                        @blur="saveCategory(cat)"
+                                        class="font-bold text-slate-950 dark:text-white bg-transparent border border-transparent rounded hover:border-slate-300 dark:hover:border-white/10 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:bg-white dark:focus:bg-[#1e1e1e] text-sm md:text-base w-full px-2 py-1"
+                                        placeholder="Nama Kategori (Contoh: A. Penyusunan RSTI)"
+                                    />
+                                </div>
                                 <button
-                                    @click="openEditCategoryModal(cat)"
-                                    class="text-[10px] font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                                    @click="deleteCategoryDirectly(cat)"
+                                    class="text-xs font-semibold text-rose-600 hover:text-rose-800 transition-colors ml-4 opacity-0 group-hover/cat:opacity-100 focus:opacity-100 print:hidden animate-fade-in-up"
                                 >
-                                    Edit
+                                    Hapus Kategori
                                 </button>
-                                <span class="text-slate-300 dark:text-white/10 text-[10px]">|</span>
+                            </div>
+
+                            <!-- SOP List -->
+                            <div class="space-y-3">
+                                <div v-for="(item, index) in getSopsForCategory(cat.id)" :key="item.id" class="flex gap-3 items-start group/sop">
+                                    <span class="font-bold min-w-[20px] text-right select-none pt-2 text-[15px] text-slate-950 dark:text-white">{{ index + 1 }}.</span>
+                                    <div class="flex-1">
+                                        <textarea
+                                            v-if="sopLocal[item.id]"
+                                            v-model="sopLocal[item.id].description"
+                                            @input="handleSopInput(item)"
+                                            @blur="saveSop(item)"
+                                            rows="2"
+                                            class="w-full bg-transparent px-3 py-2 text-justify font-serif text-[15px] leading-relaxed text-slate-900 dark:text-slate-100 border border-transparent rounded hover:border-slate-300 dark:hover:border-white/10 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:bg-white dark:focus:bg-[#1e1e1e]"
+                                            placeholder="Tulis deskripsi aktivitas SOP..."
+                                        ></textarea>
+                                    </div>
+                                    <button
+                                        @click="deleteSopDirectly(item)"
+                                        class="text-xs text-rose-600 hover:text-rose-800 transition-colors pt-2 opacity-0 group-hover/sop:opacity-100 focus:opacity-100 print:hidden"
+                                    >
+                                        Hapus
+                                    </button>
+                                </div>
+                                <div v-if="getSopsForCategory(cat.id).length === 0" class="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-center text-slate-400">Belum ada data SOP untuk kategori ini.</div>
+                            </div>
+
+                            <!-- Add SOP under this category -->
+                            <div class="pl-8">
                                 <button
-                                    @click="openDeleteCategoryModal(cat)"
-                                    class="text-[10px] font-semibold text-rose-600 hover:text-rose-800 dark:text-rose-400 dark:hover:text-rose-300"
+                                    @click="addSopDirectly(cat.id)"
+                                    class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors mt-1 print:hidden"
                                 >
-                                    Hapus
+                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    Tambah SOP
                                 </button>
                             </div>
                         </div>
-                        <button
-                            @click="openAddSopModal(cat.id)"
-                            class="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95"
-                        >
-                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                            </svg>
-                            Add SOP
-                        </button>
                     </div>
-                    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                        <div class="overflow-x-auto">
-                            <table class="w-full border-collapse text-left text-[11px] text-slate-500 dark:text-slate-400">
-                                <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
-                                    <tr>
-                                        <th scope="col" class="px-3 py-3 w-10 text-right align-middle">No</th>
-                                        <th scope="col" class="px-6 py-3">Deskripsi</th>
-                                        <th scope="col" class="px-6 py-3 w-32 text-center">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-200 dark:divide-white/10 dark:bg-transparent">
-                                    <tr v-if="getSopsForCategory(cat.id).length === 0" class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
-                                        <td colspan="3" class="px-6 py-7 text-center text-slate-400 dark:text-slate-500">
-                                            Belum ada data SOP untuk kategori ini.
-                                        </td>
-                                    </tr>
-                                    <tr v-for="(item, index) in getSopsForCategory(cat.id)" :key="item.id" class="group hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
-                                        <td class="px-3 py-2 w-10 text-right align-middle font-medium">
-                                            {{ index + 1 }}
-                                        </td>
-                                        <td class="px-6 py-2 whitespace-pre-line break-words leading-[1.15] text-slate-900 dark:text-white">
-                                            {{ item.description }}
-                                        </td>
-                                        <td class="px-6 py-2 text-center">
-                                            <div class="flex items-center justify-center gap-3">
-                                                <button
-                                                    @click="openEditSopModal(item)"
-                                                    class="text-[9px] font-bold uppercase tracking-wider text-blue-600 transition-colors hover:text-blue-800"
-                                                >
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    @click="openDeleteSopModal(item)"
-                                                    class="text-[9px] font-bold uppercase tracking-wider text-rose-600 transition-colors hover:text-rose-800"
-                                                >
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+
+                    <!-- Diagram Alir (Flowchart) Loop by Category exactly like Index.vue but editable -->
+                    <div class="mt-12 pt-10 border-t border-slate-200 dark:border-white/10">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide border-b border-slate-900/10 pb-2 dark:border-white/10">VI. DIAGRAM ALIR</h3>
+                        <div class="mt-6 space-y-6">
+                            <div v-if="categories.length === 0" class="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-center text-slate-400">Belum ada data diagram untuk regulasi ini.</div>
+                            <div v-for="cat in categories" :key="cat.id" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                                <div class="border-b border-slate-200 px-5 py-3 dark:border-white/10">
+                                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">{{ cat.tipe }}</h3>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <div class="min-w-[1200px] p-4">
+                                        <!-- Pass locked category array and flow-type to match Index.vue but keep editable -->
+                                        <FlowChart :actors="actors" :sops="flowChartSops" :flow-type="String(cat.id)" :categories="[cat]" />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </section>
+            </template>
 
-            <section id="procedure-section-diagram" class="space-y-4 scroll-mt-24">
-                <div class="flex items-center gap-2 px-1">
-                    <div class="h-5 w-1 rounded-full bg-emerald-600"></div>
-                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                        DIAGRAM ALIR RSTI
-                    </h2>
+            <!-- Tab: PENGATURAN SECTION DOKUMEN -->
+            <template v-if="activeSection?.id === 'manage_sections'">
+                <div class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 md:p-16 rounded-2xl font-sans animate-fade-in-up">
+                    <PertaminaDocumentHeader :activeRegulation="activeRegulation" />
+
+                    <div class="mt-10 flex items-center justify-between gap-4 border-b border-slate-900/10 pb-2 dark:border-white/10">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide">
+                            PENGATURAN SECTION DOKUMEN
+                        </h3>
+                        <div class="flex items-center gap-3">
+                            <!-- Auto-save status indicator -->
+                            <span class="text-[11px] flex items-center gap-1.5 select-none print:hidden mr-2">
+                                <span v-if="hasSavingSection" class="text-amber-600 dark:text-amber-400 flex items-center gap-1 font-semibold animate-pulse">
+                                    <svg class="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Menyimpan otomatis...
+                                </span>
+                                <span v-else-if="hasSavedSection" class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-bold">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3.5" stroke="currentColor" class="w-3.5 h-3.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                    Tersimpan
+                                </span>
+                                <span v-else-if="hasErrorSection" class="text-rose-600 dark:text-rose-400 font-bold">
+                                    Gagal menyimpan
+                                </span>
+                                <span v-else class="text-slate-400 dark:text-slate-500">
+                                    Auto-save aktif
+                                </span>
+                            </span>
+
+                            <button
+                                @click="addSectionDirectly"
+                                class="inline-flex items-center gap-1.5 rounded-lg bg-[#821f44] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#9c2552] active:scale-95 print:hidden"
+                            >
+                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                </svg>
+                                Tambah Section
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10">
+                        <table class="w-full border-collapse text-left text-[11px]">
+                            <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
+                                <tr>
+                                    <th class="px-6 py-3 w-20 text-center">No</th>
+                                    <th class="px-6 py-3">Nama Section</th>
+                                    <th class="px-6 py-3 w-28 text-center">Urutan</th>
+                                    <th class="px-6 py-3 w-24 text-center print:hidden">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 dark:divide-white/10">
+                                <tr v-if="tkoSections.length === 0">
+                                    <td colspan="4" class="px-6 py-8 text-center text-slate-400">Belum ada section.</td>
+                                </tr>
+                                <tr v-for="(sec, index) in tkoSections" :key="sec.id" class="group hover:bg-slate-50/50 dark:hover:bg-white/5">
+                                    <td class="px-6 py-3 text-center align-middle font-medium text-slate-500 dark:text-slate-400">{{ index + 1 }}</td>
+                                    <td class="px-6 py-2 align-middle">
+                                        <input
+                                            v-if="sectionLocal[sec.id]"
+                                            v-model="sectionLocal[sec.id].name"
+                                            @input="handleSectionInput(sec)"
+                                            @blur="saveSection(sec)"
+                                            type="text"
+                                            class="w-full bg-transparent px-2 py-1 text-slate-900 dark:text-white border border-transparent rounded focus:border-[#821f44] focus:ring-1 focus:ring-[#821f44] focus:bg-white dark:focus:bg-[#1e1e1e] hover:border-slate-300 dark:hover:border-white/10 font-bold"
+                                            placeholder="Nama Section (Contoh: TUJUAN)"
+                                        />
+                                    </td>
+                                    <td class="px-6 py-2 align-middle text-center">
+                                        <input
+                                            v-if="sectionLocal[sec.id]"
+                                            v-model="sectionLocal[sec.id].order"
+                                            @input="handleSectionInput(sec)"
+                                            @blur="saveSection(sec)"
+                                            type="number"
+                                            min="1"
+                                            class="w-20 bg-transparent px-2 py-1 text-slate-900 dark:text-white border border-transparent rounded focus:border-[#821f44] focus:ring-1 focus:ring-[#821f44] focus:bg-white dark:focus:bg-[#1e1e1e] hover:border-slate-300 dark:hover:border-white/10 text-center"
+                                        />
+                                    </td>
+                                    <td class="px-6 py-2 align-middle text-center print:hidden">
+                                        <button
+                                            @click="deleteSectionDirectly(sec)"
+                                            class="text-[9px] font-bold uppercase tracking-wider text-rose-600 transition-colors hover:text-rose-800"
+                                        >
+                                            Hapus
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-6 text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-white/5 p-4 rounded-xl">
+                        <p class="font-semibold text-slate-700 dark:text-slate-300 mb-1">Catatan Pengaturan Section:</p>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>Secara default, bab **IV (Fungsi Terkait)** diisi otomatis oleh data Aktor di Urutan **4**.</li>
+                            <li>Bab **V (Prosedur)** diisi otomatis oleh data SOP & Diagram di Urutan **5**.</li>
+                            <li>Anda bebas mengubah nama dan urutan section lainnya (seperti Tujuan, Ruang Lingkup, Lampiran, dll).</li>
+                            <li>Perubahan nama section atau urutan section akan secara otomatis memperbarui tata letak halaman dan menu navigasi.</li>
+                        </ul>
+                    </div>
                 </div>
-                <FlowChart :actors="actors" :sops="flowChartSops" :categories="categories" />
-            </section>
+            </template>
         </div>
-
-        <ConfirmationModal
-            :show="isActorModalOpen"
-            :title="editingActorId ? 'Edit Aktor' : 'Tambah Aktor Baru'"
-            :message="editingActorId ? 'Silakan sesuaikan data aktor di bawah ini.' : 'Silakan isi formulir di bawah ini untuk menambahkan aktor baru.'"
-            confirm-text="Simpan"
-            cancel-text="Batal"
-            type="info"
-            :loading="actorForm.processing"
-            @close="closeActorModal"
-            @confirm="submitActorForm"
-        >
-            <div class="mt-4 space-y-4">
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Nama Aktor / Jabatan</label>
-                    <input
-                        v-model="actorForm.name"
-                        type="text"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-black/20 dark:text-white"
-                        placeholder="Contoh: Manager IT"
-                    />
-                    <p v-if="actorForm.errors.name" class="mt-0.5 text-xs text-rose-500">{{ actorForm.errors.name }}</p>
-                </div>
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Organisasi Terkait</label>
-                    <select
-                        v-model="actorForm.organization_id"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-black/20 dark:text-white"
-                    >
-                        <option value="" disabled>-- Pilih Organisasi --</option>
-                        <option v-for="org in filteredOrganizations" :key="org.id" :value="org.id">
-                            {{ org.jabatan }} ({{ org.name }})
-                        </option>
-                    </select>
-                    <p v-if="actorForm.errors.organization_id" class="mt-0.5 text-xs text-rose-500">
-                        {{ actorForm.errors.organization_id }}
-                    </p>
-                </div>
-            </div>
-        </ConfirmationModal>
-
-        <ConfirmationModal
-            :show="isDeleteActorModalOpen"
-            title="Hapus Aktor"
-            :message="`Apakah Anda yakin ingin menghapus aktor '${selectedActor?.name}'? Tindakan ini tidak dapat dibatalkan.`"
-            confirm-text="Hapus"
-            cancel-text="Batal"
-            type="danger"
-            :loading="actorForm.processing"
-            @close="isDeleteActorModalOpen = false"
-            @confirm="submitDeleteActor"
-        />
-
-        <!-- Category Form Modal -->
-        <ConfirmationModal
-            :show="isCategoryModalOpen"
-            :title="editingCategoryId ? 'Edit Kategori SOP' : 'Tambah Kategori SOP Baru'"
-            :message="editingCategoryId ? 'Silakan sesuaikan nama kategori di bawah ini.' : 'Silakan isi formulir di bawah ini untuk menambahkan kategori SOP baru.'"
-            confirm-text="Simpan"
-            cancel-text="Batal"
-            type="info"
-            :loading="categoryForm.processing"
-            @close="closeCategoryModal"
-            @confirm="submitCategoryForm"
-        >
-            <div class="mt-4 space-y-4">
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Nama Kategori SOP</label>
-                    <input
-                        v-model="categoryForm.tipe"
-                        type="text"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-black/20 dark:text-white"
-                        placeholder="Contoh: A. Penyusunan RSTI"
-                    />
-                    <p v-if="categoryForm.errors.tipe" class="mt-0.5 text-xs text-rose-500">{{ categoryForm.errors.tipe }}</p>
-                </div>
-            </div>
-        </ConfirmationModal>
-
-        <!-- Delete Category Modal -->
-        <ConfirmationModal
-            :show="isDeleteCategoryModalOpen"
-            title="Hapus Kategori SOP"
-            :message="`Apakah Anda yakin ingin menghapus kategori '${selectedCategory?.tipe}' beserta seluruh SOP di dalamnya? Tindakan ini tidak dapat dibatalkan.`"
-            confirm-text="Hapus"
-            cancel-text="Batal"
-            type="danger"
-            :loading="categoryForm.processing"
-            @close="isDeleteCategoryModalOpen = false"
-            @confirm="submitDeleteCategory"
-        />
-
-        <ConfirmationModal
-            :show="isSopModalOpen"
-            :title="editingSopId ? 'Edit SOP' : `Tambah SOP ${activeSopTitle}`"
-            :message="editingSopId ? 'Silakan sesuaikan deskripsi SOP di bawah ini.' : `Silakan isi deskripsi untuk ${activeSopTitle}.`"
-            confirm-text="Simpan"
-            cancel-text="Batal"
-            type="info"
-            max-width="lg"
-            :loading="sopForm.processing"
-            @close="closeSopModal"
-            @confirm="submitSopForm"
-        >
-            <div class="mt-4 space-y-4">
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Kategori</label>
-                    <input
-                        :value="activeSopTitle"
-                        type="text"
-                        disabled
-                        class="w-full rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-300"
-                    />
-                    <p v-if="sopForm.errors.category_id" class="mt-0.5 text-xs text-rose-500">{{ sopForm.errors.category_id }}</p>
-                </div>
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Deskripsi SOP</label>
-                    <textarea
-                        v-model="sopForm.description"
-                        rows="6"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-black/20 dark:text-white"
-                        placeholder="Tuliskan deskripsi aktivitas SOP"
-                    ></textarea>
-                    <p v-if="sopForm.errors.description" class="mt-0.5 text-xs text-rose-500">
-                        {{ sopForm.errors.description }}
-                    </p>
-                </div>
-            </div>
-        </ConfirmationModal>
-
-        <ConfirmationModal
-            :show="isDeleteSopModalOpen"
-            title="Hapus SOP"
-            :message="`Apakah Anda yakin ingin menghapus SOP '${shortSopDescription(selectedSop?.description)}'? Tindakan ini tidak dapat dibatalkan.`"
-            confirm-text="Hapus"
-            cancel-text="Batal"
-            type="danger"
-            :loading="sopForm.processing"
-            @close="isDeleteSopModalOpen = false"
-            @confirm="submitDeleteSop"
-        />
-
     </UserLayout>
 </template>
 
 <script setup>
 import { computed, ref, watch } from 'vue';
-import { Link, useForm } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
-import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import FlowChart from '@/Components/Procedure/FlowChart.vue';
 import PertaminaDocumentHeader from '@/Components/Regulation/PertaminaDocumentHeader.vue';
 import ProcedureSectionNavigation from '@/Components/Regulation/ProcedureSectionNavigation.vue';
@@ -397,13 +457,98 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    tkoSections: {
+        type: Array,
+        default: () => [],
+    },
+});
+
+const allSections = computed(() => {
+    const list = [];
+    const romanNumerals = {
+        1: 'I',
+        2: 'II',
+        3: 'III',
+        4: 'IV',
+        5: 'V',
+        6: 'VI',
+        7: 'VII',
+        8: 'VIII',
+        9: 'IX'
+    };
+
+    // 1. TKO Sections before Fungsi
+    const tkoBefore = (props.tkoSections || []).filter(s => s.order < 4);
+    tkoBefore.forEach(s => {
+        list.push({
+            id: `tko_${s.id}`,
+            order: s.order,
+            label: `${romanNumerals[s.order] || s.order}. ${s.name.toUpperCase()}`,
+            labelShort: romanNumerals[s.order] || s.order,
+            type: 'tko',
+            name: s.name,
+            content: s.contents?.[0]?.content || '',
+            section_id: s.id
+        });
+    });
+
+    // 2. Fungsi (order 4)
+    list.push({
+        id: 'fungsi',
+        order: 4,
+        label: 'IV. FUNGSI/ UNIT ORGANISASI/ JABATAN TERKAIT',
+        labelShort: 'IV',
+        type: 'fungsi'
+    });
+
+    // 3. Prosedur (order 5)
+    list.push({
+        id: 'prosedur',
+        order: 5,
+        label: 'V. PROSEDUR',
+        labelShort: 'V',
+        type: 'prosedur'
+    });
+
+    // 4. TKO Sections after Prosedur
+    const tkoAfter = (props.tkoSections || []).filter(s => s.order > 5);
+    tkoAfter.forEach(s => {
+        list.push({
+            id: `tko_${s.id}`,
+            order: s.order,
+            label: `${romanNumerals[s.order] || s.order}. ${s.name.toUpperCase()}`,
+            labelShort: romanNumerals[s.order] || s.order,
+            type: 'tko',
+            name: s.name,
+            content: s.contents?.[0]?.content || '',
+            section_id: s.id
+        });
+    });
+
+    // 5. Manage Sections settings tab at the end
+    list.push({
+        id: 'manage_sections',
+        order: 100,
+        label: '⚙️ KELOLA SECTION',
+        labelShort: '⚙️',
+        type: 'manage_sections'
+    });
+
+    return list.sort((a, b) => a.order - b.order);
+});
+
+const activeTab = ref(allSections.value[0]?.id || 'fungsi');
+
+const activeSection = computed(() => {
+    return allSections.value.find(s => s.id === activeTab.value) || null;
 });
 
 const selectedRegulationId = ref(props.selectedRegulationId);
 watch(() => props.selectedRegulationId, (newId) => {
     selectedRegulationId.value = newId;
 });
-const actorSection = ref(null);
+
+const isManagePage = computed(() => true);
 
 function getSopsForCategory(categoryId) {
     if (!props.sop) return [];
@@ -422,95 +567,156 @@ const filteredOrganizations = computed(() => {
 });
 
 // ---------------------------------------------------
-// ACTOR CRUD
+// LOCAL EDITING STATES
 // ---------------------------------------------------
-const isActorModalOpen = ref(false);
-const isDeleteActorModalOpen = ref(false);
-const editingActorId = ref(null);
-const selectedActor = ref(null);
+const tkoInputs = ref({});
+const actorLocal = ref({});
+const categoryLocal = ref({});
+const sopLocal = ref({});
+const sectionLocal = ref({});
 
-const actorForm = useForm({
-    name: '',
-    organization_id: '',
-    regulation_id: '',
-});
+const saveStatuses = ref({});
 
-function openAddActorModal() {
-    editingActorId.value = null;
-    actorForm.reset();
-    actorForm.clearErrors();
-    actorForm.regulation_id = activeRegulation.value?.id || '';
-    isActorModalOpen.value = true;
-}
+const tkoDebounceTimers = {};
+const actorDebounceTimers = {};
+const categoryDebounceTimers = {};
+const sopDebounceTimers = {};
+const sectionDebounceTimers = {};
 
-function openEditActorModal(actor) {
-    editingActorId.value = actor.id;
-    actorForm.name = actor.name;
-    actorForm.organization_id = actor.organization_id || '';
-    actorForm.regulation_id = actor.regulation_id || activeRegulation.value?.id || '';
-    actorForm.clearErrors();
-    isActorModalOpen.value = true;
-}
+function initLocalStates() {
+    // TKO Content
+    allSections.value.forEach(s => {
+        if (s.type === 'tko') {
+            tkoInputs.value[s.id] = s.content || '';
+        }
+    });
 
-function openDeleteActorModal(actor) {
-    selectedActor.value = actor;
-    isDeleteActorModalOpen.value = true;
-}
-
-function closeActorModal() {
-    isActorModalOpen.value = false;
-    editingActorId.value = null;
-    actorForm.reset();
-}
-
-function submitActorForm() {
-    if (editingActorId.value) {
-        actorForm.put(route('policy.procedure.actor.update', editingActorId.value), {
-            preserveScroll: true,
-            onSuccess: () => {
-                closeActorModal();
-                Swal.fire({
-                    title: 'Berhasil!',
-                    text: 'Aktor berhasil diperbarui.',
-                    icon: 'success',
-                    timer: 2000,
-                    showConfirmButton: false,
-                    toast: true,
-                    position: 'top-end',
-                });
+    // Actors
+    props.actors.forEach(actor => {
+        if (!actorLocal.value[actor.id]) {
+            actorLocal.value[actor.id] = {
+                name: actor.name || '',
+                organization_id: actor.organization_id || ''
+            };
+        } else {
+            if (!actorDebounceTimers[actor.id]) {
+                actorLocal.value[actor.id].name = actor.name || '';
+                actorLocal.value[actor.id].organization_id = actor.organization_id || '';
             }
-        });
-    } else {
-        actorForm.post(route('policy.procedure.actor.store'), {
-            preserveScroll: true,
-            onSuccess: () => {
-                closeActorModal();
-                Swal.fire({
-                    title: 'Berhasil!',
-                    text: 'Aktor baru telah ditambahkan.',
-                    icon: 'success',
-                    timer: 2000,
-                    showConfirmButton: false,
-                    toast: true,
-                    position: 'top-end',
-                });
+        }
+    });
+
+    // Categories
+    props.categories.forEach(cat => {
+        if (!categoryLocal.value[cat.id]) {
+            categoryLocal.value[cat.id] = {
+                tipe: cat.tipe || ''
+            };
+        } else {
+            if (!categoryDebounceTimers[cat.id]) {
+                categoryLocal.value[cat.id].tipe = cat.tipe || '';
             }
-        });
+        }
+    });
+
+    // SOPs
+    props.sop.forEach(item => {
+        if (!sopLocal.value[item.id]) {
+            sopLocal.value[item.id] = {
+                category_id: item.category_id,
+                description: item.description || ''
+            };
+        } else {
+            if (!sopDebounceTimers[item.id]) {
+                sopLocal.value[item.id].category_id = item.category_id;
+                sopLocal.value[item.id].description = item.description || '';
+            }
+        }
+    });
+
+    // Sections
+    props.tkoSections.forEach(sec => {
+        if (!sectionLocal.value[sec.id]) {
+            sectionLocal.value[sec.id] = {
+                name: sec.name || '',
+                order: sec.order || 1
+            };
+        } else {
+            if (!sectionDebounceTimers[sec.id]) {
+                sectionLocal.value[sec.id].name = sec.name || '';
+                sectionLocal.value[sec.id].order = sec.order || 1;
+            }
+        }
+    });
+}
+
+// Initialize states
+initLocalStates();
+
+watch(() => [props.tkoSections, props.actors, props.categories, props.sop], () => {
+    initLocalStates();
+}, { deep: true });
+
+// TKO Saving
+function handleTkoInput(section) {
+    saveStatuses.value[section.id] = 'saving';
+    if (tkoDebounceTimers[section.id]) clearTimeout(tkoDebounceTimers[section.id]);
+    tkoDebounceTimers[section.id] = setTimeout(() => {
+        saveTkoContent(section);
+    }, 1500);
+}
+
+function saveTkoContent(section) {
+    if (tkoDebounceTimers[section.id]) {
+        clearTimeout(tkoDebounceTimers[section.id]);
+        delete tkoDebounceTimers[section.id];
     }
-}
-
-function submitDeleteActor() {
-    if (!selectedActor.value) return;
-    actorForm.delete(route('policy.procedure.actor.destroy', selectedActor.value.id), {
+    saveStatuses.value[section.id] = 'saving';
+    
+    router.post(route('policy.procedure.tko-content.store'), {
+        regulation_id: activeRegulation.value?.id || '',
+        section_id: section.section_id,
+        content: tkoInputs.value[section.id] || '',
+    }, {
         preserveScroll: true,
         onSuccess: () => {
-            isDeleteActorModalOpen.value = false;
-            selectedActor.value = null;
+            saveStatuses.value[section.id] = 'saved';
+            setTimeout(() => {
+                if (saveStatuses.value[section.id] === 'saved') {
+                    saveStatuses.value[section.id] = null;
+                }
+            }, 3000);
+        },
+        onError: () => {
+            saveStatuses.value[section.id] = 'error';
+        }
+    });
+}
+
+// Actor Actions
+function addActorDirectly() {
+    const defaultOrgId = filteredOrganizations.value[0]?.id || '';
+    if (!defaultOrgId) {
+        Swal.fire({
+            title: 'Error',
+            text: 'Tidak ada organisasi terkait yang valid.',
+            icon: 'error'
+        });
+        return;
+    }
+    
+    router.post(route('policy.procedure.actor.store'), {
+        name: 'Aktor Baru',
+        organization_id: defaultOrgId,
+        regulation_id: activeRegulation.value?.id || '',
+    }, {
+        preserveScroll: true,
+        onSuccess: () => {
             Swal.fire({
-                title: 'Dihapus!',
-                text: 'Aktor berhasil dihapus.',
+                title: 'Berhasil!',
+                text: 'Aktor baru telah ditambahkan.',
                 icon: 'success',
-                timer: 2000,
+                timer: 1500,
                 showConfirmButton: false,
                 toast: true,
                 position: 'top-end',
@@ -519,94 +725,94 @@ function submitDeleteActor() {
     });
 }
 
-// ---------------------------------------------------
-// CATEGORY CRUD
-// ---------------------------------------------------
-const isCategoryModalOpen = ref(false);
-const isDeleteCategoryModalOpen = ref(false);
-const editingCategoryId = ref(null);
-const selectedCategory = ref(null);
-
-const categoryForm = useForm({
-    tipe: '',
-    regulation_id: '',
-});
-
-function openAddCategoryModal() {
-    editingCategoryId.value = null;
-    categoryForm.reset();
-    categoryForm.clearErrors();
-    categoryForm.regulation_id = activeRegulation.value?.id || '';
-    isCategoryModalOpen.value = true;
+function handleActorInput(actor) {
+    saveStatuses.value[`actor_${actor.id}`] = 'saving';
+    if (actorDebounceTimers[actor.id]) clearTimeout(actorDebounceTimers[actor.id]);
+    actorDebounceTimers[actor.id] = setTimeout(() => {
+        saveActor(actor);
+    }, 1500);
 }
 
-function openEditCategoryModal(category) {
-    editingCategoryId.value = category.id;
-    categoryForm.tipe = category.tipe;
-    categoryForm.regulation_id = category.regulation_id;
-    categoryForm.clearErrors();
-    isCategoryModalOpen.value = true;
-}
-
-function openDeleteCategoryModal(category) {
-    selectedCategory.value = category;
-    isDeleteCategoryModalOpen.value = true;
-}
-
-function closeCategoryModal() {
-    isCategoryModalOpen.value = false;
-    editingCategoryId.value = null;
-    categoryForm.reset();
-}
-
-function submitCategoryForm() {
-    if (editingCategoryId.value) {
-        categoryForm.put(route('policy.procedure.category.update', editingCategoryId.value), {
-            preserveScroll: true,
-            onSuccess: () => {
-                closeCategoryModal();
-                Swal.fire({
-                    title: 'Berhasil!',
-                    text: 'Kategori SOP berhasil diperbarui.',
-                    icon: 'success',
-                    timer: 2000,
-                    showConfirmButton: false,
-                    toast: true,
-                    position: 'top-end',
-                });
-            }
-        });
-    } else {
-        categoryForm.post(route('policy.procedure.category.store'), {
-            preserveScroll: true,
-            onSuccess: () => {
-                closeCategoryModal();
-                Swal.fire({
-                    title: 'Berhasil!',
-                    text: 'Kategori SOP baru telah ditambahkan.',
-                    icon: 'success',
-                    timer: 2000,
-                    showConfirmButton: false,
-                    toast: true,
-                    position: 'top-end',
-                });
-            }
-        });
+function saveActor(actor) {
+    if (actorDebounceTimers[actor.id]) {
+        clearTimeout(actorDebounceTimers[actor.id]);
+        delete actorDebounceTimers[actor.id];
     }
-}
-
-function submitDeleteCategory() {
-    if (!selectedCategory.value) return;
-    categoryForm.delete(route('policy.procedure.category.destroy', selectedCategory.value.id), {
+    saveStatuses.value[`actor_${actor.id}`] = 'saving';
+    
+    router.put(route('policy.procedure.actor.update', actor.id), {
+        name: actorLocal.value[actor.id]?.name || '',
+        organization_id: actorLocal.value[actor.id]?.organization_id || '',
+        regulation_id: activeRegulation.value?.id || '',
+    }, {
         preserveScroll: true,
         onSuccess: () => {
-            isDeleteCategoryModalOpen.value = false;
-            selectedCategory.value = null;
+            saveStatuses.value[`actor_${actor.id}`] = 'saved';
+            setTimeout(() => {
+                if (saveStatuses.value[`actor_${actor.id}`] === 'saved') {
+                    saveStatuses.value[`actor_${actor.id}`] = null;
+                }
+            }, 3000);
+        },
+        onError: () => {
+            saveStatuses.value[`actor_${actor.id}`] = 'error';
+        }
+    });
+}
+
+function deleteActorDirectly(actor) {
+    Swal.fire({
+        title: 'Hapus Aktor',
+        text: `Apakah Anda yakin ingin menghapus aktor '${actor.name}'?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#821f44',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Ya, Hapus',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            router.delete(route('policy.procedure.actor.destroy', actor.id), {
+                preserveScroll: true,
+                onSuccess: () => {
+                    Swal.fire({
+                        title: 'Dihapus!',
+                        text: 'Aktor berhasil dihapus.',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end',
+                    });
+                }
+            });
+        }
+    });
+}
+
+const hasSavingActor = computed(() => {
+    return Object.keys(saveStatuses.value).some(k => k.startsWith('actor_') && saveStatuses.value[k] === 'saving');
+});
+const hasSavedActor = computed(() => {
+    return Object.keys(saveStatuses.value).some(k => k.startsWith('actor_') && saveStatuses.value[k] === 'saved');
+});
+const hasErrorActor = computed(() => {
+    return Object.keys(saveStatuses.value).some(k => k.startsWith('actor_') && saveStatuses.value[k] === 'error');
+});
+
+// Category Actions
+function addCategoryDirectly() {
+    router.post(route('policy.procedure.category.store'), {
+        regulation_id: activeRegulation.value?.id || '',
+        tipe: 'Kategori Baru',
+    }, {
+        preserveScroll: true,
+        onSuccess: () => {
             Swal.fire({
-                title: 'Dihapus!',
-                text: 'Kategori SOP berhasil dihapus.',
+                title: 'Berhasil!',
+                text: 'Kategori baru telah ditambahkan.',
                 icon: 'success',
-                timer: 2000,
+                timer: 1500,
                 showConfirmButton: false,
                 toast: true,
                 position: 'top-end',
@@ -615,106 +821,82 @@ function submitDeleteCategory() {
     });
 }
 
-// ---------------------------------------------------
-// SOP CRUD
-// ---------------------------------------------------
-const isSopModalOpen = ref(false);
-const isDeleteSopModalOpen = ref(false);
-const editingSopId = ref(null);
-const selectedSop = ref(null);
-const activeCategoryId = ref(null);
-
-const sopForm = useForm({
-    category_id: '',
-    description: '',
-});
-
-const activeCategoryForSop = computed(() => {
-    return props.categories.find(c => Number(c.id) === Number(activeCategoryId.value)) || null;
-});
-
-const activeSopTitle = computed(() => {
-    return activeCategoryForSop.value ? activeCategoryForSop.value.tipe : '';
-});
-
-function openAddSopModal(categoryId) {
-    activeCategoryId.value = categoryId;
-    editingSopId.value = null;
-    sopForm.reset();
-    sopForm.clearErrors();
-    sopForm.category_id = categoryId;
-    isSopModalOpen.value = true;
+function handleCategoryInput(cat) {
+    saveStatuses.value[`category_${cat.id}`] = 'saving';
+    if (categoryDebounceTimers[cat.id]) clearTimeout(categoryDebounceTimers[cat.id]);
+    categoryDebounceTimers[cat.id] = setTimeout(() => {
+        saveCategory(cat);
+    }, 1500);
 }
 
-function openEditSopModal(item) {
-    activeCategoryId.value = item.category_id;
-    editingSopId.value = item.id;
-    sopForm.category_id = item.category_id;
-    sopForm.description = item.description || '';
-    sopForm.clearErrors();
-    isSopModalOpen.value = true;
-}
-
-function openDeleteSopModal(item) {
-    selectedSop.value = item;
-    activeCategoryId.value = item?.category_id;
-    isDeleteSopModalOpen.value = true;
-}
-
-function closeSopModal() {
-    isSopModalOpen.value = false;
-    editingSopId.value = null;
-    sopForm.reset();
-}
-
-function submitSopForm() {
-    if (editingSopId.value) {
-        sopForm.put(route('policy.procedure.sop.update', editingSopId.value), {
-            preserveScroll: true,
-            onSuccess: () => {
-                closeSopModal();
-                Swal.fire({
-                    title: 'Berhasil!',
-                    text: 'SOP berhasil diperbarui.',
-                    icon: 'success',
-                    timer: 2000,
-                    showConfirmButton: false,
-                    toast: true,
-                    position: 'top-end',
-                });
-            }
-        });
-    } else {
-        sopForm.post(route('policy.procedure.sop.store'), {
-            preserveScroll: true,
-            onSuccess: () => {
-                closeSopModal();
-                Swal.fire({
-                    title: 'Berhasil!',
-                    text: 'SOP baru telah ditambahkan.',
-                    icon: 'success',
-                    timer: 2000,
-                    showConfirmButton: false,
-                    toast: true,
-                    position: 'top-end',
-                });
-            }
-        });
+function saveCategory(cat) {
+    if (categoryDebounceTimers[cat.id]) {
+        clearTimeout(categoryDebounceTimers[cat.id]);
+        delete categoryDebounceTimers[cat.id];
     }
-}
-
-function submitDeleteSop() {
-    if (!selectedSop.value) return;
-    sopForm.delete(route('policy.procedure.sop.destroy', selectedSop.value.id), {
+    saveStatuses.value[`category_${cat.id}`] = 'saving';
+    
+    router.put(route('policy.procedure.category.update', cat.id), {
+        tipe: categoryLocal.value[cat.id]?.tipe || '',
+    }, {
         preserveScroll: true,
         onSuccess: () => {
-            isDeleteSopModalOpen.value = false;
-            selectedSop.value = null;
+            saveStatuses.value[`category_${cat.id}`] = 'saved';
+            setTimeout(() => {
+                if (saveStatuses.value[`category_${cat.id}`] === 'saved') {
+                    saveStatuses.value[`category_${cat.id}`] = null;
+                }
+            }, 3000);
+        },
+        onError: () => {
+            saveStatuses.value[`category_${cat.id}`] = 'error';
+        }
+    });
+}
+
+function deleteCategoryDirectly(cat) {
+    Swal.fire({
+        title: 'Hapus Kategori',
+        text: `Apakah Anda yakin ingin menghapus kategori '${cat.tipe}' beserta seluruh SOP di dalamnya?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#821f44',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Ya, Hapus',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            router.delete(route('policy.procedure.category.destroy', cat.id), {
+                preserveScroll: true,
+                onSuccess: () => {
+                    Swal.fire({
+                        title: 'Dihapus!',
+                        text: 'Kategori berhasil dihapus.',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end',
+                    });
+                }
+            });
+        }
+    });
+}
+
+// SOP Actions
+function addSopDirectly(categoryId) {
+    router.post(route('policy.procedure.sop.store'), {
+        category_id: categoryId,
+        description: 'Aktivitas SOP Baru',
+    }, {
+        preserveScroll: true,
+        onSuccess: () => {
             Swal.fire({
-                title: 'Dihapus!',
-                text: 'SOP berhasil dihapus.',
+                title: 'Berhasil!',
+                text: 'SOP baru telah ditambahkan.',
                 icon: 'success',
-                timer: 2000,
+                timer: 1500,
                 showConfirmButton: false,
                 toast: true,
                 position: 'top-end',
@@ -723,9 +905,181 @@ function submitDeleteSop() {
     });
 }
 
-function scrollToActors() {
-    actorSection.value?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+function handleSopInput(item) {
+    saveStatuses.value[`sop_${item.id}`] = 'saving';
+    if (sopDebounceTimers[item.id]) clearTimeout(sopDebounceTimers[item.id]);
+    sopDebounceTimers[item.id] = setTimeout(() => {
+        saveSop(item);
+    }, 1500);
 }
+
+function saveSop(item) {
+    if (sopDebounceTimers[item.id]) {
+        clearTimeout(sopDebounceTimers[item.id]);
+        delete sopDebounceTimers[item.id];
+    }
+    saveStatuses.value[`sop_${item.id}`] = 'saving';
+    
+    router.put(route('policy.procedure.sop.update', item.id), {
+        category_id: sopLocal.value[item.id]?.category_id,
+        description: sopLocal.value[item.id]?.description || '',
+    }, {
+        preserveScroll: true,
+        onSuccess: () => {
+            saveStatuses.value[`sop_${item.id}`] = 'saved';
+            setTimeout(() => {
+                if (saveStatuses.value[`sop_${item.id}`] === 'saved') {
+                    saveStatuses.value[`sop_${item.id}`] = null;
+                }
+            }, 3000);
+        },
+        onError: () => {
+            saveStatuses.value[`sop_${item.id}`] = 'error';
+        }
+    });
+}
+
+function deleteSopDirectly(item) {
+    Swal.fire({
+        title: 'Hapus SOP',
+        text: `Apakah Anda yakin ingin menghapus SOP '${shortSopDescription(item.description)}'?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#821f44',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Ya, Hapus',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            router.delete(route('policy.procedure.sop.destroy', item.id), {
+                preserveScroll: true,
+                onSuccess: () => {
+                    Swal.fire({
+                        title: 'Dihapus!',
+                        text: 'SOP berhasil dihapus.',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end',
+                    });
+                }
+            });
+        }
+    });
+}
+
+const hasSavingProsedur = computed(() => {
+    return Object.keys(saveStatuses.value).some(k => (k.startsWith('sop_') || k.startsWith('category_')) && saveStatuses.value[k] === 'saving');
+});
+const hasSavedProsedur = computed(() => {
+    return Object.keys(saveStatuses.value).some(k => (k.startsWith('sop_') || k.startsWith('category_')) && saveStatuses.value[k] === 'saved');
+});
+const hasErrorProsedur = computed(() => {
+    return Object.keys(saveStatuses.value).some(k => (k.startsWith('sop_') || k.startsWith('category_')) && saveStatuses.value[k] === 'error');
+});
+
+// Section Actions
+function addSectionDirectly() {
+    const maxOrder = props.tkoSections.reduce((max, s) => Math.max(max, s.order || 0), 0);
+    let nextOrder = maxOrder + 1;
+    if (nextOrder === 4 || nextOrder === 5) {
+        nextOrder = 6;
+    }
+    
+    router.post(route('policy.procedure.section.store'), {
+        regulation_id: activeRegulation.value?.id || '',
+        name: 'Section Baru',
+        order: nextOrder,
+    }, {
+        preserveScroll: true,
+        onSuccess: () => {
+            Swal.fire({
+                title: 'Berhasil!',
+                text: 'Section baru telah ditambahkan.',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end',
+            });
+        }
+    });
+}
+
+function handleSectionInput(sec) {
+    saveStatuses.value[`section_${sec.id}`] = 'saving';
+    if (sectionDebounceTimers[sec.id]) clearTimeout(sectionDebounceTimers[sec.id]);
+    sectionDebounceTimers[sec.id] = setTimeout(() => {
+        saveSection(sec);
+    }, 1500);
+}
+
+function saveSection(sec) {
+    if (sectionDebounceTimers[sec.id]) {
+        clearTimeout(sectionDebounceTimers[sec.id]);
+        delete sectionDebounceTimers[sec.id];
+    }
+    saveStatuses.value[`section_${sec.id}`] = 'saving';
+    
+    router.put(route('policy.procedure.section.update', sec.id), {
+        name: sectionLocal.value[sec.id]?.name || '',
+        order: sectionLocal.value[sec.id]?.order || 1,
+    }, {
+        preserveScroll: true,
+        onSuccess: () => {
+            saveStatuses.value[`section_${sec.id}`] = 'saved';
+            setTimeout(() => {
+                if (saveStatuses.value[`section_${sec.id}`] === 'saved') {
+                    saveStatuses.value[`section_${sec.id}`] = null;
+                }
+            }, 3000);
+        },
+        onError: () => {
+            saveStatuses.value[`section_${sec.id}`] = 'error';
+        }
+    });
+}
+
+function deleteSectionDirectly(sec) {
+    Swal.fire({
+        title: 'Hapus Section',
+        text: `Apakah Anda yakin ingin menghapus section '${sec.name}' beserta seluruh konten di dalamnya?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#821f44',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Ya, Hapus',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            router.delete(route('policy.procedure.section.destroy', sec.id), {
+                preserveScroll: true,
+                onSuccess: () => {
+                    Swal.fire({
+                        title: 'Dihapus!',
+                        text: 'Section berhasil dihapus.',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end',
+                    });
+                }
+            });
+        }
+    });
+}
+
+const hasSavingSection = computed(() => {
+    return Object.keys(saveStatuses.value).some(k => k.startsWith('section_') && saveStatuses.value[k] === 'saving');
+});
+const hasSavedSection = computed(() => {
+    return Object.keys(saveStatuses.value).some(k => k.startsWith('section_') && saveStatuses.value[k] === 'saved');
+});
+const hasErrorSection = computed(() => {
+    return Object.keys(saveStatuses.value).some(k => k.startsWith('section_') && saveStatuses.value[k] === 'error');
+});
 
 function tightSopText(text) {
     if (!text) return '';
@@ -754,7 +1108,6 @@ function shortSopDescription(text) {
         opacity: 0;
         transform: translateY(12px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);

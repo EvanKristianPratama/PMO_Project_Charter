@@ -9,6 +9,8 @@ use App\Models\MstSop;
 use App\Models\TrsMapActorSop;
 use App\Models\TrsOrganization;
 use App\Models\TrsSopCategory;
+use App\Models\TrsTkoSections;
+use App\Models\TrsTkoContent;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -76,6 +78,35 @@ class ProcedureController extends Controller
             ->orderBy('id')
             ->get();
 
+        if ($selectedRegulation) {
+            $hasCustomSections = TrsTkoSections::where('regulation_id', $selectedRegulation->id)->exists();
+            if (!$hasCustomSections) {
+                $defaultSections = TrsTkoSections::whereNull('regulation_id')->orderBy('order')->get();
+                foreach ($defaultSections as $defSec) {
+                    $newSec = TrsTkoSections::create([
+                        'name' => $defSec->name,
+                        'order' => $defSec->order,
+                        'regulation_id' => $selectedRegulation->id,
+                    ]);
+                    TrsTkoContent::where('section_id', $defSec->id)
+                        ->where('regulation_id', $selectedRegulation->id)
+                        ->update(['section_id' => $newSec->id]);
+                }
+            }
+        }
+
+        $tkoSections = [];
+        if ($selectedRegulation) {
+            $tkoSections = TrsTkoSections::with(['contents' => function ($q) use ($selectedRegulation) {
+                $q->where('regulation_id', $selectedRegulation->id);
+            }])
+            ->where('regulation_id', $selectedRegulation->id)
+            ->orderBy('order')
+            ->get();
+        } else {
+            $tkoSections = TrsTkoSections::with('contents')->whereNull('regulation_id')->orderBy('order')->get();
+        }
+
         return Inertia::render('Policy/Procedure/Index', [
             'actors' => $actors,
             'sop' => $sop,
@@ -84,6 +115,7 @@ class ProcedureController extends Controller
             'organizations' => $organizations,
             'selectedRegulationId' => $selectedRegulation?->id,
             'categories' => $categories,
+            'tkoSections' => $tkoSections,
         ]);
     }
 
@@ -146,6 +178,35 @@ class ProcedureController extends Controller
             ->orderBy('id')
             ->get();
 
+        if ($selectedRegulation) {
+            $hasCustomSections = TrsTkoSections::where('regulation_id', $selectedRegulation->id)->exists();
+            if (!$hasCustomSections) {
+                $defaultSections = TrsTkoSections::whereNull('regulation_id')->orderBy('order')->get();
+                foreach ($defaultSections as $defSec) {
+                    $newSec = TrsTkoSections::create([
+                        'name' => $defSec->name,
+                        'order' => $defSec->order,
+                        'regulation_id' => $selectedRegulation->id,
+                    ]);
+                    TrsTkoContent::where('section_id', $defSec->id)
+                        ->where('regulation_id', $selectedRegulation->id)
+                        ->update(['section_id' => $newSec->id]);
+                }
+            }
+        }
+
+        $tkoSections = [];
+        if ($selectedRegulation) {
+            $tkoSections = TrsTkoSections::with(['contents' => function ($q) use ($selectedRegulation) {
+                $q->where('regulation_id', $selectedRegulation->id);
+            }])
+            ->where('regulation_id', $selectedRegulation->id)
+            ->orderBy('order')
+            ->get();
+        } else {
+            $tkoSections = TrsTkoSections::with('contents')->whereNull('regulation_id')->orderBy('order')->get();
+        }
+
         return Inertia::render('Policy/Procedure/Manage', [
             'actors' => $actors,
             'sop' => $sop,
@@ -154,6 +215,7 @@ class ProcedureController extends Controller
             'organizations' => $organizations,
             'selectedRegulationId' => $selectedRegulation?->id,
             'categories' => $categories,
+            'tkoSections' => $tkoSections,
         ]);
     }
 
@@ -380,5 +442,76 @@ class ProcedureController extends Controller
             ->where('actor_id', $mapping['actor_id'])
             ->when($ignoreId, fn ($query) => $query->where('id', '!=', $ignoreId))
             ->exists();
+    }
+
+    /**
+     * Store or update TKO content.
+     */
+    public function storeOrUpdateTkoContent(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'regulation_id' => 'required|exists:mst_regulation,id',
+            'section_id' => 'required|exists:trs_tko_sections,id',
+            'content' => 'nullable|string',
+        ]);
+
+        TrsTkoContent::updateOrCreate(
+            [
+                'regulation_id' => $validated['regulation_id'],
+                'section_id' => $validated['section_id'],
+            ],
+            [
+                'content' => $validated['content'],
+            ]
+        );
+
+        return back()->with('success', 'Konten TKO berhasil disimpan.');
+    }
+
+    /**
+     * Store a newly created TKO section.
+     */
+    public function storeSection(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'regulation_id' => 'required|exists:mst_regulation,id',
+            'name' => 'required|string|max:255',
+            'order' => 'required|integer',
+        ]);
+
+        TrsTkoSections::create($validated);
+
+        return back()->with('success', 'Section TKO berhasil ditambahkan.');
+    }
+
+    /**
+     * Update the specified TKO section.
+     */
+    public function updateSection(Request $request, $id): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'order' => 'required|integer',
+        ]);
+
+        $section = TrsTkoSections::findOrFail($id);
+        $section->update($validated);
+
+        return back()->with('success', 'Section TKO berhasil diperbarui.');
+    }
+
+    /**
+     * Remove the specified TKO section.
+     */
+    public function destroySection($id): RedirectResponse
+    {
+        $section = TrsTkoSections::findOrFail($id);
+        
+        // Delete associated contents first
+        TrsTkoContent::where('section_id', $section->id)->delete();
+        
+        $section->delete();
+
+        return back()->with('success', 'Section TKO berhasil dihapus.');
     }
 }
