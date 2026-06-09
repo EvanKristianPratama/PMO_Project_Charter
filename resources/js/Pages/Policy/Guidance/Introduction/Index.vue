@@ -83,7 +83,7 @@
 
         <div class="fixed bottom-8 right-8 z-50 flex flex-col gap-4 print:hidden">
             <button @click="printDocument" title="Cetak PDF"
-                class="group flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white/90 shadow-2xl backdrop-blur-md transition-all hover:bg-white hover:text-[#821f44] dark:border-white/10 dark:bg-[#1a1a1a]/90 dark:text-slate-300 dark:hover:bg-[#1a1a1a] active:scale-95">
+                class="group flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white/40 shadow-2xl backdrop-blur-md transition-all hover:bg-white hover:text-[#821f44] dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-[#1a1a1a] active:scale-95">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                     stroke="currentColor" class="w-5 h-5 transition-transform group-hover:-translate-y-0.5">
                     <path stroke-linecap="round" stroke-linejoin="round"

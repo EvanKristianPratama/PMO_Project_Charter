@@ -115,18 +115,18 @@ export function useNavigation() {
                     (url || '').startsWith("/program-evalution/review-aktor"),
             },
             {
-                label: "Report",
-                href: safeRoute("program-evaluation.report"),
-                icon: DocumentTextIcon,
-                active: (url) =>
-                    (url || '').startsWith("/program-evalution/report"),
-            },
-            {
                 label: "Review Document",
                 href: safeRoute("program-evaluation.review-document"),
                 icon: ClipboardDocumentCheckIcon,
                 active: (url) =>
                     (url || '').startsWith("/program-evalution/review-document"),
+            },
+            {
+                label: "Report",
+                href: safeRoute("program-evaluation.report"),
+                icon: DocumentTextIcon,
+                active: (url) =>
+                    (url || '').startsWith("/program-evalution/report"),
             },
         ];
 

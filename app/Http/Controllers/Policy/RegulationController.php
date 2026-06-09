@@ -125,4 +125,120 @@ class RegulationController extends Controller
             ->route('policy.regulation.index')
             ->with('success', 'Regulasi Kebijakan berhasil dihapus.');
     }
+
+    /**
+     * Get the preview data for a specific regulation.
+     */
+    public function previewData(int $id)
+    {
+        $regulation = MstRegulation::with('organization')->findOrFail($id);
+
+        if (strtolower($regulation->tipe ?? '') === 'procedure') {
+            $actors = \App\Models\MstActor::with('organization')
+                ->where('regulation_id', $regulation->id)
+                ->get();
+
+            $categories = \App\Models\TrsSopCategory::where('regulation_id', $regulation->id)
+                ->orderBy('id')
+                ->get();
+
+            $sop = \App\Models\MstSop::with(['category', 'regulation.organization'])
+                ->whereHas('category', function ($q) use ($regulation) {
+                    $q->where('regulation_id', $regulation->id);
+                })
+                ->orderBy('category_id')
+                ->orderBy('id')
+                ->get();
+
+            $flowChartSops = \App\Models\MstSop::with(['category', 'mapActorSops.actor.organization'])
+                ->whereHas('category', function ($q) use ($regulation) {
+                    $q->where('regulation_id', $regulation->id);
+                })
+                ->orderBy('category_id')
+                ->orderBy('id')
+                ->get();
+
+            // Auto-create default sections if they do not exist
+            $hasCustomSections = \App\Models\TrsTkoSections::where('regulation_id', $regulation->id)->exists();
+            if (!$hasCustomSections) {
+                $defaultSections = \App\Models\TrsTkoSections::whereNull('regulation_id')->orderBy('order')->get();
+                foreach ($defaultSections as $defSec) {
+                    $newSec = \App\Models\TrsTkoSections::create([
+                        'name' => $defSec->name,
+                        'order' => $defSec->order,
+                        'regulation_id' => $regulation->id,
+                    ]);
+                    \App\Models\TrsTkoContent::where('section_id', $defSec->id)
+                        ->where('regulation_id', $regulation->id)
+                        ->update(['section_id' => $newSec->id]);
+                }
+            }
+
+            $tkoSections = \App\Models\TrsTkoSections::with(['contents' => function ($q) use ($regulation) {
+                $q->where('regulation_id', $regulation->id);
+            }])
+            ->where('regulation_id', $regulation->id)
+            ->orderBy('order')
+            ->get();
+
+            return response()->json([
+                'tipe' => 'Procedure',
+                'regulation' => $regulation,
+                'actors' => $actors,
+                'categories' => $categories,
+                'sop' => $sop,
+                'flowChartSops' => $flowChartSops,
+                'tkoSections' => $tkoSections,
+            ]);
+        } else {
+            $policies = $regulation->generalPolicies()->orderBy('number')->get();
+
+            $objectives = \App\Models\MstObjective::with(['practices' => function($query) {
+                $query->orderBy('practice_id', 'asc');
+            }])
+            ->where('regulation_id', $regulation->id)
+            ->orderByRaw("
+                CASE 
+                    WHEN objective_id LIKE 'EDM%' THEN 1
+                    WHEN objective_id LIKE 'APO%' THEN 2
+                    WHEN objective_id LIKE 'BAI%' THEN 3
+                    WHEN objective_id LIKE 'DSS%' THEN 4
+                    WHEN objective_id LIKE 'MEA%' THEN 5
+                    ELSE 6
+                END ASC
+            ")
+            ->orderBy('objective_id', 'asc')
+            ->get();
+
+            if ($objectives->isEmpty()) {
+                $objectives = \App\Models\MstObjective::with(['practices' => function($query) {
+                    $query->orderBy('practice_id', 'asc');
+                }])
+                ->orderByRaw("
+                    CASE 
+                        WHEN objective_id LIKE 'EDM%' THEN 1
+                        WHEN objective_id LIKE 'APO%' THEN 2
+                        WHEN objective_id LIKE 'BAI%' THEN 3
+                        WHEN objective_id LIKE 'DSS%' THEN 4
+                        WHEN objective_id LIKE 'MEA%' THEN 5
+                        ELSE 6
+                    END ASC
+                ")
+                ->orderBy('objective_id', 'asc')
+                ->get();
+            }
+
+            $roles = \App\Models\MstRole::with(['responsibilities' => function ($query) {
+                $query->orderBy('id', 'asc');
+            }])->orderBy('id', 'asc')->get();
+
+            return response()->json([
+                'tipe' => 'Policy',
+                'regulation' => $regulation,
+                'policies' => $policies,
+                'objectives' => $objectives,
+                'roles' => $roles,
+            ]);
+        }
+    }
 }
