@@ -268,7 +268,7 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted, onUpdated, onBeforeUnmount } from 'vue';
+import { computed, ref, onMounted, onUpdated, onBeforeUnmount, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import Swal from 'sweetalert2';
@@ -290,37 +290,43 @@ const props = defineProps({
         type: String,
         default: null,
     },
+    categories: {
+        type: Array,
+        default: () => [],
+    },
 });
 
-const flowCategories = [
-    { value: 'A', shortLabel: 'A. Penyusunan', label: 'A. Penyusunan RSTI' },
-    { value: 'B', shortLabel: 'B. Reviu Berkala', label: 'B. Reviu & Pembaruan Berkala RSTI' },
-];
-
-const roleDefinitions = [
-    { actorId: 6, fallbackLabel: 'FUNGSI ITSP' },
-    { actorId: 2, fallbackLabel: 'DIREKTUR TEKNIS' },
-    { actorId: 9, fallbackLabel: 'FUNGSI TERKAIT IT LAINNYA' },
-    { actorId: 12, fallbackLabel: 'DIREKTUR UTAMA' },
-];
+const flowCategories = computed(() => {
+    return props.categories.map((cat) => ({
+        value: String(cat.id),
+        shortLabel: cat.tipe.length > 22 ? `${cat.tipe.slice(0, 20)}...` : cat.tipe,
+        label: cat.tipe,
+    }));
+});
 
 const rowHeight = 140;
-const activeFlowType = ref(props.flowType || 'A');
+const activeFlowType = ref(props.flowType || '');
+
+watch(() => props.categories, (newCats) => {
+    if (!activeFlowType.value && newCats && newCats.length > 0) {
+        activeFlowType.value = String(newCats[0].id);
+    }
+}, { immediate: true });
 
 const activeCategory = computed(() => {
-    return flowCategories.find((category) => category.value === activeFlowType.value) ?? flowCategories[0];
+    return flowCategories.value.find((category) => category.value === activeFlowType.value) ?? flowCategories.value[0];
 });
 
 const sopsForActiveType = computed(() => {
-    return (props.sops || []).filter((item) => item?.tipe === activeFlowType.value);
+    return (props.sops || []).filter((item) => String(item?.category_id) === String(activeFlowType.value));
 });
 
 const rows = computed(() => sopsForActiveType.value);
 
 const activeDiagramMappings = computed(() => {
     return (props.sops || [])
+        .filter((sop) => String(sop?.category_id) === String(activeFlowType.value))
         .flatMap((sop) => getMapList(sop).map((mapping) => normalizeMapping(mapping, sop)))
-        .filter((mapping) => mapping.flowType === activeFlowType.value)
         .sort((a, b) => {
             if (Number(a.sop_id) !== Number(b.sop_id)) return Number(a.sop_id) - Number(b.sop_id);
             return String(a.actorName).localeCompare(String(b.actorName));
@@ -340,16 +346,20 @@ const roleColumns = computed(() => {
         if (Number.isFinite(id) && !ids.includes(id)) ids.push(id);
     };
 
-    roleDefinitions.forEach((definition) => addId(definition.actorId));
-    mappedActorIds.value.forEach(addId);
+    (mappedActorIds.value || []).forEach(addId);
+
+    // Sort IDs by their order in props.actors to maintain input order consistency
+    ids.sort((a, b) => {
+        const indexA = props.actors.findIndex(item => Number(item.id) === a);
+        const indexB = props.actors.findIndex(item => Number(item.id) === b);
+        return indexA - indexB;
+    });
 
     return ids.map((actorId) => {
         const actor = props.actors.find((item) => Number(item.id) === actorId) ?? null;
-        const fallback = roleDefinitions.find((definition) => Number(definition.actorId) === actorId);
-
         return {
             actorId,
-            label: actor?.name || fallback?.fallbackLabel || `AKTOR ${actorId}`,
+            label: actor?.name || `AKTOR ${actorId}`,
         };
     });
 });
@@ -369,13 +379,13 @@ const editingDiagramId = ref(null);
 const selectedDiagramMapping = ref(null);
 
 const diagramForm = useForm({
-    tipe: 'A',
+    tipe: '',
     sop_id: '',
     actor_id: '',
 });
 
 const diagramSopOptions = computed(() => {
-    return (props.sops || []).filter((item) => item?.tipe === diagramForm.tipe);
+    return (props.sops || []).filter((item) => String(item?.category_id) === String(diagramForm.tipe));
 });
 
 function getMapList(row) {
@@ -384,7 +394,7 @@ function getMapList(row) {
 
 function normalizeMapping(mapping, sop) {
     const actor = mapping?.actor || props.actors.find((item) => Number(item.id) === Number(mapping?.actor_id)) || null;
-    const flowType = sop?.tipe || (['A', 'B'].includes(mapping?.tipe) ? mapping.tipe : 'A');
+    const flowType = String(sop?.category_id);
 
     return {
         ...mapping,
@@ -398,12 +408,12 @@ function normalizeMapping(mapping, sop) {
 }
 
 function mappingType(mapping, row) {
-    return row?.tipe || mapping?.flowType || 'A';
+    return String(row?.category_id) || mapping?.flowType || '';
 }
 
 function hasMapping(row, actorId) {
     return getMapList(row).some((mapping) => {
-        return Number(mapping.actor_id) === Number(actorId) && mappingType(mapping, row) === activeFlowType.value;
+        return Number(mapping.actor_id) === Number(actorId);
     });
 }
 

@@ -155,14 +155,13 @@
             <!-- Tab: PROSEDUR -->
             <template v-if="activeTab === 'prosedur'">
                 <template v-if="isManagePage">
-                    <!-- SOP A -->
-                    <section class="space-y-4">
+                    <section v-for="cat in categories" :key="cat.id" class="space-y-4">
                         <div class="flex items-center justify-between gap-4 px-1 print:hidden">
                             <div class="flex items-center gap-2">
                                 <div class="h-5 w-1 rounded-full bg-blue-600"></div>
-                                <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">A. Penyusunan RSTI</h2>
+                                <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">{{ cat.tipe }}</h2>
                             </div>
-                            <button @click="openAddSopModal('A')" class="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 active:scale-95">
+                            <button @click="openAddSopModal(cat.id)" class="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 active:scale-95">
                                 <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
                                 Add SOP
                             </button>
@@ -174,46 +173,10 @@
                                         <tr><th class="px-3 py-3 w-10 text-right">No</th><th class="px-6 py-3">Deskripsi</th><th class="px-6 py-3 w-32 text-center">Action</th></tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-200 dark:divide-white/10">
-                                        <tr v-if="sopA.length === 0"><td colspan="3" class="px-6 py-7 text-center text-slate-400">Belum ada data SOP untuk kategori ini.</td></tr>
-                                        <tr v-for="(item, index) in sopA" :key="item.id" class="group hover:bg-slate-50/50 dark:hover:bg-white/5">
+                                        <tr v-if="getSopsForCategory(cat.id).length === 0"><td colspan="3" class="px-6 py-7 text-center text-slate-400">Belum ada data SOP untuk kategori ini.</td></tr>
+                                        <tr v-for="(item, index) in getSopsForCategory(cat.id)" :key="item.id" class="group hover:bg-slate-50/50 dark:hover:bg-white/5">
                                             <td class="px-3 py-2 text-right font-medium">{{ index + 1 }}</td>
                                             <td class="px-6 py-2 whitespace-pre-line break-words text-slate-900 dark:text-white">{{ item.description }}</td>
-                                            <td class="px-6 py-2 text-center">
-                                                <div class="flex items-center justify-center gap-3">
-                                                    <button @click="openEditSopModal(item)" class="text-[9px] font-bold uppercase tracking-wider text-blue-600">Edit</button>
-                                                    <button @click="openDeleteSopModal(item)" class="text-[9px] font-bold uppercase tracking-wider text-rose-600">Delete</button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- SOP B -->
-                    <section class="space-y-4">
-                        <div class="flex items-center justify-between gap-4 px-1 print:hidden">
-                            <div class="flex items-center gap-2">
-                                <div class="h-5 w-1 rounded-full bg-emerald-600"></div>
-                                <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">B. Reviu & Pembaruan Berkala RSTI</h2>
-                            </div>
-                            <button @click="openAddSopModal('B')" class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 active:scale-95">
-                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
-                                Add SOP
-                            </button>
-                        </div>
-                        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                            <div class="overflow-x-auto">
-                                <table class="w-full border-collapse text-left text-[11px]">
-                                    <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
-                                        <tr><th class="px-3 py-3 w-10 text-right">No</th><th class="px-6 py-3">Deskripsi</th><th class="px-6 py-3 w-32 text-center">Action</th></tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-slate-200 dark:divide-white/10">
-                                        <tr v-if="sopB.length === 0"><td colspan="3" class="px-6 py-7 text-center text-slate-400">Belum ada data SOP untuk kategori ini.</td></tr>
-                                        <tr v-for="(item, index) in sopB" :key="item.id" class="group hover:bg-slate-50/50 dark:hover:bg-white/5">
-                                            <td class="px-3 py-2 text-right font-medium">{{ index + 1 }}</td>
-                                            <td class="px-6 py-2 whitespace-pre-line break-words text-slate-900 dark:text-white">{{ tightSopText(item.description) }}</td>
                                             <td class="px-6 py-2 text-center">
                                                 <div class="flex items-center justify-center gap-3">
                                                     <button @click="openEditSopModal(item)" class="text-[9px] font-bold uppercase tracking-wider text-blue-600">Edit</button>
@@ -236,24 +199,15 @@
                         </div>
 
                         <div class="mt-6 space-y-8 font-serif text-[15px] leading-relaxed text-slate-900 dark:text-slate-100">
-                            <div>
-                                <h4 class="mb-3 font-bold text-slate-950 dark:text-white">A. Penyusunan RSTI</h4>
+                            <div v-if="categories.length === 0" class="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-center text-slate-400">Belum ada data SOP untuk regulasi ini.</div>
+                            <div v-for="cat in categories" :key="cat.id">
+                                <h4 class="mb-3 font-bold text-slate-950 dark:text-white">{{ cat.tipe }}</h4>
                                 <div class="space-y-3">
-                                    <div v-for="(item, index) in sopA" :key="item.id" class="flex gap-3 items-start">
+                                    <div v-for="(item, index) in getSopsForCategory(cat.id)" :key="item.id" class="flex gap-3 items-start">
                                         <span class="font-bold min-w-[20px] text-right select-none">{{ index + 1 }}.</span>
                                         <p class="whitespace-pre-line text-justify">{{ item.description }}</p>
                                     </div>
-                                    <div v-if="sopA.length === 0" class="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-center text-slate-400">Belum ada data SOP untuk kategori ini.</div>
-                                </div>
-                            </div>
-                            <div>
-                                <h4 class="mb-3 font-bold text-slate-950 dark:text-white">B. Reviu & Pembaruan Berkala RSTI</h4>
-                                <div class="space-y-3">
-                                    <div v-for="(item, index) in sopB" :key="item.id" class="flex gap-3 items-start">
-                                        <span class="font-bold min-w-[20px] text-right select-none">{{ index + 1 }}.</span>
-                                        <p class="whitespace-pre-line text-justify">{{ tightSopText(item.description) }}</p>
-                                    </div>
-                                    <div v-if="sopB.length === 0" class="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-center text-slate-400">Belum ada data SOP untuk kategori ini.</div>
+                                    <div v-if="getSopsForCategory(cat.id).length === 0" class="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-center text-slate-400">Belum ada data SOP untuk kategori ini.</div>
                                 </div>
                             </div>
                         </div>
@@ -272,7 +226,7 @@
                         <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                             <div class="overflow-x-auto">
                                 <div class="min-w-[1200px] p-4">
-                                    <FlowChart :actors="actors" :sops="flowChartSops" />
+                                    <FlowChart :actors="actors" :sops="flowChartSops" :categories="categories" />
                                 </div>
                             </div>
                         </div>
@@ -284,13 +238,14 @@
                             <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide border-b border-slate-900/10 pb-2 dark:border-white/10">VI. DIAGRAM ALIR</h3>
                         </div>
                         <div class="space-y-6">
-                            <div v-for="diagram in procedureDiagramSections" :key="diagram.value" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                            <div v-if="categories.length === 0" class="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-center text-slate-400">Belum ada data diagram untuk regulasi ini.</div>
+                            <div v-for="cat in categories" :key="cat.id" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                                 <div class="border-b border-slate-200 px-5 py-3 dark:border-white/10">
-                                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">{{ diagram.label }}</h3>
+                                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">{{ cat.tipe }}</h3>
                                 </div>
                                 <div class="overflow-x-auto">
                                     <div class="min-w-[1200px] p-4">
-                                        <FlowChart :actors="actors" :sops="flowChartSops" readonly :flow-type="diagram.value" />
+                                        <FlowChart :actors="actors" :sops="flowChartSops" readonly :flow-type="String(cat.id)" :categories="categories" />
                                     </div>
                                 </div>
                             </div>
@@ -357,7 +312,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
@@ -373,14 +328,20 @@ const props = defineProps({
     regulations: { type: Array, default: () => [] },
     organizations: { type: Array, default: () => [] },
     selectedRegulationId: { type: Number, default: null },
+    categories: { type: Array, default: () => [] },
 });
 
 const activeTab = ref('fungsi');
 const selectedRegulationId = ref(props.selectedRegulationId);
+watch(() => props.selectedRegulationId, (newId) => {
+    selectedRegulationId.value = newId;
+});
 const isManagePage = computed(() => route().current('policy.procedure.manage'));
 
-const sopA = computed(() => props.sop?.filter(s => s.tipe === 'A') ?? []);
-const sopB = computed(() => props.sop?.filter(s => s.tipe === 'B') ?? []);
+function getSopsForCategory(categoryId) {
+    if (!props.sop) return [];
+    return props.sop.filter(s => Number(s.category_id) === Number(categoryId));
+}
 
 const activeRegulation = computed(() => {
     if (!selectedRegulationId.value || !props.regulations.length) return props.regulations[0] || null;
@@ -396,10 +357,10 @@ const isActorModalOpen = ref(false);
 const isDeleteActorModalOpen = ref(false);
 const editingActorId = ref(null);
 const selectedActor = ref(null);
-const actorForm = useForm({ name: '', organization_id: '' });
+const actorForm = useForm({ name: '', organization_id: '', regulation_id: '' });
 
-function openAddActorModal() { editingActorId.value = null; actorForm.reset(); actorForm.clearErrors(); isActorModalOpen.value = true; }
-function openEditActorModal(actor) { editingActorId.value = actor.id; actorForm.name = actor.name; actorForm.organization_id = actor.organization_id || ''; actorForm.clearErrors(); isActorModalOpen.value = true; }
+function openAddActorModal() { editingActorId.value = null; actorForm.reset(); actorForm.clearErrors(); actorForm.regulation_id = activeRegulation.value?.id || ''; isActorModalOpen.value = true; }
+function openEditActorModal(actor) { editingActorId.value = actor.id; actorForm.name = actor.name; actorForm.organization_id = actor.organization_id || ''; actorForm.regulation_id = actor.regulation_id || activeRegulation.value?.id || ''; actorForm.clearErrors(); isActorModalOpen.value = true; }
 function openDeleteActorModal(actor) { selectedActor.value = actor; isDeleteActorModalOpen.value = true; }
 function closeActorModal() { isActorModalOpen.value = false; editingActorId.value = null; actorForm.reset(); }
 function submitActorForm() {
@@ -419,14 +380,14 @@ const isSopModalOpen = ref(false);
 const isDeleteSopModalOpen = ref(false);
 const editingSopId = ref(null);
 const selectedSop = ref(null);
-const activeSopType = ref('A');
-const sopForm = useForm({ regulation_id: '', tipe: 'A', description: '' });
-const activeSopTitle = computed(() => activeSopType.value === 'B' ? 'B. Reviu & Pembaruan Berkala RSTI' : 'A. Penyusunan RSTI');
-const procedureDiagramSections = [{ value: 'A', label: 'A. Penyusunan RSTI' }, { value: 'B', label: 'B. Reviu & Pembaruan Berkala RSTI' }];
+const activeCategoryId = ref(null);
+const sopForm = useForm({ category_id: '', description: '' });
+const activeCategoryForSop = computed(() => props.categories.find(c => Number(c.id) === Number(activeCategoryId.value)) || null);
+const activeSopTitle = computed(() => activeCategoryForSop.value ? activeCategoryForSop.value.tipe : '');
 
-function openAddSopModal(tipe) { activeSopType.value = tipe; editingSopId.value = null; sopForm.reset(); sopForm.clearErrors(); sopForm.regulation_id = activeRegulation.value?.id || ''; sopForm.tipe = tipe; isSopModalOpen.value = true; }
-function openEditSopModal(item) { activeSopType.value = item.tipe || 'A'; editingSopId.value = item.id; sopForm.regulation_id = item.regulation_id || activeRegulation.value?.id || ''; sopForm.tipe = item.tipe || 'A'; sopForm.description = item.description || ''; sopForm.clearErrors(); isSopModalOpen.value = true; }
-function openDeleteSopModal(item) { selectedSop.value = item; activeSopType.value = item?.tipe || 'A'; isDeleteSopModalOpen.value = true; }
+function openAddSopModal(categoryId) { activeCategoryId.value = categoryId; editingSopId.value = null; sopForm.reset(); sopForm.clearErrors(); sopForm.category_id = categoryId; isSopModalOpen.value = true; }
+function openEditSopModal(item) { activeCategoryId.value = item.category_id; editingSopId.value = item.id; sopForm.category_id = item.category_id; sopForm.description = item.description || ''; sopForm.clearErrors(); isSopModalOpen.value = true; }
+function openDeleteSopModal(item) { selectedSop.value = item; activeCategoryId.value = item?.category_id; isDeleteSopModalOpen.value = true; }
 function closeSopModal() { isSopModalOpen.value = false; editingSopId.value = null; sopForm.reset(); }
 function submitSopForm() {
     if (editingSopId.value) {

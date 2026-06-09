@@ -349,6 +349,9 @@ Route::middleware(['auth', 'approved'])->group(function () {
         Route::post('/procedure/actor', [ProcedureController::class, 'storeActor'])->name('procedure.actor.store');
         Route::put('/procedure/actor/{id}', [ProcedureController::class, 'updateActor'])->name('procedure.actor.update');
         Route::delete('/procedure/actor/{id}', [ProcedureController::class, 'destroyActor'])->name('procedure.actor.destroy');
+        Route::post('/procedure/category', [ProcedureController::class, 'storeCategory'])->name('procedure.category.store');
+        Route::put('/procedure/category/{id}', [ProcedureController::class, 'updateCategory'])->name('procedure.category.update');
+        Route::delete('/procedure/category/{id}', [ProcedureController::class, 'destroyCategory'])->name('procedure.category.destroy');
         Route::post('/procedure/sop', [ProcedureController::class, 'storeSop'])->name('procedure.sop.store');
         Route::put('/procedure/sop/{id}', [ProcedureController::class, 'updateSop'])->name('procedure.sop.update');
         Route::delete('/procedure/sop/{id}', [ProcedureController::class, 'destroySop'])->name('procedure.sop.destroy');

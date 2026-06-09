@@ -11,7 +11,24 @@ class MstActor extends Model
     protected $fillable = [
         'name',
         'organization_id',
+        'regulation_id',
     ];
+
+    /**
+     * Relasi ke MstRegulation
+     */
+    public function regulation(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(MstRegulation::class, 'regulation_id');
+    }
+
+    /**
+     * Relasi ke MstSop melalui regulation_id
+     */
+    public function sops(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(MstSop::class, 'regulation_id', 'regulation_id');
+    }
 
     /**
      * Relasi ke TrsOrganization

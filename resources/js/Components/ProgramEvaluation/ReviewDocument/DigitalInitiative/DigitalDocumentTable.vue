@@ -49,22 +49,22 @@
                         <button
                             type="button"
                             class="rounded border px-1.5 py-0.5 text-[7px] font-bold uppercase tracking-[0.08em] transition-all"
-                            :class="showMaster
-                                ? 'border-slate-400 bg-slate-100 text-slate-700 hover:bg-slate-200 dark:border-white/20 dark:bg-white/10 dark:text-slate-200 dark:hover:bg-white/15'
-                                : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5'"
-                            @click="showMaster = !showMaster"
-                        >
-                            {{ showMaster ? 'Hide Master' : 'Show Master' }}
-                        </button>
-                        <button
-                            type="button"
-                            class="rounded border px-1.5 py-0.5 text-[7px] font-bold uppercase tracking-[0.08em] transition-all"
                             :class="showRoadmap
                                 ? 'border-slate-400 bg-slate-100 text-slate-700 hover:bg-slate-200 dark:border-white/20 dark:bg-white/10 dark:text-slate-200 dark:hover:bg-white/15'
                                 : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5'"
                             @click="showRoadmap = !showRoadmap"
                         >
                             {{ showRoadmap ? 'Hide Roadmap' : 'Show Roadmap' }}
+                        </button>
+                        <button
+                            type="button"
+                            class="rounded border px-1.5 py-0.5 text-[7px] font-bold uppercase tracking-[0.08em] transition-all"
+                            :class="showMaster
+                                ? 'border-slate-400 bg-slate-100 text-slate-700 hover:bg-slate-200 dark:border-white/20 dark:bg-white/10 dark:text-slate-200 dark:hover:bg-white/15'
+                                : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5'"
+                            @click="showMaster = !showMaster"
+                        >
+                            {{ showMaster ? 'Hide Master' : 'Show Master' }}
                         </button>
                         <button
                             type="button"
@@ -98,16 +98,16 @@
                         <tr>
                             <th rowspan="2" class="border-b border-r border-slate-900 px-4 py-2 text-center dark:border-white/20 w-12">No</th>
                             <th rowspan="2" class="border-b border-r border-slate-900 px-4 py-2 dark:border-white/20">Digital Initiative</th>
-                            <th v-if="showMaster" colspan="2" class="border-b border-r border-slate-900 px-4 py-1 text-center dark:border-white/20">Master</th>
                             <th v-if="showRoadmap" class="border-b border-r border-slate-900 px-4 py-1 text-center dark:border-white/20">Roadmap</th>
+                            <th v-if="showMaster" colspan="2" class="border-b border-r border-slate-900 px-4 py-1 text-center dark:border-white/20">Master</th>
                             <th v-if="showAppendix" colspan="2" class="border-b border-r border-slate-900 px-4 py-1 text-center dark:border-white/20">Appendix</th>
                             <th v-if="showCompendium" colspan="2" class="border-b border-r border-slate-900 px-4 py-1 text-center dark:border-white/20">Compendium</th>
                             <th rowspan="2" class="border-b border-slate-900 px-4 py-2 text-right dark:border-white/20">Aksi</th>
                         </tr>
                         <tr>
+                            <th v-if="showRoadmap" class="border-b border-r border-slate-900 px-4 py-1 text-center dark:border-white/20 w-28">Completeness</th>
                             <th v-if="showMaster" class="border-b border-r border-slate-900 px-4 py-1 text-center dark:border-white/20 w-20">Completeness</th>
                             <th v-if="showMaster" class="border-b border-r border-slate-900 px-4 py-1 dark:border-white/20 min-w-[120px]">Incomplete</th>
-                            <th v-if="showRoadmap" class="border-b border-r border-slate-900 px-4 py-1 text-center dark:border-white/20 w-28">Completeness</th>
                             <th v-if="showAppendix" class="border-b border-r border-slate-900 px-4 py-1 text-center dark:border-white/20 w-20">Completeness</th>
                             <th v-if="showAppendix" class="border-b border-r border-slate-900 px-4 py-1 dark:border-white/20 min-w-[150px]">Incomplete</th>
                             <th v-if="showCompendium" class="border-b border-r border-slate-900 px-4 py-1 text-center dark:border-white/20 w-20">Completeness</th>
@@ -136,6 +136,12 @@
                                     </div>
                                 </td>
 
+                                <!-- Roadmap Completeness -->
+                                <td v-if="showRoadmap" class="border-r border-slate-900 px-4 py-4 text-center dark:border-white/20 font-bold"
+                                    :class="project.roadmap_score === '100%' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-600'">
+                                    {{ project.roadmap_score === '100%' ? 'Available' : 'Not Available' }}
+                                </td>
+
                                 <!-- Master Completeness -->
                                 <td v-if="showMaster" class="border-r border-slate-900 px-4 py-4 text-center dark:border-white/20 font-black"
                                     :class="getScoreColorClass(project.master_score)">
@@ -152,12 +158,6 @@
                                             -
                                         </span>
                                     </div>
-                                </td>
-
-                                <!-- Roadmap Completeness -->
-                                <td v-if="showRoadmap" class="border-r border-slate-900 px-4 py-4 text-center dark:border-white/20 font-bold"
-                                    :class="project.roadmap_score === '100%' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-600'">
-                                    {{ project.roadmap_score === '100%' ? 'Available' : 'Not Available' }}
                                 </td>
 
                                 <!-- Appendix Completeness -->

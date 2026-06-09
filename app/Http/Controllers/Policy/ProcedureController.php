@@ -8,6 +8,7 @@ use App\Models\MstRegulation;
 use App\Models\MstSop;
 use App\Models\TrsMapActorSop;
 use App\Models\TrsOrganization;
+use App\Models\TrsSopCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -21,16 +22,6 @@ class ProcedureController extends Controller
      */
     public function index(Request $request): Response
     {
-        $actors = MstActor::with('organization')->get();
-        $sop = MstSop::with('regulation.organization')
-            ->orderBy('tipe')
-            ->orderBy('id')
-            ->get();
-        $flowChartSops = MstSop::with(['mapActorSops.actor.organization'])
-            ->whereIn('tipe', ['A', 'B'])
-            ->orderBy('tipe')
-            ->orderBy('id')
-            ->get();
         $regulations = MstRegulation::with('organization')->orderBy('id', 'desc')->get();
         $organizations = TrsOrganization::orderBy('name')->get();
 
@@ -42,8 +33,48 @@ class ProcedureController extends Controller
         }
 
         if (!$selectedRegulation) {
+            $selectedRegulation = $regulations->firstWhere('tipe', 'Procedure');
+        }
+
+        if (!$selectedRegulation) {
             $selectedRegulation = $regulations->first();
         }
+
+        $actorsQuery = MstActor::with('organization');
+        if ($selectedRegulation) {
+            $actorsQuery->where('regulation_id', $selectedRegulation->id);
+        }
+        $actors = $actorsQuery->get();
+
+        $categories = [];
+        if ($selectedRegulation) {
+            $categories = TrsSopCategory::where('regulation_id', $selectedRegulation->id)
+                ->orderBy('id')
+                ->get();
+        }
+
+        $sopQuery = MstSop::with(['category', 'regulation.organization']);
+        $flowChartSopsQuery = MstSop::with(['category', 'mapActorSops.actor.organization']);
+
+        if ($selectedRegulation) {
+            $sopQuery->whereHas('category', function ($q) use ($selectedRegulation) {
+                $q->where('regulation_id', $selectedRegulation->id);
+            });
+            $flowChartSopsQuery->whereHas('category', function ($q) use ($selectedRegulation) {
+                $q->where('regulation_id', $selectedRegulation->id);
+            });
+        } else {
+            $sopQuery->whereNull('category_id');
+            $flowChartSopsQuery->whereNull('category_id');
+        }
+
+        $sop = $sopQuery->orderBy('category_id')
+            ->orderBy('id')
+            ->get();
+
+        $flowChartSops = $flowChartSopsQuery->orderBy('category_id')
+            ->orderBy('id')
+            ->get();
 
         return Inertia::render('Policy/Procedure/Index', [
             'actors' => $actors,
@@ -52,6 +83,7 @@ class ProcedureController extends Controller
             'regulations' => $regulations,
             'organizations' => $organizations,
             'selectedRegulationId' => $selectedRegulation?->id,
+            'categories' => $categories,
         ]);
     }
 
@@ -60,16 +92,6 @@ class ProcedureController extends Controller
      */
     public function manage(Request $request): Response
     {
-        $actors = MstActor::with('organization')->get();
-        $sop = MstSop::with('regulation.organization')
-            ->orderBy('tipe')
-            ->orderBy('id')
-            ->get();
-        $flowChartSops = MstSop::with(['mapActorSops.actor.organization'])
-            ->whereIn('tipe', ['A', 'B'])
-            ->orderBy('tipe')
-            ->orderBy('id')
-            ->get();
         $regulations = MstRegulation::with('organization')->orderBy('id', 'desc')->get();
         $organizations = TrsOrganization::orderBy('name')->get();
 
@@ -81,8 +103,48 @@ class ProcedureController extends Controller
         }
 
         if (!$selectedRegulation) {
+            $selectedRegulation = $regulations->firstWhere('tipe', 'Procedure');
+        }
+
+        if (!$selectedRegulation) {
             $selectedRegulation = $regulations->first();
         }
+
+        $actorsQuery = MstActor::with('organization');
+        if ($selectedRegulation) {
+            $actorsQuery->where('regulation_id', $selectedRegulation->id);
+        }
+        $actors = $actorsQuery->get();
+
+        $categories = [];
+        if ($selectedRegulation) {
+            $categories = TrsSopCategory::where('regulation_id', $selectedRegulation->id)
+                ->orderBy('id')
+                ->get();
+        }
+
+        $sopQuery = MstSop::with(['category', 'regulation.organization']);
+        $flowChartSopsQuery = MstSop::with(['category', 'mapActorSops.actor.organization']);
+
+        if ($selectedRegulation) {
+            $sopQuery->whereHas('category', function ($q) use ($selectedRegulation) {
+                $q->where('regulation_id', $selectedRegulation->id);
+            });
+            $flowChartSopsQuery->whereHas('category', function ($q) use ($selectedRegulation) {
+                $q->where('regulation_id', $selectedRegulation->id);
+            });
+        } else {
+            $sopQuery->whereNull('category_id');
+            $flowChartSopsQuery->whereNull('category_id');
+        }
+
+        $sop = $sopQuery->orderBy('category_id')
+            ->orderBy('id')
+            ->get();
+
+        $flowChartSops = $flowChartSopsQuery->orderBy('category_id')
+            ->orderBy('id')
+            ->get();
 
         return Inertia::render('Policy/Procedure/Manage', [
             'actors' => $actors,
@@ -91,6 +153,7 @@ class ProcedureController extends Controller
             'regulations' => $regulations,
             'organizations' => $organizations,
             'selectedRegulationId' => $selectedRegulation?->id,
+            'categories' => $categories,
         ]);
     }
 
@@ -102,6 +165,7 @@ class ProcedureController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'organization_id' => 'required|exists:trs_organization,id',
+            'regulation_id' => 'required|exists:mst_regulation,id',
         ]);
 
         MstActor::create($validated);
@@ -117,6 +181,7 @@ class ProcedureController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'organization_id' => 'required|exists:trs_organization,id',
+            'regulation_id' => 'required|exists:mst_regulation,id',
         ]);
 
         $actor = MstActor::findOrFail($id);
@@ -137,19 +202,68 @@ class ProcedureController extends Controller
     }
 
     /**
+     * Store a newly created SOP Category.
+     */
+    public function storeCategory(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'regulation_id' => 'required|exists:mst_regulation,id',
+            'tipe' => 'required|string|max:255',
+        ]);
+
+        TrsSopCategory::create($validated);
+
+        return back()->with('success', 'Kategori SOP berhasil ditambahkan.');
+    }
+
+    /**
+     * Update the specified SOP Category.
+     */
+    public function updateCategory(Request $request, $id): RedirectResponse
+    {
+        $validated = $request->validate([
+            'tipe' => 'required|string|max:255',
+        ]);
+
+        $category = TrsSopCategory::findOrFail($id);
+        $category->update($validated);
+
+        return back()->with('success', 'Kategori SOP berhasil diperbarui.');
+    }
+
+    /**
+     * Remove the specified SOP Category.
+     */
+    public function destroyCategory($id): RedirectResponse
+    {
+        $category = TrsSopCategory::findOrFail($id);
+
+        foreach ($category->procedure as $sop) {
+            TrsMapActorSop::where('sop_id', $sop->id)->delete();
+            $sop->delete();
+        }
+
+        $category->delete();
+
+        return back()->with('success', 'Kategori SOP berhasil dihapus.');
+    }
+
+    /**
      * Store a newly created SOP item.
      */
     public function storeSop(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'regulation_id' => 'nullable|exists:mst_regulation,id',
-            'tipe' => 'required|in:A,B',
+            'category_id' => 'required|exists:trs_sop_category,id',
             'description' => 'required|string',
         ]);
 
-        MstSop::create($validated);
+        $sop = MstSop::create($validated);
+        $category = TrsSopCategory::findOrFail($validated['category_id']);
 
-        return back()->with('success', 'SOP berhasil ditambahkan.');
+        return redirect()
+            ->route('policy.procedure.manage', ['regulation_id' => $category->regulation_id])
+            ->with('success', 'SOP berhasil ditambahkan.');
     }
 
     /**
@@ -158,15 +272,18 @@ class ProcedureController extends Controller
     public function updateSop(Request $request, int $id): RedirectResponse
     {
         $validated = $request->validate([
-            'regulation_id' => 'nullable|exists:mst_regulation,id',
-            'tipe' => 'required|in:A,B',
+            'category_id' => 'required|exists:trs_sop_category,id',
             'description' => 'required|string',
         ]);
 
         $sop = MstSop::findOrFail($id);
         $sop->update($validated);
 
-        return back()->with('success', 'SOP berhasil diperbarui.');
+        $category = TrsSopCategory::findOrFail($validated['category_id']);
+
+        return redirect()
+            ->route('policy.procedure.manage', ['regulation_id' => $category->regulation_id])
+            ->with('success', 'SOP berhasil diperbarui.');
     }
 
     /**
@@ -175,11 +292,14 @@ class ProcedureController extends Controller
     public function destroySop(int $id): RedirectResponse
     {
         $sop = MstSop::findOrFail($id);
+        $regulationId = $sop->category?->regulation_id;
 
         TrsMapActorSop::where('sop_id', $sop->id)->delete();
         $sop->delete();
 
-        return back()->with('success', 'SOP berhasil dihapus.');
+        return redirect()
+            ->route('policy.procedure.manage', $regulationId ? ['regulation_id' => $regulationId] : [])
+            ->with('success', 'SOP berhasil dihapus.');
     }
 
     /**
@@ -195,9 +315,14 @@ class ProcedureController extends Controller
                 ->withInput();
         }
 
+        $sop = MstSop::findOrFail($validated['sop_id']);
+        $validated['tipe'] = $sop->category?->tipe ?? 'A';
+
         TrsMapActorSop::create($validated);
 
-        return back()->with('success', 'Mapping diagram berhasil ditambahkan.');
+        return redirect()
+            ->route('policy.procedure.manage', ['regulation_id' => $sop->category?->regulation_id])
+            ->with('success', 'Mapping diagram berhasil ditambahkan.');
     }
 
     /**
@@ -214,9 +339,14 @@ class ProcedureController extends Controller
                 ->withInput();
         }
 
+        $sop = MstSop::findOrFail($validated['sop_id']);
+        $validated['tipe'] = $sop->category?->tipe ?? 'A';
+
         $mapping->update($validated);
 
-        return back()->with('success', 'Mapping diagram berhasil diperbarui.');
+        return redirect()
+            ->route('policy.procedure.manage', ['regulation_id' => $sop->category?->regulation_id])
+            ->with('success', 'Mapping diagram berhasil diperbarui.');
     }
 
     /**
@@ -225,19 +355,20 @@ class ProcedureController extends Controller
     public function destroyDiagram(int $id): RedirectResponse
     {
         $mapping = TrsMapActorSop::findOrFail($id);
+        $sop = MstSop::find($mapping->sop_id);
+        $regulationId = $sop ? $sop->category?->regulation_id : null;
+
         $mapping->delete();
 
-        return back()->with('success', 'Mapping diagram berhasil dihapus.');
+        return redirect()
+            ->route('policy.procedure.manage', $regulationId ? ['regulation_id' => $regulationId] : [])
+            ->with('success', 'Mapping diagram berhasil dihapus.');
     }
 
     private function validateDiagramMapping(Request $request): array
     {
         return $request->validate([
-            'tipe' => ['required', Rule::in(['A', 'B'])],
-            'sop_id' => [
-                'required',
-                Rule::exists('mst_sop', 'id')->where(fn ($query) => $query->where('tipe', $request->input('tipe'))),
-            ],
+            'sop_id' => ['required', Rule::exists('mst_sop', 'id')],
             'actor_id' => ['required', Rule::exists('mst_actor', 'id')],
         ]);
     }
@@ -245,7 +376,6 @@ class ProcedureController extends Controller
     private function diagramMappingExists(array $mapping, ?int $ignoreId = null): bool
     {
         return TrsMapActorSop::query()
-            ->where('tipe', $mapping['tipe'])
             ->where('sop_id', $mapping['sop_id'])
             ->where('actor_id', $mapping['actor_id'])
             ->when($ignoreId, fn ($query) => $query->where('id', '!=', $ignoreId))

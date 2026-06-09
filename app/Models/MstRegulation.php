@@ -17,6 +17,7 @@ class MstRegulation extends Model
     public $timestamps = true;
 
     protected $fillable = [
+        'pic_id',
         'judul',
         'nomor',
         'tipe',
@@ -25,7 +26,6 @@ class MstRegulation extends Model
         'revisi',
         'terbit',
         'berlaku',
-        'pic_id',
     ];
 
     protected $casts = [
@@ -42,11 +42,23 @@ class MstRegulation extends Model
     }
 
     /**
-     * Relasi ke MstSop
+     * Relasi ke MstSop via TrsSopCategory
      */
-    public function sops(): HasMany
+    public function sops()
     {
-        return $this->hasMany(MstSop::class, 'regulation_id');
+        return $this->hasManyThrough(
+            MstSop::class,
+            TrsSopCategory::class,
+            'regulation_id', // Foreign key on TrsSopCategory table
+            'category_id',   // Foreign key on MstSop table
+            'id',            // Local key on MstRegulation table
+            'id'             // Local key on TrsSopCategory table
+        );
+    }
+
+    public function sopCategories(): HasMany
+    {
+        return $this->hasMany(TrsSopCategory::class, 'regulation_id');
     }
 
     /**
@@ -64,4 +76,6 @@ class MstRegulation extends Model
     {
         return $this->hasMany(MstObjective::class, 'regulation_id');
     }
+
+
 }
