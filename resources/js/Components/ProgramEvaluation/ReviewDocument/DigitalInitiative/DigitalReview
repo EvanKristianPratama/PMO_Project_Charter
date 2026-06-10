@@ -1,0 +1,478 @@
+<script setup>
+import { computed } from 'vue';
+import { router } from '@inertiajs/vue3';
+
+const props = defineProps({
+    projects: {
+        type: Array,
+        required: true,
+    },
+    showRoadmap: {
+        type: Boolean,
+        default: true,
+    },
+    showMaster: {
+        type: Boolean,
+        default: true,
+    },
+    showAppendix: {
+        type: Boolean,
+        default: true,
+    },
+    showCompendium: {
+        type: Boolean,
+        default: true,
+    },
+});
+
+const coeOrder = [
+    "User Interface and Experience",
+    "Integration and Automation",
+    "Business Application System",
+    "Infrastructure",
+    "Data and Analytics",
+    "Cybersecurity",
+    "People, Process and Technology",
+    "Overall Architecture",
+];
+
+const getProjectNumber = (project) => {
+    if (project.code === undefined || project.code === null) return '?';
+    const codeStr = String(project.code).trim();
+    if (!codeStr) return '?';
+    const parts = codeStr.split('-');
+    const lastPart = parts[parts.length - 1];
+    const num = parseInt(lastPart, 10);
+    return isNaN(num) ? lastPart : num;
+};
+
+const getInitiativeTooltip = (project) => {
+    const code = String(project.code || '').trim();
+    const name = String(project.name || '').trim();
+    const status = String(project.status_name || '').trim();
+    return [code, name, status].filter(Boolean).join(' - ');
+};
+
+const navigateToProject = (project) => {
+    try {
+        if (typeof route === 'function') {
+            router.visit(route('digital-initiatives.show', { digital_initiative: project.id, tab: 'detail' }));
+        } else {
+            router.visit(`/digital-initiatives/${project.id}?tab=detail`);
+        }
+    } catch (e) {
+        router.visit(`/digital-initiatives/${project.id}?tab=detail`);
+    }
+};
+
+const groupedData = computed(() => {
+    const allCoEs = [...new Set(props.projects.map(p => p.coe_name || 'Unassigned'))].sort((a, b) => {
+        const indexA = coeOrder.indexOf(a);
+        const indexB = coeOrder.indexOf(b);
+
+        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+        if (indexA !== -1) return -1;
+        if (indexB !== -1) return 1;
+
+        if (a === 'Unassigned') return 1;
+        if (b === 'Unassigned') return -1;
+        return a.localeCompare(b);
+    });
+
+    return allCoEs.map(coeName => {
+        const projectsInCoe = props.projects.filter(p => (p.coe_name || 'Unassigned') === coeName);
+
+        // Roadmap Status
+        const roadmapAvailable = projectsInCoe.filter(p => p.roadmap_score === '100%');
+        const roadmapNa = projectsInCoe.filter(p => p.roadmap_score === 'X');
+
+        // Master Status
+        const masterComplete = projectsInCoe.filter(p => p.master_score === '100%');
+        const masterIncomplete = projectsInCoe.filter(p => p.master_score !== '100%');
+
+        // Appendix Status
+        const appendixComplete = projectsInCoe.filter(p => p.appendix_score === '100%');
+        const appendixIncomplete = projectsInCoe.filter(p => p.appendix_score !== '100%' && p.appendix_score !== 'X');
+        const appendixNa = projectsInCoe.filter(p => p.appendix_score === 'X');
+
+        // Compendium Status
+        const compendiumComplete = projectsInCoe.filter(p => p.compendium_score === '100%');
+        const compendiumIncomplete = projectsInCoe.filter(p => p.compendium_score !== '100%' && p.compendium_score !== 'X');
+        const compendiumNa = projectsInCoe.filter(p => p.compendium_score === 'X');
+
+        return {
+            category: coeName,
+            total: projectsInCoe.length,
+            roadmap: {
+                available: roadmapAvailable,
+                na: roadmapNa,
+            },
+            master: {
+                complete: masterComplete,
+                incomplete: masterIncomplete,
+            },
+            appendix: {
+                complete: appendixComplete,
+                incomplete: appendixIncomplete,
+                na: appendixNa,
+            },
+            compendium: {
+                complete: compendiumComplete,
+                incomplete: compendiumIncomplete,
+                na: compendiumNa,
+            },
+        };
+    });
+});
+
+const totals = computed(() => {
+    let roadmapAvailable = 0;
+    let roadmapNa = 0;
+    let masterComplete = 0;
+    let masterIncomplete = 0;
+    let appendixComplete = 0;
+    let appendixIncomplete = 0;
+    let appendixNa = 0;
+    let compendiumComplete = 0;
+    let compendiumIncomplete = 0;
+    let compendiumNa = 0;
+    let totalProjects = props.projects.length;
+
+    props.projects.forEach(p => {
+        if (p.roadmap_score === '100%') roadmapAvailable++;
+        if (p.roadmap_score === 'X') roadmapNa++;
+
+        if (p.master_score === '100%') masterComplete++;
+        else masterIncomplete++;
+
+        if (p.appendix_score === '100%') appendixComplete++;
+        else if (p.appendix_score === 'X') appendixNa++;
+        else appendixIncomplete++;
+
+        if (p.compendium_score === '100%') compendiumComplete++;
+        else if (p.compendium_score === 'X') compendiumNa++;
+        else compendiumIncomplete++;
+    });
+
+    return {
+        total: totalProjects,
+        roadmap: {
+            available: roadmapAvailable,
+            na: roadmapNa,
+        },
+        master: {
+            complete: masterComplete,
+            incomplete: masterIncomplete,
+        },
+        appendix: {
+            complete: appendixComplete,
+            incomplete: appendixIncomplete,
+            na: appendixNa,
+        },
+        compendium: {
+            complete: compendiumComplete,
+            incomplete: compendiumIncomplete,
+            na: compendiumNa,
+        },
+    };
+});
+
+const grandTotalColspan = computed(() => {
+    let cols = 3; // No + CoE + Total
+    if (props.showRoadmap) cols += 2;
+    if (props.showMaster) cols += 2;
+    if (props.showAppendix) cols += 3;
+    if (props.showCompendium) cols += 3;
+    return cols;
+});
+</script>
+
+<template>
+    <div class="rounded-2xl border border-slate-900 bg-white shadow-sm dark:border-white/20 dark:bg-[#171717]">
+        <!-- Title and header -->
+        <div class="border-b border-slate-900 px-3 py-2 dark:border-white/20 flex items-center justify-between">
+            <h3 class="text-[9px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-200">
+                Digital Initiative Completeness Summary
+            </h3>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse text-left text-[11px]">
+                <thead class="bg-slate-50 text-[9px] font-bold uppercase tracking-widest text-slate-500 dark:bg-white/5 dark:text-slate-400">
+                    <tr>
+                        <th rowspan="2" class="border-b border-r border-slate-900 px-4 py-2 dark:border-white/20 align-middle w-12 text-center">
+                            No
+                        </th>
+                        <th rowspan="2" class="border-b border-r border-slate-900 px-4 py-2 dark:border-white/20 align-middle">
+                            CoE / Category
+                        </th>
+                        <th v-if="showRoadmap" colspan="2" class="border-b border-r border-slate-900 px-4 py-1 text-center dark:border-white/20">
+                            Roadmap
+                        </th>
+                        <th v-if="showMaster" colspan="2" class="border-b border-r border-slate-900 px-4 py-1 text-center dark:border-white/20">
+                            Master
+                        </th>
+                        <th v-if="showAppendix" colspan="3" class="border-b border-r border-slate-900 px-4 py-1 text-center dark:border-white/20">
+                            Appendix
+                        </th>
+                        <th v-if="showCompendium" colspan="3" class="border-b border-r border-slate-900 px-4 py-1 text-center dark:border-white/20">
+                            Compendium
+                        </th>
+                        <th rowspan="2" class="border-b border-slate-900 px-4 py-2 text-center dark:border-white/20 align-middle w-16">
+                            Total
+                        </th>
+                    </tr>
+                    <tr>
+                        <!-- Roadmap -->
+                        <th v-if="showRoadmap" class="border-b border-r border-slate-900 px-2 py-1 text-center dark:border-white/20 w-24">Available</th>
+                        <th v-if="showRoadmap" class="border-b border-r border-slate-900 px-2 py-1 text-center dark:border-white/20 w-24">N/A</th>
+                        <!-- Master -->
+                        <th v-if="showMaster" class="border-b border-r border-slate-900 px-2 py-1 text-center dark:border-white/20 w-24">Complete</th>
+                        <th v-if="showMaster" class="border-b border-r border-slate-900 px-2 py-1 text-center dark:border-white/20 w-24">Incomplete</th>
+                        <!-- Appendix -->
+                        <th v-if="showAppendix" class="border-b border-r border-slate-900 px-2 py-1 text-center dark:border-white/20 w-24">Complete</th>
+                        <th v-if="showAppendix" class="border-b border-r border-slate-900 px-2 py-1 text-center dark:border-white/20 w-24">Incomplete</th>
+                        <th v-if="showAppendix" class="border-b border-r border-slate-900 px-2 py-1 text-center dark:border-white/20 w-24">N/A</th>
+                        <!-- Compendium -->
+                        <th v-if="showCompendium" class="border-b border-r border-slate-900 px-2 py-1 text-center dark:border-white/20 w-24">Complete</th>
+                        <th v-if="showCompendium" class="border-b border-r border-slate-900 px-2 py-1 text-center dark:border-white/20 w-24">Incomplete</th>
+                        <th v-if="showCompendium" class="border-b border-r border-slate-900 px-2 py-1 text-center dark:border-white/20 w-24">N/A</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-[#171717] divide-y divide-slate-900 dark:divide-white/20">
+                    <tr v-for="(coe, index) in groupedData" :key="coe.category" class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                        <!-- No -->
+                        <td class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20 font-bold text-slate-700 dark:text-slate-300">
+                            {{ index + 1 }}
+                        </td>
+
+                        <!-- CoE Name -->
+                        <td class="border-r border-slate-900 px-4 py-3 dark:border-white/20 font-bold text-slate-900 dark:text-white">
+                            {{ coe.category }}
+                        </td>
+
+                        <!-- Roadmap Available -->
+                        <td v-if="showRoadmap" class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20">
+                            <div class="flex flex-col items-center justify-center gap-1">
+                                <span class="font-bold text-slate-700 dark:text-slate-300">{{ coe.roadmap.available.length }}</span>
+                                <div class="flex flex-wrap items-center justify-center gap-1">
+                                    <span v-for="p in coe.roadmap.available" :key="p.id"
+                                        class="inline-flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm cursor-pointer hover:scale-110 transition-transform bg-emerald-500"
+                                        :title="getInitiativeTooltip(p)"
+                                        @click="navigateToProject(p)">
+                                        {{ getProjectNumber(p) }}
+                                    </span>
+                                    <span v-if="!coe.roadmap.available.length" class="text-slate-400 dark:text-slate-600">-</span>
+                                </div>
+                            </div>
+                        </td>
+                        <!-- Roadmap N/A -->
+                        <td v-if="showRoadmap" class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20">
+                            <div class="flex flex-col items-center justify-center gap-1">
+                                <span class="font-bold text-slate-400 dark:text-slate-600">{{ coe.roadmap.na.length }}</span>
+                                <div class="flex flex-wrap items-center justify-center gap-1">
+                                    <span v-for="p in coe.roadmap.na" :key="p.id"
+                                        class="inline-flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm cursor-pointer hover:scale-110 transition-transform bg-rose-500"
+                                        :title="getInitiativeTooltip(p)"
+                                        @click="navigateToProject(p)">
+                                        {{ getProjectNumber(p) }}
+                                    </span>
+                                    <span v-if="!coe.roadmap.na.length" class="text-slate-400 dark:text-slate-600">-</span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Master Complete -->
+                        <td v-if="showMaster" class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20">
+                            <div class="flex flex-col items-center justify-center gap-1">
+                                <span class="font-bold text-slate-700 dark:text-slate-300">{{ coe.master.complete.length }}</span>
+                                <div class="flex flex-wrap items-center justify-center gap-1">
+                                    <span v-for="p in coe.master.complete" :key="p.id"
+                                        class="inline-flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm cursor-pointer hover:scale-110 transition-transform bg-emerald-500"
+                                        :title="getInitiativeTooltip(p)"
+                                        @click="navigateToProject(p)">
+                                        {{ getProjectNumber(p) }}
+                                    </span>
+                                    <span v-if="!coe.master.complete.length" class="text-slate-400 dark:text-slate-600">-</span>
+                                </div>
+                            </div>
+                        </td>
+                        <!-- Master Incomplete -->
+                        <td v-if="showMaster" class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20">
+                            <div class="flex flex-col items-center justify-center gap-1">
+                                <span class="font-bold text-slate-700 dark:text-slate-300">{{ coe.master.incomplete.length }}</span>
+                                <div class="flex flex-wrap items-center justify-center gap-1">
+                                    <span v-for="p in coe.master.incomplete" :key="p.id"
+                                        class="inline-flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm cursor-pointer hover:scale-110 transition-transform bg-rose-500"
+                                        :title="getInitiativeTooltip(p)"
+                                        @click="navigateToProject(p)">
+                                        {{ getProjectNumber(p) }}
+                                    </span>
+                                    <span v-if="!coe.master.incomplete.length" class="text-slate-400 dark:text-slate-600">-</span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Appendix Complete -->
+                        <td v-if="showAppendix" class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20">
+                            <div class="flex flex-col items-center justify-center gap-1">
+                                <span class="font-bold text-slate-700 dark:text-slate-300">{{ coe.appendix.complete.length }}</span>
+                                <div class="flex flex-wrap items-center justify-center gap-1">
+                                    <span v-for="p in coe.appendix.complete" :key="p.id"
+                                        class="inline-flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm cursor-pointer hover:scale-110 transition-transform bg-emerald-500"
+                                        :title="getInitiativeTooltip(p)"
+                                        @click="navigateToProject(p)">
+                                        {{ getProjectNumber(p) }}
+                                    </span>
+                                    <span v-if="!coe.appendix.complete.length" class="text-slate-400 dark:text-slate-600">-</span>
+                                </div>
+                            </div>
+                        </td>
+                        <!-- Appendix Incomplete -->
+                        <td v-if="showAppendix" class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20">
+                            <div class="flex flex-col items-center justify-center gap-1">
+                                <span class="font-bold text-slate-700 dark:text-slate-300">{{ coe.appendix.incomplete.length }}</span>
+                                <div class="flex flex-wrap items-center justify-center gap-1">
+                                    <span v-for="p in coe.appendix.incomplete" :key="p.id"
+                                        class="inline-flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm cursor-pointer hover:scale-110 transition-transform bg-rose-500"
+                                        :title="getInitiativeTooltip(p)"
+                                        @click="navigateToProject(p)">
+                                        {{ getProjectNumber(p) }}
+                                    </span>
+                                    <span v-if="!coe.appendix.incomplete.length" class="text-slate-400 dark:text-slate-600">-</span>
+                                </div>
+                            </div>
+                        </td>
+                        <!-- Appendix N/A -->
+                        <td v-if="showAppendix" class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20">
+                            <div class="flex flex-col items-center justify-center gap-1">
+                                <span class="font-bold text-slate-400 dark:text-slate-600">{{ coe.appendix.na.length }}</span>
+                                <div class="flex flex-wrap items-center justify-center gap-1">
+                                    <span v-for="p in coe.appendix.na" :key="p.id"
+                                        class="inline-flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm cursor-pointer hover:scale-110 transition-transform bg-slate-400 dark:bg-white/10"
+                                        :title="getInitiativeTooltip(p)"
+                                        @click="navigateToProject(p)">
+                                        {{ getProjectNumber(p) }}
+                                    </span>
+                                    <span v-if="!coe.appendix.na.length" class="text-slate-400 dark:text-slate-600">-</span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Compendium Complete -->
+                        <td v-if="showCompendium" class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20">
+                            <div class="flex flex-col items-center justify-center gap-1">
+                                <span class="font-bold text-slate-700 dark:text-slate-300">{{ coe.compendium.complete.length }}</span>
+                                <div class="flex flex-wrap items-center justify-center gap-1">
+                                    <span v-for="p in coe.compendium.complete" :key="p.id"
+                                        class="inline-flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm cursor-pointer hover:scale-110 transition-transform bg-emerald-500"
+                                        :title="getInitiativeTooltip(p)"
+                                        @click="navigateToProject(p)">
+                                        {{ getProjectNumber(p) }}
+                                    </span>
+                                    <span v-if="!coe.compendium.complete.length" class="text-slate-400 dark:text-slate-600">-</span>
+                                </div>
+                            </div>
+                        </td>
+                        <!-- Compendium Incomplete -->
+                        <td v-if="showCompendium" class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20">
+                            <div class="flex flex-col items-center justify-center gap-1">
+                                <span class="font-bold text-slate-700 dark:text-slate-300">{{ coe.compendium.incomplete.length }}</span>
+                                <div class="flex flex-wrap items-center justify-center gap-1">
+                                    <span v-for="p in coe.compendium.incomplete" :key="p.id"
+                                        class="inline-flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm cursor-pointer hover:scale-110 transition-transform bg-rose-500"
+                                        :title="getInitiativeTooltip(p)"
+                                        @click="navigateToProject(p)">
+                                        {{ getProjectNumber(p) }}
+                                    </span>
+                                    <span v-if="!coe.compendium.incomplete.length" class="text-slate-400 dark:text-slate-600">-</span>
+                                </div>
+                            </div>
+                        </td>
+                        <!-- Compendium N/A -->
+                        <td v-if="showCompendium" class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20">
+                            <div class="flex flex-col items-center justify-center gap-1">
+                                <span class="font-bold text-slate-400 dark:text-slate-600">{{ coe.compendium.na.length }}</span>
+                                <div class="flex flex-wrap items-center justify-center gap-1">
+                                    <span v-for="p in coe.compendium.na" :key="p.id"
+                                        class="inline-flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm cursor-pointer hover:scale-110 transition-transform bg-slate-400 dark:bg-white/10"
+                                        :title="getInitiativeTooltip(p)"
+                                        @click="navigateToProject(p)">
+                                        {{ getProjectNumber(p) }}
+                                    </span>
+                                    <span v-if="!coe.compendium.na.length" class="text-slate-400 dark:text-slate-600">-</span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Total -->
+                        <td class="px-4 py-3 text-center font-bold text-slate-700 dark:text-slate-300">
+                            {{ coe.total }}
+                        </td>
+                    </tr>
+                    <tr v-if="groupedData.length === 0">
+                        <td :colspan="grandTotalColspan" class="px-6 py-8 text-center text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                            Tidak ada data yang ditemukan.
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr v-if="groupedData.length > 0" class="bg-slate-50/80 font-black text-slate-900 dark:bg-white/5 dark:text-white uppercase text-[10px] border-t border-slate-900 dark:border-white/40">
+                        <td colspan="2" class="border-r border-slate-900 px-4 py-3 dark:border-white/20">
+                            Grand Total
+                        </td>
+
+                        <!-- Roadmap Available Total -->
+                        <td v-if="showRoadmap" class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20 font-black text-[11px] text-slate-700 dark:text-slate-300">
+                            {{ totals.roadmap.available }}
+                        </td>
+                        <!-- Roadmap N/A Total -->
+                        <td v-if="showRoadmap" class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20 font-black text-[11px] text-slate-700 dark:text-slate-300">
+                            {{ totals.roadmap.na }}
+                        </td>
+
+                        <!-- Master Complete Total -->
+                        <td v-if="showMaster" class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20 font-black text-[11px] text-slate-700 dark:text-slate-300">
+                            {{ totals.master.complete }}
+                        </td>
+                        <!-- Master Incomplete Total -->
+                        <td v-if="showMaster" class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20 font-black text-[11px] text-slate-700 dark:text-slate-300">
+                            {{ totals.master.incomplete }}
+                        </td>
+
+                        <!-- Appendix Complete Total -->
+                        <td v-if="showAppendix" class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20 font-black text-[11px] text-slate-700 dark:text-slate-300">
+                            {{ totals.appendix.complete }}
+                        </td>
+                        <!-- Appendix Incomplete Total -->
+                        <td v-if="showAppendix" class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20 font-black text-[11px] text-slate-700 dark:text-slate-300">
+                            {{ totals.appendix.incomplete }}
+                        </td>
+                        <!-- Appendix N/A Total -->
+                        <td v-if="showAppendix" class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20 font-black text-[11px] text-slate-700 dark:text-slate-300">
+                            {{ totals.appendix.na }}
+                        </td>
+
+                        <!-- Compendium Complete Total -->
+                        <td v-if="showCompendium" class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20 font-black text-[11px] text-slate-700 dark:text-slate-300">
+                            {{ totals.compendium.complete }}
+                        </td>
+                        <!-- Compendium Incomplete Total -->
+                        <td v-if="showCompendium" class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20 font-black text-[11px] text-slate-700 dark:text-slate-300">
+                            {{ totals.compendium.incomplete }}
+                        </td>
+                        <!-- Compendium N/A Total -->
+                        <td v-if="showCompendium" class="border-r border-slate-900 px-4 py-3 text-center dark:border-white/20 font-black text-[11px] text-slate-700 dark:text-slate-300">
+                            {{ totals.compendium.na }}
+                        </td>
+
+                        <!-- Grand Total Count -->
+                        <td class="px-4 py-3 text-center font-black text-[11px]">
+                            {{ totals.total }}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</template>

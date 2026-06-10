@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class TrsTkoContent extends Model
 {
     protected $table = 'trs_tko_content';
-    protected $primaryKey = 'id';
-    public $incrementing = true;
-    protected $keyType = 'int';
+    protected $primaryKey = ['regulation_id', 'section_id'];
+    public $incrementing = false;
+    protected $keyType = 'string';
     public $timestamps = true;
 
     protected $fillable = [
@@ -18,6 +18,17 @@ class TrsTkoContent extends Model
         'section_id',
         'content',
     ];
+
+    /**
+     * Override setKeysForSaveQuery to support composite primary keys.
+     */
+    protected function setKeysForSaveQuery($query)
+    {
+        $query->where('regulation_id', '=', $this->getAttribute('regulation_id'))
+              ->where('section_id', '=', $this->getAttribute('section_id'));
+
+        return $query;
+    }
 
     /**
      * Relasi ke TrsTkoSections

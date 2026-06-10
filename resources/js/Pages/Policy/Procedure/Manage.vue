@@ -988,7 +988,6 @@ function addSectionDirectly() {
     }
     
     router.post(route('policy.procedure.section.store'), {
-        regulation_id: activeRegulation.value?.id || '',
         name: 'Section Baru',
         order: nextOrder,
     }, {

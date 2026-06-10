@@ -1,5 +1,14 @@
 <template>
     <div class="space-y-6">
+        <!-- Summary Dashboard -->
+        <DigitalReviewSummary
+            :projects="projects"
+            :show-roadmap="showRoadmap"
+            :show-master="showMaster"
+            :show-appendix="showAppendix"
+            :show-compendium="showCompendium"
+        />
+
         <!-- Filters & Search -->
         <div class="rounded-2xl border border-slate-900 bg-white shadow-sm dark:border-white/20 dark:bg-[#171717]">
             <div class="border-b border-slate-900 px-3 py-2 dark:border-white/20">
@@ -326,6 +335,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/vue/24/solid';
+import DigitalReviewSummary from './DigitalReviewSummary.vue';
 
 const props = defineProps({
     projects: {

@@ -484,6 +484,7 @@ class ReviewDocumentController extends Controller
                 'id' => $initiative->id,
                 'code' => $initiative->code,
                 'name' => $initiative->name,
+                'groub_id' => $initiative->groub_id,
                 'coe_name' => $initiative->coe?->name ?? 'Uncategorized',
                 'status_name' => $initiative->status ?? '-',
                 'master_score' => $masterScore . '%',
