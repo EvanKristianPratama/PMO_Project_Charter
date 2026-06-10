@@ -56,6 +56,20 @@
                     <div class="flex items-center gap-2">
                         <label
                             class="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
+                            Organisasi
+                        </label>
+                        <select v-model="organizationFilter"
+                            class="cursor-pointer rounded border border-slate-300 bg-white px-2 py-0.5 text-[9px] font-bold outline-none transition-all focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-200">
+                            <option value="">Semua Organisasi</option>
+                            <option v-for="org in availableOrganizations" :key="org.name" :value="org.name">
+                                {{ org.name }} - {{ org.groupLabel }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <label
+                            class="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
                             Shorting
                         </label>
                         <select v-model="sortBy"
@@ -363,6 +377,7 @@ const props = defineProps({
 const expandedRows = ref(new Set());
 const statusFilter = ref('');
 const coeFilter = ref('');
+const organizationFilter = ref('');
 const sortBy = ref('');
 
 const showMaster = ref(true);
@@ -411,6 +426,30 @@ const availableCoes = computed(() => {
     return [...new Set(coes)].filter(Boolean).sort();
 });
 
+const availableOrganizations = computed(() => {
+    const orgMap = new Map();
+    props.projects.forEach(p => {
+        const name = p.organization_name;
+        if (name && name !== '-') {
+            const groupId = parseInt(p.groub_id);
+            if (!orgMap.has(name)) {
+                orgMap.set(name, {
+                    name,
+                    groupId: groupId || 99,
+                    groupLabel: groupId === 1 ? 'Holding' : (groupId === 2 ? 'Sub Holding' : 'Other')
+                });
+            }
+        }
+    });
+
+    return Array.from(orgMap.values()).sort((a, b) => {
+        if (a.groupId !== b.groupId) {
+            return a.groupId - b.groupId;
+        }
+        return a.name.localeCompare(b.name);
+    });
+});
+
 const parseScore = (score) => {
     if (!score || score === 'X') return -1;
     return parseInt(score) || 0;
@@ -420,8 +459,9 @@ const filteredProjects = computed(() => {
     let list = props.projects.filter(p => {
         const matchStatus = !statusFilter.value || p.status_name === statusFilter.value;
         const matchCoe = !coeFilter.value || p.coe_name === coeFilter.value;
+        const matchOrganization = !organizationFilter.value || p.organization_name === organizationFilter.value;
 
-        return matchStatus && matchCoe;
+        return matchStatus && matchCoe && matchOrganization;
     });
 
     if (sortBy.value === 'master') {

@@ -4,7 +4,7 @@
         <div class="rounded-2xl border border-slate-900 bg-white p-5 dark:border-white/20 dark:bg-[#171717]">
             <div class="border-b border-slate-100 pb-3 mb-4 dark:border-white/5 flex items-center justify-between">
                 <h3 class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
-                    Skor Kelengkapan Dokumen Appendix Digital Initiative
+                    Skor Kelengkapan Dokumen Appendix
                 </h3>
                 <span class="inline-flex items-center rounded bg-blue-50 px-1.5 py-0.5 text-[9px] font-bold text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
                     {{ scoreDistribution.totalProjects }} Proyek
