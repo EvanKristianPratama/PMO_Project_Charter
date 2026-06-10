@@ -9,6 +9,18 @@
             :show-compendium="showCompendium"
         />
 
+        <!-- Roadmap Completeness Chart -->
+        <RoadmapCompletnessChart v-if="showRoadmap" :projects="filteredProjects" />
+
+        <!-- Master Completeness Chart -->
+        <MasterCompletenessChart v-if="showMaster" :projects="filteredProjects" />
+
+        <!-- Appendix Completeness Chart -->
+        <AppendixCompletenessChart v-if="showAppendix" :projects="filteredProjects" />
+
+        <!-- Compendium Completeness Chart -->
+        <CompendiumCompletenessChart v-if="showCompendium" :projects="filteredProjects" />
+
         <!-- Filters & Search -->
         <div class="rounded-2xl border border-slate-900 bg-white shadow-sm dark:border-white/20 dark:bg-[#171717]">
             <div class="border-b border-slate-900 px-3 py-2 dark:border-white/20">
@@ -336,6 +348,10 @@
 import { ref, computed } from 'vue';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/vue/24/solid';
 import DigitalReviewSummary from './DigitalReviewSummary.vue';
+import RoadmapCompletnessChart from './RoadmapCompletnessChart.vue';
+import MasterCompletenessChart from './MasterCompletenessChart.vue';
+import AppendixCompletenessChart from './AppendixCompletenessChart.vue';
+import CompendiumCompletenessChart from './CompendiumCompletenessChart.vue';
 
 const props = defineProps({
     projects: {

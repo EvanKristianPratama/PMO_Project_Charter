@@ -1,6 +1,26 @@
 <script setup>
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
+
+const showCode = ref(false);
+const showOrganization = ref(false);
+const selectedCoe = ref('');
+
+const availableCoeOptions = computed(() => {
+    const names = [...new Set(props.projects.map(p => normalizeCoeName(p.coe_name)))];
+    return names.sort((a, b) => {
+        const indexA = coeOrder.indexOf(a);
+        const indexB = coeOrder.indexOf(b);
+
+        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+        if (indexA !== -1) return -1;
+        if (indexB !== -1) return 1;
+
+        if (a === 'CoE Not Identified') return 1;
+        if (b === 'CoE Not Identified') return -1;
+        return a.localeCompare(b);
+    });
+});
 
 const props = defineProps({
     projects: {
@@ -27,14 +47,12 @@ const props = defineProps({
 });
 
 const coeOrder = [
-    "User Interface and Experience",
-    "Integration and Automation",
-    "Business Application System",
-    "Infrastructure",
-    "Data and Analytics",
-    "Cybersecurity",
-    "People, Process and Technology",
-    "Overall Architecture",
+    "AI/Analytics",
+    "Cloud & Advanced Computing",
+    "IoTs",
+    "RPA",
+    "Robotics",
+    "CoE Not Identified",
 ];
 
 const getProjectNumber = (project) => {
@@ -71,11 +89,11 @@ const normalizeCoeName = (rawName) => {
     if (!name || name === '-' || name.toUpperCase() === 'NO COE') return 'CoE Not Identified';
 
     const upper = name.toUpperCase();
-    if (upper.includes('IOT')) return 'IoT';
-    if (upper.includes('CLOUD') || upper.includes('COMPUTING') || name === 'Advance Cloud') return 'Advance Cloud';
+    if (upper.includes('IOT')) return 'IoTs';
+    if (upper.includes('CLOUD') || upper.includes('COMPUTING') || name === 'Advance Cloud' || name === 'Cloud & Advanced Computing') return 'Cloud & Advanced Computing';
     if (upper === 'RPA') return 'RPA';
     if (upper.includes('ROBOT') || name === 'Robotics') return 'Robotics';
-    if (upper.includes('ANALYTICS') || name === 'AI / Adv. Analytics') return 'AI / Adv. Analytics';
+    if (upper.includes('ANALYTICS') || name === 'AI / Adv. Analytics' || name === 'AI/Analytics') return 'AI/Analytics';
 
     return name;
 };
@@ -83,11 +101,11 @@ const normalizeCoeName = (rawName) => {
 const getCoeColorClass = (coeName) => {
     const name = normalizeCoeName(coeName);
 
-    if (name === 'IoT') return 'coe-color-blue';
-    if (name === 'Advance Cloud') return 'coe-color-emerald';
+    if (name === 'IoTs') return 'coe-color-blue';
+    if (name === 'Cloud & Advanced Computing') return 'coe-color-emerald';
     if (name === 'RPA') return 'coe-color-amber';
     if (name === 'Robotics') return 'coe-color-purple';
-    if (name === 'AI / Adv. Analytics') return 'coe-color-rose';
+    if (name === 'AI/Analytics') return 'coe-color-rose';
     if (name === 'CoE Not Identified') return 'coe-color-none';
 
     return 'coe-color-none';
@@ -111,7 +129,7 @@ const getDocStatusClass = (score) => {
 };
 
 const groupedData = computed(() => {
-    const allCoEs = [...new Set(props.projects.map(p => p.coe_name || 'Unassigned'))].sort((a, b) => {
+    let allCoEs = [...new Set(props.projects.map(p => normalizeCoeName(p.coe_name)))].sort((a, b) => {
         const indexA = coeOrder.indexOf(a);
         const indexB = coeOrder.indexOf(b);
 
@@ -119,13 +137,17 @@ const groupedData = computed(() => {
         if (indexA !== -1) return -1;
         if (indexB !== -1) return 1;
 
-        if (a === 'Unassigned') return 1;
-        if (b === 'Unassigned') return -1;
+        if (a === 'CoE Not Identified') return 1;
+        if (b === 'CoE Not Identified') return -1;
         return a.localeCompare(b);
     });
 
+    if (selectedCoe.value) {
+        allCoEs = allCoEs.filter(coe => coe === selectedCoe.value);
+    }
+
     return allCoEs.map(coeName => {
-        const projectsInCoe = props.projects.filter(p => (p.coe_name || 'Unassigned') === coeName);
+        const projectsInCoe = props.projects.filter(p => normalizeCoeName(p.coe_name) === coeName);
 
         const holding = projectsInCoe.filter(p => Number(p.groub_id) !== 2);
         const subHolding = projectsInCoe.filter(p => Number(p.groub_id) === 2);
@@ -139,17 +161,6 @@ const groupedData = computed(() => {
     });
 });
 
-const totals = computed(() => {
-    const holding = props.projects.filter(p => Number(p.groub_id) !== 2).length;
-    const subHolding = props.projects.filter(p => Number(p.groub_id) === 2).length;
-    const total = props.projects.length;
-
-    return {
-        holding,
-        subHolding,
-        total,
-    };
-});
 </script>
 
 <template>
@@ -157,8 +168,33 @@ const totals = computed(() => {
         <!-- Title box -->
         <div class="px-4 py-3 border-b border-[#c7d2de] bg-slate-50/30 dark:bg-white/5 flex items-center justify-between">
             <h1 class="text-xs font-black uppercase tracking-widest text-slate-700 dark:text-slate-200">
-                Digital Initiative Completeness Summary
+                Review Digital Initiative Document Summary
             </h1>
+            <div class="flex items-center gap-2">
+                <select
+                    v-model="selectedCoe"
+                    class="rounded border border-slate-300 bg-white px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-slate-600 transition-all hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5 focus:outline-none focus:ring-0 cursor-pointer"
+                >
+                    <option value="">All CoE</option>
+                    <option v-for="coe in availableCoeOptions" :key="coe" :value="coe">
+                        {{ coe }}
+                    </option>
+                </select>
+                <button
+                    type="button"
+                    class="rounded border border-slate-300 bg-white px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-slate-600 transition-all hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5"
+                    @click="showCode = !showCode"
+                >
+                    {{ showCode ? 'Hide Code' : 'Show Code' }}
+                </button>
+                <button
+                    type="button"
+                    class="rounded border border-slate-300 bg-white px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-slate-600 transition-all hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5"
+                    @click="showOrganization = !showOrganization"
+                >
+                    {{ showOrganization ? 'Hide Organization' : 'Show Organization' }}
+                </button>
+            </div>
         </div>
 
         <!-- Legend bar -->
@@ -187,11 +223,11 @@ const totals = computed(() => {
             
             <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px]">
                 <div class="flex items-center gap-1.5">
-                    <span class="h-2.5 w-2.5 rounded-sm bg-[#d1fae5] border border-[#047857] dark:bg-[#065f46]"></span>
+                    <span class="h-2.5 w-2.5 rounded-sm bg-[#22c55e] border border-[#16a34a] dark:bg-[#22c55e] dark:border-[#16a34a]"></span>
                     <span class="text-slate-600 dark:text-slate-400">Complete / Available (100%)</span>
                 </div>
                 <div class="flex items-center gap-1.5">
-                    <span class="h-2.5 w-2.5 rounded-sm bg-[#ffe4e6] border border-[#be123c] dark:bg-[#9f1239]"></span>
+                    <span class="h-2.5 w-2.5 rounded-sm bg-[#ef4444] border border-[#dc2626] dark:bg-[#ef4444] dark:border-[#dc2626]"></span>
                     <span class="text-slate-600 dark:text-slate-400">Incomplete (<100%)</span>
                 </div>
                 <div class="flex items-center gap-1.5">
@@ -205,35 +241,24 @@ const totals = computed(() => {
             <table class="itb-table min-w-full border-collapse">
                 <thead>
                     <tr>
-                        <th rowspan="2" class="top-head border-b border-r border-[#c7d2de] align-middle w-12 text-center">
-                            No
-                        </th>
                         <th rowspan="2" class="top-head border-b border-r border-[#c7d2de] align-middle" style="width: 20%;">
-                            CoE / Category
+                            CoE
                         </th>
-                        <th colspan="2" class="top-head border-b border-[#c7d2de]" style="width: 70%;">
+                        <th colspan="2" class="top-head border-b border-[#c7d2de]" style="width: 80%;">
                             Digital Initiatives
-                        </th>
-                        <th rowspan="2" class="top-head border-b border-l border-[#c7d2de] align-middle w-20 text-center">
-                            Total
                         </th>
                     </tr>
                     <tr>
-                        <th class="top-head border-b border-r border-[#c7d2de] text-center" style="width: 35%; background-color: #0d5ea1;">
+                        <th class="top-head border-b border-r border-[#c7d2de] text-center" style="width: 40%; background-color: #0d5ea1;">
                             Holding
                         </th>
-                        <th class="top-head border-b border-r border-[#c7d2de] text-center" style="width: 35%; background-color: #0d5ea1;">
+                        <th class="top-head border-b border-r border-[#c7d2de] text-center" style="width: 40%; background-color: #0d5ea1;">
                             Sub Holding
                         </th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="(coe, index) in groupedData" :key="coe.category" class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-                        <!-- No -->
-                        <td class="border-r border-[#c7d2de] px-4 py-3 text-center dark:border-white/10 font-bold text-slate-700 dark:text-slate-300" style="vertical-align: middle;">
-                            {{ index + 1 }}
-                        </td>
-
                         <!-- CoE Name -->
                         <td class="primary-cell border-r border-[#c7d2de]" :class="getCoeColorClass(coe.category)">
                             <div class="primary-cell__content">
@@ -249,15 +274,18 @@ const totals = computed(() => {
                             <div class="initiatives-grid">
                                 <div v-for="p in coe.holding" :key="p.id"
                                     class="initiative-box initiative-box--clickable group"
-                                    :class="getCoeColorClass(coe.category)"
+                                    :class="[getCoeColorClass(coe.category), { 'initiative-box--no-code': !showCode }]"
                                     :title="getInitiativeTooltip(p)"
                                     @click="navigateToProject(p)">
-                                    <span class="initiative-box__code" :class="getStatusColorClass(p)">
+                                    <span v-if="showCode" class="initiative-box__code" :class="getStatusColorClass(p)">
                                         {{ getProjectNumber(p) }}
                                     </span>
                                     <div class="initiative-box__name py-1 flex flex-col justify-between">
-                                        <span class="initiative-box__label-text font-bold text-[9px] text-slate-800 line-clamp-1" :title="p.name">
+                                        <span class="initiative-box__label-text font-bold text-[9px] text-slate-800" :title="p.name">
                                             {{ p.name }}
+                                        </span>
+                                        <span v-if="showOrganization" class="text-[7.5px] text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider mt-0.5" :title="p.organization_name">
+                                            {{ p.organization_name }}
                                         </span>
                                         <div class="flex gap-0.5 mt-1">
                                             <span class="doc-badge" :class="getDocStatusClass(p.roadmap_score)">R</span>
@@ -276,15 +304,18 @@ const totals = computed(() => {
                             <div class="initiatives-grid">
                                 <div v-for="p in coe.subHolding" :key="p.id"
                                     class="initiative-box initiative-box--clickable group"
-                                    :class="getCoeColorClass(coe.category)"
+                                    :class="[getCoeColorClass(coe.category), { 'initiative-box--no-code': !showCode }]"
                                     :title="getInitiativeTooltip(p)"
                                     @click="navigateToProject(p)">
-                                    <span class="initiative-box__code" :class="getStatusColorClass(p)">
+                                    <span v-if="showCode" class="initiative-box__code" :class="getStatusColorClass(p)">
                                         {{ getProjectNumber(p) }}
                                     </span>
                                     <div class="initiative-box__name py-1 flex flex-col justify-between">
-                                        <span class="initiative-box__label-text font-bold text-[9px] text-slate-800 line-clamp-1" :title="p.name">
+                                        <span class="initiative-box__label-text font-bold text-[9px] text-slate-800" :title="p.name">
                                             {{ p.name }}
+                                        </span>
+                                        <span v-if="showOrganization" class="text-[7.5px] text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider mt-0.5" :title="p.organization_name">
+                                            {{ p.organization_name }}
                                         </span>
                                         <div class="flex gap-0.5 mt-1">
                                             <span class="doc-badge" :class="getDocStatusClass(p.roadmap_score)">R</span>
@@ -297,34 +328,13 @@ const totals = computed(() => {
                                 <span v-if="!coe.subHolding.length" class="text-slate-400 text-center block text-[10px] w-full py-1">-</span>
                             </div>
                         </td>
-
-                        <!-- Total -->
-                        <td class="px-4 py-3 text-center font-bold text-slate-700 dark:text-slate-300" style="vertical-align: middle;">
-                            {{ coe.total }}
-                        </td>
                     </tr>
                     <tr v-if="groupedData.length === 0">
-                        <td colspan="5" class="px-6 py-8 text-center text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                        <td colspan="3" class="px-6 py-8 text-center text-[10px] font-bold uppercase tracking-widest text-slate-500">
                             Tidak ada data yang ditemukan.
                         </td>
                     </tr>
                 </tbody>
-                <tfoot>
-                    <tr v-if="groupedData.length > 0" class="bg-slate-50/80 font-black text-slate-900 dark:bg-white/5 dark:text-white uppercase text-[10px] border-t border-[#c7d2de]">
-                        <td colspan="2" class="border-r border-[#c7d2de] px-4 py-3 align-middle font-bold text-[11px]">
-                            Grand Total
-                        </td>
-                        <td class="border-r border-[#c7d2de] px-4 py-3 text-center font-black text-[11px] text-slate-700 dark:text-slate-300">
-                            {{ totals.holding }}
-                        </td>
-                        <td class="border-r border-[#c7d2de] px-4 py-3 text-center font-black text-[11px] text-slate-700 dark:text-slate-300">
-                            {{ totals.subHolding }}
-                        </td>
-                        <td class="px-4 py-3 text-center font-black text-[11px]">
-                            {{ totals.total }}
-                        </td>
-                    </tr>
-                </tfoot>
             </table>
         </div>
     </section>
@@ -407,15 +417,18 @@ const totals = computed(() => {
     min-height: 20px;
     width: 100%;
     align-items: stretch;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #374151;
     background: #ffffff;
     font-size: 9px;
     font-weight: 500;
     line-height: 1.1;
     color: #1f2937;
-    border-radius: 4px;
+    border-radius: 0px;
     overflow: hidden;
-    margin-bottom: 4px;
+}
+
+.initiative-box--no-code {
+    grid-template-columns: 1fr !important;
 }
 
 .initiative-box--clickable {
@@ -530,15 +543,15 @@ const totals = computed(() => {
 }
 
 .doc-status-ok {
-    background-color: #d1fae5;
-    border-color: #047857;
-    color: #065f46;
+    background-color: #22c55e;
+    border-color: #16a34a;
+    color: #ffffff;
 }
 
 .doc-status-err {
-    background-color: #ffe4e6;
-    border-color: #be123c;
-    color: #9f1239;
+    background-color: #ef4444;
+    border-color: #dc2626;
+    color: #ffffff;
 }
 
 .doc-status-na {
@@ -551,6 +564,7 @@ const totals = computed(() => {
 .initiatives-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    grid-auto-rows: 1fr;
     gap: 6px;
     align-items: stretch;
 }
@@ -565,15 +579,15 @@ const totals = computed(() => {
 :deep(.dark) .coe-color-none { background-color: #f8fafc; color: #334155; }
 
 :deep(.dark) .doc-status-ok {
-    background-color: #065f46;
-    border-color: #047857;
-    color: #d1fae5;
+    background-color: #22c55e;
+    border-color: #16a34a;
+    color: #ffffff;
 }
 
 :deep(.dark) .doc-status-err {
-    background-color: #9f1239;
-    border-color: #be123c;
-    color: #ffe4e6;
+    background-color: #ef4444;
+    border-color: #dc2626;
+    color: #ffffff;
 }
 
 :deep(.dark) .doc-status-na {
