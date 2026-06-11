@@ -14,6 +14,7 @@ use App\Models\TrsTkoContent;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -496,61 +497,76 @@ class ProcedureController extends Controller
 
         $processedSectionIds = [];
 
-        foreach ($sectionsData as $secData) {
-            $name = trim($secData['name']);
-            $order = $secData['order'];
-            $content = $secData['content'] ?? '';
+        DB::transaction(function () use ($regulationId, $sectionsData, $existingSections, $normalize, &$processedSectionIds) {
+            foreach ($sectionsData as $secData) {
+                $name = trim($secData['name']);
+                $order = $secData['order'];
+                $content = $secData['content'] ?? '';
 
-            $normalizedIncoming = $normalize($name);
-            $matchedSection = null;
+                $normalizedIncoming = $normalize($name);
+                $matchedSection = null;
 
-            // Find match in existing sections by normalized name
-            foreach ($existingSections as $existing) {
-                if ($normalize($existing->name) === $normalizedIncoming) {
-                    $matchedSection = $existing;
-                    break;
+                // Find match in existing sections by normalized name
+                foreach ($existingSections as $existing) {
+                    if ($normalize($existing->name) === $normalizedIncoming) {
+                        $matchedSection = $existing;
+                        break;
+                    }
+                }
+
+                if ($matchedSection) {
+                    // Update existing section name and order if they differ
+                    $updates = [];
+                    if (strtolower(trim($matchedSection->name)) !== strtolower($name)) {
+                        $updates['name'] = $name;
+                    }
+                    if ($matchedSection->order !== $order) {
+                        $updates['order'] = $order;
+                    }
+                    if (!empty($updates)) {
+                        $matchedSection->update($updates);
+                    }
+                    $section = $matchedSection;
+                } else {
+                    // Create new global section
+                    $section = TrsTkoSections::create([
+                        'name' => $name,
+                        'order' => $order,
+                    ]);
+                }
+
+                $processedSectionIds[] = $section->id;
+
+                // Update or create regulation-specific content using direct DB check to prevent composite key issues
+                $contentExists = DB::table('trs_tko_content')
+                    ->where('regulation_id', $regulationId)
+                    ->where('section_id', $section->id)
+                    ->exists();
+
+                if ($contentExists) {
+                    DB::table('trs_tko_content')
+                        ->where('regulation_id', $regulationId)
+                        ->where('section_id', $section->id)
+                        ->update([
+                            'content' => $content,
+                            'updated_at' => now(),
+                        ]);
+                } else {
+                    DB::table('trs_tko_content')->insert([
+                        'regulation_id' => $regulationId,
+                        'section_id' => $section->id,
+                        'content' => $content,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
                 }
             }
 
-            if ($matchedSection) {
-                // Update existing section name and order if they differ
-                $updates = [];
-                if (strtolower(trim($matchedSection->name)) !== strtolower($name)) {
-                    $updates['name'] = $name;
-                }
-                if ($matchedSection->order !== $order) {
-                    $updates['order'] = $order;
-                }
-                if (!empty($updates)) {
-                    $matchedSection->update($updates);
-                }
-                $section = $matchedSection;
-            } else {
-                // Create new global section
-                $section = TrsTkoSections::create([
-                    'name' => $name,
-                    'order' => $order,
-                ]);
-            }
-
-            $processedSectionIds[] = $section->id;
-
-            // Update or create regulation-specific content
-            TrsTkoContent::updateOrCreate(
-                [
-                    'regulation_id' => $regulationId,
-                    'section_id' => $section->id,
-                ],
-                [
-                    'content' => $content,
-                ]
-            );
-        }
-
-        // Delete content for sections that were not sent in this save for this regulation
-        TrsTkoContent::where('regulation_id', $regulationId)
-            ->whereNotIn('section_id', $processedSectionIds)
-            ->delete();
+            // Delete content for sections that were not sent in this save for this regulation
+            TrsTkoContent::where('regulation_id', $regulationId)
+                ->whereNotIn('section_id', $processedSectionIds)
+                ->delete();
+        });
 
         if ($request->wantsJson()) {
             return response()->json([

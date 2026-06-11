@@ -38,32 +38,53 @@
                 <div class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 md:p-16 rounded-2xl font-sans animate-fade-in-up">
                     <PertaminaDocumentHeader :activeRegulation="activeRegulation" />
 
-                    <div class="mt-10 flex items-center justify-between gap-4 border-b border-slate-900/10 pb-2 dark:border-white/10">
+                    <div class="mt-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-900/10 pb-2 dark:border-white/10">
                         <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide uppercase">
                             {{ activeSection.label }}
                         </h3>
-                        <!-- Auto-save status indicator -->
-                        <span class="text-[11px] flex items-center gap-1.5 select-none print:hidden">
-                            <span v-if="saveStatuses[activeSection.id] === 'saving'" class="text-amber-600 dark:text-amber-400 flex items-center gap-1 font-semibold animate-pulse">
-                                <svg class="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <div class="flex items-center gap-3 print:hidden">
+                            <!-- Save status indicator -->
+                            <span class="text-[11px] flex items-center gap-1.5 select-none">
+                                <span v-if="isSavingTko" class="text-amber-600 dark:text-amber-400 flex items-center gap-1 font-semibold animate-pulse">
+                                    <svg class="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Menyimpan...
+                                </span>
+                                <span v-else-if="saveTkoStatus === 'saved'" class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-bold">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3.5" stroke="currentColor" class="w-3.5 h-3.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                    Tersimpan
+                                </span>
+                                <span v-else-if="saveTkoStatus === 'error'" class="text-rose-600 dark:text-rose-400 font-bold">
+                                    Gagal menyimpan
+                                </span>
+                                <span v-else-if="hasUnsavedChanges" class="text-amber-600 dark:text-amber-400 flex items-center gap-1 font-semibold">
+                                    <span class="h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span>
+                                    Belum disimpan
+                                </span>
+                                <span v-else class="text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 text-emerald-500">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Tersimpan
+                                </span>
+                            </span>
+
+                            <!-- Manual Save Button -->
+                            <button
+                                @click="saveStructuredDocument"
+                                :disabled="isSavingTko"
+                                class="inline-flex items-center gap-1.5 rounded-lg bg-[#821f44] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#9c2552] active:scale-95 disabled:opacity-50"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l-3 3m3-3l3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
                                 </svg>
-                                Menyimpan otomatis...
-                            </span>
-                            <span v-else-if="saveStatuses[activeSection.id] === 'saved'" class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-bold">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3.5" stroke="currentColor" class="w-3.5 h-3.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                </svg>
-                                Tersimpan
-                            </span>
-                            <span v-else-if="saveStatuses[activeSection.id] === 'error'" class="text-rose-600 dark:text-rose-400 font-bold">
-                                Gagal menyimpan
-                            </span>
-                            <span v-else class="text-slate-400 dark:text-slate-500">
-                                Auto-save aktif
-                            </span>
-                        </span>
+                                Save
+                            </button>
+                        </div>
                     </div>
 
                     <div class="mt-6 relative">
@@ -83,37 +104,56 @@
                 <div class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 md:p-16 rounded-2xl font-sans animate-fade-in-up">
                     <PertaminaDocumentHeader :activeRegulation="activeRegulation" />
 
-                    <div class="mt-10 flex items-center justify-between gap-4 border-b border-slate-900/10 pb-2 dark:border-white/10">
+                    <div class="mt-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-900/10 pb-2 dark:border-white/10">
                         <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide">
                             IV. FUNGSI/ UNIT ORGANISASI/ JABATAN TERKAIT
                         </h3>
-                        <div class="flex items-center gap-3">
-                            <!-- Auto-save status indicator -->
-                            <span class="text-[11px] flex items-center gap-1.5 select-none print:hidden mr-2">
-                                <span v-if="hasSavingActor" class="text-amber-600 dark:text-amber-400 flex items-center gap-1 font-semibold animate-pulse">
+                        <div class="flex items-center gap-3 print:hidden">
+                            <!-- Save status indicator -->
+                            <span class="text-[11px] flex items-center gap-1.5 select-none">
+                                <span v-if="saveActorsStatus === 'saving'" class="text-amber-600 dark:text-amber-400 flex items-center gap-1 font-semibold animate-pulse">
                                     <svg class="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
-                                    Menyimpan otomatis...
+                                    Menyimpan...
                                 </span>
-                                <span v-else-if="hasSavedActor" class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-bold">
+                                <span v-else-if="saveActorsStatus === 'saved'" class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-bold">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3.5" stroke="currentColor" class="w-3.5 h-3.5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                     </svg>
                                     Tersimpan
                                 </span>
-                                <span v-else-if="hasErrorActor" class="text-rose-600 dark:text-rose-400 font-bold">
+                                <span v-else-if="saveActorsStatus === 'error'" class="text-rose-600 dark:text-rose-400 font-bold">
                                     Gagal menyimpan
                                 </span>
-                                <span v-else class="text-slate-400 dark:text-slate-500">
-                                    Auto-save aktif
+                                <span v-else-if="modifiedActors.size > 0" class="text-amber-600 dark:text-amber-400 flex items-center gap-1 font-semibold">
+                                    <span class="h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span>
+                                    Belum disimpan
+                                </span>
+                                <span v-else class="text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 text-emerald-500">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Tersimpan
                                 </span>
                             </span>
 
+                            <!-- Manual Save Button -->
+                            <button
+                                @click="saveAllActors"
+                                :disabled="isSavingActors || modifiedActors.size === 0"
+                                class="inline-flex items-center gap-1.5 rounded-lg bg-[#821f44] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#9c2552] active:scale-95 disabled:opacity-50"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l-3 3m3-3l3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                                </svg>
+                                Simpan Manual
+                            </button>
+
                             <button
                                 @click="addActorDirectly"
-                                class="inline-flex items-center gap-1.5 rounded-lg bg-[#821f44] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#9c2552] active:scale-95 print:hidden"
+                                class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 dark:border-white/10 bg-transparent px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-white/5 active:scale-95"
                             >
                                 <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
@@ -143,8 +183,7 @@
                                         <input
                                             v-if="actorLocal[actor.id]"
                                             v-model="actorLocal[actor.id].name"
-                                            @input="handleActorInput(actor)"
-                                            @blur="saveActor(actor)"
+                                            @input="handleActorChange(actor.id)"
                                             type="text"
                                             class="w-full bg-transparent px-2 py-1 text-slate-900 dark:text-white border border-transparent rounded focus:border-[#821f44] focus:ring-1 focus:ring-[#821f44] focus:bg-white dark:focus:bg-[#1e1e1e] hover:border-slate-300 dark:hover:border-white/10"
                                             placeholder="Nama Aktor / Jabatan"
@@ -154,7 +193,7 @@
                                         <select
                                             v-if="actorLocal[actor.id]"
                                             v-model="actorLocal[actor.id].organization_id"
-                                            @change="saveActor(actor)"
+                                            @change="handleActorChange(actor.id)"
                                             class="w-full bg-transparent px-2 py-1 text-slate-900 dark:text-white border border-transparent rounded focus:border-[#821f44] focus:ring-1 focus:ring-[#821f44] focus:bg-white dark:focus:bg-[#1e1e1e] hover:border-slate-300 dark:hover:border-white/10"
                                         >
                                             <option value="" disabled>-- Pilih Organisasi --</option>
@@ -183,33 +222,52 @@
                 <div class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 md:p-16 rounded-2xl font-sans animate-fade-in-up">
                     <PertaminaDocumentHeader :activeRegulation="activeRegulation" />
 
-                    <div class="mt-10 flex items-center justify-between gap-4 border-b border-slate-900/10 pb-2 dark:border-white/10">
+                    <div class="mt-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-900/10 pb-2 dark:border-white/10">
                         <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide">
                             V. PROSEDUR
                         </h3>
-                        <div class="flex items-center gap-3">
-                            <!-- Auto-save status indicator -->
-                            <span class="text-[11px] flex items-center gap-1.5 select-none print:hidden mr-2">
-                                <span v-if="hasSavingProsedur" class="text-amber-600 dark:text-amber-400 flex items-center gap-1 font-semibold animate-pulse">
+                        <div class="flex items-center gap-3 print:hidden">
+                            <!-- Save status indicator -->
+                            <span class="text-[11px] flex items-center gap-1.5 select-none">
+                                <span v-if="saveProsedurStatus === 'saving'" class="text-amber-600 dark:text-amber-400 flex items-center gap-1 font-semibold animate-pulse">
                                     <svg class="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
-                                    Menyimpan otomatis...
+                                    Menyimpan...
                                 </span>
-                                <span v-else-if="hasSavedProsedur" class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-bold">
+                                <span v-else-if="saveProsedurStatus === 'saved'" class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-bold">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3.5" stroke="currentColor" class="w-3.5 h-3.5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                     </svg>
                                     Tersimpan
                                 </span>
-                                <span v-else-if="hasErrorProsedur" class="text-rose-600 dark:text-rose-400 font-bold">
+                                <span v-else-if="saveProsedurStatus === 'error'" class="text-rose-600 dark:text-rose-400 font-bold">
                                     Gagal menyimpan
                                 </span>
-                                <span v-else class="text-slate-400 dark:text-slate-500">
-                                    Auto-save aktif
+                                <span v-else-if="modifiedCategories.size > 0 || modifiedSops.size > 0" class="text-amber-600 dark:text-amber-400 flex items-center gap-1 font-semibold">
+                                    <span class="h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span>
+                                    Belum disimpan
+                                </span>
+                                <span v-else class="text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 text-emerald-500">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Tersimpan
                                 </span>
                             </span>
+
+                            <!-- Manual Save Button -->
+                            <button
+                                @click="saveAllProsedur"
+                                :disabled="isSavingProsedur || (modifiedCategories.size === 0 && modifiedSops.size === 0)"
+                                class="inline-flex items-center gap-1.5 rounded-lg bg-[#821f44] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#9c2552] active:scale-95 disabled:opacity-50"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l-3 3m3-3l3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                                </svg>
+                                Simpan Manual
+                            </button>
 
                             <button
                                 @click="addCategoryDirectly"
@@ -232,8 +290,7 @@
                                     <input
                                         v-if="categoryLocal[cat.id]"
                                         v-model="categoryLocal[cat.id].tipe"
-                                        @input="handleCategoryInput(cat)"
-                                        @blur="saveCategory(cat)"
+                                        @input="handleCategoryChange(cat.id)"
                                         class="font-bold text-slate-950 dark:text-white bg-transparent border border-transparent rounded hover:border-slate-300 dark:hover:border-white/10 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:bg-white dark:focus:bg-[#1e1e1e] text-sm md:text-base w-full px-2 py-1"
                                         placeholder="Nama Kategori (Contoh: A. Penyusunan RSTI)"
                                     />
@@ -254,8 +311,7 @@
                                         <textarea
                                             v-if="sopLocal[item.id]"
                                             v-model="sopLocal[item.id].description"
-                                            @input="handleSopInput(item)"
-                                            @blur="saveSop(item)"
+                                            @input="handleSopChange(item.id)"
                                             rows="2"
                                             class="w-full bg-transparent px-3 py-2 text-justify font-serif text-[15px] leading-relaxed text-slate-900 dark:text-slate-100 border border-transparent rounded hover:border-slate-300 dark:hover:border-white/10 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:bg-white dark:focus:bg-[#1e1e1e]"
                                             placeholder="Tulis deskripsi aktivitas SOP..."
@@ -317,28 +373,47 @@
                             PENGATURAN SECTION DOKUMEN
                         </h3>
                         <div class="flex items-center gap-3">
-                            <!-- Auto-save status indicator -->
+                            <!-- Save status indicator -->
                             <span class="text-[11px] flex items-center gap-1.5 select-none print:hidden mr-2">
-                                <span v-if="hasSavingSection" class="text-amber-600 dark:text-amber-400 flex items-center gap-1 font-semibold animate-pulse">
+                                <span v-if="saveSectionsStatus === 'saving'" class="text-amber-600 dark:text-amber-400 flex items-center gap-1 font-semibold animate-pulse">
                                     <svg class="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
-                                    Menyimpan otomatis...
+                                    Menyimpan...
                                 </span>
-                                <span v-else-if="hasSavedSection" class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-bold">
+                                <span v-else-if="saveSectionsStatus === 'saved'" class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-bold">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3.5" stroke="currentColor" class="w-3.5 h-3.5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                     </svg>
                                     Tersimpan
                                 </span>
-                                <span v-else-if="hasErrorSection" class="text-rose-600 dark:text-rose-400 font-bold">
+                                <span v-else-if="saveSectionsStatus === 'error'" class="text-rose-600 dark:text-rose-400 font-bold">
                                     Gagal menyimpan
                                 </span>
-                                <span v-else class="text-slate-400 dark:text-slate-500">
-                                    Auto-save aktif
+                                <span v-else-if="modifiedSections.size > 0" class="text-amber-600 dark:text-amber-400 flex items-center gap-1 font-semibold">
+                                    <span class="h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span>
+                                    Belum disimpan
+                                </span>
+                                <span v-else class="text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 text-emerald-500">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Tersimpan
                                 </span>
                             </span>
+
+                            <!-- Manual Save Button -->
+                            <button
+                                @click="saveAllSections"
+                                :disabled="isSavingSections || modifiedSections.size === 0"
+                                class="inline-flex items-center gap-1.5 rounded-lg bg-[#821f44] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#9c2552] active:scale-95 disabled:opacity-50 print:hidden mr-2"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l-3 3m3-3l3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                                </svg>
+                                Simpan Manual
+                            </button>
 
                             <button
                                 @click="addSectionDirectly"
@@ -372,8 +447,7 @@
                                         <input
                                             v-if="sectionLocal[sec.id]"
                                             v-model="sectionLocal[sec.id].name"
-                                            @input="handleSectionInput(sec)"
-                                            @blur="saveSection(sec)"
+                                            @input="handleSectionChange(sec.id)"
                                             type="text"
                                             class="w-full bg-transparent px-2 py-1 text-slate-900 dark:text-white border border-transparent rounded focus:border-[#821f44] focus:ring-1 focus:ring-[#821f44] focus:bg-white dark:focus:bg-[#1e1e1e] hover:border-slate-300 dark:hover:border-white/10 font-bold"
                                             placeholder="Nama Section (Contoh: TUJUAN)"
@@ -383,8 +457,7 @@
                                         <input
                                             v-if="sectionLocal[sec.id]"
                                             v-model="sectionLocal[sec.id].order"
-                                            @input="handleSectionInput(sec)"
-                                            @blur="saveSection(sec)"
+                                            @input="handleSectionChange(sec.id)"
                                             type="number"
                                             min="1"
                                             class="w-20 bg-transparent px-2 py-1 text-slate-900 dark:text-white border border-transparent rounded focus:border-[#821f44] focus:ring-1 focus:ring-[#821f44] focus:bg-white dark:focus:bg-[#1e1e1e] hover:border-slate-300 dark:hover:border-white/10 text-center"
@@ -470,8 +543,8 @@ const allSections = computed(() => {
     list.push({
         id: 'tko_document',
         order: 1,
-        label: '📝 DOKUMEN TKO',
-        labelShort: '📝',
+        label: 'DOKUMEN TKO',
+        labelShort: 'DOKUMEN TKO',
         type: 'tko'
     });
 
@@ -540,7 +613,25 @@ const filteredOrganizations = computed(() => {
 const isEditorLoaded = ref(false);
 const editorContainer = ref(null);
 const editorInstance = ref(null);
-let autoSaveTimer = null;
+const hasUnsavedChanges = ref(false);
+
+const modifiedActors = ref(new Set());
+const modifiedCategories = ref(new Set());
+const modifiedSops = ref(new Set());
+const modifiedSections = ref(new Set());
+
+const isSavingActors = ref(false);
+const saveActorsStatus = ref(null);
+
+const isSavingProsedur = ref(false);
+const saveProsedurStatus = ref(null);
+
+const isSavingSections = ref(false);
+const saveSectionsStatus = ref(null);
+
+// TKO Document save state (dedicated flags to avoid reactive lookup issues)
+const isSavingTko = ref(false);
+const saveTkoStatus = ref(null);
 
 const tkoInputs = ref({});
 const actorLocal = ref({});
@@ -654,9 +745,9 @@ function createEditorInstance() {
         editor.setData(getMergedHtml());
         isEditorLoaded.value = true;
 
-        // Auto-save on data change
+        // Set unsaved changes flag on data change
         editor.model.document.on('change:data', () => {
-            triggerAutoSave();
+            hasUnsavedChanges.value = true;
         });
     })
     .catch(error => {
@@ -664,43 +755,58 @@ function createEditorInstance() {
     });
 }
 
-function triggerAutoSave() {
-    saveStatuses.value['tko_document'] = 'saving';
-    if (autoSaveTimer) clearTimeout(autoSaveTimer);
-    autoSaveTimer = setTimeout(() => {
-        saveStructuredDocument();
-    }, 1500);
-}
+async function saveStructuredDocument() {
+    if (!editorInstance.value) {
+        console.warn('Editor belum siap, tidak dapat menyimpan.');
+        return;
+    }
 
-function saveStructuredDocument() {
-    if (!editorInstance.value) return;
+    if (!activeRegulation.value?.id) {
+        console.warn('Tidak ada regulasi aktif.');
+        return;
+    }
 
     const htmlData = editorInstance.value.getData();
     const parsedSections = parseMergedHtml(htmlData);
 
-    saveStatuses.value['tko_document'] = 'saving';
+    if (parsedSections.length === 0) {
+        console.warn('Tidak ada section untuk disimpan.');
+        return;
+    }
 
-    axios.post(route('policy.procedure.tko-content.save-structured'), {
-        regulation_id: activeRegulation.value?.id || '',
-        sections: parsedSections
-    }, {
-        headers: {
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-        }
-    })
-    .then(() => {
-        saveStatuses.value['tko_document'] = 'saved';
-        setTimeout(() => {
-            if (saveStatuses.value['tko_document'] === 'saved') {
-                saveStatuses.value['tko_document'] = null;
+    isSavingTko.value = true;
+    saveTkoStatus.value = null;
+    hasUnsavedChanges.value = false;
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+    try {
+        await axios.post(
+            route('policy.procedure.tko-content.save-structured'),
+            {
+                regulation_id: activeRegulation.value.id,
+                sections: parsedSections,
+            },
+            {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                },
             }
+        );
+
+        saveTkoStatus.value = 'saved';
+        hasUnsavedChanges.value = false;
+        setTimeout(() => {
+            saveTkoStatus.value = null;
         }, 3000);
-    })
-    .catch(error => {
-        console.error('Gagal menyimpan dokumen secara otomatis:', error);
-        saveStatuses.value['tko_document'] = 'error';
-    });
+    } catch (error) {
+        console.error('Gagal menyimpan dokumen TKO:', error);
+        saveTkoStatus.value = 'error';
+        hasUnsavedChanges.value = true;
+    } finally {
+        isSavingTko.value = false;
+    }
 }
 
 function parseMergedHtml(html) {
@@ -749,7 +855,7 @@ function parseMergedHtml(html) {
         return {
             name: sec.name,
             order: order,
-            content: sec.contentElements.join('\n')
+            content: sec.contentElements.join('\n'),
         };
     });
 }
@@ -821,7 +927,70 @@ watch(() => [props.tkoSections, props.actors, props.categories, props.sop], () =
     initLocalStates();
 }, { deep: true });
 
-watch(activeTab, (newTab) => {
+const isRevertingTab = ref(false);
+watch(activeTab, (newTab, oldTab) => {
+    if (isRevertingTab.value) {
+        isRevertingTab.value = false;
+        return;
+    }
+
+    let hasUnsaved = false;
+    let titleText = '';
+    let saveFn = null;
+    let clearFn = null;
+
+    if (oldTab === 'tko_document' && hasUnsavedChanges.value) {
+        hasUnsaved = true;
+        titleText = 'Ada perubahan dokumen TKO yang belum disimpan.';
+        saveFn = () => saveStructuredDocument();
+        clearFn = () => { hasUnsavedChanges.value = false; saveTkoStatus.value = null; };
+    } else if (oldTab === 'fungsi' && modifiedActors.value.size > 0) {
+        hasUnsaved = true;
+        titleText = 'Ada perubahan data aktor yang belum disimpan.';
+        saveFn = saveAllActors;
+        clearFn = () => { modifiedActors.value.clear(); };
+    } else if (oldTab === 'prosedur' && (modifiedCategories.value.size > 0 || modifiedSops.value.size > 0)) {
+        hasUnsaved = true;
+        titleText = 'Ada perubahan data prosedur (kategori/SOP) yang belum disimpan.';
+        saveFn = saveAllProsedur;
+        clearFn = () => { modifiedCategories.value.clear(); modifiedSops.value.clear(); };
+    } else if (oldTab === 'manage_sections' && modifiedSections.value.size > 0) {
+        hasUnsaved = true;
+        titleText = 'Ada perubahan pengaturan section yang belum disimpan.';
+        saveFn = saveAllSections;
+        clearFn = () => { modifiedSections.value.clear(); };
+    }
+
+    if (hasUnsaved) {
+        isRevertingTab.value = true;
+        activeTab.value = oldTab;
+
+        Swal.fire({
+            title: 'Simpan Perubahan?',
+            text: `${titleText} Apakah Anda ingin menyimpannya sekarang?`,
+            icon: 'question',
+            showCancelButton: true,
+            showDenyButton: true,
+            confirmButtonColor: '#821f44',
+            denyButtonColor: '#64748b',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, Simpan',
+            denyButtonText: 'Jangan Simpan',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                saveFn().then(() => {
+                    clearFn();
+                    activeTab.value = newTab;
+                });
+            } else if (result.isDenied) {
+                clearFn();
+                activeTab.value = newTab;
+            }
+        });
+        return;
+    }
+
     if (newTab === 'tko_document') {
         nextTick(() => {
             if (window.ClassicEditor) {
@@ -838,10 +1007,24 @@ watch(activeTab, (newTab) => {
 watch(() => selectedRegulationId.value, () => {
     if (activeTab.value === 'tko_document' && editorInstance.value) {
         editorInstance.value.setData(getMergedHtml());
+        hasUnsavedChanges.value = false;
     }
 });
 
+function handleBeforeUnload(e) {
+    if (hasUnsavedChanges.value || 
+        modifiedActors.value.size > 0 || 
+        modifiedCategories.value.size > 0 || 
+        modifiedSops.value.size > 0 || 
+        modifiedSections.value.size > 0) {
+        e.preventDefault();
+        e.returnValue = 'Ada perubahan yang belum disimpan.';
+        return e.returnValue;
+    }
+}
+
 onMounted(() => {
+    window.addEventListener('beforeunload', handleBeforeUnload);
     if (activeTab.value === 'tko_document') {
         loadCKEditor().then(() => {
             initEditor();
@@ -850,7 +1033,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-    if (autoSaveTimer) clearTimeout(autoSaveTimer);
+    window.removeEventListener('beforeunload', handleBeforeUnload);
     if (editorInstance.value) {
         editorInstance.value.destroy();
     }
@@ -860,11 +1043,7 @@ onUnmounted(() => {
 function addActorDirectly() {
     const defaultOrgId = filteredOrganizations.value[0]?.id || '';
     if (!defaultOrgId) {
-        Swal.fire({
-            title: 'Error',
-            text: 'Tidak ada organisasi terkait yang valid.',
-            icon: 'error'
-        });
+        Swal.fire({ title: 'Error', text: 'Tidak ada organisasi terkait yang valid.', icon: 'error' });
         return;
     }
     
@@ -872,55 +1051,41 @@ function addActorDirectly() {
         name: 'Aktor Baru',
         organization_id: defaultOrgId,
         regulation_id: activeRegulation.value?.id || '',
-    }, {
-        preserveScroll: true,
-        onSuccess: () => {
-            Swal.fire({
-                title: 'Berhasil!',
-                text: 'Aktor baru telah ditambahkan.',
-                icon: 'success',
-                timer: 1500,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end',
-            });
+    }, { preserveScroll: true });
+}
+
+function handleActorChange(actorId) {
+    modifiedActors.value.add(actorId);
+}
+
+async function saveAllActors() {
+    if (modifiedActors.value.size === 0) return;
+    isSavingActors.value = true;
+    saveActorsStatus.value = 'saving';
+
+    try {
+        const promises = [];
+        for (const actorId of modifiedActors.value) {
+            const actorData = actorLocal.value[actorId];
+            promises.push(
+                axios.put(route('policy.procedure.actor.update', actorId), {
+                    name: actorData.name,
+                    organization_id: actorData.organization_id,
+                    regulation_id: activeRegulation.value?.id || '',
+                })
+            );
         }
-    });
-}
-
-function handleActorInput(actor) {
-    saveStatuses.value[`actor_${actor.id}`] = 'saving';
-    if (actorDebounceTimers[actor.id]) clearTimeout(actorDebounceTimers[actor.id]);
-    actorDebounceTimers[actor.id] = setTimeout(() => {
-        saveActor(actor);
-    }, 1500);
-}
-
-function saveActor(actor) {
-    if (actorDebounceTimers[actor.id]) {
-        clearTimeout(actorDebounceTimers[actor.id]);
-        delete actorDebounceTimers[actor.id];
+        await Promise.all(promises);
+        modifiedActors.value.clear();
+        saveActorsStatus.value = 'saved';
+        router.reload({ preserveScroll: true });
+        setTimeout(() => { saveActorsStatus.value = null; }, 3000);
+    } catch (error) {
+        console.error('Gagal menyimpan aktor:', error);
+        saveActorsStatus.value = 'error';
+    } finally {
+        isSavingActors.value = false;
     }
-    saveStatuses.value[`actor_${actor.id}`] = 'saving';
-    
-    router.put(route('policy.procedure.actor.update', actor.id), {
-        name: actorLocal.value[actor.id]?.name || '',
-        organization_id: actorLocal.value[actor.id]?.organization_id || '',
-        regulation_id: activeRegulation.value?.id || '',
-    }, {
-        preserveScroll: true,
-        onSuccess: () => {
-            saveStatuses.value[`actor_${actor.id}`] = 'saved';
-            setTimeout(() => {
-                if (saveStatuses.value[`actor_${actor.id}`] === 'saved') {
-                    saveStatuses.value[`actor_${actor.id}`] = null;
-                }
-            }, 3000);
-        },
-        onError: () => {
-            saveStatuses.value[`actor_${actor.id}`] = 'error';
-        }
-    });
 }
 
 function deleteActorDirectly(actor) {
@@ -935,86 +1100,71 @@ function deleteActorDirectly(actor) {
         cancelButtonText: 'Batal'
     }).then((result) => {
         if (result.isConfirmed) {
-            router.delete(route('policy.procedure.actor.destroy', actor.id), {
-                preserveScroll: true,
-                onSuccess: () => {
-                    Swal.fire({
-                        title: 'Dihapus!',
-                        text: 'Aktor berhasil dihapus.',
-                        icon: 'success',
-                        timer: 1500,
-                        showConfirmButton: false,
-                        toast: true,
-                        position: 'top-end',
-                    });
-                }
-            });
+            router.delete(route('policy.procedure.actor.destroy', actor.id), { preserveScroll: true });
         }
     });
 }
-
-const hasSavingActor = computed(() => {
-    return Object.keys(saveStatuses.value).some(k => k.startsWith('actor_') && saveStatuses.value[k] === 'saving');
-});
-const hasSavedActor = computed(() => {
-    return Object.keys(saveStatuses.value).some(k => k.startsWith('actor_') && saveStatuses.value[k] === 'saved');
-});
-const hasErrorActor = computed(() => {
-    return Object.keys(saveStatuses.value).some(k => k.startsWith('actor_') && saveStatuses.value[k] === 'error');
-});
 
 // Category Actions
 function addCategoryDirectly() {
     router.post(route('policy.procedure.category.store'), {
         regulation_id: activeRegulation.value?.id || '',
         tipe: 'Kategori Baru',
-    }, {
-        preserveScroll: true,
-        onSuccess: () => {
-            Swal.fire({
-                title: 'Berhasil!',
-                text: 'Kategori baru telah ditambahkan.',
-                icon: 'success',
-                timer: 1500,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end',
-            });
+    }, { preserveScroll: true });
+}
+
+function handleCategoryChange(catId) {
+    modifiedCategories.value.add(catId);
+}
+
+// SOP Actions
+function addSopDirectly(categoryId) {
+    router.post(route('policy.procedure.sop.store'), {
+        category_id: categoryId,
+        description: 'Aktivitas SOP Baru',
+    }, { preserveScroll: true });
+}
+
+function handleSopChange(sopId) {
+    modifiedSops.value.add(sopId);
+}
+
+async function saveAllProsedur() {
+    if (modifiedCategories.value.size === 0 && modifiedSops.value.size === 0) return;
+    isSavingProsedur.value = true;
+    saveProsedurStatus.value = 'saving';
+
+    try {
+        const promises = [];
+        for (const catId of modifiedCategories.value) {
+            const catData = categoryLocal.value[catId];
+            promises.push(
+                axios.put(route('policy.procedure.category.update', catId), {
+                    tipe: catData.tipe,
+                })
+            );
         }
-    });
-}
-
-function handleCategoryInput(cat) {
-    saveStatuses.value[`category_${cat.id}`] = 'saving';
-    if (categoryDebounceTimers[cat.id]) clearTimeout(categoryDebounceTimers[cat.id]);
-    categoryDebounceTimers[cat.id] = setTimeout(() => {
-        saveCategory(cat);
-    }, 1500);
-}
-
-function saveCategory(cat) {
-    if (categoryDebounceTimers[cat.id]) {
-        clearTimeout(categoryDebounceTimers[cat.id]);
-        delete categoryDebounceTimers[cat.id];
+        for (const sopId of modifiedSops.value) {
+            const sopData = sopLocal.value[sopId];
+            promises.push(
+                axios.put(route('policy.procedure.sop.update', sopId), {
+                    category_id: sopData.category_id,
+                    description: sopData.description,
+                })
+            );
+        }
+        await Promise.all(promises);
+        modifiedCategories.value.clear();
+        modifiedSops.value.clear();
+        saveProsedurStatus.value = 'saved';
+        router.reload({ preserveScroll: true });
+        setTimeout(() => { saveProsedurStatus.value = null; }, 3000);
+    } catch (error) {
+        console.error('Gagal menyimpan prosedur:', error);
+        saveProsedurStatus.value = 'error';
+    } finally {
+        isSavingProsedur.value = false;
     }
-    saveStatuses.value[`category_${cat.id}`] = 'saving';
-    
-    router.put(route('policy.procedure.category.update', cat.id), {
-        tipe: categoryLocal.value[cat.id]?.tipe || '',
-    }, {
-        preserveScroll: true,
-        onSuccess: () => {
-            saveStatuses.value[`category_${cat.id}`] = 'saved';
-            setTimeout(() => {
-                if (saveStatuses.value[`category_${cat.id}`] === 'saved') {
-                    saveStatuses.value[`category_${cat.id}`] = null;
-                }
-            }, 3000);
-        },
-        onError: () => {
-            saveStatuses.value[`category_${cat.id}`] = 'error';
-        }
-    });
 }
 
 function deleteCategoryDirectly(cat) {
@@ -1029,75 +1179,7 @@ function deleteCategoryDirectly(cat) {
         cancelButtonText: 'Batal'
     }).then((result) => {
         if (result.isConfirmed) {
-            router.delete(route('policy.procedure.category.destroy', cat.id), {
-                preserveScroll: true,
-                onSuccess: () => {
-                    Swal.fire({
-                        title: 'Dihapus!',
-                        text: 'Kategori berhasil dihapus.',
-                        icon: 'success',
-                        timer: 1500,
-                        showConfirmButton: false,
-                        toast: true,
-                        position: 'top-end',
-                    });
-                }
-            });
-        }
-    });
-}
-
-// SOP Actions
-function addSopDirectly(categoryId) {
-    router.post(route('policy.procedure.sop.store'), {
-        category_id: categoryId,
-        description: 'Aktivitas SOP Baru',
-    }, {
-        preserveScroll: true,
-        onSuccess: () => {
-            Swal.fire({
-                title: 'Berhasil!',
-                text: 'SOP baru telah ditambahkan.',
-                icon: 'success',
-                timer: 1500,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end',
-            });
-        }
-    });
-}
-
-function handleSopInput(item) {
-    saveStatuses.value[`sop_${item.id}`] = 'saving';
-    if (sopDebounceTimers[item.id]) clearTimeout(sopDebounceTimers[item.id]);
-    sopDebounceTimers[item.id] = setTimeout(() => {
-        saveSop(item);
-    }, 1500);
-}
-
-function saveSop(item) {
-    if (sopDebounceTimers[item.id]) {
-        clearTimeout(sopDebounceTimers[item.id]);
-        delete sopDebounceTimers[item.id];
-    }
-    saveStatuses.value[`sop_${item.id}`] = 'saving';
-    
-    router.put(route('policy.procedure.sop.update', item.id), {
-        category_id: sopLocal.value[item.id]?.category_id,
-        description: sopLocal.value[item.id]?.description || '',
-    }, {
-        preserveScroll: true,
-        onSuccess: () => {
-            saveStatuses.value[`sop_${item.id}`] = 'saved';
-            setTimeout(() => {
-                if (saveStatuses.value[`sop_${item.id}`] === 'saved') {
-                    saveStatuses.value[`sop_${item.id}`] = null;
-                }
-            }, 3000);
-        },
-        onError: () => {
-            saveStatuses.value[`sop_${item.id}`] = 'error';
+            router.delete(route('policy.procedure.category.destroy', cat.id), { preserveScroll: true });
         }
     });
 }
@@ -1114,33 +1196,10 @@ function deleteSopDirectly(item) {
         cancelButtonText: 'Batal'
     }).then((result) => {
         if (result.isConfirmed) {
-            router.delete(route('policy.procedure.sop.destroy', item.id), {
-                preserveScroll: true,
-                onSuccess: () => {
-                    Swal.fire({
-                        title: 'Dihapus!',
-                        text: 'SOP berhasil dihapus.',
-                        icon: 'success',
-                        timer: 1500,
-                        showConfirmButton: false,
-                        toast: true,
-                        position: 'top-end',
-                    });
-                }
-            });
+            router.delete(route('policy.procedure.sop.destroy', item.id), { preserveScroll: true });
         }
     });
 }
-
-const hasSavingProsedur = computed(() => {
-    return Object.keys(saveStatuses.value).some(k => (k.startsWith('sop_') || k.startsWith('category_')) && saveStatuses.value[k] === 'saving');
-});
-const hasSavedProsedur = computed(() => {
-    return Object.keys(saveStatuses.value).some(k => (k.startsWith('sop_') || k.startsWith('category_')) && saveStatuses.value[k] === 'saved');
-});
-const hasErrorProsedur = computed(() => {
-    return Object.keys(saveStatuses.value).some(k => (k.startsWith('sop_') || k.startsWith('category_')) && saveStatuses.value[k] === 'error');
-});
 
 // Section Actions
 function addSectionDirectly() {
@@ -1153,54 +1212,40 @@ function addSectionDirectly() {
     router.post(route('policy.procedure.section.store'), {
         name: 'Section Baru',
         order: nextOrder,
-    }, {
-        preserveScroll: true,
-        onSuccess: () => {
-            Swal.fire({
-                title: 'Berhasil!',
-                text: 'Section baru telah ditambahkan.',
-                icon: 'success',
-                timer: 1500,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end',
-            });
+    }, { preserveScroll: true });
+}
+
+function handleSectionChange(secId) {
+    modifiedSections.value.add(secId);
+}
+
+async function saveAllSections() {
+    if (modifiedSections.value.size === 0) return;
+    isSavingSections.value = true;
+    saveSectionsStatus.value = 'saving';
+
+    try {
+        const promises = [];
+        for (const secId of modifiedSections.value) {
+            const secData = sectionLocal.value[secId];
+            promises.push(
+                axios.put(route('policy.procedure.section.update', secId), {
+                    name: secData.name,
+                    order: secData.order,
+                })
+            );
         }
-    });
-}
-
-function handleSectionInput(sec) {
-    saveStatuses.value[`section_${sec.id}`] = 'saving';
-    if (sectionDebounceTimers[sec.id]) clearTimeout(sectionDebounceTimers[sec.id]);
-    sectionDebounceTimers[sec.id] = setTimeout(() => {
-        saveSection(sec);
-    }, 1500);
-}
-
-function saveSection(sec) {
-    if (sectionDebounceTimers[sec.id]) {
-        clearTimeout(sectionDebounceTimers[sec.id]);
-        delete sectionDebounceTimers[sec.id];
+        await Promise.all(promises);
+        modifiedSections.value.clear();
+        saveSectionsStatus.value = 'saved';
+        router.reload({ preserveScroll: true });
+        setTimeout(() => { saveSectionsStatus.value = null; }, 3000);
+    } catch (error) {
+        console.error('Gagal menyimpan section:', error);
+        saveSectionsStatus.value = 'error';
+    } finally {
+        isSavingSections.value = false;
     }
-    saveStatuses.value[`section_${sec.id}`] = 'saving';
-    
-    router.put(route('policy.procedure.section.update', sec.id), {
-        name: sectionLocal.value[sec.id]?.name || '',
-        order: sectionLocal.value[sec.id]?.order || 1,
-    }, {
-        preserveScroll: true,
-        onSuccess: () => {
-            saveStatuses.value[`section_${sec.id}`] = 'saved';
-            setTimeout(() => {
-                if (saveStatuses.value[`section_${sec.id}`] === 'saved') {
-                    saveStatuses.value[`section_${sec.id}`] = null;
-                }
-            }, 3000);
-        },
-        onError: () => {
-            saveStatuses.value[`section_${sec.id}`] = 'error';
-        }
-    });
 }
 
 function deleteSectionDirectly(sec) {
@@ -1215,33 +1260,10 @@ function deleteSectionDirectly(sec) {
         cancelButtonText: 'Batal'
     }).then((result) => {
         if (result.isConfirmed) {
-            router.delete(route('policy.procedure.section.destroy', sec.id), {
-                preserveScroll: true,
-                onSuccess: () => {
-                    Swal.fire({
-                        title: 'Dihapus!',
-                        text: 'Section berhasil dihapus.',
-                        icon: 'success',
-                        timer: 1500,
-                        showConfirmButton: false,
-                        toast: true,
-                        position: 'top-end',
-                    });
-                }
-            });
+            router.delete(route('policy.procedure.section.destroy', sec.id), { preserveScroll: true });
         }
     });
 }
-
-const hasSavingSection = computed(() => {
-    return Object.keys(saveStatuses.value).some(k => k.startsWith('section_') && saveStatuses.value[k] === 'saving');
-});
-const hasSavedSection = computed(() => {
-    return Object.keys(saveStatuses.value).some(k => k.startsWith('section_') && saveStatuses.value[k] === 'saved');
-});
-const hasErrorSection = computed(() => {
-    return Object.keys(saveStatuses.value).some(k => k.startsWith('section_') && saveStatuses.value[k] === 'error');
-});
 
 function tightSopText(text) {
     if (!text) return '';
