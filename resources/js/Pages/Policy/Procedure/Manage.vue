@@ -66,15 +66,14 @@
                         </span>
                     </div>
 
-                    <div class="mt-6">
-                        <textarea
-                            v-model="tkoInputs[activeSection.id]"
-                            @input="handleTkoInput(activeSection)"
-                            @blur="saveTkoContent(activeSection)"
-                            rows="12"
-                            class="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 focus:border-[#821f44] focus:ring-1 focus:ring-[#821f44] dark:border-white/10 dark:bg-black/20 dark:text-white font-sans leading-relaxed text-justify"
-                            placeholder="Masukkan konten disini..."
-                        ></textarea>
+                    <div class="mt-6 relative">
+                        <div v-if="!isEditorLoaded" class="flex flex-col items-center justify-center py-20 space-y-4">
+                            <div class="animate-spin rounded-full h-10 w-10 border-4 border-[#821f44] border-t-transparent"></div>
+                            <span class="text-sm font-semibold text-slate-500 dark:text-slate-400 animate-pulse">Memuat editor dokumen...</span>
+                        </div>
+                        <div v-show="isEditorLoaded" class="prose dark:prose-invert max-w-none text-slate-900 dark:text-white">
+                            <div ref="editorContainer" class="min-h-[500px] bg-white dark:bg-[#1a1a1a]"></div>
+                        </div>
                     </div>
                 </div>
             </template>
@@ -420,8 +419,9 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
+import axios from 'axios';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import FlowChart from '@/Components/Procedure/FlowChart.vue';
 import PertaminaDocumentHeader from '@/Components/Regulation/PertaminaDocumentHeader.vue';
@@ -465,31 +465,14 @@ const props = defineProps({
 
 const allSections = computed(() => {
     const list = [];
-    const romanNumerals = {
-        1: 'I',
-        2: 'II',
-        3: 'III',
-        4: 'IV',
-        5: 'V',
-        6: 'VI',
-        7: 'VII',
-        8: 'VIII',
-        9: 'IX'
-    };
 
-    // 1. TKO Sections before Fungsi
-    const tkoBefore = (props.tkoSections || []).filter(s => s.order < 4);
-    tkoBefore.forEach(s => {
-        list.push({
-            id: `tko_${s.id}`,
-            order: s.order,
-            label: `${romanNumerals[s.order] || s.order}. ${s.name.toUpperCase()}`,
-            labelShort: romanNumerals[s.order] || s.order,
-            type: 'tko',
-            name: s.name,
-            content: s.contents?.[0]?.content || '',
-            section_id: s.id
-        });
+    // 1. TKO Document Editor Tab
+    list.push({
+        id: 'tko_document',
+        order: 1,
+        label: '📝 DOKUMEN TKO',
+        labelShort: '📝',
+        type: 'tko'
     });
 
     // 2. Fungsi (order 4)
@@ -510,22 +493,7 @@ const allSections = computed(() => {
         type: 'prosedur'
     });
 
-    // 4. TKO Sections after Prosedur
-    const tkoAfter = (props.tkoSections || []).filter(s => s.order > 5);
-    tkoAfter.forEach(s => {
-        list.push({
-            id: `tko_${s.id}`,
-            order: s.order,
-            label: `${romanNumerals[s.order] || s.order}. ${s.name.toUpperCase()}`,
-            labelShort: romanNumerals[s.order] || s.order,
-            type: 'tko',
-            name: s.name,
-            content: s.contents?.[0]?.content || '',
-            section_id: s.id
-        });
-    });
-
-    // 5. Manage Sections settings tab at the end
+    // 4. Manage Sections settings tab at the end
     list.push({
         id: 'manage_sections',
         order: 100,
@@ -537,7 +505,7 @@ const allSections = computed(() => {
     return list.sort((a, b) => a.order - b.order);
 });
 
-const activeTab = ref(allSections.value[0]?.id || 'fungsi');
+const activeTab = ref(allSections.value[0]?.id || 'tko_document');
 
 const activeSection = computed(() => {
     return allSections.value.find(s => s.id === activeTab.value) || null;
@@ -567,8 +535,13 @@ const filteredOrganizations = computed(() => {
 });
 
 // ---------------------------------------------------
-// LOCAL EDITING STATES
+// LOCAL EDITING STATES & CKEDITOR SETUP
 // ---------------------------------------------------
+const isEditorLoaded = ref(false);
+const editorContainer = ref(null);
+const editorInstance = ref(null);
+let autoSaveTimer = null;
+
 const tkoInputs = ref({});
 const actorLocal = ref({});
 const categoryLocal = ref({});
@@ -583,14 +556,192 @@ const categoryDebounceTimers = {};
 const sopDebounceTimers = {};
 const sectionDebounceTimers = {};
 
-function initLocalStates() {
-    // TKO Content
-    allSections.value.forEach(s => {
-        if (s.type === 'tko') {
-            tkoInputs.value[s.id] = s.content || '';
+function loadCKEditor() {
+    return new Promise((resolve, reject) => {
+        if (window.ClassicEditor) {
+            resolve(window.ClassicEditor);
+            return;
+        }
+        const script = document.createElement('script');
+        script.src = 'https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/ckeditor.js';
+        script.onload = () => {
+            resolve(window.ClassicEditor);
+        };
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
+
+function getMergedHtml() {
+    const romanNumerals = {
+        1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V', 6: 'VI', 7: 'VII', 8: 'VIII', 9: 'IX', 10: 'X'
+    };
+
+    let html = '';
+    
+    // Merge global sections in order (we sort by section.order)
+    const orderedTkoSections = [...(props.tkoSections || [])].sort((a, b) => a.order - b.order);
+    
+    orderedTkoSections.forEach((s) => {
+        const roman = romanNumerals[s.order] || s.order;
+        const headingText = `${roman}. ${s.name.toUpperCase()}`;
+        const content = s.contents?.[0]?.content || '';
+        
+        html += `<h1>${headingText}</h1>`;
+        if (content) {
+            if (content.trim().startsWith('<') || content.includes('</')) {
+                html += content;
+            } else {
+                // Convert plain text newlines to paragraphs
+                const lines = content.replace(/\r\n/g, '\n').split('\n');
+                lines.forEach(line => {
+                    if (line.trim()) {
+                        html += `<p>${line}</p>`;
+                    }
+                });
+            }
+        } else {
+            html += `<p></p>`;
         }
     });
 
+    return html;
+}
+
+function initEditor() {
+    if (editorInstance.value) {
+        editorInstance.value.destroy().then(() => {
+            editorInstance.value = null;
+            createEditorInstance();
+        });
+    } else {
+        createEditorInstance();
+    }
+}
+
+function createEditorInstance() {
+    if (!editorContainer.value) return;
+
+    window.ClassicEditor.create(editorContainer.value, {
+        toolbar: {
+            items: [
+                'heading',
+                '|',
+                'bold',
+                'italic',
+                '|',
+                'bulletedList',
+                'numberedList',
+                'outdent',
+                'indent',
+                '|',
+                'undo',
+                'redo'
+            ]
+        },
+        placeholder: 'Tulis dokumen TKO di sini...',
+    })
+    .then(editor => {
+        editorInstance.value = editor;
+        editor.setData(getMergedHtml());
+        isEditorLoaded.value = true;
+
+        // Auto-save on data change
+        editor.model.document.on('change:data', () => {
+            triggerAutoSave();
+        });
+    })
+    .catch(error => {
+        console.error('Gagal menginisialisasi CKEditor:', error);
+    });
+}
+
+function triggerAutoSave() {
+    saveStatuses.value['tko_document'] = 'saving';
+    if (autoSaveTimer) clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(() => {
+        saveStructuredDocument();
+    }, 1500);
+}
+
+function saveStructuredDocument() {
+    if (!editorInstance.value) return;
+
+    const htmlData = editorInstance.value.getData();
+    const parsedSections = parseMergedHtml(htmlData);
+
+    saveStatuses.value['tko_document'] = 'saving';
+
+    axios.post(route('policy.procedure.tko-content.save-structured'), {
+        regulation_id: activeRegulation.value?.id || '',
+        sections: parsedSections
+    })
+    .then(() => {
+        saveStatuses.value['tko_document'] = 'saved';
+        setTimeout(() => {
+            if (saveStatuses.value['tko_document'] === 'saved') {
+                saveStatuses.value['tko_document'] = null;
+            }
+        }, 3000);
+    })
+    .catch(error => {
+        console.error('Gagal menyimpan dokumen secara otomatis:', error);
+        saveStatuses.value['tko_document'] = 'error';
+    });
+}
+
+function parseMergedHtml(html) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const children = Array.from(doc.body.children);
+
+    const parsedSections = [];
+    let currentSection = null;
+
+    children.forEach(child => {
+        if (child.tagName === 'H1') {
+            if (currentSection) {
+                parsedSections.push(currentSection);
+            }
+
+            const rawTitle = child.textContent || '';
+            // Strip Roman numeral prefix (e.g. "I. TUJUAN" -> "TUJUAN")
+            const cleanTitle = rawTitle.replace(/^([ivxIVX\d]+[\.\)\-\s]+)+/, '').trim();
+
+            currentSection = {
+                name: cleanTitle || 'Section Tanpa Nama',
+                contentElements: []
+            };
+        } else {
+            if (!currentSection) {
+                currentSection = {
+                    name: 'TUJUAN',
+                    contentElements: []
+                };
+            }
+            currentSection.contentElements.push(child.outerHTML);
+        }
+    });
+
+    if (currentSection) {
+        parsedSections.push(currentSection);
+    }
+
+    // Map and assign orders (excluding 4 and 5 for Fungsi & Prosedur)
+    return parsedSections.map((sec, index) => {
+        let order = index + 1;
+        if (order >= 4) {
+            order += 2; // skip 4 and 5
+        }
+        return {
+            name: sec.name,
+            order: order,
+            content: sec.contentElements.join('\n')
+        };
+    });
+}
+
+function initLocalStates() {
     // Actors
     props.actors.forEach(actor => {
         if (!actorLocal.value[actor.id]) {
@@ -657,41 +808,40 @@ watch(() => [props.tkoSections, props.actors, props.categories, props.sop], () =
     initLocalStates();
 }, { deep: true });
 
-// TKO Saving
-function handleTkoInput(section) {
-    saveStatuses.value[section.id] = 'saving';
-    if (tkoDebounceTimers[section.id]) clearTimeout(tkoDebounceTimers[section.id]);
-    tkoDebounceTimers[section.id] = setTimeout(() => {
-        saveTkoContent(section);
-    }, 1500);
-}
-
-function saveTkoContent(section) {
-    if (tkoDebounceTimers[section.id]) {
-        clearTimeout(tkoDebounceTimers[section.id]);
-        delete tkoDebounceTimers[section.id];
+watch(activeTab, (newTab) => {
+    if (newTab === 'tko_document') {
+        nextTick(() => {
+            if (window.ClassicEditor) {
+                initEditor();
+            } else {
+                loadCKEditor().then(() => {
+                    initEditor();
+                });
+            }
+        });
     }
-    saveStatuses.value[section.id] = 'saving';
-    
-    router.post(route('policy.procedure.tko-content.store'), {
-        regulation_id: activeRegulation.value?.id || '',
-        section_id: section.section_id,
-        content: tkoInputs.value[section.id] || '',
-    }, {
-        preserveScroll: true,
-        onSuccess: () => {
-            saveStatuses.value[section.id] = 'saved';
-            setTimeout(() => {
-                if (saveStatuses.value[section.id] === 'saved') {
-                    saveStatuses.value[section.id] = null;
-                }
-            }, 3000);
-        },
-        onError: () => {
-            saveStatuses.value[section.id] = 'error';
-        }
-    });
-}
+});
+
+watch(() => selectedRegulationId.value, () => {
+    if (activeTab.value === 'tko_document' && editorInstance.value) {
+        editorInstance.value.setData(getMergedHtml());
+    }
+});
+
+onMounted(() => {
+    if (activeTab.value === 'tko_document') {
+        loadCKEditor().then(() => {
+            initEditor();
+        });
+    }
+});
+
+onUnmounted(() => {
+    if (autoSaveTimer) clearTimeout(autoSaveTimer);
+    if (editorInstance.value) {
+        editorInstance.value.destroy();
+    }
+});
 
 // Actor Actions
 function addActorDirectly() {
@@ -1111,5 +1261,138 @@ function shortSopDescription(text) {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* CKEditor 5 Theme Overrides for Light & Dark Mode */
+:deep(.ck-editor__editable_inline) {
+    min-height: 500px;
+    padding: 2rem !important;
+    font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+    font-size: 15px;
+    line-height: 1.8;
+}
+
+:deep(.ck.ck-editor__main > .ck-editor__editable) {
+    border-bottom-left-radius: 0.75rem !important;
+    border-bottom-right-radius: 0.75rem !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+}
+
+:deep(.ck.ck-toolbar) {
+    border-top-left-radius: 0.75rem !important;
+    border-top-right-radius: 0.75rem !important;
+    border-color: #cbd5e1 !important;
+    background-color: #f8fafc !important;
+    padding: 0.5rem !important;
+}
+
+/* Dark mode overrides */
+.dark :deep(.ck.ck-editor__main > .ck-editor__editable) {
+    background-color: #171717 !important;
+    color: #f3f4f6 !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark :deep(.ck.ck-toolbar) {
+    background-color: #262626 !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark :deep(.ck.ck-toolbar .ck-button) {
+    color: #d1d5db !important;
+}
+
+.dark :deep(.ck.ck-toolbar .ck-button:hover) {
+    background-color: #374151 !important;
+    color: #ffffff !important;
+}
+
+.dark :deep(.ck.ck-toolbar .ck-button.ck-on) {
+    background-color: #4b5563 !important;
+    color: #ffffff !important;
+}
+
+.dark :deep(.ck.ck-dropdown__panel) {
+    background-color: #1f2937 !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark :deep(.ck.ck-list) {
+    background-color: #1f2937 !important;
+}
+
+.dark :deep(.ck.ck-list__item .ck-button:hover) {
+    background-color: #374151 !important;
+    color: #ffffff !important;
+}
+
+.dark :deep(.ck.ck-list__item .ck-button.ck-on) {
+    background-color: #4b5563 !important;
+    color: #ffffff !important;
+}
+
+/* Custom nested list styles inside editor content area */
+:deep(.ck-content ol) {
+    list-style-type: none !important;
+    counter-reset: level1-counter !important;
+    padding-left: 1.75rem !important;
+}
+:deep(.ck-content ol > li) {
+    counter-increment: level1-counter !important;
+    position: relative !important;
+}
+:deep(.ck-content ol > li::before) {
+    content: counter(level1-counter) ". " !important;
+    position: absolute !important;
+    left: -1.5rem !important;
+    width: 1.25rem !important;
+    text-align: right !important;
+    font-weight: inherit !important;
+}
+
+:deep(.ck-content ol ol) {
+    counter-reset: level2-counter !important;
+    padding-left: 1.75rem !important;
+}
+:deep(.ck-content ol ol > li) {
+    counter-increment: level2-counter !important;
+}
+:deep(.ck-content ol ol > li::before) {
+    content: counter(level2-counter, lower-alpha) ". " !important;
+    position: absolute !important;
+    left: -1.5rem !important;
+    width: 1.25rem !important;
+    text-align: right !important;
+}
+
+:deep(.ck-content ol ol ol) {
+    counter-reset: level3-counter !important;
+    padding-left: 1.75rem !important;
+}
+:deep(.ck-content ol ol ol > li) {
+    counter-increment: level3-counter !important;
+}
+:deep(.ck-content ol ol ol > li::before) {
+    content: counter(level3-counter) ") " !important;
+    position: absolute !important;
+    left: -1.5rem !important;
+    width: 1.25rem !important;
+    text-align: right !important;
+}
+
+:deep(.ck-content ol ol ol ol) {
+    counter-reset: level4-counter !important;
+    padding-left: 1.75rem !important;
+}
+:deep(.ck-content ol ol ol ol > li) {
+    counter-increment: level4-counter !important;
+}
+:deep(.ck-content ol ol ol ol > li::before) {
+    content: counter(level4-counter, lower-alpha) ") " !important;
+    position: absolute !important;
+    left: -1.5rem !important;
+    width: 1.25rem !important;
+    text-align: right !important;
 }
 </style>

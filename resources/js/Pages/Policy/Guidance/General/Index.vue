@@ -29,7 +29,6 @@
                 <div class="mt-8 text-center space-y-2 relative z-10">
                     <h2
                         class="text-lg sm:text-xl font-bold tracking-[0.15em] text-slate-950 dark:text-white uppercase">
-                        BAB II
                     </h2>
                     <h2
                         class="text-xl sm:text-2xl font-bold tracking-[0.2em] text-slate-950 dark:text-white uppercase">

@@ -18,8 +18,7 @@
             <div class="md:col-span-5 flex flex-col divide-y divide-slate-900 dark:divide-white">
                 <div class="p-2.5 flex items-center gap-1.5 min-h-[23px]">
                     <span class="font-bold shrink-0">NOMOR :</span>
-                    <span class="font-mono font-bold text-slate-900 dark:text-white">{{ activeRegulation
-                        ? `REG-${activeRegulation.id.toString().padStart(4, '0')}` : '-' }}</span>
+                    <span class="font-mono font-bold text-slate-900 dark:text-white">{{ activeRegulation?.nomor || '-' }}</span>
                 </div>
                 <div class="p-2.5 flex items-center min-h-[23px]">
                     <div class="flex items-center gap-1.5 flex-wrap">

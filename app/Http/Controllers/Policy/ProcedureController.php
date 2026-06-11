@@ -468,4 +468,64 @@ class ProcedureController extends Controller
 
         return back()->with('success', 'Section TKO berhasil dihapus.');
     }
+
+    /**
+     * Store or update structured TKO document sections and content.
+     */
+    public function saveStructuredDocument(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'regulation_id' => 'required|exists:mst_regulation,id',
+            'sections' => 'required|array',
+            'sections.*.name' => 'required|string|max:255',
+            'sections.*.order' => 'required|integer',
+            'sections.*.content' => 'nullable|string',
+        ]);
+
+        $regulationId = $validated['regulation_id'];
+        $sectionsData = $validated['sections'];
+
+        $processedSectionIds = [];
+
+        foreach ($sectionsData as $secData) {
+            $name = trim($secData['name']);
+            $order = $secData['order'];
+            $content = $secData['content'] ?? '';
+
+            // Find or create global section
+            $section = TrsTkoSections::whereRaw('LOWER(trim(name)) = ?', [strtolower($name)])->first();
+            if (!$section) {
+                $section = TrsTkoSections::create([
+                    'name' => $name,
+                    'order' => $order,
+                ]);
+            } else {
+                // Optionally update order if it changed
+                if ($section->order !== $order) {
+                    $section->update(['order' => $order]);
+                }
+            }
+
+            $processedSectionIds[] = $section->id;
+
+            // Update or create regulation-specific content
+            TrsTkoContent::updateOrCreate(
+                [
+                    'regulation_id' => $regulationId,
+                    'section_id' => $section->id,
+                ],
+                [
+                    'content' => $content,
+                ]
+            );
+        }
+
+        // Delete content for sections that were removed in this update for this regulation
+        TrsTkoContent::where('regulation_id', $regulationId)
+            ->whereNotIn('section_id', $processedSectionIds)
+            ->delete();
+
+        return back()->with('success', 'Dokumen TKO berhasil disimpan.');
+    }
 }
+

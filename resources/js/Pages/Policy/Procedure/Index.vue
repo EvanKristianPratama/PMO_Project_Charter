@@ -58,25 +58,28 @@
                             </h3>
                             <div class="space-y-2.5">
                                 <template v-if="section.content">
-                                    <div 
-                                        v-for="(line, idx) in parseContentLines(section.content)" 
-                                        :key="idx"
-                                        :class="[
-                                            line.type === 'list' ? 'flex gap-2 items-start' : '',
-                                        ]"
-                                        :style="line.indent > 0 ? { paddingLeft: `${line.indent * 2.25}rem` } : {}"
-                                    >
-                                        <template v-if="line.type === 'list'">
-                                            <span class="font-bold select-none text-right min-w-[1.75rem] text-slate-950 dark:text-white font-sans">{{ line.marker }}</span>
-                                            <span class="flex-1 text-justify whitespace-pre-wrap">{{ line.text }}</span>
-                                        </template>
-                                        <template v-else-if="line.type === 'empty'">
-                                            <div class="h-3"></div>
-                                        </template>
-                                        <template v-else>
-                                            <span class="flex-1 text-justify whitespace-pre-wrap">{{ line.text }}</span>
-                                        </template>
-                                    </div>
+                                    <div v-if="isHtmlContent(section.content)" v-html="section.content" class="prose dark:prose-invert max-w-none text-justify whitespace-normal text-slate-800 dark:text-slate-200"></div>
+                                    <template v-else>
+                                        <div 
+                                            v-for="(line, idx) in parseContentLines(section.content)" 
+                                            :key="idx"
+                                            :class="[
+                                                line.type === 'list' ? 'flex gap-2 items-start' : '',
+                                            ]"
+                                            :style="line.indent > 0 ? { paddingLeft: `${line.indent * 2.25}rem` } : {}"
+                                        >
+                                            <template v-if="line.type === 'list'">
+                                                <span class="font-bold select-none text-right min-w-[1.75rem] text-slate-950 dark:text-white font-sans">{{ line.marker }}</span>
+                                                <span class="flex-1 text-justify whitespace-pre-wrap">{{ line.text }}</span>
+                                            </template>
+                                            <template v-else-if="line.type === 'empty'">
+                                                <div class="h-3"></div>
+                                            </template>
+                                            <template v-else>
+                                                <span class="flex-1 text-justify whitespace-pre-wrap">{{ line.text }}</span>
+                                            </template>
+                                        </div>
+                                    </template>
                                 </template>
                                 <template v-else>
                                     <div class="text-slate-400 dark:text-slate-500 italic">Belum ada konten.</div>
@@ -384,6 +387,12 @@ function parseContentLines(content) {
 
 function printDocument() { window.print(); }
 
+function isHtmlContent(content) {
+    if (!content) return false;
+    const trimmed = String(content).trim();
+    return /<[a-z][\s\S]*>/i.test(trimmed);
+}
+
 function scrollToTop() {
     window.scrollTo({
         top: 0,
@@ -395,4 +404,68 @@ function scrollToTop() {
 <style scoped>
 .animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Custom nested list styles for v-html content area */
+:deep(.prose ol) {
+    list-style-type: none !important;
+    counter-reset: level1-counter !important;
+    padding-left: 1.75rem !important;
+}
+:deep(.prose ol > li) {
+    counter-increment: level1-counter !important;
+    position: relative !important;
+}
+:deep(.prose ol > li::before) {
+    content: counter(level1-counter) ". " !important;
+    position: absolute !important;
+    left: -1.5rem !important;
+    width: 1.25rem !important;
+    text-align: right !important;
+    font-weight: inherit !important;
+}
+
+:deep(.prose ol ol) {
+    counter-reset: level2-counter !important;
+    padding-left: 1.75rem !important;
+}
+:deep(.prose ol ol > li) {
+    counter-increment: level2-counter !important;
+}
+:deep(.prose ol ol > li::before) {
+    content: counter(level2-counter, lower-alpha) ". " !important;
+    position: absolute !important;
+    left: -1.5rem !important;
+    width: 1.25rem !important;
+    text-align: right !important;
+}
+
+:deep(.prose ol ol ol) {
+    counter-reset: level3-counter !important;
+    padding-left: 1.75rem !important;
+}
+:deep(.prose ol ol ol > li) {
+    counter-increment: level3-counter !important;
+}
+:deep(.prose ol ol ol > li::before) {
+    content: counter(level3-counter) ") " !important;
+    position: absolute !important;
+    left: -1.5rem !important;
+    width: 1.25rem !important;
+    text-align: right !important;
+}
+
+:deep(.prose ol ol ol ol) {
+    counter-reset: level4-counter !important;
+    padding-left: 1.75rem !important;
+}
+:deep(.prose ol ol ol ol > li) {
+    counter-increment: level4-counter !important;
+}
+:deep(.prose ol ol ol ol > li::before) {
+    content: counter(level4-counter, lower-alpha) ") " !important;
+    position: absolute !important;
+    left: -1.5rem !important;
+    width: 1.25rem !important;
+    text-align: right !important;
+}
 </style>

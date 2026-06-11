@@ -82,49 +82,7 @@
                 style="font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.5; color: #1e293b;">
                 
                 <!-- Formal Pertamina Document Grid Header -->
-                <div class="border border-slate-900 dark:border-white text-[11px] text-slate-950 dark:text-white font-sans uppercase z-10 relative mb-8">
-                    <div class="grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-slate-900 dark:divide-white">
-                        <!-- Left Column (Fungsi & Judul) -->
-                        <div class="md:col-span-7 flex flex-col divide-y divide-slate-900 dark:divide-white">
-                            <div class="p-3 flex items-start gap-1.5 min-h-[46px]">
-                                <span class="font-bold shrink-0">FUNGSI :</span>
-                                <span class="font-bold text-slate-900 dark:text-white">{{ activeRegulation?.owner || 'ENTERPRISE IT – DIREKTORAT PENUNJANG BISNIS' }}</span>
-                            </div>
-                            <div class="p-3 flex items-start gap-1.5 min-h-[46px]">
-                                <span class="font-bold shrink-0">JUDUL :</span>
-                                <span class="font-bold text-slate-900 dark:text-white">{{ activeRegulation?.judul || 'TATA KELOLA TEKNOLOGI INFORMASI' }}</span>
-                            </div>
-                        </div>
-                        <!-- Right Column (Metadata) -->
-                        <div class="md:col-span-5 flex flex-col divide-y divide-slate-900 dark:divide-white">
-                            <div class="p-2.5 flex items-center gap-1.5 min-h-[23px]">
-                                <span class="font-bold shrink-0">NOMOR :</span>
-                                <span class="font-mono font-bold text-slate-900 dark:text-white">{{ activeRegulation ? `REG-${activeRegulation.id.toString().padStart(4, '0')}` : '-' }}</span>
-                            </div>
-                            <div class="p-2.5 flex items-center min-h-[23px]">
-                                <div class="flex items-center gap-1.5 flex-wrap">
-                                    <span class="font-bold shrink-0">REVISI KE :</span>
-                                    <template v-if="[0, 1, 2, 3, 4].includes(parseInt(activeRegulation?.revisi))">
-                                        <span v-for="num in [0, 1, 2, 3, 4]" :key="num" class="inline-flex items-center gap-1 mr-1">
-                                            <span class="w-3.5 h-3.5 border border-slate-900 dark:border-white flex items-center justify-center text-[10px] font-black bg-transparent select-none animate-none">
-                                                {{ parseInt(activeRegulation?.revisi) === num ? '✓' : '' }}
-                                            </span>
-                                            <span class="font-mono">{{ num }}</span>
-                                        </span>
-                                    </template>
-                                    <template v-else>
-                                        <span class="w-3.5 h-3.5 border border-slate-900 dark:border-white flex items-center justify-center text-[10px] font-black bg-transparent select-none mr-1">✓</span>
-                                        <span class="font-bold text-slate-900 dark:text-white mr-2">{{ activeRegulation?.revisi || '0' }}</span>
-                                    </template>
-                                </div>
-                            </div>
-                            <div class="p-2.5 flex items-center gap-1.5 min-h-[23px]">
-                                <span class="font-bold shrink-0">BERLAKU TMT :</span>
-                                <span class="font-bold text-slate-900 dark:text-white">{{ activeRegulation?.berlaku ? formatDate(activeRegulation.berlaku) : '-' }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <PertaminaDocumentHeader :activeRegulation="activeRegulation" class="mb-8" />
 
                 <!-- 2. Document Title Section -->
                 <div class="mt-16 text-center space-y-2 relative z-10">
@@ -771,6 +729,7 @@ import { ref, computed, watch } from 'vue';
 import { usePage, Link, useForm } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import GuidanceChapterNavigation from '@/Components/Regulation/GuidanceChapterNavigation.vue';
+import PertaminaDocumentHeader from '@/Components/Regulation/PertaminaDocumentHeader.vue';
 
 const props = defineProps({
     roles: {

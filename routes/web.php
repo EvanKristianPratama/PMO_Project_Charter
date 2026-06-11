@@ -360,6 +360,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
         Route::put('/procedure/diagram/{id}', [ProcedureController::class, 'updateDiagram'])->name('procedure.diagram.update');
         Route::delete('/procedure/diagram/{id}', [ProcedureController::class, 'destroyDiagram'])->name('procedure.diagram.destroy');
         Route::post('/procedure/tko-content', [ProcedureController::class, 'storeOrUpdateTkoContent'])->name('procedure.tko-content.store');
+        Route::post('/procedure/tko-content/save-structured', [ProcedureController::class, 'saveStructuredDocument'])->name('procedure.tko-content.save-structured');
         Route::post('/procedure/section', [ProcedureController::class, 'storeSection'])->name('procedure.section.store');
         Route::put('/procedure/section/{id}', [ProcedureController::class, 'updateSection'])->name('procedure.section.update');
         Route::delete('/procedure/section/{id}', [ProcedureController::class, 'destroySection'])->name('procedure.section.destroy');

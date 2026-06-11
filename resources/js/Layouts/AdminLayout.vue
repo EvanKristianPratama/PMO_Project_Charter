@@ -262,7 +262,7 @@ const logout = () => {
                     :key="`side-${item.href}`"
                     :href="item.href"
                     class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
-                    :class="item.active(currentUrl)
+                    :class="item.active(currentUrl.value)
                         ? 'bg-indigo-600/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300'
                         : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200'"
                     @click="closeSidebar"

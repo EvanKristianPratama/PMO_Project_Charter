@@ -43,8 +43,12 @@ const policyChildren = computed(() => {
         });
 });
 
+const isPolicyActive = computed(() => {
+    return policyItem.value?.active(currentUrl.value) || false;
+});
+
 const showPolicyChildren = computed(() => {
-    if (policyItem.value?.active(currentUrl.value)) {
+    if (isPolicyActive.value) {
         return true;
     }
 
@@ -88,7 +92,7 @@ const adminItem = computed(() => {
                 :href="policyItem.href"
                 class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
                 :class="[
-                    showPolicyChildren
+                    isPolicyActive
                         ? 'bg-indigo-500 text-white shadow-sm'
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
@@ -111,7 +115,7 @@ const adminItem = computed(() => {
                 :href="libaryItem.href"
                 class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
                 :class="[
-                    libaryItem.active(currentUrl)
+                    libaryItem.active(currentUrl.value)
                         ? 'bg-indigo-500 text-white shadow-sm'
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
@@ -134,7 +138,7 @@ const adminItem = computed(() => {
                 :href="adminItem.href"
                 class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
                 :class="[
-                    adminItem.active(currentUrl)
+                    adminItem.active(currentUrl.value)
                         ? 'bg-indigo-500 text-white shadow-sm'
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
@@ -152,7 +156,7 @@ const adminItem = computed(() => {
                 :href="item.href"
                 class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all duration-150"
                 :class="[
-                    item.active(currentUrl)
+                    item.active(currentUrl.value)
                         ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300'
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
@@ -170,7 +174,7 @@ const adminItem = computed(() => {
                 :href="item.href"
                 class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all duration-150"
                 :class="[
-                    item.active(currentUrl)
+                    item.active(currentUrl.value)
                         ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300'
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"

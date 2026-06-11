@@ -160,7 +160,7 @@ const logout = () => {
                             <Link
                                 :href="item.href"
                                 class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
-                                :class="item.active(currentUrl)
+                                :class="item.active(currentUrl.value)
                                     ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
                                     : 'text-slate-600 hover:bg-blue-50 hover:text-blue-600 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-blue-300'"
                                 @click="mobileMenuOpen = false"
@@ -174,7 +174,7 @@ const logout = () => {
                                     :key="`mobile-sub-${child.href}`"
                                     :href="child.href"
                                     class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
-                                    :class="child.active(currentUrl)
+                                    :class="child.active(currentUrl.value)
                                         ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
                                         : 'text-slate-600 hover:bg-blue-50 hover:text-blue-600 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-blue-300'"
                                     @click="mobileMenuOpen = false"
@@ -188,7 +188,7 @@ const logout = () => {
                             v-else
                             :href="item.href"
                             class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
-                            :class="item.active(currentUrl)
+                            :class="item.active(currentUrl.value)
                                 ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
                                 : 'text-slate-600 hover:bg-blue-50 hover:text-blue-600 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-blue-300'"
                             @click="mobileMenuOpen = false"
@@ -227,7 +227,7 @@ const logout = () => {
         <div class="sticky top-16 z-40 print:hidden">
             <div class="flex flex-col gap-2 border-b border-white/50 bg-white/40 px-4 py-2 backdrop-blur-md dark:border-white/10 dark:bg-white/5 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
                 <!-- Kiri: Program Planning / Program Implementation -->
-                <div class="w-full min-w-0 rounded-full border border-white/70 bg-white/60 px-2.5 py-1 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/5 sm:w-auto">
+                <div class="w-full min-w-0 rounded-2xl border border-white/70 bg-white/60 px-3 py-1.5 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/5 sm:w-auto">
                     <div class="overflow-x-auto">
                         <div class="min-w-max">
                             <BreadcrumbLeft />
@@ -235,7 +235,7 @@ const logout = () => {
                     </div>
                 </div>
                 <!-- Kanan: Architecture / Policy -->
-                <div class="w-full min-w-0 rounded-full border border-white/70 bg-white/60 px-2.5 py-1 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/5 sm:w-auto">
+                <div class="w-full min-w-0 rounded-2xl border border-white/70 bg-white/60 px-3 py-1.5 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/5 sm:w-auto">
                     <div class="overflow-x-auto sm:flex sm:justify-end">
                         <div class="min-w-max">
                             <BreadcrumbRight />
