@@ -3,6 +3,12 @@
         <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-white/10">
             <h2 class="text-sm font-semibold text-slate-900 dark:text-white">Organization List</h2>
             <div class="flex items-center gap-3">
+                <input
+                    v-model="searchQuery"
+                    type="text"
+                    placeholder="Cari organisasi..."
+                    class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white w-48"
+                />
                 <select
                     v-model="parentFilterCode"
                     class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
@@ -257,6 +263,7 @@ const props = defineProps({
 const displayValue = (value) => value ?? '-';
 
 const parentFilterCode = ref('');
+const searchQuery = ref('');
 
 const parentFilterOptions = computed(() => {
     return [...props.organizationStructureRows].sort((a, b) => {
@@ -271,14 +278,33 @@ const getLevelPrefix = (code) => {
 };
 
 const filteredRows = computed(() => {
-    if (!parentFilterCode.value) {
-        return props.organizationStructureRows;
+    let rows = props.organizationStructureRows;
+
+    // 1. Filter by parent organization structure
+    if (parentFilterCode.value) {
+        const filterCode = parentFilterCode.value;
+        rows = rows.filter((row) => {
+            const rowCode = row.code || '';
+            return rowCode === filterCode || rowCode.startsWith(filterCode);
+        });
     }
-    const filterCode = parentFilterCode.value;
-    return props.organizationStructureRows.filter((row) => {
-        const rowCode = row.code || '';
-        return rowCode === filterCode || rowCode.startsWith(filterCode);
-    });
+
+    // 2. Filter by search query text
+    if (searchQuery.value) {
+        const query = searchQuery.value.toLowerCase().trim();
+        rows = rows.filter((row) => {
+            return (
+                (row.code || '').toLowerCase().includes(query) ||
+                (row.organization_name || '').toLowerCase().includes(query) ||
+                (row.alias || '').toLowerCase().includes(query) ||
+                (row.jabatan || '').toLowerCase().includes(query) ||
+                (row.pejabat || '').toLowerCase().includes(query) ||
+                (row.sk || '').toLowerCase().includes(query)
+            );
+        });
+    }
+
+    return rows;
 });
 
 watch(() => props.organizationStructureRows, (newRows) => {
