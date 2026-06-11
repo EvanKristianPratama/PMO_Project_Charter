@@ -197,7 +197,7 @@ class ProcedureController extends Controller
     /**
      * Update the specified actor.
      */
-    public function updateActor(Request $request, $id): RedirectResponse
+    public function updateActor(Request $request, $id)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -207,6 +207,10 @@ class ProcedureController extends Controller
 
         $actor = MstActor::findOrFail($id);
         $actor->update($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Aktor berhasil diperbarui.']);
+        }
 
         return back()->with('success', 'Aktor berhasil diperbarui.');
     }
@@ -240,7 +244,7 @@ class ProcedureController extends Controller
     /**
      * Update the specified SOP Category.
      */
-    public function updateCategory(Request $request, $id): RedirectResponse
+    public function updateCategory(Request $request, $id)
     {
         $validated = $request->validate([
             'tipe' => 'required|string|max:255',
@@ -248,6 +252,10 @@ class ProcedureController extends Controller
 
         $category = TrsSopCategory::findOrFail($id);
         $category->update($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Kategori SOP berhasil diperbarui.']);
+        }
 
         return back()->with('success', 'Kategori SOP berhasil diperbarui.');
     }
@@ -290,7 +298,7 @@ class ProcedureController extends Controller
     /**
      * Update the specified SOP item.
      */
-    public function updateSop(Request $request, int $id): RedirectResponse
+    public function updateSop(Request $request, int $id)
     {
         $validated = $request->validate([
             'category_id' => 'required|exists:trs_sop_category,id',
@@ -299,6 +307,10 @@ class ProcedureController extends Controller
 
         $sop = MstSop::findOrFail($id);
         $sop->update($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'SOP berhasil diperbarui.']);
+        }
 
         $category = TrsSopCategory::findOrFail($validated['category_id']);
 
@@ -442,7 +454,7 @@ class ProcedureController extends Controller
     /**
      * Update the specified TKO section.
      */
-    public function updateSection(Request $request, $id): RedirectResponse
+    public function updateSection(Request $request, $id)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -451,6 +463,10 @@ class ProcedureController extends Controller
 
         $section = TrsTkoSections::findOrFail($id);
         $section->update($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Section TKO berhasil diperbarui.']);
+        }
 
         return back()->with('success', 'Section TKO berhasil diperbarui.');
     }

@@ -9,7 +9,7 @@
                         class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-indigo-500 dark:border-white/10 dark:bg-[#111111] dark:text-slate-200"
                         @change="$emit('update:selected-groub-name', $event.target.value)"
                     >
-                        <option value="">Semua Groub</option>
+                        <option value="">Semua Group</option>
                         <option v-for="groubName in groubNames" :key="groubName" :value="groubName">
                             {{ groubName }}
                         </option>

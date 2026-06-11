@@ -15,27 +15,6 @@
                             Kelola Dokumen
                         </h1>
                     </div>
-                    <div class="flex flex-wrap items-center gap-3">
-                        <button
-                            @click="printDocument"
-                            class="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-slate-900/15 transition-all hover:bg-slate-800 focus:ring-2 focus:ring-slate-900/20 active:scale-95 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.897l-1.2-6.82a2.25 2.25 0 012.23-2.64h9.5c1.12 0 2.07.82 2.23 1.94l.8 4.54a2.25 2.25 0 01-2.23 2.64H6.72z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15m15 0a2.25 2.25 0 012.25 2.25v3a2.25 2.25 0 01-2.25 2.25h-15A2.25 2.25 0 013 17.25v-3A2.25 2.25 0 015.25 12h14.25z" />
-                            </svg>
-                            Cetak
-                        </button>
-                        <Link
-                            :href="route('policy.procedure.manage', activeRegulation ? { regulation_id: activeRegulation.id } : {})"
-                            class="inline-flex items-center gap-2 rounded-xl bg-[#821f44] px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#821f44]/25 transition-all hover:bg-[#9c2552] hover:shadow-[#821f44]/40 focus:ring-2 focus:ring-[#821f44]/20 active:scale-95"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.83 20.013a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                            </svg>
-                            Kelola Procedure
-                        </Link>
-                    </div>
                 </div>
             </section>
 
@@ -191,7 +170,7 @@
             </button>
 
             <!-- Go to Management CRUD page -->
-            <Link :href="route('policy.procedure.manage', activeRegulation ? { regulation_id: activeRegulation.id } : {})" title="Kelola Procedure"
+            <Link :href="route('policy.procedure.manage', activeRegulation ? { regulation_id: activeRegulation.id } : {})" title="Editor"
                 class="group flex h-12 w-12 items-center justify-center rounded-full bg-[#821f44]/80 text-white shadow-2xl shadow-[#821f44]/30 backdrop-blur-md transition-all hover:bg-[#821f44] hover:shadow-[#821f44]/40 active:scale-95">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2"
                     stroke="currentColor" class="w-5 h-5 transition-transform group-hover:rotate-12">
