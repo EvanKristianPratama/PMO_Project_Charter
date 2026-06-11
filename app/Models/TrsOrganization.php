@@ -20,6 +20,7 @@ class TrsOrganization extends Model
         'alias',
         'jabatan',
         'pejabat',
+        'sk'
     ];
 
     protected $casts = [

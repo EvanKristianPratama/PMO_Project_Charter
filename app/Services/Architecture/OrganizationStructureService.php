@@ -15,7 +15,7 @@ class OrganizationStructureService
             ->with([
                 'company:id,name',
                 'organizations' => fn (HasMany $query) => $query
-                    ->select(['id', 'groub_id', 'code', 'name', 'alias', 'jabatan', 'pejabat'])
+                    ->select(['id', 'groub_id', 'code', 'name', 'alias', 'jabatan', 'pejabat', 'sk'])
                     ->with('picOrganization:id,organization_id,name'),
             ])
             ->get()
@@ -40,6 +40,7 @@ class OrganizationStructureService
             'alias' => $organization->alias,
             'jabatan' => $organization->jabatan,
             'pejabat' => $organization->pejabat,
+            'sk' => $organization->sk,
             'groub_id' => (int) $groub->id,
             'groub_name' => $groub->name,
             'company_id' => $groub->company?->id ? (int) $groub->company->id : null,

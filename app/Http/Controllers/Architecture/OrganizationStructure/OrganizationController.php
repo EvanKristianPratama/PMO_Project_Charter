@@ -33,6 +33,7 @@ class OrganizationController extends Controller
             'alias' => 'nullable|string|max:255',
             'jabatan' => 'nullable|string|max:255',
             'pejabat' => 'nullable|string|max:255',
+            'sk' => 'nullable|string|max:255',
         ]);
 
         TrsOrganization::create($validated);
@@ -53,6 +54,7 @@ class OrganizationController extends Controller
             'alias' => 'nullable|string|max:255',
             'jabatan' => 'nullable|string|max:255',
             'pejabat' => 'nullable|string|max:255',
+            'sk' => 'nullable|string|max:255',
         ]);
 
         $organization->update($validated);

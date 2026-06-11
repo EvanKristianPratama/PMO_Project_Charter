@@ -472,7 +472,7 @@ class ProcedureController extends Controller
     /**
      * Store or update structured TKO document sections and content.
      */
-    public function saveStructuredDocument(Request $request): RedirectResponse
+    public function saveStructuredDocument(Request $request): \Symfony\Component\HttpFoundation\Response
     {
         $validated = $request->validate([
             'regulation_id' => 'required|exists:mst_regulation,id',
@@ -485,6 +485,15 @@ class ProcedureController extends Controller
         $regulationId = $validated['regulation_id'];
         $sectionsData = $validated['sections'];
 
+        // Get all existing sections to match them cleanly
+        $existingSections = TrsTkoSections::all();
+
+        // Helper function to normalize section names for robust matching
+        $normalize = function ($name) {
+            $name = preg_replace('/^([\d\.]+|[ivxIVX]+|[a-zA-Z])[\.\)\-\s]+/u', '', $name);
+            return strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $name));
+        };
+
         $processedSectionIds = [];
 
         foreach ($sectionsData as $secData) {
@@ -492,18 +501,36 @@ class ProcedureController extends Controller
             $order = $secData['order'];
             $content = $secData['content'] ?? '';
 
-            // Find or create global section
-            $section = TrsTkoSections::whereRaw('LOWER(trim(name)) = ?', [strtolower($name)])->first();
-            if (!$section) {
+            $normalizedIncoming = $normalize($name);
+            $matchedSection = null;
+
+            // Find match in existing sections by normalized name
+            foreach ($existingSections as $existing) {
+                if ($normalize($existing->name) === $normalizedIncoming) {
+                    $matchedSection = $existing;
+                    break;
+                }
+            }
+
+            if ($matchedSection) {
+                // Update existing section name and order if they differ
+                $updates = [];
+                if (strtolower(trim($matchedSection->name)) !== strtolower($name)) {
+                    $updates['name'] = $name;
+                }
+                if ($matchedSection->order !== $order) {
+                    $updates['order'] = $order;
+                }
+                if (!empty($updates)) {
+                    $matchedSection->update($updates);
+                }
+                $section = $matchedSection;
+            } else {
+                // Create new global section
                 $section = TrsTkoSections::create([
                     'name' => $name,
                     'order' => $order,
                 ]);
-            } else {
-                // Optionally update order if it changed
-                if ($section->order !== $order) {
-                    $section->update(['order' => $order]);
-                }
             }
 
             $processedSectionIds[] = $section->id;
@@ -520,10 +547,17 @@ class ProcedureController extends Controller
             );
         }
 
-        // Delete content for sections that were removed in this update for this regulation
+        // Delete content for sections that were not sent in this save for this regulation
         TrsTkoContent::where('regulation_id', $regulationId)
             ->whereNotIn('section_id', $processedSectionIds)
             ->delete();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Dokumen TKO berhasil disimpan.'
+            ]);
+        }
 
         return back()->with('success', 'Dokumen TKO berhasil disimpan.');
     }
