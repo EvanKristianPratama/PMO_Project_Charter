@@ -2,15 +2,26 @@
     <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
         <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-white/10">
             <h2 class="text-sm font-semibold text-slate-900 dark:text-white">Organization List</h2>
-            <button
-                @click="openCreateModal"
-                class="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 dark:bg-white dark:hover:bg-slate-100 dark:text-slate-950 dark:focus:ring-white dark:focus:ring-offset-[#171717]"
-            >
-                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-                Add Organization
-            </button>
+            <div class="flex items-center gap-3">
+                <select
+                    v-model="parentFilterCode"
+                    class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                >
+                    <option value="">Semua Organisasi</option>
+                    <option v-for="org in parentFilterOptions" :key="org.organization_id" :value="org.code">
+                        {{ getLevelPrefix(org.code) }}{{ org.organization_name }} ({{ org.code }})
+                    </option>
+                </select>
+                <button
+                    @click="openCreateModal"
+                    class="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 dark:bg-white dark:hover:bg-slate-100 dark:text-slate-950 dark:focus:ring-white dark:focus:ring-offset-[#171717]"
+                >
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add Organization
+                </button>
+            </div>
         </div>
 
         <div class="overflow-x-auto">
@@ -31,7 +42,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-200 dark:divide-white/10">
                     <tr
-                        v-for="(organizationStructureRow, index) in organizationStructureRows"
+                        v-for="(organizationStructureRow, index) in filteredRows"
                         :key="organizationStructureRow.organization_id"
                         class="transition hover:bg-slate-50 dark:hover:bg-white/5"
                     >
@@ -75,7 +86,7 @@
                             </button>
                         </td>
                     </tr>
-                    <tr v-if="organizationStructureRows.length === 0">
+                    <tr v-if="filteredRows.length === 0">
                         <td colspan="10" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
                             Data organization tidak ditemukan.
                         </td>
@@ -244,6 +255,37 @@ const props = defineProps({
 });
 
 const displayValue = (value) => value ?? '-';
+
+const parentFilterCode = ref('');
+
+const parentFilterOptions = computed(() => {
+    return [...props.organizationStructureRows].sort((a, b) => {
+        return (a.code || '').localeCompare(b.code || '');
+    });
+});
+
+const getLevelPrefix = (code) => {
+    const level = Math.floor((code || '').length / 2);
+    if (level <= 1) return '';
+    return '\u00A0\u00A0'.repeat(level - 1) + '— ';
+};
+
+const filteredRows = computed(() => {
+    if (!parentFilterCode.value) {
+        return props.organizationStructureRows;
+    }
+    const filterCode = parentFilterCode.value;
+    return props.organizationStructureRows.filter((row) => {
+        const rowCode = row.code || '';
+        return rowCode === filterCode || rowCode.startsWith(filterCode);
+    });
+});
+
+watch(() => props.organizationStructureRows, (newRows) => {
+    if (parentFilterCode.value && !newRows.some(row => row.code === parentFilterCode.value)) {
+        parentFilterCode.value = '';
+    }
+});
 
 const isModalOpen = ref(false);
 const isDeleteModalOpen = ref(false);
