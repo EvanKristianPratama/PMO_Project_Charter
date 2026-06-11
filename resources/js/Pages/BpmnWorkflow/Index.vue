@@ -526,13 +526,13 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, defineAsyncComponent, nextTick, onMounted, onBeforeUnmount, ref, watch } from 'vue';
 import { usePage, router } from '@inertiajs/vue3';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
-// Modeler Component
-import BpmnModeler from '@/Components/Bpmn/BpmnModeler.vue';
+// Load the BPMN modeler lazily so the workflow page stays small until it is used.
+const BpmnModeler = defineAsyncComponent(() => import('@/Components/Bpmn/BpmnModeler.vue'));
 
 // Layout & Navigation Helper
 import UserLayout from '@/Layouts/UserLayout.vue';
