@@ -31,78 +31,100 @@
                     <table class="w-full border-collapse text-left text-xs text-slate-500 dark:text-slate-400">
                         <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
                             <tr>
-                                <th scope="col" class="px-6 py-4 w-16 text-center">No</th>
-                                <th scope="col" class="px-6 py-4">Judul</th>
-                                <th scope="col" class="px-6 py-4">Nomor</th>
-                                <th scope="col" class="px-6 py-4 w-36">Tipe</th>
-                                <th scope="col" class="px-6 py-4">Fungsi</th>
-                                <th scope="col" class="px-6 py-4">Organisasi</th>
-                                <th scope="col" class="px-6 py-4 text-center w-24">Revisi</th>
-                                <th scope="col" class="px-6 py-4 w-32">Berlaku</th>
-                                <th scope="col" class="px-6 py-4 text-center w-32">Detail</th>
+                                <th scope="col" class="px-3 py-3 w-10 text-center border-r border-b border-slate-200 dark:border-white/10">No</th>
+                                <th scope="col" colspan="3" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Judul</th>
+                                <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Nomor</th>
+                                <th scope="col" class="px-3 py-3 w-28 border-r border-b border-slate-200 dark:border-white/10">Tipe</th>
+                                <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Fungsi</th>
+                                <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Organisasi</th>
+                                <th scope="col" class="px-3 py-3 text-center w-16 border-r border-b border-slate-200 dark:border-white/10">Revisi</th>
+                                <th scope="col" class="px-3 py-3 w-24 border-r border-b border-slate-200 dark:border-white/10">Berlaku</th>
+                                <th scope="col" class="px-3 py-3 text-center w-24 border-b border-slate-200 dark:border-white/10">Detail</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-200 dark:divide-white/10 dark:bg-transparent">
-                            <tr v-if="regulations.length === 0" class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
-                                <td colspan="9" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
+                        <tbody class="dark:bg-transparent">
+                            <!-- Empty state -->
+                            <tr v-if="sortedRegulations.length === 0">
+                                <td colspan="11" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
                                     Belum ada data Regulasi. Silakan hubungi admin atau klik "Kelola Regulasi" untuk menambahkan.
                                 </td>
                             </tr>
-                            <tr 
-                                v-for="(reg, index) in regulations" 
-                                :key="reg.id" 
+
+                            <tr
+                                v-for="(reg, index) in sortedRegulations"
+                                :key="reg.id"
                                 class="group hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150"
                             >
                                 <!-- No -->
-                                <td class="px-6 py-4 text-center font-medium text-slate-700 dark:text-slate-300">
+                                <td class="px-3 py-3 text-center font-medium text-slate-700 dark:text-slate-300 border-r border-b border-slate-200 dark:border-white/10 w-10">
                                     {{ index + 1 }}
                                 </td>
-                                <!-- Judul -->
-                                <td class="px-6 py-4 text-slate-900 dark:text-white font-bold leading-relaxed max-w-sm">
-                                    {{ reg.judul }}
+
+                                <!-- Judul — 3 consistent leveling columns (Level 1, Level 2, Level 3) -->
+                                <td class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 max-w-[160px] break-words">
+                                    <span v-if="getVisualDepth(reg.org_level) === 0" class="text-slate-900 dark:text-white font-bold leading-relaxed block">
+                                        {{ reg.judul }}
+                                    </span>
                                 </td>
+                                <td class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 max-w-[160px] break-words">
+                                    <span v-if="getVisualDepth(reg.org_level) === 1" class="text-slate-900 dark:text-white font-bold leading-relaxed block">
+                                        {{ reg.judul }}
+                                    </span>
+                                </td>
+                                <td class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 max-w-[160px] break-words">
+                                    <span v-if="getVisualDepth(reg.org_level) === 2" class="text-slate-900 dark:text-white font-bold leading-relaxed block">
+                                        {{ reg.judul }}
+                                    </span>
+                                </td>
+
                                 <!-- Nomor -->
-                                <td class="px-6 py-4 text-slate-700 dark:text-slate-300 font-medium">
+                                <td class="px-3 py-3 text-slate-700 dark:text-slate-300 font-medium border-r border-b border-slate-200 dark:border-white/10 max-w-[120px] break-words">
                                     {{ reg.nomor || '-' }}
                                 </td>
-                                 <!-- Tipe -->
-                                 <td class="px-6 py-4">
-                                     <span 
-                                         :class="[
-                                             'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold border',
-                                             reg.tipe === 'Policy' 
-                                                 ? 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-500/10 dark:border-indigo-500/20 dark:text-indigo-400' 
-                                                 : reg.tipe === 'Procedure'
-                                                     ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400'
-                                                     : reg.tipe === 'Standart'
-                                                         ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400'
-                                                         : 'bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-500/10 dark:border-slate-500/20 dark:text-slate-400'
-                                         ]"
-                                     >
-                                         {{ reg.tipe }} - {{ reg.stk || '-' }}
-                                     </span>
-                                 </td>
-                                <!-- Owner -->
-                                <td class="px-6 py-4 text-slate-700 dark:text-slate-300 font-medium">
+
+                                <!-- Tipe -->
+                                <td class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 w-28">
+                                    <span
+                                        :class="[
+                                            'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold border',
+                                            reg.tipe === 'Policy'
+                                                ? 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-500/10 dark:border-indigo-500/20 dark:text-indigo-400'
+                                                : reg.tipe === 'Procedure'
+                                                    ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400'
+                                                    : reg.tipe === 'Standart'
+                                                        ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400'
+                                                        : 'bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-500/10 dark:border-slate-500/20 dark:text-slate-400'
+                                        ]"
+                                    >
+                                        {{ reg.tipe }} - {{ reg.stk || '-' }}
+                                    </span>
+                                </td>
+
+                                <!-- Fungsi / Owner -->
+                                <td class="px-3 py-3 text-slate-700 dark:text-slate-300 font-medium border-r border-b border-slate-200 dark:border-white/10 max-w-[200px] break-words">
                                     {{ reg.owner }}
                                 </td>
-                                <!-- Organisasi -->
-                                <td class="px-6 py-4 text-slate-700 dark:text-slate-300 font-medium">
-                                    {{ reg.organization?.name || '-' }}
+
+                                <!-- Organisasi — show org name -->
+                                <td class="px-3 py-3 text-slate-700 dark:text-slate-300 font-medium border-r border-b border-slate-200 dark:border-white/10 max-w-[140px] break-words">
+                                    <span>{{ reg.organization?.jabatan || reg.organization?.name || '-' }}</span>
                                 </td>
+
                                 <!-- Revisi -->
-                                <td class="px-6 py-4 text-center font-mono font-semibold text-slate-800 dark:text-slate-200">
+                                <td class="px-3 py-3 text-center font-mono font-semibold text-slate-800 dark:text-slate-200 border-r border-b border-slate-200 dark:border-white/10 w-16">
                                     {{ reg.revisi }}
                                 </td>
+
                                 <!-- Berlaku -->
-                                <td class="px-6 py-4 text-slate-600 dark:text-slate-400 font-mono text-xs">
+                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400 font-mono text-xs border-r border-b border-slate-200 dark:border-white/10 w-24">
                                     {{ formatDate(reg.berlaku) }}
                                 </td>
+
                                 <!-- Detail -->
-                                <td class="px-6 py-4 text-center">
-                                    <button 
+                                <td class="px-3 py-3 text-center border-b border-slate-200 dark:border-white/10 w-24">
+                                    <button
                                         @click="handleDetailClick(reg)"
-                                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#821f44] px-4 py-2 text-xs font-bold text-white shadow-lg shadow-[#821f44]/25 transition-all hover:bg-[#9c2552] hover:shadow-[#821f44]/40 active:scale-95"
+                                        class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#821f44] px-3 py-1.5 text-xs font-bold text-white shadow-md shadow-[#821f44]/20 transition-all hover:bg-[#9c2552] hover:shadow-[#821f44]/35 active:scale-95"
                                         title="Lihat Detail Kebijakan"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
@@ -122,16 +144,91 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
-defineProps({
+const props = defineProps({
     regulations: {
         type: Array,
         required: true,
     },
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Computed property to sort regulations hierarchically by organization code
+// and compute their organization level based on the last non-zero digit.
+// ─────────────────────────────────────────────────────────────────────────────
+const sortedRegulations = computed(() => {
+    const normalizeCode = (value) => String(value ?? '').trim();
+    const padCode = (val) => {
+        let str = normalizeCode(val);
+        if (!str) return '';
+        while (str.length < 7) {
+            str += '0';
+        }
+        return str;
+    };
+    const getLevel = (codeStr) => {
+        const padded = padCode(codeStr);
+        if (!padded) return 1;
+        for (let i = 6; i >= 0; i--) {
+            if (padded[i] !== '0') {
+                return i + 1;
+            }
+        }
+        return 1;
+    };
+
+    const mapped = props.regulations.map(reg => {
+        const orgCode = reg.organization?.code || '';
+        return {
+            ...reg,
+            org_code: orgCode,
+            org_level: getLevel(orgCode)
+        };
+    });
+
+    return mapped.sort((a, b) => {
+        const left = padCode(a.org_code);
+        const right = padCode(b.org_code);
+
+        if (left === '' && right === '') return 0;
+        if (left === '') return 1; // puts empty code at the end
+        if (right === '') return -1;
+
+        const codeCompare = left.localeCompare(right, undefined, { numeric: false, sensitivity: 'base' });
+        if (codeCompare !== 0) return codeCompare;
+
+        // Fallback secondary sort
+        return a.id - b.id;
+    });
+});
+
+// Visual depth in grid hierarchy (0, 1, or 2 empty cells)
+const getVisualDepth = (level) => {
+    if (level <= 1) return 0;
+    if (level <= 3) return 1;
+    return 2;
+};
+
+// Badge color for the level indicator in the Organisasi column
+function levelBadgeClass(level) {
+    const map = {
+        1: 'bg-slate-100   text-slate-600  dark:bg-white/10 dark:text-slate-300',
+        2: 'bg-sky-100     text-sky-700    dark:bg-sky-500/10 dark:text-sky-400',
+        3: 'bg-indigo-100  text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400',
+        4: 'bg-violet-100  text-violet-700 dark:bg-violet-500/10 dark:text-violet-400',
+        5: 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/10 dark:text-fuchsia-400',
+        6: 'bg-rose-100    text-rose-700   dark:bg-rose-500/10 dark:text-rose-400',
+        7: 'bg-orange-100  text-orange-700 dark:bg-orange-500/10 dark:text-orange-400',
+    };
+    return map[level] ?? map[1];
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Actions
+// ─────────────────────────────────────────────────────────────────────────────
 function handleDetailClick(reg) {
     const targetRoute = String(reg.tipe || '').toLowerCase() === 'procedure'
         ? 'policy.procedure.index'
