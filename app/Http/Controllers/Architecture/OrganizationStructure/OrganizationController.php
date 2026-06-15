@@ -28,6 +28,7 @@ class OrganizationController extends Controller
     {
         $validated = $request->validate([
             'groub_id' => 'required|integer|exists:trs_groub,id',
+            'parent_id' => 'nullable|integer|exists:trs_organization,id',
             'code' => 'required|string|max:50',
             'name' => 'required|string|max:255',
             'alias' => 'nullable|string|max:255',
@@ -49,6 +50,7 @@ class OrganizationController extends Controller
 
         $validated = $request->validate([
             'groub_id' => 'required|integer|exists:trs_groub,id',
+            'parent_id' => 'nullable|integer|exists:trs_organization,id',
             'code' => 'required|string|max:50',
             'name' => 'required|string|max:255',
             'alias' => 'nullable|string|max:255',

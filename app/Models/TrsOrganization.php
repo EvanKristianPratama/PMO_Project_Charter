@@ -15,6 +15,7 @@ class TrsOrganization extends Model
     protected $table = 'trs_organization';
     protected $fillable = [
         'groub_id',
+        'parent_id',
         'code',
         'name',
         'alias',
@@ -25,8 +26,19 @@ class TrsOrganization extends Model
 
     protected $casts = [
         'groub_id' => 'integer',
+        'parent_id' => 'integer',
         'code' => 'string',
     ];
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(TrsOrganization::class, 'parent_id');
+    }
+
+    public function children(): HasMany
+    {
+        return $this->hasMany(TrsOrganization::class, 'parent_id');
+    }
 
     public function groub(): BelongsTo
     {

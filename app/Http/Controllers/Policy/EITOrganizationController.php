@@ -26,6 +26,7 @@ class EITOrganizationController extends Controller
         $rows = $organizations->map(function ($org) {
             return [
                 'organization_id' => (int) $org->id,
+                'parent_id' => $org->parent_id ? (int) $org->parent_id : null,
                 'code' => trim((string) ($org->code ?? '')),
                 'organization_code' => trim((string) ($org->code ?? '')),
                 'organization_name' => $org->name,
