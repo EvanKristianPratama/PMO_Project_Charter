@@ -32,7 +32,7 @@
                         <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
                             <tr>
                                 <th scope="col" class="px-3 py-3 w-10 text-center border-r border-b border-slate-200 dark:border-white/10">No</th>
-                                <th scope="col" colspan="3" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Judul</th>
+                                <th scope="col" colspan="3" class="px-3 py-3 text-center border-r border-b border-slate-200 dark:border-white/10">Judul</th>
                                 <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Nomor</th>
                                 <th scope="col" class="px-3 py-3 w-28 border-r border-b border-slate-200 dark:border-white/10">Tipe</th>
                                 <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Fungsi</th>

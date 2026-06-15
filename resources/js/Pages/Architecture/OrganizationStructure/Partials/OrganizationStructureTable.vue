@@ -148,18 +148,112 @@
                 </select>
             </div>
 
-            <!-- Code Input -->
+            <!-- Level Organisasi (LL) Dropdown -->
             <div class="flex flex-col gap-1.5">
-                <label for="code" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Kode</label>
-                <input
-                    id="code"
-                    v-model="form.code"
-                    type="text"
+                <label for="level_org" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Level Organisasi (LL)</label>
+                <select
+                    id="level_org"
+                    v-model="selectedLevel"
                     class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
-                    placeholder="Contoh: 0102"
+                    required
+                >
+                    <option value="10">Direksi & Executive (10)</option>
+                    <option value="11">Support & Oversight (11)</option>
+                    <option value="12">Vice President (12)</option>
+                    <option value="13">Regional (13)</option>
+                    <option value="custom">Lainnya (Custom Level)</option>
+                </select>
+            </div>
+
+            <!-- Custom LL Input (if custom selected) -->
+            <div v-if="selectedLevel === 'custom'" class="flex flex-col gap-1.5">
+                <label for="custom_level" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Input Custom Level (2 Digit Angka, Contoh: 14)
+                </label>
+                <input
+                    id="custom_level"
+                    v-model="customLevel"
+                    type="text"
+                    maxlength="2"
+                    pattern="[0-9]{2}"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white font-mono"
+                    placeholder="14"
+                    required
+                />
+            </div>
+
+            <!-- Level Ketua / Member (DD) Dropdown -->
+            <div class="flex flex-col gap-1.5">
+                <label for="role_prefix" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Peran / Hubungan (DD)</label>
+                <select
+                    id="role_prefix"
+                    v-model="selectedRole"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    required
+                >
+                    <option value="01">Utama / Ketua / Pimpinan (01)</option>
+                    <option value="02">Member / Anggota / Staff (02)</option>
+                </select>
+            </div>
+
+            <!-- Sub Struktur (SS) Dropdown -->
+            <div class="flex flex-col gap-1.5">
+                <label for="sub_structure" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Sub Struktur / Jabatan (SS)</label>
+                <select
+                    id="sub_structure"
+                    v-model="selectedSubStructure"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    required
+                >
+                    <option value="00">Direktur Utama / CEO / Presiden Director (00)</option>
+                    <option value="01">Vice President / SVP (01)</option>
+                    <option value="02">Corporate Secretary (02)</option>
+                    <option value="03">Legal Counsel (03)</option>
+                    <option value="04">Chief Audit Executive (04)</option>
+                    <option value="05">Direktur Fungsional (05)</option>
+                    <option value="06">Direktur Regional (06)</option>
+                    <option value="custom">Lainnya (Custom Sub Struktur)</option>
+                </select>
+            </div>
+
+            <!-- Custom SS Input (if custom selected) -->
+            <div v-if="selectedSubStructure === 'custom'" class="flex flex-col gap-1.5">
+                <label for="custom_sub_structure" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Input Custom Sub Struktur (2 Digit Angka, Contoh: 07)
+                </label>
+                <input
+                    id="custom_sub_structure"
+                    v-model="customSubStructure"
+                    type="text"
+                    maxlength="2"
+                    pattern="[0-9]{2}"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white font-mono"
+                    placeholder="07"
+                    required
+                />
+            </div>
+
+            <!-- Sequence Number (2-Digit) (NN) -->
+            <div class="flex flex-col gap-1.5">
+                <label for="seq_num" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Nomor Urut (NN)</label>
+                <input
+                    id="seq_num"
+                    v-model="seqNumber"
+                    type="text"
+                    maxlength="2"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white font-mono"
+                    placeholder="01"
                     required
                 />
                 <span v-if="form.errors.code" class="text-xs text-red-500 font-medium">{{ form.errors.code }}</span>
+            </div>
+
+            <!-- Combined Code Live Preview -->
+            <div class="rounded-lg bg-slate-100 dark:bg-white/5 p-3 flex justify-between items-center text-xs">
+                <span class="font-semibold text-slate-500">Live Preview Kode:</span>
+                <span class="font-mono text-sm font-bold text-blue-600 dark:text-blue-400">
+                    {{ generatedCode }}
+                </span>
             </div>
 
             <!-- Name Input -->
@@ -330,6 +424,47 @@ const form = useForm({
 
 const selectedParentCode = ref('');
 
+// LLDDSSNN Code Generator State
+const selectedLevel = ref('10');
+const customLevel = ref('');
+const selectedRole = ref('02');
+const selectedSubStructure = ref('01');
+const customSubStructure = ref('');
+const seqNumber = ref('01');
+
+const resolvedLevel = computed(() => {
+    if (selectedLevel.value === 'custom') {
+        const cl = customLevel.value.trim().replace(/[^0-9]/g, '');
+        return cl.padEnd(2, '0').substring(0, 2);
+    }
+    return selectedLevel.value;
+});
+
+const resolvedRole = computed(() => {
+    return selectedRole.value;
+});
+
+const resolvedSubStructure = computed(() => {
+    if (selectedSubStructure.value === 'custom') {
+        const cs = customSubStructure.value.trim().replace(/[^0-9]/g, '');
+        return cs.padEnd(2, '0').substring(0, 2);
+    }
+    return selectedSubStructure.value;
+});
+
+const resolvedSeqNumber = computed(() => {
+    const rawSeq = seqNumber.value.trim().replace(/[^0-9]/g, '');
+    return rawSeq.padEnd(2, '0').substring(0, 2);
+});
+
+const generatedCode = computed(() => {
+    return `${resolvedLevel.value}${resolvedRole.value}${resolvedSubStructure.value}${resolvedSeqNumber.value}`;
+});
+
+watch(generatedCode, (newVal) => {
+    form.code = newVal;
+}, { immediate: true });
+
 const filteredParentOrgs = computed(() => {
     if (!form.groub_id) return [];
     
@@ -352,21 +487,14 @@ const filteredParentOrgs = computed(() => {
     });
 });
 
-watch(selectedParentCode, (newParentCode, oldParentCode) => {
-    if (newParentCode) {
-        // If the code doesn't start with the new parent code, prepend or replace it
-        if (!form.code.startsWith(newParentCode)) {
-            // If it started with the old parent code, replace the old parent code with the new one
-            if (oldParentCode && form.code.startsWith(oldParentCode)) {
-                form.code = newParentCode + form.code.substring(oldParentCode.length);
-            } else {
-                form.code = newParentCode;
-            }
-        }
-    } else {
-        // If parent is cleared, and it started with the old parent code, remove it
-        if (oldParentCode && form.code.startsWith(oldParentCode)) {
-            form.code = form.code.substring(oldParentCode.length);
+watch(selectedParentCode, (newParentCode) => {
+    if (newParentCode && newParentCode.length >= 2) {
+        const parentLL = newParentCode.substring(0, 2);
+        if (['10', '11', '12', '13'].includes(parentLL)) {
+            selectedLevel.value = parentLL;
+        } else {
+            selectedLevel.value = 'custom';
+            customLevel.value = parentLL;
         }
     }
 });
@@ -376,6 +504,15 @@ const openCreateModal = () => {
     form.clearErrors();
     form.reset();
     selectedParentCode.value = '';
+    
+    // Reset LLDDSSNN fields
+    selectedLevel.value = '10';
+    customLevel.value = '';
+    selectedRole.value = '02';
+    selectedSubStructure.value = '01';
+    customSubStructure.value = '';
+    seqNumber.value = '01';
+    
     isModalOpen.value = true;
 };
 
@@ -391,8 +528,34 @@ const openEditModal = (org) => {
     form.pejabat = org.pejabat || '';
     form.sk = org.sk || '';
     
+    // Parse LLDDSSNN from code
+    const orgCode = String(org.code || '').trim().padEnd(8, '0');
+    const ll = orgCode.substring(0, 2);
+    const dd = orgCode.substring(2, 4);
+    const ss = orgCode.substring(4, 6);
+    const nn = orgCode.substring(6, 8);
+    
+    if (['10', '11', '12', '13'].includes(ll)) {
+        selectedLevel.value = ll;
+        customLevel.value = '';
+    } else {
+        selectedLevel.value = 'custom';
+        customLevel.value = ll;
+    }
+    
+    selectedRole.value = dd;
+    
+    if (['00', '01', '02', '03', '04', '05', '06'].includes(ss)) {
+        selectedSubStructure.value = ss;
+        customSubStructure.value = '';
+    } else {
+        selectedSubStructure.value = 'custom';
+        customSubStructure.value = ss;
+    }
+    
+    seqNumber.value = nn;
+    
     // Determine parent code from current organization code
-    const orgCode = String(org.code || '').trim();
     if (orgCode.length > 2) {
         selectedParentCode.value = orgCode.slice(0, -2);
     } else {
