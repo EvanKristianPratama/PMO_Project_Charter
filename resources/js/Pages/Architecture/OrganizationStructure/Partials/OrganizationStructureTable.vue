@@ -10,12 +10,12 @@
                     class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white w-48"
                 />
                 <select
-                    v-model="parentFilterCode"
+                    v-model="parentFilterId"
                     class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
                 >
                     <option value="">Semua Organisasi</option>
-                    <option v-for="org in parentFilterOptions" :key="org.organization_id" :value="org.code">
-                        {{ getLevelPrefix(org.code) }}{{ org.organization_name }} ({{ org.code }})
+                    <option v-for="org in parentFilterOptions" :key="org.organization_id" :value="org.organization_id">
+                        {{ getLevelPrefix(org) }}{{ org.organization_name }} ({{ org.code }})
                     </option>
                 </select>
                 <button
@@ -143,7 +143,7 @@
                 >
                     <option value="">Tanpa Induk (Root / Level 1)</option>
                     <option v-for="org in filteredParentOrgs" :key="org.organization_id" :value="org.organization_id">
-                        {{ org.organization_name }} ({{ org.code }})
+                        {{ getLevelPrefix(org) }}{{ org.organization_name }} ({{ org.code }})
                     </option>
                 </select>
                 <span v-if="form.errors.parent_id" class="text-xs text-red-500 font-medium">{{ form.errors.parent_id }}</span>
@@ -263,30 +263,130 @@ const props = defineProps({
 
 const displayValue = (value) => value ?? '-';
 
-const parentFilterCode = ref('');
+const parentFilterId = ref('');
 const searchQuery = ref('');
 
+const getOrganizationDepth = (orgId) => {
+    let depth = 0;
+    let currentId = orgId;
+    const orgMap = new Map(props.organizationStructureRows.map(org => [org.organization_id, org]));
+    const visited = new Set();
+    
+    const org = orgMap.get(orgId);
+    if (!org) return 0;
+
+    while (currentId && !visited.has(currentId)) {
+        visited.add(currentId);
+        const currentOrg = orgMap.get(currentId);
+        if (currentOrg && currentOrg.parent_id) {
+            depth++;
+            currentId = currentOrg.parent_id;
+        } else {
+            break;
+        }
+    }
+
+    // Special depth adjustment for Upstream Support Staff (e.g. Corporate Secretary 01100100)
+    // to ensure they are indented as Level 3 (depth 2) and NOT parallel to Supportive Directors (depth 1 / Level 2)
+    const code = String(org.code || '').trim();
+    if (code.startsWith('011')) {
+        if (code.startsWith('01100') && code !== '01100000') {
+            return 2;
+        }
+        
+        let tempId = org.parent_id;
+        const tempVisited = new Set();
+        let hasSupportStaffAncestor = false;
+        while (tempId && !tempVisited.has(tempId)) {
+            tempVisited.add(tempId);
+            const parentOrg = orgMap.get(tempId);
+            if (parentOrg) {
+                const parentCode = String(parentOrg.code || '').trim();
+                if (parentCode.startsWith('01100') && parentCode !== '01100000') {
+                    hasSupportStaffAncestor = true;
+                    break;
+                }
+                tempId = parentOrg.parent_id;
+            } else {
+                break;
+            }
+        }
+        if (hasSupportStaffAncestor) {
+            return depth + 1;
+        }
+    }
+
+    return depth;
+};
+
+const getLevelPrefix = (org) => {
+    const depth = getOrganizationDepth(org.organization_id);
+    if (depth === 0) return '';
+    return '\u00A0\u00A0'.repeat(depth) + '— ';
+};
+
 const parentFilterOptions = computed(() => {
-    return [...props.organizationStructureRows].sort((a, b) => {
-        return (a.code || '').localeCompare(b.code || '');
+    const orgs = props.organizationStructureRows;
+    const orgMap = new Map(orgs.map(org => [org.organization_id, { ...org, children: [] }]));
+    const roots = [];
+    
+    orgs.forEach(org => {
+        const mapped = orgMap.get(org.organization_id);
+        if (org.parent_id && orgMap.has(org.parent_id)) {
+            orgMap.get(org.parent_id).children.push(mapped);
+        } else {
+            roots.push(mapped);
+        }
     });
+
+    const sortNodes = (nodes) => {
+        nodes.sort((a, b) => (a.code || '').localeCompare(b.code || ''));
+        nodes.forEach(node => {
+            if (node.children.length > 0) {
+                sortNodes(node.children);
+            }
+        });
+    };
+    sortNodes(roots);
+
+    const flattened = [];
+    const traverse = (node) => {
+        flattened.push(node);
+        node.children.forEach(traverse);
+    };
+    roots.forEach(traverse);
+    return flattened;
 });
 
-const getLevelPrefix = (code) => {
-    const level = Math.floor((code || '').length / 2);
-    if (level <= 1) return '';
-    return '\u00A0\u00A0'.repeat(level - 1) + '— ';
+const isDescendant = (orgId, targetParentId) => {
+    if (!orgId || !targetParentId) return false;
+    const orgMap = new Map(props.organizationStructureRows.map(org => [org.organization_id, org]));
+    let currentId = orgId;
+    const visited = new Set();
+    
+    while (currentId && !visited.has(currentId)) {
+        visited.add(currentId);
+        const currentOrg = orgMap.get(currentId);
+        if (currentOrg && currentOrg.parent_id) {
+            if (Number(currentOrg.parent_id) === Number(targetParentId)) {
+                return true;
+            }
+            currentId = currentOrg.parent_id;
+        } else {
+            break;
+        }
+    }
+    return false;
 };
 
 const filteredRows = computed(() => {
     let rows = props.organizationStructureRows;
 
     // 1. Filter by parent organization structure
-    if (parentFilterCode.value) {
-        const filterCode = parentFilterCode.value;
+    if (parentFilterId.value) {
+        const filterId = Number(parentFilterId.value);
         rows = rows.filter((row) => {
-            const rowCode = row.code || '';
-            return rowCode === filterCode || rowCode.startsWith(filterCode);
+            return Number(row.organization_id) === filterId || isDescendant(row.organization_id, filterId);
         });
     }
 
@@ -309,8 +409,8 @@ const filteredRows = computed(() => {
 });
 
 watch(() => props.organizationStructureRows, (newRows) => {
-    if (parentFilterCode.value && !newRows.some(row => row.code === parentFilterCode.value)) {
-        parentFilterCode.value = '';
+    if (parentFilterId.value && !newRows.some(row => Number(row.organization_id) === Number(parentFilterId.value))) {
+        parentFilterId.value = '';
     }
 });
 
@@ -333,22 +433,46 @@ const form = useForm({
 const filteredParentOrgs = computed(() => {
     if (!form.groub_id) return [];
     
-    return props.organizationStructureRows.filter((org) => {
-        // Must belong to the same group
-        const isSameGroup = Number(org.groub_id) === Number(form.groub_id);
-        
-        // If in edit mode, cannot select itself or any of its descendants as parent
+    const targetGroupId = Number(form.groub_id);
+    const orgsInGroup = props.organizationStructureRows.filter(org => Number(org.groub_id) === targetGroupId);
+    
+    const orgMap = new Map(orgsInGroup.map(org => [org.organization_id, { ...org, children: [] }]));
+    const roots = [];
+    
+    orgsInGroup.forEach(org => {
+        const mapped = orgMap.get(org.organization_id);
+        if (org.parent_id && orgMap.has(org.parent_id)) {
+            orgMap.get(org.parent_id).children.push(mapped);
+        } else {
+            roots.push(mapped);
+        }
+    });
+
+    const sortNodes = (nodes) => {
+        nodes.sort((a, b) => (a.code || '').localeCompare(b.code || ''));
+        nodes.forEach(node => {
+            if (node.children.length > 0) {
+                sortNodes(node.children);
+            }
+        });
+    };
+    sortNodes(roots);
+
+    const flattened = [];
+    const traverse = (node) => {
+        flattened.push(node);
+        node.children.forEach(traverse);
+    };
+    roots.forEach(traverse);
+    
+    return flattened.filter(org => {
         if (modalMode.value === 'edit' && selectedOrg.value) {
             const currentCode = String(selectedOrg.value.code || '').trim();
             const orgCode = String(org.code || '').trim();
-            
-            // Exclude itself and any descendants (descendants start with the current code)
             const isSelfOrDescendant = orgCode === currentCode || orgCode.startsWith(currentCode);
-            
-            return isSameGroup && !isSelfOrDescendant;
+            return !isSelfOrDescendant;
         }
-        
-        return isSameGroup;
+        return true;
     });
 });
 

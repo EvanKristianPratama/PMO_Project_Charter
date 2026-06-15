@@ -23,7 +23,7 @@
         <section
             class="mt-4 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
             <div class="border-b border-slate-200 px-3 py-2 dark:border-white/10">
-                <h2 class="text-xs font-semibold uppercase text-slate-800 dark:text-white">Struktur Organisasi Sub
+                <h2 class="text-xs font-semibold uppercase text-slate-800 dark:text-white">Struktur Organisasi
                     Holding</h2>
             </div>
 
@@ -35,6 +35,25 @@
 
                 <div v-else class="grid grid-cols-[repeat(auto-fit,minmax(12rem,1fr))] gap-3">
                     <ThreeView v-for="item in subHoldingTree" :key="item.organization_id" :node="item" :is-root="false"
+                        :depth="0" />
+                </div>
+            </div>
+        </section>
+
+        <section
+            class="mt-4 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+            <div class="border-b border-slate-200 px-3 py-2 dark:border-white/10">
+                <h2 class="text-xs font-semibold uppercase text-slate-800 dark:text-white">Struktur Organisasi Subholding Upstream / CEO</h2>
+            </div>
+
+            <div class="px-2 py-3 overflow-x-auto w-full">
+                <div v-if="ceoTree.length === 0"
+                    class="rounded-md border border-dashed border-slate-200 py-8 text-center text-xs text-slate-500 dark:border-white/10 dark:text-slate-400">
+                    Data organisasi CEO tidak ditemukan.
+                </div>
+
+                <div v-else class="flex flex-col items-center min-w-max p-4">
+                    <UpstreamThreeView v-for="item in ceoTree" :key="item.organization_id" :node="item"
                         :depth="0" />
                 </div>
             </div>
@@ -94,16 +113,18 @@
                 </div>
 
                 <!-- Children: depth < 6 use horizontal flex layout for their children -->
-                <div v-if="hasChildren && isExpanded && depth < 6" class="relative mt-2 w-full min-w-0 pt-2">
-                    <div class="absolute left-1/2 top-[-8px] h-[8px] w-px -translate-x-1/2 bg-slate-300 dark:bg-white/20"
-                        aria-hidden="true" />
+                <template v-if="hasChildren && isExpanded && depth < 6">
+                    <div class="relative mt-2 w-full min-w-0 pt-2">
+                        <div class="absolute left-1/2 top-[-8px] h-[8px] w-px -translate-x-1/2 bg-slate-300 dark:bg-white/20"
+                            aria-hidden="true" />
 
-                    <div class="flex flex-row justify-center items-start gap-x-2 gap-y-3 w-full min-w-0">
-                        <ThreeView v-for="(child, index) in node.children" :key="child.organization_id" :node="child"
-                            :is-root="false" :depth="depth + 1" :is-first-child="index === 0"
-                            :is-last-child="index === node.children.length - 1" />
+                        <div class="flex flex-row justify-center items-start gap-x-2 gap-y-3 w-full min-w-0">
+                            <ThreeView v-for="(child, index) in node.children" :key="child.organization_id" :node="child"
+                                :is-root="false" :depth="depth + 1" :is-first-child="index === 0"
+                                :is-last-child="index === node.children.length - 1" />
+                        </div>
                     </div>
-                </div>
+                </template>
 
                 <!-- Children: depth >= 6 use vertical command line layout -->
                 <div v-if="hasChildren && isExpanded && depth >= 6" class="relative mt-3"
@@ -127,6 +148,7 @@
 
 <script setup>
 import { computed, ref } from 'vue';
+import UpstreamThreeView from './UpstreamThreeView.vue';
 
 defineOptions({
     name: 'ThreeView',
@@ -235,26 +257,19 @@ const buildCodeHierarchy = (items) => {
         }))
         .sort(compareCodes);
 
-    const nodeByCode = new Map();
-
+    const nodeById = new Map();
     sorted.forEach((item) => {
-        if (item.code) {
-            nodeByCode.set(item.code, item);
-        }
+        nodeById.set(Number(item.organization_id), item);
     });
 
     const roots = [];
 
     sorted.forEach((item) => {
-        const parentCode = getParentCode(item.code);
+        const parentId = item.parent_id;
 
-        if (parentCode) {
-            const parentNode = nodeByCode.get(parentCode);
-            if (parentNode) {
-                parentNode.children.push(item);
-            } else {
-                roots.push(item);
-            }
+        if (parentId && nodeById.has(Number(parentId))) {
+            const parentNode = nodeById.get(Number(parentId));
+            parentNode.children.push(item);
         } else {
             roots.push(item);
         }
@@ -319,7 +334,39 @@ const buildFullHierarchy = (items) => {
         .sort((left, right) => left.organization_name.localeCompare(right.organization_name));
 };
 
-const organizationTree = computed(() => buildFullHierarchy(props.organizationStructureRows));
+const isDescendantOfCeo = (orgId) => {
+    let currentId = orgId;
+    const orgMap = new Map(props.organizationStructureRows.map(org => [org.organization_id, org]));
+    const visited = new Set();
+    
+    while (currentId && !visited.has(currentId)) {
+        visited.add(currentId);
+        if (Number(currentId) === 174) {
+            return true;
+        }
+        const currentOrg = orgMap.get(currentId);
+        if (currentOrg && String(currentOrg.code) === '01100000') {
+            return true;
+        }
+        if (currentOrg && currentOrg.parent_id) {
+            currentId = currentOrg.parent_id;
+        } else {
+            break;
+        }
+    }
+    return false;
+};
+
+const ceoTree = computed(() => {
+    const ceoRows = props.organizationStructureRows.filter(row => isDescendantOfCeo(row.organization_id));
+    return buildFullHierarchy(ceoRows);
+});
+
+const organizationTree = computed(() => {
+    const nonCeoRows = props.organizationStructureRows.filter(row => !isDescendantOfCeo(row.organization_id));
+    return buildFullHierarchy(nonCeoRows);
+});
+
 const holdingTree = computed(() => {
     return organizationTree.value
         .map((companyNode) => {
@@ -335,6 +382,7 @@ const holdingTree = computed(() => {
         })
         .filter((companyNode) => companyNode.children.length > 0);
 });
+
 const subHoldingTree = computed(() => {
     return organizationTree.value
         .map((companyNode) => {
@@ -360,7 +408,7 @@ const nodeSizeClass = computed(() => {
 });
 
 const nodeToneClass = computed(() => {
-    return 'bg-white text-slate-900 border-slate-300 dark:bg-white dark:text-slate-900 dark:border-slate-300';
+    return 'bg-white text-slate-900 border-slate-300 dark:bg-[#1a1a1a] dark:text-slate-100 dark:border-white/10';
 });
 
 const childGridStyle = computed(() => {
