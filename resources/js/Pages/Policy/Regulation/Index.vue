@@ -145,7 +145,15 @@
 
                                     <!-- Organisasi — show org name -->
                                     <td class="px-3 py-3 text-slate-700 dark:text-slate-300 font-medium border-r border-b border-slate-200 dark:border-white/10 max-w-[140px] break-words">
-                                        <span>{{ reg.organization?.jabatan || reg.organization?.name || '-' }}</span>
+                                        <div class="flex flex-col gap-0.5">
+                                            <span v-if="reg.master" class="font-semibold text-slate-900 dark:text-white">
+                                                {{ reg.master.jabatan || reg.master.name }}
+                                            </span>
+                                            <span v-if="reg.organization" class="text-[10px] text-slate-500 dark:text-slate-400">
+                                                {{ reg.organization.jabatan || reg.organization.name }}
+                                            </span>
+                                            <span v-if="!reg.master && !reg.organization">-</span>
+                                        </div>
                                     </td>
 
                                     <!-- Revisi -->
@@ -248,7 +256,15 @@
                                     </td>
                                     <!-- Organisasi -->
                                     <td class="px-3 py-3 text-slate-700 dark:text-slate-300 font-medium border-r border-b border-slate-200 dark:border-white/10 max-w-[140px] break-words">
-                                        <span>{{ row.organization?.jabatan || row.organization?.name || '-' }}</span>
+                                        <div class="flex flex-col gap-0.5">
+                                            <span v-if="row.master" class="font-semibold text-slate-900 dark:text-white">
+                                                {{ row.master.jabatan || row.master.name }}
+                                            </span>
+                                            <span v-if="row.organization" class="text-[10px] text-slate-500 dark:text-slate-400">
+                                                {{ row.organization.jabatan || row.organization.name }}
+                                            </span>
+                                            <span v-if="!row.master && !row.organization">-</span>
+                                        </div>
                                     </td>
                                     <!-- Revisi -->
                                     <td class="px-3 py-3 text-center font-mono font-semibold text-slate-800 dark:text-slate-200 border-r border-b border-slate-200 dark:border-white/10 w-16">
@@ -330,7 +346,15 @@
 
                                     <!-- Organisasi — show org name -->
                                     <td class="px-3 py-3 text-slate-700 dark:text-slate-300 font-medium border-r border-b border-slate-200 dark:border-white/10 max-w-[140px] break-words">
-                                        <span>{{ reg.organization?.jabatan || reg.organization?.name || '-' }}</span>
+                                        <div class="flex flex-col gap-0.5">
+                                            <span v-if="reg.master" class="font-semibold text-slate-900 dark:text-white">
+                                                {{ reg.master.jabatan || reg.master.name }}
+                                            </span>
+                                            <span v-if="reg.organization" class="text-[10px] text-slate-500 dark:text-slate-400">
+                                                {{ reg.organization.jabatan || reg.organization.name }}
+                                            </span>
+                                            <span v-if="!reg.master && !reg.organization">-</span>
+                                        </div>
                                     </td>
 
                                     <!-- Revisi -->
