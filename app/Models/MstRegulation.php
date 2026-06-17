@@ -20,6 +20,7 @@ class MstRegulation extends Model
     protected $fillable = [
         'parent_id',
         'pic_id',
+        'master_id',
         'judul',
         'nomor',
         'tipe',
@@ -34,6 +35,7 @@ class MstRegulation extends Model
         'terbit' => 'date:Y-m-d',
         'berlaku' => 'date:Y-m-d',
         'parent_id' => 'integer',
+        'master_id' => 'integer',
     ];
 
     /**
@@ -66,6 +68,14 @@ class MstRegulation extends Model
     public function organization(): BelongsTo
     {
         return $this->belongsTo(TrsOrganization::class, 'pic_id');
+    }
+
+    /**
+     * Relasi ke TrsOrganization (Master)
+     */
+    public function master(): BelongsTo
+    {
+        return $this->belongsTo(TrsOrganization::class, 'master_id');
     }
 
     /**

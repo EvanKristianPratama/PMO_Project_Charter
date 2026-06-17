@@ -61,7 +61,7 @@
             </div>
         </div>
 
-        <div class="mt-6 overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10">
+        <div class="mt-6 rounded-2xl border border-slate-200 dark:border-white/10">
             <table class="w-full border-collapse text-left text-[11px]">
                 <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
                     <tr>
@@ -87,18 +87,71 @@
                                 placeholder="Nama Aktor / Jabatan"
                             />
                         </td>
-                        <td class="px-6 py-2 align-middle">
-                            <select
-                                v-if="actorLocal[actor.id]"
-                                v-model="actorLocal[actor.id].organization_id"
-                                @change="markModified(actor.id)"
-                                class="w-full bg-transparent px-2 py-1 text-slate-900 dark:text-white border border-transparent rounded focus:border-[#821f44] focus:ring-1 focus:ring-[#821f44] focus:bg-white dark:focus:bg-[#1e1e1e] hover:border-slate-300 dark:hover:border-white/10"
-                            >
-                                <option value="" disabled>-- Pilih Organisasi --</option>
-                                <option v-for="org in filteredOrganizations" :key="org.id" :value="org.id">
-                                    {{ getLevelPrefix(org) }}{{ org.jabatan }} ({{ org.name || '-' }} - {{ org.code || '-' }})
-                                </option>
-                            </select>
+                        <td class="px-6 py-2 align-middle relative">
+                            <div v-if="actorLocal[actor.id]" class="relative">
+                                <!-- Trigger Button -->
+                                <button 
+                                    type="button"
+                                    @click="toggleActorDropdown(actor.id)"
+                                    class="w-full bg-transparent px-2 py-1 text-slate-900 dark:text-white border border-transparent rounded focus:border-[#821f44] focus:ring-1 focus:ring-[#821f44] hover:border-slate-300 dark:hover:border-white/10 text-left flex justify-between items-center text-[11px]"
+                                >
+                                    <span class="truncate pr-2">
+                                        {{ getSelectedOrgName(actor.id) }}
+                                    </span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3 text-slate-400 shrink-0">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                    </svg>
+                                </button>
+
+                                <!-- Click Outside Overlay -->
+                                <div v-if="activeDropdownActorId === actor.id" class="fixed inset-0 z-30" @click="activeDropdownActorId = null"></div>
+
+                                <!-- Dropdown Content -->
+                                <div v-if="activeDropdownActorId === actor.id" class="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl dark:bg-[#1a1a1a] dark:border-white/10 z-40 max-h-60 overflow-y-auto p-2 space-y-2">
+                                    <!-- Search Input -->
+                                    <div class="sticky top-0 bg-white dark:bg-[#1a1a1a] pb-1.5">
+                                        <input 
+                                            :id="`actor-search-input-${actor.id}`"
+                                            type="text" 
+                                            v-model="actorSearchQuery" 
+                                            placeholder="Cari jabatan/organisasi..." 
+                                            class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-black/20 dark:text-white dark:border-white/10"
+                                            @click.stop
+                                        />
+                                    </div>
+
+                                    <!-- Option List -->
+                                    <div class="space-y-0.5">
+                                        <button
+                                            type="button"
+                                            @click="selectActorOrganization(actor.id, '')"
+                                            class="w-full text-left px-2.5 py-1.5 text-[11px] rounded hover:bg-slate-100 dark:hover:bg-white/5 text-slate-500 dark:text-slate-400"
+                                        >
+                                            -- Pilih Organisasi --
+                                        </button>
+                                        <button
+                                            v-for="org in filteredSearchOrganizations" 
+                                            :key="org.id"
+                                            type="button"
+                                            @click="selectActorOrganization(actor.id, org.id)"
+                                            :class="[
+                                                'w-full text-left px-2.5 py-1.5 text-[11px] rounded hover:bg-slate-100 dark:hover:bg-white/5 transition flex items-center justify-between',
+                                                actorLocal[actor.id].organization_id === org.id ? 'bg-[#821f44]/5 text-[#821f44] dark:bg-[#db588c]/10 dark:text-[#db588c] font-semibold' : 'text-slate-700 dark:text-slate-300'
+                                            ]"
+                                        >
+                                            <span class="truncate pr-1">
+                                                {{ getLevelPrefix(org) }}{{ org.jabatan }} ({{ org.name || '-' }} - {{ org.code || '-' }})
+                                            </span>
+                                            <svg v-if="actorLocal[actor.id].organization_id === org.id" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3 text-[#821f44] dark:text-[#db588c] shrink-0">
+                                                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                                            </svg>
+                                        </button>
+                                        <div v-if="filteredSearchOrganizations.length === 0" class="text-center py-4 text-[11px] text-slate-400">
+                                            Tidak ada hasil ditemukan.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </td>
                         <td class="px-6 py-2 align-middle text-center print:hidden">
                             <button
@@ -116,7 +169,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -143,6 +196,49 @@ const actorLocal = ref({});
 const modifiedActors = ref(new Set());
 const isSaving = ref(false);
 const saveStatus = ref(null); // null | 'saved' | 'error'
+
+// Searchable actor organization select state and helpers
+const activeDropdownActorId = ref(null);
+const actorSearchQuery = ref('');
+
+function toggleActorDropdown(actorId) {
+    if (activeDropdownActorId.value === actorId) {
+        activeDropdownActorId.value = null;
+    } else {
+        activeDropdownActorId.value = actorId;
+        actorSearchQuery.value = '';
+        nextTick(() => {
+            const input = document.getElementById(`actor-search-input-${actorId}`);
+            input?.focus();
+        });
+    }
+}
+
+function selectActorOrganization(actorId, orgId) {
+    if (actorLocal.value[actorId]) {
+        actorLocal.value[actorId].organization_id = orgId;
+        markModified(actorId);
+    }
+    activeDropdownActorId.value = null;
+}
+
+const getSelectedOrgName = (actorId) => {
+    const orgId = actorLocal.value[actorId]?.organization_id;
+    if (!orgId) return '-- Pilih Organisasi --';
+    const org = props.organizations.find(o => o.id === orgId);
+    return org ? `${org.jabatan} (${org.name || '-'} - ${org.code || '-'})` : '-- Pilih Organisasi --';
+};
+
+const filteredSearchOrganizations = computed(() => {
+    const query = actorSearchQuery.value.toLowerCase().trim();
+    if (!query) return filteredOrganizations.value;
+    return filteredOrganizations.value.filter(org => 
+        (org.name || '').toLowerCase().includes(query) || 
+        (org.code || '').toLowerCase().includes(query) || 
+        (org.alias || '').toLowerCase().includes(query) ||
+        (org.jabatan || '').toLowerCase().includes(query)
+    );
+});
 
 // ─── Computed ─────────────────────────────────────────────────────────────────
 const getOrganizationDepth = (orgId) => {

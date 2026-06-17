@@ -59,23 +59,22 @@
             <!-- Regulations Table Components -->
             <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="overflow-x-auto">
-                    <table class="w-full border-collapse text-left text-sm text-slate-500 dark:text-slate-400">
-                        <thead class="bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
+                    <table class="w-full border-collapse text-left text-xs text-slate-500 dark:text-slate-400">
+                        <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
                             <tr>
-                                <th scope="col" class="px-6 py-4 w-16 text-center">No</th>
-                                <th scope="col" class="px-6 py-4">Judul</th>
-                                <th scope="col" class="px-6 py-4">Nomor</th>
-                                <th scope="col" class="px-6 py-4 w-36">Tipe</th>
-                                <th scope="col" class="px-6 py-4 w-32">STK</th>
-                                <th scope="col" class="px-6 py-4">Owner</th>
-                                <th scope="col" class="px-6 py-4">Organisasi</th>
-                                <th scope="col" class="px-6 py-4 text-center w-24">Revisi</th>
-                                <th scope="col" class="px-6 py-4 w-32">Terbit</th>
-                                <th scope="col" class="px-6 py-4 w-32">Berlaku</th>
-                                <th scope="col" class="w-28 px-6 py-4 text-center">Aksi</th>
+                                <th scope="col" class="px-3 py-3 w-10 text-center border-r border-b border-slate-200 dark:border-white/10">No</th>
+                                <th scope="col" class="px-3 py-3 text-center border-r border-b border-slate-200 dark:border-white/10">Judul</th>
+                                <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Nomor</th>
+                                <th scope="col" class="px-3 py-3 w-28 border-r border-b border-slate-200 dark:border-white/10">Tipe</th>
+                                <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Fungsi</th>
+                                <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Organisasi</th>
+                                <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Master Organisasi</th>
+                                <th scope="col" class="px-3 py-3 text-center w-16 border-r border-b border-slate-200 dark:border-white/10">Revisi</th>
+                                <th scope="col" class="px-3 py-3 w-24 border-r border-b border-slate-200 dark:border-white/10">Berlaku</th>
+                                <th scope="col" class="px-3 py-3 text-center w-28 border-b border-slate-200 dark:border-white/10">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-200 dark:divide-white/10 dark:bg-transparent">
+                        <tbody class="dark:bg-transparent">
                             <tr v-if="regulations.length === 0" class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
                                 <td colspan="10" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
                                     Belum ada data Regulasi. Klik "+ Tambah Regulasi" untuk memasukkan data pertama.
@@ -87,19 +86,19 @@
                                 class="group hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150"
                             >
                                 <!-- No -->
-                                <td class="px-6 py-4 text-center font-medium text-slate-700 dark:text-slate-300">
+                                <td class="px-3 py-3 text-center font-medium text-slate-700 dark:text-slate-300 border-r border-b border-slate-200 dark:border-white/10 w-10">
                                     {{ index + 1 }}
                                 </td>
                                 <!-- Judul -->
-                                <td class="px-6 py-4 text-slate-900 dark:text-white font-medium leading-relaxed max-w-sm">
+                                <td class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 max-w-[300px] break-words text-slate-900 dark:text-white font-bold leading-relaxed">
                                     {{ reg.judul }}
                                 </td>
                                 <!-- Nomor -->
-                                <td class="px-6 py-4 text-slate-700 dark:text-slate-300 font-medium">
+                                <td class="px-3 py-3 text-slate-700 dark:text-slate-300 font-medium border-r border-b border-slate-200 dark:border-white/10 max-w-[120px] break-words">
                                     {{ reg.nomor || '-' }}
                                 </td>
                                 <!-- Tipe -->
-                                <td class="px-6 py-4">
+                                <td class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 w-28">
                                     <span 
                                         :class="[
                                             'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold border',
@@ -114,36 +113,34 @@
                                                             : 'bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-500/10 dark:border-slate-500/20 dark:text-slate-400'
                                         ]"
                                     >
-                                        {{ reg.tipe }}
+                                        {{ reg.tipe }} - {{ reg.stk || '-' }}
                                     </span>
-                                    </td>
-                                    <!-- STK -->
-                                    <td class="px-6 py-4 text-slate-700 dark:text-slate-300 font-medium">
-                                    {{ reg.stk || '-' }}
-                                    </td>
-                                    <!-- Owner -->                                <td class="px-6 py-4 text-slate-700 dark:text-slate-300 font-medium">
+                                </td>
+                                <!-- Fungsi -->
+                                <td class="px-3 py-3 text-slate-700 dark:text-slate-300 font-medium border-r border-b border-slate-200 dark:border-white/10 max-w-[200px] break-words">
                                     {{ reg.owner }}
                                 </td>
                                 <!-- Organisasi -->
-                                <td class="px-6 py-4 text-slate-700 dark:text-slate-300 font-medium">
-                                    {{ reg.organization?.name || '-' }}
+                                <td class="px-3 py-3 text-slate-700 dark:text-slate-300 font-medium border-r border-b border-slate-200 dark:border-white/10 max-w-[140px] break-words">
+                                    <span>{{ reg.organization?.jabatan || reg.organization?.name || '-' }}</span>
+                                </td>
+                                <!-- Master Organisasi -->
+                                <td class="px-3 py-3 text-slate-700 dark:text-slate-300 font-medium border-r border-b border-slate-200 dark:border-white/10 max-w-[140px] break-words">
+                                    <span>{{ reg.master?.jabatan || reg.master?.name || '-' }}</span>
                                 </td>
                                 <!-- Revisi -->
-                                <td class="px-6 py-4 text-center font-mono font-semibold text-slate-800 dark:text-slate-200">
+                                <td class="px-3 py-3 text-center font-mono font-semibold text-slate-800 dark:text-slate-200 border-r border-b border-slate-200 dark:border-white/10 w-16">
                                     {{ reg.revisi }}
                                 </td>
-                                <!-- Terbit -->
-                                <td class="px-6 py-4 text-slate-600 dark:text-slate-400 font-mono text-xs">
-                                    {{ formatDate(reg.terbit) }}
-                                </td>
                                 <!-- Berlaku -->
-                                <td class="px-6 py-4 text-slate-600 dark:text-slate-400 font-mono text-xs">
+                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400 font-mono text-xs border-r border-b border-slate-200 dark:border-white/10 w-24">
                                     {{ formatDate(reg.berlaku) }}
                                 </td>
                                 <!-- Aksi -->
-                                <td class="px-6 py-4">
+                                <td class="px-3 py-3 text-center border-b border-slate-200 dark:border-white/10 w-28">
                                     <div class="flex items-center justify-center gap-2">
                                         <button 
+                                            type="button"
                                             @click="openEditModal(reg)"
                                             class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-[#821f44] hover:bg-[#821f44]/5 hover:border-[#821f44]/20 transition-all duration-150 active:scale-90 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-400 dark:hover:text-[#db588c] dark:hover:bg-[#db588c]/10"
                                             title="Edit Regulasi"
@@ -153,6 +150,7 @@
                                             </svg>
                                         </button>
                                         <button 
+                                            type="button"
                                             @click="deleteRegulation(reg)"
                                             class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:border-rose-200 transition-all duration-150 active:scale-90 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-400 dark:hover:text-rose-400"
                                             title="Hapus Regulasi"
@@ -259,19 +257,146 @@
                                     <div v-if="form.errors.stk" class="text-xs text-rose-500 font-medium">{{ form.errors.stk }}</div>
                                 </div>
 
-                                <!-- Organisasi Selection -->
-                                <div class="space-y-1.5">
+                                <!-- Organisasi Selection with Search -->
+                                <div class="space-y-1.5 relative">
                                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Unit Organisasi Terkait:</label>
-                                    <select 
-                                        v-model="form.pic_id" 
-                                        class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-black/20 dark:text-white dark:border-white/10"
-                                    >
-                                        <option value="">-- Pilih Organisasi --</option>
-                                        <option v-for="org in hierarchicalOrganizations" :key="org.id" :value="org.id">
-                                            {{ getLevelPrefix(org) }}{{ org.name }} ({{ org.code }})
-                                        </option>
-                                    </select>
+                                    
+                                    <!-- Trigger Button -->
+                                    <div class="relative">
+                                        <button 
+                                            type="button"
+                                            @click="togglePicDropdown"
+                                            class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg px-3.5 py-2 text-sm text-left focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-black/20 dark:text-white dark:border-white/10 flex justify-between items-center"
+                                        >
+                                            <span class="truncate">
+                                                {{ selectedPicName || '-- Pilih Organisasi --' }}
+                                            </span>
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-slate-400 shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <!-- Overlay for click outside -->
+                                    <div v-if="isPicDropdownOpen" class="fixed inset-0 z-30" @click="isPicDropdownOpen = false"></div>
+
+                                    <!-- Dropdown Content -->
+                                    <div v-if="isPicDropdownOpen" class="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl dark:bg-[#1a1a1a] dark:border-white/10 z-40 max-h-60 overflow-y-auto p-2 space-y-2">
+                                        <!-- Search input inside dropdown -->
+                                        <div class="sticky top-0 bg-white dark:bg-[#1a1a1a] pb-1.5">
+                                            <input 
+                                                type="text" 
+                                                v-model="picSearchQuery" 
+                                                placeholder="Cari organisasi..." 
+                                                class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-black/20 dark:text-white dark:border-white/10"
+                                                ref="picSearchInput"
+                                                @click.stop
+                                            />
+                                        </div>
+                                        
+                                        <!-- Options list -->
+                                        <div class="space-y-0.5">
+                                            <button
+                                                type="button"
+                                                @click="selectPic('')"
+                                                class="w-full text-left px-2.5 py-1.5 text-xs rounded hover:bg-slate-100 dark:hover:bg-white/5 text-slate-500 dark:text-slate-400"
+                                            >
+                                                -- Pilih Organisasi --
+                                            </button>
+                                            <button
+                                                v-for="org in filteredPicOrganizations" 
+                                                :key="org.id"
+                                                type="button"
+                                                @click="selectPic(org.id)"
+                                                :class="[
+                                                    'w-full text-left px-2.5 py-1.5 text-xs rounded hover:bg-slate-100 dark:hover:bg-white/5 transition flex items-center justify-between',
+                                                    form.pic_id === org.id ? 'bg-[#821f44]/5 text-[#821f44] dark:bg-[#db588c]/10 dark:text-[#db588c] font-semibold' : 'text-slate-700 dark:text-slate-300'
+                                                ]"
+                                            >
+                                                <span class="truncate">
+                                                    {{ getLevelPrefix(org) }}{{ org.name }} ({{ org.code }})
+                                                </span>
+                                                <svg v-if="form.pic_id === org.id" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-[#821f44] dark:text-[#db588c] shrink-0">
+                                                    <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
+                                            <div v-if="filteredPicOrganizations.length === 0" class="text-center py-4 text-xs text-slate-400">
+                                                Tidak ada hasil ditemukan.
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div v-if="form.errors.pic_id" class="text-xs text-rose-500 font-medium">{{ form.errors.pic_id }}</div>
+                                </div>
+
+                                <!-- Master Organisasi Selection with Search -->
+                                <div class="space-y-1.5 relative">
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Master Organisasi:</label>
+                                    
+                                    <!-- Trigger Button -->
+                                    <div class="relative">
+                                        <button 
+                                            type="button"
+                                            @click="toggleMasterDropdown"
+                                            class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg px-3.5 py-2 text-sm text-left focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-black/20 dark:text-white dark:border-white/10 flex justify-between items-center"
+                                        >
+                                            <span class="truncate">
+                                                {{ selectedMasterName || '-- Pilih Master Organisasi --' }}
+                                            </span>
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-slate-400 shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <!-- Overlay for click outside -->
+                                    <div v-if="isMasterDropdownOpen" class="fixed inset-0 z-30" @click="isMasterDropdownOpen = false"></div>
+
+                                    <!-- Dropdown Content -->
+                                    <div v-if="isMasterDropdownOpen" class="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl dark:bg-[#1a1a1a] dark:border-white/10 z-40 max-h-60 overflow-y-auto p-2 space-y-2">
+                                        <!-- Search input inside dropdown -->
+                                        <div class="sticky top-0 bg-white dark:bg-[#1a1a1a] pb-1.5">
+                                            <input 
+                                                type="text" 
+                                                v-model="masterSearchQuery" 
+                                                placeholder="Cari organisasi..." 
+                                                class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-black/20 dark:text-white dark:border-white/10"
+                                                ref="masterSearchInput"
+                                                @click.stop
+                                            />
+                                        </div>
+                                        
+                                        <!-- Options list -->
+                                        <div class="space-y-0.5">
+                                            <button
+                                                type="button"
+                                                @click="selectMaster('')"
+                                                class="w-full text-left px-2.5 py-1.5 text-xs rounded hover:bg-slate-100 dark:hover:bg-white/5 text-slate-500 dark:text-slate-400"
+                                            >
+                                                -- Pilih Master Organisasi --
+                                            </button>
+                                            <button
+                                                v-for="org in filteredMasterOrganizations" 
+                                                :key="org.id"
+                                                type="button"
+                                                @click="selectMaster(org.id)"
+                                                :class="[
+                                                    'w-full text-left px-2.5 py-1.5 text-xs rounded hover:bg-slate-100 dark:hover:bg-white/5 transition flex items-center justify-between',
+                                                    form.master_id === org.id ? 'bg-[#821f44]/5 text-[#821f44] dark:bg-[#db588c]/10 dark:text-[#db588c] font-semibold' : 'text-slate-700 dark:text-slate-300'
+                                                ]"
+                                            >
+                                                <span class="truncate">
+                                                    {{ getLevelPrefix(org) }}{{ org.name }} ({{ org.code }})
+                                                </span>
+                                                <svg v-if="form.master_id === org.id" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-[#821f44] dark:text-[#db588c] shrink-0">
+                                                    <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
+                                            <div v-if="filteredMasterOrganizations.length === 0" class="text-center py-4 text-xs text-slate-400">
+                                                Tidak ada hasil ditemukan.
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div v-if="form.errors.master_id" class="text-xs text-rose-500 font-medium">{{ form.errors.master_id }}</div>
                                 </div>
 
                                 <!-- Parent Regulation Selection -->
@@ -422,6 +547,76 @@ function formatDate(dateString) {
 const isModalOpen = ref(false);
 const editingId = ref(null);
 
+// Searchable select dropdown state and helpers
+const isPicDropdownOpen = ref(false);
+const isMasterDropdownOpen = ref(false);
+const picSearchQuery = ref('');
+const masterSearchQuery = ref('');
+const picSearchInput = ref(null);
+const masterSearchInput = ref(null);
+
+function togglePicDropdown() {
+    isPicDropdownOpen.value = !isPicDropdownOpen.value;
+    if (isPicDropdownOpen.value) {
+        picSearchQuery.value = '';
+        setTimeout(() => {
+            picSearchInput.value?.focus();
+        }, 100);
+    }
+}
+
+function toggleMasterDropdown() {
+    isMasterDropdownOpen.value = !isMasterDropdownOpen.value;
+    if (isMasterDropdownOpen.value) {
+        masterSearchQuery.value = '';
+        setTimeout(() => {
+            masterSearchInput.value?.focus();
+        }, 100);
+    }
+}
+
+function selectPic(orgId) {
+    form.pic_id = orgId;
+    isPicDropdownOpen.value = false;
+}
+
+function selectMaster(orgId) {
+    form.master_id = orgId;
+    isMasterDropdownOpen.value = false;
+}
+
+const selectedPicName = computed(() => {
+    if (!form.pic_id) return '';
+    const org = props.organizations.find(o => o.id === form.pic_id);
+    return org ? `${org.name} (${org.code})` : '';
+});
+
+const selectedMasterName = computed(() => {
+    if (!form.master_id) return '';
+    const org = props.organizations.find(o => o.id === form.master_id);
+    return org ? `${org.name} (${org.code})` : '';
+});
+
+const filteredPicOrganizations = computed(() => {
+    const query = picSearchQuery.value.toLowerCase().trim();
+    if (!query) return hierarchicalOrganizations.value;
+    return hierarchicalOrganizations.value.filter(org => 
+        (org.name || '').toLowerCase().includes(query) || 
+        (org.code || '').toLowerCase().includes(query) || 
+        (org.alias || '').toLowerCase().includes(query)
+    );
+});
+
+const filteredMasterOrganizations = computed(() => {
+    const query = masterSearchQuery.value.toLowerCase().trim();
+    if (!query) return hierarchicalOrganizations.value;
+    return hierarchicalOrganizations.value.filter(org => 
+        (org.name || '').toLowerCase().includes(query) || 
+        (org.code || '').toLowerCase().includes(query) || 
+        (org.alias || '').toLowerCase().includes(query)
+    );
+});
+
 const form = useForm({
     judul: '',
     nomor: '',
@@ -432,6 +627,7 @@ const form = useForm({
     terbit: '',
     berlaku: '',
     pic_id: '',
+    master_id: '',
     parent_id: '',
 });
 
@@ -440,6 +636,10 @@ function openAddModal() {
     form.reset();
     form.clearErrors();
     form.tipe = ''; // default empty
+    picSearchQuery.value = '';
+    masterSearchQuery.value = '';
+    isPicDropdownOpen.value = false;
+    isMasterDropdownOpen.value = false;
     isModalOpen.value = true;
 }
 
@@ -467,7 +667,12 @@ function openEditModal(reg) {
     form.terbit = terbitVal;
     form.berlaku = berlakuVal;
     form.pic_id = reg.pic_id || '';
+    form.master_id = reg.master_id || '';
     form.parent_id = reg.parent_id || '';
+    picSearchQuery.value = '';
+    masterSearchQuery.value = '';
+    isPicDropdownOpen.value = false;
+    isMasterDropdownOpen.value = false;
     form.clearErrors();
     isModalOpen.value = true;
 }
@@ -475,6 +680,8 @@ function openEditModal(reg) {
 function closeModal() {
     isModalOpen.value = false;
     editingId.value = null;
+    isPicDropdownOpen.value = false;
+    isMasterDropdownOpen.value = false;
     form.reset();
     form.clearErrors();
 }

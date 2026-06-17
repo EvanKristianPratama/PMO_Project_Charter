@@ -18,7 +18,7 @@ class RegulationController extends Controller
      */
     public function index(): Response
     {
-        $regulations = MstRegulation::with(['organization', 'parent'])
+        $regulations = MstRegulation::with(['organization', 'parent', 'master'])
             ->withCount(['generalPolicies'])
             ->orderBy('id', 'asc')
             ->get();
@@ -35,7 +35,7 @@ class RegulationController extends Controller
      */
     public function manage(): Response
     {
-        $regulations = MstRegulation::with(['organization', 'parent'])
+        $regulations = MstRegulation::with(['organization', 'parent', 'master'])
             ->withCount(['generalPolicies'])
             ->orderBy('id', 'asc')
             ->get();
@@ -62,6 +62,7 @@ class RegulationController extends Controller
             'terbit' => 'nullable|date',
             'berlaku' => 'nullable|date',
             'pic_id' => 'nullable|integer|exists:trs_organization,id',
+            'master_id' => 'nullable|integer|exists:trs_organization,id',
             'parent_id' => 'nullable|integer|exists:mst_regulation,id',
         ], [
             'judul.required' => 'Judul Kebijakan wajib diisi.',
@@ -98,6 +99,7 @@ class RegulationController extends Controller
             'terbit' => 'nullable|date',
             'berlaku' => 'nullable|date',
             'pic_id' => 'nullable|integer|exists:trs_organization,id',
+            'master_id' => 'nullable|integer|exists:trs_organization,id',
             'parent_id' => [
                 'nullable',
                 'integer',
@@ -144,7 +146,7 @@ class RegulationController extends Controller
      */
     public function previewData(int $id)
     {
-        $regulation = MstRegulation::with(['organization', 'parent'])->findOrFail($id);
+        $regulation = MstRegulation::with(['organization', 'parent', 'master'])->findOrFail($id);
 
         if (strtolower($regulation->tipe ?? '') === 'procedure') {
             $actors = \App\Models\MstActor::with('organization')
