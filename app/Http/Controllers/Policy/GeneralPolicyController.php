@@ -165,6 +165,7 @@ class GeneralPolicyController extends Controller
         $objectives = MstObjective::with(['practices' => function($query) {
             $query->orderBy('practice_id', 'asc');
         }])
+        ->where('regulation_id', $selectedRegulation?->id)
         ->orderByRaw("
             CASE 
                 WHEN objective_id LIKE 'EDM%' THEN 1
@@ -213,6 +214,7 @@ class GeneralPolicyController extends Controller
         $objectives = MstObjective::with(['practices' => function($query) {
             $query->orderBy('practice_id', 'asc');
         }])
+        ->where('regulation_id', $selectedRegulation?->id)
         ->orderByRaw("
             CASE 
                 WHEN objective_id LIKE 'EDM%' THEN 1

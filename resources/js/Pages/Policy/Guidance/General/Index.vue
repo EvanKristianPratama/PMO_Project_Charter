@@ -60,7 +60,7 @@
                     <!-- Empty State -->
                     <div v-if="policies.length === 0"
                         class="text-center py-20 text-slate-400 dark:text-slate-500 border border-dashed border-slate-300 rounded-xl">
-                        Policy Not Available
+                        Not Available
                     </div>
                 </div>
 
@@ -75,7 +75,7 @@
                 </div>
 
                 <!-- Literal Document Content in Serif style for premium Word document look -->
-                <div class="mt-6 space-y-6 relative z-10">
+                <div class="mt-6 space-y-6 relative z-10 font-serif">
 
                     <!-- Loop through Domains -->
                     <div v-for="(objectivesInDomain, domainName, domainIdx) in groupedObjectives" :key="domainName"
@@ -149,6 +149,12 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Empty State -->
+                    <div v-if="objectives.length === 0"
+                        class="text-center py-20 text-slate-400 dark:text-slate-500 border border-dashed border-slate-300 rounded-xl font-sans text-sm">
+                        Not Available
+                    </div>
                 </div>
             </div>
         </div>
@@ -175,10 +181,8 @@
                         d="M19.5 12h-15m15 0a2.25 2.25 0 012.25 2.25v3a2.25 2.25 0 01-2.25 2.25h-15A2.25 2.25 0 013 17.25v-3A2.25 2.25 0 015.25 12h14.25z" />
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 16.5h6m-6 3h6m-6-10.5h6m-6-3h6" />
                 </svg>
-            </button>
-
-            <!-- Go to Management CRUD page -->
-            <Link :href="route('policy.general.manage')" title="Kelola Kebijakan"
+            </button>            <!-- Go to Management CRUD page -->
+            <Link :href="route('policy.general.manage', { regulation_id: selectedRegulationId })" title="Kelola Kebijakan"
                 class="group flex h-12 w-12 items-center justify-center rounded-full bg-[#821f44]/80 text-white shadow-2xl shadow-[#821f44]/30 backdrop-blur-md transition-all hover:bg-[#821f44] hover:shadow-[#821f44]/40 active:scale-95">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2"
                     stroke="currentColor" class="w-5 h-5 transition-transform group-hover:rotate-12">                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -186,8 +190,8 @@
             </Link>
 
             <!-- Go to Specific Policy CRUD page -->
-            <Link :href="route('policy.specific.manage')" title="Kelola Kebijakan Khusus"
-                class="group flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/80 text-[#821f44] shadow-2xl shadow-yellow-500/30 backdrop-blur-md transition-all hover:bg-amber-500 hover:shadow-yellow-500/40 active:scale-95">
+            <Link :href="route('policy.specific.manage', { regulation_id: selectedRegulationId })" title="Kelola Kebijakan Khusus"
+                class="group flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/80 text-[#821f44] shadow-2xl shadow-yellow-500/30 backdrop-blur-md transition-all hover:bg-amber-50 hover:shadow-yellow-500/40 active:scale-95">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2"
                     stroke="currentColor" class="w-5 h-5 transition-transform group-hover:rotate-12">                    <path stroke-linecap="round" stroke-linejoin="round"
                         d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.83 20.013a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />

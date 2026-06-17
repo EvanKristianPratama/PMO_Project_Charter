@@ -36,37 +36,44 @@ import {
     FlagIcon 
 } from '@heroicons/vue/24/outline';
 
+const currentRegId = computed(() => {
+    return new URLSearchParams(window.location.search).get('regulation_id') || null;
+});
+
 // Define the 4 Chapters with icons, labels and safe route paths
-const chapters = computed(() => [
-    {
-        id: 'bab1',
-        label: 'Bab I: Pendahuluan',
-        href: route('policy.guidance.introduction'),
-        active: route().current('policy.guidance.introduction'),
-        icon: BookOpenIcon,
-    },
-    {
-        id: 'bab2',
-        label: 'Bab II: Kebijakan',
-        href: route('policy.general.index'),
-        active: route().current('policy.general.index') || route().current('policy.general.manage') || route().current('policy.specific.manage'),
-        icon: ShieldCheckIcon,
-    },
-    {
-        id: 'bab3',
-        label: 'Bab III: Tanggung Jawab',
-        href: route('policy.roles.index'),
-        active: route().current('policy.roles.index') || route().current('policy.roles.manage'),
-        icon: UsersIcon,
-    },
-    {
-        id: 'bab4',
-        label: 'Bab IV: Penutup',
-        href: route('policy.guidance.closing'),
-        active: route().current('policy.guidance.closing'),
-        icon: FlagIcon,
-    },
-]);
+const chapters = computed(() => {
+    const params = currentRegId.value ? { regulation_id: currentRegId.value } : {};
+    return [
+        {
+            id: 'bab1',
+            label: 'Bab I: Pendahuluan',
+            href: route('policy.guidance.introduction', params),
+            active: route().current('policy.guidance.introduction'),
+            icon: BookOpenIcon,
+        },
+        {
+            id: 'bab2',
+            label: 'Bab II: Kebijakan',
+            href: route('policy.general.index', params),
+            active: route().current('policy.general.index') || route().current('policy.general.manage') || route().current('policy.specific.manage'),
+            icon: ShieldCheckIcon,
+        },
+        {
+            id: 'bab3',
+            label: 'Bab III: Tanggung Jawab',
+            href: route('policy.roles.index', params),
+            active: route().current('policy.roles.index') || route().current('policy.roles.manage'),
+            icon: UsersIcon,
+        },
+        {
+            id: 'bab4',
+            label: 'Bab IV: Penutup',
+            href: route('policy.guidance.closing', params),
+            active: route().current('policy.guidance.closing'),
+            icon: FlagIcon,
+        },
+    ];
+});
 </script>
 
 <style scoped>

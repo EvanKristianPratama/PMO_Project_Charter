@@ -13,7 +13,7 @@
                     </div>
                     <div class="flex items-center gap-3">
                         <Link
-                            :href="route('policy.general.index')"
+                            :href="route('policy.general.index', { regulation_id: props.selectedRegulationId || activeRegulation?.id })"
                             class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5 active:scale-95"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
@@ -34,6 +34,7 @@
                     </div>
                 </div>
             </section>
+
 
             <!-- Floating Alerts / Feedback at Bottom-Left -->
             <div class="fixed bottom-6 left-6 z-[9999] max-w-sm space-y-3 pointer-events-none">
@@ -253,14 +254,28 @@ const isModalOpen = ref(false);
 const editingId = ref(null);
 
 const form = useForm({
+    regulation_id: activeRegulation.value?.id || '',
     number: '',
     description: '',
 });
+
+// Watch activeRegulation changes to update form's regulation_id
+watch(
+    () => activeRegulation.value,
+    (reg) => {
+        if (reg) {
+            form.regulation_id = reg.id;
+        }
+    },
+    { immediate: true }
+);
+
 
 function openAddModal() {
     editingId.value = null;
     form.reset();
     form.clearErrors();
+    form.regulation_id = activeRegulation.value?.id || '';
     // Pre-fill next number logically
     let nextNum = 1;
     if (props.policies.length > 0) {
@@ -272,6 +287,7 @@ function openAddModal() {
 
 function openEditModal(policy) {
     editingId.value = policy.id;
+    form.regulation_id = policy.regulation_id || activeRegulation.value?.id || '';
     form.number = policy.number;
     form.description = policy.description;
     form.clearErrors();

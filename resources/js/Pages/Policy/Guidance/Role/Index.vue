@@ -748,12 +748,16 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    selectedRegulationId: {
+        type: Number,
+        default: null,
+    },
 });
 
 const page = usePage();
 
 // Selected Regulation state
-const selectedRegulationId = ref(null);
+const selectedRegulationId = ref(props.selectedRegulationId);
 
 // Sub menu active state for Bab III (document | matrix | policy_mapping)
 const activeSubMenu = ref('document');

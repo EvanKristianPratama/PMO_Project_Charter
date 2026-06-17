@@ -18,7 +18,7 @@ class RoleController extends Controller
     /**
      * Display a listing of roles & responsibilities in formal document view mode.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
         try {
             // Auto-seed default roles & responsibilities if the table is empty
@@ -75,29 +75,47 @@ class RoleController extends Controller
                 }
             }
 
+            $regulations = MstRegulation::orderBy('id', 'desc')->get();
+            
+            $selectedRegulationId = $request->integer('regulation_id');
+            $selectedRegulation = null;
+            if ($selectedRegulationId) {
+                $selectedRegulation = $regulations->firstWhere('id', $selectedRegulationId);
+            }
+            
+            if (!$selectedRegulation) {
+                // Filter to prioritize regulation with "PEDOMAN TATA KELOLA" title
+                $pedoman = $regulations->first(function ($r) {
+                    return str_contains(strtoupper($r->judul ?? ''), 'PEDOMAN TATA KELOLA');
+                });
+                $selectedRegulation = $pedoman ?? $regulations->first();
+            }
+
+            if ($selectedRegulation) {
+                $regulations = collect([$selectedRegulation])->merge(
+                    $regulations->where('id', '!=', $selectedRegulation->id)->values()
+                );
+            }
+
             $roles = MstRole::with(['responsibilities' => function ($query) {
                 $query->orderBy('id', 'asc');
             }, 'mappedResponsibles'])->orderBy('id', 'asc')->get();
 
-            $responsibles = MstResponsible::with('objectives')->orderBy('responsible', 'asc')->get();
+            $responsibles = MstResponsible::with(['objectives' => function ($query) use ($selectedRegulation) {
+                $query->where('regulation_id', $selectedRegulation?->id);
+            }])->orderBy('responsible', 'asc')->get();
 
-            $regulations = MstRegulation::orderBy('id', 'desc')->get();
-            // Filter to prioritize regulation with "PEDOMAN TATA KELOLA" title
-            $pedoman = $regulations->first(function ($r) {
-                return str_contains(strtoupper($r->judul ?? ''), 'PEDOMAN TATA KELOLA');
-            });
-            if ($pedoman) {
-                $regulations = collect([$pedoman])->merge(
-                    $regulations->where('id', '!=', $pedoman->id)->values()
-                );
-            }
-            $objectives = \App\Models\MstObjective::with('practices')->orderBy('objective_id', 'asc')->get();
+            $objectives = \App\Models\MstObjective::with('practices')
+                ->where('regulation_id', $selectedRegulation?->id)
+                ->orderBy('objective_id', 'asc')
+                ->get();
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::warning('[RoleController] DB error loading roles: ' . $e->getMessage());
             $roles = collect([]);
             $responsibles = collect([]);
             $regulations = collect([]);
             $objectives = collect([]);
+            $selectedRegulation = null;
         }
 
         return Inertia::render('Policy/Guidance/Role/Index', [
@@ -105,6 +123,7 @@ class RoleController extends Controller
             'regulations' => $regulations,
             'responsibles' => $responsibles,
             'objectives' => $objectives,
+            'selectedRegulationId' => $selectedRegulation?->id,
         ]);
     }
 

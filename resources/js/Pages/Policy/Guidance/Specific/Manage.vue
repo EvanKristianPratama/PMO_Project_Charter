@@ -13,7 +13,7 @@
                     </div>
                     <div class="flex items-center gap-3">
                         <Link
-                            :href="route('policy.specific.index')"
+                            :href="route('policy.general.index', { regulation_id: props.selectedRegulationId || activeRegulation?.id })"
                             class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-4 h-4">
@@ -33,6 +33,20 @@
                     </div>
                 </div>
             </section>
+
+            <!-- Regulation Switcher Bar -->
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3 bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-200 dark:border-white/10">
+                <span class="text-xs font-black uppercase tracking-wider text-[#821f44] dark:text-pink-400">Pilih Regulasi / Pedoman:</span>
+                <select 
+                    :value="props.selectedRegulationId || activeRegulation?.id" 
+                    @change="onRegulationChange"
+                    class="text-xs font-semibold bg-white border border-slate-300 rounded-lg px-3 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-[#1a1a1a] dark:border-white/10 dark:text-white shadow-sm cursor-pointer min-w-[300px]"
+                >
+                    <option v-for="reg in regulations" :key="reg.id" :value="reg.id">
+                        {{ reg.judul }}
+                    </option>
+                </select>
+            </div>
 
             <!-- Floating Alerts / Feedback at Bottom-Left -->
             <div class="fixed bottom-6 left-6 z-[9999] max-w-sm space-y-3 pointer-events-none">
@@ -664,6 +678,11 @@ watch(
     { deep: true, immediate: true }
 );
 
+function onRegulationChange(event) {
+    const regId = event.target.value;
+    router.visit(route('policy.specific.manage', { regulation_id: regId }));
+}
+
 // Helper to determine Domain name by Objective ID prefix (English fallback)
 function getDomainName(id) {
     if (!id) return 'Governance / Management Domain';
@@ -695,19 +714,28 @@ const isCreatingObjective = ref(false);
 
 const objectiveForm = useForm({
     objective_id: '',
-    regulation_id: '',
+    regulation_id: activeRegulation.value?.id || '',
     domain: '',
     objective: '',
     objective_description: '',
     objective_purpose: '',
 });
 
-// ... (watch logic)
+// Watch activeRegulation changes to update forms' regulation_id
+watch(
+    () => activeRegulation.value,
+    (reg) => {
+        if (reg) {
+            objectiveForm.regulation_id = reg.id;
+        }
+    },
+    { immediate: true }
+);
 
 function startCreateObjective() {
     isCreatingObjective.value = true;
     objectiveForm.reset();
-    objectiveForm.regulation_id = null;
+    objectiveForm.regulation_id = activeRegulation.value?.id || '';
     objectiveForm.clearErrors();
     // Scroll smoothly to top form
     window.scrollTo({ top: 0, behavior: 'smooth' });

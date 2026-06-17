@@ -119,6 +119,12 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Empty State -->
+                    <div v-if="objectives.length === 0"
+                        class="text-center py-20 text-slate-400 dark:text-slate-500 border border-dashed border-slate-300 rounded-xl font-sans text-sm">
+                        Not Available
+                    </div>
                 </div>
             </div>
 
@@ -149,7 +155,7 @@
             </button>
 
             <!-- Go to Management CRUD page -->
-            <Link :href="route('policy.specific.manage')" title="Kelola Kebijakan"
+            <Link :href="route('policy.specific.manage', { regulation_id: props.selectedRegulationId || activeRegulation?.id })" title="Kelola Kebijakan"
                 class="group flex h-12 w-12 items-center justify-center rounded-full bg-[#821f44]/80 text-white shadow-2xl shadow-[#821f44]/30 backdrop-blur-md transition-all hover:bg-[#821f44] hover:shadow-[#821f44]/40 active:scale-95">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2"
                     stroke="currentColor" class="w-5 h-5 transition-transform group-hover:rotate-12">
@@ -177,12 +183,16 @@ const props = defineProps({
         type: Array,
         required: true,
     },
+    selectedRegulationId: {
+        type: Number,
+        default: null,
+    },
 });
 
 const page = usePage();
 
 // Selected Regulation state
-const selectedRegulationId = ref(null);
+const selectedRegulationId = ref(props.selectedRegulationId);
 
 const activeRegulation = computed(() => {
     if (!selectedRegulationId.value || props.regulations.length === 0) {

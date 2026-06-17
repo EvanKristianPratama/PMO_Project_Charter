@@ -15,11 +15,37 @@ class PolicyController extends Controller
     /**
      * Display a listing of COBIT objectives and practices.
      */
-    public function index(): Response
+    /**
+     * Display a listing of COBIT objectives and practices.
+     */
+    public function index(Request $request): Response
     {
+        try {
+            $regulations = \App\Models\MstRegulation::orderBy('id', 'desc')->get();
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('[PolicyController] DB error loading regulations: ' . $e->getMessage());
+            $regulations = collect([]);
+        }
+
+        $selectedRegulationId = $request->integer('regulation_id');
+        $selectedRegulation = null;
+
+        if ($selectedRegulationId) {
+            $selectedRegulation = $regulations->firstWhere('id', $selectedRegulationId);
+        }
+
+        if (!$selectedRegulation) {
+            // Prioritize regulation with "PEDOMAN TATA KELOLA" title
+            $pedoman = $regulations->first(function ($r) {
+                return str_contains(strtoupper($r->judul ?? ''), 'PEDOMAN TATA KELOLA');
+            });
+            $selectedRegulation = $pedoman ?? $regulations->first();
+        }
+
         $objectives = MstObjective::with(['practices' => function($query) {
             $query->orderBy('practice_id', 'asc');
         }])
+        ->where('regulation_id', $selectedRegulation?->id)
         ->orderByRaw("
             CASE 
                 WHEN objective_id LIKE 'EDM%' THEN 1
@@ -33,25 +59,10 @@ class PolicyController extends Controller
         ->orderBy('objective_id', 'asc')
         ->get();
 
-        try {
-            $regulations = \App\Models\MstRegulation::orderBy('id', 'desc')->get();
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('[PolicyController] DB error loading regulations: ' . $e->getMessage());
-            $regulations = collect([]);
-        }
-        // Prioritize regulation with "PEDOMAN TATA KELOLA" title
-        $pedoman = $regulations->first(function ($r) {
-            return str_contains(strtoupper($r->judul ?? ''), 'PEDOMAN TATA KELOLA');
-        });
-        if ($pedoman) {
-            $regulations = collect([$pedoman])->merge(
-                $regulations->where('id', '!=', $pedoman->id)->values()
-            );
-        }
-
         return Inertia::render('Policy/Guidance/Specific/Index', [
             'objectives' => $objectives,
             'regulations' => $regulations,
+            'selectedRegulationId' => $selectedRegulation?->id,
         ]);
     }
 
@@ -60,9 +71,23 @@ class PolicyController extends Controller
      */
     public function manage(Request $request): Response
     {
+        $regulations = \App\Models\MstRegulation::orderBy('judul', 'asc')->get();
+        
+        $selectedRegulationId = $request->integer('regulation_id');
+        $selectedRegulation = null;
+
+        if ($selectedRegulationId) {
+            $selectedRegulation = $regulations->firstWhere('id', $selectedRegulationId);
+        }
+
+        if (!$selectedRegulation) {
+            $selectedRegulation = $regulations->first();
+        }
+
         $objectives = MstObjective::with(['practices' => function($query) {
             $query->orderBy('practice_id', 'asc');
         }])
+        ->where('regulation_id', $selectedRegulation?->id)
         ->orderByRaw("
             CASE 
                 WHEN objective_id LIKE 'EDM%' THEN 1
@@ -76,14 +101,10 @@ class PolicyController extends Controller
         ->orderBy('objective_id', 'asc')
         ->get();
 
-        $regulations = \App\Models\MstRegulation::orderBy('judul', 'asc')->get();
-        
-        $selectedRegulationId = $request->integer('regulation_id');
-
         return Inertia::render('Policy/Guidance/Specific/Manage', [
             'objectives' => $objectives,
             'regulations' => $regulations,
-            'selectedRegulationId' => $selectedRegulationId,
+            'selectedRegulationId' => $selectedRegulation?->id,
         ]);
     }
 
@@ -109,7 +130,7 @@ class PolicyController extends Controller
         MstObjective::create($validated);
 
         return redirect()
-            ->route('policy.specific.manage')
+            ->route('policy.specific.manage', ['regulation_id' => $request->regulation_id])
             ->with('success', 'Governance Objective berhasil ditambahkan.');
     }
 
@@ -165,7 +186,7 @@ class PolicyController extends Controller
         }
 
         return redirect()
-            ->route('policy.specific.manage')
+            ->route('policy.specific.manage', ['regulation_id' => $request->regulation_id])
             ->with('success', 'Governance Objective berhasil diperbarui.');
     }
 
@@ -175,10 +196,11 @@ class PolicyController extends Controller
     public function destroyObjective(string $id): RedirectResponse
     {
         $objective = MstObjective::findOrFail($id);
+        $regulationId = $objective->regulation_id;
         $objective->delete();
 
         return redirect()
-            ->route('policy.specific.manage')
+            ->route('policy.specific.manage', ['regulation_id' => $regulationId])
             ->with('success', 'Governance Objective berhasil dihapus.');
     }
 
@@ -200,8 +222,11 @@ class PolicyController extends Controller
 
         MstPractice::create($validated);
 
+        $objective = MstObjective::find($request->objective_id);
+        $regulationId = $objective?->regulation_id;
+
         return redirect()
-            ->route('policy.specific.manage')
+            ->route('policy.specific.manage', ['regulation_id' => $regulationId])
             ->with('success', 'Management Practice berhasil ditambahkan.');
     }
 
@@ -237,8 +262,11 @@ class PolicyController extends Controller
             $practice->update($validated);
         }
 
+        $objective = MstObjective::find($practice->objective_id);
+        $regulationId = $objective?->regulation_id;
+
         return redirect()
-            ->route('policy.specific.manage')
+            ->route('policy.specific.manage', ['regulation_id' => $regulationId])
             ->with('success', 'Management Practice berhasil diperbarui.');
     }
 
@@ -248,10 +276,12 @@ class PolicyController extends Controller
     public function destroyPractice(string $id): RedirectResponse
     {
         $practice = MstPractice::findOrFail($id);
+        $objective = MstObjective::find($practice->objective_id);
+        $regulationId = $objective?->regulation_id;
         $practice->delete();
 
         return redirect()
-            ->route('policy.specific.manage')
+            ->route('policy.specific.manage', ['regulation_id' => $regulationId])
             ->with('success', 'Management Practice berhasil dihapus.');
     }
 }
