@@ -34,19 +34,6 @@
                 </div>
             </section>
 
-            <!-- Regulation Switcher Bar -->
-            <div class="flex flex-col sm:flex-row sm:items-center gap-3 bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-200 dark:border-white/10">
-                <span class="text-xs font-black uppercase tracking-wider text-[#821f44] dark:text-pink-400">Pilih Regulasi / Pedoman:</span>
-                <select 
-                    :value="props.selectedRegulationId || activeRegulation?.id" 
-                    @change="onRegulationChange"
-                    class="text-xs font-semibold bg-white border border-slate-300 rounded-lg px-3 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-[#1a1a1a] dark:border-white/10 dark:text-white shadow-sm cursor-pointer min-w-[300px]"
-                >
-                    <option v-for="reg in regulations" :key="reg.id" :value="reg.id">
-                        {{ reg.judul }}
-                    </option>
-                </select>
-            </div>
 
             <!-- Floating Alerts / Feedback at Bottom-Left -->
             <div class="fixed bottom-6 left-6 z-[9999] max-w-sm space-y-3 pointer-events-none">
@@ -678,10 +665,6 @@ watch(
     { deep: true, immediate: true }
 );
 
-function onRegulationChange(event) {
-    const regId = event.target.value;
-    router.visit(route('policy.specific.manage', { regulation_id: regId }));
-}
 
 // Helper to determine Domain name by Objective ID prefix (English fallback)
 function getDomainName(id) {
