@@ -18,6 +18,7 @@ class MstRegulation extends Model
     public $timestamps = true;
 
     protected $fillable = [
+        'parent_id',
         'pic_id',
         'judul',
         'nomor',
@@ -32,7 +33,32 @@ class MstRegulation extends Model
     protected $casts = [
         'terbit' => 'date:Y-m-d',
         'berlaku' => 'date:Y-m-d',
+        'parent_id' => 'integer',
     ];
+
+    /**
+     * Relasi ke parent regulation (self relation)
+     */
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(MstRegulation::class, 'parent_id');
+    }
+
+    /**
+     * Relasi ke children regulation (self relation)
+     */
+    public function children(): HasMany
+    {
+        return $this->hasMany(MstRegulation::class, 'parent_id');
+    }
+
+    /**
+     * Relasi ke children regulation secara rekursif
+     */
+    public function childrenRecursive(): HasMany
+    {
+        return $this->children()->with('childrenRecursive');
+    }
 
     /**
      * Relasi ke TrsOrganization

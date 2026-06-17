@@ -18,13 +18,15 @@ class RegulationController extends Controller
      */
     public function index(): Response
     {
-        $regulations = MstRegulation::with('organization')
+        $regulations = MstRegulation::with(['organization', 'parent'])
             ->withCount(['generalPolicies'])
             ->orderBy('id', 'asc')
             ->get();
+        $organizations = TrsOrganization::all();
 
         return Inertia::render('Policy/Regulation/Index', [
             'regulations' => $regulations,
+            'organizations' => $organizations,
         ]);
     }
 
@@ -33,7 +35,7 @@ class RegulationController extends Controller
      */
     public function manage(): Response
     {
-        $regulations = MstRegulation::with('organization')
+        $regulations = MstRegulation::with(['organization', 'parent'])
             ->withCount(['generalPolicies'])
             ->orderBy('id', 'asc')
             ->get();
@@ -60,6 +62,7 @@ class RegulationController extends Controller
             'terbit' => 'nullable|date',
             'berlaku' => 'nullable|date',
             'pic_id' => 'nullable|integer|exists:trs_organization,id',
+            'parent_id' => 'nullable|integer|exists:mst_regulation,id',
         ], [
             'judul.required' => 'Judul Kebijakan wajib diisi.',
             'tipe.required' => 'Tipe Kebijakan wajib diisi.',
@@ -95,6 +98,16 @@ class RegulationController extends Controller
             'terbit' => 'nullable|date',
             'berlaku' => 'nullable|date',
             'pic_id' => 'nullable|integer|exists:trs_organization,id',
+            'parent_id' => [
+                'nullable',
+                'integer',
+                'exists:mst_regulation,id',
+                function ($attribute, $value, $fail) use ($id) {
+                    if ($value == $id) {
+                        $fail('Kebijakan tidak boleh merujuk ke dirinya sendiri sebagai parent.');
+                    }
+                },
+            ],
         ], [
             'judul.required' => 'Judul Kebijakan wajib diisi.',
             'tipe.required' => 'Tipe Kebijakan wajib diisi.',
@@ -131,7 +144,7 @@ class RegulationController extends Controller
      */
     public function previewData(int $id)
     {
-        $regulation = MstRegulation::with('organization')->findOrFail($id);
+        $regulation = MstRegulation::with(['organization', 'parent'])->findOrFail($id);
 
         if (strtolower($regulation->tipe ?? '') === 'procedure') {
             $actors = \App\Models\MstActor::with('organization')

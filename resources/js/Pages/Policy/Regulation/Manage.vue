@@ -271,6 +271,26 @@
                                     <div v-if="form.errors.pic_id" class="text-xs text-rose-500 font-medium">{{ form.errors.pic_id }}</div>
                                 </div>
 
+                                <!-- Parent Regulation Selection -->
+                                <div class="space-y-1.5">
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Parent Regulasi (Opsional):</label>
+                                    <select 
+                                        v-model="form.parent_id" 
+                                        class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-black/20 dark:text-white dark:border-white/10"
+                                    >
+                                        <option value="">-- Pilih Parent Regulasi --</option>
+                                        <option 
+                                            v-for="reg in regulations" 
+                                            :key="reg.id" 
+                                            :value="reg.id"
+                                            v-show="!editingId || reg.id !== editingId"
+                                        >
+                                            [{{ reg.tipe }}] {{ reg.judul }}
+                                        </option>
+                                    </select>
+                                    <div v-if="form.errors.parent_id" class="text-xs text-rose-500 font-medium">{{ form.errors.parent_id }}</div>
+                                </div>
+
                                 <!-- Revisi -->
                                 <div class="space-y-1.5">
                                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Revisi / Versi:</label>
@@ -409,6 +429,7 @@ const form = useForm({
     terbit: '',
     berlaku: '',
     pic_id: '',
+    parent_id: '',
 });
 
 function openAddModal() {
@@ -443,6 +464,7 @@ function openEditModal(reg) {
     form.terbit = terbitVal;
     form.berlaku = berlakuVal;
     form.pic_id = reg.pic_id || '';
+    form.parent_id = reg.parent_id || '';
     form.clearErrors();
     isModalOpen.value = true;
 }
