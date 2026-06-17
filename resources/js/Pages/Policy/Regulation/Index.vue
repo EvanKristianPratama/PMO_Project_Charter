@@ -78,7 +78,7 @@
                         <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
                             <tr>
                                 <th scope="col" class="px-3 py-3 w-10 text-center border-r border-b border-slate-200 dark:border-white/10">No</th>
-                                <th scope="col" colspan="3" class="px-3 py-3 text-center border-r border-b border-slate-200 dark:border-white/10">Judul</th>
+                                <th scope="col" class="px-3 py-3 text-center border-r border-b border-slate-200 dark:border-white/10">Judul</th>
                                 <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Nomor</th>
                                 <th scope="col" class="px-3 py-3 w-28 border-r border-b border-slate-200 dark:border-white/10">Tipe</th>
                                 <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Fungsi</th>
@@ -93,7 +93,7 @@
                             <template v-if="activeViewMode === 'flat'">
                                 <!-- Empty state -->
                                 <tr v-if="sortedRegulations.length === 0">
-                                    <td colspan="11" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
+                                    <td colspan="9" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
                                         Belum ada data Regulasi. Silakan hubungi admin atau klik "Kelola Regulasi" untuk menambahkan.
                                     </td>
                                 </tr>
@@ -108,21 +108,9 @@
                                         {{ index + 1 }}
                                     </td>
 
-                                    <!-- Judul — 3 consistent leveling columns (Level 1, Level 2, Level 3) -->
-                                    <td class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 max-w-[160px] break-words">
-                                        <span v-if="getVisualDepth(reg.org_level) === 0" class="text-slate-900 dark:text-white font-bold leading-relaxed block">
-                                            {{ reg.judul }}
-                                        </span>
-                                    </td>
-                                    <td class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 max-w-[160px] break-words">
-                                        <span v-if="getVisualDepth(reg.org_level) === 1" class="text-slate-900 dark:text-white font-bold leading-relaxed block">
-                                            {{ reg.judul }}
-                                        </span>
-                                    </td>
-                                    <td class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 max-w-[160px] break-words">
-                                        <span v-if="getVisualDepth(reg.org_level) === 2" class="text-slate-900 dark:text-white font-bold leading-relaxed block">
-                                            {{ reg.judul }}
-                                        </span>
+                                    <!-- Judul -->
+                                    <td class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 max-w-[300px] break-words text-slate-900 dark:text-white font-bold leading-relaxed">
+                                        {{ reg.judul }}
                                     </td>
 
                                     <!-- Nomor -->
@@ -190,7 +178,7 @@
                             <!-- Document Hierarchy Mode -->
                             <template v-if="activeViewMode === 'document'">
                                 <tr v-if="visibleDocRows.length === 0">
-                                    <td colspan="11" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
+                                    <td colspan="9" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
                                         Belum ada data Regulasi.
                                     </td>
                                 </tr>
@@ -203,8 +191,8 @@
                                     <td class="px-3 py-3 text-center font-medium text-slate-700 dark:text-slate-300 border-r border-b border-slate-200 dark:border-white/10 w-10">
                                         {{ index + 1 }}
                                     </td>
-                                    <!-- Judul (colspan 3 to fit the header) -->
-                                    <td colspan="3" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 max-w-[300px] break-words" :style="{ paddingLeft: (row.depth * 24 + 12) + 'px' }">
+                                    <!-- Judul -->
+                                    <td class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 max-w-[300px] break-words" :style="{ paddingLeft: (row.depth * 24 + 12) + 'px' }">
                                         <div class="flex items-center gap-1.5">
                                             <!-- Toggle Button -->
                                             <button 
@@ -287,10 +275,10 @@
                                 </tr>
                             </template>
 
-                            <!-- Organization Hierarchy Mode (Flat Table style, same as flat view) -->
+                            <!-- Organization Hierarchy Mode -->
                             <template v-if="activeViewMode === 'organization'">
                                 <tr v-if="regulationsByOrgHierarchy.length === 0">
-                                    <td colspan="11" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
+                                    <td colspan="9" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
                                         Belum ada data Regulasi.
                                     </td>
                                 </tr>
@@ -305,21 +293,9 @@
                                         {{ index + 1 }}
                                     </td>
 
-                                    <!-- Judul — 3 consistent leveling columns (Level 1, Level 2, Level 3) based on org_depth -->
-                                    <td class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 max-w-[160px] break-words">
-                                        <span v-if="getVisualOrgDepth(reg.org_depth) === 0" class="text-slate-900 dark:text-white font-bold leading-relaxed block">
-                                            {{ reg.judul }}
-                                        </span>
-                                    </td>
-                                    <td class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 max-w-[160px] break-words">
-                                        <span v-if="getVisualOrgDepth(reg.org_depth) === 1" class="text-slate-900 dark:text-white font-bold leading-relaxed block">
-                                            {{ reg.judul }}
-                                        </span>
-                                    </td>
-                                    <td class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 max-w-[160px] break-words">
-                                        <span v-if="getVisualOrgDepth(reg.org_depth) === 2" class="text-slate-900 dark:text-white font-bold leading-relaxed block">
-                                            {{ reg.judul }}
-                                        </span>
+                                    <!-- Judul -->
+                                    <td class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 max-w-[300px] break-words text-slate-900 dark:text-white font-bold leading-relaxed">
+                                        {{ reg.judul }}
                                     </td>
 
                                     <!-- Nomor -->
