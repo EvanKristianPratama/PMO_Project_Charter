@@ -519,8 +519,11 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::post('/sync/pull', [SyncController::class, 'pull'])->name('sync.pull');
 
     Route::get('/libary', [LibaryController::class, 'index'])->name('libary.index');
-    Route::get('/libary/{filename}', [LibaryController::class, 'show'])->name('libary.show');
-    Route::get('/libary/render/{filename}', [LibaryController::class, 'viewHtml'])->name('libary.render');
+    Route::post('/libary/upload', [LibaryController::class, 'upload'])->name('libary.upload');
+    Route::get('/libary/document/{uuid}/preview', [LibaryController::class, 'previewFile'])->name('libary.document.preview');
+    Route::get('/libary/document/{uuid}/download', [LibaryController::class, 'downloadFile'])->name('libary.document.download');
+    Route::delete('/libary/document/{uuid}', [LibaryController::class, 'destroy'])->name('libary.document.destroy');
+    Route::get('/libary/{uuid}', [LibaryController::class, 'show'])->name('libary.show');
 
     // BPMN Workflow Controller (Proof of Concept)
     Route::prefix('/bpmn-workflow')->name('bpmn-workflow.')->group(function () {
