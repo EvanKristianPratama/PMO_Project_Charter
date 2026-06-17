@@ -121,6 +121,7 @@
                 <select
                     id="groub_id"
                     v-model="form.groub_id"
+                    @change="parentGroupFilterId = form.groub_id"
                     class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
                     required
                 >
@@ -489,34 +490,6 @@ const filteredParentOrgs = computed(() => {
         }
         return true;
     });
-});
-
-watch(() => form.parent_id, (newParentId, oldParentId) => {
-    const parentOrg = props.organizationStructureRows.find(org => Number(org.organization_id) === Number(newParentId));
-    const oldParentOrg = props.organizationStructureRows.find(org => Number(org.organization_id) === Number(oldParentId));
-    
-    const newParentCode = parentOrg ? parentOrg.code : '';
-    const oldParentCode = oldParentOrg ? oldParentOrg.code : '';
-    
-    if (newParentCode) {
-        if (!form.code.startsWith(newParentCode)) {
-            if (oldParentCode && form.code.startsWith(oldParentCode)) {
-                form.code = newParentCode + form.code.substring(oldParentCode.length);
-            } else {
-                form.code = newParentCode;
-            }
-        }
-    } else {
-        if (oldParentCode && form.code.startsWith(oldParentCode)) {
-            form.code = form.code.substring(oldParentCode.length);
-        }
-    }
-});
-
-watch(() => form.groub_id, (newGroupId) => {
-    if (newGroupId) {
-        parentGroupFilterId.value = newGroupId;
-    }
 });
 
 const openCreateModal = () => {
