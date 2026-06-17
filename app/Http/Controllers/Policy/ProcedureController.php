@@ -401,8 +401,8 @@ class ProcedureController extends Controller
     private function validateDiagramMapping(Request $request): array
     {
         return $request->validate([
-            'sop_id' => ['required', Rule::exists('mst_sop', 'id')],
-            'actor_id' => ['required', Rule::exists('mst_actor', 'id')],
+            'sop_id' => ['required', Rule::exists(MstSop::class, 'id')],
+            'actor_id' => ['required', Rule::exists(MstActor::class, 'id')],
         ]);
     }
 

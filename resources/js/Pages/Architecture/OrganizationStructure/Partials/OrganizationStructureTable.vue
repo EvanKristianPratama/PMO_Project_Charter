@@ -121,7 +121,6 @@
                 <select
                     id="groub_id"
                     v-model="form.groub_id"
-                    @change="selectedParentCode = ''"
                     class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
                     required
                 >
@@ -133,8 +132,23 @@
                 <span v-if="form.errors.groub_id" class="text-xs text-red-500 font-medium">{{ form.errors.groub_id }}</span>
             </div>
 
+            <!-- Parent Organization Group Filter -->
+            <div class="flex flex-col gap-1.5">
+                <label for="parent_group_filter_id" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Filter Group Organisasi Induk</label>
+                <select
+                    id="parent_group_filter_id"
+                    v-model="parentGroupFilterId"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                >
+                    <option value="">Semua Group</option>
+                    <option v-for="option in groubOptions" :key="option.id" :value="option.id">
+                        {{ option.name }}
+                    </option>
+                </select>
+            </div>
+
             <!-- Parent Organization Option Select -->
-            <div v-if="form.groub_id" class="flex flex-col gap-1.5">
+            <div class="flex flex-col gap-1.5">
                 <label for="parent_id" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Organisasi Induk</label>
                 <select
                     id="parent_id"
@@ -264,6 +278,7 @@ const props = defineProps({
 const displayValue = (value) => value ?? '-';
 
 const parentFilterId = ref('');
+const parentGroupFilterId = ref('');
 const searchQuery = ref('');
 
 const getOrganizationDepth = (orgId) => {
@@ -431,15 +446,15 @@ const form = useForm({
 });
 
 const filteredParentOrgs = computed(() => {
-    if (!form.groub_id) return [];
+    const targetGroupId = parentGroupFilterId.value ? Number(parentGroupFilterId.value) : null;
+    const orgs = targetGroupId
+        ? props.organizationStructureRows.filter(org => Number(org.groub_id) === targetGroupId)
+        : props.organizationStructureRows;
     
-    const targetGroupId = Number(form.groub_id);
-    const orgsInGroup = props.organizationStructureRows.filter(org => Number(org.groub_id) === targetGroupId);
-    
-    const orgMap = new Map(orgsInGroup.map(org => [org.organization_id, { ...org, children: [] }]));
+    const orgMap = new Map(orgs.map(org => [org.organization_id, { ...org, children: [] }]));
     const roots = [];
     
-    orgsInGroup.forEach(org => {
+    orgs.forEach(org => {
         const mapped = orgMap.get(org.organization_id);
         if (org.parent_id && orgMap.has(org.parent_id)) {
             orgMap.get(org.parent_id).children.push(mapped);
@@ -498,10 +513,17 @@ watch(() => form.parent_id, (newParentId, oldParentId) => {
     }
 });
 
+watch(() => form.groub_id, (newGroupId) => {
+    if (newGroupId) {
+        parentGroupFilterId.value = newGroupId;
+    }
+});
+
 const openCreateModal = () => {
     modalMode.value = 'create';
     form.clearErrors();
     form.reset();
+    parentGroupFilterId.value = '';
     isModalOpen.value = true;
 };
 
@@ -517,6 +539,9 @@ const openEditModal = (org) => {
     form.jabatan = org.jabatan || '';
     form.pejabat = org.pejabat || '';
     form.sk = org.sk || '';
+    
+    const parentOrg = props.organizationStructureRows.find(o => Number(o.organization_id) === Number(org.parent_id));
+    parentGroupFilterId.value = parentOrg ? (parentOrg.groub_id || '') : (org.groub_id || '');
     
     isModalOpen.value = true;
 };
