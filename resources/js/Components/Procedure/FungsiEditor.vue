@@ -78,14 +78,15 @@
                     <tr v-for="(actor, index) in actors" :key="actor.id" class="group hover:bg-slate-50/50 dark:hover:bg-white/5">
                         <td class="px-6 py-3 text-center align-middle font-medium text-slate-500 dark:text-slate-400">{{ index + 1 }}</td>
                         <td class="px-6 py-2 align-middle">
-                            <input
+                            <textarea
                                 v-if="actorLocal[actor.id]"
                                 v-model="actorLocal[actor.id].name"
                                 @input="markModified(actor.id)"
-                                type="text"
-                                class="w-full bg-transparent px-2 py-1 text-slate-900 dark:text-white border border-transparent rounded focus:border-[#821f44] focus:ring-1 focus:ring-[#821f44] focus:bg-white dark:focus:bg-[#1e1e1e] hover:border-slate-300 dark:hover:border-white/10"
+                                @keydown.enter.prevent
+                                rows="2"
+                                class="w-full bg-transparent px-2 py-1 text-slate-900 dark:text-white border border-transparent rounded focus:border-[#821f44] focus:ring-1 focus:ring-[#821f44] focus:bg-white dark:focus:bg-[#1e1e1e] hover:border-slate-300 dark:hover:border-white/10 resize-none leading-normal"
                                 placeholder="Nama Aktor / Jabatan"
-                            />
+                            ></textarea>
                         </td>
                         <td class="px-6 py-2 align-middle relative">
                             <div v-if="actorLocal[actor.id]" class="relative">
@@ -95,7 +96,7 @@
                                     @click="toggleActorDropdown(actor.id)"
                                     class="w-full bg-transparent px-2 py-1 text-slate-900 dark:text-white border border-transparent rounded focus:border-[#821f44] focus:ring-1 focus:ring-[#821f44] hover:border-slate-300 dark:hover:border-white/10 text-left flex justify-between items-center text-[11px]"
                                 >
-                                    <span class="truncate pr-2">
+                                    <span class="line-clamp-2 whitespace-normal break-words pr-2">
                                         {{ getSelectedOrgName(actor.id) }}
                                     </span>
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3 text-slate-400 shrink-0">

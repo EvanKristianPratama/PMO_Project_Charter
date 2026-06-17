@@ -268,7 +268,7 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted, onUpdated, onBeforeUnmount, watch } from 'vue';
+import { computed, ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import Swal from 'sweetalert2';
@@ -632,22 +632,38 @@ function updatePaths() {
     paths.value = newPaths;
 }
 
+// Watch dependencies that affect flowchart paths to trigger updatePaths safely
+watch(
+    [() => props.actors, () => props.sops, activeFlowType],
+    () => {
+        nextTick(() => {
+            updatePaths();
+        });
+    },
+    { deep: true }
+);
+
 onMounted(() => {
     updatePaths();
     setTimeout(updatePaths, 150);
 
     window.addEventListener('resize', updatePaths);
 
+    let lastWidth = 0;
+    let lastHeight = 0;
     if (flowchartContainer.value && typeof ResizeObserver !== 'undefined') {
-        resizeObserver = new ResizeObserver(() => {
-            updatePaths();
+        resizeObserver = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+                const { width, height } = entry.contentRect;
+                if (Math.abs(width - lastWidth) > 1 || Math.abs(height - lastHeight) > 1) {
+                    lastWidth = width;
+                    lastHeight = height;
+                    updatePaths();
+                }
+            }
         });
         resizeObserver.observe(flowchartContainer.value);
     }
-});
-
-onUpdated(() => {
-    updatePaths();
 });
 
 onBeforeUnmount(() => {

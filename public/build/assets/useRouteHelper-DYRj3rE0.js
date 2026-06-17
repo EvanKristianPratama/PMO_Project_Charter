@@ -1,1 +1,0 @@
-import{l as t}from"./vendor-vue-runtime-core-Bpe28IMP.js";function r(e){if(typeof e!="function")throw new Error("Route helper is not available. Ensure ZiggyVue is registered in resources/js/app.js.");return e}function o(){return r(globalThis.route??null)}function n(...e){return o()(...e)}function l(){return r(t("route",globalThis.route??null))}export{n as r,l as u};

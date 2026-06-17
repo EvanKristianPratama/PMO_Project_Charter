@@ -86,10 +86,12 @@
                                         </tr>
                                         <tr v-for="(actor, index) in actors" :key="actor.id">
                                             <td class="px-6 py-3 text-center font-medium">{{ index + 1 }}</td>
-                                            <td class="px-6 py-3 font-semibold text-slate-900 dark:text-white">{{ actor.name }}</td>
+                                            <td class="px-6 py-3 font-semibold text-slate-900 dark:text-white">
+                                                <span class="line-clamp-2 whitespace-normal break-words">{{ actor.name }}</span>
+                                            </td>
                                             <td class="px-6 py-3 text-slate-700 dark:text-slate-300 font-sans">
                                                 <template v-if="actor.organization">
-                                                    <span v-if="actor.organization.jabatan">{{ actor.organization.jabatan }}</span>
+                                                    <span v-if="actor.organization.jabatan" class="line-clamp-2 whitespace-normal break-words">{{ actor.organization.jabatan }}</span>
                                                     <span v-else>-</span>
                                                 </template>
                                                 <span v-else>-</span>
