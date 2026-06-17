@@ -1711,7 +1711,7 @@
     ]
   },
   "resources/js/Pages/BpmnWorkflow/Index.vue": {
-    "file": "assets/Index-D8_tlX1S.js",
+    "file": "assets/Index-BtUlmgjo.js",
     "name": "Index",
     "src": "resources/js/Pages/BpmnWorkflow/Index.vue",
     "isDynamicEntry": true,
@@ -2998,7 +2998,7 @@
     ]
   },
   "resources/js/Pages/Policy/Regulation/Manage.vue": {
-    "file": "assets/Manage-0T0_bwk7.js",
+    "file": "assets/Manage-MEHRBG5-.js",
     "name": "Manage",
     "src": "resources/js/Pages/Policy/Regulation/Manage.vue",
     "isDynamicEntry": true,
@@ -3039,7 +3039,7 @@
       "_headlessui-yh3_4XJM.js"
     ],
     "css": [
-      "assets/Manage-Zvp7LkEs.css"
+      "assets/Manage-W0rwLgeR.css"
     ]
   },
   "resources/js/Pages/Profile/Index.vue": {
@@ -4825,7 +4825,7 @@
     ]
   },
   "resources/js/Pages/StrategicHouse/Index.vue": {
-    "file": "assets/Index-cq-evUIM.js",
+    "file": "assets/Index-5Kbqgmc6.js",
     "name": "Index",
     "src": "resources/js/Pages/StrategicHouse/Index.vue",
     "isDynamicEntry": true,
@@ -5322,7 +5322,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-CNMc5HMP.js",
+    "file": "assets/app-DBj_wma3.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,

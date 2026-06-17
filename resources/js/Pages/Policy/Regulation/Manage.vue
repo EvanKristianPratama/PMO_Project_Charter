@@ -267,8 +267,8 @@
                                         class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-black/20 dark:text-white dark:border-white/10"
                                     >
                                         <option value="">-- Pilih Organisasi --</option>
-                                        <option v-for="org in organizations" :key="org.id" :value="org.id">
-                                            {{ org.code }} - {{ org.name }}
+                                        <option v-for="org in hierarchicalOrganizations" :key="org.id" :value="org.id">
+                                            {{ getLevelPrefix(org) }}{{ org.name }} ({{ org.code }})
                                         </option>
                                     </select>
                                     <div v-if="form.errors.pic_id" class="text-xs text-rose-500 font-medium">{{ form.errors.pic_id }}</div>
@@ -360,7 +360,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { usePage, useForm, router, Link } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import Swal from 'sweetalert2';
@@ -552,6 +552,97 @@ function deleteRegulation(reg) {
         }
     });
 }
+
+const getOrganizationDepth = (orgId) => {
+    let depth = 0;
+    let currentId = orgId;
+    const orgMap = new Map(props.organizations.map(org => [org.id, org]));
+    const visited = new Set();
+    
+    const org = orgMap.get(orgId);
+    if (!org) return 0;
+
+    while (currentId && !visited.has(currentId)) {
+        visited.add(currentId);
+        const currentOrg = orgMap.get(currentId);
+        if (currentOrg && currentOrg.parent_id) {
+            depth++;
+            currentId = currentOrg.parent_id;
+        } else {
+            break;
+        }
+    }
+
+    // Special depth adjustment for Upstream Support Staff (e.g. Corporate Secretary 01100100)
+    // to ensure they are indented as Level 3 (depth 2) and NOT parallel to Supportive Directors (depth 1 / Level 2)
+    const code = String(org.code || '').trim();
+    if (code.startsWith('011')) {
+        if (code.startsWith('01100') && code !== '01100000') {
+            return 2;
+        }
+        
+        let tempId = org.parent_id;
+        const tempVisited = new Set();
+        let hasSupportStaffAncestor = false;
+        while (tempId && !tempVisited.has(tempId)) {
+            tempVisited.add(tempId);
+            const parentOrg = orgMap.get(tempId);
+            if (parentOrg) {
+                const parentCode = String(parentOrg.code || '').trim();
+                if (parentCode.startsWith('01100') && parentCode !== '01100000') {
+                    hasSupportStaffAncestor = true;
+                    break;
+                }
+                tempId = parentOrg.parent_id;
+            } else {
+                break;
+            }
+        }
+        if (hasSupportStaffAncestor) {
+            return depth + 1;
+        }
+    }
+
+    return depth;
+};
+
+const getLevelPrefix = (org) => {
+    const depth = getOrganizationDepth(org.id);
+    if (depth === 0) return '';
+    return '\u00A0\u00A0'.repeat(depth) + '— ';
+};
+
+const hierarchicalOrganizations = computed(() => {
+    const orgMap = new Map(props.organizations.map(org => [org.id, { ...org, children: [] }]));
+    const roots = [];
+    
+    props.organizations.forEach(org => {
+        const mapped = orgMap.get(org.id);
+        if (org.parent_id && orgMap.has(org.parent_id)) {
+            orgMap.get(org.parent_id).children.push(mapped);
+        } else {
+            roots.push(mapped);
+        }
+    });
+
+    const sortNodes = (nodes) => {
+        nodes.sort((a, b) => (a.code || '').localeCompare(b.code || ''));
+        nodes.forEach(node => {
+            if (node.children.length > 0) {
+                sortNodes(node.children);
+            }
+        });
+    };
+    sortNodes(roots);
+
+    const flattened = [];
+    const traverse = (node) => {
+        flattened.push(node);
+        node.children.forEach(traverse);
+    };
+    roots.forEach(traverse);
+    return flattened;
+});
 </script>
 
 <style scoped>
