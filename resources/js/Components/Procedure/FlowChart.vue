@@ -532,6 +532,7 @@ function shortText(text, length = 90) {
 const flowchartContainer = ref(null);
 const paths = ref([]);
 let resizeObserver = null;
+let frameId = null;
 
 function updatePaths() {
     if (!flowchartContainer.value || rows.value.length === 0) {
@@ -653,14 +654,17 @@ onMounted(() => {
     let lastHeight = 0;
     if (flowchartContainer.value && typeof ResizeObserver !== 'undefined') {
         resizeObserver = new ResizeObserver((entries) => {
-            for (const entry of entries) {
-                const { width, height } = entry.contentRect;
-                if (Math.abs(width - lastWidth) > 1 || Math.abs(height - lastHeight) > 1) {
-                    lastWidth = width;
-                    lastHeight = height;
-                    updatePaths();
+            if (frameId) cancelAnimationFrame(frameId);
+            frameId = requestAnimationFrame(() => {
+                for (const entry of entries) {
+                    const { width, height } = entry.contentRect;
+                    if (Math.abs(width - lastWidth) > 1 || Math.abs(height - lastHeight) > 1) {
+                        lastWidth = width;
+                        lastHeight = height;
+                        updatePaths();
+                    }
                 }
-            }
+            });
         });
         resizeObserver.observe(flowchartContainer.value);
     }
@@ -670,6 +674,9 @@ onBeforeUnmount(() => {
     window.removeEventListener('resize', updatePaths);
     if (resizeObserver) {
         resizeObserver.disconnect();
+    }
+    if (frameId) {
+        cancelAnimationFrame(frameId);
     }
 });
 </script>

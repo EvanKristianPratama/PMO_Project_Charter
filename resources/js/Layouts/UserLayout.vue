@@ -1,6 +1,6 @@
 <script setup>
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
@@ -49,6 +49,21 @@ const getInitials = (name) => {
 const logout = () => {
     router.post(route('logout'));
 };
+
+function handleAfterPrint() {
+    window.focus();
+    if (document.activeElement && typeof document.activeElement.blur === 'function') {
+        document.activeElement.blur();
+    }
+}
+
+onMounted(() => {
+    window.addEventListener('afterprint', handleAfterPrint);
+});
+
+onUnmounted(() => {
+    window.removeEventListener('afterprint', handleAfterPrint);
+});
 
 // Database connection toggle removed
 </script>

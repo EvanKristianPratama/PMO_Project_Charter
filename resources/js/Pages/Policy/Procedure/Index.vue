@@ -366,7 +366,11 @@ function parseContentLines(content) {
     return parsed;
 }
 
-function printDocument() { window.print(); }
+function printDocument() {
+    setTimeout(() => {
+        window.print();
+    }, 100);
+}
 
 function isHtmlContent(content) {
     if (!content) return false;
