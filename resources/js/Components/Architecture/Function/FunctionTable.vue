@@ -16,7 +16,7 @@
                 >
                     <option value="">Semua Function</option>
                     <option v-for="fn in parentFilterOptions" :key="fn.id" :value="fn.id">
-                        {{ getLevelPrefix(fn) }}{{ fn.name }} ({{ fn.kode }})
+                        {{ getLevelPrefix(fn) }}{{ fn.name }} ({{ fn.code }})
                     </option>
                 </select>
                 <button
@@ -37,8 +37,14 @@
                 <thead class="bg-slate-50 dark:bg-white/5">
                     <tr>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">No</th>
-                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Kode</th>
+                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Group</th>
+                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">ID</th>
+                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Code</th>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Name</th>
+                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Alias</th>
+                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Jabatan</th>
+                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Pejabat</th>
+                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">SK</th>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Parent</th>
                         <th class="px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-36">Actions</th>
                     </tr>
@@ -50,16 +56,34 @@
                         class="transition hover:bg-slate-50 dark:hover:bg-white/5"
                     >
                         <td class="px-4 py-3 text-slate-500 dark:text-slate-400">{{ index + 1 }}</td>
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
+                            {{ displayValue(fn.groub_name) }}
+                        </td>
+                        <td class="px-4 py-3 text-slate-500 dark:text-slate-400 font-mono text-xs">
+                            {{ displayValue(fn.id) }}
+                        </td>
                         <td class="px-4 py-3 font-mono text-xs text-slate-500 dark:text-slate-400">
                             <span
                                 :style="{ paddingLeft: getDepth(fn.id) * 16 + 'px' }"
                                 class="inline-block"
                             >
                                 <span v-if="getDepth(fn.id) > 0" class="text-slate-400 mr-1">—</span>
-                                {{ fn.kode }}
+                                {{ displayValue(fn.code) }}
                             </span>
                         </td>
                         <td class="px-4 py-3 text-slate-600 dark:text-slate-300">{{ fn.name }}</td>
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
+                            {{ displayValue(fn.alias) }}
+                        </td>
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
+                            {{ displayValue(fn.jabatan) }}
+                        </td>
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
+                            {{ displayValue(fn.pejabat) }}
+                        </td>
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
+                            {{ displayValue(fn.sk) }}
+                        </td>
                         <td class="px-4 py-3 text-slate-500 dark:text-slate-400 text-xs">
                             {{ getParentLabel(fn.parent_id) }}
                         </td>
@@ -79,7 +103,7 @@
                         </td>
                     </tr>
                     <tr v-if="filteredRows.length === 0">
-                        <td colspan="5" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+                        <td colspan="11" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
                             Data function tidak ditemukan.
                         </td>
                     </tr>
@@ -101,6 +125,21 @@
         @confirm="submitForm"
     >
         <div class="mt-4 space-y-4">
+            <!-- Parent Function Group Filter -->
+            <div class="flex flex-col gap-1.5">
+                <label for="parent_group_filter_id" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Group Function Induk</label>
+                <select
+                    id="parent_group_filter_id"
+                    v-model="parentGroupFilterId"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                >
+                    <option value="">Semua Group</option>
+                    <option v-for="option in groubOptions" :key="option.id" :value="option.id">
+                        {{ option.name }}
+                    </option>
+                </select>
+            </div>
+
             <!-- Parent Function Select -->
             <div class="flex flex-col gap-1.5">
                 <label for="fn_parent_id" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Function Induk</label>
@@ -111,24 +150,42 @@
                 >
                     <option value="">Tanpa Induk (Root / Level 1)</option>
                     <option v-for="fn in filteredParentOptions" :key="fn.id" :value="fn.id">
-                        {{ getLevelPrefix(fn) }}{{ fn.name }} ({{ fn.kode }})
+                        {{ getLevelPrefix(fn) }}{{ fn.name }} ({{ fn.code }})
                     </option>
                 </select>
                 <span v-if="form.errors.parent_id" class="text-xs text-red-500 font-medium">{{ form.errors.parent_id }}</span>
             </div>
 
-            <!-- Kode Input -->
+            <!-- Group Option Select -->
             <div class="flex flex-col gap-1.5">
-                <label for="fn_kode" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Kode</label>
+                <label for="groub_id" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Group Function Baru</label>
+                <select
+                    id="groub_id"
+                    v-model="form.groub_id"
+                    @change="parentGroupFilterId = form.groub_id"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    required
+                >
+                    <option value="" disabled>Pilih Group...</option>
+                    <option v-for="option in groubOptions" :key="option.id" :value="option.id">
+                        {{ option.name }}
+                    </option>
+                </select>
+                <span v-if="form.errors.groub_id" class="text-xs text-red-500 font-medium">{{ form.errors.groub_id }}</span>
+            </div>
+
+            <!-- Code Input -->
+            <div class="flex flex-col gap-1.5">
+                <label for="fn_code" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Kode</label>
                 <input
-                    id="fn_kode"
-                    v-model="form.kode"
+                    id="fn_code"
+                    v-model="form.code"
                     type="text"
                     class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white font-mono"
                     placeholder="Contoh: FN-001"
                     required
                 />
-                <span v-if="form.errors.kode" class="text-xs text-red-500 font-medium">{{ form.errors.kode }}</span>
+                <span v-if="form.errors.code" class="text-xs text-red-500 font-medium">{{ form.errors.code }}</span>
             </div>
 
             <!-- Name Input -->
@@ -143,6 +200,58 @@
                     required
                 />
                 <span v-if="form.errors.name" class="text-xs text-red-500 font-medium">{{ form.errors.name }}</span>
+            </div>
+
+            <!-- Alias Input -->
+            <div class="flex flex-col gap-1.5">
+                <label for="fn_alias" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Alias (Singkatan)</label>
+                <input
+                    id="fn_alias"
+                    v-model="form.alias"
+                    type="text"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    placeholder="Contoh: FN-OPS"
+                />
+                <span v-if="form.errors.alias" class="text-xs text-red-500 font-medium">{{ form.errors.alias }}</span>
+            </div>
+
+            <!-- Jabatan Input -->
+            <div class="flex flex-col gap-1.5">
+                <label for="fn_jabatan" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Jabatan</label>
+                <input
+                    id="fn_jabatan"
+                    v-model="form.jabatan"
+                    type="text"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    placeholder="Contoh: Manager IT"
+                />
+                <span v-if="form.errors.jabatan" class="text-xs text-red-500 font-medium">{{ form.errors.jabatan }}</span>
+            </div>
+
+            <!-- Pejabat Input -->
+            <div class="flex flex-col gap-1.5">
+                <label for="fn_pejabat" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Pejabat</label>
+                <input
+                    id="fn_pejabat"
+                    v-model="form.pejabat"
+                    type="text"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    placeholder="Contoh: Budi Santoso"
+                />
+                <span v-if="form.errors.pejabat" class="text-xs text-red-500 font-medium">{{ form.errors.pejabat }}</span>
+            </div>
+
+            <!-- SK Input -->
+            <div class="flex flex-col gap-1.5">
+                <label for="fn_sk" class="text-xs font-semibold text-slate-700 dark:text-slate-300">SK</label>
+                <input
+                    id="fn_sk"
+                    v-model="form.sk"
+                    type="text"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    placeholder="Contoh: SK/123/2026"
+                />
+                <span v-if="form.errors.sk" class="text-xs text-red-500 font-medium">{{ form.errors.sk }}</span>
             </div>
         </div>
     </ConfirmationModal>
@@ -162,7 +271,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 
@@ -171,7 +280,13 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    groubOptions: {
+        type: Array,
+        default: () => [],
+    },
 });
+
+const displayValue = (value) => value ?? '-';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -204,10 +319,10 @@ const getLevelPrefix = (fn) => {
 const getParentLabel = (parentId) => {
     if (!parentId) return '-';
     const parent = fnMap.value.get(parentId);
-    return parent ? `${parent.name} (${parent.kode})` : '-';
+    return parent ? `${parent.name} (${parent.code})` : '-';
 };
 
-/** Cek apakah orgId adalah turunan dari targetParentId */
+/** Cek apakah fnId adalah turunan dari targetParentId */
 const isDescendant = (id, targetId) => {
     if (!id || !targetId) return false;
     let currentId = id;
@@ -225,7 +340,7 @@ const isDescendant = (id, targetId) => {
     return false;
 };
 
-// ─── Flatten tree (sort by kode, depth-first) ────────────────────────────────
+// ─── Flatten tree (sort by code, depth-first) ────────────────────────────────
 
 const flattenedTree = computed(() => {
     const fns = props.functions;
@@ -242,7 +357,7 @@ const flattenedTree = computed(() => {
     });
 
     const sort = (nodes) => {
-        nodes.sort((a, b) => (a.kode || '').localeCompare(b.kode || ''));
+        nodes.sort((a, b) => (a.code || '').localeCompare(b.code || ''));
         nodes.forEach(n => sort(n.children));
     };
     sort(roots);
@@ -260,6 +375,7 @@ const flattenedTree = computed(() => {
 
 const searchQuery = ref('');
 const parentFilterId = ref('');
+const parentGroupFilterId = ref('');
 
 const parentFilterOptions = computed(() => flattenedTree.value);
 
@@ -276,12 +392,22 @@ const filteredRows = computed(() => {
     if (searchQuery.value) {
         const q = searchQuery.value.toLowerCase().trim();
         rows = rows.filter(fn =>
-            (fn.kode || '').toLowerCase().includes(q) ||
-            (fn.name || '').toLowerCase().includes(q)
+            (fn.code || '').toLowerCase().includes(q) ||
+            (fn.name || '').toLowerCase().includes(q) ||
+            (fn.alias || '').toLowerCase().includes(q) ||
+            (fn.jabatan || '').toLowerCase().includes(q) ||
+            (fn.pejabat || '').toLowerCase().includes(q) ||
+            (fn.sk || '').toLowerCase().includes(q)
         );
     }
 
     return rows;
+});
+
+watch(() => props.functions, (newFunctions) => {
+    if (parentFilterId.value && !newFunctions.some(fn => Number(fn.id) === Number(parentFilterId.value))) {
+        parentFilterId.value = '';
+    }
 });
 
 // ─── Modal state ─────────────────────────────────────────────────────────────
@@ -292,27 +418,63 @@ const selectedFn = ref(null);
 const modalMode = ref('create');
 
 const form = useForm({
+    groub_id: '',
     parent_id: '',
-    kode: '',
+    code: '',
     name: '',
+    alias: '',
+    jabatan: '',
+    pejabat: '',
+    sk: '',
 });
 
-/** Opsi parent di modal — exclude diri sendiri & turunannya saat edit */
-const filteredParentOptions = computed(() =>
-    flattenedTree.value.filter(fn => {
+/** Opsi parent di modal — exclude diri sendiri & turunannya saat edit, pre-filtered by group if selected */
+const filteredParentOptions = computed(() => {
+    const targetGroupId = parentGroupFilterId.value ? String(parentGroupFilterId.value) : null;
+    const fns = targetGroupId
+        ? props.functions.filter(fn => String(fn.groub_id ?? '') === targetGroupId)
+        : props.functions;
+
+    const map = new Map(fns.map(fn => [fn.id, { ...fn, children: [] }]));
+    const roots = [];
+
+    fns.forEach(fn => {
+        const node = map.get(fn.id);
+        if (fn.parent_id && map.has(fn.parent_id)) {
+            map.get(fn.parent_id).children.push(node);
+        } else {
+            roots.push(node);
+        }
+    });
+
+    const sort = (nodes) => {
+        nodes.sort((a, b) => (a.code || '').localeCompare(b.code || ''));
+        nodes.forEach(n => sort(n.children));
+    };
+    sort(roots);
+
+    const result = [];
+    const traverse = (node) => {
+        result.push(node);
+        node.children.forEach(traverse);
+    };
+    roots.forEach(traverse);
+
+    return result.filter(fn => {
         if (modalMode.value === 'edit' && selectedFn.value) {
             const currentId = selectedFn.value.id;
             if (Number(fn.id) === Number(currentId)) return false;
             if (isDescendant(fn.id, currentId)) return false;
         }
         return true;
-    })
-);
+    });
+});
 
 const openCreateModal = () => {
     modalMode.value = 'create';
     form.clearErrors();
     form.reset();
+    parentGroupFilterId.value = '';
     isModalOpen.value = true;
 };
 
@@ -320,9 +482,21 @@ const openEditModal = (fn) => {
     modalMode.value = 'edit';
     selectedFn.value = fn;
     form.clearErrors();
+    form.groub_id = String(fn.groub_id ?? '');
     form.parent_id = fn.parent_id ? String(fn.parent_id) : '';
-    form.kode = fn.kode || '';
+    form.code = fn.code || '';
     form.name = fn.name || '';
+    form.alias = fn.alias || '';
+    form.jabatan = fn.jabatan || '';
+    form.pejabat = fn.pejabat || '';
+    form.sk = fn.sk || '';
+
+    const parentFn = props.functions.find(
+        f => String(f.id) === String(fn.parent_id)
+    );
+    const resolvedGroupId = parentFn?.groub_id ?? fn.groub_id;
+    parentGroupFilterId.value = resolvedGroupId != null ? String(resolvedGroupId) : '';
+
     isModalOpen.value = true;
 };
 

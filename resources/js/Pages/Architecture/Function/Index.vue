@@ -1,7 +1,7 @@
 <template>
     <UserLayout title="Function">
         <div class="animate-fade-in-up space-y-3">
-            <FunctionTable :functions="functions" />
+            <FunctionTable :functions="functions" :groubOptions="groubOptions" />
         </div>
     </UserLayout>
 </template>
@@ -12,6 +12,10 @@ import FunctionTable from '@/Components/Architecture/Function/FunctionTable.vue'
 
 defineProps({
     functions: {
+        type: Array,
+        default: () => [],
+    },
+    groubOptions: {
         type: Array,
         default: () => [],
     },

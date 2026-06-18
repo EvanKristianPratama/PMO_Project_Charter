@@ -11,9 +11,20 @@ class MstFunction extends Model
     protected $table = 'mst_function';
 
     protected $fillable = [
+        'groub_id',
         'parent_id',
-        'kode',
+        'code',
         'name',
+        'alias',
+        'jabatan',
+        'pejabat',
+        'sk',
+    ];
+
+    protected $casts = [
+        'groub_id' => 'integer',
+        'parent_id' => 'integer',
+        'code' => 'string',
     ];
 
     /**
@@ -30,5 +41,13 @@ class MstFunction extends Model
     public function children(): HasMany
     {
         return $this->hasMany(MstFunction::class, 'parent_id');
+    }
+
+    /**
+     * Relasi ke Groub.
+     */
+    public function groub(): BelongsTo
+    {
+        return $this->belongsTo(Groub::class, 'groub_id');
     }
 }
