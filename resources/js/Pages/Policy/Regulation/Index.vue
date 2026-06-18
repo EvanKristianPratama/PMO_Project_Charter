@@ -83,6 +83,7 @@
                                 <th scope="col" class="px-3 py-3 w-28 border-r border-b border-slate-200 dark:border-white/10">Tipe</th>
                                 <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Fungsi</th>
                                 <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Organisasi</th>
+                                <th scope="col" class="px-3 py-3 text-center w-24 border-r border-b border-slate-200 dark:border-white/10">Status</th>
                                 <th scope="col" class="px-3 py-3 text-center w-16 border-r border-b border-slate-200 dark:border-white/10">Revisi</th>
                                 <th scope="col" class="px-3 py-3 w-24 border-r border-b border-slate-200 dark:border-white/10">Berlaku</th>
                                 <th scope="col" class="px-3 py-3 text-center w-24 border-b border-slate-200 dark:border-white/10">Detail</th>
@@ -93,7 +94,7 @@
                             <template v-if="activeViewMode === 'flat'">
                                 <!-- Empty state -->
                                 <tr v-if="sortedRegulations.length === 0">
-                                    <td colspan="9" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
+                                    <td colspan="10" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
                                         Belum ada data Regulasi. Silakan hubungi admin atau klik "Kelola Regulasi" untuk menambahkan.
                                     </td>
                                 </tr>
@@ -156,6 +157,26 @@
                                         </div>
                                     </td>
 
+                                    <!-- Status -->
+                                    <td class="px-3 py-3 text-center border-r border-b border-slate-200 dark:border-white/10 w-24">
+                                        <span
+                                            v-if="reg.status"
+                                            :class="[
+                                                'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold border uppercase tracking-wider',
+                                                reg.status.toLowerCase() === 'aktif' || reg.status.toLowerCase() === 'active' || reg.status.toLowerCase() === 'terbit'
+                                                    ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400'
+                                                    : reg.status.toLowerCase() === 'draft'
+                                                        ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400'
+                                                        : reg.status.toLowerCase() === 'dicabut'
+                                                            ? 'bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400'
+                                                            : 'bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-500/10 dark:border-slate-500/20 dark:text-slate-400'
+                                            ]"
+                                        >
+                                            {{ reg.status }}
+                                        </span>
+                                        <span v-else class="text-slate-400">-</span>
+                                    </td>
+
                                     <!-- Revisi -->
                                     <td class="px-3 py-3 text-center font-mono font-semibold text-slate-800 dark:text-slate-200 border-r border-b border-slate-200 dark:border-white/10 w-16">
                                         {{ reg.revisi }}
@@ -186,7 +207,7 @@
                             <!-- Document Hierarchy Mode -->
                             <template v-if="activeViewMode === 'document'">
                                 <tr v-if="visibleDocRows.length === 0">
-                                    <td colspan="9" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
+                                    <td colspan="10" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
                                         Belum ada data Regulasi.
                                     </td>
                                 </tr>
@@ -266,6 +287,27 @@
                                             <span v-if="!row.master && !row.organization">-</span>
                                         </div>
                                     </td>
+
+                                    <!-- Status -->
+                                    <td class="px-3 py-3 text-center border-r border-b border-slate-200 dark:border-white/10 w-24">
+                                        <span
+                                            v-if="row.status"
+                                            :class="[
+                                                'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold border uppercase tracking-wider',
+                                                row.status.toLowerCase() === 'aktif' || row.status.toLowerCase() === 'active' || row.status.toLowerCase() === 'terbit'
+                                                    ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400'
+                                                    : row.status.toLowerCase() === 'draft'
+                                                        ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400'
+                                                        : row.status.toLowerCase() === 'dicabut'
+                                                            ? 'bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400'
+                                                            : 'bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-500/10 dark:border-slate-500/20 dark:text-slate-400'
+                                            ]"
+                                        >
+                                            {{ row.status }}
+                                        </span>
+                                        <span v-else class="text-slate-400">-</span>
+                                    </td>
+
                                     <!-- Revisi -->
                                     <td class="px-3 py-3 text-center font-mono font-semibold text-slate-800 dark:text-slate-200 border-r border-b border-slate-200 dark:border-white/10 w-16">
                                         {{ row.revisi }}
@@ -294,7 +336,7 @@
                             <!-- Organization Hierarchy Mode -->
                             <template v-if="activeViewMode === 'organization'">
                                 <tr v-if="regulationsByOrgHierarchy.length === 0">
-                                    <td colspan="9" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
+                                    <td colspan="10" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
                                         Belum ada data Regulasi.
                                     </td>
                                 </tr>
@@ -355,6 +397,26 @@
                                             </span>
                                             <span v-if="!reg.master && !reg.organization">-</span>
                                         </div>
+                                    </td>
+
+                                    <!-- Status -->
+                                    <td class="px-3 py-3 text-center border-r border-b border-slate-200 dark:border-white/10 w-24">
+                                        <span
+                                            v-if="reg.status"
+                                            :class="[
+                                                'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold border uppercase tracking-wider',
+                                                reg.status.toLowerCase() === 'aktif' || reg.status.toLowerCase() === 'active' || reg.status.toLowerCase() === 'terbit'
+                                                    ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400'
+                                                    : reg.status.toLowerCase() === 'draft'
+                                                        ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400'
+                                                        : reg.status.toLowerCase() === 'dicabut'
+                                                            ? 'bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400'
+                                                            : 'bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-500/10 dark:border-slate-500/20 dark:text-slate-400'
+                                            ]"
+                                        >
+                                            {{ reg.status }}
+                                        </span>
+                                        <span v-else class="text-slate-400">-</span>
                                     </td>
 
                                     <!-- Revisi -->

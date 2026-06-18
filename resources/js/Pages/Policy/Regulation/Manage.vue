@@ -69,6 +69,7 @@
                                 <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Fungsi</th>
                                 <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Organisasi</th>
                                 <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Master Organisasi</th>
+                                <th scope="col" class="px-3 py-3 text-center w-24 border-r border-b border-slate-200 dark:border-white/10">Status</th>
                                 <th scope="col" class="px-3 py-3 text-center w-16 border-r border-b border-slate-200 dark:border-white/10">Revisi</th>
                                 <th scope="col" class="px-3 py-3 w-24 border-r border-b border-slate-200 dark:border-white/10">Berlaku</th>
                                 <th scope="col" class="px-3 py-3 text-center w-28 border-b border-slate-200 dark:border-white/10">Aksi</th>
@@ -76,7 +77,7 @@
                         </thead>
                         <tbody class="dark:bg-transparent">
                             <tr v-if="regulations.length === 0" class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
-                                <td colspan="10" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
+                                <td colspan="11" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
                                     Belum ada data Regulasi. Klik "+ Tambah Regulasi" untuk memasukkan data pertama.
                                 </td>
                             </tr>
@@ -127,6 +128,25 @@
                                 <!-- Master Organisasi -->
                                 <td class="px-3 py-3 text-slate-700 dark:text-slate-300 font-medium border-r border-b border-slate-200 dark:border-white/10 max-w-[140px] break-words">
                                     <span>{{ reg.master?.jabatan || reg.master?.name || '-' }}</span>
+                                </td>
+                                <!-- Status -->
+                                <td class="px-3 py-3 text-center border-r border-b border-slate-200 dark:border-white/10 w-24">
+                                    <span 
+                                        v-if="reg.status"
+                                        :class="[
+                                            'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold border uppercase tracking-wider',
+                                            reg.status.toLowerCase() === 'aktif' || reg.status.toLowerCase() === 'active' || reg.status.toLowerCase() === 'terbit'
+                                                ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400'
+                                                : reg.status.toLowerCase() === 'draft'
+                                                    ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400'
+                                                    : reg.status.toLowerCase() === 'dicabut'
+                                                        ? 'bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400'
+                                                        : 'bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-500/10 dark:border-slate-500/20 dark:text-slate-400'
+                                        ]"
+                                    >
+                                        {{ reg.status }}
+                                    </span>
+                                    <span v-else class="text-slate-400">-</span>
                                 </td>
                                 <!-- Revisi -->
                                 <td class="px-3 py-3 text-center font-mono font-semibold text-slate-800 dark:text-slate-200 border-r border-b border-slate-200 dark:border-white/10 w-16">
@@ -419,17 +439,32 @@
                                     <div v-if="form.errors.parent_id" class="text-xs text-rose-500 font-medium">{{ form.errors.parent_id }}</div>
                                 </div>
 
-                                <!-- Revisi -->
-                                <div class="space-y-1.5">
-                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Revisi / Versi:</label>
-                                    <input 
-                                        type="text" 
-                                        v-model="form.revisi" 
-                                        placeholder="Contoh: Rev 0, Rev 1.2" 
-                                        class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-black/20 dark:text-white dark:border-white/10"
-                                        required
-                                    />
-                                    <div v-if="form.errors.revisi" class="text-xs text-rose-500 font-medium">{{ form.errors.revisi }}</div>
+                                <!-- Revisi & Status -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div class="space-y-1.5">
+                                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Revisi / Versi:</label>
+                                        <input 
+                                            type="text" 
+                                            v-model="form.revisi" 
+                                            placeholder="Contoh: Rev 0, Rev 1.2" 
+                                            class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-black/20 dark:text-white dark:border-white/10"
+                                            required
+                                        />
+                                        <div v-if="form.errors.revisi" class="text-xs text-rose-500 font-medium">{{ form.errors.revisi }}</div>
+                                    </div>
+                                    <div class="space-y-1.5">
+                                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status:</label>
+                                        <select 
+                                            v-model="form.status" 
+                                            class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-[#1a1a1a] dark:text-white dark:border-white/10"
+                                        >
+                                            <option value="">-- Pilih Status --</option>
+                                            <option value="Draft">Draft</option>
+                                            <option value="Terbit">Terbit</option>
+                                            <option value="Dicabut">Dicabut</option>
+                                        </select>
+                                        <div v-if="form.errors.status" class="text-xs text-rose-500 font-medium">{{ form.errors.status }}</div>
+                                    </div>
                                 </div>
 
                                 <!-- Tanggal Terbit & Tanggal Berlaku -->
@@ -624,6 +659,7 @@ const form = useForm({
     stk: '',
     owner: '',
     revisi: '',
+    status: '',
     terbit: '',
     berlaku: '',
     pic_id: '',
@@ -664,6 +700,7 @@ function openEditModal(reg) {
     form.stk = reg.stk || '';
     form.owner = reg.owner;
     form.revisi = reg.revisi;
+    form.status = reg.status || '';
     form.terbit = terbitVal;
     form.berlaku = berlakuVal;
     form.pic_id = reg.pic_id || '';

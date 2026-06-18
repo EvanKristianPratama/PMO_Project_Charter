@@ -29,6 +29,7 @@ class MstRegulation extends Model
         'revisi',
         'terbit',
         'berlaku',
+        'status',
     ];
 
     protected $casts = [

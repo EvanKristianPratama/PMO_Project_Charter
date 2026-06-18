@@ -64,6 +64,7 @@ class RegulationController extends Controller
             'pic_id' => 'nullable|integer|exists:trs_organization,id',
             'master_id' => 'nullable|integer|exists:trs_organization,id',
             'parent_id' => 'nullable|integer|exists:mst_regulation,id',
+            'status' => 'nullable|string|max:255',
         ], [
             'judul.required' => 'Judul Kebijakan wajib diisi.',
             'tipe.required' => 'Tipe Kebijakan wajib diisi.',
@@ -100,6 +101,7 @@ class RegulationController extends Controller
             'berlaku' => 'nullable|date',
             'pic_id' => 'nullable|integer|exists:trs_organization,id',
             'master_id' => 'nullable|integer|exists:trs_organization,id',
+            'status' => 'nullable|string|max:255',
             'parent_id' => [
                 'nullable',
                 'integer',
