@@ -219,7 +219,34 @@ const filteredRegulations = computed(() => {
 
     if (selectedAksesRoleId.value) {
         const targetId = Number(selectedAksesRoleId.value);
-        result = result.filter(reg => reg.master_id === targetId);
+
+        // Helper: collect all descendant IDs (recursively) for a given parent ID
+        const collectDescendantIds = (parentId, allRegs) => {
+            const ids = new Set();
+            const queue = [parentId];
+            while (queue.length > 0) {
+                const current = queue.shift();
+                allRegs.forEach(reg => {
+                    if (reg.parent_id === current && !ids.has(reg.id)) {
+                        ids.add(reg.id);
+                        queue.push(reg.id);
+                    }
+                });
+            }
+            return ids;
+        };
+
+        // Find documents whose access role matches the selected role
+        const matchedRegs = result.filter(reg => reg.master_id === targetId);
+
+        // Collect all descendant IDs for each matched document
+        const allIncludedIds = new Set(matchedRegs.map(r => r.id));
+        matchedRegs.forEach(reg => {
+            const descendantIds = collectDescendantIds(reg.id, props.regulations);
+            descendantIds.forEach(id => allIncludedIds.add(id));
+        });
+
+        result = props.regulations.filter(reg => allIncludedIds.has(reg.id));
     }
 
     if (selectedStatus.value) {
