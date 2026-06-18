@@ -95,7 +95,7 @@
                                 <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Nomor</th>
                                 <th scope="col" class="px-3 py-3 w-28 border-r border-b border-slate-200 dark:border-white/10">Tipe</th>
                                 <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Pemilik Dokumen</th>
-                                <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Akses Role / Pemilik Dokumen (Internal)</th>
+                                <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Akses Role / Pemilik Dokumen</th>
                                 <th scope="col" class="px-3 py-3 text-center w-24 border-r border-b border-slate-200 dark:border-white/10">Status</th>
                                 <th scope="col" class="px-3 py-3 text-center w-16 border-r border-b border-slate-200 dark:border-white/10">Revisi</th>
                                 <th scope="col" class="px-3 py-3 w-24 border-r border-b border-slate-200 dark:border-white/10">Berlaku</th>
