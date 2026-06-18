@@ -337,6 +337,92 @@
                                 <div v-if="form.errors.revoked_ids" class="text-xs text-rose-500 font-medium">{{ form.errors.revoked_ids }}</div>
                             </div>
 
+                            <!-- Dokumen Terkait (Opsional) -->
+                            <div class="space-y-1.5 relative">
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Dokumen Terkait (Opsional):</label>
+                                
+                                <!-- Trigger Button -->
+                                <div class="relative">
+                                    <button 
+                                        type="button"
+                                        @click="toggleRelatedDropdown"
+                                        class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg px-3.5 py-2 text-sm text-left focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-black/20 dark:text-white dark:border-white/10 flex justify-between items-center"
+                                    >
+                                        <span class="truncate text-slate-400">
+                                            -- Pilih Dokumen Terkait --
+                                        </span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-slate-400 shrink-0">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <!-- Overlay for click outside -->
+                                <div v-if="isRelatedDropdownOpen" class="fixed inset-0 z-30" @click="isRelatedDropdownOpen = false"></div>
+
+                                <!-- Dropdown Content -->
+                                <div v-if="isRelatedDropdownOpen" class="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl dark:bg-[#1a1a1a] dark:border-white/10 z-40 max-h-60 overflow-y-auto p-2 space-y-2">
+                                    <!-- Search input inside dropdown -->
+                                    <div class="sticky top-0 bg-white dark:bg-[#1a1a1a] pb-1.5">
+                                        <input 
+                                            type="text" 
+                                            v-model="relatedSearchQuery" 
+                                            placeholder="Cari dokumen terkait..." 
+                                            class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-black/20 dark:text-white dark:border-white/10"
+                                            ref="relatedSearchInput"
+                                            @click.stop
+                                        />
+                                    </div>
+                                    
+                                    <!-- Options list -->
+                                    <div class="space-y-0.5">
+                                        <button
+                                            v-for="reg in filteredRelatedRegulations" 
+                                            :key="reg.id"
+                                            type="button"
+                                            @click="toggleRelatedSelection(reg.id)"
+                                            :class="[
+                                                'w-full text-left px-2.5 py-1.5 text-xs rounded hover:bg-slate-100 dark:hover:bg-white/5 transition flex items-center justify-between',
+                                                form.related_ids.includes(reg.id) ? 'bg-[#821f44]/5 text-[#821f44] dark:bg-[#db588c]/10 dark:text-[#db588c] font-semibold' : 'text-slate-700 dark:text-slate-300'
+                                            ]"
+                                        >
+                                            <span class="truncate">
+                                                [{{ reg.tipe }}] {{ reg.judul }} {{ reg.nomor ? `(${reg.nomor})` : '' }}
+                                            </span>
+                                            <svg v-if="form.related_ids.includes(reg.id)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-[#821f44] dark:text-[#db588c] shrink-0">
+                                                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                                            </svg>
+                                        </button>
+                                        <div v-if="filteredRelatedRegulations.length === 0" class="text-center py-4 text-xs text-slate-400">
+                                            Tidak ada hasil ditemukan.
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Selected list display -->
+                                <div v-if="form.related_ids && form.related_ids.length > 0" class="mt-2 flex flex-wrap gap-1.5">
+                                    <span 
+                                        v-for="id in form.related_ids" 
+                                        :key="id"
+                                        class="inline-flex items-center gap-1 rounded-lg bg-blue-50 pl-2.5 pr-1.5 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 border border-blue-200 dark:border-blue-700/30"
+                                    >
+                                        <span class="max-w-[200px] truncate">
+                                            {{ getRegulationTitle(id) }}
+                                        </span>
+                                        <button 
+                                            type="button" 
+                                            @click="removeRelatedId(id)"
+                                            class="rounded-full p-0.5 hover:bg-blue-100 dark:hover:bg-blue-700/30 text-blue-400 hover:text-blue-600 dark:hover:text-blue-200"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3">
+                                                <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                                            </svg>
+                                        </button>
+                                    </span>
+                                </div>
+                                <div v-if="form.errors.related_ids" class="text-xs text-rose-500 font-medium">{{ form.errors.related_ids }}</div>
+                            </div>
+
                             <!-- Revisi & Status -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div class="space-y-1.5">
@@ -358,6 +444,7 @@
                                     >
                                         <option value="">-- Pilih Status --</option>
                                         <option value="Draft">Draft</option>
+                                        <option value="Draft Dicabut">Draft Dicabut</option>
                                         <option value="Berlaku">Berlaku</option>
                                         <option value="Dicabut">Dicabut</option>
                                     </select>
@@ -441,12 +528,15 @@ const editingId = ref(null);
 const isPicDropdownOpen = ref(false);
 const isMasterDropdownOpen = ref(false);
 const isRevokedDropdownOpen = ref(false);
+const isRelatedDropdownOpen = ref(false);
 const picSearchQuery = ref('');
 const masterSearchQuery = ref('');
 const revokedSearchQuery = ref('');
+const relatedSearchQuery = ref('');
 const picSearchInput = ref(null);
 const masterSearchInput = ref(null);
 const revokedSearchInput = ref(null);
+const relatedSearchInput = ref(null);
 
 function togglePicDropdown() {
     isPicDropdownOpen.value = !isPicDropdownOpen.value;
@@ -508,6 +598,36 @@ function removeRevokedId(id) {
     }
 }
 
+function toggleRelatedDropdown() {
+    isRelatedDropdownOpen.value = !isRelatedDropdownOpen.value;
+    if (isRelatedDropdownOpen.value) {
+        relatedSearchQuery.value = '';
+        setTimeout(() => {
+            relatedSearchInput.value?.focus();
+        }, 100);
+    }
+}
+
+function toggleRelatedSelection(id) {
+    if (!form.related_ids) {
+        form.related_ids = [];
+    }
+    const index = form.related_ids.indexOf(id);
+    if (index > -1) {
+        form.related_ids.splice(index, 1);
+    } else {
+        form.related_ids.push(id);
+    }
+}
+
+function removeRelatedId(id) {
+    if (!form.related_ids) return;
+    const index = form.related_ids.indexOf(id);
+    if (index > -1) {
+        form.related_ids.splice(index, 1);
+    }
+}
+
 function getRegulationTitle(id) {
     const reg = props.regulations.find(r => r.id === id);
     return reg ? `[${reg.tipe}] ${reg.judul}` : '';
@@ -516,6 +636,17 @@ function getRegulationTitle(id) {
 const filteredRevokedRegulations = computed(() => {
     const pool = props.regulations.filter(r => !editingId.value || r.id !== editingId.value);
     const query = revokedSearchQuery.value.toLowerCase().trim();
+    if (!query) return pool;
+    return pool.filter(r => 
+        (r.judul || '').toLowerCase().includes(query) || 
+        (r.nomor || '').toLowerCase().includes(query) || 
+        (r.tipe || '').toLowerCase().includes(query)
+    );
+});
+
+const filteredRelatedRegulations = computed(() => {
+    const pool = props.regulations.filter(r => !editingId.value || r.id !== editingId.value);
+    const query = relatedSearchQuery.value.toLowerCase().trim();
     if (!query) return pool;
     return pool.filter(r => 
         (r.judul || '').toLowerCase().includes(query) || 
@@ -570,6 +701,7 @@ const form = useForm({
     master_id: '',
     parent_id: '',
     revoked_ids: [],
+    related_ids: [],
 });
 
 function openAddModal() {
@@ -580,9 +712,11 @@ function openAddModal() {
     picSearchQuery.value = '';
     masterSearchQuery.value = '';
     revokedSearchQuery.value = '';
+    relatedSearchQuery.value = '';
     isPicDropdownOpen.value = false;
     isMasterDropdownOpen.value = false;
     isRevokedDropdownOpen.value = false;
+    isRelatedDropdownOpen.value = false;
     isModalOpen.value = true;
 }
 
@@ -614,13 +748,16 @@ function openEditModal(reg) {
     form.master_id = reg.master_id || '';
     form.parent_id = reg.parent_id || '';
     form.revoked_ids = reg.revoked_regulations ? reg.revoked_regulations.map(r => r.id) : [];
+    form.related_ids = reg.related_regulations ? reg.related_regulations.map(r => r.id) : [];
     
     picSearchQuery.value = '';
     masterSearchQuery.value = '';
     revokedSearchQuery.value = '';
+    relatedSearchQuery.value = '';
     isPicDropdownOpen.value = false;
     isMasterDropdownOpen.value = false;
     isRevokedDropdownOpen.value = false;
+    isRelatedDropdownOpen.value = false;
     form.clearErrors();
     isModalOpen.value = true;
 }
@@ -631,6 +768,8 @@ function closeModal() {
     isPicDropdownOpen.value = false;
     isMasterDropdownOpen.value = false;
     isRevokedDropdownOpen.value = false;
+    isRelatedDropdownOpen.value = false;
+    relatedSearchQuery.value = '';
     form.reset();
     form.clearErrors();
 }

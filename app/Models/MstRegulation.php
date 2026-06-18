@@ -141,4 +141,22 @@ class MstRegulation extends Model
         return $this->belongsToMany(MstRegulation::class, 'trs_record_regulation', 'revoked', 'revocation')
             ->withTimestamps();
     }
+
+    /**
+     * Dokumen terkait — regulations linked to this one (Many-to-Many via trs_related_regulation)
+     */
+    public function relatedRegulations(): BelongsToMany
+    {
+        return $this->belongsToMany(MstRegulation::class, 'trs_related_regulation', 'regulation', 'related')
+            ->withTimestamps();
+    }
+
+    /**
+     * Regulations that link to this one as related (inverse)
+     */
+    public function relatedByRegulations(): BelongsToMany
+    {
+        return $this->belongsToMany(MstRegulation::class, 'trs_related_regulation', 'related', 'regulation')
+            ->withTimestamps();
+    }
 }

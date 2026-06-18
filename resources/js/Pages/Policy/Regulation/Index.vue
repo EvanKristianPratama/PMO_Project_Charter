@@ -250,7 +250,56 @@ const filteredRegulations = computed(() => {
     }
 
     if (selectedStatus.value) {
-        result = result.filter(reg => reg.status === selectedStatus.value);
+        const allRegs = props.regulations;
+
+        // Helper: collect all descendant IDs recursively
+        const collectDescendantIds = (parentId) => {
+            const ids = new Set();
+            const queue = [parentId];
+            while (queue.length > 0) {
+                const current = queue.shift();
+                allRegs.forEach(reg => {
+                    if (reg.parent_id === current && !ids.has(reg.id)) {
+                        ids.add(reg.id);
+                        queue.push(reg.id);
+                    }
+                });
+            }
+            return ids;
+        };
+
+        // Helper: collect all ancestor IDs (walk up parent chain)
+        const collectAncestorIds = (reg) => {
+            const ids = new Set();
+            let current = reg;
+            while (current.parent_id) {
+                const parent = allRegs.find(r => r.id === current.parent_id);
+                if (!parent) break;
+                ids.add(parent.id);
+                current = parent;
+            }
+            return ids;
+        };
+
+        // Step 1: find all docs within current result that match the status
+        const matchedByStatus = result.filter(reg => reg.status === selectedStatus.value);
+
+        const includedIds = new Set();
+
+        matchedByStatus.forEach(reg => {
+            // Include the matched doc itself
+            includedIds.add(reg.id);
+
+            // Include all ancestors so hierarchy is visible
+            const ancestorIds = collectAncestorIds(reg);
+            ancestorIds.forEach(id => includedIds.add(id));
+
+            // Include all descendants of the matched doc
+            const descendantIds = collectDescendantIds(reg.id);
+            descendantIds.forEach(id => includedIds.add(id));
+        });
+
+        result = result.filter(reg => includedIds.has(reg.id));
     }
 
     return result;

@@ -484,10 +484,11 @@ const filteredParentOrgs = computed(() => {
     
     return flattened.filter(org => {
         if (modalMode.value === 'edit' && selectedOrg.value) {
-            const currentCode = String(selectedOrg.value.code || '').trim();
-            const orgCode = String(org.code || '').trim();
-            const isSelfOrDescendant = orgCode === currentCode || orgCode.startsWith(currentCode);
-            return !isSelfOrDescendant;
+            const currentOrgId = selectedOrg.value.organization_id;
+            // Exclude the org itself
+            if (Number(org.organization_id) === Number(currentOrgId)) return false;
+            // Exclude descendants using proper graph traversal (not code-prefix matching)
+            if (isDescendant(org.organization_id, currentOrgId)) return false;
         }
         return true;
     });
