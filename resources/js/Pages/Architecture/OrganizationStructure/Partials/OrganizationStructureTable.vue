@@ -41,7 +41,8 @@
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Organization</th>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Alias</th>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Jabatan</th>
-                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Pejabat</th>
+                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Pejabat (SDM)</th>
+                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Pejabat (Original)</th>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">SK</th>
                         <th class="px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-36">Actions</th>
                     </tr>
@@ -75,6 +76,9 @@
                             {{ displayValue(organizationStructureRow.pejabat) }}
                         </td>
                         <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
+                            {{ displayValue(organizationStructureRow.pejabat_original) }}
+                        </td>
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
                             {{ displayValue(organizationStructureRow.sk) }}
                         </td>
                         <td class="px-4 py-3 text-center space-x-3 w-36">
@@ -93,7 +97,7 @@
                         </td>
                     </tr>
                     <tr v-if="filteredRows.length === 0">
-                        <td colspan="10" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+                        <td colspan="11" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
                             Data organization tidak ditemukan.
                         </td>
                     </tr>
@@ -218,18 +222,7 @@
                 <span v-if="form.errors.jabatan" class="text-xs text-red-500 font-medium">{{ form.errors.jabatan }}</span>
             </div>
 
-            <!-- Pejabat Input -->
-            <div class="flex flex-col gap-1.5">
-                <label for="pejabat" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Pejabat</label>
-                <input
-                    id="pejabat"
-                    v-model="form.pejabat"
-                    type="text"
-                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
-                    placeholder="Contoh: Budi Santoso"
-                />
-                <span v-if="form.errors.pejabat" class="text-xs text-red-500 font-medium">{{ form.errors.pejabat }}</span>
-            </div>
+
 
             <!-- SK Input -->
             <div class="flex flex-col gap-1.5">
@@ -416,6 +409,7 @@ const filteredRows = computed(() => {
                 (row.alias || '').toLowerCase().includes(query) ||
                 (row.jabatan || '').toLowerCase().includes(query) ||
                 (row.pejabat || '').toLowerCase().includes(query) ||
+                (row.pejabat_original || '').toLowerCase().includes(query) ||
                 (row.sk || '').toLowerCase().includes(query)
             );
         });
@@ -442,7 +436,6 @@ const form = useForm({
     name: '',
     alias: '',
     jabatan: '',
-    pejabat: '',
     sk: '',
 });
 
@@ -512,7 +505,6 @@ const openEditModal = (org) => {
     form.name = org.organization_name || '';
     form.alias = org.alias || '';
     form.jabatan = org.jabatan || '';
-    form.pejabat = org.pejabat || '';
     form.sk = org.sk || '';
 
     // Gunakan groub_id dari parent org jika ada, fallback ke groub_id org sendiri

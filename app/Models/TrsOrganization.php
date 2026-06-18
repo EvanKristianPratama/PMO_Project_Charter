@@ -74,4 +74,9 @@ class TrsOrganization extends Model
     {
         return $this->hasMany(MstItSteeringComittee::class, 'organization_id');
     }
+
+    public function resources(): HasMany
+    {
+        return $this->hasMany(MstResource::class, 'jabatan');
+    }
 }

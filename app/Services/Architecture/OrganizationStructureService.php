@@ -16,7 +16,10 @@ class OrganizationStructureService
                 'company:id,name',
                 'organizations' => fn (HasMany $query) => $query
                     ->select(['id', 'groub_id', 'parent_id', 'code', 'name', 'alias', 'jabatan', 'pejabat', 'sk'])
-                    ->with('picOrganization:id,organization_id,name'),
+                    ->with([
+                        'picOrganization:id,organization_id,name',
+                        'resources:id,jabatan,name',
+                    ]),
             ])
             ->get()
             ->flatMap(fn (Groub $groub) => $groub->organizations
@@ -40,7 +43,8 @@ class OrganizationStructureService
             'organization_name' => $organization->name,
             'alias' => $organization->alias,
             'jabatan' => $organization->jabatan,
-            'pejabat' => $organization->pejabat,
+            'pejabat' => $organization->resources->pluck('name')->implode(', ') ?: null,
+            'pejabat_original' => $organization->pejabat,
             'sk' => $organization->sk,
             'groub_id' => (int) $groub->id,
             'groub_name' => $groub->name,
