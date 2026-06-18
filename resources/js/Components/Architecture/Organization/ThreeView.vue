@@ -60,6 +60,19 @@
         </section>
     </template>
 
+    <!-- Non-root: jika node bertipe sub_holding, skip kotak dan langsung render children-nya -->
+    <template v-else-if="node?.type === 'sub_holding'">
+        <ThreeView
+            v-for="(child, index) in node.children"
+            :key="child.organization_id"
+            :node="child"
+            :is-root="false"
+            :depth="depth"
+            :is-first-child="index === 0"
+            :is-last-child="index === node.children.length - 1"
+        />
+    </template>
+
     <!-- Non-root: depth 0-5 = horizontal grid layout, depth >= 6 = vertical command line layout -->
 
     <div v-else class="relative min-w-0" :class="depth < 6 ? 'shrink-0' : 'w-full'">

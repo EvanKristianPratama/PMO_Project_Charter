@@ -1,5 +1,18 @@
 <template>
-    <div class="relative min-w-0" :class="depth < 4 ? 'shrink-0' : 'w-full'">
+    <!-- Jika node bertipe sub_holding, skip kotak dan langsung render children-nya -->
+    <template v-if="node?.type === 'sub_holding'">
+        <UpstreamThreeView
+            v-for="(child, index) in node.children"
+            :key="child.organization_id"
+            :node="child"
+            :depth="depth"
+            :is-first-child="index === 0"
+            :is-last-child="index === node.children.length - 1"
+        />
+    </template>
+
+    <!-- Render normal untuk semua tipe node lainnya -->
+    <div v-else class="relative min-w-0" :class="depth < 4 ? 'shrink-0' : 'w-full'">
         <!-- Horizontal line (for grid-based sibling connectors at depth 1 through 3) -->
         <div v-if="depth >= 1 && depth <= 3 && (!isFirstChild || !isLastChild)"
             class="absolute top-[-8px] h-px bg-slate-300 dark:bg-white/20" :class="[
@@ -131,6 +144,7 @@
         </div>
     </div>
 </template>
+
 
 <script setup>
 import { computed, ref } from 'vue';

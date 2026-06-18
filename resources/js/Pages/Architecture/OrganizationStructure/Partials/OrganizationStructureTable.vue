@@ -115,27 +115,9 @@
         @confirm="submitForm"
     >
         <div class="mt-4 space-y-4">
-            <!-- Group Option Select -->
-            <div class="flex flex-col gap-1.5">
-                <label for="groub_id" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Group</label>
-                <select
-                    id="groub_id"
-                    v-model="form.groub_id"
-                    @change="parentGroupFilterId = form.groub_id"
-                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
-                    required
-                >
-                    <option value="" disabled>Pilih Group...</option>
-                    <option v-for="option in groubOptions" :key="option.id" :value="option.id">
-                        {{ option.name }}
-                    </option>
-                </select>
-                <span v-if="form.errors.groub_id" class="text-xs text-red-500 font-medium">{{ form.errors.groub_id }}</span>
-            </div>
-
             <!-- Parent Organization Group Filter -->
             <div class="flex flex-col gap-1.5">
-                <label for="parent_group_filter_id" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Filter Group Organisasi Induk</label>
+                <label for="parent_group_filter_id" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Group Organisasi Induk</label>
                 <select
                     id="parent_group_filter_id"
                     v-model="parentGroupFilterId"
@@ -162,6 +144,24 @@
                     </option>
                 </select>
                 <span v-if="form.errors.parent_id" class="text-xs text-red-500 font-medium">{{ form.errors.parent_id }}</span>
+            </div>
+
+            <!-- Group Option Select -->
+            <div class="flex flex-col gap-1.5">
+                <label for="groub_id" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Group Organisasi Baru</label>
+                <select
+                    id="groub_id"
+                    v-model="form.groub_id"
+                    @change="parentGroupFilterId = form.groub_id"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    required
+                >
+                    <option value="" disabled>Pilih Group...</option>
+                    <option v-for="option in groubOptions" :key="option.id" :value="option.id">
+                        {{ option.name }}
+                    </option>
+                </select>
+                <span v-if="form.errors.groub_id" class="text-xs text-red-500 font-medium">{{ form.errors.groub_id }}</span>
             </div>
 
             <!-- Code Input -->
@@ -447,9 +447,10 @@ const form = useForm({
 });
 
 const filteredParentOrgs = computed(() => {
-    const targetGroupId = parentGroupFilterId.value ? Number(parentGroupFilterId.value) : null;
+    // Normalisasi ke String agar konsisten di semua environment (groub_id bisa number/string/null)
+    const targetGroupId = parentGroupFilterId.value ? String(parentGroupFilterId.value) : null;
     const orgs = targetGroupId
-        ? props.organizationStructureRows.filter(org => Number(org.groub_id) === targetGroupId)
+        ? props.organizationStructureRows.filter(org => String(org.groub_id ?? '') === targetGroupId)
         : props.organizationStructureRows;
     
     const orgMap = new Map(orgs.map(org => [org.organization_id, { ...org, children: [] }]));
@@ -504,18 +505,23 @@ const openEditModal = (org) => {
     modalMode.value = 'edit';
     selectedOrg.value = org;
     form.clearErrors();
-    form.groub_id = org.groub_id || '';
-    form.parent_id = org.parent_id || '';
+    form.groub_id = String(org.groub_id ?? '');
+    form.parent_id = String(org.parent_id ?? '');
     form.code = org.code || '';
     form.name = org.organization_name || '';
     form.alias = org.alias || '';
     form.jabatan = org.jabatan || '';
     form.pejabat = org.pejabat || '';
     form.sk = org.sk || '';
-    
-    const parentOrg = props.organizationStructureRows.find(o => Number(o.organization_id) === Number(org.parent_id));
-    parentGroupFilterId.value = parentOrg ? (parentOrg.groub_id || '') : (org.groub_id || '');
-    
+
+    // Gunakan groub_id dari parent org jika ada, fallback ke groub_id org sendiri
+    // Normalisasi ke String agar cocok dengan value di <select>
+    const parentOrg = props.organizationStructureRows.find(
+        o => String(o.organization_id) === String(org.parent_id)
+    );
+    const resolvedGroupId = parentOrg?.groub_id ?? org.groub_id;
+    parentGroupFilterId.value = resolvedGroupId != null ? String(resolvedGroupId) : '';
+
     isModalOpen.value = true;
 };
 
