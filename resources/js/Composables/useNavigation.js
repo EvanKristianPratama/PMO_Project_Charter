@@ -344,9 +344,9 @@ export function useNavigation() {
             },
             {
                 label: "Resource Management",
-                href: safeRoute("program-implementation.resources-management.index"),
+                href: safeRoute("resource-management.index"),
                 icon: UserGroupIcon,
-                active: (url) => (url || '').startsWith("/program-implementation/resources-management") || (url || '').startsWith("/resources-management"),
+                active: (url) => (url || '').startsWith("/resource-management"),
             },
             {
                 label: "Libary",

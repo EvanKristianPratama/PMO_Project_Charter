@@ -11,6 +11,7 @@ use App\Http\Controllers\Architecture\BusinessCapability\BusinessCapabilityContr
 use App\Http\Controllers\Architecture\OrganizationStructure\OrganizationController as ArchitectureOrganizationStructureController;
 use App\Http\Controllers\Architecture\ProsesBisnis\ProsesBisnisController as ArchitectureProsesBisnisController;
 use App\Http\Controllers\Architecture\Function\FunctionController as ArchitectureFunctionController;
+use App\Http\Controllers\ResourceManagement\ResourceManagementController as MainResourceManagementController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\SsoController;
 use App\Http\Controllers\BpmnWorkflowController;
@@ -291,8 +292,16 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::post('/architecture/function', [ArchitectureFunctionController::class, 'store'])->name('architecture.function.store');
     Route::put('/architecture/function/{id}', [ArchitectureFunctionController::class, 'update'])->name('architecture.function.update');
     Route::delete('/architecture/function/{id}', [ArchitectureFunctionController::class, 'destroy'])->name('architecture.function.destroy');
-    Route::get('/resources-management', fn () => redirect()->route('program-implementation.resources-management.index'))
+    Route::get('/resources-management', fn () => redirect()->route('resource-management.index'))
         ->name('resources-management.index');
+
+    // Resource Management CRUD
+    Route::prefix('/resource-management')->name('resource-management.')->group(function () {
+        Route::get('/', [MainResourceManagementController::class, 'index'])->name('index');
+        Route::post('/', [MainResourceManagementController::class, 'store'])->name('store');
+        Route::put('/{resource}', [MainResourceManagementController::class, 'update'])->name('update');
+        Route::delete('/{resource}', [MainResourceManagementController::class, 'destroy'])->name('destroy');
+    });
     Route::get('/service-portofolio', fn () => Inertia::render('Placeholder/Index', [
         'title' => 'Service Portofolio',
     ]))->name('service-portofolio.index');

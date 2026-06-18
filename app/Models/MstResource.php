@@ -6,5 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class MstResource extends Model
 {
-    //
+    protected $table = 'mst_resource_management';
+
+    protected $fillable = [
+        'name',
+    ];
 }
