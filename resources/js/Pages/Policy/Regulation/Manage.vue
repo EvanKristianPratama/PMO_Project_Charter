@@ -135,7 +135,7 @@
                                         v-if="reg.status"
                                         :class="[
                                             'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold border uppercase tracking-wider',
-                                            reg.status.toLowerCase() === 'aktif' || reg.status.toLowerCase() === 'active' || reg.status.toLowerCase() === 'terbit'
+                                            reg.status.toLowerCase() === 'aktif' || reg.status.toLowerCase() === 'active' || reg.status.toLowerCase() === 'Berlaku'
                                                 ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400'
                                                 : reg.status.toLowerCase() === 'draft'
                                                     ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400'
@@ -460,23 +460,23 @@
                                         >
                                             <option value="">-- Pilih Status --</option>
                                             <option value="Draft">Draft</option>
-                                            <option value="Terbit">Terbit</option>
+                                            <option value="Berlaku">Berlaku</option>
                                             <option value="Dicabut">Dicabut</option>
                                         </select>
                                         <div v-if="form.errors.status" class="text-xs text-rose-500 font-medium">{{ form.errors.status }}</div>
                                     </div>
                                 </div>
 
-                                <!-- Tanggal Terbit & Tanggal Berlaku -->
+                                <!-- Tanggal Berlaku & Tanggal Berlaku -->
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div class="space-y-1.5">
-                                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Tanggal Terbit (Opsional):</label>
+                                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Tanggal Berlaku (Opsional):</label>
                                         <input 
                                             type="date" 
-                                            v-model="form.terbit" 
+                                            v-model="form.Berlaku" 
                                             class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-black/20 dark:text-white dark:border-white/10"
                                         />
-                                        <div v-if="form.errors.terbit" class="text-xs text-rose-500 font-medium">{{ form.errors.terbit }}</div>
+                                        <div v-if="form.errors.Berlaku" class="text-xs text-rose-500 font-medium">{{ form.errors.Berlaku }}</div>
                                     </div>
                                     <div class="space-y-1.5">
                                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Tanggal Berlaku (Opsional):</label>
@@ -660,7 +660,7 @@ const form = useForm({
     owner: '',
     revisi: '',
     status: '',
-    terbit: '',
+    Berlaku: '',
     berlaku: '',
     pic_id: '',
     master_id: '',
@@ -683,11 +683,11 @@ function openEditModal(reg) {
     editingId.value = reg.id;
     
     // Parse date values to YYYY-MM-DD for standard html input compatibility
-    let terbitVal = '';
+    let BerlakuVal = '';
     let berlakuVal = '';
-    if (reg.terbit) {
-        const d = new Date(reg.terbit);
-        terbitVal = d.toISOString().split('T')[0];
+    if (reg.Berlaku) {
+        const d = new Date(reg.Berlaku);
+        BerlakuVal = d.toISOString().split('T')[0];
     }
     if (reg.berlaku) {
         const d = new Date(reg.berlaku);
@@ -701,7 +701,7 @@ function openEditModal(reg) {
     form.owner = reg.owner;
     form.revisi = reg.revisi;
     form.status = reg.status || '';
-    form.terbit = terbitVal;
+    form.Berlaku = BerlakuVal;
     form.berlaku = berlakuVal;
     form.pic_id = reg.pic_id || '';
     form.master_id = reg.master_id || '';
