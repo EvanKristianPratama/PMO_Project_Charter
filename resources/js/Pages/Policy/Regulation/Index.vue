@@ -163,7 +163,7 @@
                                             v-if="reg.status"
                                             :class="[
                                                 'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold border uppercase tracking-wider',
-                                                reg.status.toLowerCase() === 'aktif' || reg.status.toLowerCase() === 'active' || reg.status.toLowerCase() === 'terbit'
+                                                reg.status.toLowerCase() === 'aktif' || reg.status.toLowerCase() === 'active' || reg.status.toLowerCase() === 'berlaku'
                                                     ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400'
                                                     : reg.status.toLowerCase() === 'draft'
                                                         ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400'
@@ -294,7 +294,7 @@
                                             v-if="row.status"
                                             :class="[
                                                 'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold border uppercase tracking-wider',
-                                                row.status.toLowerCase() === 'aktif' || row.status.toLowerCase() === 'active' || row.status.toLowerCase() === 'terbit'
+                                                row.status.toLowerCase() === 'aktif' || row.status.toLowerCase() === 'active' || row.status.toLowerCase() === 'berlaku'
                                                     ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400'
                                                     : row.status.toLowerCase() === 'draft'
                                                         ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400'
@@ -405,7 +405,7 @@
                                             v-if="reg.status"
                                             :class="[
                                                 'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold border uppercase tracking-wider',
-                                                reg.status.toLowerCase() === 'aktif' || reg.status.toLowerCase() === 'active' || reg.status.toLowerCase() === 'terbit'
+                                                reg.status.toLowerCase() === 'aktif' || reg.status.toLowerCase() === 'active' || reg.status.toLowerCase() === 'berlaku'
                                                     ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400'
                                                     : reg.status.toLowerCase() === 'draft'
                                                         ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400'
