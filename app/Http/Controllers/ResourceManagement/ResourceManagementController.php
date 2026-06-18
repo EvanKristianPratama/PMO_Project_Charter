@@ -29,7 +29,10 @@ class ResourceManagementController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'nullable|string|max:255',
+            'jabatan' => 'nullable|string|max:255',
+            'internal_id' => 'nullable|string|max:255',
+            'masa_berlaku' => 'nullable|string|max:255',
         ]);
 
         MstResource::create($validated);
@@ -45,7 +48,10 @@ class ResourceManagementController extends Controller
         $resource = MstResource::findOrFail($id);
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'nullable|string|max:255',
+            'jabatan' => 'nullable|string|max:255',
+            'internal_id' => 'nullable|string|max:255',
+            'masa_berlaku' => 'nullable|string|max:255',
         ]);
 
         $resource->update($validated);

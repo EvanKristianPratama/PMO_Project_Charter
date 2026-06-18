@@ -10,5 +10,8 @@ class MstResource extends Model
 
     protected $fillable = [
         'name',
+        'jabatan',
+        'internal_id',
+        'masa_berlaku',
     ];
 }

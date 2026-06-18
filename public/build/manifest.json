@@ -1752,7 +1752,7 @@
     ]
   },
   "resources/js/Pages/BpmnWorkflow/Index.vue": {
-    "file": "assets/Index-DOz71q1p.js",
+    "file": "assets/Index-CSu0JfsS.js",
     "name": "Index",
     "src": "resources/js/Pages/BpmnWorkflow/Index.vue",
     "isDynamicEntry": true,
@@ -4778,7 +4778,7 @@
     ]
   },
   "resources/js/Pages/ResourceManagement/Index.vue": {
-    "file": "assets/Index-CkwOCcai.js",
+    "file": "assets/Index-BwZFaBq6.js",
     "name": "Index",
     "src": "resources/js/Pages/ResourceManagement/Index.vue",
     "isDynamicEntry": true,
@@ -4863,7 +4863,7 @@
     ]
   },
   "resources/js/Pages/StrategicHouse/Index.vue": {
-    "file": "assets/Index-xkSYglu-.js",
+    "file": "assets/Index-DWY5rk74.js",
     "name": "Index",
     "src": "resources/js/Pages/StrategicHouse/Index.vue",
     "isDynamicEntry": true,
@@ -5360,7 +5360,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-CsGBHUgW.js",
+    "file": "assets/app-DVQV8DOx.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
