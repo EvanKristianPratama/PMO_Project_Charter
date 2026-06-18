@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\SyncController;
 use App\Http\Controllers\Architecture\BusinessCapability\BusinessCapabilityController;
 use App\Http\Controllers\Architecture\OrganizationStructure\OrganizationController as ArchitectureOrganizationStructureController;
 use App\Http\Controllers\Architecture\ProsesBisnis\ProsesBisnisController as ArchitectureProsesBisnisController;
+use App\Http\Controllers\Architecture\Function\FunctionController as ArchitectureFunctionController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\SsoController;
 use App\Http\Controllers\BpmnWorkflowController;
@@ -285,6 +286,11 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::post('/architecture/proses-bisnis', [ArchitectureProsesBisnisController::class, 'store'])->name('architecture.proses-bisnis.store');
     Route::put('/architecture/proses-bisnis/{id}', [ArchitectureProsesBisnisController::class, 'update'])->name('architecture.proses-bisnis.update');
     Route::delete('/architecture/proses-bisnis/{id}', [ArchitectureProsesBisnisController::class, 'destroy'])->name('architecture.proses-bisnis.destroy');
+    // Function CRUD under Architecture
+    Route::get('/architecture/function', [ArchitectureFunctionController::class, 'index'])->name('architecture.function.index');
+    Route::post('/architecture/function', [ArchitectureFunctionController::class, 'store'])->name('architecture.function.store');
+    Route::put('/architecture/function/{id}', [ArchitectureFunctionController::class, 'update'])->name('architecture.function.update');
+    Route::delete('/architecture/function/{id}', [ArchitectureFunctionController::class, 'destroy'])->name('architecture.function.destroy');
     Route::get('/resources-management', fn () => redirect()->route('program-implementation.resources-management.index'))
         ->name('resources-management.index');
     Route::get('/service-portofolio', fn () => Inertia::render('Placeholder/Index', [

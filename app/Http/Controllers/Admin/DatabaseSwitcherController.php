@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Http\RedirectResponse;
+
 
 class DatabaseSwitcherController extends Controller
 {
@@ -18,17 +18,18 @@ class DatabaseSwitcherController extends Controller
 
         $target = $request->input('connection');
 
-        // Persist the selected connection preference to user session
-        Session::put('active_db_connection', $target);
-
-        // Important: log user out immediately on change, forcing re-authentication 
-        // in context of new database structure to avoid user data cross-contamination.
+        // Logout user terlebih dahulu sebelum invalidate session.
         Auth::guard('web')->logout();
+
+        // Invalidate session lama dan generate CSRF token baru.
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        // Restore chosen target for NEXT lifecycle re-check on login redirect
-        Session::put('active_db_connection', $target);
+        // Setelah session baru dibuat, simpan preferensi koneksi DB.
+        // Ini dilakukan SETELAH invalidate agar tersimpan di session yang baru.
+        // Middleware DynamicDatabaseConnection akan membaca nilai ini pada
+        // request berikutnya (setelah login), BUKAN di halaman login itu sendiri.
+        $request->session()->put('active_db_connection', $target);
 
         return redirect()->route('login')->with('status', "Database switched to {$target}. Please re-login.");
     }
