@@ -42,9 +42,7 @@
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Code</th>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Name</th>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Alias</th>
-                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Jabatan</th>
-                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Pejabat</th>
-                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">SK</th>
+                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Regulation Link</th>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Parent</th>
                         <th class="px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-36">Actions</th>
                     </tr>
@@ -76,13 +74,7 @@
                             {{ displayValue(fn.alias) }}
                         </td>
                         <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
-                            {{ displayValue(fn.jabatan) }}
-                        </td>
-                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
-                            {{ displayValue(fn.pejabat) }}
-                        </td>
-                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
-                            {{ displayValue(fn.sk) }}
+                            {{ fn.regulation ? `${fn.regulation.judul} (${fn.regulation.nomor})` : '-' }}
                         </td>
                         <td class="px-4 py-3 text-slate-500 dark:text-slate-400 text-xs">
                             {{ getParentLabel(fn.parent_id) }}
@@ -103,7 +95,7 @@
                         </td>
                     </tr>
                     <tr v-if="filteredRows.length === 0">
-                        <td colspan="11" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+                        <td colspan="9" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
                             Data function tidak ditemukan.
                         </td>
                     </tr>
@@ -215,43 +207,27 @@
                 <span v-if="form.errors.alias" class="text-xs text-red-500 font-medium">{{ form.errors.alias }}</span>
             </div>
 
-            <!-- Jabatan Input -->
+            <!-- Regulation Input -->
             <div class="flex flex-col gap-1.5">
-                <label for="fn_jabatan" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Jabatan</label>
+                <label for="fn_regulation_id" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Regulation</label>
+                <!-- Search Input for Regulation -->
                 <input
-                    id="fn_jabatan"
-                    v-model="form.jabatan"
                     type="text"
-                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
-                    placeholder="Contoh: Manager IT"
+                    v-model="regulationSearchQuery"
+                    placeholder="Cari regulation berdasarkan judul atau nomor..."
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
                 />
-                <span v-if="form.errors.jabatan" class="text-xs text-red-500 font-medium">{{ form.errors.jabatan }}</span>
-            </div>
-
-            <!-- Pejabat Input -->
-            <div class="flex flex-col gap-1.5">
-                <label for="fn_pejabat" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Pejabat</label>
-                <input
-                    id="fn_pejabat"
-                    v-model="form.pejabat"
-                    type="text"
+                <select
+                    id="fn_regulation_id"
+                    v-model="form.regulation_id"
                     class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
-                    placeholder="Contoh: Budi Santoso"
-                />
-                <span v-if="form.errors.pejabat" class="text-xs text-red-500 font-medium">{{ form.errors.pejabat }}</span>
-            </div>
-
-            <!-- SK Input -->
-            <div class="flex flex-col gap-1.5">
-                <label for="fn_sk" class="text-xs font-semibold text-slate-700 dark:text-slate-300">SK</label>
-                <input
-                    id="fn_sk"
-                    v-model="form.sk"
-                    type="text"
-                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
-                    placeholder="Contoh: SK/123/2026"
-                />
-                <span v-if="form.errors.sk" class="text-xs text-red-500 font-medium">{{ form.errors.sk }}</span>
+                >
+                    <option value="">-- Pilih Regulation --</option>
+                    <option v-for="reg in filteredFormRegulations" :key="reg.id" :value="reg.id">
+                        {{ reg.judul }} ({{ reg.nomor }})
+                    </option>
+                </select>
+                <span v-if="form.errors.regulation_id" class="text-xs text-red-500 font-medium">{{ form.errors.regulation_id }}</span>
             </div>
         </div>
     </ConfirmationModal>
@@ -284,7 +260,13 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    regulations: {
+        type: Array,
+        default: () => [],
+    },
 });
+
+console.log('FunctionTable props.regulations:', props.regulations);
 
 const displayValue = (value) => value ?? '-';
 
@@ -395,9 +377,8 @@ const filteredRows = computed(() => {
             (fn.code || '').toLowerCase().includes(q) ||
             (fn.name || '').toLowerCase().includes(q) ||
             (fn.alias || '').toLowerCase().includes(q) ||
-            (fn.jabatan || '').toLowerCase().includes(q) ||
-            (fn.pejabat || '').toLowerCase().includes(q) ||
-            (fn.sk || '').toLowerCase().includes(q)
+            (fn.regulation?.judul || '').toLowerCase().includes(q) ||
+            (fn.regulation?.nomor || '').toLowerCase().includes(q)
         );
     }
 
@@ -416,6 +397,16 @@ const isModalOpen = ref(false);
 const isDeleteModalOpen = ref(false);
 const selectedFn = ref(null);
 const modalMode = ref('create');
+const regulationSearchQuery = ref('');
+
+const filteredFormRegulations = computed(() => {
+    const query = regulationSearchQuery.value.toLowerCase().trim();
+    if (!query) return props.regulations;
+    return props.regulations.filter(reg =>
+        (reg.judul || '').toLowerCase().includes(query) ||
+        (reg.nomor || '').toLowerCase().includes(query)
+    );
+});
 
 const form = useForm({
     groub_id: '',
@@ -423,9 +414,7 @@ const form = useForm({
     code: '',
     name: '',
     alias: '',
-    jabatan: '',
-    pejabat: '',
-    sk: '',
+    regulation_id: '',
 });
 
 /** Opsi parent di modal — exclude diri sendiri & turunannya saat edit, pre-filtered by group if selected */
@@ -475,6 +464,7 @@ const openCreateModal = () => {
     form.clearErrors();
     form.reset();
     parentGroupFilterId.value = '';
+    regulationSearchQuery.value = '';
     isModalOpen.value = true;
 };
 
@@ -487,9 +477,8 @@ const openEditModal = (fn) => {
     form.code = fn.code || '';
     form.name = fn.name || '';
     form.alias = fn.alias || '';
-    form.jabatan = fn.jabatan || '';
-    form.pejabat = fn.pejabat || '';
-    form.sk = fn.sk || '';
+    form.regulation_id = fn.regulation_id ? String(fn.regulation_id) : '';
+    regulationSearchQuery.value = '';
 
     const parentFn = props.functions.find(
         f => String(f.id) === String(fn.parent_id)

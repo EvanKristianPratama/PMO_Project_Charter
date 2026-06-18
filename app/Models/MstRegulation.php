@@ -159,4 +159,12 @@ class MstRegulation extends Model
         return $this->belongsToMany(MstRegulation::class, 'trs_related_regulation', 'related', 'regulation')
             ->withTimestamps();
     }
+
+    /**
+     * Relasi ke MstFunction.
+     */
+    public function functions(): HasMany
+    {
+        return $this->hasMany(MstFunction::class, 'regulation_id');
+    }
 }

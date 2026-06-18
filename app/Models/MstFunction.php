@@ -16,15 +16,14 @@ class MstFunction extends Model
         'code',
         'name',
         'alias',
-        'jabatan',
-        'pejabat',
-        'sk',
+        'regulation_id',
     ];
 
     protected $casts = [
         'groub_id' => 'integer',
         'parent_id' => 'integer',
         'code' => 'string',
+        'regulation_id' => 'integer',
     ];
 
     /**
@@ -49,5 +48,13 @@ class MstFunction extends Model
     public function groub(): BelongsTo
     {
         return $this->belongsTo(Groub::class, 'groub_id');
+    }
+
+    /**
+     * Relasi ke MstRegulation.
+     */
+    public function regulation(): BelongsTo
+    {
+        return $this->belongsTo(MstRegulation::class, 'regulation_id');
     }
 }

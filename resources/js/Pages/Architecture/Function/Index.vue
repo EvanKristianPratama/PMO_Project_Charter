@@ -1,7 +1,7 @@
 <template>
     <UserLayout title="Function">
         <div class="animate-fade-in-up space-y-3">
-            <FunctionTable :functions="functions" :groubOptions="groubOptions" />
+            <FunctionTable :functions="functions" :groubOptions="groubOptions" :regulations="regulations" />
         </div>
     </UserLayout>
 </template>
@@ -16,6 +16,10 @@ defineProps({
         default: () => [],
     },
     groubOptions: {
+        type: Array,
+        default: () => [],
+    },
+    regulations: {
         type: Array,
         default: () => [],
     },
