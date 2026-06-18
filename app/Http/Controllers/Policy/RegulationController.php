@@ -30,22 +30,7 @@ class RegulationController extends Controller
         ]);
     }
 
-    /**
-     * Display management page for regulations.
-     */
-    public function manage(): Response
-    {
-        $regulations = MstRegulation::with(['organization', 'parent', 'master'])
-            ->withCount(['generalPolicies'])
-            ->orderBy('id', 'asc')
-            ->get();
-        $organizations = TrsOrganization::orderBy('name')->get();
 
-        return Inertia::render('Policy/Regulation/Manage', [
-            'regulations' => $regulations,
-            'organizations' => $organizations,
-        ]);
-    }
 
     /**
      * Store a newly created regulation.

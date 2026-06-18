@@ -339,7 +339,6 @@ Route::middleware(['auth', 'approved'])->group(function () {
         // Regulasi (Regulation) CRUD
         Route::get('/regulation/{id}/preview', [RegulationController::class, 'previewData'])->name('regulation.preview');
         Route::get('/regulation', [RegulationController::class, 'index'])->name('regulation.index');
-        Route::get('/regulation/manage', [RegulationController::class, 'manage'])->name('regulation.manage');
         Route::post('/regulation', [RegulationController::class, 'store'])->name('regulation.store');
         Route::put('/regulation/{id}', [RegulationController::class, 'update'])->name('regulation.update');
         Route::delete('/regulation/{id}', [RegulationController::class, 'destroy'])->name('regulation.destroy');
