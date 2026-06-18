@@ -64,7 +64,7 @@
                                     <div v-if="form.errors.tipe" class="text-xs text-rose-500 font-medium">{{ form.errors.tipe }}</div>
                                 </div>
                                 <div class="space-y-1.5">
-                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Owner / Pemilik:</label>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Pemilik Dokumen:</label>
                                     <input 
                                         type="text" 
                                         v-model="form.owner" 
@@ -88,9 +88,10 @@
                                 <div v-if="form.errors.stk" class="text-xs text-rose-500 font-medium">{{ form.errors.stk }}</div>
                             </div>
 
-                            <!-- Organisasi Selection with Search -->
+                            <!-- 
+                            Internal) Selection with Search -->
                             <div class="space-y-1.5 relative">
-                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Unit Organisasi Terkait:</label>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Pemilik Dokumen:</label>
                                 
                                 <!-- Trigger Button -->
                                 <div class="relative">
@@ -100,7 +101,7 @@
                                         class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg px-3.5 py-2 text-sm text-left focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-black/20 dark:text-white dark:border-white/10 flex justify-between items-center"
                                     >
                                         <span class="truncate">
-                                            {{ selectedPicName || '-- Pilih Organisasi --' }}
+                                            {{ selectedPicName || '-- Pilih Pemilik Dokumen (Internal) --' }}
                                         </span>
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-slate-400 shrink-0">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
@@ -118,7 +119,7 @@
                                         <input 
                                             type="text" 
                                             v-model="picSearchQuery" 
-                                            placeholder="Cari organisasi..." 
+                                            placeholder="Cari pemilik dokumen (internal)..." 
                                             class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-black/20 dark:text-white dark:border-white/10"
                                             ref="picSearchInput"
                                             @click.stop
@@ -132,7 +133,7 @@
                                             @click="selectPic('')"
                                             class="w-full text-left px-2.5 py-1.5 text-xs rounded hover:bg-slate-100 dark:hover:bg-white/5 text-slate-500 dark:text-slate-400"
                                         >
-                                            -- Pilih Organisasi --
+                                            -- Pilih Pemilik Dokumen (Internal) --
                                         </button>
                                         <button
                                             v-for="org in filteredPicOrganizations" 
@@ -159,9 +160,9 @@
                                 <div v-if="form.errors.pic_id" class="text-xs text-rose-500 font-medium">{{ form.errors.pic_id }}</div>
                             </div>
 
-                            <!-- Master Organisasi Selection with Search -->
+                            <!-- Akses Role Selection with Search -->
                             <div class="space-y-1.5 relative">
-                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Master Organisasi:</label>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Access Roles:</label>
                                 
                                 <!-- Trigger Button -->
                                 <div class="relative">
@@ -171,7 +172,7 @@
                                         class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg px-3.5 py-2 text-sm text-left focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-black/20 dark:text-white dark:border-white/10 flex justify-between items-center"
                                     >
                                         <span class="truncate">
-                                            {{ selectedMasterName || '-- Pilih Master Organisasi --' }}
+                                            {{ selectedMasterName || '-- Pilih Akses Role --' }}
                                         </span>
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-slate-400 shrink-0">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
@@ -189,7 +190,7 @@
                                         <input 
                                             type="text" 
                                             v-model="masterSearchQuery" 
-                                            placeholder="Cari organisasi..." 
+                                            placeholder="Cari akses role..." 
                                             class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-black/20 dark:text-white dark:border-white/10"
                                             ref="masterSearchInput"
                                             @click.stop
@@ -203,7 +204,7 @@
                                             @click="selectMaster('')"
                                             class="w-full text-left px-2.5 py-1.5 text-xs rounded hover:bg-slate-100 dark:hover:bg-white/5 text-slate-500 dark:text-slate-400"
                                         >
-                                            -- Pilih Master Organisasi --
+                                            -- Pilih Akses Role --
                                         </button>
                                         <button
                                             v-for="org in filteredMasterOrganizations" 

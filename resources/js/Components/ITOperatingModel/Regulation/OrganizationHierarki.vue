@@ -45,12 +45,12 @@
             </span>
         </td>
 
-        <!-- Fungsi / Owner -->
+        <!-- Pemilik Dokumen -->
         <td class="px-3 py-3 text-slate-700 dark:text-slate-300 font-medium border-r border-b border-slate-200 dark:border-white/10 max-w-[200px] break-words">
             {{ reg.owner }}
         </td>
 
-        <!-- Organisasi — show org name -->
+        <!-- Akses Role / Pemilik Dokumen (Internal) — show org name -->
         <td class="px-3 py-3 text-slate-700 dark:text-slate-300 font-medium border-r border-b border-slate-200 dark:border-white/10 max-w-[140px] break-words">
             <div class="flex flex-col gap-0.5">
                 <span v-if="reg.master" class="font-semibold text-slate-900 dark:text-white">

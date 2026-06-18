@@ -25,36 +25,63 @@
                 </div>
             </section>
 
-            <!-- Toggles / Tabs for View Modes -->
-            <div class="flex items-center gap-1.5 rounded-xl bg-slate-100 p-1 dark:bg-white/5 w-fit">
-                <button
-                    @click="activeViewMode = 'document'"
-                    :class="[
-                        'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all duration-200 active:scale-95',
-                        activeViewMode === 'document'
-                            ? 'bg-[#821f44] text-white shadow-md shadow-[#821f44]/20'
-                            : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
-                    ]"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                    </svg>
-                    Hirarki Dokumen
-                </button>
-                <button
-                    @click="activeViewMode = 'organization'"
-                    :class="[
-                        'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all duration-200 active:scale-95',
-                        activeViewMode === 'organization'
-                            ? 'bg-[#821f44] text-white shadow-md shadow-[#821f44]/20'
-                            : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
-                    ]"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94-3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-                    </svg>
-                    Hirarki Organisasi
-                </button>
+            <!-- Controls: View Modes & Filters -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <!-- Toggles / Tabs for View Modes -->
+                <div class="flex items-center gap-1.5 rounded-xl bg-slate-100 p-1 dark:bg-white/5 w-fit">
+                    <button
+                        @click="activeViewMode = 'document'"
+                        :class="[
+                            'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all duration-200 active:scale-95',
+                            activeViewMode === 'document'
+                                ? 'bg-[#821f44] text-white shadow-md shadow-[#821f44]/20'
+                                : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+                        ]"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                        </svg>
+                        Hirarki Dokumen
+                    </button>
+                    <button
+                        @click="activeViewMode = 'organization'"
+                        :class="[
+                            'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all duration-200 active:scale-95',
+                            activeViewMode === 'organization'
+                                ? 'bg-[#821f44] text-white shadow-md shadow-[#821f44]/20'
+                                : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+                        ]"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94-3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                        </svg>
+                        Hirarki Organisasi
+                    </button>
+                </div>
+
+                <!-- Filter by Akses Role -->
+                <div class="flex items-center gap-2">
+                    <div class="relative">
+                        <select
+                            v-model="selectedAksesRoleId"
+                            class="appearance-none bg-white text-slate-800 border border-slate-200 rounded-xl pl-3.5 pr-8 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-[#1a1a1a] dark:text-slate-300 dark:border-white/10 transition-all hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer min-w-[200px]"
+                        >
+                            <option value="">Semua Akses Role</option>
+                            <option
+                                v-for="role in uniqueAksesRoles"
+                                :key="role.id"
+                                :value="role.id"
+                            >
+                                {{ role.name }} ({{ role.code }})
+                            </option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Regulations Table Components -->
@@ -67,8 +94,8 @@
                                 <th scope="col" class="px-3 py-3 text-center border-r border-b border-slate-200 dark:border-white/10">Judul</th>
                                 <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Nomor</th>
                                 <th scope="col" class="px-3 py-3 w-28 border-r border-b border-slate-200 dark:border-white/10">Tipe</th>
-                                <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Fungsi</th>
-                                <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Organisasi</th>
+                                <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Pemilik Dokumen</th>
+                                <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Akses Role / Pemilik Dokumen (Internal)</th>
                                 <th scope="col" class="px-3 py-3 text-center w-24 border-r border-b border-slate-200 dark:border-white/10">Status</th>
                                 <th scope="col" class="px-3 py-3 text-center w-16 border-r border-b border-slate-200 dark:border-white/10">Revisi</th>
                                 <th scope="col" class="px-3 py-3 w-24 border-r border-b border-slate-200 dark:border-white/10">Berlaku</th>
@@ -79,7 +106,7 @@
                             <!-- Document Hierarchy Mode -->
                             <template v-if="activeViewMode === 'document'">
                                 <DocumentHierarki
-                                    :regulations="regulations"
+                                    :regulations="filteredRegulations"
                                     :formatDate="formatDate"
                                     @detail="handleDetailClick"
                                     @edit="openEditModal"
@@ -90,7 +117,7 @@
                             <!-- Organization Hierarchy Mode -->
                             <template v-if="activeViewMode === 'organization'">
                                 <OrganizationHierarki
-                                    :regulations="regulations"
+                                    :regulations="filteredRegulations"
                                     :organizations="organizations"
                                     :formatDate="formatDate"
                                     @detail="handleDetailClick"
@@ -135,6 +162,31 @@ const props = defineProps({
 
 // View mode state
 const activeViewMode = ref('document'); // 'document', 'organization'
+
+// Filter by Akses Role
+const selectedAksesRoleId = ref('');
+
+const uniqueAksesRoles = computed(() => {
+    const rolesMap = new Map();
+    props.regulations.forEach(reg => {
+        if (reg.master_id && reg.master) {
+            rolesMap.set(reg.master_id, {
+                id: reg.master_id,
+                name: reg.master.jabatan || reg.master.name,
+                code: reg.master.code
+            });
+        }
+    });
+    return Array.from(rolesMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+});
+
+const filteredRegulations = computed(() => {
+    if (!selectedAksesRoleId.value) {
+        return props.regulations;
+    }
+    const targetId = Number(selectedAksesRoleId.value);
+    return props.regulations.filter(reg => reg.master_id === targetId);
+});
 
 const manageRegulationModal = ref(null);
 
