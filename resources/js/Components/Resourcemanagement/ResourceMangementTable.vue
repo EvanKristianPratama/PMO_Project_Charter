@@ -28,11 +28,10 @@
                 <thead class="bg-slate-50 dark:bg-white/5">
                     <tr>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-16">No</th>
-                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-24">ID</th>
+                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Internal ID</th>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Name</th>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Jabatan</th>
-                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Internal ID</th>
-                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Masa Berlaku</th>
+                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">SK</th>
                         <th class="px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-36">Actions</th>
                     </tr>
                 </thead>
@@ -43,13 +42,12 @@
                         class="transition hover:bg-slate-50 dark:hover:bg-white/5"
                     >
                         <td class="px-4 py-3 text-slate-500 dark:text-slate-400">{{ index + 1 }}</td>
-                        <td class="px-4 py-3 text-slate-500 dark:text-slate-400 font-mono text-xs">
-                            {{ resource.id }}
-                        </td>
-                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300 font-medium">{{ resource.name || '-' }}</td>
-                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300">{{ resource.jabatan || '-' }}</td>
                         <td class="px-4 py-3 text-slate-600 dark:text-slate-300 font-mono text-xs">{{ resource.internal_id || '-' }}</td>
-                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300">{{ resource.masa_berlaku || '-' }}</td>
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300 font-medium">{{ resource.name || '-' }}</td>
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
+                            {{ resource.organization ? (resource.organization.jabatan || resource.organization.name) : '-' }}
+                        </td>
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300">{{ resource.sk || '-' }}</td>
                         <td class="px-4 py-3 text-center space-x-3 w-36">
                             <button
                                 @click="openEditModal(resource)"
@@ -66,7 +64,7 @@
                         </td>
                     </tr>
                     <tr v-if="filteredRows.length === 0">
-                        <td colspan="7" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+                        <td colspan="6" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
                             Data SDM tidak ditemukan.
                         </td>
                     </tr>
@@ -88,6 +86,19 @@
         @confirm="submitForm"
     >
         <div class="mt-4 space-y-4">
+            <!-- Internal ID Input -->
+            <div class="flex flex-col gap-1.5">
+                <label for="res_internal_id" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Internal ID</label>
+                <input
+                    id="res_internal_id"
+                    v-model="form.internal_id"
+                    type="text"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white font-mono"
+                    placeholder="Contoh: INT-12345"
+                />
+                <span v-if="form.errors.internal_id" class="text-xs text-red-500 font-medium">{{ form.errors.internal_id }}</span>
+            </div>
+
             <!-- Name Input -->
             <div class="flex flex-col gap-1.5">
                 <label for="res_name" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Nama</label>
@@ -104,40 +115,30 @@
             <!-- Jabatan Input -->
             <div class="flex flex-col gap-1.5">
                 <label for="res_jabatan" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Jabatan</label>
-                <input
+                <select
                     id="res_jabatan"
                     v-model="form.jabatan"
-                    type="text"
                     class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
-                    placeholder="Contoh: Senior Developer"
-                />
+                >
+                    <option value="" disabled>Pilih Jabatan...</option>
+                    <option v-for="org in organizations" :key="org.id" :value="org.id">
+                        {{ org.jabatan ? `${org.jabatan} (${org.name})` : org.name }}
+                    </option>
+                </select>
                 <span v-if="form.errors.jabatan" class="text-xs text-red-500 font-medium">{{ form.errors.jabatan }}</span>
             </div>
 
-            <!-- Internal ID Input -->
+            <!-- SK Input -->
             <div class="flex flex-col gap-1.5">
-                <label for="res_internal_id" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Internal ID</label>
+                <label for="res_sk" class="text-xs font-semibold text-slate-700 dark:text-slate-300">SK</label>
                 <input
-                    id="res_internal_id"
-                    v-model="form.internal_id"
-                    type="text"
-                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white font-mono"
-                    placeholder="Contoh: INT-12345"
-                />
-                <span v-if="form.errors.internal_id" class="text-xs text-red-500 font-medium">{{ form.errors.internal_id }}</span>
-            </div>
-
-            <!-- Masa Berlaku Input -->
-            <div class="flex flex-col gap-1.5">
-                <label for="res_masa_berlaku" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Masa Berlaku</label>
-                <input
-                    id="res_masa_berlaku"
-                    v-model="form.masa_berlaku"
+                    id="res_sk"
+                    v-model="form.sk"
                     type="text"
                     class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
                     placeholder="Contoh: 31 Desember 2026 atau 1 Tahun"
                 />
-                <span v-if="form.errors.masa_berlaku" class="text-xs text-red-500 font-medium">{{ form.errors.masa_berlaku }}</span>
+                <span v-if="form.errors.sk" class="text-xs text-red-500 font-medium">{{ form.errors.sk }}</span>
             </div>
         </div>
     </ConfirmationModal>
@@ -166,6 +167,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    organizations: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const searchQuery = ref('');
@@ -178,7 +183,7 @@ const form = useForm({
     name: '',
     jabatan: '',
     internal_id: '',
-    masa_berlaku: '',
+    sk: '',
 });
 
 const filteredRows = computed(() => {
@@ -188,9 +193,10 @@ const filteredRows = computed(() => {
         const q = searchQuery.value.toLowerCase().trim();
         rows = rows.filter(res =>
             (res.name || '').toLowerCase().includes(q) ||
-            (res.jabatan || '').toLowerCase().includes(q) ||
+            (res.organization?.jabatan || '').toLowerCase().includes(q) ||
+            (res.organization?.name || '').toLowerCase().includes(q) ||
             (res.internal_id || '').toLowerCase().includes(q) ||
-            (res.masa_berlaku || '').toLowerCase().includes(q) ||
+            (res.sk || '').toLowerCase().includes(q) ||
             String(res.id).includes(q)
         );
     }
@@ -212,7 +218,7 @@ const openEditModal = (resource) => {
     form.name = resource.name || '';
     form.jabatan = resource.jabatan || '';
     form.internal_id = resource.internal_id || '';
-    form.masa_berlaku = resource.masa_berlaku || '';
+    form.sk = resource.sk || '';
     isModalOpen.value = true;
 };
 

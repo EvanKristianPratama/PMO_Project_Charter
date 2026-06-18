@@ -1,7 +1,7 @@
 <template>
     <UserLayout title="Resource Management">
         <div class="animate-fade-in-up space-y-3">
-            <ResourceMangementTable :resources="resources" />
+            <ResourceMangementTable :resources="resources" :organizations="organizations" />
         </div>
     </UserLayout>
 </template>
@@ -12,6 +12,10 @@ import ResourceMangementTable from '@/Components/Resourcemanagement/ResourceMang
 
 defineProps({
     resources: {
+        type: Array,
+        default: () => [],
+    },
+    organizations: {
         type: Array,
         default: () => [],
     },

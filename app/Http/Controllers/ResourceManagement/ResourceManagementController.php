@@ -4,6 +4,7 @@ namespace App\Http\Controllers\ResourceManagement;
 
 use App\Http\Controllers\Controller;
 use App\Models\MstResource;
+use App\Models\TrsOrganization;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -16,10 +17,12 @@ class ResourceManagementController extends Controller
      */
     public function index(): Response
     {
-        $resources = MstResource::orderBy('id', 'desc')->get();
+        $resources = MstResource::with('organization')->orderBy('id', 'desc')->get();
+        $organizations = TrsOrganization::orderBy('name', 'asc')->get();
 
         return Inertia::render('ResourceManagement/Index', [
             'resources' => $resources,
+            'organizations' => $organizations,
         ]);
     }
 
@@ -30,9 +33,9 @@ class ResourceManagementController extends Controller
     {
         $validated = $request->validate([
             'name' => 'nullable|string|max:255',
-            'jabatan' => 'nullable|string|max:255',
+            'jabatan' => 'required|integer|exists:trs_organization,id',
             'internal_id' => 'nullable|string|max:255',
-            'masa_berlaku' => 'nullable|string|max:255',
+            'sk' => 'nullable|string|max:255',
         ]);
 
         MstResource::create($validated);
@@ -49,9 +52,9 @@ class ResourceManagementController extends Controller
 
         $validated = $request->validate([
             'name' => 'nullable|string|max:255',
-            'jabatan' => 'nullable|string|max:255',
+            'jabatan' => 'required|integer|exists:trs_organization,id',
             'internal_id' => 'nullable|string|max:255',
-            'masa_berlaku' => 'nullable|string|max:255',
+            'sk' => 'nullable|string|max:255',
         ]);
 
         $resource->update($validated);
