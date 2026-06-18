@@ -18,7 +18,7 @@ class RegulationController extends Controller
      */
     public function index(): Response
     {
-        $regulations = MstRegulation::with(['organization', 'parent', 'master'])
+        $regulations = MstRegulation::with(['organization', 'parent', 'master', 'revokedRegulations'])
             ->withCount(['generalPolicies'])
             ->orderBy('id', 'asc')
             ->get();
@@ -50,6 +50,8 @@ class RegulationController extends Controller
             'master_id' => 'nullable|integer|exists:trs_organization,id',
             'parent_id' => 'nullable|integer|exists:mst_regulation,id',
             'status' => 'nullable|string|max:255',
+            'revoked_ids' => 'nullable|array',
+            'revoked_ids.*' => 'integer|exists:mst_regulation,id',
         ], [
             'judul.required' => 'Judul Kebijakan wajib diisi.',
             'tipe.required' => 'Tipe Kebijakan wajib diisi.',
@@ -61,7 +63,11 @@ class RegulationController extends Controller
             'berlaku.date' => 'Tanggal Berlaku harus berupa format tanggal.',
         ]);
 
-        MstRegulation::create($validated);
+        $regulation = MstRegulation::create(\Illuminate\Support\Arr::except($validated, ['revoked_ids']));
+
+        if ($request->has('revoked_ids')) {
+            $regulation->revokedRegulations()->sync($request->input('revoked_ids'));
+        }
 
         return redirect()
             ->route('policy.regulation.index')
@@ -97,6 +103,16 @@ class RegulationController extends Controller
                     }
                 },
             ],
+            'revoked_ids' => 'nullable|array',
+            'revoked_ids.*' => [
+                'integer',
+                'exists:mst_regulation,id',
+                function ($attribute, $value, $fail) use ($id) {
+                    if ($value == $id) {
+                        $fail('Kebijakan tidak boleh mencabut dirinya sendiri.');
+                    }
+                },
+            ],
         ], [
             'judul.required' => 'Judul Kebijakan wajib diisi.',
             'tipe.required' => 'Tipe Kebijakan wajib diisi.',
@@ -108,7 +124,11 @@ class RegulationController extends Controller
             'berlaku.date' => 'Tanggal Berlaku harus berupa format tanggal.',
         ]);
 
-        $regulation->update($validated);
+        $regulation->update(\Illuminate\Support\Arr::except($validated, ['revoked_ids']));
+
+        if ($request->has('revoked_ids')) {
+            $regulation->revokedRegulations()->sync($request->input('revoked_ids'));
+        }
 
         return redirect()
             ->route('policy.regulation.index')

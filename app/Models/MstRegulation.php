@@ -7,6 +7,7 @@ use App\Models\TrsOrganization;
 use App\Models\TrsTkoContent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MstRegulation extends Model
@@ -121,5 +122,23 @@ class MstRegulation extends Model
     public function tkoContents(): HasMany
     {
         return $this->hasMany(TrsTkoContent::class, 'regulation_id');
+    }
+
+    /**
+     * Regulations revoked by this regulation (Many-to-Many via trs_record_regulation)
+     */
+    public function revokedRegulations(): BelongsToMany
+    {
+        return $this->belongsToMany(MstRegulation::class, 'trs_record_regulation', 'revocation', 'revoked')
+            ->withTimestamps();
+    }
+
+    /**
+     * Regulations that revoke this regulation (Many-to-Many via trs_record_regulation)
+     */
+    public function revocationRegulations(): BelongsToMany
+    {
+        return $this->belongsToMany(MstRegulation::class, 'trs_record_regulation', 'revoked', 'revocation')
+            ->withTimestamps();
     }
 }

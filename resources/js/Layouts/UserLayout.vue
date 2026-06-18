@@ -15,7 +15,7 @@ import {
     ChevronDownIcon,
     TableCellsIcon,
     ArrowRightOnRectangleIcon,
-    
+    CircleStackIcon,
 } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
@@ -34,6 +34,8 @@ const currentUrl = computed(() => page.url || '');
 const displayName = computed(() => authUser.value?.name || authUser.value?.email || 'User');
 const userEmail = computed(() => authUser.value?.email || '-');
 const { navItems } = useNavigation();
+
+const currentDb = computed(() => page.props.currentConnection || 'sqlite');
 
 const getInitials = (name) => {
     if (!name) return 'U';
@@ -156,6 +158,20 @@ onUnmounted(() => {
                         </transition>
                     </Menu>
 
+                    <!-- Database Connection Indicator -->
+                    <div 
+                        class="hidden sm:flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors"
+                        :class="currentDb === 'sqlite' 
+                            ? 'bg-slate-50 text-slate-700 border-slate-200 dark:bg-white/5 dark:text-slate-300 dark:border-white/10' 
+                            : 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20'"
+                    >
+                        <CircleStackIcon class="h-4 w-4 shrink-0" :class="currentDb === 'sqlite' ? 'text-slate-400 dark:text-slate-500' : 'text-indigo-500 dark:text-indigo-400'" />
+                        <span class="text-slate-500 dark:text-slate-400">Data:</span>
+                        <span class="font-bold">
+                            {{ currentDb === 'sqlite' ? 'Lokal (SQLite)' : 'Master (Server)' }}
+                        </span>
+                    </div>
+
                     <!-- Mobile Menu Button -->
                     <button
                         type="button"
@@ -217,6 +233,19 @@ onUnmounted(() => {
 
                     <!-- User Info & Logout -->
                     <div class="px-3 py-2">
+                        <!-- Database Connection Indicator (Mobile) -->
+                        <div 
+                            class="mb-4 flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors"
+                            :class="currentDb === 'sqlite' 
+                                ? 'bg-slate-50 text-slate-700 border-slate-200 dark:bg-white/5 dark:text-slate-300 dark:border-white/10' 
+                                : 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20'"
+                        >
+                            <CircleStackIcon class="h-4 w-4 shrink-0" :class="currentDb === 'sqlite' ? 'text-slate-400 dark:text-slate-500' : 'text-indigo-500 dark:text-indigo-400'" />
+                            <span class="text-slate-500 dark:text-slate-400">Data:</span>
+                            <span class="font-bold">
+                                {{ currentDb === 'sqlite' ? 'Lokal (SQLite)' : 'Master (Server)' }}
+                            </span>
+                        </div>
                         <div class="mb-3 flex items-center gap-3">
                             <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-xs font-semibold text-white">
                                 {{ getInitials(displayName) }}
