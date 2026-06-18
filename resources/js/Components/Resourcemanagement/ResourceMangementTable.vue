@@ -217,6 +217,48 @@ const form = useForm({
     end: '',
 });
 
+// Build sorted/flattened organization hierarchy list
+const sortedOrganizations = computed(() => {
+    const orgs = props.organizations;
+    const orgMap = new Map(orgs.map(org => [org.id, { ...org, children: [] }]));
+    const roots = [];
+
+    orgs.forEach(org => {
+        const mapped = orgMap.get(org.id);
+        if (org.parent_id && orgMap.has(org.parent_id)) {
+            orgMap.get(org.parent_id).children.push(mapped);
+        } else {
+            roots.push(mapped);
+        }
+    });
+
+    const sortNodes = (nodes) => {
+        nodes.sort((a, b) => (a.code || '').localeCompare(b.code || ''));
+        nodes.forEach(node => {
+            if (node.children.length > 0) {
+                sortNodes(node.children);
+            }
+        });
+    };
+    sortNodes(roots);
+
+    const flattened = [];
+    const traverse = (node) => {
+        flattened.push(node);
+        node.children.forEach(traverse);
+    };
+    roots.forEach(traverse);
+    return flattened;
+});
+
+const orgOrderMap = computed(() => {
+    const map = new Map();
+    sortedOrganizations.value.forEach((org, index) => {
+        map.set(Number(org.id), index);
+    });
+    return map;
+});
+
 const filteredRows = computed(() => {
     let rows = props.resources;
 
@@ -234,7 +276,17 @@ const filteredRows = computed(() => {
         );
     }
 
-    return rows;
+    // Sort rows based on organization hierarchy order
+    return [...rows].sort((a, b) => {
+        const orderA = a.jabatan ? (orgOrderMap.value.get(Number(a.jabatan)) ?? Infinity) : Infinity;
+        const orderB = b.jabatan ? (orgOrderMap.value.get(Number(b.jabatan)) ?? Infinity) : Infinity;
+
+        if (orderA !== orderB) {
+            return orderA - orderB;
+        }
+
+        return (a.name || '').localeCompare(b.name || '');
+    });
 });
 
 const openCreateModal = () => {
