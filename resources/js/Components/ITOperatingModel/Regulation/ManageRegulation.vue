@@ -59,7 +59,8 @@
                                         <option value="Policy">Policy</option>
                                         <option value="Procedure">Procedure</option>
                                         <option value="Standart">Standart</option>
-                                        <option value="Surat Keterangan">Surat Keterangan</option>
+                                        <option value="Surat Keputusan">Surat Keputusan</option>
+                                        <option value="Surat Perintah">Surat Perintah</option>
                                     </select>
                                     <div v-if="form.errors.tipe" class="text-xs text-rose-500 font-medium">{{ form.errors.tipe }}</div>
                                 </div>
