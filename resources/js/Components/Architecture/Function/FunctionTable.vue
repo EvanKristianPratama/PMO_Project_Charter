@@ -74,7 +74,12 @@
                             {{ displayValue(fn.alias) }}
                         </td>
                         <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
-                            {{ fn.regulation ? `${fn.regulation.judul} (${fn.regulation.nomor})` : '-' }}
+                            <div class="flex flex-wrap gap-1">
+                                <span v-for="reg in fn.regulations" :key="reg.id" class="inline-flex items-center rounded bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-800 dark:bg-white/10 dark:text-slate-200">
+                                    {{ reg.judul }} ({{ reg.nomor }})
+                                </span>
+                                <span v-if="!fn.regulations || fn.regulations.length === 0">-</span>
+                            </div>
                         </td>
                         <td class="px-4 py-3 text-slate-500 dark:text-slate-400 text-xs">
                             {{ getParentLabel(fn.parent_id) }}
@@ -207,27 +212,91 @@
                 <span v-if="form.errors.alias" class="text-xs text-red-500 font-medium">{{ form.errors.alias }}</span>
             </div>
 
-            <!-- Regulation Input -->
-            <div class="flex flex-col gap-1.5">
-                <label for="fn_regulation_id" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Regulation</label>
-                <!-- Search Input for Regulation -->
-                <input
-                    type="text"
-                    v-model="regulationSearchQuery"
-                    placeholder="Cari regulation berdasarkan judul atau nomor..."
-                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
-                />
-                <select
-                    id="fn_regulation_id"
-                    v-model="form.regulation_id"
-                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
-                >
-                    <option value="">-- Pilih Regulation --</option>
-                    <option v-for="reg in filteredFormRegulations" :key="reg.id" :value="reg.id">
-                        {{ reg.judul }} ({{ reg.nomor }})
-                    </option>
-                </select>
-                <span v-if="form.errors.regulation_id" class="text-xs text-red-500 font-medium">{{ form.errors.regulation_id }}</span>
+            <!-- Regulation Links Input -->
+            <!-- Regulation Links Input -->
+            <div class="flex flex-col gap-1.5 relative">
+                <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Regulation Links</label>
+                
+                <!-- Trigger Button -->
+                <div class="relative">
+                    <button 
+                        type="button"
+                        @click="toggleRegulationDropdown"
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-left focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white flex justify-between items-center"
+                    >
+                        <span class="truncate text-slate-400 dark:text-slate-500">
+                            -- Pilih Regulation --
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-slate-400 shrink-0">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Overlay for click outside -->
+                <div v-if="isRegulationDropdownOpen" class="fixed inset-0 z-30" @click="isRegulationDropdownOpen = false"></div>
+
+                <!-- Dropdown Content -->
+                <div v-if="isRegulationDropdownOpen" class="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl dark:bg-[#1a1a1a] dark:border-white/10 z-40 max-h-60 overflow-y-auto p-2 space-y-2">
+                    <!-- Search input inside dropdown -->
+                    <div class="sticky top-0 bg-white dark:bg-[#1a1a1a] pb-1.5">
+                        <input 
+                            type="text" 
+                            v-model="regulationSearchQuery" 
+                            placeholder="Cari regulation berdasarkan judul atau nomor..." 
+                            class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-slate-500/20 dark:bg-black/20 dark:text-white dark:border-white/10"
+                            ref="regulationSearchInput"
+                            @click.stop
+                        />
+                    </div>
+                    
+                    <!-- Options list -->
+                    <div class="space-y-0.5">
+                        <button
+                            v-for="reg in filteredFormRegulations" 
+                            :key="reg.id"
+                            type="button"
+                            @click="toggleRegulation(reg.id)"
+                            :class="[
+                                'w-full text-left px-2.5 py-1.5 text-xs rounded hover:bg-slate-100 dark:hover:bg-white/5 transition flex items-center justify-between',
+                                form.regulation_ids.includes(reg.id) ? 'bg-slate-100 text-slate-900 dark:bg-white/10 dark:text-white font-semibold' : 'text-slate-700 dark:text-slate-300'
+                            ]"
+                        >
+                            <span class="truncate">
+                                [{{ reg.tipe }}] {{ reg.judul }} {{ reg.nomor ? `(${reg.nomor})` : '' }}
+                            </span>
+                            <svg v-if="form.regulation_ids.includes(reg.id)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-slate-900 dark:text-white shrink-0">
+                                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <div v-if="filteredFormRegulations.length === 0" class="text-center py-4 text-xs text-slate-400">
+                            Tidak ada hasil ditemukan.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selected list display -->
+                <div v-if="form.regulation_ids.length > 0" class="mt-2 flex flex-wrap gap-1.5">
+                    <span 
+                        v-for="id in form.regulation_ids" 
+                        :key="id"
+                        class="inline-flex items-center gap-1 rounded-lg bg-slate-100 pl-2.5 pr-1.5 py-1 text-xs font-medium text-slate-700 dark:bg-white/5 dark:text-slate-300 border border-slate-200 dark:border-white/10"
+                    >
+                        <span class="max-w-[200px] truncate">
+                            {{ getRegulationLabel(id) }}
+                        </span>
+                        <button 
+                            type="button" 
+                            @click="removeRegulationId(id)"
+                            class="rounded-full p-0.5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3">
+                                <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                            </svg>
+                        </button>
+                    </span>
+                </div>
+                <span v-if="form.errors.regulation_ids" class="text-xs text-red-500 font-medium">{{ form.errors.regulation_ids }}</span>
             </div>
         </div>
     </ConfirmationModal>
@@ -377,8 +446,10 @@ const filteredRows = computed(() => {
             (fn.code || '').toLowerCase().includes(q) ||
             (fn.name || '').toLowerCase().includes(q) ||
             (fn.alias || '').toLowerCase().includes(q) ||
-            (fn.regulation?.judul || '').toLowerCase().includes(q) ||
-            (fn.regulation?.nomor || '').toLowerCase().includes(q)
+            (fn.regulations || []).some(reg =>
+                (reg.judul || '').toLowerCase().includes(q) ||
+                (reg.nomor || '').toLowerCase().includes(q)
+            )
         );
     }
 
@@ -399,14 +470,50 @@ const selectedFn = ref(null);
 const modalMode = ref('create');
 const regulationSearchQuery = ref('');
 
+// Dropdown selector state & helpers
+const isRegulationDropdownOpen = ref(false);
+const regulationSearchInput = ref(null);
+
+const toggleRegulationDropdown = () => {
+    isRegulationDropdownOpen.value = !isRegulationDropdownOpen.value;
+    if (isRegulationDropdownOpen.value) {
+        regulationSearchQuery.value = '';
+        setTimeout(() => {
+            regulationSearchInput.value?.focus();
+        }, 100);
+    }
+};
+
+const removeRegulationId = (id) => {
+    const index = form.regulation_ids.indexOf(id);
+    if (index > -1) {
+        form.regulation_ids.splice(index, 1);
+    }
+};
+
 const filteredFormRegulations = computed(() => {
     const query = regulationSearchQuery.value.toLowerCase().trim();
     if (!query) return props.regulations;
     return props.regulations.filter(reg =>
         (reg.judul || '').toLowerCase().includes(query) ||
-        (reg.nomor || '').toLowerCase().includes(query)
+        (reg.nomor || '').toLowerCase().includes(query) ||
+        (reg.tipe || '').toLowerCase().includes(query)
     );
 });
+
+const getRegulationLabel = (id) => {
+    const reg = props.regulations.find(r => r.id === Number(id));
+    return reg ? `[${reg.tipe}] ${reg.judul}` : '';
+};
+
+const toggleRegulation = (id) => {
+    const index = form.regulation_ids.indexOf(id);
+    if (index > -1) {
+        form.regulation_ids.splice(index, 1);
+    } else {
+        form.regulation_ids.push(id);
+    }
+};
 
 const form = useForm({
     groub_id: '',
@@ -414,7 +521,7 @@ const form = useForm({
     code: '',
     name: '',
     alias: '',
-    regulation_id: '',
+    regulation_ids: [],
 });
 
 /** Opsi parent di modal — exclude diri sendiri & turunannya saat edit, pre-filtered by group if selected */
@@ -465,6 +572,7 @@ const openCreateModal = () => {
     form.reset();
     parentGroupFilterId.value = '';
     regulationSearchQuery.value = '';
+    isRegulationDropdownOpen.value = false;
     isModalOpen.value = true;
 };
 
@@ -477,8 +585,9 @@ const openEditModal = (fn) => {
     form.code = fn.code || '';
     form.name = fn.name || '';
     form.alias = fn.alias || '';
-    form.regulation_id = fn.regulation_id ? String(fn.regulation_id) : '';
+    form.regulation_ids = fn.regulations ? fn.regulations.map(r => r.id) : [];
     regulationSearchQuery.value = '';
+    isRegulationDropdownOpen.value = false;
 
     const parentFn = props.functions.find(
         f => String(f.id) === String(fn.parent_id)

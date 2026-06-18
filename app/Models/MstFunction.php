@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class MstFunction extends Model
 {
@@ -16,14 +17,12 @@ class MstFunction extends Model
         'code',
         'name',
         'alias',
-        'regulation_id',
     ];
 
     protected $casts = [
         'groub_id' => 'integer',
         'parent_id' => 'integer',
         'code' => 'string',
-        'regulation_id' => 'integer',
     ];
 
     /**
@@ -53,8 +52,9 @@ class MstFunction extends Model
     /**
      * Relasi ke MstRegulation.
      */
-    public function regulation(): BelongsTo
+    public function regulations(): BelongsToMany
     {
-        return $this->belongsTo(MstRegulation::class, 'regulation_id');
+        return $this->belongsToMany(MstRegulation::class, 'trs_map_func_regulation', 'function_id', 'regulation_id')
+            ->withTimestamps();
     }
 }

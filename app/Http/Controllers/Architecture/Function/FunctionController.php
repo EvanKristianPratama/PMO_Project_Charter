@@ -12,7 +12,7 @@ class FunctionController extends Controller
 {
     public function index()
     {
-        $functions = MstFunction::with(['groub', 'regulation'])->orderBy('code')->get();
+        $functions = MstFunction::with(['groub', 'regulations'])->orderBy('code')->get();
         $groubOptions = Groub::with('company')->orderBy('name')->get()->map(fn ($g) => [
             'id' => $g->id,
             'name' => $g->company ? "{$g->company->name} - {$g->name}" : $g->name,
@@ -33,22 +33,24 @@ class FunctionController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'groub_id'      => ['required', 'integer', 'exists:trs_groub,id'],
-            'parent_id'     => ['nullable', 'integer', 'exists:mst_function,id'],
-            'code'          => ['required', 'string', 'max:255'],
-            'name'          => ['required', 'string', 'max:255'],
-            'alias'         => ['nullable', 'string', 'max:255'],
-            'regulation_id' => ['nullable', 'integer', 'exists:mst_regulation,id'],
+            'groub_id'       => ['required', 'integer', 'exists:trs_groub,id'],
+            'parent_id'      => ['nullable', 'integer', 'exists:mst_function,id'],
+            'code'           => ['required', 'string', 'max:255'],
+            'name'           => ['required', 'string', 'max:255'],
+            'alias'          => ['nullable', 'string', 'max:255'],
+            'regulation_ids' => ['nullable', 'array'],
+            'regulation_ids.*' => ['integer', 'exists:mst_regulation,id'],
         ]);
 
-        MstFunction::create([
-            'groub_id'      => $validated['groub_id'],
-            'parent_id'     => $validated['parent_id'] ?: null,
-            'code'          => $validated['code'],
-            'name'          => $validated['name'],
-            'alias'         => $validated['alias'] ?? null,
-            'regulation_id' => $validated['regulation_id'] ?? null,
+        $function = MstFunction::create([
+            'groub_id'  => $validated['groub_id'],
+            'parent_id' => $validated['parent_id'] ?: null,
+            'code'      => $validated['code'],
+            'name'      => $validated['name'],
+            'alias'     => $validated['alias'] ?? null,
         ]);
+
+        $function->regulations()->sync($validated['regulation_ids'] ?? []);
 
         return redirect()->back()->with('success', 'Function berhasil ditambahkan.');
     }
@@ -58,22 +60,24 @@ class FunctionController extends Controller
         $function = MstFunction::findOrFail($id);
 
         $validated = $request->validate([
-            'groub_id'      => ['required', 'integer', 'exists:trs_groub,id'],
-            'parent_id'     => ['nullable', 'integer', 'exists:mst_function,id'],
-            'code'          => ['required', 'string', 'max:255'],
-            'name'          => ['required', 'string', 'max:255'],
-            'alias'         => ['nullable', 'string', 'max:255'],
-            'regulation_id' => ['nullable', 'integer', 'exists:mst_regulation,id'],
+            'groub_id'       => ['required', 'integer', 'exists:trs_groub,id'],
+            'parent_id'      => ['nullable', 'integer', 'exists:mst_function,id'],
+            'code'           => ['required', 'string', 'max:255'],
+            'name'           => ['required', 'string', 'max:255'],
+            'alias'          => ['nullable', 'string', 'max:255'],
+            'regulation_ids' => ['nullable', 'array'],
+            'regulation_ids.*' => ['integer', 'exists:mst_regulation,id'],
         ]);
 
         $function->update([
-            'groub_id'      => $validated['groub_id'],
-            'parent_id'     => $validated['parent_id'] ?: null,
-            'code'          => $validated['code'],
-            'name'          => $validated['name'],
-            'alias'         => $validated['alias'] ?? null,
-            'regulation_id' => $validated['regulation_id'] ?? null,
+            'groub_id'  => $validated['groub_id'],
+            'parent_id' => $validated['parent_id'] ?: null,
+            'code'      => $validated['code'],
+            'name'      => $validated['name'],
+            'alias'     => $validated['alias'] ?? null,
         ]);
+
+        $function->regulations()->sync($validated['regulation_ids'] ?? []);
 
         return redirect()->back()->with('success', 'Function berhasil diperbarui.');
     }
