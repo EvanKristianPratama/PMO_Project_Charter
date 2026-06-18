@@ -90,16 +90,16 @@
                     <table class="w-full border-collapse text-left text-xs text-slate-500 dark:text-slate-400">
                         <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
                             <tr>
-                                <th scope="col" class="px-3 py-3 w-10 text-center border-r border-b border-slate-200 dark:border-white/10">No</th>
+                                <th scope="col" class="px-3 py-3 w-10 min-w-[40px] whitespace-nowrap text-center border-r border-b border-slate-200 dark:border-white/10">No</th>
                                 <th scope="col" class="px-3 py-3 text-center border-r border-b border-slate-200 dark:border-white/10">Judul</th>
                                 <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Nomor</th>
-                                <th scope="col" class="px-3 py-3 w-28 border-r border-b border-slate-200 dark:border-white/10">Tipe</th>
+                                <th scope="col" class="px-3 py-3 w-28 min-w-[112px] whitespace-nowrap border-r border-b border-slate-200 dark:border-white/10">Tipe</th>
                                 <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Pemilik Dokumen</th>
                                 <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Akses Role / Pemilik Dokumen</th>
-                                <th scope="col" class="px-3 py-3 text-center w-24 border-r border-b border-slate-200 dark:border-white/10">Status</th>
-                                <th scope="col" class="px-3 py-3 text-center w-16 border-r border-b border-slate-200 dark:border-white/10">Revisi</th>
-                                <th scope="col" class="px-3 py-3 w-24 border-r border-b border-slate-200 dark:border-white/10">Berlaku</th>
-                                <th scope="col" class="px-3 py-3 text-center w-24 border-b border-slate-200 dark:border-white/10">Aksi</th>
+                                <th scope="col" class="px-3 py-3 text-center w-24 min-w-[96px] whitespace-nowrap border-r border-b border-slate-200 dark:border-white/10">Status</th>
+                                <th scope="col" class="px-3 py-3 text-center w-16 min-w-[64px] whitespace-nowrap border-r border-b border-slate-200 dark:border-white/10">Revisi</th>
+                                <th scope="col" class="px-3 py-3 w-24 min-w-[96px] whitespace-nowrap border-r border-b border-slate-200 dark:border-white/10">Berlaku</th>
+                                <th scope="col" class="px-3 py-3 text-center w-24 min-w-[96px] whitespace-nowrap border-b border-slate-200 dark:border-white/10">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="dark:bg-transparent">
