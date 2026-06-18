@@ -36,6 +36,8 @@ class ResourceManagementController extends Controller
             'jabatan' => 'required|integer|exists:trs_organization,id',
             'internal_id' => 'nullable|string|max:255',
             'sk' => 'nullable|string|max:255',
+            'start' => 'nullable|date',
+            'end' => 'nullable|date',
         ]);
 
         MstResource::create($validated);
@@ -55,6 +57,8 @@ class ResourceManagementController extends Controller
             'jabatan' => 'required|integer|exists:trs_organization,id',
             'internal_id' => 'nullable|string|max:255',
             'sk' => 'nullable|string|max:255',
+            'start' => 'nullable|date',
+            'end' => 'nullable|date',
         ]);
 
         $resource->update($validated);

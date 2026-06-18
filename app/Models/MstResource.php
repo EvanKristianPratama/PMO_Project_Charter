@@ -10,6 +10,8 @@ class MstResource extends Model
 
     protected $casts = [
         'jabatan' => 'integer',
+        'start' => 'date:Y-m-d',
+        'end' => 'date:Y-m-d',
     ];
 
     protected $fillable = [
@@ -17,6 +19,8 @@ class MstResource extends Model
         'jabatan',
         'internal_id',
         'sk',
+        'start',
+        'end',
     ];
 
     public function organization(): \Illuminate\Database\Eloquent\Relations\BelongsTo

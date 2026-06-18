@@ -31,7 +31,9 @@
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Internal ID</th>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Name</th>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Jabatan</th>
-                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">SK</th>
+                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">SK Penugasan</th>
+                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Start Date</th>
+                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">End Date</th>
                         <th class="px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-36">Actions</th>
                     </tr>
                 </thead>
@@ -48,6 +50,8 @@
                             {{ resource.organization ? (resource.organization.jabatan || resource.organization.name) : '-' }}
                         </td>
                         <td class="px-4 py-3 text-slate-600 dark:text-slate-300">{{ resource.sk || '-' }}</td>
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300">{{ resource.start || '-' }}</td>
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300">{{ resource.end || '-' }}</td>
                         <td class="px-4 py-3 text-center space-x-3 w-36">
                             <button
                                 @click="openEditModal(resource)"
@@ -64,7 +68,7 @@
                         </td>
                     </tr>
                     <tr v-if="filteredRows.length === 0">
-                        <td colspan="6" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+                        <td colspan="8" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
                             Data SDM tidak ditemukan.
                         </td>
                     </tr>
@@ -130,7 +134,7 @@
 
             <!-- SK Input -->
             <div class="flex flex-col gap-1.5">
-                <label for="res_sk" class="text-xs font-semibold text-slate-700 dark:text-slate-300">SK</label>
+                <label for="res_sk" class="text-xs font-semibold text-slate-700 dark:text-slate-300">SK Penugasan</label>
                 <input
                     id="res_sk"
                     v-model="form.sk"
@@ -139,6 +143,31 @@
                     placeholder="Contoh: 31 Desember 2026 atau 1 Tahun"
                 />
                 <span v-if="form.errors.sk" class="text-xs text-red-500 font-medium">{{ form.errors.sk }}</span>
+            </div>
+
+            <!-- Start & End Date Inputs -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1.5">
+                    <label for="res_start" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Start Date</label>
+                    <input
+                        id="res_start"
+                        v-model="form.start"
+                        type="date"
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    />
+                    <span v-if="form.errors.start" class="text-xs text-red-500 font-medium">{{ form.errors.start }}</span>
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                    <label for="res_end" class="text-xs font-semibold text-slate-700 dark:text-slate-300">End Date</label>
+                    <input
+                        id="res_end"
+                        v-model="form.end"
+                        type="date"
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    />
+                    <span v-if="form.errors.end" class="text-xs text-red-500 font-medium">{{ form.errors.end }}</span>
+                </div>
             </div>
         </div>
     </ConfirmationModal>
@@ -184,6 +213,8 @@ const form = useForm({
     jabatan: '',
     internal_id: '',
     sk: '',
+    start: '',
+    end: '',
 });
 
 const filteredRows = computed(() => {
@@ -197,6 +228,8 @@ const filteredRows = computed(() => {
             (res.organization?.name || '').toLowerCase().includes(q) ||
             (res.internal_id || '').toLowerCase().includes(q) ||
             (res.sk || '').toLowerCase().includes(q) ||
+            (res.start || '').toLowerCase().includes(q) ||
+            (res.end || '').toLowerCase().includes(q) ||
             String(res.id).includes(q)
         );
     }
@@ -219,6 +252,8 @@ const openEditModal = (resource) => {
     form.jabatan = resource.jabatan || '';
     form.internal_id = resource.internal_id || '';
     form.sk = resource.sk || '';
+    form.start = resource.start || '';
+    form.end = resource.end || '';
     isModalOpen.value = true;
 };
 
