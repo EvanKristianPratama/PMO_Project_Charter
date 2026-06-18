@@ -169,23 +169,27 @@ const getVisualOrgDepth = (depth) => {
 };
 
 const regulationsByOrgHierarchy = computed(() => {
+    // Build a local tree for regulations under one org node.
+    // Orphaned children (parent absent from the subset) are promoted to root.
     const sortLocalRegulations = (regs) => {
         const map = {};
         const roots = [];
-        
+
         regs.forEach(reg => {
             map[reg.id] = { ...reg, children: [] };
         });
-        
+
         regs.forEach(reg => {
             const mapped = map[reg.id];
             if (reg.parent_id && map[reg.parent_id]) {
+                // Parent present in this local subset → attach as child
                 map[reg.parent_id].children.push(mapped);
             } else {
+                // Orphaned (parent filtered out or simply absent) → promote to root
                 roots.push(mapped);
             }
         });
-        
+
         const sorted = [];
         const traverseRegs = (regNode) => {
             sorted.push(regNode);
@@ -193,11 +197,11 @@ const regulationsByOrgHierarchy = computed(() => {
                 traverseRegs(child);
             });
         };
-        
+
         roots.forEach(root => {
             traverseRegs(root);
         });
-        
+
         return sorted;
     };
 

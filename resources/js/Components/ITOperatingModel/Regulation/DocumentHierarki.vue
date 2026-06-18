@@ -140,7 +140,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { Link } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -157,23 +157,26 @@ const props = defineProps({
 defineEmits(['detail', 'delete', 'edit']);
 
 // Tree hierarchy computing
+// If a child's parent is absent from the filtered list (orphaned), treat it as a root.
 const documentTree = computed(() => {
     const map = {};
     const roots = [];
-    
+
     props.regulations.forEach(reg => {
         map[reg.id] = { ...reg, children: [] };
     });
-    
+
     props.regulations.forEach(reg => {
         const mapped = map[reg.id];
         if (reg.parent_id && map[reg.parent_id]) {
+            // Parent exists in the current filtered list → attach as child
             map[reg.parent_id].children.push(mapped);
         } else {
+            // No parent in the filtered list → promote to root
             roots.push(mapped);
         }
     });
-    
+
     return roots;
 });
 
@@ -230,6 +233,15 @@ const initializeExpandedDocs = () => {
 onMounted(() => {
     initializeExpandedDocs();
 });
+
+// Re-initialize expanded state whenever filtered regulations change
+watch(
+    () => props.regulations,
+    () => {
+        initializeExpandedDocs();
+    },
+    { deep: false }
+);
 </script>
 
 <style scoped>
