@@ -115,6 +115,7 @@ const selectedPeriod = ref(PERIOD_FILTER_LATEST);
 const selectedOrganization = ref("");
 const selectedProjectLeader = ref("");
 const selectedProjectOwner = ref("");
+const roadmapFilter = ref("all"); // "all" | "with" | "without"
 
 /* ── Year / Month grid ─────────────────────────────── */
 const years = computed(() =>
@@ -1028,6 +1029,14 @@ const displayGroups = computed(() =>
                     }
                 }
 
+                if (roadmapFilter.value !== "all") {
+                    const hasRoadmap = initiative.timeline_rows?.some(
+                        (row) => !row.isPlaceholder && row.cells?.some((c) => c.type === 'bar'),
+                    ) ?? false;
+                    if (roadmapFilter.value === "with" && !hasRoadmap) return false;
+                    if (roadmapFilter.value === "without" && hasRoadmap) return false;
+                }
+
                 if (selectedReviewStatus.value === "Total") return true;
                 return normalizeStatusLabel(initiative?.display_status) === selectedReviewStatus.value;
             });
@@ -1205,6 +1214,45 @@ const reviewStatusLegendItems = computed(() => {
                                     <span class="legend-count">({{ item.count }})</span>
                                 </span>
                             </button>
+                        </div>
+
+                        <!-- Filter: Tampilan roadmap -->
+                        <div class="legend-panel__section legend-panel__section--roadmap-filter">
+                            <div class="legend-panel__subtitle">Roadmap</div>
+                            <div class="legend-list">
+                                <button
+                                    type="button"
+                                    :aria-pressed="roadmapFilter === 'with'"
+                                    :class="[
+                                        'legend-item',
+                                        'legend-item--button',
+                                        roadmapFilter === 'with' ? 'legend-item--active' : '',
+                                    ]"
+                                    @click="roadmapFilter = roadmapFilter === 'with' ? 'all' : 'with'"
+                                >
+                                    <span class="legend-swatch legend-swatch--has-roadmap" />
+                                    <span class="legend-label">Dengan Roadmap</span>
+                                    <span class="legend-toggle">
+                                        {{ roadmapFilter === 'with' ? 'Aktif' : 'Off' }}
+                                    </span>
+                                </button>
+                                <button
+                                    type="button"
+                                    :aria-pressed="roadmapFilter === 'without'"
+                                    :class="[
+                                        'legend-item',
+                                        'legend-item--button',
+                                        roadmapFilter === 'without' ? 'legend-item--active legend-item--active--warning' : '',
+                                    ]"
+                                    @click="roadmapFilter = roadmapFilter === 'without' ? 'all' : 'without'"
+                                >
+                                    <span class="legend-swatch legend-swatch--no-roadmap" />
+                                    <span class="legend-label">Tanpa Roadmap</span>
+                                    <span class="legend-toggle">
+                                        {{ roadmapFilter === 'without' ? 'Aktif' : 'Off' }}
+                                    </span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1887,6 +1935,7 @@ const reviewStatusLegendItems = computed(() => {
 }
 
 .legend-item--active { border-color: #5d8cc0; background: #eef6ff; }
+.legend-item--active--warning { border-color: #f59e0b !important; background: #fffbeb !important; }
 .legend-item--muted  { opacity: 0.5; }
 
 .legend-swatch {
@@ -1910,6 +1959,16 @@ const reviewStatusLegendItems = computed(() => {
     height: 10px;
     border-radius: 2px;
     transform: rotate(45deg);
+}
+
+.legend-swatch--has-roadmap {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0b2a8a 100%);
+    border-radius: 3px;
+}
+
+.legend-swatch--no-roadmap {
+    background: linear-gradient(135deg, #f97316 0%, #dc2626 100%);
+    border-radius: 3px;
 }
 
 .legend-label  { font-size: 11px; font-weight: 600; color: #475569; }

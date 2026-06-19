@@ -217,10 +217,17 @@ class ProcedureController extends Controller
             'name' => 'required|string|max:255',
             'organization_id' => 'required|exists:trs_organization,id',
             'regulation_id' => 'required|exists:mst_regulation,id',
+            'function_ids' => 'nullable|array',
+            'function_ids.*' => 'exists:mst_function,id',
+            'organization_ids' => 'nullable|array',
+            'organization_ids.*' => 'exists:trs_organization,id',
         ]);
 
         $actor = MstActor::findOrFail($id);
         $actor->update($validated);
+
+        $actor->functions()->sync($request->input('function_ids', []));
+        $actor->organizations()->sync($request->input('organization_ids', []));
 
         if ($request->wantsJson()) {
             return response()->json(['message' => 'Aktor berhasil diperbarui.']);

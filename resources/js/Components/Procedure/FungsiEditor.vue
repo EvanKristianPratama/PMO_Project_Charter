@@ -7,48 +7,6 @@
                 IV. FUNGSI/ UNIT ORGANISASI/ JABATAN TERKAIT
             </h3>
             <div class="flex items-center gap-3 print:hidden">
-                <!-- Save status indicator -->
-                <span class="text-[11px] flex items-center gap-1.5 select-none">
-                    <span v-if="isSaving" class="text-amber-600 dark:text-amber-400 flex items-center gap-1 font-semibold animate-pulse">
-                        <svg class="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Menyimpan...
-                    </span>
-                    <span v-else-if="saveStatus === 'saved'" class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-bold">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3.5" stroke="currentColor" class="w-3.5 h-3.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                        </svg>
-                        Tersimpan
-                    </span>
-                    <span v-else-if="saveStatus === 'error'" class="text-rose-600 dark:text-rose-400 font-bold">
-                        Gagal menyimpan
-                    </span>
-                    <span v-else-if="modifiedActors.size > 0" class="text-amber-600 dark:text-amber-400 flex items-center gap-1 font-semibold">
-                        <span class="h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span>
-                        Belum disimpan
-                    </span>
-                    <span v-else class="text-slate-400 dark:text-slate-500 flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 text-emerald-500">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Tersimpan
-                    </span>
-                </span>
-
-                <!-- Manual Save Button -->
-                <button
-                    @click="saveAll"
-                    :disabled="isSaving || modifiedActors.size === 0"
-                    class="inline-flex items-center gap-1.5 rounded-lg bg-[#821f44] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#9c2552] active:scale-95 disabled:opacity-50"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l-3 3m3-3l3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
-                    </svg>
-                    Simpan
-                </button>
-
                 <button
                     @click="openAddActorModal"
                     class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 dark:border-white/10 bg-transparent px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-white/5 active:scale-95"
@@ -56,7 +14,7 @@
                     <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                     </svg>
-                    Tambah Aktor
+                    Tambah Peran
                 </button>
             </div>
         </div>
@@ -75,86 +33,18 @@
                 </thead>
                 <tbody class="divide-y divide-slate-200 dark:divide-white/10">
                     <tr v-if="actors.length === 0">
-                        <td colspan="6" class="px-6 py-8 text-center text-slate-400">Belum ada data aktor terkait.</td>
+                        <td colspan="6" class="px-6 py-8 text-center text-slate-400">Belum ada data peran terkait.</td>
                     </tr>
                     <tr v-for="(actor, index) in actors" :key="actor.id" class="group hover:bg-slate-50/50 dark:hover:bg-white/5">
                         <td class="px-6 py-3 text-center align-middle font-medium text-slate-500 dark:text-slate-400">{{ index + 1 }}</td>
-                        <td class="px-6 py-2 align-middle">
-                            <textarea
-                                v-if="actorLocal[actor.id]"
-                                v-model="actorLocal[actor.id].name"
-                                @input="markModified(actor.id)"
-                                @keydown.enter.prevent
-                                rows="2"
-                                class="w-full bg-transparent px-2 py-1 text-slate-900 dark:text-white border border-transparent rounded focus:border-[#821f44] focus:ring-1 focus:ring-[#821f44] focus:bg-white dark:focus:bg-[#1e1e1e] hover:border-slate-300 dark:hover:border-white/10 resize-none leading-normal"
-                                placeholder="Nama Aktor / Jabatan"
-                            ></textarea>
+                        <td class="px-6 py-3 align-middle font-medium text-slate-900 dark:text-white">
+                            {{ actor.name }}
                         </td>
-                        <td class="px-6 py-2 align-middle relative">
-                            <div v-if="actorLocal[actor.id]" class="relative">
-                                <!-- Trigger Button -->
-                                <button 
-                                    type="button"
-                                    @click="toggleActorDropdown(actor.id)"
-                                    class="w-full bg-transparent px-2 py-1 text-slate-900 dark:text-white border border-transparent rounded focus:border-[#821f44] focus:ring-1 focus:ring-[#821f44] hover:border-slate-300 dark:hover:border-white/10 text-left flex justify-between items-center text-[11px]"
-                                >
-                                    <span class="line-clamp-2 whitespace-normal break-words pr-2">
-                                        {{ getSelectedOrgName(actor.id) }}
-                                    </span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3 text-slate-400 shrink-0">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                                    </svg>
-                                </button>
-
-                                <!-- Click Outside Overlay -->
-                                <div v-if="activeDropdownActorId === actor.id" class="fixed inset-0 z-30" @click="activeDropdownActorId = null"></div>
-
-                                <!-- Dropdown Content -->
-                                <div v-if="activeDropdownActorId === actor.id" class="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl dark:bg-[#1a1a1a] dark:border-white/10 z-40 max-h-60 overflow-y-auto p-2 space-y-2">
-                                    <!-- Search Input -->
-                                    <div class="sticky top-0 bg-white dark:bg-[#1a1a1a] pb-1.5">
-                                        <input 
-                                            :id="`actor-search-input-${actor.id}`"
-                                            type="text" 
-                                            v-model="actorSearchQuery" 
-                                            placeholder="Cari jabatan/organisasi..." 
-                                            class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-black/20 dark:text-white dark:border-white/10"
-                                            @click.stop
-                                        />
-                                    </div>
-
-                                    <!-- Option List -->
-                                    <div class="space-y-0.5">
-                                        <button
-                                            type="button"
-                                            @click="selectActorOrganization(actor.id, '')"
-                                            class="w-full text-left px-2.5 py-1.5 text-[11px] rounded hover:bg-slate-100 dark:hover:bg-white/5 text-slate-500 dark:text-slate-400"
-                                        >
-                                            -- Pilih Organisasi --
-                                        </button>
-                                        <button
-                                            v-for="org in filteredSearchOrganizations" 
-                                            :key="org.id"
-                                            type="button"
-                                            @click="selectActorOrganization(actor.id, org.id)"
-                                            :class="[
-                                                'w-full text-left px-2.5 py-1.5 text-[11px] rounded hover:bg-slate-100 dark:hover:bg-white/5 transition flex items-center justify-between',
-                                                actorLocal[actor.id].organization_id === org.id ? 'bg-[#821f44]/5 text-[#821f44] dark:bg-[#db588c]/10 dark:text-[#db588c] font-semibold' : 'text-slate-700 dark:text-slate-300'
-                                            ]"
-                                        >
-                                            <span class="truncate pr-1">
-                                                {{ getLevelPrefix(org) }}{{ org.jabatan }} ({{ org.name || '-' }} - {{ org.code || '-' }})
-                                            </span>
-                                            <svg v-if="actorLocal[actor.id].organization_id === org.id" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3 text-[#821f44] dark:text-[#db588c] shrink-0">
-                                                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
-                                            </svg>
-                                        </button>
-                                        <div v-if="filteredSearchOrganizations.length === 0" class="text-center py-4 text-[11px] text-slate-400">
-                                            Tidak ada hasil ditemukan.
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <td class="px-6 py-3 align-middle text-slate-700 dark:text-slate-300">
+                            <span v-if="actor.organization">
+                                {{ actor.organization.jabatan }} ({{ actor.organization.name || '-' }} - {{ actor.organization.code || '-' }})
+                            </span>
+                            <span v-else class="text-slate-400 italic">—</span>
                         </td>
                         <!-- Kolom Fungsi -->
                         <td class="px-6 py-2 align-middle">
@@ -187,12 +77,20 @@
                             </div>
                         </td>
                         <td class="px-6 py-2 align-middle text-center print:hidden">
-                            <button
-                                @click="deleteActor(actor)"
-                                class="text-[9px] font-bold uppercase tracking-wider text-rose-600 transition-colors hover:text-rose-800"
-                            >
-                                Hapus
-                            </button>
+                            <div class="flex flex-col items-center justify-center gap-1">
+                                <button
+                                    @click="openEditActorModal(actor)"
+                                    class="w-14 inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-bold text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5 active:scale-95"
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    @click="deleteActor(actor)"
+                                    class="w-14 inline-flex items-center justify-center rounded-full border border-rose-200 bg-white px-2 py-0.5 text-[10px] font-bold text-rose-700 transition hover:bg-rose-50 hover:border-rose-300 dark:border-rose-500/30 dark:bg-[#1a1a1a] dark:text-rose-400 dark:hover:bg-rose-500/10 active:scale-95"
+                                >
+                                    Delete
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 </tbody>
@@ -202,23 +100,27 @@
         <!-- Edit/Add Actor Modal -->
         <ConfirmationModal
             :show="isActorModalOpen"
-            title="Tambah Aktor"
-            message="Silakan isi data aktor baru di bawah ini."
+            :title="editingActorId ? 'Edit Peran' : 'Tambah Peran'"
+            :message="editingActorId ? 'Silakan ubah data peran di bawah ini.' : 'Silakan isi data peran baru di bawah ini.'"
             confirm-text="Simpan"
             cancel-text="Batal"
             type="info"
+            maxWidth="2xl"
             :loading="actorForm.processing"
             @close="closeActorModal"
             @confirm="submitActorForm"
         >
-            <div class="mt-4 space-y-4 font-sans text-xs">
+            <div 
+                class="mt-4 space-y-4 font-sans text-sm transition-all duration-200"
+                :class="isFunctionDropdownOpen || isOrgDropdownOpen ? 'pb-80' : 'pb-4'"
+            >
                 <div class="flex flex-col gap-1.5">
-                    <label for="actor_name" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Nama Aktor</label>
+                    <label for="actor_name" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Nama Peran</label>
                     <input
                         id="actor_name"
                         v-model="actorForm.name"
                         type="text"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#821f44] focus:ring-1 focus:ring-[#821f44] dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-[#821f44] focus:ring-1 focus:ring-[#821f44] dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
                         placeholder="Contoh: Direktur Utama"
                         required
                     />
@@ -230,7 +132,7 @@
                     <select
                         id="actor_org"
                         v-model="actorForm.organization_id"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#821f44] focus:ring-1 focus:ring-[#821f44] dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-[#821f44] focus:ring-1 focus:ring-[#821f44] dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
                         required
                     >
                         <option value="" disabled>Pilih Organisasi...</option>
@@ -250,7 +152,7 @@
                         <button 
                             type="button"
                             @click="toggleFunctionDropdown"
-                            class="w-full bg-white text-slate-800 border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-left focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-[#1a1a1a] dark:text-white dark:border-white/10 flex justify-between items-center"
+                            class="w-full bg-white text-slate-800 border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm text-left focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-[#1a1a1a] dark:text-white dark:border-white/10 flex justify-between items-center"
                         >
                             <span class="truncate text-slate-400">
                                 -- Pilih Fungsi --
@@ -265,14 +167,14 @@
                     <div v-if="isFunctionDropdownOpen" class="fixed inset-0 z-30" @click="isFunctionDropdownOpen = false"></div>
 
                     <!-- Dropdown Content -->
-                    <div v-if="isFunctionDropdownOpen" class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl dark:bg-[#1a1a1a] dark:border-white/10 z-40 max-h-48 overflow-y-auto p-2 space-y-2">
+                    <div v-if="isFunctionDropdownOpen" class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl dark:bg-[#1a1a1a] dark:border-white/10 z-40 max-h-80 overflow-y-auto p-2 space-y-2">
                         <!-- Search input inside dropdown -->
                         <div class="sticky top-0 bg-white dark:bg-[#1a1a1a] pb-1.5">
                             <input 
                                 type="text" 
                                 v-model="functionSearchQuery" 
                                 placeholder="Cari fungsi..." 
-                                class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-black/20 dark:text-white dark:border-white/10"
+                                class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-black/20 dark:text-white dark:border-white/10"
                                 ref="functionSearchInput"
                                 @click.stop
                             />
@@ -286,7 +188,7 @@
                                 type="button"
                                 @click="toggleFunctionSelection(func.id)"
                                 :class="[
-                                    'w-full text-left px-2.5 py-1.5 text-xs rounded hover:bg-slate-100 dark:hover:bg-white/5 transition flex items-center justify-between',
+                                    'w-full text-left px-3 py-2 text-sm rounded hover:bg-slate-100 dark:hover:bg-white/5 transition flex items-center justify-between',
                                     actorForm.function_ids.includes(func.id) ? 'bg-[#821f44]/5 text-[#821f44] dark:bg-[#db588c]/10 dark:text-[#db588c] font-semibold' : 'text-slate-700 dark:text-slate-300'
                                 ]"
                             >
@@ -297,7 +199,7 @@
                                     <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
                                 </svg>
                             </button>
-                            <div v-if="filteredFunctions.length === 0" class="text-center py-4 text-xs text-slate-400">
+                            <div v-if="filteredFunctions.length === 0" class="text-center py-4 text-sm text-slate-400">
                                 Tidak ada hasil ditemukan.
                             </div>
                         </div>
@@ -308,7 +210,7 @@
                         <span 
                             v-for="id in actorForm.function_ids" 
                             :key="id"
-                            class="inline-flex items-center gap-1 rounded-lg bg-slate-100 pl-2.5 pr-1.5 py-1 text-[11px] font-medium text-slate-700 dark:bg-white/5 dark:text-slate-300 border border-slate-200 dark:border-white/10"
+                            class="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 pl-3 pr-2 py-1 text-xs font-medium text-slate-700 dark:bg-white/5 dark:text-slate-300 border border-slate-200 dark:border-white/10"
                         >
                             <span class="max-w-[200px] truncate">
                                 {{ getFunctionTitle(id) }}
@@ -336,7 +238,7 @@
                         <button 
                             type="button"
                             @click="toggleOrgDropdown"
-                            class="w-full bg-white text-slate-800 border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-left focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-[#1a1a1a] dark:text-white dark:border-white/10 flex justify-between items-center"
+                            class="w-full bg-white text-slate-800 border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm text-left focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-[#1a1a1a] dark:text-white dark:border-white/10 flex justify-between items-center"
                         >
                             <span class="truncate text-slate-400">
                                 -- Pilih Organisasi --
@@ -351,14 +253,14 @@
                     <div v-if="isOrgDropdownOpen" class="fixed inset-0 z-30" @click="isOrgDropdownOpen = false"></div>
 
                     <!-- Dropdown Content -->
-                    <div v-if="isOrgDropdownOpen" class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl dark:bg-[#1a1a1a] dark:border-white/10 z-40 max-h-48 overflow-y-auto p-2 space-y-2">
+                    <div v-if="isOrgDropdownOpen" class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl dark:bg-[#1a1a1a] dark:border-white/10 z-40 max-h-80 overflow-y-auto p-2 space-y-2">
                         <!-- Search input inside dropdown -->
                         <div class="sticky top-0 bg-white dark:bg-[#1a1a1a] pb-1.5">
                             <input 
                                 type="text" 
                                 v-model="orgDropdownSearchQuery" 
                                 placeholder="Cari organisasi..." 
-                                class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-black/20 dark:text-white dark:border-white/10"
+                                class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-black/20 dark:text-white dark:border-white/10"
                                 ref="orgDropdownSearchInput"
                                 @click.stop
                             />
@@ -372,7 +274,7 @@
                                 type="button"
                                 @click="toggleOrgSelection(org.id)"
                                 :class="[
-                                    'w-full text-left px-2.5 py-1.5 text-xs rounded hover:bg-slate-100 dark:hover:bg-white/5 transition flex items-center justify-between',
+                                    'w-full text-left px-3 py-2 text-sm rounded hover:bg-slate-100 dark:hover:bg-white/5 transition flex items-center justify-between',
                                     actorForm.organization_ids.includes(org.id) ? 'bg-[#821f44]/5 text-[#821f44] dark:bg-[#db588c]/10 dark:text-[#db588c] font-semibold' : 'text-slate-700 dark:text-slate-300'
                                 ]"
                             >
@@ -383,7 +285,7 @@
                                     <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
                                 </svg>
                             </button>
-                            <div v-if="filteredOrgDropdown.length === 0" class="text-center py-4 text-xs text-slate-400">
+                            <div v-if="filteredOrgDropdown.length === 0" class="text-center py-4 text-sm text-slate-400">
                                 Tidak ada hasil ditemukan.
                             </div>
                         </div>
@@ -394,7 +296,7 @@
                         <span 
                             v-for="id in actorForm.organization_ids" 
                             :key="id"
-                            class="inline-flex items-center gap-1 rounded-lg bg-slate-100 pl-2.5 pr-1.5 py-1 text-[11px] font-medium text-slate-700 dark:bg-white/5 dark:text-slate-300 border border-slate-200 dark:border-white/10"
+                            class="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 pl-3 pr-2 py-1 text-xs font-medium text-slate-700 dark:bg-white/5 dark:text-slate-300 border border-slate-200 dark:border-white/10"
                         >
                             <span class="max-w-[200px] truncate">
                                 {{ getOrgTitle(id) }}
@@ -588,7 +490,7 @@ const filteredOrganizations = computed(() => {
     return flattened;
 });
 
-const hasUnsavedChanges = computed(() => modifiedActors.value.size > 0);
+const hasUnsavedChanges = computed(() => false);
 
 // ─── Init local state ─────────────────────────────────────────────────────────
 function initLocal() {
@@ -617,6 +519,7 @@ function markModified(actorId) {
 
 // ─── Modal State and Methods ──────────────────────────────────────────────────
 const isActorModalOpen = ref(false);
+const editingActorId = ref(null);
 const actorForm = useForm({
     name: '',
     organization_id: '',
@@ -728,6 +631,7 @@ const filteredOrgDropdown = computed(() => {
 });
 
 function openAddActorModal() {
+    editingActorId.value = null;
     actorForm.reset();
     actorForm.clearErrors();
     actorForm.regulation_id = props.activeRegulation?.id || '';
@@ -744,8 +648,24 @@ function openAddActorModal() {
     isActorModalOpen.value = true;
 }
 
+function openEditActorModal(actor) {
+    editingActorId.value = actor.id;
+    actorForm.clearErrors();
+    actorForm.name = actor.name || '';
+    actorForm.organization_id = actor.organization_id || '';
+    actorForm.regulation_id = props.activeRegulation?.id || '';
+    actorForm.function_ids = actor.functions ? actor.functions.map(f => f.id) : [];
+    actorForm.organization_ids = actor.organizations ? actor.organizations.map(o => o.id) : [];
+    isFunctionDropdownOpen.value = false;
+    functionSearchQuery.value = '';
+    isOrgDropdownOpen.value = false;
+    orgDropdownSearchQuery.value = '';
+    isActorModalOpen.value = true;
+}
+
 function closeActorModal() {
     isActorModalOpen.value = false;
+    editingActorId.value = null;
     actorForm.reset();
     isFunctionDropdownOpen.value = false;
     functionSearchQuery.value = '';
@@ -754,25 +674,41 @@ function closeActorModal() {
 }
 
 function submitActorForm() {
-    actorForm.post(route('policy.procedure.actor.store'), {
-        preserveScroll: true,
-        onSuccess: () => {
-            closeActorModal();
-            Swal.fire({
-                title: 'Berhasil!',
-                text: 'Aktor baru telah ditambahkan.',
-                icon: 'success',
-                timer: 2000,
-                showConfirmButton: false,
-            });
-        },
-    });
+    if (editingActorId.value) {
+        actorForm.put(route('policy.procedure.actor.update', editingActorId.value), {
+            preserveScroll: true,
+            onSuccess: () => {
+                closeActorModal();
+                Swal.fire({
+                    title: 'Berhasil!',
+                    text: 'Peran telah diperbarui.',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false,
+                });
+            },
+        });
+    } else {
+        actorForm.post(route('policy.procedure.actor.store'), {
+            preserveScroll: true,
+            onSuccess: () => {
+                closeActorModal();
+                Swal.fire({
+                    title: 'Berhasil!',
+                    text: 'Peran baru telah ditambahkan.',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false,
+                });
+            },
+        });
+    }
 }
 
 function deleteActor(actor) {
     Swal.fire({
-        title: 'Hapus Aktor',
-        text: `Apakah Anda yakin ingin menghapus aktor '${actor.name}'?`,
+        title: 'Hapus Peran',
+        text: `Apakah Anda yakin ingin menghapus peran '${actor.name}'?`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#821f44',
@@ -787,40 +723,7 @@ function deleteActor(actor) {
 }
 
 async function saveAll() {
-    if (modifiedActors.value.size === 0) return;
-    isSaving.value = true;
-    saveStatus.value = null;
-
-    try {
-        const promises = [];
-        for (const actorId of modifiedActors.value) {
-            const data = actorLocal.value[actorId];
-            promises.push(
-                axios.put(
-                    route('policy.procedure.actor.update', actorId),
-                    {
-                        name: data.name,
-                        organization_id: data.organization_id,
-                        regulation_id: props.activeRegulation?.id || '',
-                    },
-                    { headers: { 'Accept': 'application/json' } }
-                )
-            );
-        }
-        await Promise.all(promises);
-        modifiedActors.value.clear();
-        saveStatus.value = 'saved';
-        // Reload after delay so the "Tersimpan" notification is visible first
-        setTimeout(() => {
-            saveStatus.value = null;
-            router.reload({ preserveScroll: true });
-        }, 2000);
-    } catch (error) {
-        console.error('Gagal menyimpan aktor:', error);
-        saveStatus.value = 'error';
-    } finally {
-        isSaving.value = false;
-    }
+    return Promise.resolve();
 }
 
 // ─── Expose for parent tab-switch guard ───────────────────────────────────────

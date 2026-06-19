@@ -115,9 +115,9 @@
                 <button
                     @click="$emit('delete', reg)"
                     class="w-14 inline-flex items-center justify-center rounded-full border border-rose-200 bg-white px-2 py-0.5 text-[10px] font-bold text-rose-700 transition hover:bg-rose-50 hover:border-rose-300 dark:border-rose-500/30 dark:bg-[#1a1a1a] dark:text-rose-400 dark:hover:bg-rose-500/10 active:scale-95"
-                    title="Hapus Regulasi"
+                    title="Delete Regulasi"
                 >
-                    Hapus
+                    Delete
                 </button>
             </div>
         </td>
