@@ -11,6 +11,7 @@ use App\Models\TrsOrganization;
 use App\Models\TrsSopCategory;
 use App\Models\TrsTkoSections;
 use App\Models\TrsTkoContent;
+use App\Models\MstFunction;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -122,7 +123,7 @@ class ProcedureController extends Controller
             $selectedRegulation = $regulations->first();
         }
 
-        $actorsQuery = MstActor::with('organization');
+        $actorsQuery = MstActor::with(['organization', 'functions', 'organizations']);
         if ($selectedRegulation) {
             $actorsQuery->where('regulation_id', $selectedRegulation->id);
         }
@@ -175,6 +176,7 @@ class ProcedureController extends Controller
             'selectedRegulationId' => $selectedRegulation?->id,
             'categories' => $categories,
             'tkoSections' => $tkoSections,
+            'functions' => MstFunction::orderBy('name')->get(),
         ]);
     }
 
@@ -187,9 +189,21 @@ class ProcedureController extends Controller
             'name' => 'required|string|max:255',
             'organization_id' => 'required|exists:trs_organization,id',
             'regulation_id' => 'required|exists:mst_regulation,id',
+            'function_ids' => 'nullable|array',
+            'function_ids.*' => 'exists:mst_function,id',
+            'organization_ids' => 'nullable|array',
+            'organization_ids.*' => 'exists:trs_organization,id',
         ]);
 
-        MstActor::create($validated);
+        $actor = MstActor::create($validated);
+
+        if (!empty($validated['function_ids'])) {
+            $actor->functions()->sync($validated['function_ids']);
+        }
+
+        if (!empty($validated['organization_ids'])) {
+            $actor->organizations()->sync($validated['organization_ids']);
+        }
 
         return back()->with('success', 'Aktor berhasil ditambahkan.');
     }

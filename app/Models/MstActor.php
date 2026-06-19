@@ -45,4 +45,38 @@ class MstActor extends Model
     {
         return $this->hasMany(TrsMapActorSop::class, 'actor_id');
     }
+
+    /**
+     * Many-to-Many relationship with MstFunction.
+     */
+    public function functions(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(MstFunction::class, 'trs_map_actor_function', 'actor_id', 'function_id')
+            ->withTimestamps('created_at', 'updated-at');
+    }
+
+    /**
+     * One-to-Many relationship with TrsMapActorFunction.
+     */
+    public function mapActorFunctions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(TrsMapActorFunction::class, 'actor_id');
+    }
+
+    /**
+     * Many-to-Many relationship with TrsOrganization via trs_map_actor_organization.
+     */
+    public function organizations(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(TrsOrganization::class, 'trs_map_actor_organization', 'actor', 'organization')
+            ->withTimestamps();
+    }
+
+    /**
+     * One-to-Many relationship with TrsMapActorOrganization.
+     */
+    public function mapActorOrganizations(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(TrsMapActorOrganization::class, 'actor');
+    }
 }

@@ -79,4 +79,21 @@ class TrsOrganization extends Model
     {
         return $this->hasMany(MstResource::class, 'jabatan');
     }
+
+    /**
+     * Many-to-Many relationship with MstActor via trs_map_actor_organization.
+     */
+    public function actors(): BelongsToMany
+    {
+        return $this->belongsToMany(MstActor::class, 'trs_map_actor_organization', 'organization', 'actor')
+            ->withTimestamps();
+    }
+
+    /**
+     * One-to-Many relationship with TrsMapActorOrganization.
+     */
+    public function mapActorOrganizations(): HasMany
+    {
+        return $this->hasMany(TrsMapActorOrganization::class, 'organization');
+    }
 }

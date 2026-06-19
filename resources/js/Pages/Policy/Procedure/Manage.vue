@@ -49,6 +49,7 @@
                     :actors="actors"
                     :organizations="organizations"
                     :activeRegulation="activeRegulation"
+                    :functions="functions"
                 />
             </template>
 
@@ -117,6 +118,10 @@ const props = defineProps({
         default: () => [],
     },
     tkoSections: {
+        type: Array,
+        default: () => [],
+    },
+    functions: {
         type: Array,
         default: () => [],
     },

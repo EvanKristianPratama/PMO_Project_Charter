@@ -4,6 +4,7 @@
         :actors="actors"
         :organizations="organizations"
         :activeRegulation="activeRegulation"
+        :functions="functions"
     />
 </template>
 
@@ -23,6 +24,10 @@ const props = defineProps({
     activeRegulation: {
         type: Object,
         default: null,
+    },
+    functions: {
+        type: Array,
+        default: () => [],
     },
 });
 

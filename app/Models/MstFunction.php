@@ -57,4 +57,21 @@ class MstFunction extends Model
         return $this->belongsToMany(MstRegulation::class, 'trs_map_func_regulation', 'function_id', 'regulation_id')
             ->withTimestamps();
     }
+
+    /**
+     * Relasi ke MstActor via trs_map_actor_function.
+     */
+    public function actors(): BelongsToMany
+    {
+        return $this->belongsToMany(MstActor::class, 'trs_map_actor_function', 'function_id', 'actor_id')
+            ->withTimestamps('created_at', 'updated-at');
+    }
+
+    /**
+     * One-to-Many relationship with TrsMapActorFunction.
+     */
+    public function mapActorFunctions(): HasMany
+    {
+        return $this->hasMany(TrsMapActorFunction::class, 'function_id');
+    }
 }
