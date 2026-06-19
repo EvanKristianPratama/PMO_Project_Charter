@@ -44,7 +44,7 @@ class ProcedureController extends Controller
             $selectedRegulation = $regulations->first();
         }
 
-        $actorsQuery = MstActor::with('organization');
+        $actorsQuery = MstActor::with(['organization', 'functions', 'organizations']);
         if ($selectedRegulation) {
             $actorsQuery->where('regulation_id', $selectedRegulation->id);
         }

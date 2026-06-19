@@ -64,7 +64,7 @@ class MstFunction extends Model
     public function actors(): BelongsToMany
     {
         return $this->belongsToMany(MstActor::class, 'trs_map_actor_function', 'function_id', 'actor_id')
-            ->withTimestamps('created_at', 'updated-at');
+            ->withTimestamps('created_at', 'updated_at');
     }
 
     /**

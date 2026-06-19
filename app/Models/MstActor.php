@@ -52,7 +52,7 @@ class MstActor extends Model
     public function functions(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(MstFunction::class, 'trs_map_actor_function', 'actor_id', 'function_id')
-            ->withTimestamps('created_at', 'updated-at');
+            ->withTimestamps('created_at', 'updated_at');
     }
 
     /**
