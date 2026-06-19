@@ -25,49 +25,30 @@
                     <tr>
                         <th class="px-6 py-3 w-20 text-center">No</th>
                         <th class="px-6 py-3">Fungsi / Unit Organisasi / Jabatan</th>
-                        <th class="px-6 py-3">Fungsi</th>
-                        <th class="px-6 py-3">Organisasi</th>
                         <th class="px-6 py-3">Jabatan</th>
                         <th class="px-6 py-3 w-24 text-center print:hidden">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 dark:divide-white/10">
                     <tr v-if="actors.length === 0">
-                        <td colspan="6" class="px-6 py-8 text-center text-slate-400">Belum ada data peran terkait.</td>
+                        <td colspan="4" class="px-6 py-8 text-center text-slate-400">Belum ada data peran terkait.</td>
                     </tr>
                     <tr v-for="(actor, index) in actors" :key="actor.id" class="group hover:bg-slate-50/50 dark:hover:bg-white/5">
                         <td class="px-6 py-3 text-center align-middle font-medium text-slate-500 dark:text-slate-400">{{ index + 1 }}</td>
                         <td class="px-6 py-3 align-middle font-medium text-slate-900 dark:text-white">
-                            {{ actor.name }}
-                        </td>
-                        <!-- Kolom Fungsi -->
-                        <td class="px-6 py-2 align-middle">
-                            <div class="flex flex-wrap gap-1">
-                                <template v-if="actor.functions && actor.functions.length > 0">
-                                    <span
-                                        v-for="func in actor.functions"
-                                        :key="func.id"
-                                        class="inline-flex items-center rounded-md bg-violet-50 dark:bg-violet-900/20 px-2 py-0.5 text-[10px] font-medium text-violet-700 dark:text-violet-300 ring-1 ring-inset ring-violet-600/20 dark:ring-violet-400/20"
-                                    >
-                                        {{ func.name }}<template v-if="func.code"> ({{ func.code }})</template>
-                                    </span>
-                                </template>
-                                <span v-else class="text-[10px] text-slate-400 italic">—</span>
-                            </div>
-                        </td>
-                        <!-- Kolom Organisasi -->
-                        <td class="px-6 py-2 align-middle">
-                            <div class="flex flex-wrap gap-1">
-                                <template v-if="actor.organizations && actor.organizations.length > 0">
-                                    <span
-                                        v-for="org in actor.organizations"
-                                        :key="org.id"
-                                        class="inline-flex items-center rounded-md bg-sky-50 dark:bg-sky-900/20 px-2 py-0.5 text-[10px] font-medium text-sky-700 dark:text-sky-300 ring-1 ring-inset ring-sky-600/20 dark:ring-sky-400/20"
-                                    >
-                                        {{ org.jabatan || org.name }}<template v-if="org.code"> ({{ org.code }})</template>
-                                    </span>
-                                </template>
-                                <span v-else class="text-[10px] text-slate-400 italic">—</span>
+                            <div class="flex items-center gap-2">
+                                <span>{{ actor.name }}</span>
+                                <span 
+                                    v-if="actor.tipe" 
+                                    class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider capitalize border"
+                                    :class="{
+                                        'bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-900/20 dark:text-violet-300 dark:border-violet-800/30': actor.tipe === 'fungsi',
+                                        'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-900/20 dark:text-sky-300 dark:border-sky-800/30': actor.tipe === 'organisasi',
+                                        'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800/30': actor.tipe === 'jabatan'
+                                    }"
+                                >
+                                    {{ actor.tipe }}
+                                </span>
                             </div>
                         </td>
                         <!-- Kolom Jabatan -->
@@ -536,9 +517,10 @@ function markModified(actorId) {
 // ─── Modal State and Methods ──────────────────────────────────────────────────
 const isActorModalOpen = ref(false);
 const editingActorId = ref(null);
-const actorType = ref('fungsi'); // 'fungsi' | 'organisasi'
+const actorType = ref('fungsi'); // 'fungsi' | 'organisasi' | 'jabatan'
 const actorForm = useForm({
     name: '',
+    tipe: 'fungsi',
     organization_id: '',
     regulation_id: '',
     function_ids: [],
@@ -656,6 +638,7 @@ function openAddActorModal() {
     actorForm.organization_id = '';
     actorForm.function_ids = [];
     actorForm.organization_ids = [];
+    actorForm.tipe = 'fungsi';
     isFunctionDropdownOpen.value = false;
     functionSearchQuery.value = '';
     isOrgDropdownOpen.value = false;
@@ -672,14 +655,17 @@ function openEditActorModal(actor) {
     actorForm.function_ids = actor.functions ? actor.functions.map(f => f.id) : [];
     actorForm.organization_ids = actor.organizations ? actor.organizations.map(o => o.id) : [];
     
-    // Set actorType dynamically based on existing data
-    if (actor.organization_id) {
+    // Set actorType dynamically based on database column or existing mapping data
+    if (actor.tipe) {
+        actorType.value = actor.tipe;
+    } else if (actor.organization_id) {
         actorType.value = 'jabatan';
     } else if (actor.organizations && actor.organizations.length > 0) {
         actorType.value = 'organisasi';
     } else {
         actorType.value = 'fungsi';
     }
+    actorForm.tipe = actorType.value;
     
     isFunctionDropdownOpen.value = false;
     functionSearchQuery.value = '';
@@ -699,6 +685,7 @@ function closeActorModal() {
 }
 
 function submitActorForm() {
+    actorForm.tipe = actorType.value;
     // Clear the unused mapping fields based on selected type
     if (actorType.value === 'fungsi') {
         actorForm.organization_id = '';

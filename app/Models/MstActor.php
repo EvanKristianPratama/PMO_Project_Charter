@@ -12,6 +12,7 @@ class MstActor extends Model
         'name',
         'organization_id',
         'regulation_id',
+        'tipe',
     ];
 
     /**

@@ -116,48 +116,29 @@
                                         <tr>
                                             <th class="px-6 py-3 w-20 text-center border-b border-slate-200 dark:border-white/10">No</th>
                                             <th class="px-6 py-3 border-b border-slate-200 dark:border-white/10">Fungsi / Unit Organisasi / Jabatan</th>
-                                            <th class="px-6 py-3 border-b border-slate-200 dark:border-white/10">Fungsi</th>
-                                            <th class="px-6 py-3 border-b border-slate-200 dark:border-white/10">Organisasi</th>
                                             <th class="px-6 py-3 border-b border-slate-200 dark:border-white/10">Jabatan</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-200 dark:divide-white/10">
                                         <tr v-if="actors.length === 0">
-                                            <td colspan="5" class="px-6 py-8 text-center text-slate-400">Belum ada data aktor terkait.</td>
+                                            <td colspan="3" class="px-6 py-8 text-center text-slate-400">Belum ada data aktor terkait.</td>
                                         </tr>
                                         <tr v-for="(actor, index) in actors" :key="actor.id">
                                             <td class="px-6 py-3 text-center font-medium">{{ index + 1 }}</td>
                                             <td class="px-6 py-3 font-semibold text-slate-900 dark:text-white">
-                                                <span class="line-clamp-2 whitespace-normal break-words">{{ actor.name }}</span>
-                                            </td>
-                                            <!-- Kolom Fungsi -->
-                                            <td class="px-6 py-3 text-slate-700 dark:text-slate-300">
-                                                <div class="flex flex-wrap gap-1">
-                                                    <template v-if="actor.functions && actor.functions.length > 0">
-                                                        <span
-                                                            v-for="func in actor.functions"
-                                                            :key="func.id"
-                                                            class="inline-flex items-center rounded-md bg-violet-50 dark:bg-violet-900/20 px-2 py-0.5 text-[10px] font-medium text-violet-700 dark:text-violet-300 ring-1 ring-inset ring-violet-600/20 dark:ring-violet-400/20"
-                                                        >
-                                                            {{ func.name }}<template v-if="func.code"> ({{ func.code }})</template>
-                                                        </span>
-                                                    </template>
-                                                    <span v-else class="text-[10px] text-slate-400 italic">—</span>
-                                                </div>
-                                            </td>
-                                            <!-- Kolom Organisasi -->
-                                            <td class="px-6 py-3 text-slate-700 dark:text-slate-300">
-                                                <div class="flex flex-wrap gap-1">
-                                                    <template v-if="actor.organizations && actor.organizations.length > 0">
-                                                        <span
-                                                            v-for="org in actor.organizations"
-                                                            :key="org.id"
-                                                            class="inline-flex items-center rounded-md bg-sky-50 dark:bg-sky-900/20 px-2 py-0.5 text-[10px] font-medium text-sky-700 dark:text-sky-300 ring-1 ring-inset ring-sky-600/20 dark:ring-sky-400/20"
-                                                        >
-                                                            {{ org.jabatan || org.name }}<template v-if="org.code"> ({{ org.code }})</template>
-                                                        </span>
-                                                    </template>
-                                                    <span v-else class="text-[10px] text-slate-400 italic">—</span>
+                                                <div class="flex items-center gap-2">
+                                                    <span class="line-clamp-2 whitespace-normal break-words">{{ actor.name }}</span>
+                                                    <span 
+                                                        v-if="actor.tipe" 
+                                                        class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider capitalize border"
+                                                        :class="{
+                                                            'bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-900/20 dark:text-violet-300 dark:border-violet-800/30': actor.tipe === 'fungsi',
+                                                            'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-900/20 dark:text-sky-300 dark:border-sky-800/30': actor.tipe === 'organisasi',
+                                                            'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800/30': actor.tipe === 'jabatan'
+                                                        }"
+                                                    >
+                                                        {{ actor.tipe }}
+                                                    </span>
                                                 </div>
                                             </td>
                                             <!-- Kolom Jabatan -->

@@ -39,6 +39,7 @@
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">ID</th>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Code</th>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Organization</th>
+                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Parent</th>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Alias</th>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Jabatan</th>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Pejabat (SDM)</th>
@@ -65,6 +66,9 @@
                         </td>
                         <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
                             {{ displayValue(organizationStructureRow.organization_name) }}
+                        </td>
+                        <td class="px-4 py-3 text-slate-500 dark:text-slate-400 text-xs">
+                            {{ getParentName(organizationStructureRow.parent_id) }}
                         </td>
                         <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
                             {{ displayValue(organizationStructureRow.alias) }}
@@ -97,7 +101,7 @@
                         </td>
                     </tr>
                     <tr v-if="filteredRows.length === 0">
-                        <td colspan="11" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+                        <td colspan="12" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
                             Data organization tidak ditemukan.
                         </td>
                     </tr>
@@ -270,6 +274,14 @@ const props = defineProps({
 });
 
 const displayValue = (value) => value ?? '-';
+
+const getParentName = (parentId) => {
+    if (!parentId) return '—';
+    const parent = props.organizationStructureRows.find(
+        (org) => String(org.organization_id) === String(parentId)
+    );
+    return parent ? parent.organization_name : '—';
+};
 
 const parentFilterId = ref('');
 const parentGroupFilterId = ref('');

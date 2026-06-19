@@ -1073,6 +1073,22 @@ const reviewStatusLegendItems = computed(() => {
             .filter((item) => item.count > 0),
     ];
 });
+
+const withRoadmapCount = computed(() =>
+    legendInitiatives.value.filter((initiative) =>
+        initiative.timeline_rows?.some(
+            (row) => !row.isPlaceholder && row.cells?.some((c) => c.type === 'bar'),
+        ) ?? false,
+    ).length,
+);
+
+const withoutRoadmapCount = computed(() =>
+    legendInitiatives.value.filter((initiative) =>
+        !(initiative.timeline_rows?.some(
+            (row) => !row.isPlaceholder && row.cells?.some((c) => c.type === 'bar'),
+        ) ?? false),
+    ).length,
+);
 </script>
 
 <template>
@@ -1231,10 +1247,8 @@ const reviewStatusLegendItems = computed(() => {
                                     @click="roadmapFilter = roadmapFilter === 'with' ? 'all' : 'with'"
                                 >
                                     <span class="legend-swatch legend-swatch--has-roadmap" />
-                                    <span class="legend-label">Dengan Roadmap</span>
-                                    <span class="legend-toggle">
-                                        {{ roadmapFilter === 'with' ? 'Aktif' : 'Off' }}
-                                    </span>
+                                    <span class="legend-label">With Roadmap</span>
+                                    <span class="legend-count">({{ withRoadmapCount }})</span>
                                 </button>
                                 <button
                                     type="button"
@@ -1247,10 +1261,8 @@ const reviewStatusLegendItems = computed(() => {
                                     @click="roadmapFilter = roadmapFilter === 'without' ? 'all' : 'without'"
                                 >
                                     <span class="legend-swatch legend-swatch--no-roadmap" />
-                                    <span class="legend-label">Tanpa Roadmap</span>
-                                    <span class="legend-toggle">
-                                        {{ roadmapFilter === 'without' ? 'Aktif' : 'Off' }}
-                                    </span>
+                                    <span class="legend-label">Without Roadmap</span>
+                                    <span class="legend-count">({{ withoutRoadmapCount }})</span>
                                 </button>
                             </div>
                         </div>
@@ -1973,7 +1985,7 @@ const reviewStatusLegendItems = computed(() => {
 
 .legend-label  { font-size: 11px; font-weight: 600; color: #475569; }
 .legend-toggle { font-size: 10px; font-weight: 700; color: #6b7280; }
-.legend-count  { color: #64748b;  font-weight: 700; }
+.legend-count  { font-size: 11px; color: #64748b;  font-weight: 700; }
 
 /* ─────────────────────────────────────────────────────
    Period filter
