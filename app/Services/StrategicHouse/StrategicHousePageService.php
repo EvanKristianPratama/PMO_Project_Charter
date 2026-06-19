@@ -455,11 +455,12 @@ class StrategicHousePageService
                         'name' => implode('; ', $activityLabels),
                         'status' => 'baseline',
                         'status_ref' => ['name' => 'Baseline'],
-                        'milestones' => [[
-                            'id' => (int) ($firstItem['id'] ?? 0),
-                            'start_date' => $startDate,
-                            'end_date' => $endDate,
-                        ]],
+                        'milestones' => $initiativeItems->map(fn (array $item) => [
+                            'id' => (int) ($item['id'] ?? 0),
+                            'title' => trim((string) ($item['activity'] ?? '')),
+                            'start_date' => $this->resolveQuarterDate((int) ($item['startYear'] ?? 0), (string) ($item['startQ'] ?? ''), false),
+                            'end_date' => $this->resolveQuarterDate((int) ($item['endYear'] ?? 0), (string) ($item['endQ'] ?? ''), true),
+                        ])->values()->all(),
                     ]],
                     'implementation_status' => $this->normalizeImplementationStatus((string) ($firstItem['implementation_status'] ?? '')),
                     'review_statuses' => [],

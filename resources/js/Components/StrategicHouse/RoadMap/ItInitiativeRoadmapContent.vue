@@ -117,6 +117,181 @@ const selectedProjectLeader = ref("");
 const selectedProjectOwner = ref("");
 const roadmapFilter = ref("all"); // "all" | "with" | "without"
 
+/* ── Expand / collapse state ─────────────────────────── */
+const expandedInitiatives = ref(new Set());
+
+function isExpanded(initiativeId) {
+    return expandedInitiatives.value.has(initiativeId);
+}
+
+function toggleInitiative(initiativeId) {
+    const next = new Set(expandedInitiatives.value);
+    if (next.has(initiativeId)) {
+        next.delete(initiativeId);
+    } else {
+        next.add(initiativeId);
+    }
+    expandedInitiatives.value = next;
+}
+
+function expandAll() {
+    expandedInitiatives.value = new Set(
+        displayGroups.value.flatMap((g) =>
+            (g.initiatives ?? []).map((ini) => ini.id),
+        ),
+    );
+}
+
+function collapseAll() {
+    expandedInitiatives.value = new Set();
+}
+
+const allExpanded = computed(() => {
+    const allIds = displayGroups.value.flatMap((g) =>
+        (g.initiatives ?? []).map((ini) => ini.id),
+    );
+    return allIds.length > 0 && allIds.every((id) => expandedInitiatives.value.has(id));
+});
+
+/* ── Detail roadmap (quarter-based, DigitalRoadmap style) ── */
+
+const DETAIL_QUARTER_NUMBERS = [1, 2, 3, 4];
+
+/** Quarter cells for the mini roadmap header */
+const detailQuarterCells = computed(() =>
+    years.value.flatMap((year) =>
+        DETAIL_QUARTER_NUMBERS.map((quarter) => ({ year, quarter, label: `Q${quarter}` })),
+    ),
+);
+
+const detailTotalCells = computed(() => detailQuarterCells.value.length);
+
+/** Convert a YYYY-MM-DD date to a quarter index relative to startYear */
+function dateToQuarterIdx(dateStr) {
+    if (!dateStr) return null;
+    const m = String(dateStr).match(/^(\d{4})-(\d{2})/);
+    if (!m) return null;
+    const year   = parseInt(m[1], 10);
+    const month  = parseInt(m[2], 10);
+    const quarter = Math.ceil(month / 3);
+    const raw = (year - props.startYear) * 4 + (quarter - 1);
+    return raw;
+}
+
+/** Allocate items into non-overlapping lanes (same as DigitalRoadmap) */
+function allocateDetailLanes(items) {
+    const lanes = [];
+    const laneEnds = [];
+    items.forEach((item) => {
+        let li = laneEnds.findIndex((e) => item.startIdx > e);
+        if (li === -1) { li = lanes.length; lanes.push([]); laneEnds.push(-1); }
+        lanes[li].push(item);
+        laneEnds[li] = item.endIdx;
+    });
+    return lanes;
+}
+
+/** Build gap/bar cells for one lane (identical logic to DigitalRoadmap buildLaneCells) */
+function buildDetailLaneCells(laneItems, keyPrefix) {
+    const total = detailTotalCells.value;
+    const cells = [];
+    let cursor = 0;
+    laneItems.forEach((item, i) => {
+        while (cursor < item.startIdx) {
+            cells.push({
+                key: `${keyPrefix}-g${cursor}`,
+                type: 'gap',
+                span: 1,
+                endsYear: detailQuarterCells.value[cursor]?.quarter === 4,
+            });
+            cursor++;
+        }
+        cells.push({
+            key:      `${keyPrefix}-b${i}`,
+            type:     'bar',
+            span:     item.endIdx - item.startIdx + 1,
+            endsYear: detailQuarterCells.value[item.endIdx]?.quarter === 4,
+            label:    item.label,
+        });
+        cursor = item.endIdx + 1;
+    });
+    while (cursor < total) {
+        cells.push({
+            key: `${keyPrefix}-g${cursor}`,
+            type: 'gap',
+            span: 1,
+            endsYear: detailQuarterCells.value[cursor]?.quarter === 4,
+        });
+        cursor++;
+    }
+    return cells;
+}
+
+/**
+ * Build a flat list of lane rows from ALL milestones across all projects.
+ * Returns { lanes, hasData } — mirrors DigitalRoadmapComponent logic.
+ *   lanes[i] = { key, milestoneName, cells[] }
+ */
+function buildDetailRoadmap(initiative) {
+    const projects = Array.isArray(initiative?.projects) ? initiative.projects : [];
+    const maxIdx   = detailTotalCells.value - 1;
+
+    // 1. Flatten all milestones across all projects into normalised items
+    const items = [];
+    projects.forEach((project) => {
+        const milestones = Array.isArray(project?.milestones) ? project.milestones : [];
+        milestones.forEach((ms, msIdx) => {
+            const rawSI = dateToQuarterIdx(ms.start_date ?? ms.end_date);
+            const rawEI = dateToQuarterIdx(ms.end_date   ?? ms.start_date);
+            if (rawSI === null && rawEI === null) return;
+
+            const startIdxRaw = rawSI ?? rawEI;
+            const endIdxRaw   = rawEI ?? rawSI;
+            const startIdx = Math.min(startIdxRaw, endIdxRaw);
+            const endIdx   = Math.max(startIdxRaw, endIdxRaw);
+
+            // If the entire milestone is outside the visible timeline range, skip it
+            if (endIdx < 0 || startIdx > maxIdx) return;
+
+            items.push({
+                startIdx: Math.max(0, startIdx),
+                endIdx:   Math.min(maxIdx, endIdx),
+                label:    ms.title ?? ms.name ?? `Milestone ${msIdx + 1}`,
+                sourceIdx: items.length,
+            });
+        });
+    });
+
+    // 2. Sort by start then end (same as DigitalRoadmap)
+    items.sort((a, b) => a.startIdx - b.startIdx || a.endIdx - b.endIdx || a.sourceIdx - b.sourceIdx);
+
+    // 3. Lane packing
+    const rawLanes = allocateDetailLanes(items);
+    const lanes = rawLanes.map((laneItems, li) => ({
+        key:           `${initiative.id}-lane-${li}`,
+        milestoneName: laneItems[0]?.label ?? '',   // first milestone name for label cell
+        cells:         buildDetailLaneCells(laneItems, `${initiative.id}-${li}`),
+    }));
+
+    const hasData = items.length > 0;
+
+    // fallback: 1 empty lane so table always renders
+    if (lanes.length === 0) {
+        lanes.push({
+            key:           `${initiative.id}-lane-0`,
+            milestoneName: '',
+            cells: detailQuarterCells.value.map((qc, i) => ({
+                key: `empty-${i}`, type: 'gap', span: 1,
+                endsYear: qc.quarter === 4,
+            })),
+        });
+    }
+
+    return { lanes, hasData };
+}
+
+const totalColumns = computed(() => 3 + monthCells.value.length);
+
 /* ── Year / Month grid ─────────────────────────────── */
 const years = computed(() =>
     Array.from(
@@ -1295,6 +1470,28 @@ const withoutRoadmapCount = computed(() =>
             v-else
             class="gantt-wrapper dark:border-white/10 dark:bg-[#171717]"
         >
+            <!-- Expand / collapse all toolbar -->
+            <div class="gantt-expand-toolbar">
+                <span class="gantt-expand-toolbar__hint">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    Klik baris initiative untuk melihat detail
+                </span>
+                <div class="gantt-expand-toolbar__actions">
+                    <button
+                        type="button"
+                        class="expand-all-btn"
+                        @click="expandAll"
+                        :disabled="allExpanded"
+                    >Expand All</button>
+                    <button
+                        type="button"
+                        class="expand-all-btn expand-all-btn--secondary"
+                        @click="collapseAll"
+                        :disabled="expandedInitiatives.size === 0"
+                    >Collapse All</button>
+                </div>
+            </div>
+
             <table
                 class="gantt-table"
                 :style="{ '--cellcount': Math.max(totalCells, 1) }"
@@ -1369,6 +1566,17 @@ const withoutRoadmapCount = computed(() =>
                                     class="cell-initiative"
                                 >
                                     <div class="initiative-label">
+                                        <button
+                                            type="button"
+                                            :class="['ini-expand-btn', isExpanded(initiative.id) ? 'ini-expand-btn--open' : '']"
+                                            :aria-expanded="isExpanded(initiative.id)"
+                                            :aria-label="isExpanded(initiative.id) ? 'Collapse detail' : 'Expand detail'"
+                                            @click.stop="toggleInitiative(initiative.id)"
+                                        >
+                                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                        </button>
                                         <span :class="['badge', badgeClass(initiative.display_status)]">
                                             {{ initiative.no }}
                                         </span>
@@ -1424,6 +1632,102 @@ const withoutRoadmapCount = computed(() =>
                                                 top: `${marker.topOffset}%`,
                                             }"
                                         />
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- ── Expanded detail row (DigitalRoadmap-style) ── -->
+                            <tr
+                                v-if="isExpanded(initiative.id)"
+                                :key="`detail-${initiative.id}`"
+                                class="row-detail"
+                            >
+                                <td />
+                                <td :colspan="totalColumns - 1" class="cell-detail">
+                                    <div class="detail-panel">
+
+                                        <!-- Panel header -->
+                                        <div class="detail-panel__header">
+                                            <span class="detail-panel__title">
+                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                                Detail Roadmap — {{ initiative.name }}
+                                            </span>
+                                            <button
+                                                type="button"
+                                                class="detail-panel__close"
+                                                @click="toggleInitiative(initiative.id)"
+                                            >✕</button>
+                                        </div>
+
+                                        <!-- Quarter roadmap table (flat milestone lanes) -->
+                                        <template v-if="initiative.projects?.length">
+                                            <template v-if="buildDetailRoadmap(initiative).hasData">
+                                                <div class="detail-roadmap-wrap">
+                                                    <table
+                                                        class="detail-roadmap-table"
+                                                        :style="{ '--dqcount': Math.max(detailTotalCells, 1) }"
+                                                    >
+                                                        <colgroup>
+                                                            <col
+                                                                v-for="(_, qi) in detailQuarterCells"
+                                                                :key="`dcol-${qi}`"
+                                                                class="detail-col-q"
+                                                            >
+                                                        </colgroup>
+                                                        <thead>
+                                                            <tr>
+                                                                <th
+                                                                    v-for="yr in years"
+                                                                    :key="`dyr-${yr}`"
+                                                                    colspan="4"
+                                                                    class="detail-th"
+                                                                >
+                                                                    {{ yr }}
+                                                                </th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th
+                                                                    v-for="(qc, qi) in detailQuarterCells"
+                                                                    :key="`dqh-${qi}`"
+                                                                    class="detail-th detail-th--q"
+                                                                    :class="{ 'detail-year-sep': qc.quarter === 4 }"
+                                                                >
+                                                                    {{ qc.label }}
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr
+                                                                v-for="(lane, li) in buildDetailRoadmap(initiative).lanes"
+                                                                :key="lane.key"
+                                                                class="detail-row"
+                                                            >
+                                                                <!-- Quarter cells -->
+                                                                <td
+                                                                    v-for="cell in lane.cells"
+                                                                    :key="cell.key"
+                                                                    :colspan="cell.span"
+                                                                    :class="[
+                                                                        cell.type === 'bar' ? 'detail-td-bar' : 'detail-td-gap',
+                                                                        cell.endsYear ? 'detail-year-sep' : '',
+                                                                    ]"
+                                                                    :title="cell.type === 'bar' ? cell.label : ''"
+                                                                >
+                                                                    <span v-if="cell.type === 'bar'" class="detail-bar-label">
+                                                                        {{ cell.label }}
+                                                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </template>
+                                            <div v-else class="detail-empty">Belum ada milestone dengan tanggal terdaftar.</div>
+                                        </template>
+
+                                        <div v-else class="detail-empty">
+                                            Roadmap Not Available
+                                        </div>
+
                                     </div>
                                 </td>
                             </tr>
@@ -2029,6 +2333,419 @@ const withoutRoadmapCount = computed(() =>
     outline: none;
     border-color: #5d8cc0;
     box-shadow: 0 0 0 3px rgba(93, 140, 192, 0.14);
+}
+
+/* ─────────────────────────────────────────────────────
+   Expand / collapse toolbar
+   ───────────────────────────────────────────────────── */
+.gantt-expand-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 12px;
+    background: linear-gradient(90deg, #f0f6ff 0%, #e8f3ff 100%);
+    border-bottom: 1px solid #d0dff0;
+    flex-wrap: wrap;
+}
+
+.gantt-expand-toolbar__hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    color: #5b728d;
+    font-weight: 500;
+}
+
+.gantt-expand-toolbar__actions {
+    display: flex;
+    gap: 6px;
+}
+
+.expand-all-btn {
+    padding: 4px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 999px;
+    border: 1px solid #4a7fc1;
+    background: #ffffff;
+    color: #2a5f9f;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, opacity 0.15s;
+    letter-spacing: 0.03em;
+}
+
+.expand-all-btn:hover:not(:disabled) {
+    background: #2a5f9f;
+    color: #ffffff;
+}
+
+.expand-all-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.expand-all-btn--secondary {
+    border-color: #94a3b8;
+    color: #64748b;
+}
+
+.expand-all-btn--secondary:hover:not(:disabled) {
+    background: #64748b;
+    color: #ffffff;
+}
+
+/* ─────────────────────────────────────────────────────
+   Initiative expand button
+   ───────────────────────────────────────────────────── */
+.ini-expand-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1px solid #b8ccdf;
+    background: #f0f7ff;
+    color: #4a7fc1;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.2s ease, border-color 0.15s;
+    padding: 0;
+}
+
+.ini-expand-btn:hover {
+    background: #dbeafe;
+    border-color: #4a7fc1;
+}
+
+.ini-expand-btn svg {
+    transition: transform 0.2s ease;
+}
+
+.ini-expand-btn--open svg {
+    transform: rotate(180deg);
+}
+
+/* ─────────────────────────────────────────────────────
+   Detail row
+   ───────────────────────────────────────────────────── */
+.row-detail {
+    background: #f4f9ff;
+    border-bottom: 2px solid #c2d4ea;
+}
+
+.cell-detail {
+    padding: 0 !important;
+    border-bottom: 2px solid #c2d4ea !important;
+}
+
+.detail-panel {
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    animation: detail-slide-in 0.22s ease;
+}
+
+@keyframes detail-slide-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0);    }
+}
+
+.detail-panel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border-bottom: 1px solid #d8e7f5;
+    padding-bottom: 10px;
+}
+
+.detail-panel__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #1a3f6f;
+    letter-spacing: 0.02em;
+}
+
+.detail-panel__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid #c4d4e8;
+    background: #ffffff;
+    color: #6b7280;
+    font-size: 10px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+}
+
+.detail-panel__close:hover {
+    background: #ef4444;
+    color: #ffffff;
+    border-color: #ef4444;
+}
+
+/* Meta info row */
+.detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+}
+
+.detail-meta__item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.detail-meta__label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #7b97b8;
+}
+
+.detail-meta__value {
+    font-size: 11px;
+    font-weight: 600;
+    color: #2c4a6e;
+}
+
+.badge--lg {
+    width: auto !important;
+    height: auto !important;
+    border-radius: 999px !important;
+    padding: 2px 8px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+}
+
+/* Project block */
+.detail-project {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 12px;
+    background: #ffffff;
+    border: 1px solid #dae7f5;
+    border-radius: 10px;
+}
+
+.detail-project__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    font-weight: 700;
+    color: #1a3f6f;
+}
+
+.detail-project__owner,
+.detail-project__leader {
+    font-size: 10px;
+    font-weight: 500;
+    color: #5b728d;
+    background: #eef5ff;
+    border-radius: 999px;
+    padding: 2px 8px;
+}
+
+/* Milestone title label (kept for status history section) */
+.detail-milestones__title {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6b8cae;
+    margin-bottom: 4px;
+}
+
+/* Status history */
+.detail-status-history { display: flex; flex-direction: column; gap: 6px; }
+
+.detail-status-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.detail-status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: #f0f6ff;
+    border: 1px solid #c8d9ee;
+    font-size: 10px;
+}
+
+.detail-status-chip__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.detail-status-chip__period {
+    font-weight: 600;
+    color: #334155;
+}
+
+.detail-status-chip__status {
+    font-weight: 700;
+    color: #1e3f6f;
+}
+
+.detail-empty {
+    font-size: 10px;
+    color: #94a3b8;
+    font-style: italic;
+    padding: 4px 0;
+}
+
+/* ─────────────────────────────────────────────────────
+   Detail panel header right (legend + close)
+   ───────────────────────────────────────────────────── */
+.detail-panel__header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.detail-legend {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.detail-legend__swatch {
+    display: inline-block;
+    width: 22px;
+    height: 9px;
+    border-radius: 999px;
+    flex-shrink: 0;
+}
+
+.detail-legend__label {
+    font-size: 9px;
+    font-weight: 700;
+    color: #5b728d;
+    white-space: nowrap;
+}
+
+/* ─────────────────────────────────────────────────────
+   Detail roadmap table (DigitalRoadmap-style quarter grid)
+   ───────────────────────────────────────────────────── */
+.detail-roadmap-wrap {
+    overflow-x: auto;
+    border: 2px solid #1c75bc;
+    border-radius: 6px;
+    background: #ffffff;
+}
+
+.detail-roadmap-table {
+    width: 100%;
+    min-width: 500px;
+    table-layout: fixed;
+    border-collapse: collapse;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.detail-roadmap-table th,
+.detail-roadmap-table td {
+    border: 1px solid #b9d1e8;
+    overflow: hidden;
+}
+
+.detail-col-q    { width: calc(100% / var(--dqcount)); }
+
+/* Header cells */
+.detail-th {
+    background: #1c75bc;
+    color: #ffffff;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 4px 5px;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.detail-th--name { text-align: left; padding-left: 8px; }
+
+.detail-th--q {
+    background: #e2f0fb;
+    color: #1c75bc;
+    font-size: 8px;
+    font-weight: 700;
+    padding: 2px 0;
+    text-align: center;
+    border-top: 1px solid #b9d1e8;
+}
+
+.detail-year-sep { border-right: 2px solid #1c75bc !important; }
+
+/* Body rows */
+.detail-row { background: #f9fbff; }
+
+.detail-td-name {
+    font-size: 10px;
+    font-weight: 500;
+    color: #0f172a;
+    padding: 6px 8px;
+    vertical-align: middle;
+    line-height: 1.3;
+    word-break: break-word;
+    background: #ffffff;
+}
+
+.detail-td-gap {
+    height: 20px;
+    padding: 0;
+    background: #f9fbff;
+}
+
+/* Bar cell — single colour matching DigitalRoadmapComponent */
+.detail-roadmap-table td.detail-td-bar {
+    height: auto;
+    padding: 6px 10px;
+    background: #b7cd26;
+    color: #2f3d0a;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.3;
+    vertical-align: middle;
+    text-align: center;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    border-top: 1px solid rgba(111,130,20,0.45);
+    border-bottom: 1px solid rgba(111,130,20,0.45);
+}
+
+.detail-bar-label {
+    display: block;
+    max-width: 100%;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 /* ─────────────────────────────────────────────────────
