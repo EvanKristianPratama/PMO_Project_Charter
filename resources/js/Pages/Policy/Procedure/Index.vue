@@ -116,7 +116,7 @@
                                         <tr>
                                             <th class="px-6 py-3 w-20 text-center border-b border-slate-200 dark:border-white/10">No</th>
                                             <th class="px-6 py-3 border-b border-slate-200 dark:border-white/10">Fungsi / Unit Organisasi / Jabatan</th>
-                                            <th class="px-6 py-3 border-b border-slate-200 dark:border-white/10">Jabatan</th>
+                                            <th class="px-6 py-3 border-b border-slate-200 dark:border-white/10">Mapping Master</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-200 dark:divide-white/10">
@@ -141,10 +141,28 @@
                                                     </span>
                                                 </div>
                                             </td>
-                                            <!-- Kolom Jabatan -->
+                                            <!-- Kolom Mapping Master -->
                                             <td class="px-6 py-3 text-slate-700 dark:text-slate-300 font-sans">
-                                                <template v-if="actor.organization">
-                                                    <span v-if="actor.organization.jabatan" class="line-clamp-2 whitespace-normal break-words">{{ actor.organization.jabatan }}</span>
+                                                <template v-if="actor.tipe === 'jabatan'">
+                                                    <span v-if="actor.organization && actor.organization.jabatan" class="line-clamp-2 whitespace-normal break-words">
+                                                        {{ actor.organization.jabatan }} ({{ actor.organization.name || '-' }} - {{ actor.organization.code || '-' }})
+                                                    </span>
+                                                    <span v-else>-</span>
+                                                </template>
+                                                <template v-else-if="actor.tipe === 'fungsi'">
+                                                    <div v-if="actor.functions && actor.functions.length > 0" class="space-y-1">
+                                                        <div v-for="f in actor.functions" :key="f.id" class="line-clamp-2 whitespace-normal break-words">
+                                                            {{ f.name }}{{ f.code ? ` (${f.code})` : '' }}
+                                                        </div>
+                                                    </div>
+                                                    <span v-else>-</span>
+                                                </template>
+                                                <template v-else-if="actor.tipe === 'organisasi'">
+                                                    <div v-if="actor.organizations && actor.organizations.length > 0" class="space-y-1">
+                                                        <div v-for="o in actor.organizations" :key="o.id" class="line-clamp-2 whitespace-normal break-words">
+                                                            {{ o.jabatan }}{{ o.name || o.code ? ` (${o.name || '-'}${o.code ? ` - ${o.code}` : ''})` : '' }}
+                                                        </div>
+                                                    </div>
                                                     <span v-else>-</span>
                                                 </template>
                                                 <span v-else>-</span>

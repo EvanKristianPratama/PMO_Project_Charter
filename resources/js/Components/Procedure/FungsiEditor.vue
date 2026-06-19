@@ -25,7 +25,7 @@
                     <tr>
                         <th class="px-6 py-3 w-20 text-center">No</th>
                         <th class="px-6 py-3">Fungsi / Unit Organisasi / Jabatan</th>
-                        <th class="px-6 py-3">Jabatan</th>
+                        <th class="px-6 py-3">Mapping Master</th>
                         <th class="px-6 py-3 w-24 text-center print:hidden">Aksi</th>
                     </tr>
                 </thead>
@@ -51,11 +51,30 @@
                                 </span>
                             </div>
                         </td>
-                        <!-- Kolom Jabatan -->
+                        <!-- Kolom Mapping Master -->
                         <td class="px-6 py-3 align-middle text-slate-700 dark:text-slate-300">
-                            <span v-if="actor.organization">
-                                {{ actor.organization.jabatan }} ({{ actor.organization.name || '-' }} - {{ actor.organization.code || '-' }})
-                            </span>
+                            <template v-if="actor.tipe === 'jabatan'">
+                                <span v-if="actor.organization">
+                                    {{ actor.organization.jabatan }} ({{ actor.organization.name || '-' }} - {{ actor.organization.code || '-' }})
+                                </span>
+                                <span v-else class="text-slate-400 italic">—</span>
+                            </template>
+                            <template v-else-if="actor.tipe === 'fungsi'">
+                                <div v-if="actor.functions && actor.functions.length > 0" class="space-y-1">
+                                    <div v-for="f in actor.functions" :key="f.id">
+                                        {{ f.name }}{{ f.code ? ` (${f.code})` : '' }}
+                                    </div>
+                                </div>
+                                <span v-else class="text-slate-400 italic">—</span>
+                            </template>
+                            <template v-else-if="actor.tipe === 'organisasi'">
+                                <div v-if="actor.organizations && actor.organizations.length > 0" class="space-y-1">
+                                    <div v-for="o in actor.organizations" :key="o.id">
+                                        {{ o.jabatan }}{{ o.name || o.code ? ` (${o.name || '-'}${o.code ? ` - ${o.code}` : ''})` : '' }}
+                                    </div>
+                                </div>
+                                <span v-else class="text-slate-400 italic">—</span>
+                            </template>
                             <span v-else class="text-slate-400 italic">—</span>
                         </td>
                         <td class="px-6 py-2 align-middle text-center print:hidden">
