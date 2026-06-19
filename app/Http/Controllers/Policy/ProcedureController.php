@@ -187,7 +187,7 @@ class ProcedureController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'organization_id' => 'required|exists:trs_organization,id',
+            'organization_id' => 'nullable|exists:trs_organization,id',
             'regulation_id' => 'required|exists:mst_regulation,id',
             'function_ids' => 'nullable|array',
             'function_ids.*' => 'exists:mst_function,id',
@@ -215,7 +215,7 @@ class ProcedureController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'organization_id' => 'required|exists:trs_organization,id',
+            'organization_id' => 'nullable|exists:trs_organization,id',
             'regulation_id' => 'required|exists:mst_regulation,id',
             'function_ids' => 'nullable|array',
             'function_ids.*' => 'exists:mst_function,id',

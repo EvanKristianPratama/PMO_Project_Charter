@@ -25,9 +25,9 @@
                     <tr>
                         <th class="px-6 py-3 w-20 text-center">No</th>
                         <th class="px-6 py-3">Fungsi / Unit Organisasi / Jabatan</th>
-                        <th class="px-6 py-3">Jabatan</th>
                         <th class="px-6 py-3">Fungsi</th>
                         <th class="px-6 py-3">Organisasi</th>
+                        <th class="px-6 py-3">Jabatan</th>
                         <th class="px-6 py-3 w-24 text-center print:hidden">Aksi</th>
                     </tr>
                 </thead>
@@ -39,12 +39,6 @@
                         <td class="px-6 py-3 text-center align-middle font-medium text-slate-500 dark:text-slate-400">{{ index + 1 }}</td>
                         <td class="px-6 py-3 align-middle font-medium text-slate-900 dark:text-white">
                             {{ actor.name }}
-                        </td>
-                        <td class="px-6 py-3 align-middle text-slate-700 dark:text-slate-300">
-                            <span v-if="actor.organization">
-                                {{ actor.organization.jabatan }} ({{ actor.organization.name || '-' }} - {{ actor.organization.code || '-' }})
-                            </span>
-                            <span v-else class="text-slate-400 italic">—</span>
                         </td>
                         <!-- Kolom Fungsi -->
                         <td class="px-6 py-2 align-middle">
@@ -75,6 +69,13 @@
                                 </template>
                                 <span v-else class="text-[10px] text-slate-400 italic">—</span>
                             </div>
+                        </td>
+                        <!-- Kolom Jabatan -->
+                        <td class="px-6 py-3 align-middle text-slate-700 dark:text-slate-300">
+                            <span v-if="actor.organization">
+                                {{ actor.organization.jabatan }} ({{ actor.organization.name || '-' }} - {{ actor.organization.code || '-' }})
+                            </span>
+                            <span v-else class="text-slate-400 italic">—</span>
                         </td>
                         <td class="px-6 py-2 align-middle text-center print:hidden">
                             <div class="flex flex-col items-center justify-center gap-1">
@@ -112,7 +113,7 @@
         >
             <div 
                 class="mt-4 space-y-4 font-sans text-sm transition-all duration-200"
-                :class="isFunctionDropdownOpen || isOrgDropdownOpen ? 'pb-80' : 'pb-4'"
+                :class="(actorType === 'fungsi' && isFunctionDropdownOpen) || (actorType === 'organisasi' && isOrgDropdownOpen) ? 'pb-80' : 'pb-4'"
             >
                 <div class="flex flex-col gap-1.5">
                     <label for="actor_name" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Nama Peran</label>
@@ -127,15 +128,30 @@
                     <span v-if="actorForm.errors.name" class="text-xs text-red-500 font-medium">{{ actorForm.errors.name }}</span>
                 </div>
 
+                <!-- Tipe Peran Selection -->
                 <div class="flex flex-col gap-1.5">
-                    <label for="actor_org" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Jabatan / Organisasi</label>
+                    <label for="actor_type" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Tipe Peran</label>
+                    <select
+                        id="actor_type"
+                        v-model="actorType"
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-[#821f44] focus:ring-1 focus:ring-[#821f44] dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                        required
+                    >
+                        <option value="fungsi">Fungsi</option>
+                        <option value="organisasi">Organisasi</option>
+                        <option value="jabatan">Jabatan</option>
+                    </select>
+                </div>
+
+                <div v-if="actorType === 'jabatan'" class="flex flex-col gap-1.5">
+                    <label for="actor_org" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Jabatan</label>
                     <select
                         id="actor_org"
                         v-model="actorForm.organization_id"
                         class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-[#821f44] focus:ring-1 focus:ring-[#821f44] dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
                         required
                     >
-                        <option value="" disabled>Pilih Organisasi...</option>
+                        <option value="">-- Pilih Jabatan --</option>
                         <option v-for="org in filteredOrganizations" :key="org.id" :value="org.id">
                             {{ getLevelPrefix(org) }}{{ org.jabatan }} ({{ org.name || '-' }} - {{ org.code || '-' }})
                         </option>
@@ -144,7 +160,7 @@
                 </div>
 
                 <!-- Tambah Fungsi (Opsional) -->
-                <div class="flex flex-col gap-1.5 relative">
+                <div v-if="actorType === 'fungsi'" class="flex flex-col gap-1.5 relative">
                     <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Tambah Fungsi (Opsional)</label>
                     
                     <!-- Trigger Button -->
@@ -230,7 +246,7 @@
                 </div>
 
                 <!-- Tambah Organisasi (Opsional) -->
-                <div class="flex flex-col gap-1.5 relative">
+                <div v-if="actorType === 'organisasi'" class="flex flex-col gap-1.5 relative">
                     <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Tambah Organisasi (Opsional)</label>
                     
                     <!-- Trigger Button -->
@@ -520,6 +536,7 @@ function markModified(actorId) {
 // ─── Modal State and Methods ──────────────────────────────────────────────────
 const isActorModalOpen = ref(false);
 const editingActorId = ref(null);
+const actorType = ref('fungsi'); // 'fungsi' | 'organisasi'
 const actorForm = useForm({
     name: '',
     organization_id: '',
@@ -632,13 +649,11 @@ const filteredOrgDropdown = computed(() => {
 
 function openAddActorModal() {
     editingActorId.value = null;
+    actorType.value = 'fungsi';
     actorForm.reset();
     actorForm.clearErrors();
     actorForm.regulation_id = props.activeRegulation?.id || '';
-    // Set first valid organization as default if available
-    if (filteredOrganizations.value && filteredOrganizations.value.length > 0) {
-        actorForm.organization_id = filteredOrganizations.value[0].id;
-    }
+    actorForm.organization_id = '';
     actorForm.function_ids = [];
     actorForm.organization_ids = [];
     isFunctionDropdownOpen.value = false;
@@ -656,6 +671,16 @@ function openEditActorModal(actor) {
     actorForm.regulation_id = props.activeRegulation?.id || '';
     actorForm.function_ids = actor.functions ? actor.functions.map(f => f.id) : [];
     actorForm.organization_ids = actor.organizations ? actor.organizations.map(o => o.id) : [];
+    
+    // Set actorType dynamically based on existing data
+    if (actor.organization_id) {
+        actorType.value = 'jabatan';
+    } else if (actor.organizations && actor.organizations.length > 0) {
+        actorType.value = 'organisasi';
+    } else {
+        actorType.value = 'fungsi';
+    }
+    
     isFunctionDropdownOpen.value = false;
     functionSearchQuery.value = '';
     isOrgDropdownOpen.value = false;
@@ -674,6 +699,18 @@ function closeActorModal() {
 }
 
 function submitActorForm() {
+    // Clear the unused mapping fields based on selected type
+    if (actorType.value === 'fungsi') {
+        actorForm.organization_id = '';
+        actorForm.organization_ids = [];
+    } else if (actorType.value === 'organisasi') {
+        actorForm.organization_id = '';
+        actorForm.function_ids = [];
+    } else if (actorType.value === 'jabatan') {
+        actorForm.function_ids = [];
+        actorForm.organization_ids = [];
+    }
+
     if (editingActorId.value) {
         actorForm.put(route('policy.procedure.actor.update', editingActorId.value), {
             preserveScroll: true,

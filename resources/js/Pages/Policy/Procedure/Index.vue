@@ -116,9 +116,9 @@
                                         <tr>
                                             <th class="px-6 py-3 w-20 text-center border-b border-slate-200 dark:border-white/10">No</th>
                                             <th class="px-6 py-3 border-b border-slate-200 dark:border-white/10">Fungsi / Unit Organisasi / Jabatan</th>
-                                            <th class="px-6 py-3 border-b border-slate-200 dark:border-white/10">Jabatan</th>
                                             <th class="px-6 py-3 border-b border-slate-200 dark:border-white/10">Fungsi</th>
                                             <th class="px-6 py-3 border-b border-slate-200 dark:border-white/10">Organisasi</th>
+                                            <th class="px-6 py-3 border-b border-slate-200 dark:border-white/10">Jabatan</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-200 dark:divide-white/10">
@@ -129,13 +129,6 @@
                                             <td class="px-6 py-3 text-center font-medium">{{ index + 1 }}</td>
                                             <td class="px-6 py-3 font-semibold text-slate-900 dark:text-white">
                                                 <span class="line-clamp-2 whitespace-normal break-words">{{ actor.name }}</span>
-                                            </td>
-                                            <td class="px-6 py-3 text-slate-700 dark:text-slate-300 font-sans">
-                                                <template v-if="actor.organization">
-                                                    <span v-if="actor.organization.jabatan" class="line-clamp-2 whitespace-normal break-words">{{ actor.organization.jabatan }}</span>
-                                                    <span v-else>-</span>
-                                                </template>
-                                                <span v-else>-</span>
                                             </td>
                                             <!-- Kolom Fungsi -->
                                             <td class="px-6 py-3 text-slate-700 dark:text-slate-300">
@@ -166,6 +159,14 @@
                                                     </template>
                                                     <span v-else class="text-[10px] text-slate-400 italic">—</span>
                                                 </div>
+                                            </td>
+                                            <!-- Kolom Jabatan -->
+                                            <td class="px-6 py-3 text-slate-700 dark:text-slate-300 font-sans">
+                                                <template v-if="actor.organization">
+                                                    <span v-if="actor.organization.jabatan" class="line-clamp-2 whitespace-normal break-words">{{ actor.organization.jabatan }}</span>
+                                                    <span v-else>-</span>
+                                                </template>
+                                                <span v-else>-</span>
                                             </td>
                                         </tr>
                                     </tbody>
