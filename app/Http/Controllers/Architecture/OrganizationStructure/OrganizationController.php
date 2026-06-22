@@ -26,10 +26,13 @@ class OrganizationController extends Controller
                 'company_id' => $g->company_id,
                 'group_name' => $g->name,
             ])->values()->all(),
-            'companies' => MstCompany::orderBy('id', 'asc')->get()->map(fn ($c) => [
+            'companies' => MstCompany::with('parent')->orderBy('id', 'asc')->get()->map(fn ($c) => [
                 'id' => $c->id,
+                'parent_id' => $c->parent_id,
+                'parent_name' => $c->parent?->name,
                 'name' => $c->name,
                 'organization' => $c->organization,
+                'singkatan' => $c->singkatan,
             ])->values()->all(),
             'bods' => MstBod::with('company')->orderBy('id', 'asc')->get()->map(fn ($b) => [
                 'id' => $b->id,
@@ -46,13 +49,17 @@ class OrganizationController extends Controller
     public function storeCompany(Request $request): RedirectResponse
     {
         $validated = $request->validate([
+            'parent_id' => 'nullable|integer|exists:mst_company,id',
             'name' => 'required|string|max:255|unique:mst_company,name',
             'organization' => 'nullable|string|max:255',
+            'singkatan' => 'nullable|string|max:255',
         ]);
 
         MstCompany::create([
+            'parent_id' => $validated['parent_id'] ?? null,
             'name' => $validated['name'],
             'organization' => $validated['organization'] ?? null,
+            'singkatan' => $validated['singkatan'] ?? null,
         ]);
 
         return redirect()
@@ -117,8 +124,10 @@ class OrganizationController extends Controller
         $company = MstCompany::findOrFail($id);
 
         $validated = $request->validate([
+            'parent_id' => 'nullable|integer|exists:mst_company,id|different:id',
             'name' => 'required|string|max:255|unique:mst_company,name,' . $id,
             'organization' => 'nullable|string|max:255',
+            'singkatan' => 'nullable|string|max:255',
         ]);
 
         $company->update($validated);

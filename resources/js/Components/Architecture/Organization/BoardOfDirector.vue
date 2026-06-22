@@ -5,8 +5,9 @@
                 <h3 class="text-xs font-bold tracking-wider text-slate-700 dark:text-slate-200">
                     Board of Directors
                 </h3>
-                <!-- Company Filter -->
+                <!-- Company Filter (hanya di Table view) -->
                 <select
+                    v-if="viewMode === 'table'"
                     v-model="selectedCompanyId"
                     class="rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
                 >
@@ -16,18 +17,52 @@
                     </option>
                 </select>
             </div>
-            <button
-                @click="openBODModal"
-                class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-emerald-400 dark:focus:ring-offset-[#171717]"
-            >
-                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-                Add BOD Member
-            </button>
+            <div class="flex items-center gap-2">
+                <!-- View Mode Toggle -->
+                <div class="flex gap-1">
+                    <button
+                        :class="[
+                            'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition',
+                            viewMode === 'table'
+                                ? 'bg-blue-500 text-white shadow-sm hover:bg-blue-600'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/10 dark:text-slate-300 dark:hover:bg-white/20',
+                        ]"
+                        @click="viewMode = 'table'"
+                    >
+                        <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18M10 3v18M14 3v18" />
+                        </svg>
+                        Table
+                    </button>
+                    <button
+                        :class="[
+                            'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition',
+                            viewMode === 'tree'
+                                ? 'bg-blue-500 text-white shadow-sm hover:bg-blue-600'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/10 dark:text-slate-300 dark:hover:bg-white/20',
+                        ]"
+                        @click="viewMode = 'tree'"
+                    >
+                        <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h10M4 18h6" />
+                        </svg>
+                        Tree
+                    </button>
+                </div>
+                <button
+                    @click="openBODModal"
+                    class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-emerald-400 dark:focus:ring-offset-[#171717]"
+                >
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add BOD Member
+                </button>
+            </div>
         </div>
 
-        <div class="overflow-x-auto">
+        <!-- Table View -->
+        <div v-if="viewMode === 'table'" class="overflow-x-auto">
             <table class="w-full divide-y divide-slate-200 text-[11px] dark:divide-white/10 table-fixed">
                 <thead class="bg-slate-50 dark:bg-white/5">
                     <tr>
@@ -96,6 +131,15 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Tree View -->
+        <div v-if="viewMode === 'tree'" class="px-4 py-4">
+            <BodThreeView
+                :companies="companies"
+                :bods="bods"
+                :is-root="true"
+            />
+        </div>
     </section>
 
     <!-- Create/Edit BOD Modal -->
@@ -119,7 +163,7 @@
                     v-model="bodForm.company_id"
                     class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
                     required
-                    @change="bodForm.parent_id = ''"
+
                 >
                     <option value="" disabled>Pilih Company...</option>
                     <option v-for="company in companies" :key="company.id" :value="company.id">
@@ -145,7 +189,7 @@
                         :key="parentBod.id"
                         :value="parentBod.id"
                     >
-                        {{ parentBod.name }}
+                        [{{ getCompanyName(parentBod.company_id) }}] {{ parentBod.name }}
                     </option>
                 </select>
                 <span v-if="bodForm.errors.parent_id" class="text-xs text-red-500 font-medium">{{ bodForm.errors.parent_id }}</span>
@@ -211,6 +255,7 @@
 import { ref, computed } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import BodThreeView from '@/Components/Architecture/Organization/BodThreeView.vue';
 
 const props = defineProps({
     companies: {
@@ -224,6 +269,7 @@ const props = defineProps({
 });
 
 const selectedCompanyId = ref('');
+const viewMode = ref('table'); // 'table' | 'tree'
 
 const filteredBods = computed(() => {
     if (!selectedCompanyId.value) {
@@ -233,17 +279,25 @@ const filteredBods = computed(() => {
 });
 
 /**
- * Kandidat parent: BOD dari company yang sama, exclude diri sendiri (saat edit).
+ * Kandidat parent: Semua BOD dari semua company, exclude diri sendiri (saat edit).
+ * Ditampilkan dengan informasi nama company untuk konteks.
  */
 const availableParents = computed(() => {
-    if (!bodForm.company_id) return [];
     return props.bods.filter(bod => {
-        if (Number(bod.company_id) !== Number(bodForm.company_id)) return false;
         // Saat edit, exclude diri sendiri dari pilihan parent
         if (bodModalMode.value === 'edit' && selectedBod.value && bod.id === selectedBod.value.id) return false;
         return true;
     });
 });
+
+/**
+ * Dapatkan nama company berdasarkan company_id.
+ */
+const getCompanyName = (companyId) => {
+    if (!companyId) return '-';
+    const company = props.companies.find(c => Number(c.id) === Number(companyId));
+    return company ? company.name : '-';
+};
 
 /**
  * Dapatkan nama jabatan parent berdasarkan parent_id.

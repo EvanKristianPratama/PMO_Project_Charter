@@ -251,6 +251,7 @@
         :groub-options="groubOptions"
     />
 
+
     <!-- BOD View -->
     <BoardOfDirector
         v-if="activeTab === 'bod'"
@@ -424,6 +425,7 @@ import { useForm } from '@inertiajs/vue3';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import ThreeView from '@/Components/Architecture/Organization/ThreeView.vue';
 import CompanyStructure from '@/Components/Architecture/Organization/CompanyStructure.vue';
+import CompanyThreeView from '@/Components/Architecture/Organization/CompanyThreeView.vue';
 import BoardOfDirector from '@/Components/Architecture/Organization/BoardOfDirector.vue';
 
 const props = defineProps({
@@ -457,6 +459,7 @@ const getParentName = (parentId) => {
 
 const activeTab = ref('company'); // 'organization', 'company' or 'bod'
 const viewMode = ref('table'); // 'table' or 'tree'
+const companyViewMode = ref('table'); // 'table' or 'tree'
 const selectedGroubName = ref('');
 const selectedCompanyId = ref('');
 const parentFilterId = ref('');

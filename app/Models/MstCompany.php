@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
@@ -18,9 +19,28 @@ class MstCompany extends Model
     public $incrementing = true;
 
     protected $fillable = [
+        'mst_companycol',
+        'parent_id',
         'name',
         'organization',
+        'singkatan',
     ];
+
+    /**
+     * Parent company (self-referencing).
+     */
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(MstCompany::class, 'parent_id');
+    }
+
+    /**
+     * Child companies (self-referencing).
+     */
+    public function children(): HasMany
+    {
+        return $this->hasMany(MstCompany::class, 'parent_id');
+    }
 
     public function groups(): HasMany
     {
