@@ -17,7 +17,7 @@ class Groub extends Model
 
     public function company(): BelongsTo
     {
-        return $this->belongsTo(Company::class, 'company_id');
+        return $this->belongsTo(MstCompany::class, 'company_id');
     }
 
     public function organizations(): HasMany

@@ -7,11 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
-class Company extends Model
+class MstCompany extends Model
 {
     use LogsActivity;
 
     protected $table = 'mst_company';
+
+    protected $primaryKey = 'id';
+
+    public $incrementing = true;
 
     protected $fillable = [
         'name',

@@ -277,8 +277,17 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/architecture', fn () => Inertia::render('Architecture/Index'))->name('architecture.index');
     Route::get('/architecture/organization-structure', [ArchitectureOrganizationStructureController::class, 'index'])->name('architecture.organization-structure');
     Route::post('/architecture/organization-structure', [ArchitectureOrganizationStructureController::class, 'store'])->name('architecture.organization-structure.store');
+    Route::post('/architecture/organization-structure/company', [ArchitectureOrganizationStructureController::class, 'storeCompany'])->name('architecture.organization-structure.company.store');
+    Route::put('/architecture/organization-structure/company/{id}', [ArchitectureOrganizationStructureController::class, 'updateCompany'])->name('architecture.organization-structure.company.update');
+    Route::delete('/architecture/organization-structure/company/{id}', [ArchitectureOrganizationStructureController::class, 'destroyCompany'])->name('architecture.organization-structure.company.destroy');
+    Route::post('/architecture/organization-structure/group', [ArchitectureOrganizationStructureController::class, 'storeGroup'])->name('architecture.organization-structure.group.store');
+    Route::put('/architecture/organization-structure/group/{id}', [ArchitectureOrganizationStructureController::class, 'updateGroup'])->name('architecture.organization-structure.group.update');
+    Route::delete('/architecture/organization-structure/group/{id}', [ArchitectureOrganizationStructureController::class, 'destroyGroup'])->name('architecture.organization-structure.group.destroy');
     Route::put('/architecture/organization-structure/{organization}', [ArchitectureOrganizationStructureController::class, 'update'])->name('architecture.organization-structure.update');
     Route::delete('/architecture/organization-structure/{organization}', [ArchitectureOrganizationStructureController::class, 'destroy'])->name('architecture.organization-structure.destroy');
+    Route::post('/architecture/organization-structure/bod', [ArchitectureOrganizationStructureController::class, 'storeBod'])->name('architecture.organization-structure.bod.store');
+    Route::put('/architecture/organization-structure/bod/{id}', [ArchitectureOrganizationStructureController::class, 'updateBod'])->name('architecture.organization-structure.bod.update');
+    Route::delete('/architecture/organization-structure/bod/{id}', [ArchitectureOrganizationStructureController::class, 'destroyBod'])->name('architecture.organization-structure.bod.destroy');
     Route::get('/architecture/informatic-system', fn () => Inertia::render('Architecture/InformaticSystem/Index'))->name('architecture.informatic-system');
 
     // Proses Bisnis (Business Process) CRUD under Architecture

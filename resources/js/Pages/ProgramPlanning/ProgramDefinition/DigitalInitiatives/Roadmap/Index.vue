@@ -1,34 +1,68 @@
 <template>
-    <UserLayout title="Roadmap">
+    <UserLayout title="Program Definition Digital Initiatives — Roadmap">
         <div class="space-y-6">
-            <div class="flex w-fit flex-wrap items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                <Link
-                    :href="route('program-planning.program-definition.digital-initiatives.master.index')"
-                    class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 transition-all hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
-                >
-                    Digital Initiatives List
-                </Link>
-                <div class="rounded-lg bg-blue-50 px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-blue-600 shadow-sm dark:bg-blue-500/10 dark:text-blue-400">
-                    Roadmap
+            <div
+                class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+            >
+                <div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <Link
+                            :href="route('program-planning.program-definition.digital-initiatives')"
+                            class="inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition"
+                            :class="
+                                route().current('program-planning.program-definition.digital-initiatives')
+                                    ? 'border-[#1C75BC] bg-[#1C75BC] text-white hover:bg-[#0b5c9d]'
+                                    : 'border-[#1C75BC]/45 bg-[#1C75BC]/10 text-[#1C75BC] hover:bg-[#1C75BC]/20 dark:text-[#7FC0F2]'
+                            "
+                        >
+                            Digital Initiatives
+                        </Link>
+                        <Link
+                            :href="route('program-planning.program-definition.digital-initiatives.roadmap.index')"
+                            class="inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition"
+                            :class="
+                                route().current('program-planning.program-definition.digital-initiatives.roadmap.index')
+                                    ? 'border-[#1C75BC] bg-[#1C75BC] text-white hover:bg-[#0b5c9d]'
+                                    : 'border-[#1C75BC]/45 bg-[#1C75BC]/10 text-[#1C75BC] hover:bg-[#1C75BC]/20 dark:text-[#7FC0F2]'
+                            "
+                        >
+                            Roadmap
+                        </Link>
+                        <Link
+                            :href="route('program-planning.program-definition.digital-initiatives.compendium.index')"
+                            class="inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition"
+                            :class="
+                                route().current('program-planning.program-definition.digital-initiatives.compendium.index')
+                                    ? 'border-[#1C75BC] bg-[#1C75BC] text-white hover:bg-[#0b5c9d]'
+                                    : 'border-[#1C75BC]/45 bg-[#1C75BC]/10 text-[#1C75BC] hover:bg-[#1C75BC]/20 dark:text-[#7FC0F2]'
+                            "
+                        >
+                            Compendium
+                        </Link>
+                        <Link
+                            :href="route('program-planning.program-definition.digital-initiatives.appendix.index')"
+                            class="inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition"
+                            :class="
+                                route().current('program-planning.program-definition.digital-initiatives.appendix.index')
+                                    ? 'border-[#1C75BC] bg-[#1C75BC] text-white hover:bg-[#0b5c9d]'
+                                    : 'border-[#1C75BC]/45 bg-[#1C75BC]/10 text-[#1C75BC] hover:bg-[#1C75BC]/20 dark:text-[#7FC0F2]'
+                            "
+                        >
+                            Appendix
+                        </Link>
+                        <Link
+                            :href="route('program-planning.program-definition.digital-initiatives.mapping.index')"
+                            class="inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition"
+                            :class="
+                                route().current('program-planning.program-definition.digital-initiatives.mapping.index')
+                                    ? 'border-[#1C75BC] bg-[#1C75BC] text-white hover:bg-[#0b5c9d]'
+                                    : 'border-[#1C75BC]/45 bg-[#1C75BC]/10 text-[#1C75BC] hover:bg-[#1C75BC]/20 dark:text-[#7FC0F2]'
+                            "
+                        >
+                            Mapping
+                        </Link>
+                    </div>
                 </div>
-                <Link
-                    :href="route('program-planning.program-definition.digital-initiatives.compendium.index')"
-                    class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 transition-all hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
-                >
-                    Compendium List
-                </Link>
-                <Link
-                    :href="route('program-planning.program-definition.digital-initiatives.appendix.index')"
-                    class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 transition-all hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
-                >
-                    Appendix List
-                </Link>
-                <Link
-                    :href="route('program-planning.program-definition.digital-initiatives.mapping.index')"
-                    class="rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 transition-all hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5"
-                >
-                    Mapping
-                </Link>
             </div>
 
             <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#171717]">

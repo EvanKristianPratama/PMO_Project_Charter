@@ -125,7 +125,7 @@ const widths = {
                                     <DialogTitle as="h3" class="text-lg font-bold leading-6 text-gray-900 dark:text-white">
                                         {{ title }}
                                     </DialogTitle>
-                                    <div class="mt-2">
+                                    <div v-if="message" class="mt-2">
                                         <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                                             {{ message }}
                                         </p>
@@ -133,7 +133,7 @@ const widths = {
                                 </div>
                             </div>
 
-                            <div v-if="$slots.default" class="mt-5">
+                            <div v-if="$slots.default" :class="message ? 'mt-5' : 'mt-3'">
                                 <slot />
                             </div>
 

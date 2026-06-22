@@ -11,6 +11,9 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
+use App\Models\MstCompany;
+use App\Models\MstBod;
+
 class OrganizationController extends Controller
 {
     public function index(OrganizationStructureService $organizationStructureService): Response
@@ -20,8 +23,40 @@ class OrganizationController extends Controller
             'groubOptions' => Groub::with('company')->orderBy('name')->get()->map(fn ($g) => [
                 'id' => $g->id,
                 'name' => $g->company ? "{$g->company->name} - {$g->name}" : $g->name,
+                'company_id' => $g->company_id,
+                'group_name' => $g->name,
+            ])->values()->all(),
+            'companies' => MstCompany::orderBy('id', 'asc')->get()->map(fn ($c) => [
+                'id' => $c->id,
+                'name' => $c->name,
+                'organization' => $c->organization,
+            ])->values()->all(),
+            'bods' => MstBod::with('company')->orderBy('id', 'asc')->get()->map(fn ($b) => [
+                'id' => $b->id,
+                'company_id' => $b->company_id,
+                'company_name' => $b->company?->name,
+                'name' => $b->name,
+                'sumber' => $b->sumber,
+                'pejabat' => $b->pejabat,
             ])->values()->all(),
         ]);
+    }
+
+    public function storeCompany(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:mst_company,name',
+            'organization' => 'nullable|string|max:255',
+        ]);
+
+        MstCompany::create([
+            'name' => $validated['name'],
+            'organization' => $validated['organization'] ?? null,
+        ]);
+
+        return redirect()
+            ->route('architecture.organization-structure')
+            ->with('success', 'Company berhasil ditambahkan.');
     }
 
     public function store(Request $request): RedirectResponse
@@ -74,5 +109,126 @@ class OrganizationController extends Controller
         return redirect()
             ->route('architecture.organization-structure')
             ->with('success', 'Organisasi berhasil dihapus.');
+    }
+
+    public function updateCompany(Request $request, int $id): RedirectResponse
+    {
+        $company = MstCompany::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:mst_company,name,' . $id,
+            'organization' => 'nullable|string|max:255',
+        ]);
+
+        $company->update($validated);
+
+        return redirect()
+            ->route('architecture.organization-structure')
+            ->with('success', 'Company berhasil diperbarui.');
+    }
+
+    public function destroyCompany(int $id): RedirectResponse
+    {
+        $company = MstCompany::findOrFail($id);
+
+        // Delete all groups and organizations associated with this company
+        $groups = Groub::where('company_id', $id)->get();
+        foreach ($groups as $group) {
+            TrsOrganization::where('groub_id', $group->id)->delete();
+            $group->delete();
+        }
+
+        $company->delete();
+
+        return redirect()
+            ->route('architecture.organization-structure')
+            ->with('success', 'Company dan seluruh organisasi di dalamnya berhasil dihapus.');
+    }
+
+    public function storeGroup(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'company_id' => 'required|integer|exists:mst_company,id',
+            'name' => 'required|string|max:255',
+        ]);
+
+        Groub::create($validated);
+
+        return redirect()
+            ->route('architecture.organization-structure')
+            ->with('success', 'Grup berhasil ditambahkan.');
+    }
+
+    public function updateGroup(Request $request, int $id): RedirectResponse
+    {
+        $group = Groub::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $group->update($validated);
+
+        return redirect()
+            ->route('architecture.organization-structure')
+            ->with('success', 'Grup berhasil diperbarui.');
+    }
+
+    public function destroyGroup(int $id): RedirectResponse
+    {
+        $group = Groub::findOrFail($id);
+
+        // Delete all organizations inside the group
+        TrsOrganization::where('groub_id', $id)->delete();
+
+        $group->delete();
+
+        return redirect()
+            ->route('architecture.organization-structure')
+            ->with('success', 'Grup dan seluruh struktur organisasi di dalamnya berhasil dihapus.');
+    }
+
+    public function storeBod(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'company_id' => 'required|integer|exists:mst_company,id',
+            'name' => 'required|string|max:255',
+            'sumber' => 'nullable|string|max:255',
+            'pejabat' => 'nullable|string|max:255',
+        ]);
+
+        MstBod::create($validated);
+
+        return redirect()
+            ->route('architecture.organization-structure')
+            ->with('success', 'Anggota BOD berhasil ditambahkan.');
+    }
+
+    public function updateBod(Request $request, int $id): RedirectResponse
+    {
+        $bod = MstBod::findOrFail($id);
+
+        $validated = $request->validate([
+            'company_id' => 'required|integer|exists:mst_company,id',
+            'name' => 'required|string|max:255',
+            'sumber' => 'nullable|string|max:255',
+            'pejabat' => 'nullable|string|max:255',
+        ]);
+
+        $bod->update($validated);
+
+        return redirect()
+            ->route('architecture.organization-structure')
+            ->with('success', 'Anggota BOD berhasil diperbarui.');
+    }
+
+    public function destroyBod(int $id): RedirectResponse
+    {
+        $bod = MstBod::findOrFail($id);
+        $bod->delete();
+
+        return redirect()
+            ->route('architecture.organization-structure')
+            ->with('success', 'Anggota BOD berhasil dihapus.');
     }
 }

@@ -1,7 +1,7 @@
 <template>
     <div class="flex h-full flex-col gap-3">
         <article
-            class="relative flex min-h-[220px] flex-1 cursor-pointer flex-col justify-between rounded-2xl border border-[#A7C942] bg-[#A7C942] p-5 shadow-[0_4px_16px_rgba(167,201,66,0.3)] transition hover:shadow-[0_6px_24px_rgba(167,201,66,0.4)]"
+            class="relative flex min-h-[140px] flex-1 cursor-pointer flex-col justify-between rounded-2xl border border-[#A7C942] bg-[#A7C942] p-4 shadow-[0_4px_16px_rgba(167,201,66,0.3)] transition hover:shadow-[0_6px_24px_rgba(167,201,66,0.4)]"
             @click="emit('show-all')"
         >
             <div>
