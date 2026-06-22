@@ -133,7 +133,11 @@
         </div>
 
         <!-- Tree View -->
-        <div v-if="viewMode === 'tree'" class="px-4 py-4">
+        <div v-if="viewMode === 'tree'" class="px-4 py-4 space-y-6">
+            <CompanyThreeView
+                :companies="companies"
+                :is-root="true"
+            />
             <BodThreeView
                 :companies="companies"
                 :bods="bods"
@@ -256,6 +260,7 @@ import { ref, computed } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import BodThreeView from '@/Components/Architecture/Organization/BodThreeView.vue';
+import CompanyThreeView from '@/Components/Architecture/Organization/CompanyThreeView.vue';
 
 const props = defineProps({
     companies: {
