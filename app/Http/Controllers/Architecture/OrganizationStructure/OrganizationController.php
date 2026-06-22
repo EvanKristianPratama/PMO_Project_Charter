@@ -34,6 +34,7 @@ class OrganizationController extends Controller
             'bods' => MstBod::with('company')->orderBy('id', 'asc')->get()->map(fn ($b) => [
                 'id' => $b->id,
                 'company_id' => $b->company_id,
+                'parent_id' => $b->parent_id,
                 'company_name' => $b->company?->name,
                 'name' => $b->name,
                 'sumber' => $b->sumber,
@@ -192,6 +193,7 @@ class OrganizationController extends Controller
     {
         $validated = $request->validate([
             'company_id' => 'required|integer|exists:mst_company,id',
+            'parent_id' => 'nullable|integer|exists:mst_bod,id',
             'name' => 'required|string|max:255',
             'sumber' => 'nullable|string|max:255',
             'pejabat' => 'nullable|string|max:255',
@@ -210,6 +212,7 @@ class OrganizationController extends Controller
 
         $validated = $request->validate([
             'company_id' => 'required|integer|exists:mst_company,id',
+            'parent_id' => 'nullable|integer|exists:mst_bod,id|different:id',
             'name' => 'required|string|max:255',
             'sumber' => 'nullable|string|max:255',
             'pejabat' => 'nullable|string|max:255',

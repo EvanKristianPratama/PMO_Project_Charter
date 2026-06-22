@@ -31,12 +31,13 @@
             <table class="w-full divide-y divide-slate-200 text-[11px] dark:divide-white/10 table-fixed">
                 <thead class="bg-slate-50 dark:bg-white/5">
                     <tr>
-                        <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-16">No</th>
+                        <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-12">No</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Company</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Organization Structure</th>
-                        <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Official (Pejabat)</th>
+                        <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Parent</th>
+                        <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Pejabat</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Sumber</th>
-                        <th class="px-4 py-2 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-48">Actions</th>
+                        <th class="px-4 py-2 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-40">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 dark:divide-white/10">
@@ -45,12 +46,15 @@
                         :key="bod.id"
                         class="transition hover:bg-slate-50 dark:hover:bg-white/5"
                     >
-                        <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-left w-16">{{ index + 1 }}</td>
+                        <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-left w-12">{{ index + 1 }}</td>
                         <td class="px-4 py-2.5 text-slate-900 dark:text-white font-medium text-left">
                             {{ bod.company_name }}
                         </td>
                         <td class="px-4 py-2.5 text-slate-900 dark:text-white font-medium text-left">
                             {{ bod.name }}
+                        </td>
+                        <td class="px-4 py-2.5 text-slate-900 dark:text-white font-medium text-left">
+                            {{ getParentName(bod.parent_id) || '-' }}
                         </td>
                         <td class="px-4 py-2.5 text-slate-900 dark:text-white text-left font-medium">
                             {{ bod.pejabat || '-' }}
@@ -58,17 +62,17 @@
                         <td class="px-4 py-2.5 text-slate-900 dark:text-white text-left font-medium">
                             {{ bod.sumber || '-' }}
                         </td>
-                        <td class="px-4 py-2.5 text-center w-48">
-                            <div class="flex items-center justify-center gap-2">
+                        <td class="px-4 py-2.5 text-center w-40">
+                            <div class="flex flex-col items-center justify-center gap-1">
                                 <button
                                     @click="openEditBODModal(bod)"
-                                    class="inline-flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-white/10 dark:hover:bg-white/20 dark:text-slate-200 px-3 py-1 text-[10px] font-semibold transition"
+                                    class="inline-flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-white/10 dark:hover:bg-white/20 dark:text-slate-200 px-2.5 py-0.5 text-[10px] font-semibold transition w-full max-w-[56px]"
                                 >
                                     Edit
                                 </button>
                                 <button
                                     @click="openDeleteBODModal(bod)"
-                                    class="inline-flex items-center justify-center rounded-full bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-500/10 dark:hover:bg-red-500/20 dark:text-red-400 px-3 py-1 text-[10px] font-semibold transition"
+                                    class="inline-flex items-center justify-center rounded-full bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-500/10 dark:hover:bg-red-500/20 dark:text-red-400 px-2.5 py-0.5 text-[10px] font-semibold transition w-full max-w-[56px]"
                                 >
                                     Delete
                                 </button>
@@ -76,7 +80,7 @@
                         </td>
                     </tr>
                     <tr v-if="filteredBods.length === 0">
-                        <td colspan="6" class="px-4 py-12 text-center">
+                        <td colspan="7" class="px-4 py-12 text-center">
                             <div class="flex flex-col items-center justify-center text-center">
                                 <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-slate-500 mb-4 border border-slate-200 dark:border-white/10">
                                     <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -86,9 +90,6 @@
                                 <h4 class="text-sm font-semibold text-slate-900 dark:text-white mb-1">
                                     Board of Directors Not Available
                                 </h4>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm">
-                                    Silakan tambahkan data direksi baru dengan mengeklik tombol "Add BOD Member" di atas.
-                                </p>
                             </div>
                         </td>
                     </tr>
@@ -118,6 +119,7 @@
                     v-model="bodForm.company_id"
                     class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
                     required
+                    @change="bodForm.parent_id = ''"
                 >
                     <option value="" disabled>Pilih Company...</option>
                     <option v-for="company in companies" :key="company.id" :value="company.id">
@@ -125,6 +127,28 @@
                     </option>
                 </select>
                 <span v-if="bodForm.errors.company_id" class="text-xs text-red-500 font-medium">{{ bodForm.errors.company_id }}</span>
+            </div>
+
+            <!-- Parent BOD Selection -->
+            <div class="flex flex-col gap-1.5">
+                <label for="bod_parent" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Parent Jabatan <span class="text-slate-400 font-normal">(Opsional)</span>
+                </label>
+                <select
+                    id="bod_parent"
+                    v-model="bodForm.parent_id"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                >
+                    <option value="">-- Tidak ada parent (jabatan tertinggi) --</option>
+                    <option
+                        v-for="parentBod in availableParents"
+                        :key="parentBod.id"
+                        :value="parentBod.id"
+                    >
+                        {{ parentBod.name }}
+                    </option>
+                </select>
+                <span v-if="bodForm.errors.parent_id" class="text-xs text-red-500 font-medium">{{ bodForm.errors.parent_id }}</span>
             </div>
 
             <!-- BOD Member Name Input -->
@@ -208,6 +232,28 @@ const filteredBods = computed(() => {
     return props.bods.filter(bod => Number(bod.company_id) === Number(selectedCompanyId.value));
 });
 
+/**
+ * Kandidat parent: BOD dari company yang sama, exclude diri sendiri (saat edit).
+ */
+const availableParents = computed(() => {
+    if (!bodForm.company_id) return [];
+    return props.bods.filter(bod => {
+        if (Number(bod.company_id) !== Number(bodForm.company_id)) return false;
+        // Saat edit, exclude diri sendiri dari pilihan parent
+        if (bodModalMode.value === 'edit' && selectedBod.value && bod.id === selectedBod.value.id) return false;
+        return true;
+    });
+});
+
+/**
+ * Dapatkan nama jabatan parent berdasarkan parent_id.
+ */
+const getParentName = (parentId) => {
+    if (!parentId) return null;
+    const parent = props.bods.find(b => b.id === Number(parentId));
+    return parent ? parent.name : null;
+};
+
 const isBODModalOpen = ref(false);
 const isBODDeleteModalOpen = ref(false);
 const bodModalMode = ref('create'); // 'create' or 'edit'
@@ -215,6 +261,7 @@ const selectedBod = ref(null);
 
 const bodForm = useForm({
     company_id: '',
+    parent_id: '',
     name: '',
     sumber: '',
     pejabat: '',
@@ -222,6 +269,7 @@ const bodForm = useForm({
 
 const openBODModal = () => {
     bodModalMode.value = 'create';
+    selectedBod.value = null;
     bodForm.clearErrors();
     bodForm.reset();
     isBODModalOpen.value = true;
@@ -232,6 +280,7 @@ const openEditBODModal = (bod) => {
     selectedBod.value = bod;
     bodForm.clearErrors();
     bodForm.company_id = bod.company_id;
+    bodForm.parent_id = bod.parent_id ?? '';
     bodForm.name = bod.name;
     bodForm.sumber = bod.sumber || '';
     bodForm.pejabat = bod.pejabat || '';

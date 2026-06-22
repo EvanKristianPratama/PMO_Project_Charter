@@ -49,16 +49,16 @@
                             </div>
                         </td>
                         <td class="px-4 py-2.5 text-center w-48">
-                            <div class="flex items-center justify-center gap-2">
+                            <div class="flex flex-col items-center justify-center gap-1">
                                 <button
                                     @click="openEditCompanyModal(company)"
-                                    class="inline-flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-white/10 dark:hover:bg-white/20 dark:text-slate-200 px-3 py-1 text-[10px] font-semibold transition"
+                                    class="inline-flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-white/10 dark:hover:bg-white/20 dark:text-slate-200 px-2.5 py-0.5 text-[10px] font-semibold transition w-full max-w-[56px]"
                                 >
                                     Edit
                                 </button>
                                 <button
                                     @click="openDeleteCompanyModal(company)"
-                                    class="inline-flex items-center justify-center rounded-full bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-500/10 dark:hover:bg-red-500/20 dark:text-red-400 px-3 py-1 text-[10px] font-semibold transition"
+                                    class="inline-flex items-center justify-center rounded-full bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-500/10 dark:hover:bg-red-500/20 dark:text-red-400 px-2.5 py-0.5 text-[10px] font-semibold transition w-full max-w-[56px]"
                                 >
                                     Delete
                                 </button>
