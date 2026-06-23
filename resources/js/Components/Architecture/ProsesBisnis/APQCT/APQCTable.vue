@@ -12,7 +12,7 @@
                 />
                 <select
                     v-model="parentFilterId"
-                    class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white w-40 truncate"
                 >
                     <option value="">All APQC</option>
                     <option v-for="item in parentFilterOptions" :key="item.id" :value="item.id">
@@ -187,26 +187,8 @@ const props = defineProps({
 
 const apqcMap = computed(() => new Map(props.apqcList.map(item => [item.id, item])));
 
-/** Hitung kedalaman hierarki dari sebuah node */
-const getDepth = (id) => {
-    let depth = 0;
-    let currentId = id;
-    const visited = new Set();
-    while (currentId && !visited.has(currentId)) {
-        visited.add(currentId);
-        const node = apqcMap.value.get(currentId);
-        if (node?.parent_id) {
-            depth++;
-            currentId = node.parent_id;
-        } else {
-            break;
-        }
-    }
-    return depth;
-};
-
 const getLevelPrefix = (item) => {
-    const depth = item.depth !== undefined ? item.depth : getDepth(item.id);
+    const depth = item.depth !== undefined ? item.depth : 0;
     if (depth === 0) return '';
     return '\u00A0\u00A0'.repeat(depth) + '— ';
 };
@@ -269,7 +251,7 @@ const expandLevel = ref('all');
 const maxDepth = computed(() => {
     let max = 0;
     props.apqcList.forEach(item => {
-        const d = getDepth(item.id);
+        const d = item.depth !== undefined ? item.depth : 0;
         if (d > max) max = d;
     });
     return max;
@@ -302,7 +284,7 @@ const handleExpandLevelChange = () => {
         const targetDepth = parseInt(val, 10);
         if (targetDepth > 0) {
             props.apqcList.forEach(item => {
-                const depth = getDepth(item.id);
+                const depth = item.depth !== undefined ? item.depth : 0;
                 if (depth < targetDepth) {
                     const isParent = props.apqcList.some(r => r.parent_id === item.id);
                     if (isParent) {

@@ -11,7 +11,23 @@ class ApqcService
      */
     public function getApqcList()
     {
-        return MstApqc::with('parent')->orderBy('id')->get();
+        $items = MstApqc::with('parent')->orderBy('id')->get();
+        
+        // Build map for efficient parent lookup in memory
+        $itemsMap = $items->keyBy('id');
+        
+        foreach ($items as $item) {
+            $level = 1;
+            $current = $item;
+            while ($current->parent_id && isset($itemsMap[$current->parent_id])) {
+                $level++;
+                $current = $itemsMap[$current->parent_id];
+            }
+            $item->setAttribute('level', $level);
+            $item->setAttribute('depth', $level - 1);
+        }
+        
+        return $items;
     }
 
     /**

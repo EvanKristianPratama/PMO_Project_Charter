@@ -19,6 +19,45 @@ class MstApqc extends Model
         'parent_id' => 'integer',
     ];
 
+    protected $appends = [
+        'level',
+        'depth',
+    ];
+
+    /**
+     * Get the level of the APQC process (1-based index).
+     */
+    public function getLevelAttribute(): int
+    {
+        if (array_key_exists('level', $this->attributes)) {
+            return (int) $this->attributes['level'];
+        }
+
+        $level = 1;
+        $current = $this;
+        while ($current->parent_id) {
+            $level++;
+            $parent = $current->parent;
+            if ($parent) {
+                $current = $parent;
+            } else {
+                break;
+            }
+        }
+        return $level;
+    }
+
+    /**
+     * Get the depth of the APQC process (0-based index).
+     */
+    public function getDepthAttribute(): int
+    {
+        if (array_key_exists('depth', $this->attributes)) {
+            return (int) $this->attributes['depth'];
+        }
+        return $this->level - 1;
+    }
+
     /**
      * Relasi ke parent (self-referential).
      */
