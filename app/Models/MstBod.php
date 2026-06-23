@@ -20,6 +20,7 @@ class MstBod extends Model
         'alias',
         'sumber',
         'pejabat',
+        'grup_function',
         'tipe',
         'sk_id',
     ];

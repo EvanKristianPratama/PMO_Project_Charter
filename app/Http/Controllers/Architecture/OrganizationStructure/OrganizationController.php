@@ -46,6 +46,7 @@ class OrganizationController extends Controller
                 'alias' => $b->alias,
                 'sumber' => $b->sumber,
                 'pejabat' => $b->pejabat,
+                'grup_function' => $b->grup_function,
                 'tipe' => $b->tipe,
                 'sk_id' => $b->sk_id,
             ])->values()->all(),
@@ -224,6 +225,7 @@ class OrganizationController extends Controller
             'alias' => 'nullable|string|max:255',
             'sumber' => 'nullable|string|max:255',
             'pejabat' => 'nullable|string|max:255',
+            'grup_function' => 'nullable|string|max:255',
             'tipe' => 'nullable|string|max:255',
             'sk_id' => 'nullable|integer|exists:mst_sk_organization,id',
         ]);
@@ -246,6 +248,7 @@ class OrganizationController extends Controller
             'alias' => 'nullable|string|max:255',
             'sumber' => 'nullable|string|max:255',
             'pejabat' => 'nullable|string|max:255',
+            'grup_function' => 'nullable|string|max:255',
             'tipe' => 'nullable|string|max:255',
             'sk_id' => 'nullable|integer|exists:mst_sk_organization,id',
         ]);

@@ -72,6 +72,7 @@
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Parent</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Pejabat</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-24">Tipe</th>
+                        <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Grup</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-48">Sumber</th>
                         <th class="px-4 py-2 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-40">Actions</th>
                     </tr>
@@ -98,6 +99,9 @@
                         <td class="px-4 py-2.5 text-slate-700 dark:text-slate-300 text-left">
                             {{ bod.tipe || '-' }}
                         </td>
+                        <td class="px-4 py-2.5 text-slate-900 dark:text-white text-left font-medium">
+                            {{ bod.grup_function || '-' }}
+                        </td>
                         <td class="px-4 py-2.5 text-slate-900 dark:text-white text-left font-medium w-48" :title="bod.sumber || '-'">
                             <div class="break-words whitespace-normal">
                                 {{ bod.sumber || '-' }}
@@ -121,7 +125,7 @@
                         </td>
                     </tr>
                     <tr v-if="filteredBods.length === 0">
-                        <td colspan="8" class="px-4 py-12 text-center">
+                        <td colspan="9" class="px-4 py-12 text-center">
                             <div class="flex flex-col items-center justify-center text-center">
                                 <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-slate-500 mb-4 border border-slate-200 dark:border-white/10">
                                     <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -250,6 +254,19 @@
                 <span v-if="bodForm.errors.tipe" class="text-xs text-red-500 font-medium">{{ bodForm.errors.tipe }}</span>
             </div>
 
+            <!-- BOD Grup Function Input -->
+            <div class="flex flex-col gap-1.5">
+                <label for="bod_grup_function" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Grup</label>
+                <input
+                    id="bod_grup_function"
+                    v-model="bodForm.grup_function"
+                    type="text"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    placeholder="Contoh: Corporate / Operasional"
+                />
+                <span v-if="bodForm.errors.grup_function" class="text-xs text-red-500 font-medium">{{ bodForm.errors.grup_function }}</span>
+            </div>
+
             <!-- BOD Member Pejabat Input -->
             <div class="flex flex-col gap-1.5">
                 <label for="bod_pejabat" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Nama Pejabat (Official)</label>
@@ -374,6 +391,7 @@ const bodForm = useForm({
     alias: '',
     sumber: '',
     pejabat: '',
+    grup_function: '',
     tipe: '',
 });
 
@@ -399,6 +417,7 @@ const openEditBODModal = (bod) => {
     bodForm.alias = bod.alias || '';
     bodForm.sumber = bod.sumber || '';
     bodForm.pejabat = bod.pejabat || '';
+    bodForm.grup_function = bod.grup_function || '';
     bodForm.tipe = 'bod';
     isBODModalOpen.value = true;
 };
