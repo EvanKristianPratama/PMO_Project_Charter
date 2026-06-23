@@ -14,10 +14,22 @@
                     v-model="parentFilterId"
                     class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
                 >
-                    <option value="">Semua APQC</option>
+                    <option value="">All APQC</option>
                     <option v-for="item in parentFilterOptions" :key="item.id" :value="item.id">
                         {{ getLevelPrefix(item) }}{{ item.name }}
                     </option>
+                </select>
+                <select
+                    v-model="expandLevel"
+                    @change="handleExpandLevelChange"
+                    class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white cursor-pointer"
+                >
+                    <option value="custom" disabled>Expand Level...</option>
+                    <option value="0">Collapse All</option>
+                    <option v-for="depth in maxDepth + 1" :key="depth" :value="depth">
+                        Level {{ depth }}
+                    </option>
+                    <option value="all">Expand All</option>
                 </select>
                 <button
                     @click="openCreateModal"
@@ -36,8 +48,9 @@
             <table class="w-full divide-y divide-slate-200 text-sm dark:divide-white/10">
                 <thead class="bg-slate-50 dark:bg-white/5">
                     <tr>
-                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Name</th>
-                        <th class="px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-36">Actions</th>
+                        <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Name</th>
+                        <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Parent</th>
+                        <th class="px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-36">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 dark:divide-white/10">
@@ -47,7 +60,7 @@
                         class="group transition duration-150 hover:bg-slate-50/50 dark:hover:bg-white/5 animate-fade-in"
                     >
                         <td 
-                            class="px-4 py-3 text-slate-600 dark:text-slate-300 break-words" 
+                            class="px-4 py-1.5 text-slate-500 dark:text-slate-400 text-xs break-words" 
                             :style="{ paddingLeft: (item.depth * 24 + 16) + 'px' }"
                         >
                             <div class="flex items-center gap-2">
@@ -66,13 +79,16 @@
                                 </button>
                                 <span v-else-if="item.depth > 0" class="text-slate-300 dark:text-white/20 mr-1.5 font-mono shrink-0">├─</span>
                                 
-                                <span :class="[item.depth === 0 ? 'font-bold text-slate-900 dark:text-white' : 'font-medium text-slate-700 dark:text-slate-300']">
+                                <span>
                                     {{ item.name }}
                                 </span>
                             </div>
                         </td>
-                        <td class="px-4 py-3 text-center w-28 print:hidden">
-                            <div class="flex flex-col items-center justify-center gap-1">
+                        <td class="px-4 py-1.5 text-slate-500 dark:text-slate-400 text-xs">
+                            {{ getParentLabel(item.parent_id) }}
+                        </td>
+                        <td class="px-4 py-1.5 text-center print:hidden">
+                            <div class="flex items-center justify-center gap-1.5">
                                 <button
                                     @click="openEditModal(item)"
                                     class="w-14 inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-bold text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5 active:scale-95"
@@ -89,7 +105,7 @@
                         </td>
                     </tr>
                     <tr v-if="visibleApqcRows.length === 0">
-                        <td colspan="2" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+                        <td colspan="3" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
                             Data APQC tidak ditemukan.
                         </td>
                     </tr>
@@ -248,14 +264,55 @@ const apqcTree = computed(() => {
 
 // ─── Expand / Collapse State ───
 const expandedApqcIds = ref(new Set());
+const expandLevel = ref('all');
+
+const maxDepth = computed(() => {
+    let max = 0;
+    props.apqcList.forEach(item => {
+        const d = getDepth(item.id);
+        if (d > max) max = d;
+    });
+    return max;
+});
 
 const toggleApqcExpand = (id) => {
+    expandLevel.value = 'custom';
     if (expandedApqcIds.value.has(id)) {
         expandedApqcIds.value.delete(id);
     } else {
         expandedApqcIds.value.add(id);
     }
     expandedApqcIds.value = new Set(expandedApqcIds.value);
+};
+
+const handleExpandLevelChange = () => {
+    const val = expandLevel.value;
+    if (val === 'custom') return;
+
+    const ids = new Set();
+
+    if (val === 'all') {
+        props.apqcList.forEach(item => {
+            const isParent = props.apqcList.some(r => r.parent_id === item.id);
+            if (isParent) {
+                ids.add(item.id);
+            }
+        });
+    } else {
+        const targetDepth = parseInt(val, 10);
+        if (targetDepth > 0) {
+            props.apqcList.forEach(item => {
+                const depth = getDepth(item.id);
+                if (depth < targetDepth) {
+                    const isParent = props.apqcList.some(r => r.parent_id === item.id);
+                    if (isParent) {
+                        ids.add(item.id);
+                    }
+                }
+            });
+        }
+    }
+    expandedApqcIds.value = ids;
 };
 
 const initializeExpandedApqc = () => {
@@ -267,6 +324,7 @@ const initializeExpandedApqc = () => {
         }
     });
     expandedApqcIds.value = ids;
+    expandLevel.value = 'all';
 };
 
 onMounted(() => {
@@ -310,6 +368,7 @@ watch(searchQuery, (newQuery) => {
             }
         });
         expandedApqcIds.value = ids;
+        expandLevel.value = 'all';
     } else {
         initializeExpandedApqc();
     }

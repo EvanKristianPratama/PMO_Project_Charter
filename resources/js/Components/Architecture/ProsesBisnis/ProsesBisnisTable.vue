@@ -50,7 +50,7 @@
                             <th scope="col" class="px-6 py-4">Tugas</th>
                             <th scope="col" class="px-6 py-4">Hasil</th>
                             <th scope="col" class="px-6 py-4">Status</th>
-                            <th scope="col" class="px-6 py-4 text-center w-28 print:hidden">Aksi</th>
+                            <th scope="col" class="px-6 py-4 text-center w-36 print:hidden">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 dark:divide-white/10">
@@ -80,8 +80,8 @@
                                     {{ item.status || 'Draft' }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 border-b border-slate-200 dark:border-white/10 w-24 print:hidden">
-                                <div class="flex flex-col items-center justify-center gap-1">
+                            <td class="px-6 py-4 border-b border-slate-200 dark:border-white/10 print:hidden">
+                                <div class="flex items-center justify-center gap-1.5">
                                     <button 
                                         @click="openEditModal(item)"
                                         class="w-14 inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-bold text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5 active:scale-95"
