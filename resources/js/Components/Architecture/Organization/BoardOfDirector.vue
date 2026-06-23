@@ -219,6 +219,19 @@
                 <span v-if="bodForm.errors.name" class="text-xs text-red-500 font-medium">{{ bodForm.errors.name }}</span>
             </div>
 
+            <!-- BOD Member Alias Input -->
+            <div class="flex flex-col gap-1.5">
+                <label for="bod_alias" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Alias (Singkatan)</label>
+                <input
+                    id="bod_alias"
+                    v-model="bodForm.alias"
+                    type="text"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    placeholder="Contoh: DIRUT / DIR-HULU"
+                />
+                <span v-if="bodForm.errors.alias" class="text-xs text-red-500 font-medium">{{ bodForm.errors.alias }}</span>
+            </div>
+
             <!-- BOD Member Tipe Input -->
             <div class="flex flex-col gap-1.5">
                 <label for="bod_tipe" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Tipe</label>
@@ -353,6 +366,7 @@ const bodForm = useForm({
     company_id: '',
     parent_id: '',
     name: '',
+    alias: '',
     sumber: '',
     pejabat: '',
     tipe: '',
@@ -374,6 +388,7 @@ const openEditBODModal = (bod) => {
     bodForm.company_id = bod.company_id;
     bodForm.parent_id = bod.parent_id ?? '';
     bodForm.name = bod.name;
+    bodForm.alias = bod.alias || '';
     bodForm.sumber = bod.sumber || '';
     bodForm.pejabat = bod.pejabat || '';
     bodForm.tipe = 'bod';
