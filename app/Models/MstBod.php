@@ -23,6 +23,11 @@ class MstBod extends Model
         'grup_function',
         'tipe',
         'sk_id',
+        'order',
+    ];
+
+    protected $casts = [
+        'order' => 'integer',
     ];
 
     public function company(): BelongsTo

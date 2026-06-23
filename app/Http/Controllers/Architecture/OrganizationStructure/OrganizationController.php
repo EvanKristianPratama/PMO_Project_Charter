@@ -49,6 +49,7 @@ class OrganizationController extends Controller
                 'grup_function' => $b->grup_function,
                 'tipe' => $b->tipe,
                 'sk_id' => $b->sk_id,
+                'order' => $b->order,
             ])->values()->all(),
             'skOrganizations' => MstSkOrganization::orderBy('id', 'asc')->get()->map(fn ($s) => [
                 'id' => $s->id,
@@ -228,6 +229,7 @@ class OrganizationController extends Controller
             'grup_function' => 'nullable|string|max:255',
             'tipe' => 'nullable|string|max:255',
             'sk_id' => 'nullable|integer|exists:mst_sk_organization,id',
+            'order' => 'nullable|integer',
         ]);
 
         MstBod::create($validated);
@@ -251,6 +253,7 @@ class OrganizationController extends Controller
             'grup_function' => 'nullable|string|max:255',
             'tipe' => 'nullable|string|max:255',
             'sk_id' => 'nullable|integer|exists:mst_sk_organization,id',
+            'order' => 'nullable|integer',
         ]);
 
         $bod->update($validated);

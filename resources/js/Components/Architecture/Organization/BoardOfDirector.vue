@@ -5,14 +5,13 @@
                 <h3 class="text-xs font-bold tracking-wider text-slate-700 dark:text-slate-200">
                     Board of Directors
                 </h3>
-                <!-- Company Filter (hanya di Table view) -->
+                <!-- Company Filter -->
                 <select
-                    v-if="viewMode === 'table'"
                     v-model="selectedCompanyId"
                     class="rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
                 >
                     <option value="">Semua Company</option>
-                    <option v-for="company in companies" :key="company.id" :value="company.id">
+                    <option v-for="company in companiesWithBodsList" :key="company.id" :value="company.id">
                         {{ company.name }}
                     </option>
                 </select>
@@ -73,6 +72,7 @@
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Pejabat</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-24">Tipe</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Grup</th>
+                        <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-16">Order</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-48">Sumber</th>
                         <th class="px-4 py-2 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-40">Actions</th>
                     </tr>
@@ -102,6 +102,9 @@
                         <td class="px-4 py-2.5 text-slate-900 dark:text-white text-left font-medium">
                             {{ bod.grup_function || '-' }}
                         </td>
+                        <td class="px-4 py-2.5 text-slate-900 dark:text-white text-left font-medium w-16">
+                            {{ bod.order !== null && bod.order !== undefined ? bod.order : '-' }}
+                        </td>
                         <td class="px-4 py-2.5 text-slate-900 dark:text-white text-left font-medium w-48" :title="bod.sumber || '-'">
                             <div class="break-words whitespace-normal">
                                 {{ bod.sumber || '-' }}
@@ -125,7 +128,7 @@
                         </td>
                     </tr>
                     <tr v-if="filteredBods.length === 0">
-                        <td colspan="9" class="px-4 py-12 text-center">
+                        <td colspan="10" class="px-4 py-12 text-center">
                             <div class="flex flex-col items-center justify-center text-center">
                                 <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-slate-500 mb-4 border border-slate-200 dark:border-white/10">
                                     <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -145,11 +148,11 @@
         <!-- Tree View -->
         <div v-if="viewMode === 'tree'" class="px-4 py-4 space-y-6">
             <CompanyThreeView
-                :companies="companies"
+                :companies="filteredCompanies"
                 :is-root="true"
             />
             <BodThreeView
-                :companies="companies"
+                :companies="filteredCompanies"
                 :bods="bodsOnly"
                 :is-root="true"
             />
@@ -267,6 +270,20 @@
                 <span v-if="bodForm.errors.grup_function" class="text-xs text-red-500 font-medium">{{ bodForm.errors.grup_function }}</span>
             </div>
 
+            <!-- BOD Order Input -->
+            <div class="flex flex-col gap-1.5">
+                <label for="bod_order" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Order</label>
+                <input
+                    id="bod_order"
+                    v-model="bodForm.order"
+                    type="number"
+                    min="0"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    placeholder="Contoh: 1, 2, 3"
+                />
+                <span v-if="bodForm.errors.order" class="text-xs text-red-500 font-medium">{{ bodForm.errors.order }}</span>
+            </div>
+
             <!-- BOD Member Pejabat Input -->
             <div class="flex flex-col gap-1.5">
                 <label for="bod_pejabat" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Nama Pejabat (Official)</label>
@@ -349,6 +366,28 @@ const filteredBods = computed(() => {
     return bodsOnly.value.filter(bod => Number(bod.company_id) === Number(selectedCompanyId.value));
 });
 
+const getDescendantCompanyIds = (companyId, list) => {
+    const ids = [Number(companyId)];
+    const children = list.filter(c => Number(c.parent_id) === Number(companyId));
+    for (const child of children) {
+        ids.push(...getDescendantCompanyIds(child.id, list));
+    }
+    return ids;
+};
+
+const filteredCompanies = computed(() => {
+    if (!selectedCompanyId.value) {
+        return props.companies;
+    }
+    const allowedIds = getDescendantCompanyIds(selectedCompanyId.value, props.companies);
+    return props.companies.filter(c => allowedIds.includes(Number(c.id)));
+});
+
+const companiesWithBodsList = computed(() => {
+    const activeCompanyIds = new Set(bodsOnly.value.map(bod => Number(bod.company_id)));
+    return props.companies.filter(company => activeCompanyIds.has(Number(company.id)));
+});
+
 /**
  * Kandidat parent: Semua BOD dari semua company, exclude diri sendiri (saat edit).
  * Ditampilkan dengan informasi nama company untuk konteks.
@@ -393,6 +432,7 @@ const bodForm = useForm({
     pejabat: '',
     grup_function: '',
     tipe: '',
+    order: '',
 });
 
 const openBODModal = () => {
@@ -401,6 +441,7 @@ const openBODModal = () => {
     bodForm.clearErrors();
     bodForm.reset();
     bodForm.tipe = 'bod';
+    bodForm.order = '';
     if (selectedCompanyId.value) {
         bodForm.company_id = selectedCompanyId.value;
     }
@@ -419,6 +460,7 @@ const openEditBODModal = (bod) => {
     bodForm.pejabat = bod.pejabat || '';
     bodForm.grup_function = bod.grup_function || '';
     bodForm.tipe = 'bod';
+    bodForm.order = bod.order ?? '';
     isBODModalOpen.value = true;
 };
 

@@ -319,7 +319,7 @@ const props = defineProps({
 });
 
 const selectedCompanyId = ref('');
-const showBod = ref(false);
+const showBod = ref(true);
 const searchQuery = ref('');
 
 watch(() => props.initialCompanyId, (newVal) => {

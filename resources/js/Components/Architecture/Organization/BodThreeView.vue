@@ -7,6 +7,7 @@
         </div>
 
         <div v-else class="space-y-4">
+
             <section
                 v-for="company in companiesWithBods"
                 :key="company.id"
@@ -125,7 +126,7 @@
     <!-- NODE: render satu kotak jabatan BOD + children-nya -->
     <div v-else class="relative flex flex-col items-center min-w-0 shrink-0">
         <!-- Sibling connectors -->
-        <div v-if="depth >= 1 && (!isFirstChild || !isLastChild)"
+        <div v-if="!isWakilStack && depth >= 1 && (!isFirstChild || !isLastChild)"
             class="absolute top-0 h-px bg-slate-300 dark:bg-white/20" :class="[
                 isFirstChild ? 'left-1/2 -right-2' : '',
                 isLastChild ? '-left-2 right-1/2' : '',
@@ -168,8 +169,23 @@
             </span>
         </div>
 
-        <!-- Children -->
-        <template v-if="hasChildren && isExpanded">
+        <!-- Children (vertical wakil stack) -->
+        <template v-if="combinedWakil.length > 0 && isExpanded">
+            <BodThreeView
+                :node="wakilChildToRender"
+                :extra-children="remainingChildrenToPushDown"
+                :is-wakil-stack="true"
+                :all-bods="allBods"
+                :all-bods-global="allBodsGlobal"
+                :companies="companies"
+                :is-root="false"
+                :depth="depth + 1"
+                :type-label="typeLabel"
+            />
+        </template>
+
+        <!-- Children (horizontal branching for normal children) -->
+        <template v-if="combinedWakil.length === 0 && combinedNormal.length > 0 && isExpanded">
             <div class="relative mt-4 w-full">
                 <!-- Garis vertikal turun -->
                 <div
@@ -180,9 +196,8 @@
 
                 <!-- Children nodes -->
                 <div class="relative flex flex-row justify-center items-start gap-4 flex-wrap">
-
                     <BodThreeView
-                        v-for="(child, idx) in children"
+                        v-for="(child, idx) in combinedNormal"
                         :key="child.id"
                         :node="child"
                         :all-bods="allBods"
@@ -191,7 +206,7 @@
                         :is-root="false"
                         :depth="depth + 1"
                         :is-first-child="idx === 0"
-                        :is-last-child="idx === children.length - 1"
+                        :is-last-child="idx === combinedNormal.length - 1"
                         :type-label="typeLabel"
                     />
                 </div>
@@ -250,6 +265,14 @@ const props = defineProps({
     typeLabel: {
         type: String,
         default: 'BOD',
+    },
+    extraChildren: {
+        type: Array,
+        default: () => [],
+    },
+    isWakilStack: {
+        type: Boolean,
+        default: false,
     },
 });
 
@@ -343,13 +366,31 @@ const getLocalRootBods = (company) => {
 // Node-level computed
 // =====================
 
-/** Children langsung dari node ini (hanya dalam company yang sama / allBods) */
-const children = computed(() => {
+const combinedWakil = computed(() => {
     if (!props.node) return [];
-    return props.allBods.filter(b => Number(b.parent_id) === Number(props.node.id));
+    const directWakil = props.allBods.filter(b => Number(b.parent_id) === Number(props.node.id) && b.grup_function && b.grup_function.toLowerCase() === 'wakil');
+    const extraWakil = (props.extraChildren || []).filter(b => b.grup_function && b.grup_function.toLowerCase() === 'wakil');
+    return [...directWakil, ...extraWakil];
 });
 
-const hasChildren = computed(() => children.value.length > 0);
+const combinedNormal = computed(() => {
+    if (!props.node) return [];
+    const directNormal = props.allBods.filter(b => Number(b.parent_id) === Number(props.node.id) && (!b.grup_function || b.grup_function.toLowerCase() !== 'wakil'));
+    const extraNormal = (props.extraChildren || []).filter(b => !b.grup_function || b.grup_function.toLowerCase() !== 'wakil');
+    return [...directNormal, ...extraNormal];
+});
+
+const hasChildren = computed(() => {
+    return combinedWakil.value.length > 0 || combinedNormal.value.length > 0;
+});
+
+const wakilChildToRender = computed(() => combinedWakil.value[0]);
+const remainingChildrenToPushDown = computed(() => {
+    return [
+        ...combinedWakil.value.slice(1),
+        ...combinedNormal.value
+    ];
+});
 
 const nodeTitle = computed(() => {
     const parts = [props.node?.name];
@@ -367,6 +408,9 @@ const toggleExpand = () => {
 
 /** Style box — node normal */
 const nodeBoxClass = computed(() => {
+    if (props.node?.grup_function && props.node.grup_function.toLowerCase() === 'wakil') {
+        return 'min-w-[80px] max-w-[120px] bg-slate-50 text-slate-900 border-blue-400 dark:bg-[#1a1a1a] dark:text-slate-100 dark:border-blue-500/40';
+    }
     return 'min-w-[80px] max-w-[120px] bg-white text-slate-900 border-slate-300 dark:bg-[#1a1a1a] dark:text-slate-100 dark:border-white/10';
 });
 
