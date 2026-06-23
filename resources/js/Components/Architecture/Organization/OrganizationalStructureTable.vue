@@ -1,88 +1,85 @@
 <template>
-    <!-- Tab Navigation -->
-    <div class="flex border-b border-slate-200 dark:border-white/10 mb-4 gap-2">
-        <button
-            @click="activeTab = 'company'"
-            :class="[
-                'px-4 py-2 text-sm font-semibold border-b-2 transition-all duration-200',
-                activeTab === 'company'
-                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                    : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
-            ]"
-        >
-            Company List
-        </button>
-        <button
-            @click="activeTab = 'bod'"
-            :class="[
-                'px-4 py-2 text-sm font-semibold border-b-2 transition-all duration-200',
-                activeTab === 'bod'
-                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                    : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
-            ]"
-        >
-            BoD
-        </button>
-        <button
-            @click="activeTab = 'organization'"
-            :class="[
-                'px-4 py-2 text-sm font-semibold border-b-2 transition-all duration-200',
-                activeTab === 'organization'
-                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                    : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
-            ]"
-        >
-            Organization Structure
-        </button>
-    </div>
-
-    <div v-if="activeTab === 'organization'" class="space-y-4">
-        <!-- Filter & Actions Header Section -->
+    <div class="space-y-4">
+        <!-- Search & Company Filters Section -->
         <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#171717]">
-            <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                <!-- Filters List -->
-                <div class="flex flex-wrap items-center gap-3">
-                    <input
-                        v-if="viewMode === 'table'"
-                        v-model="searchQuery"
-                        type="text"
-                        placeholder="Cari organisasi..."
-                        class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white w-48"
-                    />
-
-                    <!-- Company Filter -->
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <!-- Company Filter -->
+                <div class="w-full sm:w-72 flex flex-col gap-1.5">
                     <select
                         v-model="selectedCompanyId"
-                        class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
                     >
                         <option value="">Semua Company</option>
                         <option v-for="company in companies" :key="company.id" :value="company.id">
                             {{ company.name }}
                         </option>
                     </select>
+                </div>
+            </div>
+        </section>
 
+        <!-- BOD Tree View of Selected Company -->
+        <div v-if="selectedCompany" class="space-y-4">
+            <BodThreeView
+                :companies="[selectedCompany]"
+                :bods="bods"
+                :is-root="true"
+            />
+            <EmployeeStructure
+                :companies="companies"
+                :bods="bods"
+                :initial-company-id="selectedCompanyId"
+            />
+        </div>
+
+        <!-- Organization Structure Main Card -->
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+            <!-- Header Section containing: Group Filter, Organization Filter, Add Button, Table/Tree Toggle -->
+            <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between border-b border-slate-200 px-4 py-3 dark:border-white/10">
+                <!-- Group & Parent Filters -->
+                <div class="flex flex-wrap items-center gap-3">
                     <!-- Group Filter -->
-                    <select
-                        v-model="selectedGroubName"
-                        class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
-                    >
-                        <option value="">Semua Group</option>
-                        <option v-for="groubName in groubNames" :key="groubName" :value="groubName">
-                            {{ groubName }}
-                        </option>
-                    </select>
+                    <div class="flex flex-col gap-1.5">
+                        <select
+                            v-model="selectedGroubName"
+                            class="w-full sm:w-32 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                        >
+                            <option value="">Semua Group</option>
+                            <option v-for="groubName in groubNames" :key="groubName" :value="groubName">
+                                {{ groubName }}
+                            </option>
+                        </select>
+                    </div>
 
                     <!-- Parent Filter -->
-                    <select
-                        v-if="viewMode === 'table'"
-                        v-model="parentFilterId"
-                        class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
-                    >
-                        <option value="">Semua Organisasi</option>
-                        <option v-for="org in parentFilterOptions" :key="org.organization_id" :value="org.organization_id">
-                            {{ getLevelPrefix(org) }}{{ org.organization_name }} ({{ org.code }})
-                        </option>
-                    </select>
+                    <div v-if="viewMode === 'table'" class="flex flex-col gap-1.5">
+                        <select
+                            v-model="parentFilterId"
+                            class="w-full sm:w-40 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                        >
+                            <option value="">Semua Organisasi</option>
+                            <option v-for="org in parentFilterOptions" :key="org.organization_id" :value="org.organization_id">
+                                {{ getLevelPrefix(org) }}{{ org.organization_name }} ({{ org.code }})
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Search by Query -->
+                    <div v-if="viewMode === 'table'" class="w-full sm:w-48 flex flex-col gap-1.5">
+                        <div class="relative">
+                            <input
+                                v-model="searchQuery"
+                                type="text"
+                                placeholder="Cari kode, nama, jabatan, pejabat..."
+                                class="w-full rounded-lg border border-slate-300 bg-white pl-8 pr-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                            />
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-slate-400 dark:text-slate-500">
+                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Actions & Toggle -->
@@ -98,166 +95,155 @@
                     </button>
 
                     <!-- View Mode Toggle -->
-                    <div class="flex gap-2">
+                    <div class="flex gap-1">
                         <button
                             :class="[
-                                'inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition',
+                                'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition',
                                 viewMode === 'table'
-                                    ? 'bg-blue-500 text-white shadow-md hover:bg-blue-600'
-                                    : 'bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600',
+                                    ? 'bg-blue-500 text-white shadow-sm hover:bg-blue-600'
+                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/10 dark:text-slate-300 dark:hover:bg-white/20',
                             ]"
                             @click="viewMode = 'table'"
                         >
+                            <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18M10 3v18M14 3v18" />
+                            </svg>
                             Table
                         </button>
                         <button
                             :class="[
-                                'inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition',
+                                'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition',
                                 viewMode === 'tree'
-                                    ? 'bg-blue-500 text-white shadow-md hover:bg-blue-600'
-                                    : 'bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600',
+                                    ? 'bg-blue-500 text-white shadow-sm hover:bg-blue-600'
+                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/10 dark:text-slate-300 dark:hover:bg-white/20',
                             ]"
                             @click="viewMode = 'tree'"
                         >
+                            <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h10M4 18h6" />
+                            </svg>
                             Tree
                         </button>
                     </div>
                 </div>
             </div>
+
+            <!-- Table View -->
+            <div v-if="viewMode === 'table'" class="overflow-x-auto">
+                <table class="w-full divide-y divide-slate-200 text-[11px] dark:divide-white/10 table-fixed">
+                    <thead class="bg-slate-50 dark:bg-white/5">
+                        <tr>
+                            <th class="px-2 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-8">No</th>
+                            <th class="px-2 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-20">Company</th>
+                            <th class="px-2 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-16">Group</th>
+                            <th class="px-2 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-10">ID</th>
+                            <th class="px-2 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-20">Code</th>
+                            <th class="px-2 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-28">Organization</th>
+                            <th class="px-2 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-28">Parent</th>
+                            <th class="px-2 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-14">Alias</th>
+                            <th class="px-2 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-28">Jabatan</th>
+                            <th class="px-2 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-24">Pejabat (SDM)</th>
+                            <th class="px-2 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-24">Pejabat (Original)</th>
+                            <th class="px-2 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-24">SK</th>
+                            <th class="px-2 py-2 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-24">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 dark:divide-white/10">
+                        <tr
+                            v-for="(organizationStructureRow, index) in filteredRows"
+                            :key="organizationStructureRow.organization_id"
+                            class="transition hover:bg-slate-50 dark:hover:bg-white/5"
+                        >
+                            <td class="px-2 py-1.5 text-slate-500 dark:text-slate-400 w-8 text-center">{{ index + 1 }}</td>
+                            <td class="px-2 py-1.5 text-slate-600 dark:text-slate-300 w-20" :title="displayValue(organizationStructureRow.company_name)">
+                                <div class="break-words whitespace-normal font-medium">
+                                    {{ displayValue(organizationStructureRow.company_name) }}
+                                </div>
+                            </td>
+                            <td class="px-2 py-1.5 text-slate-600 dark:text-slate-300 w-16" :title="displayValue(organizationStructureRow.groub_name)">
+                                <div class="break-words whitespace-normal">
+                                    {{ displayValue(organizationStructureRow.groub_name) }}
+                                </div>
+                            </td>
+                            <td class="px-2 py-1.5 text-slate-500 dark:text-slate-400 font-mono text-[10px] w-10" :title="displayValue(organizationStructureRow.organization_id)">
+                                <div class="break-all whitespace-normal">
+                                    {{ displayValue(organizationStructureRow.organization_id) }}
+                                </div>
+                            </td>
+                            <td class="px-2 py-1.5 text-slate-500 dark:text-slate-400 font-mono text-[10px] w-20" :title="displayValue(organizationStructureRow.code)">
+                                <div class="break-all whitespace-normal">
+                                    {{ displayValue(organizationStructureRow.code) }}
+                                </div>
+                            </td>
+                            <td class="px-2 py-1.5 text-slate-600 dark:text-slate-300 font-medium w-28" :title="displayValue(organizationStructureRow.organization_name)">
+                                <div class="break-words whitespace-normal">
+                                    {{ displayValue(organizationStructureRow.organization_name) }}
+                                </div>
+                            </td>
+                            <td class="px-2 py-1.5 text-slate-500 dark:text-slate-400 text-[10px] w-28" :title="getParentName(organizationStructureRow.parent_id)">
+                                <div class="break-words whitespace-normal">
+                                    {{ getParentName(organizationStructureRow.parent_id) }}
+                                </div>
+                            </td>
+                            <td class="px-2 py-1.5 text-slate-600 dark:text-slate-300 w-14" :title="displayValue(organizationStructureRow.alias)">
+                                <div class="break-words whitespace-normal">
+                                    {{ displayValue(organizationStructureRow.alias) }}
+                                </div>
+                            </td>
+                            <td class="px-2 py-1.5 text-slate-600 dark:text-slate-300 w-28" :title="displayValue(organizationStructureRow.jabatan)">
+                                <div class="break-words whitespace-normal">
+                                    {{ displayValue(organizationStructureRow.jabatan) }}
+                                </div>
+                            </td>
+                            <td class="px-2 py-1.5 text-slate-600 dark:text-slate-300 w-24" :title="displayValue(organizationStructureRow.pejabat)">
+                                <div class="break-words whitespace-normal">
+                                    {{ displayValue(organizationStructureRow.pejabat) }}
+                                </div>
+                            </td>
+                            <td class="px-2 py-1.5 text-slate-600 dark:text-slate-300 w-24" :title="displayValue(organizationStructureRow.pejabat_original)">
+                                <div class="break-words whitespace-normal">
+                                    {{ displayValue(organizationStructureRow.pejabat_original) }}
+                                </div>
+                            </td>
+                            <td class="px-2 py-1.5 text-slate-600 dark:text-slate-300 w-24" :title="displayValue(organizationStructureRow.sk)">
+                                <div class="break-words whitespace-normal">
+                                    {{ displayValue(organizationStructureRow.sk) }}
+                                </div>
+                            </td>
+                            <td class="px-2 py-1.5 text-center w-24">
+                                <div class="flex flex-col gap-1 items-center justify-center">
+                                    <button
+                                        @click="openEditModal(organizationStructureRow)"
+                                        class="inline-flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-white/10 dark:hover:bg-white/20 dark:text-slate-200 px-2.5 py-0.5 text-[10px] font-semibold transition w-full max-w-[56px]"
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        @click="openDeleteModal(organizationStructureRow)"
+                                        class="inline-flex items-center justify-center rounded-full bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-500/10 dark:hover:bg-red-500/20 dark:text-red-400 px-2.5 py-0.5 text-[10px] font-semibold transition w-full max-w-[56px]"
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr v-if="filteredRows.length === 0">
+                            <td colspan="13" class="px-2 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
+                                Organization Not Available
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Tree View -->
+            <div v-if="viewMode === 'tree'" class="px-4 py-4">
+                <ThreeView
+                    :organization-structure-rows="filteredByGroupRows"
+                />
+            </div>
         </section>
-
-        <!-- Table View -->
-        <section v-if="viewMode === 'table'" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-
-        <div class="overflow-x-auto">
-            <table class="w-full divide-y divide-slate-200 text-[11px] dark:divide-white/10 table-fixed">
-                <thead class="bg-slate-50 dark:bg-white/5">
-                    <tr>
-                        <th class="px-2 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-8">No</th>
-                        <th class="px-2 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-20">Company</th>
-                        <th class="px-2 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-16">Group</th>
-                        <th class="px-2 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-10">ID</th>
-                        <th class="px-2 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-20">Code</th>
-                        <th class="px-2 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-28">Organization</th>
-                        <th class="px-2 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-28">Parent</th>
-                        <th class="px-2 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-14">Alias</th>
-                        <th class="px-2 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-28">Jabatan</th>
-                        <th class="px-2 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-24">Pejabat (SDM)</th>
-                        <th class="px-2 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-24">Pejabat (Original)</th>
-                        <th class="px-2 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-24">SK</th>
-                        <th class="px-2 py-2 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-24">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-200 dark:divide-white/10">
-                    <tr
-                        v-for="(organizationStructureRow, index) in filteredRows"
-                        :key="organizationStructureRow.organization_id"
-                        class="transition hover:bg-slate-50 dark:hover:bg-white/5"
-                    >
-                        <td class="px-2 py-1.5 text-slate-500 dark:text-slate-400 w-8 text-center">{{ index + 1 }}</td>
-                        <td class="px-2 py-1.5 text-slate-600 dark:text-slate-300 w-20" :title="displayValue(organizationStructureRow.company_name)">
-                            <div class="break-words whitespace-normal font-medium">
-                                {{ displayValue(organizationStructureRow.company_name) }}
-                            </div>
-                        </td>
-                        <td class="px-2 py-1.5 text-slate-600 dark:text-slate-300 w-16" :title="displayValue(organizationStructureRow.groub_name)">
-                            <div class="break-words whitespace-normal">
-                                {{ displayValue(organizationStructureRow.groub_name) }}
-                            </div>
-                        </td>
-                        <td class="px-2 py-1.5 text-slate-500 dark:text-slate-400 font-mono text-[10px] w-10" :title="displayValue(organizationStructureRow.organization_id)">
-                            <div class="break-all whitespace-normal">
-                                {{ displayValue(organizationStructureRow.organization_id) }}
-                            </div>
-                        </td>
-                        <td class="px-2 py-1.5 text-slate-500 dark:text-slate-400 font-mono text-[10px] w-20" :title="displayValue(organizationStructureRow.code)">
-                            <div class="break-all whitespace-normal">
-                                {{ displayValue(organizationStructureRow.code) }}
-                            </div>
-                        </td>
-                        <td class="px-2 py-1.5 text-slate-600 dark:text-slate-300 font-medium w-28" :title="displayValue(organizationStructureRow.organization_name)">
-                            <div class="break-words whitespace-normal">
-                                {{ displayValue(organizationStructureRow.organization_name) }}
-                            </div>
-                        </td>
-                        <td class="px-2 py-1.5 text-slate-500 dark:text-slate-400 text-[10px] w-28" :title="getParentName(organizationStructureRow.parent_id)">
-                            <div class="break-words whitespace-normal">
-                                {{ getParentName(organizationStructureRow.parent_id) }}
-                            </div>
-                        </td>
-                        <td class="px-2 py-1.5 text-slate-600 dark:text-slate-300 w-14" :title="displayValue(organizationStructureRow.alias)">
-                            <div class="break-words whitespace-normal">
-                                {{ displayValue(organizationStructureRow.alias) }}
-                            </div>
-                        </td>
-                        <td class="px-2 py-1.5 text-slate-600 dark:text-slate-300 w-28" :title="displayValue(organizationStructureRow.jabatan)">
-                            <div class="break-words whitespace-normal">
-                                {{ displayValue(organizationStructureRow.jabatan) }}
-                            </div>
-                        </td>
-                        <td class="px-2 py-1.5 text-slate-600 dark:text-slate-300 w-24" :title="displayValue(organizationStructureRow.pejabat)">
-                            <div class="break-words whitespace-normal">
-                                {{ displayValue(organizationStructureRow.pejabat) }}
-                            </div>
-                        </td>
-                        <td class="px-2 py-1.5 text-slate-600 dark:text-slate-300 w-24" :title="displayValue(organizationStructureRow.pejabat_original)">
-                            <div class="break-words whitespace-normal">
-                                {{ displayValue(organizationStructureRow.pejabat_original) }}
-                            </div>
-                        </td>
-                        <td class="px-2 py-1.5 text-slate-600 dark:text-slate-300 w-24" :title="displayValue(organizationStructureRow.sk)">
-                            <div class="break-words whitespace-normal">
-                                {{ displayValue(organizationStructureRow.sk) }}
-                            </div>
-                        </td>
-                        <td class="px-2 py-1.5 text-center w-24">
-                            <div class="flex flex-col gap-1 items-center justify-center">
-                                <button
-                                    @click="openEditModal(organizationStructureRow)"
-                                    class="inline-flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-white/10 dark:hover:bg-white/20 dark:text-slate-200 px-2.5 py-0.5 text-[10px] font-semibold transition w-full max-w-[56px]"
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    @click="openDeleteModal(organizationStructureRow)"
-                                    class="inline-flex items-center justify-center rounded-full bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-500/10 dark:hover:bg-red-500/20 dark:text-red-400 px-2.5 py-0.5 text-[10px] font-semibold transition w-full max-w-[56px]"
-                                >
-                                    Delete
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr v-if="filteredRows.length === 0">
-                        <td colspan="13" class="px-2 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
-                            Data organization tidak ditemukan.
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-    <!-- Tree View -->
-    <ThreeView
-        v-if="viewMode === 'tree'"
-        :organization-structure-rows="filteredByGroupRows"
-    />
     </div>
-
-    <!-- Company View -->
-    <CompanyStructure
-        v-if="activeTab === 'company'"
-        :companies="companies"
-        :groub-options="groubOptions"
-    />
-
-
-    <!-- BOD View -->
-    <BoardOfDirector
-        v-if="activeTab === 'bod'"
-        :companies="companies"
-        :bods="bods"
-    />
 
     <!-- Create & Edit Modal -->
     <ConfirmationModal
@@ -287,22 +273,6 @@
                 </select>
             </div>
 
-            <!-- Parent Organization Option Select -->
-            <div class="flex flex-col gap-1.5">
-                <label for="parent_id" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Organisasi Induk</label>
-                <select
-                    id="parent_id"
-                    v-model="form.parent_id"
-                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
-                >
-                    <option value="">Tanpa Induk (Root / Level 1)</option>
-                    <option v-for="org in filteredParentOrgs" :key="org.organization_id" :value="org.organization_id">
-                        {{ getLevelPrefix(org) }}{{ org.organization_name }} ({{ org.code }})
-                    </option>
-                </select>
-                <span v-if="form.errors.parent_id" class="text-xs text-red-500 font-medium">{{ form.errors.parent_id }}</span>
-            </div>
-
             <!-- Company Option Select -->
             <div class="flex flex-col gap-1.5">
                 <label for="form_company_id" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Company</label>
@@ -317,6 +287,22 @@
                         {{ company.name }}
                     </option>
                 </select>
+            </div>
+
+            <!-- Parent Organization Option Select -->
+            <div class="flex flex-col gap-1.5">
+                <label for="parent_id" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Organisasi Induk</label>
+                <select
+                    id="parent_id"
+                    v-model="form.parent_id"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                >
+                    <option value="">Tanpa Induk (Root / Level 1)</option>
+                    <option v-for="org in filteredParentOrgs" :key="org.organization_id" :value="org.organization_id">
+                        {{ getLevelPrefix(org) }}{{ org.organization_name }} ({{ org.code }})
+                    </option>
+                </select>
+                <span v-if="form.errors.parent_id" class="text-xs text-red-500 font-medium">{{ form.errors.parent_id }}</span>
             </div>
 
             <!-- Group Type Option Select -->
@@ -424,9 +410,8 @@ import { ref, computed, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import ThreeView from '@/Components/Architecture/Organization/ThreeView.vue';
-import CompanyStructure from '@/Components/Architecture/Organization/CompanyStructure.vue';
-import CompanyThreeView from '@/Components/Architecture/Organization/CompanyThreeView.vue';
-import BoardOfDirector from '@/Components/Architecture/Organization/BoardOfDirector.vue';
+import BodThreeView from '@/Components/Architecture/Organization/BodThreeView.vue';
+import EmployeeStructure from '@/Components/Architecture/Organization/EmployeeStructure.vue';
 
 const props = defineProps({
     organizationStructureRows: {
@@ -457,9 +442,7 @@ const getParentName = (parentId) => {
     return parent ? parent.organization_name : '—';
 };
 
-const activeTab = ref('company'); // 'organization', 'company' or 'bod'
 const viewMode = ref('table'); // 'table' or 'tree'
-const companyViewMode = ref('table'); // 'table' or 'tree'
 const selectedGroubName = ref('');
 const selectedCompanyId = ref('');
 const parentFilterId = ref('');
@@ -495,6 +478,11 @@ const filteredByGroupRows = computed(() => {
     return props.organizationStructureRows.filter((row) => {
         return matchesGroubFilter(row.groub_name) && matchesCompanyFilter(row.company_id);
     });
+});
+
+const selectedCompany = computed(() => {
+    if (!selectedCompanyId.value) return null;
+    return props.companies.find(c => String(c.id) === String(selectedCompanyId.value));
 });
 
 const getOrganizationDepth = (orgId) => {

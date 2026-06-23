@@ -19,6 +19,7 @@ class MstBod extends Model
         'name',
         'sumber',
         'pejabat',
+        'tipe',
     ];
 
     public function company(): BelongsTo

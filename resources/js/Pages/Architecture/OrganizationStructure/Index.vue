@@ -9,20 +9,53 @@
                 {{ flash.error }}
             </div>
 
-            <OrganizationalStructureTable
-                :organization-structure-rows="organizationStructureRows"
-                :groub-options="groubOptions"
-                :companies="companies"
-                :bods="bods"
-            />
+            <!-- Capsule Navigation Menu -->
+            <div class="flex items-center gap-1.5 rounded-xl bg-slate-100 p-1 dark:bg-white/5 w-fit">
+                <button
+                    v-for="tab in tabs"
+                    :key="tab.key"
+                    @click="activeTab = tab.key"
+                    class="rounded-lg px-4 py-1.5 text-xs font-semibold transition-all duration-200"
+                    :class="activeTab === tab.key
+                        ? 'bg-white text-blue-600 shadow-sm dark:bg-[#1A1A1A] dark:text-blue-400'
+                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'"
+                >
+                    {{ tab.label }}
+                </button>
+            </div>
+
+            <!-- Component Views -->
+            <div class="mt-4">
+                <CompanyStructure
+                    v-if="activeTab === 'company'"
+                    :companies="companies"
+                    :groub-options="groubOptions"
+                />
+
+                <BoardOfDirector
+                    v-else-if="activeTab === 'bod'"
+                    :companies="companies"
+                    :bods="bods"
+                />
+
+                <OrganizationalStructureTable
+                    v-else-if="activeTab === 'organization'"
+                    :organization-structure-rows="organizationStructureRows"
+                    :groub-options="groubOptions"
+                    :companies="companies"
+                    :bods="bods"
+                />
+            </div>
         </div>
     </UserLayout>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
+import CompanyStructure from '@/Components/Architecture/Organization/CompanyStructure.vue';
+import BoardOfDirector from '@/Components/Architecture/Organization/BoardOfDirector.vue';
 import OrganizationalStructureTable from '@/Components/Architecture/Organization/OrganizationalStructureTable.vue';
 
 defineProps({
@@ -46,4 +79,12 @@ defineProps({
 
 const page = usePage();
 const flash = computed(() => page.props.flash ?? {});
+
+const tabs = [
+    { key: 'company', label: 'Company' },
+    { key: 'bod', label: 'BoD' },
+    { key: 'organization', label: 'Organization Structure' },
+];
+
+const activeTab = ref('company');
 </script>

@@ -42,6 +42,7 @@ class OrganizationController extends Controller
                 'name' => $b->name,
                 'sumber' => $b->sumber,
                 'pejabat' => $b->pejabat,
+                'tipe' => $b->tipe,
             ])->values()->all(),
         ]);
     }
@@ -206,6 +207,7 @@ class OrganizationController extends Controller
             'name' => 'required|string|max:255',
             'sumber' => 'nullable|string|max:255',
             'pejabat' => 'nullable|string|max:255',
+            'tipe' => 'nullable|string|max:255',
         ]);
 
         MstBod::create($validated);
@@ -225,6 +227,7 @@ class OrganizationController extends Controller
             'name' => 'required|string|max:255',
             'sumber' => 'nullable|string|max:255',
             'pejabat' => 'nullable|string|max:255',
+            'tipe' => 'nullable|string|max:255',
         ]);
 
         $bod->update($validated);

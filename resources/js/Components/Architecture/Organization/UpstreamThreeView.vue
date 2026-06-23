@@ -194,27 +194,30 @@ const handleNodeClick = () => {
 };
 
 const isUpstreamCeo = computed(() => {
-    return props.node && String(props.node.code) === '01100000';
+    return props.node && (Number(props.node.organization_id) === 174 || String(props.node.code) === '01100000');
 });
 
 const isUpstreamDirector = computed(() => {
-    const code = String(props.node?.code || '').trim();
-    return code.startsWith('011') && code.endsWith('0000') && code !== '01100000';
+    if (!props.node) return false;
+    const parentIsCeo = Number(props.node.parent_id) === 174;
+    const title = String(props.node.jabatan || props.node.organization_name || '').toLowerCase();
+    const hasDirectorTitle = title.includes('direktur');
+    return parentIsCeo && hasDirectorTitle;
 });
 
 const upstreamSupportStaff = computed(() => {
     if (!isUpstreamCeo.value || !props.node.children) return [];
     return props.node.children.filter(child => {
-        const code = String(child.code || '').trim();
-        return code.startsWith('01100') && code !== '01100000';
+        const title = String(child.jabatan || child.organization_name || '').toLowerCase();
+        return !title.includes('direktur');
     });
 });
 
 const upstreamDirectors = computed(() => {
     if (!isUpstreamCeo.value || !props.node.children) return props.node?.children || [];
     return props.node.children.filter(child => {
-        const code = String(child.code || '').trim();
-        return !(code.startsWith('01100') && code !== '01100000');
+        const title = String(child.jabatan || child.organization_name || '').toLowerCase();
+        return title.includes('direktur');
     });
 });
 

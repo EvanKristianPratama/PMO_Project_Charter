@@ -3,7 +3,7 @@
     <template v-if="isRoot">
         <div v-if="!companies || companies.length === 0"
             class="rounded-md border border-dashed border-slate-200 py-8 text-center text-xs text-slate-500 dark:border-white/10 dark:text-slate-400">
-            Data BOD tidak ditemukan.
+            Data {{ typeLabel }} tidak ditemukan.
         </div>
 
         <div v-else class="space-y-4">
@@ -30,7 +30,7 @@
                 <div class="px-4 py-4 overflow-x-auto">
                     <div v-if="company.bods.length === 0"
                         class="rounded-md border border-dashed border-slate-200 py-6 text-center text-xs text-slate-500 dark:border-white/10 dark:text-slate-400">
-                        Tidak ada data BOD untuk company ini.
+                        Tidak ada data {{ typeLabel }} untuk company ini.
                     </div>
 
                     <!--
@@ -97,6 +97,7 @@
                                     :depth="1"
                                     :is-first-child="idx === 0"
                                     :is-last-child="idx === ghostGroup.children.length - 1"
+                                    :type-label="typeLabel"
                                 />
                             </div>
                         </div>
@@ -118,6 +119,7 @@
                                 :companies="companies"
                                 :is-root="false"
                                 :depth="0"
+                                :type-label="typeLabel"
                             />
                         </div>
                     </div>
@@ -194,6 +196,7 @@
                         :depth="depth + 1"
                         :is-first-child="idx === 0"
                         :is-last-child="idx === children.length - 1"
+                        :type-label="typeLabel"
                     />
                 </div>
             </div>
@@ -247,6 +250,10 @@ const props = defineProps({
     isLastChild: {
         type: Boolean,
         default: false,
+    },
+    typeLabel: {
+        type: String,
+        default: 'BOD',
     },
 });
 
