@@ -80,12 +80,6 @@
 
                             <!-- Children lokal yang mengarah ke ghost node ini -->
                             <div class="relative flex flex-row justify-center items-start gap-4 flex-wrap min-w-max">
-                                <!-- Garis horizontal jika lebih dari 1 child -->
-                                <div
-                                    v-if="ghostGroup.children.length > 1"
-                                    class="absolute top-0 left-0 right-0 h-px bg-slate-300 dark:bg-white/20"
-                                    aria-hidden="true"
-                                />
                                 <BodThreeView
                                     v-for="(child, idx) in ghostGroup.children"
                                     :key="child.id"
@@ -130,6 +124,14 @@
 
     <!-- NODE: render satu kotak jabatan BOD + children-nya -->
     <div v-else class="relative flex flex-col items-center min-w-0 shrink-0">
+        <!-- Sibling connectors -->
+        <div v-if="depth >= 1 && (!isFirstChild || !isLastChild)"
+            class="absolute top-0 h-px bg-slate-300 dark:bg-white/20" :class="[
+                isFirstChild ? 'left-1/2 -right-2' : '',
+                isLastChild ? '-left-2 right-1/2' : '',
+                !isFirstChild && !isLastChild ? '-left-2 -right-2' : '',
+            ]" aria-hidden="true" />
+
         <!-- Garis vertikal dari atas ke kotak (untuk non-root depth >= 1) -->
         <div
             v-if="depth >= 1"
@@ -178,12 +180,6 @@
 
                 <!-- Children nodes -->
                 <div class="relative flex flex-row justify-center items-start gap-4 flex-wrap">
-                    <!-- Garis horizontal menghubungkan siblings -->
-                    <div
-                        v-if="children.length > 1"
-                        class="absolute top-0 left-0 right-0 h-px bg-slate-300 dark:bg-white/20"
-                        aria-hidden="true"
-                    />
 
                     <BodThreeView
                         v-for="(child, idx) in children"

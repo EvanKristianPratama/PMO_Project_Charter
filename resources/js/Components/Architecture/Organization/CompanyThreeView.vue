@@ -22,6 +22,14 @@
 
     <!-- NODE: render satu kotak company + children-nya -->
     <div v-else class="relative flex flex-col items-center min-w-0 shrink-0">
+        <!-- Sibling connectors -->
+        <div v-if="depth >= 1 && (!isFirstChild || !isLastChild)"
+            class="absolute top-0 h-px bg-slate-300 dark:bg-white/20" :class="[
+                isFirstChild ? 'left-1/2 -right-3' : '',
+                isLastChild ? '-left-3 right-1/2' : '',
+                !isFirstChild && !isLastChild ? '-left-3 -right-3' : '',
+            ]" aria-hidden="true" />
+
         <!-- Garis vertikal dari atas ke kotak (untuk depth >= 1) -->
         <div
             v-if="depth >= 1"
@@ -83,12 +91,6 @@
 
                 <!-- Children nodes -->
                 <div class="relative flex flex-row justify-center items-start gap-6 flex-wrap">
-                    <!-- Garis horizontal menghubungkan siblings -->
-                    <div
-                        v-if="children.length > 1"
-                        class="absolute top-0 left-0 right-0 h-px bg-slate-300 dark:bg-white/20"
-                        aria-hidden="true"
-                    />
 
                     <CompanyThreeView
                         v-for="(child, idx) in children"
@@ -145,8 +147,8 @@ const props = defineProps({
     },
 });
 
-// Expand by default kecuali depth >= 3
-const isExpanded = ref(props.depth < 3);
+// Expand by default kecuali depth >= 1
+const isExpanded = ref(props.depth < 1);
 
 // =====================
 // Root-level computed

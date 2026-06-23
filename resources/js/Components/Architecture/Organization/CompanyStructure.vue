@@ -328,7 +328,7 @@ const props = defineProps({
 const isCompanyModalOpen = ref(false);
 const isCompanyDeleteModalOpen = ref(false);
 const companyModalMode = ref('create'); // 'create' or 'edit'
-const viewMode = ref('table'); // 'table' | 'tree'
+const viewMode = ref('tree'); // 'table' | 'tree'
 const selectedCompany = ref(null);
 const companyForm = useForm({
     parent_id: null,
