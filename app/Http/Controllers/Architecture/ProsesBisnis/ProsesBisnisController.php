@@ -57,6 +57,24 @@ class ProsesBisnisController extends Controller
     }
 
     /**
+     * Display the business process management page.
+     */
+    public function manage(): Response
+    {
+        $prosesBisnis = TrsProsesBisnis::with('organization')
+            ->orderBy('organization_id')
+            ->orderBy('no')
+            ->get();
+
+        $organizations = TrsOrganization::orderBy('name')->get();
+
+        return Inertia::render('Architecture/ProsesBisnis/Manage', [
+            'prosesBisnis' => $prosesBisnis,
+            'organizations' => $organizations,
+        ]);
+    }
+
+    /**
      * Store a newly created business process.
      */
     public function store(Request $request): RedirectResponse
@@ -73,7 +91,7 @@ class ProsesBisnisController extends Controller
         TrsProsesBisnis::create($validated);
 
         return redirect()
-            ->route('architecture.proses-bisnis.index')
+            ->back()
             ->with('success', 'Proses Bisnis berhasil ditambahkan.');
     }
 
@@ -96,7 +114,7 @@ class ProsesBisnisController extends Controller
         $prosesBisnis->update($validated);
 
         return redirect()
-            ->route('architecture.proses-bisnis.index')
+            ->back()
             ->with('success', 'Proses Bisnis berhasil diperbarui.');
     }
 
@@ -109,7 +127,7 @@ class ProsesBisnisController extends Controller
         $prosesBisnis->delete();
 
         return redirect()
-            ->route('architecture.proses-bisnis.index')
+            ->back()
             ->with('success', 'Proses Bisnis berhasil dihapus.');
     }
 

@@ -29,15 +29,15 @@
                     </div>
 
                     <!-- Add button -->
-                    <button
-                        @click="openAddModal"
-                        class="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 dark:bg-white dark:hover:bg-slate-100 dark:text-slate-950 dark:focus:ring-white dark:focus:ring-offset-[#171717]"
+                    <Link
+                        :href="route('architecture.proses-bisnis.manage')"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-[#821f44] hover:bg-[#9c2552] text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 active:scale-95"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                         </svg>
-                        Add Business Process
-                    </button>
+                        Kelola Proses Bisnis
+                    </Link>
                 </div>
             </div>
             <div class="overflow-x-auto">
@@ -82,13 +82,13 @@
                             </td>
                             <td class="px-6 py-4 border-b border-slate-200 dark:border-white/10 print:hidden">
                                 <div class="flex items-center justify-center gap-1.5">
-                                    <button 
-                                        @click="openEditModal(item)"
+                                    <Link 
+                                        :href="route('architecture.proses-bisnis.manage', { edit_id: item.id })"
                                         class="w-14 inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-bold text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5 active:scale-95"
                                         title="Edit Proses Bisnis"
                                     >
                                         Edit
-                                    </button>
+                                    </Link>
                                     <button 
                                         @click="deleteProsesBisnis(item)"
                                         class="w-14 inline-flex items-center justify-center rounded-full border border-rose-200 bg-white px-2 py-0.5 text-[10px] font-bold text-rose-700 transition hover:bg-rose-50 hover:border-rose-300 dark:border-rose-500/30 dark:bg-[#1a1a1a] dark:text-rose-400 dark:hover:bg-rose-500/10 active:scale-95"
@@ -104,20 +104,14 @@
             </div>
         </div>
 
-        <!-- ManageModal Component -->
-        <ManageProsesBisnis
-            ref="manageModal"
-            :proses-bisnis="prosesBisnis"
-            :organizations="organizations"
-        />
+        <!-- ManageModal Component removed (now loaded in a separate page) -->
     </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { router, Link } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
-import ManageProsesBisnis from '@/Components/Architecture/ProsesBisnis/ManageProsesBisnis.vue';
 
 const props = defineProps({
     prosesBisnis: {
@@ -152,16 +146,6 @@ const filteredProsesBisnis = computed(() => {
 
     return result;
 });
-
-const manageModal = ref(null);
-
-function openAddModal() {
-    manageModal.value?.openAddModal();
-}
-
-function openEditModal(item) {
-    manageModal.value?.openEditModal(item);
-}
 
 function deleteProsesBisnis(item) {
     Swal.fire({

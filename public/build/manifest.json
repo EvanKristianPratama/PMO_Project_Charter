@@ -1496,7 +1496,7 @@
     ]
   },
   "resources/js/Pages/Architecture/ProsesBisnis/Index.vue": {
-    "file": "assets/Index-3OV0fncs.js",
+    "file": "assets/Index-CdTx1TsX.js",
     "name": "Index",
     "src": "resources/js/Pages/Architecture/ProsesBisnis/Index.vue",
     "isDynamicEntry": true,
@@ -1505,11 +1505,11 @@
       "_vendor-vue-runtime-dom-UkAQs5Wl.js",
       "_inertia-BR7sULRN.js",
       "_sweetalert2-DVN6D7eS.js",
-      "__plugin-vue_export-helper-DlAUqK2U.js",
       "_vendor-vue-runtime-core-dvwo2OAf.js",
       "_vendor-vue-shared-BC0FtGEN.js",
       "_vendor-vue-reactivity-BTrCj1Uo.js",
       "_ConfirmationModal-DuTEVqHB.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
       "_useDarkMode-CzS_SQgs.js",
       "_useRouteHelper-BIwUgTn2.js",
       "_heroicons-QOPew-1j.js",
@@ -1538,7 +1538,52 @@
       "_vendor-laravel-precognition-CApEZYE-.js"
     ],
     "css": [
-      "assets/Index-CIcEKJM0.css"
+      "assets/Index-DlLtasj2.css"
+    ]
+  },
+  "resources/js/Pages/Architecture/ProsesBisnis/Manage.vue": {
+    "file": "assets/Manage-D7ZAtGki.js",
+    "name": "Manage",
+    "src": "resources/js/Pages/Architecture/ProsesBisnis/Manage.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-vue-runtime-dom-UkAQs5Wl.js",
+      "_inertia-BR7sULRN.js",
+      "_UserLayout-CKboI_U8.js",
+      "_sweetalert2-DVN6D7eS.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_vendor-vue-reactivity-BTrCj1Uo.js",
+      "_vendor-vue-runtime-core-dvwo2OAf.js",
+      "_vendor-vue-shared-BC0FtGEN.js",
+      "_vendor-qs-BENwtKv8.js",
+      "_vendor-side-channel-CObUJzLj.js",
+      "_vendor-es-errors-DRNByn_O.js",
+      "_vendor-object-inspect-B_nVp1mo.js",
+      "_vendor-side-channel-list-D-2BtmIs.js",
+      "_vendor-side-channel-map-D1fjGT6N.js",
+      "_vendor-get-intrinsic-CwVZ3Qhl.js",
+      "_vendor-es-object-atoms-BR76m4z7.js",
+      "_vendor-math-intrinsics-DP1tGiab.js",
+      "_vendor-gopd-C1lCZ5Qs.js",
+      "_vendor-es-define-property-D_7cP-M3.js",
+      "_vendor-has-symbols-BaUvM3gb.js",
+      "_vendor-get-proto-DZiXqF4q.js",
+      "_vendor-dunder-proto-5xp6kQrr.js",
+      "_vendor-call-bind-apply-helpers-R8oMH6fk.js",
+      "_vendor-function-bind-CHqF18-c.js",
+      "_vendor-hasown-CH2RbkDu.js",
+      "_vendor-call-bound-BGkfP8QT.js",
+      "_vendor-side-channel-weakmap-yC90O2LV.js",
+      "_vendor-axios-KcFgf-gG.js",
+      "_vendor-lodash-es-Bc66MGl4.js",
+      "_vendor-laravel-precognition-CApEZYE-.js",
+      "_useDarkMode-CzS_SQgs.js",
+      "_useRouteHelper-BIwUgTn2.js",
+      "_heroicons-QOPew-1j.js",
+      "_headlessui-DbEswjdO.js"
+    ],
+    "css": [
+      "assets/Manage-C5caeWpB.css"
     ]
   },
   "resources/js/Pages/Auth/Login.vue": {
@@ -1618,7 +1663,7 @@
     ]
   },
   "resources/js/Pages/BpmnWorkflow/Index.vue": {
-    "file": "assets/Index-B0QmnMWs.js",
+    "file": "assets/Index-CKIAXQnm.js",
     "name": "Index",
     "src": "resources/js/Pages/BpmnWorkflow/Index.vue",
     "isDynamicEntry": true,
@@ -4729,7 +4774,7 @@
     ]
   },
   "resources/js/Pages/StrategicHouse/Index.vue": {
-    "file": "assets/Index-CJV1sSiU.js",
+    "file": "assets/Index-BUkxvOli.js",
     "name": "Index",
     "src": "resources/js/Pages/StrategicHouse/Index.vue",
     "isDynamicEntry": true,
@@ -5226,7 +5271,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-BAJpMJIY.js",
+    "file": "assets/app-gk41aNi2.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -5271,6 +5316,7 @@
       "resources/js/Pages/Architecture/InformaticSystem/Index.vue",
       "resources/js/Pages/Architecture/OrganizationStructure/Index.vue",
       "resources/js/Pages/Architecture/ProsesBisnis/Index.vue",
+      "resources/js/Pages/Architecture/ProsesBisnis/Manage.vue",
       "resources/js/Pages/Auth/Login.vue",
       "resources/js/Pages/Auth/Register.vue",
       "resources/js/Pages/BpmnWorkflow/Index.vue",
