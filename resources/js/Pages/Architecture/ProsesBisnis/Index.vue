@@ -37,6 +37,17 @@
                 >
                     APQC
                 </button>
+                <button
+                    @click="activeTab = 'regulation-map'"
+                    :class="[
+                        'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all duration-200 active:scale-95',
+                        activeTab === 'regulation-map'
+                            ? 'bg-[#821f44] text-white shadow-md shadow-[#821f44]/20'
+                            : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+                    ]"
+                >
+                    Regulation Mapping Function
+                </button>
             </div>
 
             <!-- Table Component -->
@@ -48,12 +59,17 @@
             <FunctionTable
                 v-else-if="activeTab === 'function'"
                 :functions="functions"
-                :groub-options="groubOptions"
+                :company-options="companyOptions"
                 :regulations="regulations"
             />
             <APQCTable
                 v-else-if="activeTab === 'apqc'"
                 :apqc-list="apqcList"
+            />
+            <RegulationMap
+                v-else-if="activeTab === 'regulation-map'"
+                :functions="functions"
+                :regulations="regulations"
             />
         </div>
     </UserLayout>
@@ -63,8 +79,9 @@
 import { ref } from 'vue';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import ProsesBisnisTable from '@/Components/Architecture/ProsesBisnis/ProsesBisnisTable.vue';
-import FunctionTable from '@/Components/Architecture/Function/FunctionTable.vue';
+import FunctionTable from '@/Components/Architecture/ProsesBisnis/Function/FunctionTable.vue';
 import APQCTable from '@/Components/Architecture/ProsesBisnis/APQCT/APQCTable.vue';
+import RegulationMap from '@/Components/Architecture/ProsesBisnis/RegulationMap/RegulationMap.vue';
 
 defineProps({
     prosesBisnis: {
@@ -79,7 +96,7 @@ defineProps({
         type: Array,
         default: () => [],
     },
-    groubOptions: {
+    companyOptions: {
         type: Array,
         default: () => [],
     },

@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\TrsOrganization;
 use App\Models\TrsProsesBisnis;
 use App\Models\MstFunction;
-use App\Models\Groub;
 use App\Models\MstApqc;
+use App\Models\MstCompany;
 use App\Services\Architecture\ApqcService;
 use App\Services\Architecture\FunctionService;
 use Illuminate\Http\RedirectResponse;
@@ -32,9 +32,9 @@ class ProsesBisnisController extends Controller
         $functions = $functionService->getFunctions();
 
 
-        $groubOptions = Groub::with('company')->orderBy('name')->get()->map(fn ($g) => [
-            'id' => $g->id,
-            'name' => $g->company ? "{$g->company->name} - {$g->name}" : $g->name,
+        $companyOptions = MstCompany::orderBy('name')->get()->map(fn ($c) => [
+            'id' => $c->id,
+            'name' => $c->name,
         ])->values()->all();
 
         $regulations = \App\Models\MstRegulation::orderBy('judul')->get()->map(fn ($r) => [
@@ -50,7 +50,7 @@ class ProsesBisnisController extends Controller
             'prosesBisnis' => $prosesBisnis,
             'organizations' => $organizations,
             'functions' => $functions,
-            'groubOptions' => $groubOptions,
+            'companyOptions' => $companyOptions,
             'regulations' => $regulations,
             'apqcList' => $apqcList,
         ]);
@@ -167,6 +167,59 @@ class ProsesBisnisController extends Controller
         return redirect()
             ->route('architecture.proses-bisnis.index')
             ->with('success', 'APQC berhasil dihapus.');
+    }
+
+    /**
+     * Store a newly created Function item.
+     */
+    public function storeFunction(Request $request, FunctionService $functionService): RedirectResponse
+    {
+        $validated = $request->validate([
+            'company_id'     => ['required', 'integer', 'exists:mst_company,id'],
+            'parent_id'      => ['nullable', 'integer', 'exists:mst_function,id'],
+            'code'           => ['required', 'string', 'max:255'],
+            'name'           => ['required', 'string', 'max:255'],
+            'alias'          => ['nullable', 'string', 'max:255'],
+            'regulation_ids' => ['nullable', 'array'],
+            'regulation_ids.*' => ['integer', 'exists:mst_regulation,id'],
+        ]);
+
+        $functionService->createFunction($validated);
+
+        return redirect()->back()->with('success', 'Function berhasil ditambahkan.');
+    }
+
+    /**
+     * Update the specified Function item.
+     */
+    public function updateFunction(Request $request, int $id, FunctionService $functionService): RedirectResponse
+    {
+        $function = MstFunction::findOrFail($id);
+
+        $validated = $request->validate([
+            'company_id'     => ['required', 'integer', 'exists:mst_company,id'],
+            'parent_id'      => ['nullable', 'integer', 'exists:mst_function,id'],
+            'code'           => ['required', 'string', 'max:255'],
+            'name'           => ['required', 'string', 'max:255'],
+            'alias'          => ['nullable', 'string', 'max:255'],
+            'regulation_ids' => ['nullable', 'array'],
+            'regulation_ids.*' => ['integer', 'exists:mst_regulation,id'],
+        ]);
+
+        $functionService->updateFunction($function, $validated);
+
+        return redirect()->back()->with('success', 'Function berhasil diperbarui.');
+    }
+
+    /**
+     * Remove the specified Function item.
+     */
+    public function destroyFunction(int $id, FunctionService $functionService): RedirectResponse
+    {
+        $function = MstFunction::findOrFail($id);
+        $functionService->deleteFunction($function);
+
+        return redirect()->back()->with('success', 'Function berhasil dihapus.');
     }
 }
 

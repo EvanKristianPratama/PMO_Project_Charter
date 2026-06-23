@@ -12,7 +12,7 @@ class MstFunction extends Model
     protected $table = 'mst_function';
 
     protected $fillable = [
-        'groub_id',
+        'company_id',
         'parent_id',
         'code',
         'name',
@@ -20,7 +20,7 @@ class MstFunction extends Model
     ];
 
     protected $casts = [
-        'groub_id' => 'integer',
+        'company_id' => 'integer',
         'parent_id' => 'integer',
         'code' => 'string',
     ];
@@ -42,11 +42,11 @@ class MstFunction extends Model
     }
 
     /**
-     * Relasi ke Groub.
+     * Relasi ke MstCompany.
      */
-    public function groub(): BelongsTo
+    public function company(): BelongsTo
     {
-        return $this->belongsTo(Groub::class, 'groub_id');
+        return $this->belongsTo(MstCompany::class, 'company_id');
     }
 
     /**

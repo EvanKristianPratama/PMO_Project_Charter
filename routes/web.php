@@ -10,7 +10,6 @@ use App\Http\Controllers\Admin\SyncController;
 use App\Http\Controllers\Architecture\BusinessCapability\BusinessCapabilityController;
 use App\Http\Controllers\Architecture\OrganizationStructure\OrganizationController as ArchitectureOrganizationStructureController;
 use App\Http\Controllers\Architecture\ProsesBisnis\ProsesBisnisController as ArchitectureProsesBisnisController;
-use App\Http\Controllers\Architecture\Function\FunctionController as ArchitectureFunctionController;
 use App\Http\Controllers\ResourceManagement\ResourceManagementController as MainResourceManagementController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\SsoController;
@@ -304,10 +303,9 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::delete('/architecture/apqc/{id}', [ArchitectureProsesBisnisController::class, 'destroyApqc'])->name('architecture.apqc.destroy');
 
     // Function CRUD under Architecture
-    Route::get('/architecture/function', [ArchitectureFunctionController::class, 'index'])->name('architecture.function.index');
-    Route::post('/architecture/function', [ArchitectureFunctionController::class, 'store'])->name('architecture.function.store');
-    Route::put('/architecture/function/{id}', [ArchitectureFunctionController::class, 'update'])->name('architecture.function.update');
-    Route::delete('/architecture/function/{id}', [ArchitectureFunctionController::class, 'destroy'])->name('architecture.function.destroy');
+    Route::post('/architecture/function', [ArchitectureProsesBisnisController::class, 'storeFunction'])->name('architecture.function.store');
+    Route::put('/architecture/function/{id}', [ArchitectureProsesBisnisController::class, 'updateFunction'])->name('architecture.function.update');
+    Route::delete('/architecture/function/{id}', [ArchitectureProsesBisnisController::class, 'destroyFunction'])->name('architecture.function.destroy');
     Route::get('/resources-management', fn () => redirect()->route('resource-management.index'))
         ->name('resources-management.index');
 

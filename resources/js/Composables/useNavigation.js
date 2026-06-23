@@ -200,12 +200,6 @@ export function useNavigation() {
                 active: (url) => (url || '').startsWith("/architecture/proses-bisnis"),
             },
             {
-                label: "Function",
-                href: safeRoute("architecture.function.index"),
-                icon: DocumentTextIcon,
-                active: (url) => (url || '').startsWith("/architecture/function"),
-            },
-            {
                 label: "Organization",
                 href: safeRoute("architecture.organization-structure"),
                 icon: BuildingOffice2Icon,

@@ -37,27 +37,39 @@
                 <thead class="bg-slate-50 dark:bg-white/5">
                     <tr>
                         <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Name</th>
-                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Parent</th>
                         <th class="px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-36">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 dark:divide-white/10">
                     <tr
-                        v-for="(item, index) in filteredRows"
-                        :key="item.id"
-                        class="transition hover:bg-slate-50 dark:hover:bg-white/5"
+                        v-for="item in visibleApqcRows"
+                        :key="'apqc-' + item.id"
+                        class="group transition duration-150 hover:bg-slate-50/50 dark:hover:bg-white/5 animate-fade-in"
                     >
-                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
-                            <span
-                                :style="{ paddingLeft: getDepth(item.id) * 16 + 'px' }"
-                                class="inline-block"
-                            >
-                                <span v-if="getDepth(item.id) > 0" class="text-slate-400 mr-1.5">—</span>
-                                {{ item.name }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3 text-slate-500 dark:text-slate-400 text-xs">
-                            {{ getParentLabel(item.parent_id) }}
+                        <td 
+                            class="px-4 py-3 text-slate-600 dark:text-slate-300 break-words" 
+                            :style="{ paddingLeft: (item.depth * 24 + 16) + 'px' }"
+                        >
+                            <div class="flex items-center gap-2">
+                                <!-- Toggle Button -->
+                                <button 
+                                    v-if="item.hasChildren" 
+                                    @click.stop="toggleApqcExpand(item.id)" 
+                                    class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none shrink-0"
+                                >
+                                    <svg v-if="item.isExpanded" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                    </svg>
+                                    <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                    </svg>
+                                </button>
+                                <span v-else-if="item.depth > 0" class="text-slate-300 dark:text-white/20 mr-1.5 font-mono shrink-0">├─</span>
+                                
+                                <span :class="[item.depth === 0 ? 'font-bold text-slate-900 dark:text-white' : 'font-medium text-slate-700 dark:text-slate-300']">
+                                    {{ item.name }}
+                                </span>
+                            </div>
                         </td>
                         <td class="px-4 py-3 text-center w-28 print:hidden">
                             <div class="flex flex-col items-center justify-center gap-1">
@@ -76,9 +88,8 @@
                             </div>
                         </td>
                     </tr>
-                    <tr v-if="filteredRows.length === 0">
-                        <td colspan="3" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
-
+                    <tr v-if="visibleApqcRows.length === 0">
+                        <td colspan="2" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
                             Data APQC tidak ditemukan.
                         </td>
                     </tr>
@@ -147,7 +158,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 
@@ -179,7 +190,7 @@ const getDepth = (id) => {
 };
 
 const getLevelPrefix = (item) => {
-    const depth = getDepth(item.id);
+    const depth = item.depth !== undefined ? item.depth : getDepth(item.id);
     if (depth === 0) return '';
     return '\u00A0\u00A0'.repeat(depth) + '— ';
 };
@@ -208,18 +219,21 @@ const isDescendant = (id, targetId) => {
     return false;
 };
 
-// ─── Flatten tree (depth-first traversal to display hierarchy naturally) ───
-const flattenedTree = computed(() => {
-    const list = props.apqcList;
-    const map = new Map(list.map(item => [item.id, { ...item, children: [] }]));
+// ─── Hierarchy tree mapping ───
+const apqcTree = computed(() => {
+    const map = {};
     const roots = [];
 
-    list.forEach(item => {
-        const node = map.get(item.id);
-        if (item.parent_id && map.has(item.parent_id)) {
-            map.get(item.parent_id).children.push(node);
+    props.apqcList.forEach(item => {
+        map[item.id] = { ...item, children: [] };
+    });
+
+    props.apqcList.forEach(item => {
+        const mapped = map[item.id];
+        if (item.parent_id && map[item.parent_id]) {
+            map[item.parent_id].children.push(mapped);
         } else {
-            roots.push(node);
+            roots.push(mapped);
         }
     });
 
@@ -229,48 +243,145 @@ const flattenedTree = computed(() => {
     };
     sort(roots);
 
-    const result = [];
-    const traverse = (node) => {
-        result.push(node);
-        node.children.forEach(traverse);
-    };
-    roots.forEach(traverse);
-    return result;
+    return roots;
 });
 
-// ─── Filters ─────────────────────────────────────────────────────────────────
+// ─── Expand / Collapse State ───
+const expandedApqcIds = ref(new Set());
+
+const toggleApqcExpand = (id) => {
+    if (expandedApqcIds.value.has(id)) {
+        expandedApqcIds.value.delete(id);
+    } else {
+        expandedApqcIds.value.add(id);
+    }
+    expandedApqcIds.value = new Set(expandedApqcIds.value);
+};
+
+const initializeExpandedApqc = () => {
+    const ids = new Set();
+    props.apqcList.forEach(item => {
+        const isParent = props.apqcList.some(r => r.parent_id === item.id);
+        if (isParent) {
+            ids.add(item.id);
+        }
+    });
+    expandedApqcIds.value = ids;
+};
+
+onMounted(() => {
+    initializeExpandedApqc();
+});
+
+watch(
+    () => props.apqcList,
+    () => {
+        initializeExpandedApqc();
+    },
+    { deep: false }
+);
+
+// ─── Search / Filter ───
 const searchQuery = ref('');
 const parentFilterId = ref('');
 
-const parentFilterOptions = computed(() => flattenedTree.value);
+const matchesSearch = (node) => {
+    if (!searchQuery.value) return true;
+    const q = searchQuery.value.toLowerCase().trim();
+    return (node.name || '').toLowerCase().includes(q);
+};
 
-const filteredRows = computed(() => {
-    let rows = flattenedTree.value;
+const shouldShowNode = (node) => {
+    if (matchesSearch(node)) return true;
+    if (node.children && node.children.length > 0) {
+        return node.children.some(child => shouldShowNode(child));
+    }
+    return false;
+};
 
+watch(searchQuery, (newQuery) => {
+    if (newQuery) {
+        // Expand all items when searching so matches are visible
+        const ids = new Set();
+        props.apqcList.forEach(item => {
+            const isParent = props.apqcList.some(r => r.parent_id === item.id);
+            if (isParent) {
+                ids.add(item.id);
+            }
+        });
+        expandedApqcIds.value = ids;
+    } else {
+        initializeExpandedApqc();
+    }
+});
+
+// Root selection filter
+const filteredRoots = computed(() => {
     if (parentFilterId.value) {
         const filterId = Number(parentFilterId.value);
-        rows = rows.filter(item =>
-            Number(item.id) === filterId || isDescendant(item.id, filterId)
-        );
+        
+        const findNode = (nodes) => {
+            for (const n of nodes) {
+                if (n.id === filterId) return [n];
+                if (n.children && n.children.length > 0) {
+                    const found = findNode(n.children);
+                    if (found) return found;
+                }
+            }
+            return null;
+        };
+        
+        return findNode(apqcTree.value) || [];
     }
+    return apqcTree.value;
+});
 
-    if (searchQuery.value) {
-        const q = searchQuery.value.toLowerCase().trim();
-        rows = rows.filter(item =>
-            (item.name || '').toLowerCase().includes(q)
-        );
-    }
-
+// Build active visible rows representing the collapsed/expanded list
+const visibleApqcRows = computed(() => {
+    const rows = [];
+    
+    const traverse = (node, depth = 0) => {
+        const visibleChildren = (node.children || []).filter(child => shouldShowNode(child));
+        const hasChildren = visibleChildren.length > 0;
+        const isExpanded = expandedApqcIds.value.has(node.id);
+        
+        rows.push({
+            ...node,
+            depth,
+            hasChildren,
+            isExpanded
+        });
+        
+        if (hasChildren && isExpanded) {
+            visibleChildren.forEach(child => {
+                traverse(child, depth + 1);
+            });
+        }
+    };
+    
+    filteredRoots.value.forEach(root => {
+        if (shouldShowNode(root)) {
+            traverse(root, 0);
+        }
+    });
+    
     return rows;
 });
 
-watch(() => props.apqcList, (newList) => {
-    if (parentFilterId.value && !newList.some(item => Number(item.id) === Number(parentFilterId.value))) {
-        parentFilterId.value = '';
-    }
+// Flatten tree for dropdown selection options
+const parentFilterOptions = computed(() => {
+    const result = [];
+    const traverse = (node, depth = 0) => {
+        result.push({ ...node, depth });
+        if (node.children && node.children.length > 0) {
+            node.children.forEach(child => traverse(child, depth + 1));
+        }
+    };
+    apqcTree.value.forEach(root => traverse(root, 0));
+    return result;
 });
 
-// ─── Modal state & form ──────────────────────────────────────────────────────
+// ─── Modal state & form ───
 const isModalOpen = ref(false);
 const isDeleteModalOpen = ref(false);
 const selectedItem = ref(null);
@@ -281,9 +392,8 @@ const form = useForm({
     name: '',
 });
 
-/** Opsi parent di modal — exclude diri sendiri & turunannya saat edit */
 const filteredParentOptions = computed(() => {
-    return flattenedTree.value.filter(item => {
+    return parentFilterOptions.value.filter(item => {
         if (modalMode.value === 'edit' && selectedItem.value) {
             const currentId = selectedItem.value.id;
             if (Number(item.id) === Number(currentId)) return false;
@@ -345,3 +455,18 @@ const submitDelete = () => {
     });
 };
 </script>
+
+<style scoped>
+.animate-fade-in {
+    animation: fadeIn 0.25s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+</style>
