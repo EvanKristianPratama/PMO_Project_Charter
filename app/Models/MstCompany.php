@@ -24,6 +24,12 @@ class MstCompany extends Model
         'name',
         'organization',
         'singkatan',
+        'grup',
+        'level',
+    ];
+
+    protected $casts = [
+        'level' => 'integer',
     ];
 
     /**

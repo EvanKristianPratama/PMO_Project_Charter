@@ -2,19 +2,40 @@
     <!-- Company View -->
     <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 px-4 py-3 gap-3 dark:border-white/10">
-            <!-- Add Company button -->
-            <button
-                @click="openCompanyModal"
-                class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-emerald-400 dark:focus:ring-offset-[#171717]"
-            >
-                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-                Add Company
-            </button>
+            <!-- Left Side: Add Company & Filter -->
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
+                <button
+                    @click="openCompanyModal"
+                    class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-emerald-400 dark:focus:ring-offset-[#171717]"
+                >
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add Company
+                </button>
+
+                <!-- Parent Company Filter -->
+                <div class="flex items-center gap-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg px-2.5 py-1">
+                    <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Parent:</span>
+                    <select
+                        v-model="selectedParentFilter"
+                        class="border-0 bg-transparent py-0 pl-1 pr-7 text-xs font-semibold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-0 cursor-pointer"
+                    >
+                        <option value="all" class="dark:bg-[#171717]">Semua Company</option>
+                        <option
+                            v-for="c in parentFilterOptions"
+                            :key="c.id"
+                            :value="c.id"
+                            class="dark:bg-[#171717]"
+                        >
+                            {{ c.name }}
+                        </option>
+                    </select>
+                </div>
+            </div>
 
             <!-- View Mode Toggle -->
-            <div class="flex gap-1">
+            <div class="flex gap-1 shrink-0">
                 <button
                     :class="[
                         'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition',
@@ -54,15 +75,17 @@
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-16">No</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Company</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Singkatan</th>
+                        <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-20">Level</th>
+                        <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Grup</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Parent</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Organization</th>
-                        <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-64">Grup</th>
+                        <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-64">Daftar Grup</th>
                         <th class="px-4 py-2 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-48">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 dark:divide-white/10">
                     <tr
-                        v-for="(company, index) in companies"
+                        v-for="(company, index) in filteredCompanies"
                         :key="company.id"
                         class="transition hover:bg-slate-50 dark:hover:bg-white/5"
                     >
@@ -72,6 +95,12 @@
                         </td>
                         <td class="px-4 py-2.5 text-slate-700 dark:text-slate-300 text-left">
                             {{ company.singkatan || '-' }}
+                        </td>
+                        <td class="px-4 py-2.5 text-slate-700 dark:text-slate-300 text-left font-semibold text-blue-600 dark:text-blue-400">
+                            {{ company.level || '-' }}
+                        </td>
+                        <td class="px-4 py-2.5 text-slate-700 dark:text-slate-300 text-left font-semibold text-indigo-600 dark:text-indigo-400">
+                            {{ company.grup || '-' }}
                         </td>
                         <td class="px-4 py-2.5 text-slate-700 dark:text-slate-300 text-left">
                             {{ company.parent_name || '-' }}
@@ -107,8 +136,8 @@
                             </div>
                         </td>
                     </tr>
-                    <tr v-if="companies.length === 0">
-                        <td colspan="7" class="px-4 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
+                    <tr v-if="filteredCompanies.length === 0">
+                        <td colspan="9" class="px-4 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
                             Data company tidak ditemukan.
                         </td>
                     </tr>
@@ -119,7 +148,7 @@
         <!-- Tree View -->
         <div v-if="viewMode === 'tree'" class="px-4 py-4">
             <CompanyThreeView
-                :companies="companies"
+                :companies="filteredCompanies"
                 :is-root="true"
             />
         </div>
@@ -194,6 +223,34 @@
                     placeholder="Contoh: PLN, PGN, PGAS"
                 />
                 <span v-if="companyForm.errors.singkatan" class="text-xs text-red-500 font-medium">{{ companyForm.errors.singkatan }}</span>
+            </div>
+
+            <!-- Grup Input -->
+            <div class="flex flex-col gap-1.5">
+                <label for="company_grup" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Grup <span class="font-normal text-slate-400">(opsional)</span></label>
+                <input
+                    id="company_grup"
+                    v-model="companyForm.grup"
+                    type="text"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    placeholder="Contoh: PLN Group, Pertamina Group"
+                />
+                <span v-if="companyForm.errors.grup" class="text-xs text-red-500 font-medium">{{ companyForm.errors.grup }}</span>
+            </div>
+
+            <!-- Level Input -->
+            <div class="flex flex-col gap-1.5">
+                <label for="company_level" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Level <span class="font-normal text-slate-400">(opsional, angka)</span></label>
+                <input
+                    id="company_level"
+                    v-model="companyForm.level"
+                    type="number"
+                    min="1"
+                    step="1"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    placeholder="Contoh: 1, 2, 3"
+                />
+                <span v-if="companyForm.errors.level" class="text-xs text-red-500 font-medium">{{ companyForm.errors.level }}</span>
             </div>
 
             <!-- Manage Groups Section (Only shown when editing company) -->
@@ -335,6 +392,8 @@ const companyForm = useForm({
     name: '',
     organization: '',
     singkatan: '',
+    grup: '',
+    level: '',
 });
 
 // Computed: companies selectable as parent (excludes the company being edited)
@@ -343,6 +402,37 @@ const parentCompanyOptions = computed(() => {
         return props.companies.filter(c => c.id !== selectedCompany.value.id);
     }
     return props.companies;
+});
+
+// Filtering state & logic
+const selectedParentFilter = ref('all');
+
+const getDescendants = (companyId, list) => {
+    const children = list.filter(c => Number(c.parent_id) === Number(companyId));
+    let result = [...children];
+    for (const child of children) {
+        result = [...result, ...getDescendants(child.id, list)];
+    }
+    return result;
+};
+
+const filteredCompanies = computed(() => {
+    if (selectedParentFilter.value === 'all') {
+        return props.companies;
+    }
+    
+    const selectedId = Number(selectedParentFilter.value);
+    const targetCompany = props.companies.find(c => Number(c.id) === selectedId);
+    if (!targetCompany) return [];
+    
+    return [targetCompany, ...getDescendants(selectedId, props.companies)];
+});
+
+const parentFilterOptions = computed(() => {
+    const parentIds = new Set(props.companies.map(c => c.parent_id).filter(id => id !== null && id !== undefined));
+    return [...props.companies]
+        .filter(c => parentIds.has(c.id))
+        .sort((a, b) => a.name.localeCompare(b.name));
 });
 
 // Group CRUD state
@@ -379,6 +469,8 @@ const openEditCompanyModal = (company) => {
     companyForm.name = company.name;
     companyForm.organization = company.organization || '';
     companyForm.singkatan = company.singkatan || '';
+    companyForm.grup = company.grup || '';
+    companyForm.level = company.level ?? '';
     
     // Initialize group CRUD state for the selected company
     editingGroupId.value = null;

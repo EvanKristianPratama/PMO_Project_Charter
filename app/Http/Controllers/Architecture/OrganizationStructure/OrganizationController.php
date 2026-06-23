@@ -34,6 +34,8 @@ class OrganizationController extends Controller
                 'name' => $c->name,
                 'organization' => $c->organization,
                 'singkatan' => $c->singkatan,
+                'grup' => $c->grup,
+                'level' => $c->level,
             ])->values()->all(),
             'bods' => MstBod::with('company')->orderBy('id', 'asc')->get()->map(fn ($b) => [
                 'id' => $b->id,
@@ -62,6 +64,8 @@ class OrganizationController extends Controller
             'name' => 'required|string|max:255|unique:mst_company,name',
             'organization' => 'nullable|string|max:255',
             'singkatan' => 'nullable|string|max:255',
+            'grup' => 'nullable|string|max:255',
+            'level' => 'nullable|integer',
         ]);
 
         MstCompany::create([
@@ -69,6 +73,8 @@ class OrganizationController extends Controller
             'name' => $validated['name'],
             'organization' => $validated['organization'] ?? null,
             'singkatan' => $validated['singkatan'] ?? null,
+            'grup' => $validated['grup'] ?? null,
+            'level' => $validated['level'] ?? null,
         ]);
 
         return redirect()
@@ -137,6 +143,8 @@ class OrganizationController extends Controller
             'name' => 'required|string|max:255|unique:mst_company,name,' . $id,
             'organization' => 'nullable|string|max:255',
             'singkatan' => 'nullable|string|max:255',
+            'grup' => 'nullable|string|max:255',
+            'level' => 'nullable|integer',
         ]);
 
         $company->update($validated);

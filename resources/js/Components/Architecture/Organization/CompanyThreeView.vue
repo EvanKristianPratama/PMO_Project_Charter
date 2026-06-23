@@ -30,6 +30,14 @@
                 !isFirstChild && !isLastChild ? '-left-3 -right-3' : '',
             ]" aria-hidden="true" />
 
+        <!-- Garis horizontal masuk dari kiri untuk sideways first child -->
+        <div
+            v-if="isSideways && isFirstChild"
+            class="absolute top-0 h-px bg-slate-300 dark:bg-white/20"
+            style="left: 88px; right: 50%;"
+            aria-hidden="true"
+        />
+
         <!-- Garis vertikal dari atas ke kotak (untuk depth >= 1) -->
         <div
             v-if="depth >= 1"
@@ -40,6 +48,33 @@
 
         <!-- Kotak node -->
         <div
+            v-if="node.isVirtualGroup"
+            class="relative flex flex-col items-center justify-center rounded-xl border border-dashed border-indigo-400 bg-indigo-50/50 px-3 py-1.5 text-center leading-tight shadow-sm transition duration-200 cursor-default dark:bg-indigo-950/20 dark:border-indigo-500/40"
+            :title="nodeTitle"
+        >
+            <span class="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 mb-1">
+                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125V17.25c0 .621-.504 1.125-1.125 1.125h-6A1.125 1.125 0 0 1 2.25 17.25V7.125z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12.75 7.125c0-.621.504-1.125 1.125-1.125h6c.621 0 1.125.504 1.125 1.125V17.25c0 .621-.504 1.125-1.125 1.125h-6a1.125 1.125 0 0 1-1.125-1.125V7.125z" />
+                </svg>
+            </span>
+            <span class="block max-w-[110px] break-words whitespace-normal text-[8px] font-extrabold uppercase text-indigo-700 dark:text-indigo-300 tracking-wider">
+                {{ node.name }}
+            </span>
+            <span
+                v-if="hasChildren"
+                @click.stop="toggleExpand"
+                class="absolute -bottom-2 left-1/2 -translate-x-1/2 flex items-center justify-center w-4 h-4 rounded-full text-[8px] font-bold leading-none transition-colors duration-200 cursor-pointer z-10 shadow"
+                :class="isExpanded
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-slate-200 text-slate-600 dark:bg-slate-600 dark:text-slate-300'"
+            >
+                {{ isExpanded ? '−' : '+' }}
+            </span>
+        </div>
+
+        <div
+            v-else
             class="relative flex flex-col items-center justify-center rounded border px-3 py-2 text-center leading-tight shadow-sm transition duration-200 cursor-default"
             :class="nodeBoxClass"
             :title="nodeTitle"
@@ -61,6 +96,7 @@
                 ({{ node.singkatan }})
             </span>
 
+
             <!-- Organization -->
             <span v-if="node.organization" class="block max-w-full break-words whitespace-normal text-[8px] font-normal mt-0.5 opacity-70">
                 {{ node.organization }}
@@ -81,26 +117,64 @@
 
         <!-- Children -->
         <template v-if="hasChildren && isExpanded">
-            <div class="relative mt-4 w-full">
-                <!-- Garis vertikal turun -->
+            <div class="relative mt-4 w-full flex flex-col items-center gap-8">
+                <!-- Garis vertikal turun dari parent box ke Row 1 -->
                 <div
                     class="absolute left-1/2 -translate-x-1/2 w-px bg-slate-300 dark:bg-white/20"
                     style="top: -8px; height: 8px;"
                     aria-hidden="true"
                 />
 
-                <!-- Children nodes -->
-                <div class="relative flex flex-row justify-center items-start gap-6 flex-wrap">
+                <!-- Garis horizontal bypass ke kiri (menghubungkan trunk ke line vertical kiri) -->
+                <div
+                    v-if="hasSidewaysRows"
+                    class="absolute h-px bg-slate-300 dark:bg-white/20"
+                    style="left: -32px; right: 50%; top: -8px;"
+                    aria-hidden="true"
+                />
 
+                <!-- Render each row -->
+                <div
+                    v-for="(row, rowIdx) in childrenRows"
+                    :key="row.level"
+                    :class="[
+                        'relative flex flex-row justify-center items-start gap-6 flex-wrap w-full',
+                        row.level > 1 && !node.isVirtualGroup ? '-ml-60 justify-start' : ''
+                    ]"
+                >
+                    <!-- Vertical bypass line segment -->
+                    <template v-if="hasSidewaysRows">
+                        <!-- If it's not the last row, draw from top of this row to top of next row -->
+                        <div 
+                            v-if="rowIdx < childrenRows.length - 1"
+                            class="absolute bg-slate-300 dark:bg-white/20 w-px"
+                            :style="{
+                                left: '-32px',
+                                top: rowIdx === 0 ? '-8px' : '0px',
+                                bottom: '-32px'
+                            }"
+                            aria-hidden="true"
+                        />
+                        <!-- If it is the only row and it's sideways, draw the 8px link to top bypass connector -->
+                        <div 
+                            v-else-if="rowIdx === 0 && row.level > 1"
+                            class="absolute bg-slate-300 dark:bg-white/20 w-px"
+                            style="left: -32px; top: -8px; bottom: 100%;"
+                            aria-hidden="true"
+                        />
+                    </template>
+
+                    <!-- Render nodes inside the row -->
                     <CompanyThreeView
-                        v-for="(child, idx) in children"
+                        v-for="(child, idx) in row.nodes"
                         :key="child.id"
                         :node="child"
                         :all-companies="allCompanies"
                         :is-root="false"
                         :depth="depth + 1"
                         :is-first-child="idx === 0"
-                        :is-last-child="idx === children.length - 1"
+                        :is-last-child="idx === row.nodes.length - 1"
+                        :is-sideways="!node.isVirtualGroup && row.level > 1"
                     />
                 </div>
             </div>
@@ -145,35 +219,127 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    isSideways: {
+        type: Boolean,
+        default: false,
+    },
 });
 
-// Expand by default kecuali depth >= 1
-const isExpanded = ref(props.depth < 1);
+// Expand by default kecuali depth >= 1, tapi expand virtual groups
+const isExpanded = ref(props.depth < 1 || props.node?.isVirtualGroup);
 
 // =====================
 // Root-level computed
 // =====================
 
-/** Root companies = yang tidak punya parent_id */
+/** Root companies = yang tidak punya parent_id, atau parent-nya tidak ada dalam list yang dipassing (untuk support filter) */
 const rootCompanies = computed(() => {
-    return (props.companies || []).filter(c => !c.parent_id);
+    const list = props.companies || [];
+    const ids = new Set(list.map(c => c.id));
+    return list.filter(c => !c.parent_id || !ids.has(Number(c.parent_id)));
 });
 
 // =====================
 // Node-level computed
 // =====================
 
-/** Children langsung dari node ini */
-const children = computed(() => {
-    if (!props.node) return [];
+/** Children langsung dari node ini (tanpa grouping, untuk helper) */
+const rawChildren = computed(() => {
+    if (!props.node || props.node.isVirtualGroup) return [];
     const allList = props.allCompanies.length ? props.allCompanies : props.companies;
     return allList.filter(c => Number(c.parent_id) === Number(props.node.id));
 });
 
-const hasChildren = computed(() => children.value.length > 0);
+/** Grouped database-level children: Kelompokkan DB children berdasarkan kolom grup. */
+const groupedChildren = computed(() => {
+    if (!props.node || props.node.isVirtualGroup) return [];
+    
+    const list = rawChildren.value;
+    const result = [];
+    const groups = {};
+    
+    for (const child of list) {
+        if (!child.grup) {
+            // Direct child without group. Is it top-level?
+            const isTop = !child.level || child.level === 1 || !list.some(other => !other.grup && other.level === child.level - 1);
+            if (isTop) {
+                result.push(child);
+            }
+        } else {
+            // Under a group
+            if (!groups[child.grup]) {
+                groups[child.grup] = [];
+            }
+            groups[child.grup].push(child);
+        }
+    }
+    
+    // Add virtual group nodes
+    for (const groupName in groups) {
+        result.push({
+            isVirtualGroup: true,
+            id: `virtual-group-${props.node.id}-${groupName}`,
+            name: groupName,
+            parent_id: props.node.id,
+            groupChildren: groups[groupName],
+        });
+    }
+    
+    return result;
+});
+
+/** List anak yang akan dirender */
+const childrenToRender = computed(() => {
+    if (!props.node) return [];
+    
+    const allList = props.allCompanies.length ? props.allCompanies : props.companies;
+    
+    if (props.node.isVirtualGroup) {
+        // Virtual Group Node: represents group category
+        // Direct children under this group node should only be the top-level ones (level 1 or level null, or no parent level in groupChildren)
+        const list = props.node.groupChildren || [];
+        return list.filter(c => {
+            if (!c.level || c.level === 1) return true;
+            const hasParentLevel = list.some(other => other.level === c.level - 1);
+            return !hasParentLevel;
+        });
+    }
+    
+    // Real company node
+    let children = [];
+    
+    // 1. Resolve virtual children based on level (same parent, same group, level = current_level + 1)
+    if (props.node.level) {
+        const parentId = props.node.parent_id;
+        const groupName = props.node.grup;
+        const currentLevel = props.node.level;
+        
+        // Find all companies under the same parent and same group
+        const sameContextCompanies = allList.filter(c => 
+            Number(c.parent_id) === Number(parentId) && 
+            c.grup === groupName
+        );
+        
+        // Filter for level + 1 children
+        const levelChildren = sameContextCompanies.filter(c => Number(c.level) === Number(currentLevel) + 1);
+        children = [...children, ...levelChildren];
+    }
+    
+    // 2. Resolve database-level children (grouped by group / level)
+    children = [...children, ...groupedChildren.value];
+    
+    return children;
+});
+
+const hasChildren = computed(() => childrenToRender.value.length > 0);
 
 const nodeTitle = computed(() => {
+    if (props.node?.isVirtualGroup) {
+        return `Kategori Grup: ${props.node.name} (${childrenToRender.value.length} anak perusahaan)`;
+    }
     const parts = [props.node?.name];
+    if (props.node?.level) parts.push(`Level ${props.node.level}`);
+    if (props.node?.grup) parts.push(props.node.grup);
     if (props.node?.organization) parts.push(props.node.organization);
     if (hasChildren.value) {
         parts.push(`(Klik ± untuk ${isExpanded.value ? 'sembunyikan' : 'tampilkan'} anak)`);
@@ -184,6 +350,44 @@ const nodeTitle = computed(() => {
 const toggleExpand = () => {
     isExpanded.value = !isExpanded.value;
 };
+
+const getLevelOfNode = (n) => {
+    if (!n) return 1;
+    if (n.isVirtualGroup) {
+        const childrenLevels = (n.groupChildren || []).map(c => c.level).filter(Boolean);
+        if (childrenLevels.length > 0) {
+            return Math.min(...childrenLevels);
+        }
+        return 1;
+    }
+    return n.level || 1;
+};
+
+const childrenRows = computed(() => {
+    const list = childrenToRender.value;
+    const rows = {};
+    
+    for (const child of list) {
+        const lvl = getLevelOfNode(child);
+        if (!rows[lvl]) {
+            rows[lvl] = [];
+        }
+        rows[lvl].push(child);
+    }
+    
+    return Object.keys(rows)
+        .map(Number)
+        .sort((a, b) => a - b)
+        .map(lvl => ({
+            level: lvl,
+            nodes: rows[lvl]
+        }));
+});
+
+const hasSidewaysRows = computed(() => {
+    if (props.node?.isVirtualGroup) return false;
+    return childrenRows.value.some(row => row.level > 1);
+});
 
 /** Style box — root company lebih menonjol, child company lebih simpel */
 const nodeBoxClass = computed(() => {
