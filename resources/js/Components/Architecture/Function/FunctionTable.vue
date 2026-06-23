@@ -84,19 +84,21 @@
                         <td class="px-4 py-3 text-slate-500 dark:text-slate-400 text-xs">
                             {{ getParentLabel(fn.parent_id) }}
                         </td>
-                        <td class="px-4 py-3 text-center space-x-3 w-36">
-                            <button
-                                @click="openEditModal(fn)"
-                                class="inline-flex items-center text-xs font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition"
-                            >
-                                Edit
-                            </button>
-                            <button
-                                @click="openDeleteModal(fn)"
-                                class="inline-flex items-center text-xs font-semibold text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition"
-                            >
-                                Delete
-                            </button>
+                        <td class="px-4 py-3 text-center w-28 print:hidden">
+                            <div class="flex flex-col items-center justify-center gap-1">
+                                <button
+                                    @click="openEditModal(fn)"
+                                    class="w-14 inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-bold text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5 active:scale-95"
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    @click="openDeleteModal(fn)"
+                                    class="w-14 inline-flex items-center justify-center rounded-full border border-rose-200 bg-white px-2 py-0.5 text-[10px] font-bold text-rose-700 transition hover:bg-rose-50 hover:border-rose-300 dark:border-rose-500/30 dark:bg-[#1a1a1a] dark:text-rose-400 dark:hover:bg-rose-500/10 active:scale-95"
+                                >
+                                    Delete
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     <tr v-if="filteredRows.length === 0">

@@ -1,75 +1,70 @@
 <template>
     <UserLayout title="Dokumen Proses Bisnis">
         <div class="animate-fade-in-up space-y-6">
-            <!-- Sleek Action Bar at Top (print:hidden) -->
-            <section class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717] print:hidden">
-                <div class="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full bg-[#821f44]/10 blur-2xl"></div>
-                <div class="pointer-events-none absolute -bottom-16 -left-12 h-40 w-40 rounded-full bg-blue-500/5 blur-2xl"></div>
 
-                <div class="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#821f44] dark:text-[#a83262]">Pratinjau Dokumen Architecture</p>
-                        <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Proses Bisnis</h1>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-3">
-                        <!-- Go to Management CRUD page -->
-                        <Link
-                            :href="route('architecture.proses-bisnis.manage')"
-                            class="inline-flex items-center gap-2 rounded-xl bg-[#821f44] px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#821f44]/25 transition-all hover:bg-[#9c2552] hover:shadow-[#821f44]/40 focus:ring-2 focus:ring-[#821f44]/20 active:scale-95"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-4 h-4">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.83 20.013a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                            </svg>
-                            Kelola Proses Bisnis
-                        </Link>
-                    </div>
-                </div>
-            </section>
+            <!-- Capsule Page Navigation Menu -->
+            <div class="flex flex-wrap items-center gap-1.5 rounded-xl bg-slate-100 p-1 dark:bg-white/5 w-fit print:hidden">
+                <button
+                    @click="activeTab = 'proses-bisnis'"
+                    :class="[
+                        'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all duration-200 active:scale-95',
+                        activeTab === 'proses-bisnis'
+                            ? 'bg-[#821f44] text-white shadow-md shadow-[#821f44]/20'
+                            : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+                    ]"
+                >
+                    Business Process
+                </button>
+                <button
+                    @click="activeTab = 'function'"
+                    :class="[
+                        'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all duration-200 active:scale-95',
+                        activeTab === 'function'
+                            ? 'bg-[#821f44] text-white shadow-md shadow-[#821f44]/20'
+                            : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+                    ]"
+                >
+                    Function
+                </button>
+                <button
+                    @click="activeTab = 'apqc'"
+                    :class="[
+                        'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all duration-200 active:scale-95',
+                        activeTab === 'apqc'
+                            ? 'bg-[#821f44] text-white shadow-md shadow-[#821f44]/20'
+                            : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+                    ]"
+                >
+                    APQC
+                </button>
+            </div>
 
-            <!-- Table-based View Only Content -->
-            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                <div class="overflow-x-auto">
-                    <table class="w-full border-collapse text-left text-xs text-slate-500 dark:text-slate-400">
-                        <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
-                            <tr>
-                                <th scope="col" class="px-6 py-4">Organisasi</th>
-                                <th scope="col" class="px-6 py-4 w-16 text-center">No</th>
-                                <th scope="col" class="px-6 py-4">Proses Bisnis</th>
-                                <th scope="col" class="px-6 py-4">Tugas</th>
-                                <th scope="col" class="px-6 py-4">Hasil</th>
-                                <th scope="col" class="px-6 py-4">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-200 dark:divide-white/10">
-                            <tr v-if="prosesBisnis.length === 0">
-                                <td colspan="6" class="px-6 py-12 text-center text-slate-400">
-                                    Belum ada data proses bisnis.
-                                </td>
-                            </tr>
-                            <tr v-for="item in prosesBisnis" :key="item.id" class="group hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150">
-                                <td class="px-6 py-4 text-slate-900 dark:text-white font-semibold">
-                                    {{ item.organization?.name || '-' }}
-                                </td>
-                                <td class="px-6 py-4 text-center font-medium text-slate-700 dark:text-slate-300">
-                                    {{ item.no }}
-                                </td>
-                                <td class="px-6 py-4 text-slate-700 dark:text-slate-300">
-                                    {{ item.proses_bisnis }}
-                                </td>
-                                <td class="px-6 py-4 text-slate-700 dark:text-slate-300 whitespace-pre-line">
-                                    {{ item.tugas }}
-                                </td>
-                                <td class="px-6 py-4 text-slate-700 dark:text-slate-300 whitespace-pre-line">
-                                    {{ item.hasil }}
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold border" :class="item.status === 'Aktif' ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400' : 'bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-500/10 dark:border-slate-500/20 dark:text-slate-400'">
-                                        {{ item.status || 'Draft' }}
-                                    </span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <!-- Table Component -->
+            <ProsesBisnisTable
+                v-if="activeTab === 'proses-bisnis'"
+                :proses-bisnis="prosesBisnis"
+                :organizations="organizations"
+            />
+            <FunctionTable
+                v-else-if="activeTab === 'function'"
+                :functions="functions"
+                :groub-options="groubOptions"
+                :regulations="regulations"
+            />
+            <div
+                v-else-if="activeTab === 'apqc'"
+                class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-white/10 dark:bg-[#171717]"
+            >
+                <div class="text-center py-12">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-slate-100 text-slate-500 dark:bg-white/5 dark:text-slate-400 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-base font-semibold text-slate-900 dark:text-white mb-2">APQC Process Classification Framework</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+                        Halaman ini akan menampilkan klasifikasi proses bisnis standar APQC. Modul ini sedang dalam tahap perencanaan.
+                    </p>
                 </div>
             </div>
         </div>
@@ -77,15 +72,35 @@
 </template>
 
 <script setup>
-import { Link } from '@inertiajs/vue3';
+import { ref } from 'vue';
 import UserLayout from '@/Layouts/UserLayout.vue';
+import ProsesBisnisTable from '@/Components/Architecture/ProsesBisnis/ProsesBisnisTable.vue';
+import FunctionTable from '@/Components/Architecture/Function/FunctionTable.vue';
 
 defineProps({
     prosesBisnis: {
         type: Array,
         required: true,
     },
+    organizations: {
+        type: Array,
+        required: true,
+    },
+    functions: {
+        type: Array,
+        default: () => [],
+    },
+    groubOptions: {
+        type: Array,
+        default: () => [],
+    },
+    regulations: {
+        type: Array,
+        default: () => [],
+    },
 });
+
+const activeTab = ref('proses-bisnis');
 </script>
 
 <style scoped>

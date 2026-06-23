@@ -295,7 +295,6 @@ Route::middleware(['auth', 'approved'])->group(function () {
 
     // Proses Bisnis (Business Process) CRUD under Architecture
     Route::get('/architecture/proses-bisnis', [ArchitectureProsesBisnisController::class, 'index'])->name('architecture.proses-bisnis.index');
-    Route::get('/architecture/proses-bisnis/manage', [ArchitectureProsesBisnisController::class, 'manage'])->name('architecture.proses-bisnis.manage');
     Route::post('/architecture/proses-bisnis', [ArchitectureProsesBisnisController::class, 'store'])->name('architecture.proses-bisnis.store');
     Route::put('/architecture/proses-bisnis/{id}', [ArchitectureProsesBisnisController::class, 'update'])->name('architecture.proses-bisnis.update');
     Route::delete('/architecture/proses-bisnis/{id}', [ArchitectureProsesBisnisController::class, 'destroy'])->name('architecture.proses-bisnis.destroy');
