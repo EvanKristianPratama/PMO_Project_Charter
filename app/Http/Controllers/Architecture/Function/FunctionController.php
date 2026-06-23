@@ -5,14 +5,15 @@ namespace App\Http\Controllers\Architecture\Function;
 use App\Http\Controllers\Controller;
 use App\Models\MstFunction;
 use App\Models\Groub;
+use App\Services\Architecture\FunctionService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class FunctionController extends Controller
 {
-    public function index()
+    public function index(FunctionService $functionService)
     {
-        $functions = MstFunction::with(['groub', 'regulations'])->orderBy('code')->get();
+        $functions = $functionService->getFunctions();
         $groubOptions = Groub::with('company')->orderBy('name')->get()->map(fn ($g) => [
             'id' => $g->id,
             'name' => $g->company ? "{$g->company->name} - {$g->name}" : $g->name,
@@ -30,7 +31,7 @@ class FunctionController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, FunctionService $functionService)
     {
         $validated = $request->validate([
             'groub_id'       => ['required', 'integer', 'exists:trs_groub,id'],
@@ -42,20 +43,12 @@ class FunctionController extends Controller
             'regulation_ids.*' => ['integer', 'exists:mst_regulation,id'],
         ]);
 
-        $function = MstFunction::create([
-            'groub_id'  => $validated['groub_id'],
-            'parent_id' => $validated['parent_id'] ?: null,
-            'code'      => $validated['code'],
-            'name'      => $validated['name'],
-            'alias'     => $validated['alias'] ?? null,
-        ]);
-
-        $function->regulations()->sync($validated['regulation_ids'] ?? []);
+        $functionService->createFunction($validated);
 
         return redirect()->back()->with('success', 'Function berhasil ditambahkan.');
     }
 
-    public function update(Request $request, int $id)
+    public function update(Request $request, int $id, FunctionService $functionService)
     {
         $function = MstFunction::findOrFail($id);
 
@@ -69,24 +62,17 @@ class FunctionController extends Controller
             'regulation_ids.*' => ['integer', 'exists:mst_regulation,id'],
         ]);
 
-        $function->update([
-            'groub_id'  => $validated['groub_id'],
-            'parent_id' => $validated['parent_id'] ?: null,
-            'code'      => $validated['code'],
-            'name'      => $validated['name'],
-            'alias'     => $validated['alias'] ?? null,
-        ]);
-
-        $function->regulations()->sync($validated['regulation_ids'] ?? []);
+        $functionService->updateFunction($function, $validated);
 
         return redirect()->back()->with('success', 'Function berhasil diperbarui.');
     }
 
-    public function destroy(int $id)
+    public function destroy(int $id, FunctionService $functionService)
     {
         $function = MstFunction::findOrFail($id);
-        $function->delete();
+        $functionService->deleteFunction($function);
 
         return redirect()->back()->with('success', 'Function berhasil dihapus.');
     }
 }
+
