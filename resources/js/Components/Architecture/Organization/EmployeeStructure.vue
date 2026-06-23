@@ -5,16 +5,7 @@
                 <h3 class="text-xs font-bold tracking-wider text-slate-700 dark:text-slate-200">
                     Employee Structure
                 </h3>
-                <!-- Company Filter -->
-                <select
-                    v-model="selectedCompanyId"
-                    class="rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
-                >
-                    <option value="">Semua Company</option>
-                    <option v-for="company in companies" :key="company.id" :value="company.id">
-                        {{ company.name }}
-                    </option>
-                </select>
+
                 <!-- Search Input -->
                 <div class="relative w-full sm:w-48">
                     <input
@@ -60,6 +51,8 @@
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-12">No</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Company</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Organization Structure</th>
+                        <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-32">SK</th>
+                        <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-20">Alias</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Parent</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Pejabat</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-24">Tipe</th>
@@ -79,6 +72,14 @@
                         </td>
                         <td class="px-4 py-2.5 text-slate-900 dark:text-white font-medium text-left">
                             {{ employee.name }}
+                        </td>
+                        <td class="px-4 py-2.5 text-slate-900 dark:text-white text-left font-medium w-32" :title="getSkName(employee.sk_id) || '-'">
+                            <div class="break-words whitespace-normal">
+                                {{ getSkName(employee.sk_id) || '-' }}
+                            </div>
+                        </td>
+                        <td class="px-4 py-2.5 text-slate-700 dark:text-slate-300 text-left w-20">
+                            {{ employee.alias || '-' }}
                         </td>
                         <td class="px-4 py-2.5 text-slate-900 dark:text-white font-medium text-left">
                             {{ getParentName(employee.parent_id) || '-' }}
@@ -112,7 +113,7 @@
                         </td>
                     </tr>
                     <tr v-if="filteredEmployees.length === 0">
-                        <td colspan="8" class="px-4 py-12 text-center">
+                        <td colspan="10" class="px-4 py-12 text-center">
                             <div class="flex flex-col items-center justify-center text-center">
                                 <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-slate-500 mb-4 border border-slate-200 dark:border-white/10">
                                     <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -189,6 +190,28 @@
                 <span v-if="employeeForm.errors.parent_id" class="text-xs text-red-500 font-medium">{{ employeeForm.errors.parent_id }}</span>
             </div>
 
+            <!-- SK Selection -->
+            <div class="flex flex-col gap-1.5">
+                <label for="employee_sk" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    SK Organisasi <span class="text-slate-400 font-normal">(Opsional)</span>
+                </label>
+                <select
+                    id="employee_sk"
+                    v-model="employeeForm.sk_id"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                >
+                    <option value="">-- Tanpa SK --</option>
+                    <option
+                        v-for="skOrg in skOrganizations"
+                        :key="skOrg.id"
+                        :value="skOrg.id"
+                    >
+                        {{ skOrg.sk }}
+                    </option>
+                </select>
+                <span v-if="employeeForm.errors.sk_id" class="text-xs text-red-500 font-medium">{{ employeeForm.errors.sk_id }}</span>
+            </div>
+
             <!-- Employee Name Input -->
             <div class="flex flex-col gap-1.5">
                 <label for="employee_name" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Jabatan (Organization Structure)</label>
@@ -205,7 +228,7 @@
 
             <!-- Employee Alias Input -->
             <div class="flex flex-col gap-1.5">
-                <label for="employee_alias" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Alias (Singkatan)</label>
+                <label for="employee_alias" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Alias</label>
                 <input
                     id="employee_alias"
                     v-model="employeeForm.alias"
@@ -289,6 +312,10 @@ const props = defineProps({
         type: [String, Number],
         default: '',
     },
+    skOrganizations: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const selectedCompanyId = ref('');
@@ -337,6 +364,8 @@ const filteredEmployees = computed(() => {
  */
 const availableParents = computed(() => {
     return employeesOnly.value.filter(employee => {
+        // Hanya tampilkan data MstBod pada company yg dipilih
+        if (selectedCompanyId.value && Number(employee.company_id) !== Number(selectedCompanyId.value)) return false;
         // Saat edit, exclude diri sendiri dari pilihan parent
         if (employeeModalMode.value === 'edit' && selectedEmployee.value && employee.id === selectedEmployee.value.id) return false;
         return true;
@@ -361,6 +390,15 @@ const getParentName = (parentId) => {
     return parent ? parent.name : null;
 };
 
+/**
+ * Dapatkan nomor SK berdasarkan sk_id.
+ */
+const getSkName = (skId) => {
+    if (!skId) return null;
+    const sk = props.skOrganizations.find(s => Number(s.id) === Number(skId));
+    return sk ? sk.sk : null;
+};
+
 const isEmployeeModalOpen = ref(false);
 const isEmployeeDeleteModalOpen = ref(false);
 const employeeModalMode = ref('create'); // 'create' or 'edit'
@@ -374,6 +412,7 @@ const employeeForm = useForm({
     sumber: '',
     pejabat: '',
     tipe: '',
+    sk_id: '',
 });
 
 const openEmployeeModal = () => {
@@ -382,6 +421,7 @@ const openEmployeeModal = () => {
     employeeForm.clearErrors();
     employeeForm.reset();
     employeeForm.tipe = 'employee';
+    employeeForm.sk_id = '';
     if (selectedCompanyId.value) {
         employeeForm.company_id = selectedCompanyId.value;
     }
@@ -399,6 +439,7 @@ const openEditEmployeeModal = (employee) => {
     employeeForm.sumber = employee.sumber || '';
     employeeForm.pejabat = employee.pejabat || '';
     employeeForm.tipe = employee.tipe || 'employee';
+    employeeForm.sk_id = employee.sk_id ?? '';
     isEmployeeModalOpen.value = true;
 };
 

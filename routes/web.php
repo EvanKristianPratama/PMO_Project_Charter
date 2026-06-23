@@ -288,6 +288,9 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::post('/architecture/organization-structure/bod', [ArchitectureOrganizationStructureController::class, 'storeBod'])->name('architecture.organization-structure.bod.store');
     Route::put('/architecture/organization-structure/bod/{id}', [ArchitectureOrganizationStructureController::class, 'updateBod'])->name('architecture.organization-structure.bod.update');
     Route::delete('/architecture/organization-structure/bod/{id}', [ArchitectureOrganizationStructureController::class, 'destroyBod'])->name('architecture.organization-structure.bod.destroy');
+    Route::post('/architecture/organization-structure/sk', [ArchitectureOrganizationStructureController::class, 'storeSk'])->name('architecture.organization-structure.sk.store');
+    Route::put('/architecture/organization-structure/sk/{id}', [ArchitectureOrganizationStructureController::class, 'updateSk'])->name('architecture.organization-structure.sk.update');
+    Route::delete('/architecture/organization-structure/sk/{id}', [ArchitectureOrganizationStructureController::class, 'destroySk'])->name('architecture.organization-structure.sk.destroy');
     Route::get('/architecture/informatic-system', fn () => Inertia::render('Architecture/InformaticSystem/Index'))->name('architecture.informatic-system');
 
     // Proses Bisnis (Business Process) CRUD under Architecture

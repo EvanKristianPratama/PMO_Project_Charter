@@ -38,12 +38,18 @@
                     :bods="bods"
                 />
 
+                <SkStructure
+                    v-else-if="activeTab === 'sk'"
+                    :sk-organizations="skOrganizations"
+                />
+
                 <OrganizationalStructureTable
                     v-else-if="activeTab === 'organization'"
                     :organization-structure-rows="organizationStructureRows"
                     :groub-options="groubOptions"
                     :companies="companies"
                     :bods="bods"
+                    :sk-organizations="skOrganizations"
                 />
             </div>
         </div>
@@ -57,6 +63,7 @@ import UserLayout from '@/Layouts/UserLayout.vue';
 import CompanyStructure from '@/Components/Architecture/Organization/CompanyStructure.vue';
 import BoardOfDirector from '@/Components/Architecture/Organization/BoardOfDirector.vue';
 import OrganizationalStructureTable from '@/Components/Architecture/Organization/OrganizationalStructureTable.vue';
+import SkStructure from '@/Components/Architecture/Organization/SkStructure.vue';
 
 defineProps({
     organizationStructureRows: {
@@ -75,6 +82,10 @@ defineProps({
         type: Array,
         default: () => [],
     },
+    skOrganizations: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const page = usePage();
@@ -83,6 +94,7 @@ const flash = computed(() => page.props.flash ?? {});
 const tabs = [
     { key: 'company', label: 'Company' },
     { key: 'bod', label: 'BoD' },
+    { key: 'sk', label: 'SK' },
     { key: 'organization', label: 'Organization Structure' },
 ];
 

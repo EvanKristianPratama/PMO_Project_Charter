@@ -21,6 +21,7 @@ class MstBod extends Model
         'sumber',
         'pejabat',
         'tipe',
+        'sk_id',
     ];
 
     public function company(): BelongsTo
@@ -36,5 +37,10 @@ class MstBod extends Model
     public function children(): HasMany
     {
         return $this->hasMany(MstBod::class, 'parent_id');
+    }
+
+    public function skOrganization(): BelongsTo
+    {
+        return $this->belongsTo(MstSkOrganization::class, 'sk_id');
     }
 }

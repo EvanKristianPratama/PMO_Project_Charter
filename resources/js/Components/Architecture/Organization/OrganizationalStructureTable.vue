@@ -29,6 +29,7 @@
                 :companies="companies"
                 :bods="bods"
                 :initial-company-id="selectedCompanyId"
+                :sk-organizations="skOrganizations"
             />
         </div>
 
@@ -427,6 +428,10 @@ const props = defineProps({
         default: () => [],
     },
     bods: {
+        type: Array,
+        default: () => [],
+    },
+    skOrganizations: {
         type: Array,
         default: () => [],
     },

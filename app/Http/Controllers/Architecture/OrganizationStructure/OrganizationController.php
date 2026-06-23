@@ -13,6 +13,7 @@ use Inertia\Response;
 
 use App\Models\MstCompany;
 use App\Models\MstBod;
+use App\Models\MstSkOrganization;
 
 class OrganizationController extends Controller
 {
@@ -44,6 +45,12 @@ class OrganizationController extends Controller
                 'sumber' => $b->sumber,
                 'pejabat' => $b->pejabat,
                 'tipe' => $b->tipe,
+                'sk_id' => $b->sk_id,
+            ])->values()->all(),
+            'skOrganizations' => MstSkOrganization::orderBy('id', 'asc')->get()->map(fn ($s) => [
+                'id' => $s->id,
+                'sk' => $s->sk,
+                'deskripsi' => $s->deskripsi,
             ])->values()->all(),
         ]);
     }
@@ -210,6 +217,7 @@ class OrganizationController extends Controller
             'sumber' => 'nullable|string|max:255',
             'pejabat' => 'nullable|string|max:255',
             'tipe' => 'nullable|string|max:255',
+            'sk_id' => 'nullable|integer|exists:mst_sk_organization,id',
         ]);
 
         MstBod::create($validated);
@@ -231,6 +239,7 @@ class OrganizationController extends Controller
             'sumber' => 'nullable|string|max:255',
             'pejabat' => 'nullable|string|max:255',
             'tipe' => 'nullable|string|max:255',
+            'sk_id' => 'nullable|integer|exists:mst_sk_organization,id',
         ]);
 
         $bod->update($validated);
@@ -248,5 +257,45 @@ class OrganizationController extends Controller
         return redirect()
             ->route('architecture.organization-structure')
             ->with('success', 'Anggota BOD berhasil dihapus.');
+    }
+
+    public function storeSk(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'sk' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string|max:255',
+        ]);
+
+        MstSkOrganization::create($validated);
+
+        return redirect()
+            ->route('architecture.organization-structure')
+            ->with('success', 'SK Organisasi berhasil ditambahkan.');
+    }
+
+    public function updateSk(Request $request, int $id): RedirectResponse
+    {
+        $sk = MstSkOrganization::findOrFail($id);
+
+        $validated = $request->validate([
+            'sk' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string|max:255',
+        ]);
+
+        $sk->update($validated);
+
+        return redirect()
+            ->route('architecture.organization-structure')
+            ->with('success', 'SK Organisasi berhasil diperbarui.');
+    }
+
+    public function destroySk(int $id): RedirectResponse
+    {
+        $sk = MstSkOrganization::findOrFail($id);
+        $sk->delete();
+
+        return redirect()
+            ->route('architecture.organization-structure')
+            ->with('success', 'SK Organisasi berhasil dihapus.');
     }
 }

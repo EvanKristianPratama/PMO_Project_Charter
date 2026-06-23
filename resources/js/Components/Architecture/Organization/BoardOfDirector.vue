@@ -171,9 +171,14 @@
                 <select
                     id="bod_company"
                     v-model="bodForm.company_id"
-                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    :disabled="!!selectedCompanyId"
+                    :class="[
+                        'w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1',
+                        selectedCompanyId
+                            ? 'border-slate-300 bg-slate-100 text-slate-500 cursor-not-allowed dark:border-white/10 dark:bg-[#1a1a1a]/50 dark:text-slate-400'
+                            : 'border-slate-300 bg-white text-slate-900 focus:border-slate-500 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white'
+                    ]"
                     required
-
                 >
                     <option value="" disabled>Pilih Company...</option>
                     <option v-for="company in companies" :key="company.id" :value="company.id">
@@ -221,7 +226,7 @@
 
             <!-- BOD Member Alias Input -->
             <div class="flex flex-col gap-1.5">
-                <label for="bod_alias" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Alias (Singkatan)</label>
+                <label for="bod_alias" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Alias</label>
                 <input
                     id="bod_alias"
                     v-model="bodForm.alias"
@@ -378,6 +383,9 @@ const openBODModal = () => {
     bodForm.clearErrors();
     bodForm.reset();
     bodForm.tipe = 'bod';
+    if (selectedCompanyId.value) {
+        bodForm.company_id = selectedCompanyId.value;
+    }
     isBODModalOpen.value = true;
 };
 
