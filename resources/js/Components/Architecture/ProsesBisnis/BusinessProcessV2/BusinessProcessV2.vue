@@ -58,9 +58,8 @@
                 <thead class="bg-slate-50 dark:bg-white/5">
                     <tr>
                         <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Company</th>
-                        <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Nama</th>
-                        <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Deskripsi</th>
-                        <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Parent</th>
+                        <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Business Process Name</th>
+                        <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Description</th>
                         <th class="px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-36">Aksi</th>
                     </tr>
                 </thead>
@@ -103,9 +102,6 @@
                         <td class="px-4 py-2 text-slate-500 dark:text-slate-400 text-xs whitespace-pre-wrap break-words">
                             {{ item.deskripsi || '-' }}
                         </td>
-                        <td class="px-4 py-2 text-slate-500 dark:text-slate-400 text-xs">
-                            {{ getParentLabel(item.parent_id) }}
-                        </td>
                         <td class="px-4 py-2 text-center print:hidden">
                             <div class="flex items-center justify-center gap-1.5">
                                 <button
@@ -124,7 +120,7 @@
                         </td>
                     </tr>
                     <tr v-if="visibleRows.length === 0">
-                        <td colspan="5" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+                        <td colspan="4" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
                             Data Proses Bisnis tidak ditemukan.
                         </td>
                     </tr>

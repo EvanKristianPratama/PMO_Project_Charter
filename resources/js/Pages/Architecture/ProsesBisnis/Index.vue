@@ -38,6 +38,17 @@
                     Function
                 </button>
                 <button
+                    @click="activeTab = 'kpi'"
+                    :class="[
+                        'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all duration-200 active:scale-95',
+                        activeTab === 'kpi'
+                            ? 'bg-[#821f44] text-white shadow-md shadow-[#821f44]/20'
+                            : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+                    ]"
+                >
+                    KPI
+                </button>
+                <button
                     @click="activeTab = 'apqc'"
                     :class="[
                         'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all duration-200 active:scale-95',
@@ -82,6 +93,10 @@
                 v-else-if="activeTab === 'apqc'"
                 :apqc-list="apqcList"
             />
+            <KpiTable
+                v-else-if="activeTab === 'kpi'"
+                :kpi-list="kpiList"
+            />
             <RegulationMap
                 v-else-if="activeTab === 'regulation-map'"
                 :functions="functions"
@@ -97,7 +112,8 @@ import UserLayout from '@/Layouts/UserLayout.vue';
 import ProsesBisnisTable from '@/Components/Architecture/ProsesBisnis/ProsesBisnisTable.vue';
 import BusinessProcessV2 from '@/Components/Architecture/ProsesBisnis/BusinessProcessV2/BusinessProcessV2.vue';
 import FunctionTable from '@/Components/Architecture/ProsesBisnis/Function/FunctionTable.vue';
-import APQCTable from '@/Components/Architecture/ProsesBisnis/APQCT/APQCTable.vue';
+import APQCTable from '@/Components/Architecture/ProsesBisnis/APQC/APQCTable.vue';
+import KpiTable from '@/Components/Architecture/ProsesBisnis/Kpi/KpiTable.vue';
 import RegulationMap from '@/Components/Architecture/ProsesBisnis/RegulationMap/RegulationMap.vue';
 
 defineProps({
@@ -126,6 +142,10 @@ defineProps({
         default: () => [],
     },
     prosesBisnisV2: {
+        type: Array,
+        default: () => [],
+    },
+    kpiList: {
         type: Array,
         default: () => [],
     },

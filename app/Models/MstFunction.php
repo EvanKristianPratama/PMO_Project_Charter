@@ -17,6 +17,7 @@ class MstFunction extends Model
         'code',
         'name',
         'alias',
+        'deskripsi',
     ];
 
     protected $casts = [
@@ -56,6 +57,14 @@ class MstFunction extends Model
     {
         return $this->belongsToMany(MstRegulation::class, 'trs_map_func_regulation', 'function_id', 'regulation_id')
             ->withTimestamps();
+    }
+
+    /**
+     * Relasi ke MstKpi.
+     */
+    public function kpis(): BelongsToMany
+    {
+        return $this->belongsToMany(MstKpi::class, 'trs_function_kpi', 'function_id', 'kpi_id');
     }
 
     /**

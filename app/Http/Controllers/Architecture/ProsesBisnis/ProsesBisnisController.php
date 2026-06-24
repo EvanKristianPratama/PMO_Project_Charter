@@ -12,6 +12,8 @@ use App\Models\MstProsesBisnis;
 use App\Services\Architecture\ApqcService;
 use App\Services\Architecture\FunctionService;
 use App\Services\Architecture\BusinessProcessV2Service;
+use App\Models\MstKpi;
+use App\Services\Architecture\KpiService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -25,7 +27,8 @@ class ProsesBisnisController extends Controller
     public function index(
         ApqcService $apqcService, 
         FunctionService $functionService,
-        BusinessProcessV2Service $businessProcessV2Service
+        BusinessProcessV2Service $businessProcessV2Service,
+        KpiService $kpiService
     ): Response
     {
         $prosesBisnis = TrsProsesBisnis::with('organization')
@@ -54,6 +57,8 @@ class ProsesBisnisController extends Controller
         
         $prosesBisnisV2 = $businessProcessV2Service->getProsesBisnisV2List();
 
+        $kpis = $kpiService->getKpis();
+
         return Inertia::render('Architecture/ProsesBisnis/Index', [
             'prosesBisnis' => $prosesBisnis,
             'organizations' => $organizations,
@@ -62,6 +67,7 @@ class ProsesBisnisController extends Controller
             'regulations' => $regulations,
             'apqcList' => $apqcList,
             'prosesBisnisV2' => $prosesBisnisV2,
+            'kpiList' => $kpis,
         ]);
     }
 
@@ -207,6 +213,7 @@ class ProsesBisnisController extends Controller
             'code'           => ['nullable', 'string', 'max:255'],
             'name'           => ['required', 'string', 'max:255'],
             'alias'          => ['nullable', 'string', 'max:255'],
+            'deskripsi'      => ['nullable', 'string'],
             'regulation_ids' => ['nullable', 'array'],
             'regulation_ids.*' => ['integer', 'exists:mst_regulation,id'],
         ]);
@@ -233,6 +240,7 @@ class ProsesBisnisController extends Controller
             'code'           => ['nullable', 'string', 'max:255'],
             'name'           => ['required', 'string', 'max:255'],
             'alias'          => ['nullable', 'string', 'max:255'],
+            'deskripsi'      => ['nullable', 'string'],
             'regulation_ids' => ['nullable', 'array'],
             'regulation_ids.*' => ['integer', 'exists:mst_regulation,id'],
         ]);
@@ -307,6 +315,47 @@ class ProsesBisnisController extends Controller
         }
 
         return redirect()->back()->with('success', 'Proses Bisnis v2 berhasil dihapus.');
+    }
+
+    /**
+     * Store a newly created KPI item.
+     */
+    public function storeKpi(Request $request, KpiService $kpiService): RedirectResponse
+    {
+        $validated = $request->validate([
+            'deskripsi' => ['required', 'string'],
+        ]);
+
+        $kpiService->createKpi($validated);
+
+        return redirect()->back()->with('success', 'KPI berhasil ditambahkan.');
+    }
+
+    /**
+     * Update the specified KPI item.
+     */
+    public function updateKpi(Request $request, int $id, KpiService $kpiService): RedirectResponse
+    {
+        $kpi = MstKpi::findOrFail($id);
+
+        $validated = $request->validate([
+            'deskripsi' => ['required', 'string'],
+        ]);
+
+        $kpiService->updateKpi($kpi, $validated);
+
+        return redirect()->back()->with('success', 'KPI berhasil diperbarui.');
+    }
+
+    /**
+     * Remove the specified KPI item.
+     */
+    public function destroyKpi(int $id, KpiService $kpiService): RedirectResponse
+    {
+        $kpi = MstKpi::findOrFail($id);
+        $kpiService->deleteKpi($kpi);
+
+        return redirect()->back()->with('success', 'KPI berhasil dihapus.');
     }
 }
 

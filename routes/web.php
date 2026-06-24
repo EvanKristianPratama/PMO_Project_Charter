@@ -312,6 +312,12 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::post('/architecture/function', [ArchitectureProsesBisnisController::class, 'storeFunction'])->name('architecture.function.store');
     Route::put('/architecture/function/{id}', [ArchitectureProsesBisnisController::class, 'updateFunction'])->name('architecture.function.update');
     Route::delete('/architecture/function/{id}', [ArchitectureProsesBisnisController::class, 'destroyFunction'])->name('architecture.function.destroy');
+
+    // KPI CRUD under Architecture
+    Route::post('/architecture/kpi', [ArchitectureProsesBisnisController::class, 'storeKpi'])->name('architecture.kpi.store');
+    Route::put('/architecture/kpi/{id}', [ArchitectureProsesBisnisController::class, 'updateKpi'])->name('architecture.kpi.update');
+    Route::delete('/architecture/kpi/{id}', [ArchitectureProsesBisnisController::class, 'destroyKpi'])->name('architecture.kpi.destroy');
+
     Route::get('/resources-management', fn () => redirect()->route('resource-management.index'))
         ->name('resources-management.index');
 

@@ -25,6 +25,7 @@ class FunctionService
             'code'       => $payload['code'],
             'name'       => $payload['name'],
             'alias'      => $payload['alias'] ?? null,
+            'deskripsi'  => $payload['deskripsi'] ?? null,
         ]);
 
         $function->regulations()->sync($payload['regulation_ids'] ?? []);
@@ -43,6 +44,7 @@ class FunctionService
             'code'       => $payload['code'],
             'name'       => $payload['name'],
             'alias'      => $payload['alias'] ?? null,
+            'deskripsi'  => $payload['deskripsi'] ?? null,
         ]);
 
         $function->regulations()->sync($payload['regulation_ids'] ?? []);

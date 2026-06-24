@@ -60,7 +60,7 @@
                         <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Company</th>
                         <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Name</th>
                         <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Alias</th>
-                        <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Parent</th>
+                        <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Description</th>
                         <th class="px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-36">Actions</th>
                     </tr>
                 </thead>
@@ -103,8 +103,8 @@
                         <td class="px-4 py-2 text-slate-600 dark:text-slate-300 text-xs">
                             {{ displayValue(fn.alias) }}
                         </td>
-                        <td class="px-4 py-2 text-slate-500 dark:text-slate-400 text-xs">
-                            {{ getParentLabel(fn.parent_id) }}
+                        <td class="px-4 py-2 text-slate-500 dark:text-slate-400 text-xs whitespace-pre-wrap break-words">
+                            {{ fn.deskripsi || '-' }}
                         </td>
                         <td class="px-4 py-2 text-center print:hidden">
                             <div class="flex items-center justify-center gap-1.5">
@@ -206,6 +206,19 @@
                     placeholder="Contoh: FN-OPS"
                 />
                 <span v-if="form.errors.alias" class="text-xs text-red-500 font-medium">{{ form.errors.alias }}</span>
+            </div>
+
+            <!-- Deskripsi Input -->
+            <div class="flex flex-col gap-1.5">
+                <label for="fn_deskripsi" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Deskripsi</label>
+                <textarea
+                    id="fn_deskripsi"
+                    v-model="form.deskripsi"
+                    rows="3"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    placeholder="Tulis deskripsi function di sini..."
+                ></textarea>
+                <span v-if="form.errors.deskripsi" class="text-xs text-red-500 font-medium">{{ form.errors.deskripsi }}</span>
             </div>
 
             <!-- Regulation Links Input -->
@@ -512,11 +525,12 @@ const matchesSearch = (node) => {
     const matchesCode = (node.code || '').toLowerCase().includes(q);
     const matchesName = (node.name || '').toLowerCase().includes(q);
     const matchesAlias = (node.alias || '').toLowerCase().includes(q);
+    const matchesDesc = (node.deskripsi || '').toLowerCase().includes(q);
     const matchesReg = (node.regulations || []).some(reg =>
         (reg.judul || '').toLowerCase().includes(q) ||
         (reg.nomor || '').toLowerCase().includes(q)
     );
-    return matchesCode || matchesName || matchesAlias || matchesReg;
+    return matchesCode || matchesName || matchesAlias || matchesDesc || matchesReg;
 };
 
 const shouldShowNode = (node) => {
@@ -697,6 +711,7 @@ const form = useForm({
     code: '',
     name: '',
     alias: '',
+    deskripsi: '',
     regulation_ids: [],
 });
 
@@ -780,6 +795,7 @@ const openEditModal = (fn) => {
     form.code = fn.code || '';
     form.name = fn.name || '';
     form.alias = fn.alias || '';
+    form.deskripsi = fn.deskripsi || '';
     form.regulation_ids = fn.regulations ? fn.regulations.map(r => r.id) : [];
     regulationSearchQuery.value = '';
     isRegulationDropdownOpen.value = false;
