@@ -25,7 +25,7 @@
                 >
                     <option value="">Semua Function</option>
                     <option v-for="fn in parentFilterOptions" :key="fn.id" :value="fn.id">
-                        {{ getLevelPrefix(fn) }}{{ fn.name }} ({{ fn.code }})
+                        {{ getLevelPrefix(fn) }}{{ fn.name }}
                     </option>
                 </select>
                 <select
@@ -173,7 +173,7 @@
                 >
                     <option value="">Tanpa Induk (Root / Level 1)</option>
                     <option v-for="fn in filteredParentOptions" :key="fn.id" :value="fn.id">
-                        {{ getLevelPrefix(fn) }}{{ fn.name }} ({{ fn.code }})
+                        {{ getLevelPrefix(fn) }}{{ fn.name }}
                     </option>
                 </select>
                 <span v-if="form.errors.parent_id" class="text-xs text-red-500 font-medium">{{ form.errors.parent_id }}</span>
@@ -429,7 +429,7 @@ const functionTree = computed(() => {
     });
 
     const sort = (nodes) => {
-        nodes.sort((a, b) => (a.code || '').localeCompare(b.code || ''));
+        nodes.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
         nodes.forEach(n => sort(n.children));
     };
     sort(roots);
@@ -522,7 +522,6 @@ const parentFilterId = ref('');
 const matchesSearch = (node) => {
     if (!searchQuery.value) return true;
     const q = searchQuery.value.toLowerCase().trim();
-    const matchesCode = (node.code || '').toLowerCase().includes(q);
     const matchesName = (node.name || '').toLowerCase().includes(q);
     const matchesAlias = (node.alias || '').toLowerCase().includes(q);
     const matchesDesc = (node.deskripsi || '').toLowerCase().includes(q);
@@ -530,7 +529,7 @@ const matchesSearch = (node) => {
         (reg.judul || '').toLowerCase().includes(q) ||
         (reg.nomor || '').toLowerCase().includes(q)
     );
-    return matchesCode || matchesName || matchesAlias || matchesDesc || matchesReg;
+    return matchesName || matchesAlias || matchesDesc || matchesReg;
 };
 
 const shouldShowNode = (node) => {
@@ -708,7 +707,6 @@ const toggleRegulation = (id) => {
 const form = useForm({
     company_id: '',
     parent_id: '',
-    code: '',
     name: '',
     alias: '',
     deskripsi: '',
@@ -735,7 +733,7 @@ const filteredParentOptions = computed(() => {
     });
 
     const sort = (nodes) => {
-        nodes.sort((a, b) => (a.code || '').localeCompare(b.code || ''));
+        nodes.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
         nodes.forEach(n => sort(n.children));
     };
     sort(roots);
@@ -792,7 +790,6 @@ const openEditModal = (fn) => {
     form.clearErrors();
     form.company_id = String(fn.company_id ?? '');
     form.parent_id = fn.parent_id ? String(fn.parent_id) : '';
-    form.code = fn.code || '';
     form.name = fn.name || '';
     form.alias = fn.alias || '';
     form.deskripsi = fn.deskripsi || '';

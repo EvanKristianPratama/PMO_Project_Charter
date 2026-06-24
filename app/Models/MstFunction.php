@@ -14,7 +14,6 @@ class MstFunction extends Model
     protected $fillable = [
         'company_id',
         'parent_id',
-        'code',
         'name',
         'alias',
         'deskripsi',
@@ -23,7 +22,6 @@ class MstFunction extends Model
     protected $casts = [
         'company_id' => 'integer',
         'parent_id' => 'integer',
-        'code' => 'string',
     ];
 
     /**

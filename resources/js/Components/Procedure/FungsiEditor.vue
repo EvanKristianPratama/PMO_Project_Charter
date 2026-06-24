@@ -62,7 +62,7 @@
                             <template v-else-if="actor.tipe === 'fungsi'">
                                 <div v-if="actor.functions && actor.functions.length > 0" class="space-y-1">
                                     <div v-for="f in actor.functions" :key="f.id">
-                                        {{ f.name }}{{ f.code ? ` (${f.code})` : '' }}
+                                        {{ f.name }}
                                     </div>
                                 </div>
                                 <span v-else class="text-slate-400 italic">—</span>
@@ -209,7 +209,7 @@
                                 ]"
                             >
                                 <span class="truncate">
-                                    {{ func.name }} {{ func.code ? `(${func.code})` : '' }}
+                                    {{ func.name }}
                                 </span>
                                 <svg v-if="actorForm.function_ids.includes(func.id)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-[#821f44] dark:text-[#db588c] shrink-0">
                                     <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
@@ -591,7 +591,6 @@ const filteredFunctions = computed(() => {
     if (!query) return pool;
     return pool.filter(f => 
         (f.name || '').toLowerCase().includes(query) || 
-        (f.code || '').toLowerCase().includes(query) ||
         (f.alias || '').toLowerCase().includes(query)
     );
 });

@@ -11,7 +11,7 @@ class FunctionService
      */
     public function getFunctions()
     {
-        return MstFunction::with(['company', 'regulations'])->orderBy('code')->get();
+        return MstFunction::with(['company', 'regulations'])->orderBy('name')->get();
     }
 
     /**
@@ -22,7 +22,6 @@ class FunctionService
         $function = MstFunction::create([
             'company_id' => $payload['company_id'],
             'parent_id'  => !empty($payload['parent_id']) ? $payload['parent_id'] : null,
-            'code'       => $payload['code'],
             'name'       => $payload['name'],
             'alias'      => $payload['alias'] ?? null,
             'deskripsi'  => $payload['deskripsi'] ?? null,
@@ -41,7 +40,6 @@ class FunctionService
         $function->update([
             'company_id' => $payload['company_id'],
             'parent_id'  => !empty($payload['parent_id']) ? $payload['parent_id'] : null,
-            'code'       => $payload['code'],
             'name'       => $payload['name'],
             'alias'      => $payload['alias'] ?? null,
             'deskripsi'  => $payload['deskripsi'] ?? null,

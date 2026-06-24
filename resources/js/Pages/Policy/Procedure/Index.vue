@@ -152,7 +152,7 @@
                                                 <template v-else-if="actor.tipe === 'fungsi'">
                                                     <div v-if="actor.functions && actor.functions.length > 0" class="space-y-1">
                                                         <div v-for="f in actor.functions" :key="f.id" class="line-clamp-2 whitespace-normal break-words">
-                                                            {{ f.name }}{{ f.code ? ` (${f.code})` : '' }}
+                                                            {{ f.name }}
                                                         </div>
                                                     </div>
                                                     <span v-else>-</span>

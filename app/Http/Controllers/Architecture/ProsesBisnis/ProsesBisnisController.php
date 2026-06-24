@@ -51,6 +51,8 @@ class ProsesBisnisController extends Controller
             'judul' => $r->judul,
             'nomor' => $r->nomor,
             'tipe' => $r->tipe,
+            'parent_id' => $r->parent_id,
+            'status' => $r->status,
         ])->values()->all();
 
         $apqcList = $apqcService->getApqcList();
@@ -210,17 +212,12 @@ class ProsesBisnisController extends Controller
         $validated = $request->validate([
             'company_id'     => ['required', 'integer', 'exists:mst_company,id'],
             'parent_id'      => ['nullable', 'integer', 'exists:mst_function,id'],
-            'code'           => ['nullable', 'string', 'max:255'],
             'name'           => ['required', 'string', 'max:255'],
             'alias'          => ['nullable', 'string', 'max:255'],
             'deskripsi'      => ['nullable', 'string'],
             'regulation_ids' => ['nullable', 'array'],
             'regulation_ids.*' => ['integer', 'exists:mst_regulation,id'],
         ]);
-
-        if (empty($validated['code'])) {
-            $validated['code'] = 'FN-' . strtoupper(uniqid());
-        }
 
         $functionService->createFunction($validated);
 
@@ -237,17 +234,12 @@ class ProsesBisnisController extends Controller
         $validated = $request->validate([
             'company_id'     => ['required', 'integer', 'exists:mst_company,id'],
             'parent_id'      => ['nullable', 'integer', 'exists:mst_function,id'],
-            'code'           => ['nullable', 'string', 'max:255'],
             'name'           => ['required', 'string', 'max:255'],
             'alias'          => ['nullable', 'string', 'max:255'],
             'deskripsi'      => ['nullable', 'string'],
             'regulation_ids' => ['nullable', 'array'],
             'regulation_ids.*' => ['integer', 'exists:mst_regulation,id'],
         ]);
-
-        if (empty($validated['code'])) {
-            $validated['code'] = $function->code ?? ('FN-' . strtoupper(uniqid()));
-        }
 
         $functionService->updateFunction($function, $validated);
 
