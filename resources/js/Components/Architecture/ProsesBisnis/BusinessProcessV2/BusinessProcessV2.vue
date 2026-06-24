@@ -92,8 +92,8 @@
                         <th class="px-0 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-16">Company</th>
                         <th class="px-1 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-6">No</th>
                         <th class="pl-2 pr-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-[20%]">Business Process Name</th>
-                        <th v-if="showDescriptionColumn" :class="flexibleColWidth" class="px-0 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Description</th>
-                        <th v-if="showKpiColumn" :class="flexibleColWidth" class="pl-0 pr-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">KPI Mapping</th>
+                        <th v-if="showDescriptionColumn" :class="flexibleColWidth" class="px-0 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Description / Tugas</th>
+                        <th v-if="showKpiColumn" :class="flexibleColWidth" class="pl-0 pr-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Hasil / KPI</th>
                         <th v-if="showRegulationColumn" :class="flexibleColWidth" class="pl-0 pr-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Regulation Mapping</th>
                         <th class="px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-36">Aksi</th>
                     </tr>
