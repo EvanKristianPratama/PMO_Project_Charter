@@ -5,11 +5,6 @@
                 class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
             >
                 <div>
-                    <h2
-                        class="text-2xl font-bold text-slate-900 dark:text-white"
-                    >
-                        Digital Initiatives
-                    </h2>
                     <div class="mt-2 flex flex-wrap items-center gap-2">
                         <button
                             type="button"

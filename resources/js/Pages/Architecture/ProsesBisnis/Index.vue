@@ -16,6 +16,17 @@
                     Business Process
                 </button>
                 <button
+                    @click="activeTab = 'proses-bisnis-v2'"
+                    :class="[
+                        'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all duration-200 active:scale-95',
+                        activeTab === 'proses-bisnis-v2'
+                            ? 'bg-[#821f44] text-white shadow-md shadow-[#821f44]/20'
+                            : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+                    ]"
+                >
+                    Business Process v2
+                </button>
+                <button
                     @click="activeTab = 'function'"
                     :class="[
                         'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all duration-200 active:scale-95',
@@ -56,6 +67,11 @@
                 :proses-bisnis="prosesBisnis"
                 :organizations="organizations"
             />
+            <BusinessProcessV2
+                v-else-if="activeTab === 'proses-bisnis-v2'"
+                :proses-bisnis-v2="prosesBisnisV2"
+                :company-options="companyOptions"
+            />
             <FunctionTable
                 v-else-if="activeTab === 'function'"
                 :functions="functions"
@@ -79,6 +95,7 @@
 import { ref } from 'vue';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import ProsesBisnisTable from '@/Components/Architecture/ProsesBisnis/ProsesBisnisTable.vue';
+import BusinessProcessV2 from '@/Components/Architecture/ProsesBisnis/BusinessProcessV2/BusinessProcessV2.vue';
 import FunctionTable from '@/Components/Architecture/ProsesBisnis/Function/FunctionTable.vue';
 import APQCTable from '@/Components/Architecture/ProsesBisnis/APQCT/APQCTable.vue';
 import RegulationMap from '@/Components/Architecture/ProsesBisnis/RegulationMap/RegulationMap.vue';
@@ -105,6 +122,10 @@ defineProps({
         default: () => [],
     },
     apqcList: {
+        type: Array,
+        default: () => [],
+    },
+    prosesBisnisV2: {
         type: Array,
         default: () => [],
     },

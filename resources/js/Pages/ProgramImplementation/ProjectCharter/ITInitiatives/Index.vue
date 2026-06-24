@@ -7,9 +7,6 @@
                     : 'mb-4'
                 ">
                 <div>
-                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white">
-                        IT Initiatives
-                    </h2>
                     <div class="mt-2 flex flex-wrap items-center gap-2">
                         <button type="button"
                             class="inline-flex items-center rounded-full border border-[#1C75BC]/45 bg-[#1C75BC]/10 px-3 py-1.5 text-xs font-semibold text-[#1C75BC] transition hover:bg-[#1C75BC]/20 dark:text-[#7FC0F2]"

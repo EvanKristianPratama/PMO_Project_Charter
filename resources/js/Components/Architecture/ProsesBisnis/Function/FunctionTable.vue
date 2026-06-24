@@ -11,13 +11,34 @@
                     class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white w-48"
                 />
                 <select
+                    v-model="companyFilterId"
+                    class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white w-40 truncate"
+                >
+                    <option value="">Semua Perusahaan</option>
+                    <option v-for="option in availableCompanies" :key="option.id" :value="option.id">
+                        {{ option.name }}
+                    </option>
+                </select>
+                <select
                     v-model="parentFilterId"
-                    class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white w-40 truncate"
                 >
                     <option value="">Semua Function</option>
                     <option v-for="fn in parentFilterOptions" :key="fn.id" :value="fn.id">
                         {{ getLevelPrefix(fn) }}{{ fn.name }} ({{ fn.code }})
                     </option>
+                </select>
+                <select
+                    v-model="expandLevel"
+                    @change="handleExpandLevelChange"
+                    class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white cursor-pointer"
+                >
+                    <option value="custom" disabled>Expand Level...</option>
+                    <option value="0">Collapse All</option>
+                    <option v-for="depth in maxDepth + 1" :key="depth" :value="depth">
+                        Level {{ depth }}
+                    </option>
+                    <option value="all">Expand All</option>
                 </select>
                 <button
                     @click="openCreateModal"
@@ -36,40 +57,56 @@
             <table class="w-full divide-y divide-slate-200 text-sm dark:divide-white/10">
                 <thead class="bg-slate-50 dark:bg-white/5">
                     <tr>
-                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">No</th>
-                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Company</th>
-                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Name</th>
-                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Alias</th>
-                        <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Parent</th>
-                        <th class="px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-36">Actions</th>
+                        <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Company</th>
+                        <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Name</th>
+                        <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Alias</th>
+                        <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Parent</th>
+                        <th class="px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-36">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 dark:divide-white/10">
                     <tr
-                        v-for="(fn, index) in filteredRows"
-                        :key="fn.id"
-                        class="transition hover:bg-slate-50 dark:hover:bg-white/5"
+                        v-for="fn in visibleRows"
+                        :key="'fn-' + fn.id"
+                        class="group transition duration-150 hover:bg-slate-50/50 dark:hover:bg-white/5 animate-fade-in"
                     >
-                        <td class="px-4 py-3 text-slate-500 dark:text-slate-400">{{ index + 1 }}</td>
-                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
+                        <td class="px-4 py-2 text-slate-600 dark:text-slate-300 text-xs">
                             {{ displayValue(fn.company?.name) }}
                         </td>
-                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
-                            <span
-                                :style="{ paddingLeft: getDepth(fn.id) * 16 + 'px' }"
-                                class="inline-block"
-                            >
-                                <span v-if="getDepth(fn.id) > 0" class="text-slate-400 mr-1">—</span>
-                                {{ fn.name }}
-                            </span>
+                        <td 
+                            class="px-4 py-2 text-slate-900 dark:text-white text-xs break-words font-medium" 
+                            :style="{ paddingLeft: (fn.depth * 24 + 16) + 'px' }"
+                        >
+                            <div class="flex items-center gap-2">
+                                <!-- Toggle Button / Branch Spacer -->
+                                <div class="w-5 h-5 flex items-center justify-center shrink-0">
+                                    <button 
+                                        v-if="fn.hasChildren" 
+                                        @click.stop="toggleExpand(fn.id)" 
+                                        class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none shrink-0 flex items-center justify-center"
+                                    >
+                                        <svg v-if="fn.isExpanded" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                        <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                        </svg>
+                                    </button>
+                                    <span v-else-if="fn.depth > 0" class="text-slate-300 dark:text-white/20 font-mono text-xs select-none">├─</span>
+                                </div>
+                                
+                                <span>
+                                    {{ fn.name }}
+                                </span>
+                            </div>
                         </td>
-                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
+                        <td class="px-4 py-2 text-slate-600 dark:text-slate-300 text-xs">
                             {{ displayValue(fn.alias) }}
                         </td>
-                        <td class="px-4 py-3 text-slate-500 dark:text-slate-400 text-xs">
+                        <td class="px-4 py-2 text-slate-500 dark:text-slate-400 text-xs">
                             {{ getParentLabel(fn.parent_id) }}
                         </td>
-                        <td class="px-4 py-3 text-center print:hidden">
+                        <td class="px-4 py-2 text-center print:hidden">
                             <div class="flex items-center justify-center gap-1.5">
                                 <button
                                     @click="openEditModal(fn)"
@@ -86,8 +123,8 @@
                             </div>
                         </td>
                     </tr>
-                    <tr v-if="filteredRows.length === 0">
-                        <td colspan="6" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+                    <tr v-if="visibleRows.length === 0">
+                        <td colspan="5" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
                             Data function tidak ditemukan.
                         </td>
                     </tr>
@@ -142,19 +179,7 @@
                 <span v-if="form.errors.parent_id" class="text-xs text-red-500 font-medium">{{ form.errors.parent_id }}</span>
             </div>
 
-            <!-- Code Input -->
-            <div class="flex flex-col gap-1.5">
-                <label for="fn_code" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Kode</label>
-                <input
-                    id="fn_code"
-                    v-model="form.code"
-                    type="text"
-                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white font-mono"
-                    placeholder="Contoh: FN-001"
-                    required
-                />
-                <span v-if="form.errors.code" class="text-xs text-red-500 font-medium">{{ form.errors.code }}</span>
-            </div>
+
 
             <!-- Name Input -->
             <div class="flex flex-col gap-1.5">
@@ -287,7 +312,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 
@@ -313,6 +338,16 @@ const displayValue = (value) => value ?? '-';
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 const fnMap = computed(() => new Map(props.functions.map(fn => [fn.id, fn])));
+
+const availableCompanies = computed(() => {
+    const compMap = new Map();
+    props.functions.forEach(fn => {
+        if (fn.company) {
+            compMap.set(fn.company.id, fn.company);
+        }
+    });
+    return Array.from(compMap.values()).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+});
 
 /** Hitung kedalaman hierarki dari sebuah node */
 const getDepth = (id) => {
@@ -341,7 +376,7 @@ const getLevelPrefix = (fn) => {
 const getParentLabel = (parentId) => {
     if (!parentId) return '-';
     const parent = fnMap.value.get(parentId);
-    return parent ? `${parent.name} (${parent.code})` : '-';
+    return parent ? parent.name : '-';
 };
 
 /** Cek apakah fnId adalah turunan dari targetParentId */
@@ -362,19 +397,21 @@ const isDescendant = (id, targetId) => {
     return false;
 };
 
-// ─── Flatten tree (sort by code, depth-first) ────────────────────────────────
-
-const flattenedTree = computed(() => {
-    const fns = props.functions;
-    const map = new Map(fns.map(fn => [fn.id, { ...fn, children: [] }]));
+// ─── Hierarchy tree mapping ──────────────────────────────────────────────────
+const functionTree = computed(() => {
+    const map = {};
     const roots = [];
 
-    fns.forEach(fn => {
-        const node = map.get(fn.id);
-        if (fn.parent_id && map.has(fn.parent_id)) {
-            map.get(fn.parent_id).children.push(node);
+    props.functions.forEach(item => {
+        map[item.id] = { ...item, children: [] };
+    });
+
+    props.functions.forEach(item => {
+        const mapped = map[item.id];
+        if (item.parent_id && map[item.parent_id]) {
+            map[item.parent_id].children.push(mapped);
         } else {
-            roots.push(node);
+            roots.push(mapped);
         }
     });
 
@@ -384,46 +421,215 @@ const flattenedTree = computed(() => {
     };
     sort(roots);
 
-    const result = [];
-    const traverse = (node) => {
-        result.push(node);
-        node.children.forEach(traverse);
-    };
-    roots.forEach(traverse);
-    return result;
+    return roots;
 });
 
-// ─── Filters ─────────────────────────────────────────────────────────────────
+// ─── Expand / Collapse State ─────────────────────────────────────────────────
+const expandedIds = ref(new Set());
+const expandLevel = ref('all');
 
+const maxDepth = computed(() => {
+    let max = 0;
+    props.functions.forEach(item => {
+        const d = getDepth(item.id);
+        if (d > max) max = d;
+    });
+    return max;
+});
+
+const toggleExpand = (id) => {
+    expandLevel.value = 'custom';
+    if (expandedIds.value.has(id)) {
+        expandedIds.value.delete(id);
+    } else {
+        expandedIds.value.add(id);
+    }
+    expandedIds.value = new Set(expandedIds.value);
+};
+
+const handleExpandLevelChange = () => {
+    const val = expandLevel.value;
+    if (val === 'custom') return;
+
+    const ids = new Set();
+
+    if (val === 'all') {
+        props.functions.forEach(item => {
+            const isParent = props.functions.some(r => r.parent_id === item.id);
+            if (isParent) {
+                ids.add(item.id);
+            }
+        });
+    } else {
+        const targetDepth = parseInt(val, 10);
+        if (targetDepth > 0) {
+            props.functions.forEach(item => {
+                const depth = getDepth(item.id);
+                if (depth < targetDepth) {
+                    const isParent = props.functions.some(r => r.parent_id === item.id);
+                    if (isParent) {
+                        ids.add(item.id);
+                    }
+                }
+            });
+        }
+    }
+    expandedIds.value = ids;
+};
+
+const initializeExpanded = () => {
+    const ids = new Set();
+    props.functions.forEach(item => {
+        const isParent = props.functions.some(r => r.parent_id === item.id);
+        if (isParent) {
+            ids.add(item.id);
+        }
+    });
+    expandedIds.value = ids;
+    expandLevel.value = 'all';
+};
+
+onMounted(() => {
+    initializeExpanded();
+});
+
+watch(
+    () => props.functions,
+    () => {
+        initializeExpanded();
+    },
+    { deep: false }
+);
+
+// ─── Filters & Search ────────────────────────────────────────────────────────
 const searchQuery = ref('');
+const companyFilterId = ref('');
 const parentFilterId = ref('');
 
-const parentFilterOptions = computed(() => flattenedTree.value);
+const matchesSearch = (node) => {
+    if (!searchQuery.value) return true;
+    const q = searchQuery.value.toLowerCase().trim();
+    const matchesCode = (node.code || '').toLowerCase().includes(q);
+    const matchesName = (node.name || '').toLowerCase().includes(q);
+    const matchesAlias = (node.alias || '').toLowerCase().includes(q);
+    const matchesReg = (node.regulations || []).some(reg =>
+        (reg.judul || '').toLowerCase().includes(q) ||
+        (reg.nomor || '').toLowerCase().includes(q)
+    );
+    return matchesCode || matchesName || matchesAlias || matchesReg;
+};
 
-const filteredRows = computed(() => {
-    let rows = flattenedTree.value;
+const shouldShowNode = (node) => {
+    if (matchesSearch(node)) return true;
+    if (node.children && node.children.length > 0) {
+        return node.children.some(child => shouldShowNode(child));
+    }
+    return false;
+};
+
+watch(searchQuery, (newQuery) => {
+    if (newQuery) {
+        const ids = new Set();
+        props.functions.forEach(item => {
+            const isParent = props.functions.some(r => r.parent_id === item.id);
+            if (isParent) {
+                ids.add(item.id);
+            }
+        });
+        expandedIds.value = ids;
+        expandLevel.value = 'all';
+    } else {
+        initializeExpanded();
+    }
+});
+
+// Root selection filter
+const filteredRoots = computed(() => {
+    let roots = functionTree.value;
+    
+    if (companyFilterId.value) {
+        const compId = Number(companyFilterId.value);
+        roots = roots.filter(root => Number(root.company_id) === compId);
+    }
 
     if (parentFilterId.value) {
         const filterId = Number(parentFilterId.value);
-        rows = rows.filter(fn =>
-            Number(fn.id) === filterId || isDescendant(fn.id, filterId)
-        );
+        
+        const findNode = (nodes) => {
+            for (const n of nodes) {
+                if (n.id === filterId) return [n];
+                if (n.children && n.children.length > 0) {
+                    const found = findNode(n.children);
+                    if (found) return found;
+                }
+            }
+            return null;
+        };
+        
+        return findNode(roots) || [];
     }
+    return roots;
+});
 
-    if (searchQuery.value) {
-        const q = searchQuery.value.toLowerCase().trim();
-        rows = rows.filter(fn =>
-            (fn.code || '').toLowerCase().includes(q) ||
-            (fn.name || '').toLowerCase().includes(q) ||
-            (fn.alias || '').toLowerCase().includes(q) ||
-            (fn.regulations || []).some(reg =>
-                (reg.judul || '').toLowerCase().includes(q) ||
-                (reg.nomor || '').toLowerCase().includes(q)
-            )
-        );
-    }
-
+// Build active visible rows
+const visibleRows = computed(() => {
+    const rows = [];
+    
+    const traverse = (node, depth = 0) => {
+        const visibleChildren = (node.children || []).filter(child => shouldShowNode(child));
+        const hasChildren = visibleChildren.length > 0;
+        const isExpanded = expandedIds.value.has(node.id);
+        
+        rows.push({
+            ...node,
+            depth,
+            hasChildren,
+            isExpanded
+        });
+        
+        if (hasChildren && isExpanded) {
+            visibleChildren.forEach(child => {
+                traverse(child, depth + 1);
+            });
+        }
+    };
+    
+    filteredRoots.value.forEach(root => {
+        if (shouldShowNode(root)) {
+            traverse(root, 0);
+        }
+    });
+    
     return rows;
+});
+
+// Flatten tree for dropdown selection filter
+const parentFilterOptions = computed(() => {
+    const result = [];
+    const traverse = (node, depth = 0) => {
+        result.push({ ...node, depth });
+        if (node.children && node.children.length > 0) {
+            node.children.forEach(child => traverse(child, depth + 1));
+        }
+    };
+    
+    let roots = functionTree.value;
+    if (companyFilterId.value) {
+        const compId = Number(companyFilterId.value);
+        roots = roots.filter(root => Number(root.company_id) === compId);
+    }
+    
+    roots.forEach(root => traverse(root, 0));
+    return result;
+});
+
+watch(companyFilterId, (newCompanyFilterId) => {
+    if (parentFilterId.value) {
+        const selectedParent = props.functions.find(f => Number(f.id) === Number(parentFilterId.value));
+        if (selectedParent && newCompanyFilterId && Number(selectedParent.company_id) !== Number(newCompanyFilterId)) {
+            parentFilterId.value = '';
+        }
+    }
 });
 
 watch(() => props.functions, (newFunctions) => {
@@ -619,3 +825,18 @@ const submitDelete = () => {
     });
 };
 </script>
+
+<style scoped>
+.animate-fade-in {
+    animation: fadeIn 0.25s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+</style>

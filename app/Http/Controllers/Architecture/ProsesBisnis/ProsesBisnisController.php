@@ -8,8 +8,10 @@ use App\Models\TrsProsesBisnis;
 use App\Models\MstFunction;
 use App\Models\MstApqc;
 use App\Models\MstCompany;
+use App\Models\MstProsesBisnis;
 use App\Services\Architecture\ApqcService;
 use App\Services\Architecture\FunctionService;
+use App\Services\Architecture\BusinessProcessV2Service;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -20,7 +22,11 @@ class ProsesBisnisController extends Controller
     /**
      * Display a listing of business processes.
      */
-    public function index(ApqcService $apqcService, FunctionService $functionService): Response
+    public function index(
+        ApqcService $apqcService, 
+        FunctionService $functionService,
+        BusinessProcessV2Service $businessProcessV2Service
+    ): Response
     {
         $prosesBisnis = TrsProsesBisnis::with('organization')
             ->orderBy('organization_id')
@@ -45,6 +51,8 @@ class ProsesBisnisController extends Controller
         ])->values()->all();
 
         $apqcList = $apqcService->getApqcList();
+        
+        $prosesBisnisV2 = $businessProcessV2Service->getProsesBisnisV2List();
 
         return Inertia::render('Architecture/ProsesBisnis/Index', [
             'prosesBisnis' => $prosesBisnis,
@@ -53,6 +61,7 @@ class ProsesBisnisController extends Controller
             'companyOptions' => $companyOptions,
             'regulations' => $regulations,
             'apqcList' => $apqcList,
+            'prosesBisnisV2' => $prosesBisnisV2,
         ]);
     }
 
@@ -195,12 +204,16 @@ class ProsesBisnisController extends Controller
         $validated = $request->validate([
             'company_id'     => ['required', 'integer', 'exists:mst_company,id'],
             'parent_id'      => ['nullable', 'integer', 'exists:mst_function,id'],
-            'code'           => ['required', 'string', 'max:255'],
+            'code'           => ['nullable', 'string', 'max:255'],
             'name'           => ['required', 'string', 'max:255'],
             'alias'          => ['nullable', 'string', 'max:255'],
             'regulation_ids' => ['nullable', 'array'],
             'regulation_ids.*' => ['integer', 'exists:mst_regulation,id'],
         ]);
+
+        if (empty($validated['code'])) {
+            $validated['code'] = 'FN-' . strtoupper(uniqid());
+        }
 
         $functionService->createFunction($validated);
 
@@ -217,12 +230,16 @@ class ProsesBisnisController extends Controller
         $validated = $request->validate([
             'company_id'     => ['required', 'integer', 'exists:mst_company,id'],
             'parent_id'      => ['nullable', 'integer', 'exists:mst_function,id'],
-            'code'           => ['required', 'string', 'max:255'],
+            'code'           => ['nullable', 'string', 'max:255'],
             'name'           => ['required', 'string', 'max:255'],
             'alias'          => ['nullable', 'string', 'max:255'],
             'regulation_ids' => ['nullable', 'array'],
             'regulation_ids.*' => ['integer', 'exists:mst_regulation,id'],
         ]);
+
+        if (empty($validated['code'])) {
+            $validated['code'] = $function->code ?? ('FN-' . strtoupper(uniqid()));
+        }
 
         $functionService->updateFunction($function, $validated);
 
@@ -238,6 +255,58 @@ class ProsesBisnisController extends Controller
         $functionService->deleteFunction($function);
 
         return redirect()->back()->with('success', 'Function berhasil dihapus.');
+    }
+
+    /**
+     * Store a newly created Business Process v2 item.
+     */
+    public function storeProsesBisnisV2(Request $request, BusinessProcessV2Service $service): RedirectResponse
+    {
+        $validated = $request->validate([
+            'company_id' => 'required|integer|exists:mst_company,id',
+            'parent_id' => 'nullable|exists:mst_proses_bisnis,id',
+            'name' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+        ]);
+
+        $service->create($validated);
+
+        return redirect()->back()->with('success', 'Proses Bisnis v2 berhasil ditambahkan.');
+    }
+
+    /**
+     * Update the specified Business Process v2 item.
+     */
+    public function updateProsesBisnisV2(Request $request, int $id, BusinessProcessV2Service $service): RedirectResponse
+    {
+        $item = MstProsesBisnis::findOrFail($id);
+
+        $validated = $request->validate([
+            'company_id' => 'required|integer|exists:mst_company,id',
+            'parent_id' => 'nullable|exists:mst_proses_bisnis,id',
+            'name' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+        ]);
+
+        $service->update($item, $validated);
+
+        return redirect()->back()->with('success', 'Proses Bisnis v2 berhasil diperbarui.');
+    }
+
+    /**
+     * Remove the specified Business Process v2 item.
+     */
+    public function destroyProsesBisnisV2(int $id, BusinessProcessV2Service $service): RedirectResponse
+    {
+        $item = MstProsesBisnis::findOrFail($id);
+        
+        $success = $service->delete($item);
+
+        if (!$success) {
+            return redirect()->back()->with('error', 'Tidak dapat menghapus Proses Bisnis ini karena memiliki sub-proses.');
+        }
+
+        return redirect()->back()->with('success', 'Proses Bisnis v2 berhasil dihapus.');
     }
 }
 

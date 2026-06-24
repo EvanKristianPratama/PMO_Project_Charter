@@ -1,12 +1,6 @@
 <template>
     <UserLayout title="Program Definition IT Initiatives">
         <div class="animate-fade-in">
-            <div class="mb-4">
-                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">
-                    Program Definition IT Initiatives
-                </h2>
-            </div>
-
             <section class="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
                 <SummaryCard :total="totalItInitiatives" @create="showCreateModal = true" @show-all="toggleShowAll" />
 

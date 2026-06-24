@@ -58,6 +58,11 @@ class MstCompany extends Model
         return $this->hasMany(MstBod::class, 'company_id');
     }
 
+    public function prosesBisnis(): HasMany
+    {
+        return $this->hasMany(MstProsesBisnis::class, 'company_id');
+    }
+
     public function organizations(): HasManyThrough
     {
         return $this->hasManyThrough(

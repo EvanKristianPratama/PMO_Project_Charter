@@ -303,6 +303,11 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::put('/architecture/apqc/{id}', [ArchitectureProsesBisnisController::class, 'updateApqc'])->name('architecture.apqc.update');
     Route::delete('/architecture/apqc/{id}', [ArchitectureProsesBisnisController::class, 'destroyApqc'])->name('architecture.apqc.destroy');
 
+    // Proses Bisnis v2 CRUD under Architecture
+    Route::post('/architecture/proses-bisnis-v2', [ArchitectureProsesBisnisController::class, 'storeProsesBisnisV2'])->name('architecture.proses-bisnis-v2.store');
+    Route::put('/architecture/proses-bisnis-v2/{id}', [ArchitectureProsesBisnisController::class, 'updateProsesBisnisV2'])->name('architecture.proses-bisnis-v2.update');
+    Route::delete('/architecture/proses-bisnis-v2/{id}', [ArchitectureProsesBisnisController::class, 'destroyProsesBisnisV2'])->name('architecture.proses-bisnis-v2.destroy');
+
     // Function CRUD under Architecture
     Route::post('/architecture/function', [ArchitectureProsesBisnisController::class, 'storeFunction'])->name('architecture.function.store');
     Route::put('/architecture/function/{id}', [ArchitectureProsesBisnisController::class, 'updateFunction'])->name('architecture.function.update');
