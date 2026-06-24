@@ -77,6 +77,7 @@ class BusinessProcessV2Service
             'name' => isset($payload['name']) ? trim($payload['name']) : null,
             'deskripsi' => isset($payload['deskripsi']) ? trim($payload['deskripsi']) : null,
             'parent_id' => !empty($payload['parent_id']) ? (int) $payload['parent_id'] : null,
+            'order' => isset($payload['order']) && $payload['order'] !== '' && $payload['order'] !== null ? (int) $payload['order'] : null,
         ];
     }
 }

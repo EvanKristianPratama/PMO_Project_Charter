@@ -16,11 +16,13 @@ class MstProsesBisnis extends Model
         'parent_id',
         'name',
         'deskripsi',
+        'order',
     ];
 
     protected $casts = [
         'company_id' => 'integer',
         'parent_id' => 'integer',
+        'order' => 'integer',
     ];
 
 

@@ -275,6 +275,7 @@ class ProsesBisnisController extends Controller
             'parent_id' => 'nullable|exists:mst_proses_bisnis,id',
             'name' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
+            'order' => 'nullable|integer',
             'kpi_ids' => 'nullable|array',
             'kpi_ids.*' => 'integer|exists:mst_kpi,id',
         ]);
@@ -296,6 +297,7 @@ class ProsesBisnisController extends Controller
             'parent_id' => 'nullable|exists:mst_proses_bisnis,id',
             'name' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
+            'order' => 'nullable|integer',
             'kpi_ids' => 'nullable|array',
             'kpi_ids.*' => 'integer|exists:mst_kpi,id',
         ]);
