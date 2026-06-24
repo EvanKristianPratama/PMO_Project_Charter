@@ -87,10 +87,8 @@
                                 </span>
                             </div>
                         </td>
-                        <td class="px-4 py-1.5 text-slate-500 dark:text-slate-400 text-xs max-w-xs">
-                            <span class="line-clamp-2" :title="item.deskripsi || ''">
-                                {{ item.deskripsi || '-' }}
-                            </span>
+                        <td class="px-4 py-1.5 text-slate-500 dark:text-slate-400 text-xs whitespace-pre-wrap break-words">
+                            {{ item.deskripsi || '-' }}
                         </td>
 
                         <td class="px-4 py-1.5 text-center print:hidden">

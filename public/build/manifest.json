@@ -1496,7 +1496,7 @@
     ]
   },
   "resources/js/Pages/Architecture/ProsesBisnis/Index.vue": {
-    "file": "assets/Index-JzBCwbQV.js",
+    "file": "assets/Index-BS4GEKHi.js",
     "name": "Index",
     "src": "resources/js/Pages/Architecture/ProsesBisnis/Index.vue",
     "isDynamicEntry": true,
@@ -1538,7 +1538,7 @@
       "_vendor-laravel-precognition-CApEZYE-.js"
     ],
     "css": [
-      "assets/Index-D9uFbfIe.css"
+      "assets/Index-BJKhVFBV.css"
     ]
   },
   "resources/js/Pages/Architecture/ProsesBisnis/Manage.vue": {
@@ -1663,7 +1663,7 @@
     ]
   },
   "resources/js/Pages/BpmnWorkflow/Index.vue": {
-    "file": "assets/Index-B652sFvH.js",
+    "file": "assets/Index-CGQ093Wd.js",
     "name": "Index",
     "src": "resources/js/Pages/BpmnWorkflow/Index.vue",
     "isDynamicEntry": true,
@@ -4774,7 +4774,7 @@
     ]
   },
   "resources/js/Pages/StrategicHouse/Index.vue": {
-    "file": "assets/Index-CJ7i0Wy3.js",
+    "file": "assets/Index-CGRKEnpu.js",
     "name": "Index",
     "src": "resources/js/Pages/StrategicHouse/Index.vue",
     "isDynamicEntry": true,
@@ -5271,7 +5271,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-BTNru89i.js",
+    "file": "assets/app-CuvwvnqE.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
