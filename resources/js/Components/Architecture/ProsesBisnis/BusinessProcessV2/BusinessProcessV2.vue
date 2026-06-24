@@ -70,7 +70,7 @@
                         <path v-if="showRegulationColumn" stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path v-else stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.893 7.893L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
                     </svg>
-                    <span>{{ showRegulationColumn ? 'Hide Reg' : 'Show Reg' }}</span>
+                    <span>{{ showRegulationColumn ? 'Hide STK' : 'Show STK' }}</span>
                 </button>
                 <button
                     @click="openCreateModal"
@@ -94,7 +94,7 @@
                         <th :class="nameColWidth" class="pl-2 pr-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Business Process Name</th>
                         <th v-if="showDescriptionColumn" :class="flexibleColWidth" class="px-0 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Description / Tugas</th>
                         <th v-if="showKpiColumn" :class="flexibleColWidth" class="pl-0 pr-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Hasil / KPI</th>
-                        <th v-if="showRegulationColumn" :class="flexibleColWidth" class="pl-0 pr-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Regulation Mapping</th>
+                        <th v-if="showRegulationColumn" :class="flexibleColWidth" class="pl-0 pr-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Daftar STK</th>
                         <th class="px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-36">Aksi</th>
                     </tr>
                 </thead>
@@ -164,8 +164,25 @@
                                 >
                                     <span class="shrink-0 select-none">-</span>
                                     <span class="flex flex-col items-start text-left">
-                                        <span class="font-semibold">{{ reg.judul }}</span>
+                                        <div class="flex items-center gap-1.5 flex-wrap">
+                                            <span class="font-semibold text-slate-900 dark:text-white">{{ reg.judul }}</span>
+                                            <span v-if="reg.status" :class="getStatusBadgeClass(reg.status)">
+                                                {{ reg.status }}
+                                            </span>
+                                        </div>
                                         <span class="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">{{ reg.nomor }}</span>
+                                        
+                                        <!-- Category List -->
+                                        <ul v-if="reg.sop_categories && reg.sop_categories.length > 0" class="mt-1 pl-2 space-y-0.5">
+                                            <li 
+                                                v-for="cat in reg.sop_categories" 
+                                                :key="'cat-' + cat.id"
+                                                class="text-[10px] text-slate-500 dark:text-slate-400 list-none flex items-start gap-1"
+                                            >
+                                                <span class="shrink-0 select-none">-</span>
+                                                <span>{{ cat.tipe }}</span>
+                                            </li>
+                                        </ul>
                                     </span>
                                 </li>
                             </ul>
@@ -521,6 +538,23 @@ const nameColWidth = computed(() => {
     if (count === 2) return 'w-[25%]';
     return 'w-[20%]';
 });
+
+const getStatusBadgeClass = (status) => {
+    const base = 'inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[8px] font-bold tracking-wide uppercase border shrink-0';
+    if (!status) return `${base} bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-500/10 dark:border-slate-500/20 dark:text-slate-400`;
+    
+    const formatted = status.toLowerCase().trim();
+    if (formatted === 'aktif' || formatted === 'active' || formatted === 'berlaku') {
+        return `${base} bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400`;
+    }
+    if (formatted === 'draft') {
+        return `${base} bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400`;
+    }
+    if (formatted === 'dicabut' || formatted === 'revisi' || formatted === 'expired' || formatted === 'tidak berlaku') {
+        return `${base} bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400`;
+    }
+    return `${base} bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-500/10 dark:border-slate-500/20 dark:text-slate-400`;
+};
 
 const itemsMap = computed(() => new Map(props.prosesBisnisV2.map(item => [item.id, item])));
 

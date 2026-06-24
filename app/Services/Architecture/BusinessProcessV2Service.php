@@ -11,7 +11,7 @@ class BusinessProcessV2Service
      */
     public function getProsesBisnisV2List()
     {
-        $items = MstProsesBisnis::with(['parent', 'company', 'kpis', 'regulations'])->orderBy('id')->get();
+        $items = MstProsesBisnis::with(['parent', 'company', 'kpis', 'regulations.sopCategories'])->orderBy('id')->get();
         
         // Build map for efficient parent lookup in memory
         $itemsMap = $items->keyBy('id');
