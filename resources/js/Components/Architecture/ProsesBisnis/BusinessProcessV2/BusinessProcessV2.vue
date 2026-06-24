@@ -86,12 +86,12 @@
 
         <!-- Table -->
         <div class="overflow-x-auto">
-            <table class="w-full divide-y divide-slate-200 text-sm dark:divide-white/10">
+            <table class="w-full table-fixed divide-y divide-slate-200 text-sm dark:divide-white/10">
                 <thead class="bg-slate-50 dark:bg-white/5">
                     <tr>
                         <th class="px-0 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-16">Company</th>
                         <th class="px-1 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-6">No</th>
-                        <th class="pl-2 pr-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-[20%]">Business Process Name</th>
+                        <th :class="nameColWidth" class="pl-2 pr-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Business Process Name</th>
                         <th v-if="showDescriptionColumn" :class="flexibleColWidth" class="px-0 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Description / Tugas</th>
                         <th v-if="showKpiColumn" :class="flexibleColWidth" class="pl-0 pr-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Hasil / KPI</th>
                         <th v-if="showRegulationColumn" :class="flexibleColWidth" class="pl-0 pr-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Regulation Mapping</th>
@@ -111,7 +111,8 @@
                             {{ item.order !== null && item.order !== undefined ? item.order : '-' }}
                         </td>
                         <td 
-                            class="pl-0 pr-4 py-2 text-slate-900 dark:text-white text-xs break-words font-medium w-[20%]" 
+                            :class="nameColWidth"
+                            class="pl-0 pr-4 py-2 text-slate-900 dark:text-white text-xs break-words font-medium" 
                             :style="{ paddingLeft: (item.depth * 16 + 8) + 'px' }"
                         >
                             <div class="flex items-center gap-2">
@@ -509,6 +510,16 @@ const flexibleColWidth = computed(() => {
     if (count === 1) return 'w-auto';
     if (count === 2) return 'w-1/2';
     return 'w-1/3';
+});
+
+const nameColWidth = computed(() => {
+    const count = (showDescriptionColumn.value ? 1 : 0)
+        + (showKpiColumn.value ? 1 : 0)
+        + (showRegulationColumn.value ? 1 : 0);
+    if (count === 0) return 'w-auto';
+    if (count === 1) return 'w-[30%]';
+    if (count === 2) return 'w-[25%]';
+    return 'w-[20%]';
 });
 
 const itemsMap = computed(() => new Map(props.prosesBisnisV2.map(item => [item.id, item])));
