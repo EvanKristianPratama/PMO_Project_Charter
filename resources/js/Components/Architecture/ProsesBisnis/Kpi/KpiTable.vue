@@ -137,9 +137,10 @@ const form = useForm({
 });
 
 const filteredKpis = computed(() => {
-    if (!searchQuery.value) return props.kpiList;
+    const list = [...props.kpiList].sort((a, b) => a.id - b.id);
+    if (!searchQuery.value) return list;
     const q = searchQuery.value.toLowerCase().trim();
-    return props.kpiList.filter(kpi => 
+    return list.filter(kpi => 
         (kpi.deskripsi || '').toLowerCase().includes(q)
     );
 });

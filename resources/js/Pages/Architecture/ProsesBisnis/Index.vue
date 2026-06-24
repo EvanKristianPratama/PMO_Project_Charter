@@ -82,6 +82,7 @@
                 v-else-if="activeTab === 'proses-bisnis-v2'"
                 :proses-bisnis-v2="prosesBisnisV2"
                 :company-options="companyOptions"
+                :kpi-list="kpiList"
             />
             <FunctionTable
                 v-else-if="activeTab === 'function'"

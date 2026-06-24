@@ -11,7 +11,7 @@ class KpiService
      */
     public function getKpis()
     {
-        return MstKpi::orderBy('id', 'desc')->get();
+        return MstKpi::orderBy('id', 'asc')->get();
     }
 
     /**

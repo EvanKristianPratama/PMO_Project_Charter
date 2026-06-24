@@ -41,8 +41,19 @@
                     <option value="all">Expand All</option>
                 </select>
                 <button
+                    @click="showKpiColumn = !showKpiColumn"
+                    class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 text-xs font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-slate-500/20 active:scale-95 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+                        <path v-if="showKpiColumn" stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                        <path v-if="showKpiColumn" stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path v-else stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.893 7.893L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                    </svg>
+                    <span>{{ showKpiColumn ? 'Hide KPI' : 'Show KPI' }}</span>
+                </button>
+                <button
                     @click="openCreateModal"
-                    class="inline-flex items-center gap-1.5 rounded-lg bg-[#821f44] hover:bg-[#9c2552] text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 active:scale-95"
+                    class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 text-xs font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-slate-500/20 active:scale-95 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5"
                 >
                     <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
@@ -57,9 +68,10 @@
             <table class="w-full divide-y divide-slate-200 text-sm dark:divide-white/10">
                 <thead class="bg-slate-50 dark:bg-white/5">
                     <tr>
-                        <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Company</th>
+                        <th class="pl-4 pr-0 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-24">Company</th>
                         <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Business Process Name</th>
                         <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Description</th>
+                        <th v-if="showKpiColumn" class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">KPI Mapping</th>
                         <th class="px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-36">Aksi</th>
                     </tr>
                 </thead>
@@ -69,8 +81,8 @@
                         :key="'pb2-' + item.id"
                         class="group transition duration-150 hover:bg-slate-50/50 dark:hover:bg-white/5 animate-fade-in"
                     >
-                        <td class="px-4 py-2 text-slate-600 dark:text-slate-300 text-xs">
-                            {{ item.company?.name || '-' }}
+                        <td class="pl-4 pr-0 py-2 text-slate-600 dark:text-slate-300 text-xs">
+                            {{ item.depth === 0 ? (item.company?.name || '-') : '' }}
                         </td>
                         <td 
                             class="px-4 py-2 text-slate-900 dark:text-white text-xs break-words font-medium" 
@@ -102,6 +114,20 @@
                         <td class="px-4 py-2 text-slate-500 dark:text-slate-400 text-xs whitespace-pre-wrap break-words">
                             {{ item.deskripsi || '-' }}
                         </td>
+                        <td v-if="showKpiColumn" class="px-4 py-2 text-slate-600 dark:text-slate-300 text-xs">
+                            <!-- Display mapped KPIs as list with indentation and preserving newlines -->
+                            <ul v-if="item.kpis && item.kpis.length > 0" class="space-y-1.5 list-none">
+                                <li 
+                                    v-for="kpi in item.kpis" 
+                                    :key="'item-kpi-' + kpi.id"
+                                    class="flex items-start gap-1 whitespace-pre-wrap leading-relaxed text-[11px]"
+                                >
+                                    <span class="shrink-0 select-none">-</span>
+                                    <span>{{ kpi.deskripsi }}</span>
+                                </li>
+                            </ul>
+                            <span v-else class="text-slate-400 dark:text-slate-600 font-mono text-xs select-none">-</span>
+                        </td>
                         <td class="px-4 py-2 text-center print:hidden">
                             <div class="flex items-center justify-center gap-1.5">
                                 <button
@@ -120,7 +146,7 @@
                         </td>
                     </tr>
                     <tr v-if="visibleRows.length === 0">
-                        <td colspan="4" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+                        <td :colspan="showKpiColumn ? 5 : 4" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
                             Data Proses Bisnis tidak ditemukan.
                         </td>
                     </tr>
@@ -137,69 +163,162 @@
         confirm-text="Simpan"
         cancel-text="Batal"
         type="info"
+        max-width="2xl"
         :loading="form.processing"
         @close="isModalOpen = false"
         @confirm="submitForm"
     >
-        <div class="mt-4 space-y-4 text-left">
-            <!-- Company Option Select -->
-            <div class="flex flex-col gap-1.5">
-                <label for="company_id" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Perusahaan</label>
-                <select
-                    id="company_id"
-                    v-model="form.company_id"
-                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
-                    required
-                >
-                    <option value="" disabled>Pilih Perusahaan...</option>
-                    <option v-for="option in companyOptions" :key="option.id" :value="option.id">
-                        {{ option.name }}
-                    </option>
-                </select>
-                <span v-if="form.errors.company_id" class="text-xs text-red-500 font-medium">{{ form.errors.company_id }}</span>
-            </div>
+        <div class="mt-4 text-left">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                <!-- Left Column: Info Utama -->
+                <div class="space-y-4">
+                    <!-- Company Option Select -->
+                    <div class="flex flex-col gap-1.5">
+                        <label for="company_id" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Perusahaan</label>
+                        <select
+                            id="company_id"
+                            v-model="form.company_id"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                            required
+                        >
+                            <option value="" disabled>Pilih Perusahaan...</option>
+                            <option v-for="option in companyOptions" :key="option.id" :value="option.id">
+                                {{ option.name }}
+                            </option>
+                        </select>
+                        <span v-if="form.errors.company_id" class="text-xs text-red-500 font-medium">{{ form.errors.company_id }}</span>
+                    </div>
 
-            <!-- Parent Select -->
-            <div class="flex flex-col gap-1.5">
-                <label for="parent_id" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Proses Bisnis Parent</label>
-                <select
-                    id="parent_id"
-                    v-model="form.parent_id"
-                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
-                >
-                    <option value="">Tanpa Parent (Root / Level 1)</option>
-                    <option v-for="item in filteredParentOptions" :key="item.id" :value="item.id">
-                        {{ getLevelPrefix(item) }}{{ item.name }}
-                    </option>
-                </select>
-                <span v-if="form.errors.parent_id" class="text-xs text-red-500 font-medium">{{ form.errors.parent_id }}</span>
-            </div>
+                    <!-- Parent Select -->
+                    <div class="flex flex-col gap-1.5">
+                        <label for="parent_id" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Proses Bisnis Parent</label>
+                        <select
+                            id="parent_id"
+                            v-model="form.parent_id"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                        >
+                            <option value="">Tanpa Parent (Root / Level 1)</option>
+                            <option v-for="item in filteredParentOptions" :key="item.id" :value="item.id">
+                                {{ getLevelPrefix(item) }}{{ item.name }}
+                            </option>
+                        </select>
+                        <span v-if="form.errors.parent_id" class="text-xs text-red-500 font-medium">{{ form.errors.parent_id }}</span>
+                    </div>
 
-            <!-- Name Input -->
-            <div class="flex flex-col gap-1.5">
-                <label for="name" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Nama Proses Bisnis</label>
-                <input
-                    id="name"
-                    v-model="form.name"
-                    type="text"
-                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
-                    placeholder="Contoh: Perencanaan Bisnis Strategis"
-                    required
-                />
-                <span v-if="form.errors.name" class="text-xs text-red-500 font-medium">{{ form.errors.name }}</span>
-            </div>
+                    <!-- Name Input -->
+                    <div class="flex flex-col gap-1.5">
+                        <label for="name" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Nama Proses Bisnis</label>
+                        <input
+                            id="name"
+                            v-model="form.name"
+                            type="text"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                            placeholder="Contoh: Perencanaan Bisnis Strategis"
+                            required
+                        />
+                        <span v-if="form.errors.name" class="text-xs text-red-500 font-medium">{{ form.errors.name }}</span>
+                    </div>
 
-            <!-- Deskripsi Input -->
-            <div class="flex flex-col gap-1.5">
-                <label for="deskripsi" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Deskripsi</label>
-                <textarea
-                    id="deskripsi"
-                    v-model="form.deskripsi"
-                    rows="3"
-                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
-                    placeholder="Tulis deskripsi atau tujuan proses bisnis di sini..."
-                ></textarea>
-                <span v-if="form.errors.deskripsi" class="text-xs text-red-500 font-medium">{{ form.errors.deskripsi }}</span>
+                    <!-- Deskripsi Input -->
+                    <div class="flex flex-col gap-1.5">
+                        <label for="deskripsi" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Deskripsi</label>
+                        <textarea
+                            id="deskripsi"
+                            v-model="form.deskripsi"
+                            rows="3"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                            placeholder="Tulis deskripsi atau tujuan proses bisnis di sini..."
+                        ></textarea>
+                        <span v-if="form.errors.deskripsi" class="text-xs text-red-500 font-medium">{{ form.errors.deskripsi }}</span>
+                    </div>
+                </div>
+
+                <!-- Right Column: KPI Mapping -->
+                <div class="space-y-4">
+                    <!-- Mapping KPI -->
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Mapping KPI</label>
+                        <div class="relative">
+                            <button 
+                                type="button"
+                                @click="toggleKpiDropdown"
+                                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-left focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white flex justify-between items-center"
+                            >
+                                <span class="truncate text-slate-400 dark:text-slate-500">
+                                    -- Pilih KPI --
+                                </span>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-slate-400 shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                </svg>
+                            </button>
+
+                            <!-- Dropdown Content (Absolute positioning relative to button container) -->
+                            <div v-if="isKpiDropdownOpen" class="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg dark:bg-[#1a1a1a] dark:border-white/10 z-50 max-h-60 overflow-y-auto p-2 space-y-2 w-full">
+                                <!-- Search input inside dropdown -->
+                                <div class="sticky top-0 bg-white dark:bg-[#1a1a1a] pb-1.5">
+                                    <input 
+                                        type="text" 
+                                        v-model="kpiSearchQuery" 
+                                        placeholder="Cari KPI..." 
+                                        class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-slate-500/20 dark:bg-black/20 dark:text-white dark:border-white/10"
+                                        ref="kpiSearchInput"
+                                        @click.stop
+                                    />
+                                </div>
+                                
+                                <!-- Options list -->
+                                <div class="space-y-0.5">
+                                    <button
+                                        v-for="kpi in filteredFormKpis" 
+                                        :key="kpi.id"
+                                        type="button"
+                                        @click="toggleKpi(kpi.id)"
+                                        :class="[
+                                            'w-full text-left px-2.5 py-1.5 text-xs rounded hover:bg-slate-100 dark:hover:bg-white/5 transition flex items-center justify-between',
+                                            form.kpi_ids.includes(kpi.id) ? 'bg-slate-100 text-slate-900 dark:bg-white/10 dark:text-white font-semibold' : 'text-slate-700 dark:text-slate-300'
+                                        ]"
+                                    >
+                                        <span class="whitespace-normal break-words pr-2 leading-relaxed">
+                                            {{ kpi.deskripsi }}
+                                        </span>
+                                        <svg v-if="form.kpi_ids.includes(kpi.id)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-slate-900 dark:text-white shrink-0">
+                                            <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                    <div v-if="filteredFormKpis.length === 0" class="text-center py-4 text-xs text-slate-400">
+                                        Tidak ada hasil ditemukan.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Overlay for click outside -->
+                        <div v-if="isKpiDropdownOpen" class="fixed inset-0 z-30" @click="isKpiDropdownOpen = false"></div>
+
+                        <!-- Selected list display (restricted height with scroll to prevent modal scrolling) -->
+                        <div v-if="form.kpi_ids.length > 0" class="mt-2 flex flex-wrap gap-1.5 max-h-[220px] overflow-y-auto pr-1 pb-1">
+                            <span 
+                                v-for="id in form.kpi_ids" 
+                                :key="id"
+                                class="inline-flex items-center gap-1 rounded-lg bg-slate-100 pl-2.5 pr-1.5 py-1 text-xs font-medium text-slate-700 dark:bg-white/5 dark:text-slate-300 border border-slate-200 dark:border-white/10"
+                            >
+                                <span class="whitespace-normal break-words font-medium text-slate-800 dark:text-slate-200 leading-normal">
+                                    {{ getKpiLabel(id) }}
+                                </span>
+                                <button 
+                                    type="button" 
+                                    @click="removeKpiId(id)"
+                                    class="rounded-full p-0.5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3">
+                                        <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                                    </svg>
+                                </button>
+                            </span>
+                        </div>
+                        <span v-if="form.errors.kpi_ids" class="text-xs text-red-500 font-medium">{{ form.errors.kpi_ids }}</span>
+                    </div>
+                </div>
             </div>
         </div>
     </ConfirmationModal>
@@ -232,7 +351,13 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    kpiList: {
+        type: Array,
+        default: () => [],
+    },
 });
+
+const showKpiColumn = ref(true);
 
 const itemsMap = computed(() => new Map(props.prosesBisnisV2.map(item => [item.id, item])));
 
@@ -519,7 +644,51 @@ const form = useForm({
     parent_id: '',
     name: '',
     deskripsi: '',
+    kpi_ids: [],
 });
+
+const isKpiDropdownOpen = ref(false);
+const kpiSearchQuery = ref('');
+const kpiSearchInput = ref(null);
+
+const toggleKpiDropdown = () => {
+    isKpiDropdownOpen.value = !isKpiDropdownOpen.value;
+    if (isKpiDropdownOpen.value) {
+        kpiSearchQuery.value = '';
+        setTimeout(() => {
+            kpiSearchInput.value?.focus();
+        }, 100);
+    }
+};
+
+const toggleKpi = (id) => {
+    const index = form.kpi_ids.indexOf(id);
+    if (index > -1) {
+        form.kpi_ids.splice(index, 1);
+    } else {
+        form.kpi_ids.push(id);
+    }
+};
+
+const removeKpiId = (id) => {
+    const index = form.kpi_ids.indexOf(id);
+    if (index > -1) {
+        form.kpi_ids.splice(index, 1);
+    }
+};
+
+const filteredFormKpis = computed(() => {
+    const query = kpiSearchQuery.value.toLowerCase().trim();
+    if (!query) return props.kpiList;
+    return props.kpiList.filter(kpi =>
+        (kpi.deskripsi || '').toLowerCase().includes(query)
+    );
+});
+
+const getKpiLabel = (id) => {
+    const kpi = props.kpiList.find(k => k.id === Number(id));
+    return kpi ? kpi.deskripsi : '-';
+};
 
 const filteredParentOptions = computed(() => {
     const targetCompanyId = form.company_id ? String(form.company_id) : null;
@@ -561,6 +730,8 @@ const openCreateModal = () => {
     modalMode.value = 'create';
     form.clearErrors();
     form.reset();
+    form.kpi_ids = [];
+    isKpiDropdownOpen.value = false;
     isModalOpen.value = true;
 };
 
@@ -572,6 +743,8 @@ const openEditModal = (item) => {
     form.parent_id = item.parent_id ? String(item.parent_id) : '';
     form.name = item.name || '';
     form.deskripsi = item.deskripsi || '';
+    form.kpi_ids = item.kpis ? item.kpis.map(k => k.id) : [];
+    isKpiDropdownOpen.value = false;
     isModalOpen.value = true;
 };
 
@@ -586,6 +759,7 @@ const submitForm = () => {
         name: form.name,
         deskripsi: form.deskripsi,
         parent_id: form.parent_id ? Number(form.parent_id) : null,
+        kpi_ids: form.kpi_ids,
     };
 
     if (modalMode.value === 'create') {

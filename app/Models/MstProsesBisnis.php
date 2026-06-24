@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class MstProsesBisnis extends Model
 {
@@ -45,5 +46,21 @@ class MstProsesBisnis extends Model
     public function company(): BelongsTo
     {
         return $this->belongsTo(MstCompany::class, 'company_id');
+    }
+
+    /**
+     * Relasi ke MstKpi via trs_probis_kpi.
+     */
+    public function kpis(): BelongsToMany
+    {
+        return $this->belongsToMany(MstKpi::class, 'trs_probis_kpi', 'probis_id', 'kpi_id');
+    }
+
+    /**
+     * Relasi ke TrsProbisKpi.
+     */
+    public function probisKpis(): HasMany
+    {
+        return $this->hasMany(TrsProbisKpi::class, 'probis_id');
     }
 }
