@@ -68,7 +68,7 @@
             <table class="w-full divide-y divide-slate-200 text-sm dark:divide-white/10">
                 <thead class="bg-slate-50 dark:bg-white/5">
                     <tr>
-                        <th class="pl-4 pr-0 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-24">Company</th>
+                        <th class="pl-4 pr-0 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-16">Company</th>
                         <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Business Process Name</th>
                         <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Description</th>
                         <th v-if="showKpiColumn" class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">KPI Mapping</th>
@@ -81,7 +81,7 @@
                         :key="'pb2-' + item.id"
                         class="group transition duration-150 hover:bg-slate-50/50 dark:hover:bg-white/5 animate-fade-in"
                     >
-                        <td class="pl-4 pr-0 py-2 text-slate-600 dark:text-slate-300 text-xs">
+                        <td class="pl-4 pr-0 py-2 text-slate-600 dark:text-slate-300 text-xs max-w-[64px] truncate" :title="item.company?.name">
                             {{ item.depth === 0 ? (item.company?.name || '-') : '' }}
                         </td>
                         <td 
@@ -357,7 +357,7 @@ const props = defineProps({
     },
 });
 
-const showKpiColumn = ref(true);
+const showKpiColumn = ref(false);
 
 const itemsMap = computed(() => new Map(props.prosesBisnisV2.map(item => [item.id, item])));
 
