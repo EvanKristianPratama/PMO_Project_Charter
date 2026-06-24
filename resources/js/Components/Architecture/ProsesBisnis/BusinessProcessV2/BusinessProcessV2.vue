@@ -68,8 +68,8 @@
             <table class="w-full divide-y divide-slate-200 text-sm dark:divide-white/10">
                 <thead class="bg-slate-50 dark:bg-white/5">
                     <tr>
-                        <th class="pl-4 pr-0 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-16">Company</th>
-                        <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Business Process Name</th>
+                        <th class="px-0 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-16">Company</th>
+                        <th class="pl-2 pr-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Business Process Name</th>
                         <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Description</th>
                         <th v-if="showKpiColumn" class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">KPI Mapping</th>
                         <th class="px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-36">Aksi</th>
@@ -81,12 +81,12 @@
                         :key="'pb2-' + item.id"
                         class="group transition duration-150 hover:bg-slate-50/50 dark:hover:bg-white/5 animate-fade-in"
                     >
-                        <td class="pl-4 pr-0 py-2 text-slate-600 dark:text-slate-300 text-xs max-w-[64px] truncate" :title="item.company?.name">
+                        <td class="px-0 py-2 text-slate-600 dark:text-slate-300 text-xs whitespace-normal break-words max-w-[64px]">
                             {{ item.depth === 0 ? (item.company?.name || '-') : '' }}
                         </td>
                         <td 
-                            class="px-4 py-2 text-slate-900 dark:text-white text-xs break-words font-medium" 
-                            :style="{ paddingLeft: (item.depth * 24 + 16) + 'px' }"
+                            class="pl-0 pr-4 py-2 text-slate-900 dark:text-white text-xs break-words font-medium" 
+                            :style="{ paddingLeft: (item.depth * 16 + 8) + 'px' }"
                         >
                             <div class="flex items-center gap-2">
                                 <!-- Toggle Button / Branch Spacer -->
