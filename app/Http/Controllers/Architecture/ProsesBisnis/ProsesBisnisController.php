@@ -156,6 +156,7 @@ class ProsesBisnisController extends Controller
         $validated = $request->validate([
             'parent_id' => 'nullable|exists:mst_apqc,id',
             'name' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
         ]);
 
         $apqcService->createApqc($validated);
@@ -175,6 +176,7 @@ class ProsesBisnisController extends Controller
         $validated = $request->validate([
             'parent_id' => 'nullable|exists:mst_apqc,id',
             'name' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
         ]);
 
         $apqcService->updateApqc($apqc, $validated);
