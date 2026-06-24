@@ -44,12 +44,16 @@
                 </thead>
                 <tbody class="divide-y divide-slate-200 dark:divide-white/10">
                     <tr
-                        v-for="(kpi, index) in filteredKpis"
+                        v-for="(kpi, index) in kpisWithRowspan"
                         :key="'kpi-' + kpi.id"
                         class="group transition duration-150 hover:bg-slate-50/50 dark:hover:bg-white/5 animate-fade-in"
                     >
-                        <td class="px-0 py-2 text-slate-600 dark:text-slate-300 text-xs whitespace-normal break-words max-w-[64px]">
-                            {{ kpi.company?.name || '-' }}
+                        <td
+                            v-if="kpi.companyRowspan > 0"
+                            :rowspan="kpi.companyRowspan"
+                            class="px-2 py-2 text-slate-600 dark:text-slate-300 text-xs whitespace-normal break-words max-w-[80px] align-top border-r border-slate-100 dark:border-white/5 bg-slate-50/60 dark:bg-white/[0.02]"
+                        >
+                            <span class="font-semibold text-slate-700 dark:text-slate-200">{{ kpi.company?.name || '-' }}</span>
                         </td>
                         <td class="px-4 py-3 text-slate-600 dark:text-slate-300 text-xs">
                             {{ index + 1 }}
@@ -195,6 +199,22 @@ const filteredKpis = computed(() => {
         (kpi.deskripsi || '').toLowerCase().includes(q) ||
         (kpi.company?.name || '').toLowerCase().includes(q)
     );
+});
+
+// Compute rowspan for Company column — merge consecutive rows with same company
+const kpisWithRowspan = computed(() => {
+    const rows = filteredKpis.value.map(kpi => ({ ...kpi, companyRowspan: 0 }));
+    let i = 0;
+    while (i < rows.length) {
+        const companyId = rows[i].company_id ?? null;
+        let span = 1;
+        while (i + span < rows.length && (rows[i + span].company_id ?? null) === companyId) {
+            span++;
+        }
+        rows[i].companyRowspan = span;
+        i += span;
+    }
+    return rows;
 });
 
 const openCreateModal = () => {

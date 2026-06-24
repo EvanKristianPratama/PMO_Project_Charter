@@ -24,7 +24,7 @@
                             : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
                     ]"
                 >
-                    Business Process v2
+                    Business Process
                 </button>
                 <button
                     @click="activeTab = 'function'"

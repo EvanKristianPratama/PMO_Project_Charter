@@ -70,8 +70,12 @@
                         :key="'fn-' + fn.id"
                         class="group transition duration-150 hover:bg-slate-50/50 dark:hover:bg-white/5 animate-fade-in"
                     >
-                        <td class="px-0 py-2 text-slate-600 dark:text-slate-300 text-xs whitespace-normal break-words max-w-[64px]">
-                            {{ fn.depth === 0 ? (fn.company?.name || '-') : '' }}
+                        <td
+                            v-if="fn.companyRowspan > 0"
+                            :rowspan="fn.companyRowspan"
+                            class="px-2 py-2 text-slate-600 dark:text-slate-300 text-xs whitespace-normal break-words max-w-[80px] align-top border-r border-slate-100 dark:border-white/5 bg-slate-50/60 dark:bg-white/[0.02]"
+                        >
+                            <span class="font-semibold text-slate-700 dark:text-slate-200">{{ fn.company?.name || '-' }}</span>
                         </td>
                         <td 
                             class="px-4 py-2 text-slate-900 dark:text-white text-xs break-words font-medium" 
@@ -612,6 +616,31 @@ const visibleRows = computed(() => {
             traverse(root, 0);
         }
     });
+    
+    // Compute companyRowspan: for each root group, count total visible rows belonging to it
+    // Group consecutive rows by their root company
+    // We tag each row with companyRowspan > 0 only for the first row of each company group
+    // and companyRowspan = 0 for subsequent rows in the same group (so we skip rendering td)
+    const rootCompanyOf = (row) => {
+        // The root-level company: travel up from row's ancestry
+        // Since rows retain their company_id from the flat functions list, use that.
+        return row.company_id ?? null;
+    };
+
+    let i = 0;
+    while (i < rows.length) {
+        const companyId = rootCompanyOf(rows[i]);
+        // Find how many consecutive rows share the same company_id
+        let span = 1;
+        while (i + span < rows.length && rootCompanyOf(rows[i + span]) === companyId) {
+            span++;
+        }
+        rows[i].companyRowspan = span;
+        for (let j = 1; j < span; j++) {
+            rows[i + j].companyRowspan = 0;
+        }
+        i += span;
+    }
     
     return rows;
 });
