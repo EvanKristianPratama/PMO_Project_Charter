@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -12,14 +13,15 @@ class MstKpi extends Model
 
     protected $fillable = [
         'deskripsi',
+        'company_id',
     ];
 
     /**
-     * Relasi ke MstFunction.
+     * Relasi ke MstCompany.
      */
-    public function functions(): BelongsToMany
+    public function company(): BelongsTo
     {
-        return $this->belongsToMany(MstFunction::class, 'trs_function_kpi', 'kpi_id', 'function_id');
+        return $this->belongsTo(MstCompany::class, 'company_id');
     }
 
     /**

@@ -168,4 +168,21 @@ class MstRegulation extends Model
         return $this->belongsToMany(MstFunction::class, 'trs_map_func_regulation', 'regulation_id', 'function_id')
             ->withTimestamps();
     }
+
+    /**
+     * Relasi ke MstProsesBisnis via trs_probis_regulation.
+     */
+    public function prosesBisnis(): BelongsToMany
+    {
+        return $this->belongsToMany(MstProsesBisnis::class, 'trs_probis_regulation', 'regulation_id', 'probis_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Relasi ke TrsProbisRegulation.
+     */
+    public function probisRegulations(): HasMany
+    {
+        return $this->hasMany(TrsProbisRegulation::class, 'regulation_id');
+    }
 }

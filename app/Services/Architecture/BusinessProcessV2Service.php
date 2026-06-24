@@ -11,7 +11,7 @@ class BusinessProcessV2Service
      */
     public function getProsesBisnisV2List()
     {
-        $items = MstProsesBisnis::with(['parent', 'company', 'kpis'])->orderBy('id')->get();
+        $items = MstProsesBisnis::with(['parent', 'company', 'kpis', 'regulations'])->orderBy('id')->get();
         
         // Build map for efficient parent lookup in memory
         $itemsMap = $items->keyBy('id');
@@ -39,6 +39,9 @@ class BusinessProcessV2Service
         if (isset($payload['kpi_ids'])) {
             $item->kpis()->sync($payload['kpi_ids']);
         }
+        if (isset($payload['regulation_ids'])) {
+            $item->regulations()->sync($payload['regulation_ids']);
+        }
         return $item;
     }
 
@@ -50,6 +53,9 @@ class BusinessProcessV2Service
         $item->update($this->normalizePayload($payload));
         if (isset($payload['kpi_ids'])) {
             $item->kpis()->sync($payload['kpi_ids']);
+        }
+        if (isset($payload['regulation_ids'])) {
+            $item->regulations()->sync($payload['regulation_ids']);
         }
         return $item->refresh();
     }

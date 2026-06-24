@@ -63,6 +63,11 @@ class MstCompany extends Model
         return $this->hasMany(MstProsesBisnis::class, 'company_id');
     }
 
+    public function kpis(): HasMany
+    {
+        return $this->hasMany(MstKpi::class, 'company_id');
+    }
+
     public function organizations(): HasManyThrough
     {
         return $this->hasManyThrough(

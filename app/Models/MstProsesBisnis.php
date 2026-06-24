@@ -65,4 +65,21 @@ class MstProsesBisnis extends Model
     {
         return $this->hasMany(TrsProbisKpi::class, 'probis_id');
     }
+
+    /**
+     * Relasi ke MstRegulation via trs_probis_regulation.
+     */
+    public function regulations(): BelongsToMany
+    {
+        return $this->belongsToMany(MstRegulation::class, 'trs_probis_regulation', 'probis_id', 'regulation_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Relasi ke TrsProbisRegulation.
+     */
+    public function probisRegulations(): HasMany
+    {
+        return $this->hasMany(TrsProbisRegulation::class, 'probis_id');
+    }
 }

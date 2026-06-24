@@ -11,7 +11,7 @@ class KpiService
      */
     public function getKpis()
     {
-        return MstKpi::orderBy('id', 'asc')->get();
+        return MstKpi::with('company')->orderBy('id', 'asc')->get();
     }
 
     /**
@@ -21,6 +21,7 @@ class KpiService
     {
         return MstKpi::create([
             'deskripsi' => $payload['deskripsi'] ?? null,
+            'company_id' => $payload['company_id'] ?? null,
         ]);
     }
 
@@ -31,6 +32,7 @@ class KpiService
     {
         $kpi->update([
             'deskripsi' => $payload['deskripsi'] ?? null,
+            'company_id' => $payload['company_id'] ?? null,
         ]);
         return $kpi->refresh();
     }

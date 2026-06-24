@@ -10,6 +10,15 @@
                     placeholder="Cari KPI..."
                     class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white w-48"
                 />
+                <select
+                    v-model="companyFilterId"
+                    class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white w-40 truncate"
+                >
+                    <option value="">Semua Perusahaan</option>
+                    <option v-for="company in availableCompanies" :key="company.id" :value="company.id">
+                        {{ company.name }}
+                    </option>
+                </select>
                 <button
                     @click="openCreateModal"
                     class="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 dark:bg-white dark:hover:bg-slate-100 dark:text-slate-950 dark:focus:ring-white dark:focus:ring-offset-[#171717]"
@@ -27,6 +36,7 @@
             <table class="w-full divide-y divide-slate-200 text-sm dark:divide-white/10">
                 <thead class="bg-slate-50 dark:bg-white/5">
                     <tr>
+                        <th class="px-0 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-16">Company</th>
                         <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-16">No</th>
                         <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Description</th>
                         <th class="px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-36">Actions</th>
@@ -38,6 +48,9 @@
                         :key="'kpi-' + kpi.id"
                         class="group transition duration-150 hover:bg-slate-50/50 dark:hover:bg-white/5 animate-fade-in"
                     >
+                        <td class="px-0 py-2 text-slate-600 dark:text-slate-300 text-xs whitespace-normal break-words max-w-[64px]">
+                            {{ kpi.company?.name || '-' }}
+                        </td>
                         <td class="px-4 py-3 text-slate-600 dark:text-slate-300 text-xs">
                             {{ index + 1 }}
                         </td>
@@ -62,7 +75,7 @@
                         </td>
                     </tr>
                     <tr v-if="filteredKpis.length === 0">
-                        <td colspan="3" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+                        <td colspan="4" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
                             Data KPI tidak ditemukan.
                         </td>
                     </tr>
@@ -84,6 +97,22 @@
         @confirm="submitForm"
     >
         <div class="mt-4 space-y-4">
+            <!-- Company Select -->
+            <div class="flex flex-col gap-1.5">
+                <label for="kpi_company" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Company</label>
+                <select
+                    id="kpi_company"
+                    v-model="form.company_id"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                >
+                    <option :value="null">-- Pilih Company --</option>
+                    <option v-for="company in companyOptions" :key="company.id" :value="company.id">
+                        {{ company.name }}
+                    </option>
+                </select>
+                <span v-if="form.errors.company_id" class="text-xs text-red-500 font-medium">{{ form.errors.company_id }}</span>
+            </div>
+
             <!-- Deskripsi Input -->
             <div class="flex flex-col gap-1.5">
                 <label for="kpi_deskripsi" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Deskripsi KPI</label>
@@ -124,24 +153,47 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    companyOptions: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const searchQuery = ref('');
+const companyFilterId = ref('');
 const isModalOpen = ref(false);
 const isDeleteModalOpen = ref(false);
 const selectedKpi = ref(null);
 const modalMode = ref('create');
 
+const availableCompanies = computed(() => {
+    const compMap = new Map();
+    props.kpiList.forEach(kpi => {
+        if (kpi.company) {
+            compMap.set(kpi.company.id, kpi.company);
+        }
+    });
+    return Array.from(compMap.values()).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+});
+
 const form = useForm({
     deskripsi: '',
+    company_id: null,
 });
 
 const filteredKpis = computed(() => {
-    const list = [...props.kpiList].sort((a, b) => a.id - b.id);
+    let list = [...props.kpiList].sort((a, b) => a.id - b.id);
+    
+    if (companyFilterId.value) {
+        const compId = Number(companyFilterId.value);
+        list = list.filter(kpi => Number(kpi.company_id) === compId);
+    }
+    
     if (!searchQuery.value) return list;
     const q = searchQuery.value.toLowerCase().trim();
     return list.filter(kpi => 
-        (kpi.deskripsi || '').toLowerCase().includes(q)
+        (kpi.deskripsi || '').toLowerCase().includes(q) ||
+        (kpi.company?.name || '').toLowerCase().includes(q)
     );
 });
 
@@ -157,6 +209,7 @@ const openEditModal = (kpi) => {
     selectedKpi.value = kpi;
     form.clearErrors();
     form.deskripsi = kpi.deskripsi || '';
+    form.company_id = kpi.company_id || null;
     isModalOpen.value = true;
 };
 

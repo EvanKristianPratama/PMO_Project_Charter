@@ -49,7 +49,8 @@
                 <thead class="bg-slate-50 dark:bg-white/5">
                     <tr>
                         <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Name</th>
-                        <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Parent</th>
+                        <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Deskripsi</th>
+
                         <th class="px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-36">Actions</th>
                     </tr>
                 </thead>
@@ -84,9 +85,12 @@
                                 </span>
                             </div>
                         </td>
-                        <td class="px-4 py-1.5 text-slate-500 dark:text-slate-400 text-xs">
-                            {{ getParentLabel(item.parent_id) }}
+                        <td class="px-4 py-1.5 text-slate-500 dark:text-slate-400 text-xs max-w-xs">
+                            <span class="line-clamp-2" :title="item.deskripsi || ''">
+                                {{ item.deskripsi || '-' }}
+                            </span>
                         </td>
+
                         <td class="px-4 py-1.5 text-center print:hidden">
                             <div class="flex items-center justify-center gap-1.5">
                                 <button
@@ -105,7 +109,7 @@
                         </td>
                     </tr>
                     <tr v-if="visibleApqcRows.length === 0">
-                        <td colspan="3" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+                        <td colspan="4" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
                             Data APQC tidak ditemukan.
                         </td>
                     </tr>
@@ -155,6 +159,19 @@
                     required
                 />
                 <span v-if="form.errors.name" class="text-xs text-red-500 font-medium">{{ form.errors.name }}</span>
+            </div>
+
+            <!-- Deskripsi Input -->
+            <div class="flex flex-col gap-1.5">
+                <label for="apqc_deskripsi" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Deskripsi</label>
+                <textarea
+                    id="apqc_deskripsi"
+                    v-model="form.deskripsi"
+                    rows="3"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white resize-none"
+                    placeholder="Deskripsi singkat tentang proses APQC ini..."
+                />
+                <span v-if="form.errors.deskripsi" class="text-xs text-red-500 font-medium">{{ form.errors.deskripsi }}</span>
             </div>
         </div>
     </ConfirmationModal>
@@ -431,6 +448,7 @@ const modalMode = ref('create');
 const form = useForm({
     parent_id: '',
     name: '',
+    deskripsi: '',
 });
 
 const filteredParentOptions = computed(() => {
@@ -457,6 +475,7 @@ const openEditModal = (item) => {
     form.clearErrors();
     form.parent_id = item.parent_id ? String(item.parent_id) : '';
     form.name = item.name || '';
+    form.deskripsi = item.deskripsi || '';
     isModalOpen.value = true;
 };
 
@@ -468,6 +487,7 @@ const openDeleteModal = (item) => {
 const submitForm = () => {
     const payload = {
         name: form.name,
+        deskripsi: form.deskripsi || null,
         parent_id: form.parent_id ? Number(form.parent_id) : null,
     };
 

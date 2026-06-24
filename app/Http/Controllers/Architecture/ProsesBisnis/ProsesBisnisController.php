@@ -270,6 +270,8 @@ class ProsesBisnisController extends Controller
             'order' => 'nullable|integer',
             'kpi_ids' => 'nullable|array',
             'kpi_ids.*' => 'integer|exists:mst_kpi,id',
+            'regulation_ids' => 'nullable|array',
+            'regulation_ids.*' => 'integer|exists:mst_regulation,id',
         ]);
 
         $service->create($validated);
@@ -292,6 +294,8 @@ class ProsesBisnisController extends Controller
             'order' => 'nullable|integer',
             'kpi_ids' => 'nullable|array',
             'kpi_ids.*' => 'integer|exists:mst_kpi,id',
+            'regulation_ids' => 'nullable|array',
+            'regulation_ids.*' => 'integer|exists:mst_regulation,id',
         ]);
 
         $service->update($item, $validated);
@@ -322,6 +326,7 @@ class ProsesBisnisController extends Controller
     {
         $validated = $request->validate([
             'deskripsi' => ['required', 'string'],
+            'company_id' => ['nullable', 'integer', 'exists:mst_company,id'],
         ]);
 
         $kpiService->createKpi($validated);
@@ -338,6 +343,7 @@ class ProsesBisnisController extends Controller
 
         $validated = $request->validate([
             'deskripsi' => ['required', 'string'],
+            'company_id' => ['nullable', 'integer', 'exists:mst_company,id'],
         ]);
 
         $kpiService->updateKpi($kpi, $validated);

@@ -13,6 +13,7 @@ class MstApqc extends Model
     protected $fillable = [
         'parent_id',
         'name',
+        'deskripsi',
     ];
 
     protected $casts = [

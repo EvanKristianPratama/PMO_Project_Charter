@@ -57,13 +57,7 @@ class MstFunction extends Model
             ->withTimestamps();
     }
 
-    /**
-     * Relasi ke MstKpi.
-     */
-    public function kpis(): BelongsToMany
-    {
-        return $this->belongsToMany(MstKpi::class, 'trs_function_kpi', 'function_id', 'kpi_id');
-    }
+
 
     /**
      * Relasi ke MstActor via trs_map_actor_function.

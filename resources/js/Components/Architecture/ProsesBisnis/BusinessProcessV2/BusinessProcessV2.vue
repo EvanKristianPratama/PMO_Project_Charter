@@ -2,7 +2,6 @@
     <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
         <!-- Header -->
         <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-white/10">
-            <h2 class="text-sm font-semibold text-slate-900 dark:text-white">Business Process List v2</h2>
             <div class="flex items-center gap-3">
                 <input
                     v-model="searchQuery"
@@ -41,6 +40,17 @@
                     <option value="all">Expand All</option>
                 </select>
                 <button
+                    @click="showDescriptionColumn = !showDescriptionColumn"
+                    class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 text-xs font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-slate-500/20 active:scale-95 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+                        <path v-if="showDescriptionColumn" stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                        <path v-if="showDescriptionColumn" stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path v-else stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.893 7.893L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                    </svg>
+                    <span>{{ showDescriptionColumn ? 'Hide Desc' : 'Show Desc' }}</span>
+                </button>
+                <button
                     @click="showKpiColumn = !showKpiColumn"
                     class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 text-xs font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-slate-500/20 active:scale-95 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5"
                 >
@@ -50,6 +60,17 @@
                         <path v-else stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.893 7.893L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
                     </svg>
                     <span>{{ showKpiColumn ? 'Hide KPI' : 'Show KPI' }}</span>
+                </button>
+                <button
+                    @click="showRegulationColumn = !showRegulationColumn"
+                    class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 text-xs font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-slate-500/20 active:scale-95 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+                        <path v-if="showRegulationColumn" stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                        <path v-if="showRegulationColumn" stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path v-else stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.893 7.893L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                    </svg>
+                    <span>{{ showRegulationColumn ? 'Hide Reg' : 'Show Reg' }}</span>
                 </button>
                 <button
                     @click="openCreateModal"
@@ -69,10 +90,11 @@
                 <thead class="bg-slate-50 dark:bg-white/5">
                     <tr>
                         <th class="px-0 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-16">Company</th>
-                        <th class="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-10">No</th>
-                        <th class="pl-2 pr-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Business Process Name</th>
-                        <th class="px-0 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-[30%]">Description</th>
-                        <th v-if="showKpiColumn" class="pl-0 pr-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-[30%]">KPI Mapping</th>
+                        <th class="px-1 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-6">No</th>
+                        <th class="pl-2 pr-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-[20%]">Business Process Name</th>
+                        <th v-if="showDescriptionColumn" class="px-0 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-[25%]">Description</th>
+                        <th v-if="showKpiColumn" class="pl-0 pr-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">KPI Mapping</th>
+                        <th v-if="showRegulationColumn" class="pl-0 pr-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Regulation Mapping</th>
                         <th class="px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-36">Aksi</th>
                     </tr>
                 </thead>
@@ -85,11 +107,11 @@
                         <td class="px-0 py-2 text-slate-600 dark:text-slate-300 text-xs whitespace-normal break-words max-w-[64px]">
                             {{ item.depth === 0 ? (item.company?.name || '-') : '' }}
                         </td>
-                        <td class="px-2 py-2 text-slate-600 dark:text-slate-300 text-xs">
+                        <td class="px-1 py-2 text-slate-600 dark:text-slate-300 text-xs w-6">
                             {{ item.order !== null && item.order !== undefined ? item.order : '-' }}
                         </td>
                         <td 
-                            class="pl-0 pr-4 py-2 text-slate-900 dark:text-white text-xs break-words font-medium" 
+                            class="pl-0 pr-4 py-2 text-slate-900 dark:text-white text-xs break-words font-medium w-[20%]" 
                             :style="{ paddingLeft: (item.depth * 16 + 8) + 'px' }"
                         >
                             <div class="flex items-center gap-2">
@@ -115,19 +137,35 @@
                                 </span>
                             </div>
                         </td>
-                        <td class="px-0 py-2 text-slate-500 dark:text-slate-400 text-xs whitespace-pre-wrap break-words w-[30%]">
+                        <td v-if="showDescriptionColumn" class="px-0 py-2 text-slate-500 dark:text-slate-400 text-xs whitespace-pre-wrap break-words w-[25%]">
                             {{ item.deskripsi || '-' }}
                         </td>
-                        <td v-if="showKpiColumn" class="pl-0 pr-4 py-2 text-slate-600 dark:text-slate-300 text-xs w-[30%]">
-                            <!-- Display mapped KPIs as list with indentation and preserving newlines -->
-                            <ul v-if="item.kpis && item.kpis.length > 0" class="space-y-1.5 list-none">
+                        <td v-if="showKpiColumn" class="pl-0 pr-4 py-2 text-slate-600 dark:text-slate-300 text-xs">
+                            <!-- Display mapped KPIs as ordered list with numbering -->
+                            <ol v-if="item.kpis && item.kpis.length > 0" class="space-y-1.5 list-none">
                                 <li 
-                                    v-for="kpi in item.kpis" 
+                                    v-for="(kpi, kpiIndex) in item.kpis" 
                                     :key="'item-kpi-' + kpi.id"
                                     class="flex items-start gap-1 whitespace-pre-wrap leading-relaxed text-[11px]"
                                 >
-                                    <span class="shrink-0 select-none">-</span>
+                                    <span class="shrink-0 select-none font-mono text-slate-400 dark:text-slate-500">{{ kpiIndex + 1 }}.</span>
                                     <span>{{ kpi.deskripsi }}</span>
+                                </li>
+                            </ol>
+                            <span v-else class="text-slate-400 dark:text-slate-600 font-mono text-xs select-none">-</span>
+                        </td>
+                        <td v-if="showRegulationColumn" class="pl-0 pr-4 py-2 text-slate-600 dark:text-slate-300 text-xs">
+                            <ul v-if="item.regulations && item.regulations.length > 0" class="space-y-1.5 list-none">
+                                <li 
+                                    v-for="reg in item.regulations" 
+                                    :key="'item-reg-' + reg.id"
+                                    class="flex items-start gap-1 whitespace-pre-wrap leading-relaxed text-[11px]"
+                                >
+                                    <span class="shrink-0 select-none">-</span>
+                                    <span class="flex flex-col items-start text-left">
+                                        <span class="font-semibold">{{ reg.judul }}</span>
+                                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">{{ reg.nomor }}</span>
+                                    </span>
                                 </li>
                             </ul>
                             <span v-else class="text-slate-400 dark:text-slate-600 font-mono text-xs select-none">-</span>
@@ -150,7 +188,7 @@
                         </td>
                     </tr>
                     <tr v-if="visibleRows.length === 0">
-                        <td :colspan="showKpiColumn ? 6 : 5" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+                        <td :colspan="4 + (showDescriptionColumn ? 1 : 0) + (showKpiColumn ? 1 : 0) + (showRegulationColumn ? 1 : 0)" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
                             Data Proses Bisnis tidak ditemukan.
                         </td>
                     </tr>
@@ -270,15 +308,15 @@
                                 </svg>
                             </button>
 
-                            <!-- Dropdown Content (Absolute positioning relative to button container) -->
-                            <div v-if="isKpiDropdownOpen" class="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg dark:bg-[#1a1a1a] dark:border-white/10 z-50 max-h-60 overflow-y-auto p-2 space-y-2 w-full">
+                            <!-- Dropdown Content (Relative positioning to naturally expand container height) -->
+                            <div v-if="isKpiDropdownOpen" class="relative mt-1 bg-slate-50 border border-slate-200 rounded-lg shadow-inner dark:bg-black/20 dark:border-white/10 z-10 max-h-60 overflow-y-auto p-2 space-y-2 w-full">
                                 <!-- Search input inside dropdown -->
-                                <div class="sticky top-0 bg-white dark:bg-[#1a1a1a] pb-1.5">
+                                <div class="sticky top-0 bg-slate-50 dark:bg-[#1a1a1a] pb-1.5">
                                     <input 
                                         type="text" 
                                         v-model="kpiSearchQuery" 
                                         placeholder="Cari KPI..." 
-                                        class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-slate-500/20 dark:bg-black/20 dark:text-white dark:border-white/10"
+                                        class="w-full bg-white text-slate-800 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-slate-500/20 dark:bg-black/20 dark:text-white dark:border-white/10"
                                         ref="kpiSearchInput"
                                         @click.stop
                                     />
@@ -310,9 +348,6 @@
                             </div>
                         </div>
 
-                        <!-- Overlay for click outside -->
-                        <div v-if="isKpiDropdownOpen" class="fixed inset-0 z-30" @click="isKpiDropdownOpen = false"></div>
-
                         <!-- Selected list display (restricted height with scroll to prevent modal scrolling) -->
                         <div v-if="form.kpi_ids.length > 0" class="mt-2 flex flex-wrap gap-1.5 max-h-[220px] overflow-y-auto pr-1 pb-1">
                             <span 
@@ -335,6 +370,89 @@
                             </span>
                         </div>
                         <span v-if="form.errors.kpi_ids" class="text-xs text-red-500 font-medium">{{ form.errors.kpi_ids }}</span>
+                    </div>
+
+                    <!-- Mapping Regulation -->
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Mapping Regulasi</label>
+                        <div class="relative">
+                            <button 
+                                type="button"
+                                @click="toggleRegulationDropdown"
+                                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-left focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white flex justify-between items-center"
+                            >
+                                <span class="truncate text-slate-400 dark:text-slate-500">
+                                    -- Pilih Regulasi --
+                                </span>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-slate-400 shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                </svg>
+                            </button>
+
+                            <!-- Dropdown Content (Relative positioning to naturally expand container height) -->
+                            <div v-if="isRegulationDropdownOpen" class="relative mt-1 bg-slate-50 border border-slate-200 rounded-lg shadow-inner dark:bg-black/20 dark:border-white/10 z-10 max-h-60 overflow-y-auto p-2 space-y-2 w-full">
+                                <!-- Search input inside dropdown -->
+                                <div class="sticky top-0 bg-slate-50 dark:bg-[#1a1a1a] pb-1.5">
+                                    <input 
+                                        type="text" 
+                                        v-model="regulationSearchQuery" 
+                                        placeholder="Cari Regulasi..." 
+                                        class="w-full bg-white text-slate-800 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-slate-500/20 dark:bg-black/20 dark:text-white dark:border-white/10"
+                                        ref="regulationSearchInput"
+                                        @click.stop
+                                    />
+                                </div>
+                                
+                                <!-- Options list -->
+                                <div class="space-y-0.5">
+                                    <button
+                                        v-for="reg in filteredFormRegulations" 
+                                        :key="reg.id"
+                                        type="button"
+                                        @click="toggleRegulation(reg.id)"
+                                        :class="[
+                                            'w-full text-left px-2.5 py-1.5 text-xs rounded hover:bg-slate-100 dark:hover:bg-white/5 transition flex items-center justify-between',
+                                            form.regulation_ids.includes(reg.id) ? 'bg-slate-100 text-slate-900 dark:bg-white/10 dark:text-white font-semibold' : 'text-slate-700 dark:text-slate-300'
+                                        ]"
+                                    >
+                                        <span class="whitespace-normal break-words pr-2 leading-relaxed flex flex-col items-start text-left">
+                                            <span class="font-semibold">{{ reg.judul }}</span>
+                                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">{{ reg.nomor }}</span>
+                                        </span>
+                                        <svg v-if="form.regulation_ids.includes(reg.id)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-slate-900 dark:text-white shrink-0">
+                                            <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                    <div v-if="filteredFormRegulations.length === 0" class="text-center py-4 text-xs text-slate-400">
+                                        Tidak ada hasil ditemukan.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Selected list display -->
+                        <div v-if="form.regulation_ids.length > 0" class="mt-2 flex flex-wrap gap-1.5 max-h-[220px] overflow-y-auto pr-1 pb-1">
+                            <span 
+                                v-for="id in form.regulation_ids" 
+                                :key="id"
+                                class="inline-flex items-center gap-1 rounded-lg bg-slate-100 pl-2.5 pr-1.5 py-1 text-xs font-medium text-slate-700 dark:bg-white/5 dark:text-slate-300 border border-slate-200 dark:border-white/10"
+                            >
+                                <span class="whitespace-normal break-words font-medium text-slate-800 dark:text-slate-200 leading-normal flex flex-col items-start text-left">
+                                    <span class="font-semibold">{{ getRegulationTitle(id) }}</span>
+                                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">{{ getRegulationNomor(id) }}</span>
+                                </span>
+                                <button 
+                                    type="button" 
+                                    @click="removeRegulationId(id)"
+                                    class="rounded-full p-0.5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3">
+                                        <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                                    </svg>
+                                </button>
+                            </span>
+                        </div>
+                        <span v-if="form.errors.regulation_ids" class="text-xs text-red-500 font-medium">{{ form.errors.regulation_ids }}</span>
                     </div>
                 </div>
             </div>
@@ -373,9 +491,15 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    regulations: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const showKpiColumn = ref(true);
+const showDescriptionColumn = ref(true);
+const showRegulationColumn = ref(true);
 
 const itemsMap = computed(() => new Map(props.prosesBisnisV2.map(item => [item.id, item])));
 
@@ -678,6 +802,7 @@ const form = useForm({
     deskripsi: '',
     order: '',
     kpi_ids: [],
+    regulation_ids: [],
 });
 
 const isKpiDropdownOpen = ref(false);
@@ -723,6 +848,60 @@ const getKpiLabel = (id) => {
     return kpi ? kpi.deskripsi : '-';
 };
 
+const isRegulationDropdownOpen = ref(false);
+const regulationSearchQuery = ref('');
+const regulationSearchInput = ref(null);
+
+const toggleRegulationDropdown = () => {
+    isRegulationDropdownOpen.value = !isRegulationDropdownOpen.value;
+    if (isRegulationDropdownOpen.value) {
+        regulationSearchQuery.value = '';
+        setTimeout(() => {
+            regulationSearchInput.value?.focus();
+        }, 100);
+    }
+};
+
+const toggleRegulation = (id) => {
+    const index = form.regulation_ids.indexOf(id);
+    if (index > -1) {
+        form.regulation_ids.splice(index, 1);
+    } else {
+        form.regulation_ids.push(id);
+    }
+};
+
+const removeRegulationId = (id) => {
+    const index = form.regulation_ids.indexOf(id);
+    if (index > -1) {
+        form.regulation_ids.splice(index, 1);
+    }
+};
+
+const filteredFormRegulations = computed(() => {
+    const query = regulationSearchQuery.value.toLowerCase().trim();
+    if (!query) return props.regulations;
+    return props.regulations.filter(reg =>
+        (reg.judul || '').toLowerCase().includes(query) ||
+        (reg.nomor || '').toLowerCase().includes(query)
+    );
+});
+
+const getRegulationLabel = (id) => {
+    const reg = props.regulations.find(r => r.id === Number(id));
+    return reg ? `${reg.judul} (${reg.nomor})` : '-';
+};
+
+const getRegulationTitle = (id) => {
+    const reg = props.regulations.find(r => r.id === Number(id));
+    return reg ? reg.judul : '-';
+};
+
+const getRegulationNomor = (id) => {
+    const reg = props.regulations.find(r => r.id === Number(id));
+    return reg ? reg.nomor : '';
+};
+
 const filteredParentOptions = computed(() => {
     const targetCompanyId = form.company_id ? String(form.company_id) : null;
     const items = targetCompanyId
@@ -764,7 +943,9 @@ const openCreateModal = () => {
     form.clearErrors();
     form.reset();
     form.kpi_ids = [];
+    form.regulation_ids = [];
     isKpiDropdownOpen.value = false;
+    isRegulationDropdownOpen.value = false;
     isModalOpen.value = true;
 };
 
@@ -778,7 +959,9 @@ const openEditModal = (item) => {
     form.deskripsi = item.deskripsi || '';
     form.order = item.order !== null && item.order !== undefined ? String(item.order) : '';
     form.kpi_ids = item.kpis ? item.kpis.map(k => k.id) : [];
+    form.regulation_ids = item.regulations ? item.regulations.map(r => r.id) : [];
     isKpiDropdownOpen.value = false;
+    isRegulationDropdownOpen.value = false;
     isModalOpen.value = true;
 };
 
@@ -795,6 +978,7 @@ const submitForm = () => {
         parent_id: form.parent_id ? Number(form.parent_id) : null,
         order: form.order !== '' && form.order !== null && form.order !== undefined ? Number(form.order) : null,
         kpi_ids: form.kpi_ids,
+        regulation_ids: form.regulation_ids,
     };
 
     if (modalMode.value === 'create') {

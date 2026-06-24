@@ -83,6 +83,7 @@
                 :proses-bisnis-v2="prosesBisnisV2"
                 :company-options="companyOptions"
                 :kpi-list="kpiList"
+                :regulations="regulations"
             />
             <FunctionTable
                 v-else-if="activeTab === 'function'"
@@ -97,6 +98,7 @@
             <KpiTable
                 v-else-if="activeTab === 'kpi'"
                 :kpi-list="kpiList"
+                :company-options="companyOptions"
             />
             <RegulationMap
                 v-else-if="activeTab === 'regulation-map'"
