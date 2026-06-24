@@ -65,20 +65,22 @@
                             :style="{ paddingLeft: (item.depth * 24 + 16) + 'px' }"
                         >
                             <div class="flex items-center gap-2">
-                                <!-- Toggle Button -->
-                                <button 
-                                    v-if="item.hasChildren" 
-                                    @click.stop="toggleApqcExpand(item.id)" 
-                                    class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none shrink-0"
-                                >
-                                    <svg v-if="item.isExpanded" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                                    </svg>
-                                    <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                                    </svg>
-                                </button>
-                                <span v-else-if="item.depth > 0" class="text-slate-300 dark:text-white/20 mr-1.5 font-mono shrink-0">├─</span>
+                                <!-- Toggle Button / Branch Spacer -->
+                                <div class="w-5 h-5 flex items-center justify-center shrink-0">
+                                    <button 
+                                        v-if="item.hasChildren" 
+                                        @click.stop="toggleApqcExpand(item.id)" 
+                                        class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none shrink-0 flex items-center justify-center"
+                                    >
+                                        <svg v-if="item.isExpanded" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                        <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                        </svg>
+                                    </button>
+                                    <span v-else-if="item.depth > 0" class="text-slate-300 dark:text-white/20 font-mono text-xs select-none">├─</span>
+                                </div>
                                 
                                 <span>
                                     {{ item.name }}

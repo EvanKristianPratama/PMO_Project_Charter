@@ -92,9 +92,9 @@
                         <th class="px-0 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-16">Company</th>
                         <th class="px-1 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-6">No</th>
                         <th class="pl-2 pr-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-[20%]">Business Process Name</th>
-                        <th v-if="showDescriptionColumn" class="px-0 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Description</th>
-                        <th v-if="showKpiColumn" class="pl-0 pr-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">KPI Mapping</th>
-                        <th v-if="showRegulationColumn" class="pl-0 pr-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Regulation Mapping</th>
+                        <th v-if="showDescriptionColumn" :class="flexibleColWidth" class="px-0 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Description</th>
+                        <th v-if="showKpiColumn" :class="flexibleColWidth" class="pl-0 pr-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">KPI Mapping</th>
+                        <th v-if="showRegulationColumn" :class="flexibleColWidth" class="pl-0 pr-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Regulation Mapping</th>
                         <th class="px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-36">Aksi</th>
                     </tr>
                 </thead>
@@ -137,10 +137,10 @@
                                 </span>
                             </div>
                         </td>
-                        <td v-if="showDescriptionColumn" class="px-0 py-2 text-slate-500 dark:text-slate-400 text-xs whitespace-pre-wrap break-words">
+                        <td v-if="showDescriptionColumn" :class="flexibleColWidth" class="px-0 py-2 text-slate-500 dark:text-slate-400 text-xs whitespace-pre-wrap break-words">
                             {{ item.deskripsi || '-' }}
                         </td>
-                        <td v-if="showKpiColumn" class="pl-0 pr-4 py-2 text-slate-600 dark:text-slate-300 text-xs">
+                        <td v-if="showKpiColumn" :class="flexibleColWidth" class="pl-0 pr-4 py-2 text-slate-600 dark:text-slate-300 text-xs">
                             <!-- Display mapped KPIs as ordered list with numbering -->
                             <ol v-if="item.kpis && item.kpis.length > 0" class="space-y-1.5 list-none">
                                 <li 
@@ -154,7 +154,7 @@
                             </ol>
                             <span v-else class="text-slate-400 dark:text-slate-600 font-mono text-xs select-none">-</span>
                         </td>
-                        <td v-if="showRegulationColumn" class="pl-0 pr-4 py-2 text-slate-600 dark:text-slate-300 text-xs">
+                        <td v-if="showRegulationColumn" :class="flexibleColWidth" class="pl-0 pr-4 py-2 text-slate-600 dark:text-slate-300 text-xs">
                             <ul v-if="item.regulations && item.regulations.length > 0" class="space-y-1.5 list-none">
                                 <li 
                                     v-for="reg in item.regulations" 
@@ -500,6 +500,16 @@ const props = defineProps({
 const showKpiColumn = ref(true);
 const showDescriptionColumn = ref(true);
 const showRegulationColumn = ref(true);
+
+// Equal-proportion width for flexible columns based on how many are visible
+const flexibleColWidth = computed(() => {
+    const count = (showDescriptionColumn.value ? 1 : 0)
+        + (showKpiColumn.value ? 1 : 0)
+        + (showRegulationColumn.value ? 1 : 0);
+    if (count === 1) return 'w-auto';
+    if (count === 2) return 'w-1/2';
+    return 'w-1/3';
+});
 
 const itemsMap = computed(() => new Map(props.prosesBisnisV2.map(item => [item.id, item])));
 
