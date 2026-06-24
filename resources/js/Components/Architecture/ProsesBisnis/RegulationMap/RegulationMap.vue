@@ -43,22 +43,20 @@
                     <tr>
                         <th scope="col" class="px-3 py-3 w-10 text-center border-r border-b border-slate-200 dark:border-white/10">No</th>
                         <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Judul Regulasi</th>
-                        <th scope="col" class="px-3 py-3 w-32 border-r border-b border-slate-200 dark:border-white/10">Nomor</th>
                         <th scope="col" class="px-3 py-3 w-24 text-center border-r border-b border-slate-200 dark:border-white/10">Tipe</th>
-                        <th scope="col" class="px-3 py-3 w-24 text-center border-r border-b border-slate-200 dark:border-white/10">Status</th>
                         <th scope="col" class="px-3 py-3 w-48 border-b border-slate-200 dark:border-white/10">Fungsi Terkait</th>
                     </tr>
                 </thead>
                 <tbody class="dark:bg-transparent">
                     <!-- Empty State -->
                     <tr v-if="visibleDocRows.length === 0">
-                        <td colspan="6" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500 border-b border-slate-200 dark:border-white/10">
+                        <td colspan="4" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500 border-b border-slate-200 dark:border-white/10">
                             Data mapping regulation tidak ditemukan.
                         </td>
                     </tr>
                     
                     <tr
-                        v-for="(row, index) in visibleDocRows"
+                         v-for="(row, index) in visibleDocRows"
                         :key="'doc-' + row.id"
                         class="group hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150 animate-fade-in"
                     >
@@ -68,45 +66,48 @@
                         </td>
                         
                         <!-- Judul Regulasi -->
-                        <td class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 max-w-[300px] break-words" :style="{ paddingLeft: (row.depth * 24 + 12) + 'px' }">
-                            <div class="flex items-center gap-1.5">
-                                <!-- Toggle Button -->
-                                <button 
-                                    v-if="row.hasChildren" 
-                                    @click.stop="toggleDocExpand(row.id)" 
-                                    class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none shrink-0"
-                                >
-                                    <svg v-if="row.isExpanded" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                                    </svg>
-                                    <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                                    </svg>
-                                </button>
-                                <span v-else-if="row.depth > 0" class="text-slate-300 dark:text-white/20 mr-1 font-mono shrink-0">├─</span>
-                                
-                                <span :class="[row.depth === 0 ? 'font-bold text-slate-900 dark:text-white' : 'font-medium text-slate-700 dark:text-slate-300', 'text-xs']" :title="row.judul">
-                                    {{ row.judul }}
-                                </span>
+                        <td class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 max-w-[400px] break-words" :style="{ paddingLeft: (row.depth * 24 + 12) + 'px' }">
+                            <div class="flex items-start gap-2">
+                                <!-- Toggle Button / Indent indicator -->
+                                <div class="flex items-center shrink-0 mt-0.5">
+                                    <button 
+                                        v-if="row.hasChildren" 
+                                        @click.stop="toggleDocExpand(row.id)" 
+                                        class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none shrink-0"
+                                    >
+                                        <svg v-if="row.isExpanded" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                        <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                        </svg>
+                                    </button>
+                                    <span v-else-if="row.depth > 0" class="text-slate-300 dark:text-white/20 mr-1 font-mono shrink-0">├─</span>
+                                </div>
+
+                                <div class="flex flex-col gap-0.5 min-w-0">
+                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                        <span class="font-semibold text-slate-900 dark:text-white text-xs" :title="row.judul">
+                                            {{ row.judul }}
+                                        </span>
+
+                                        <!-- Status Badge -->
+                                        <span v-if="row.status" :class="getStatusBadgeClass(row.status)">
+                                            {{ row.status }}
+                                        </span>
+                                    </div>
+
+                                    <span v-if="row.nomor" class="font-mono text-[10px] text-slate-500 dark:text-slate-400">
+                                        {{ row.nomor }}
+                                    </span>
+                                </div>
                             </div>
-                        </td>
-                        
-                        <!-- Nomor -->
-                        <td class="px-3 py-3 text-slate-700 dark:text-slate-300 font-mono text-xs font-medium border-r border-b border-slate-200 dark:border-white/10 max-w-[120px] break-words">
-                            {{ row.nomor || '-' }}
                         </td>
                         
                         <!-- Tipe -->
                         <td class="px-3 py-3 text-center border-r border-b border-slate-200 dark:border-white/10 w-24">
                             <span :class="getTypeBadgeClass(row.tipe)">
                                 {{ row.tipe }}
-                            </span>
-                        </td>
-                        
-                        <!-- Status -->
-                        <td class="px-3 py-3 text-center border-r border-b border-slate-200 dark:border-white/10 w-24">
-                            <span :class="getStatusBadgeClass(row.status)">
-                                {{ row.status || '-' }}
                             </span>
                         </td>
                         
@@ -122,7 +123,7 @@
                                     <span class="truncate" :title="fn.name">{{ fn.name }}</span>
                                 </span>
                                 <span v-if="getMappedFunctions(row.id).length === 0" class="text-xs text-slate-400 italic">
-                                    Belum ada fungsi terpetakan
+                                    Function Not Available      
                                 </span>
                             </div>
                         </td>
@@ -329,36 +330,42 @@ watch(
 
 const getTypeBadgeClass = (type) => {
     const base = 'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wide uppercase border';
-    if (!type) return `${base} bg-slate-100 border-slate-200 text-slate-800 dark:bg-white/10 dark:text-slate-300`;
+    if (!type) return `${base} bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-500/10 dark:border-slate-500/20 dark:text-slate-400`;
     
-    const formatted = type.toUpperCase().trim();
-    if (formatted === 'PTK') {
-        return `${base} bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-500/10 dark:border-blue-500/20 dark:text-blue-400`;
+    const formatted = type.toLowerCase().trim();
+    if (formatted === 'policy' || formatted === 'ptk') {
+        return `${base} bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-500/10 dark:border-indigo-500/20 dark:text-indigo-400`;
     }
-    if (formatted === 'TKO') {
-        return `${base} bg-purple-50 border-purple-200 text-purple-700 dark:bg-purple-500/10 dark:border-purple-500/20 dark:text-purple-400`;
+    if (formatted === 'procedure' || formatted === 'tko') {
+        return `${base} bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400`;
     }
-    if (formatted === 'SKI') {
+    if (formatted === 'standart' || formatted === 'ski') {
         return `${base} bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400`;
     }
-    return `${base} bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400`;
+    if (formatted === 'surat keputusan') {
+        return `${base} bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400`;
+    }
+    if (formatted === 'surat perintah') {
+        return `${base} bg-sky-50 border-sky-200 text-sky-700 dark:bg-sky-500/10 dark:border-sky-500/20 dark:text-sky-400`;
+    }
+    return `${base} bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-500/10 dark:border-slate-500/20 dark:text-slate-400`;
 };
 
 const getStatusBadgeClass = (status) => {
     const base = 'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wide uppercase border';
-    if (!status) return `${base} bg-slate-100 border-slate-200 text-slate-800 dark:bg-white/10 dark:text-slate-300`;
+    if (!status) return `${base} bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-500/10 dark:border-slate-500/20 dark:text-slate-400`;
     
-    const formatted = status.toUpperCase().trim();
-    if (formatted === 'AKTIF' || formatted === 'ACTIVE' || formatted === 'BERLAKU') {
+    const formatted = status.toLowerCase().trim();
+    if (formatted === 'aktif' || formatted === 'active' || formatted === 'berlaku') {
         return `${base} bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400`;
     }
-    if (formatted === 'DRAFT') {
-        return `${base} bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-500/10 dark:border-blue-500/20 dark:text-blue-400`;
+    if (formatted === 'draft') {
+        return `${base} bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400`;
     }
-    if (formatted === 'REVISI' || formatted === 'EXPIRED' || formatted === 'TIDAK BERLAKU') {
+    if (formatted === 'dicabut' || formatted === 'revisi' || formatted === 'expired' || formatted === 'tidak berlaku') {
         return `${base} bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400`;
     }
-    return `${base} bg-slate-100 border-slate-200 text-slate-800 dark:bg-white/10 dark:text-slate-300`;
+    return `${base} bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-500/10 dark:border-slate-500/20 dark:text-slate-400`;
 };
 </script>
 

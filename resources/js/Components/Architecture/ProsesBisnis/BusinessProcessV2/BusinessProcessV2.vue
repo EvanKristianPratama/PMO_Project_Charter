@@ -133,7 +133,7 @@
                             <span v-else class="text-slate-400 dark:text-slate-600 font-mono text-xs select-none">-</span>
                         </td>
                         <td class="px-4 py-2 text-center print:hidden">
-                            <div class="flex items-center justify-center gap-1.5">
+                            <div class="flex flex-col items-center justify-center gap-1">
                                 <button
                                     @click="openEditModal(item)"
                                     class="w-14 inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-bold text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5 active:scale-95"
