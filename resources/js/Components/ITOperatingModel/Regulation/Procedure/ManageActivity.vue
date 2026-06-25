@@ -6,6 +6,8 @@
         :flowChartSops="flowChartSops"
         :actors="actors"
         :activeRegulation="activeRegulation"
+        :activeCategoryId="activeCategoryId"
+        @select-category="id => $emit('select-category', id)"
     />
 </template>
 
@@ -34,7 +36,13 @@ const props = defineProps({
         type: Object,
         default: null,
     },
+    activeCategoryId: {
+        type: Number,
+        default: null,
+    },
 });
+
+defineEmits(['select-category']);
 
 const prosedurEditorRef = ref(null);
 

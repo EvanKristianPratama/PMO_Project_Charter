@@ -33,7 +33,7 @@
                     <tr v-if="actors.length === 0">
                         <td colspan="4" class="px-6 py-8 text-center text-slate-400">Belum ada data peran terkait.</td>
                     </tr>
-                    <tr v-for="(actor, index) in actors" :key="actor.id" class="group hover:bg-slate-50/50 dark:hover:bg-white/5">
+                    <tr :id="`actor-row-${actor.id}`" v-for="(actor, index) in actors" :key="actor.id" class="group hover:bg-slate-50/50 dark:hover:bg-white/5 transition-all duration-500">
                         <td class="px-6 py-3 text-center align-middle font-medium text-slate-500 dark:text-slate-400">{{ index + 1 }}</td>
                         <td class="px-6 py-3 align-middle font-medium text-slate-900 dark:text-white">
                             <div class="flex items-center gap-2">
