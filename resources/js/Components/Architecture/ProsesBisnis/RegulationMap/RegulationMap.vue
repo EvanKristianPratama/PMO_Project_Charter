@@ -23,14 +23,14 @@
                     </div>
                 </div>
 
-                <!-- Tipe Filter -->
+                <!-- Status Filter -->
                 <select
-                    v-model="selectedType"
+                    v-model="selectedStatus"
                     class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white cursor-pointer min-w-[120px]"
                 >
-                    <option value="">Semua Tipe</option>
-                    <option v-for="type in availableTypes" :key="type" :value="type">
-                        {{ type }}
+                    <option value="">Semua Status</option>
+                    <option v-for="status in availableStatuses" :key="status" :value="status">
+                        {{ status }}
                     </option>
                 </select>
             </div>
@@ -43,14 +43,13 @@
                     <tr>
                         <th scope="col" class="px-3 py-3 w-10 text-center border-r border-b border-slate-200 dark:border-white/10">No</th>
                         <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Judul Regulasi</th>
-                        <th scope="col" class="px-3 py-3 w-24 text-center border-r border-b border-slate-200 dark:border-white/10">Tipe</th>
                         <th scope="col" class="px-3 py-3 w-48 border-b border-slate-200 dark:border-white/10">Fungsi Terkait</th>
                     </tr>
                 </thead>
                 <tbody class="dark:bg-transparent">
                     <!-- Empty State -->
                     <tr v-if="visibleDocRows.length === 0">
-                        <td colspan="4" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500 border-b border-slate-200 dark:border-white/10">
+                        <td colspan="3" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500 border-b border-slate-200 dark:border-white/10">
                             Data mapping regulation tidak ditemukan.
                         </td>
                     </tr>
@@ -104,13 +103,6 @@
                             </div>
                         </td>
                         
-                        <!-- Tipe -->
-                        <td class="px-3 py-3 text-center border-r border-b border-slate-200 dark:border-white/10 w-24">
-                            <span :class="getTypeBadgeClass(row.tipe)">
-                                {{ row.tipe }}
-                            </span>
-                        </td>
-                        
                         <!-- Fungsi Terkait -->
                         <td class="px-3 py-3 border-b border-slate-200 dark:border-white/10 w-48">
                             <div class="flex flex-col items-start gap-1.5">
@@ -149,12 +141,12 @@ const props = defineProps({
 });
 
 const searchQuery = ref('');
-const selectedType = ref('');
+const selectedStatus = ref('');
 
-// List all available types from regulations
-const availableTypes = computed(() => {
-    const types = new Set(props.regulations.map(r => r.tipe).filter(Boolean));
-    return Array.from(types).sort();
+// List all available statuses from regulations
+const availableStatuses = computed(() => {
+    const statuses = new Set(props.regulations.map(r => r.status).filter(Boolean));
+    return Array.from(statuses).sort();
 });
 
 // Cache map of regulation ID to associated functions
@@ -184,22 +176,22 @@ const getMappedFunctions = (regulationId) => {
     return regulationToFunctionsMap.value.get(regulationId) || [];
 };
 
-// Filter regulations based on search query and type filter
+// Filter regulations based on search query and status filter
 const filteredRegulations = computed(() => {
     // Find direct matches first
     const matched = props.regulations.filter(reg => {
-        // Tipe filter
-        if (selectedType.value && reg.tipe !== selectedType.value) {
+        // Status filter
+        if (selectedStatus.value && reg.status !== selectedStatus.value) {
             return false;
         }
         
-        // Search query filter (matches regulation title, number, type or mapped function code/name)
+        // Search query filter (matches regulation title, number, status or mapped function code/name)
         if (searchQuery.value) {
             const query = searchQuery.value.toLowerCase().trim();
             const matchesReg = 
                 (reg.judul || '').toLowerCase().includes(query) ||
                 (reg.nomor || '').toLowerCase().includes(query) ||
-                (reg.tipe || '').toLowerCase().includes(query);
+                (reg.status || '').toLowerCase().includes(query);
                 
             if (matchesReg) return true;
             
@@ -215,7 +207,7 @@ const filteredRegulations = computed(() => {
     });
 
     // If there are no active filters, return the full list of regulations
-    if (!searchQuery.value && !selectedType.value) {
+    if (!searchQuery.value && !selectedStatus.value) {
         return props.regulations;
     }
 
@@ -328,28 +320,7 @@ watch(
     { deep: false }
 );
 
-const getTypeBadgeClass = (type) => {
-    const base = 'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wide uppercase border';
-    if (!type) return `${base} bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-500/10 dark:border-slate-500/20 dark:text-slate-400`;
-    
-    const formatted = type.toLowerCase().trim();
-    if (formatted === 'policy' || formatted === 'ptk') {
-        return `${base} bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-500/10 dark:border-indigo-500/20 dark:text-indigo-400`;
-    }
-    if (formatted === 'procedure' || formatted === 'tko') {
-        return `${base} bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400`;
-    }
-    if (formatted === 'standart' || formatted === 'ski') {
-        return `${base} bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400`;
-    }
-    if (formatted === 'surat keputusan') {
-        return `${base} bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400`;
-    }
-    if (formatted === 'surat perintah') {
-        return `${base} bg-sky-50 border-sky-200 text-sky-700 dark:bg-sky-500/10 dark:border-sky-500/20 dark:text-sky-400`;
-    }
-    return `${base} bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-500/10 dark:border-slate-500/20 dark:text-slate-400`;
-};
+// Type badge is no longer needed since Tipe column was removed
 
 const getStatusBadgeClass = (status) => {
     const base = 'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wide uppercase border';
