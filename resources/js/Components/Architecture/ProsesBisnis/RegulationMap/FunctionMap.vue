@@ -4,7 +4,7 @@
             <thead class="bg-slate-50 dark:bg-white/5">
                 <tr>
                     <th scope="col" class="px-0 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-16">Company</th>
-                    <th scope="col" class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-80">Fungsi</th>
+                    <th scope="col" class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-80">Function</th>
                     <th scope="col" class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-24">Alias</th>
                     <th scope="col" class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Regulation Mapping</th>
                 </tr>

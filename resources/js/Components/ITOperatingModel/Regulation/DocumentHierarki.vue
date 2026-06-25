@@ -149,9 +149,13 @@ const props = defineProps({
         type: Function,
         required: true,
     },
+    expandLevel: {
+        type: String,
+        default: 'all',
+    },
 });
 
-defineEmits(['detail', 'delete', 'edit']);
+const emit = defineEmits(['detail', 'delete', 'edit', 'update:expandLevel']);
 
 // Tree hierarchy computing
 // If a child's parent is absent from the filtered list (orphaned), treat it as a root.
@@ -179,7 +183,26 @@ const documentTree = computed(() => {
 
 const expandedDocIds = ref(new Set());
 
+// Compute depth of a regulation
+const getDepth = (id) => {
+    let depth = 0;
+    let currentId = id;
+    const visited = new Set();
+    while (currentId && !visited.has(currentId)) {
+        visited.add(currentId);
+        const node = props.regulations.find(r => r.id === currentId);
+        if (node?.parent_id) {
+            depth++;
+            currentId = node.parent_id;
+        } else {
+            break;
+        }
+    }
+    return depth;
+};
+
 const toggleDocExpand = (id) => {
+    emit('update:expandLevel', 'custom');
     if (expandedDocIds.value.has(id)) {
         expandedDocIds.value.delete(id);
     } else {
@@ -216,6 +239,35 @@ const visibleDocRows = computed(() => {
     return rows;
 });
 
+const handleExpandLevelChange = (val) => {
+    if (val === 'custom') return;
+
+    const ids = new Set();
+
+    if (val === 'all') {
+        props.regulations.forEach(item => {
+            const isParent = props.regulations.some(r => r.parent_id === item.id);
+            if (isParent) {
+                ids.add(item.id);
+            }
+        });
+    } else {
+        const targetDepth = parseInt(val, 10);
+        if (targetDepth > 0) {
+            props.regulations.forEach(item => {
+                const depth = getDepth(item.id);
+                if (depth < targetDepth) {
+                    const isParent = props.regulations.some(r => r.parent_id === item.id);
+                    if (isParent) {
+                        ids.add(item.id);
+                    }
+                }
+            });
+        }
+    }
+    expandedDocIds.value = ids;
+};
+
 const initializeExpandedDocs = () => {
     const ids = new Set();
     props.regulations.forEach(reg => {
@@ -225,6 +277,7 @@ const initializeExpandedDocs = () => {
         }
     });
     expandedDocIds.value = ids;
+    emit('update:expandLevel', 'all');
 };
 
 onMounted(() => {
@@ -238,6 +291,13 @@ watch(
         initializeExpandedDocs();
     },
     { deep: false }
+);
+
+watch(
+    () => props.expandLevel,
+    (newVal) => {
+        handleExpandLevelChange(newVal);
+    }
 );
 </script>
 

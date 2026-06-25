@@ -61,25 +61,46 @@
 
                 <!-- Filters -->
                 <div class="flex items-center gap-2">
-                    <!-- Filter by Status -->
-                    <div class="relative">
-                        <select
-                            v-model="selectedStatus"
-                            class="appearance-none bg-white text-slate-800 border border-slate-200 rounded-xl pl-3.5 pr-8 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-[#1a1a1a] dark:text-slate-300 dark:border-white/10 transition-all hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer min-w-[150px]"
+                    <!-- Filter by Status (Multi-select Dropdown) -->
+                    <div class="relative inline-block text-left">
+                        <button 
+                            type="button"
+                            @click="isStatusDropdownOpen = !isStatusDropdownOpen"
+                            class="inline-flex items-center justify-between gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-[#1a1a1a] dark:text-slate-300 dark:border-white/10 cursor-pointer min-w-[150px] text-left select-none active:scale-[0.98] transition-transform duration-100"
                         >
-                            <option value="">Semua Status</option>
-                            <option
-                                v-for="status in uniqueStatuses"
-                                :key="status"
-                                :value="status"
-                            >
-                                {{ status }}
-                            </option>
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                            <span class="truncate">
+                                {{ selectedStatuses.length === 0 ? 'Semua Status' : selectedStatuses.join(', ') }}
+                            </span>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-slate-400 shrink-0">
+                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                             </svg>
+                        </button>
+
+                        <div v-if="isStatusDropdownOpen" class="fixed inset-0 z-30" @click="isStatusDropdownOpen = false"></div>
+
+                        <div v-if="isStatusDropdownOpen" class="absolute left-0 mt-1 w-44 rounded-lg bg-white border border-slate-200 shadow-lg dark:bg-[#1a1a1a] dark:border-white/10 z-40 p-2 space-y-1">
+                            <label 
+                                v-for="status in uniqueStatuses" 
+                                :key="status"
+                                class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-white/5 transition duration-150 cursor-pointer select-none text-xs text-slate-700 dark:text-slate-300 font-medium"
+                            >
+                                <input 
+                                    type="checkbox" 
+                                    :value="status" 
+                                    v-model="selectedStatuses"
+                                    class="rounded border-slate-300 text-[#821f44] focus:ring-[#821f44] dark:border-white/10 dark:bg-black/20"
+                                />
+                                <span>{{ status }}</span>
+                            </label>
+                            <div v-if="selectedStatuses.length > 0" class="border-t border-slate-100 dark:border-white/5 pt-1.5 mt-1 flex justify-end">
+                                <button 
+                                    type="button" 
+                                    @click="selectedStatuses = []" 
+                                    class="text-[10px] text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white font-bold"
+                                >
+                                    Clear
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -97,6 +118,26 @@
                             >
                                 {{ role.name }} ({{ role.code }})
                             </option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Expand Level Filter (only for document hierarchy) -->
+                    <div v-if="activeViewMode === 'document'" class="relative">
+                        <select
+                            v-model="expandLevel"
+                            class="appearance-none bg-white text-slate-800 border border-slate-200 rounded-xl pl-3.5 pr-8 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-[#1a1a1a] dark:text-slate-300 dark:border-white/10 transition-all hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer min-w-[130px]"
+                        >
+                            <option value="custom" disabled>Expand Level...</option>
+                            <option value="0">Collapse All (Level 0)</option>
+                            <option v-for="depth in maxDepth + 1" :key="depth" :value="depth">
+                                Level {{ depth }}
+                            </option>
+                            <option value="all">Expand All</option>
                         </select>
                         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-500">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
@@ -131,6 +172,8 @@
                                 <DocumentHierarki
                                     :regulations="filteredRegulations"
                                     :formatDate="formatDate"
+                                    :expand-level="expandLevel"
+                                    @update:expand-level="expandLevel = $event"
                                     @detail="handleDetailClick"
                                     @edit="openEditModal"
                                     @delete="deleteRegulation"
@@ -188,7 +231,36 @@ const activeViewMode = ref('document'); // 'document', 'organization'
 
 // Filters
 const selectedAksesRoleId = ref('');
-const selectedStatus = ref('');
+const selectedStatuses = ref([]);
+const isStatusDropdownOpen = ref(false);
+const expandLevel = ref('all');
+
+// Compute depth of a regulation
+const getDepth = (id) => {
+    let depth = 0;
+    let currentId = id;
+    const visited = new Set();
+    while (currentId && !visited.has(currentId)) {
+        visited.add(currentId);
+        const node = props.regulations.find(r => r.id === currentId);
+        if (node?.parent_id) {
+            depth++;
+            currentId = node.parent_id;
+        } else {
+            break;
+        }
+    }
+    return depth;
+};
+
+const maxDepth = computed(() => {
+    let max = 0;
+    props.regulations.forEach(item => {
+        const d = getDepth(item.id);
+        if (d > max) max = d;
+    });
+    return max;
+});
 
 const uniqueStatuses = computed(() => {
     const statusSet = new Set();
@@ -249,7 +321,7 @@ const filteredRegulations = computed(() => {
         result = props.regulations.filter(reg => allIncludedIds.has(reg.id));
     }
 
-    if (selectedStatus.value) {
+    if (selectedStatuses.value && selectedStatuses.value.length > 0) {
         const allRegs = props.regulations;
 
         // Helper: collect all descendant IDs recursively
@@ -282,7 +354,7 @@ const filteredRegulations = computed(() => {
         };
 
         // Step 1: find all docs within current result that match the status
-        const matchedByStatus = result.filter(reg => reg.status === selectedStatus.value);
+        const matchedByStatus = result.filter(reg => reg.status && selectedStatuses.value.includes(reg.status));
 
         const includedIds = new Set();
 

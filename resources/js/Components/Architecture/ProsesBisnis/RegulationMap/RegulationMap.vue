@@ -180,8 +180,8 @@
                 <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
                     <tr>
                         <th scope="col" class="px-3 py-3 w-10 text-center border-r border-b border-slate-200 dark:border-white/10">No</th>
-                        <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Regulasi</th>
-                        <th scope="col" class="px-3 py-3 w-48 border-b border-slate-200 dark:border-white/10">Function Mapping</th>
+                        <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 w-[700px]">Regulation</th>
+                        <th scope="col" class="px-3 py-3 border-b border-slate-200 dark:border-white/10">Fungsi / Organisasi / Jabatan</th>
                     </tr>
                 </thead>
                 <tbody class="dark:bg-transparent">
@@ -203,7 +203,7 @@
                         </td>
                         
                         <!-- Judul Regulasi -->
-                        <td class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 max-w-[400px] break-words" :style="{ paddingLeft: (row.depth * 24 + 12) + 'px' }">
+                        <td class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 w-[700px] max-w-[700px] break-words" :style="{ paddingLeft: (row.depth * 24 + 12) + 'px' }">
                             <div class="flex items-start gap-2">
                                 <!-- Toggle Button / Indent indicator -->
                                  <div class="w-5 h-5 flex items-center justify-center shrink-0 mt-0.5">
@@ -242,20 +242,21 @@
                         </td>
                         
                         <!-- Fungsi Terkait -->
-                        <td class="px-3 py-3 border-b border-slate-200 dark:border-white/10 w-48">
-                            <div class="flex flex-col items-start gap-1.5">
-                                <span
+                        <td class="px-3 py-3 border-b border-slate-200 dark:border-white/10">
+                            <ul v-if="getMappedFunctions(row.id).length > 0" class="space-y-0.5 list-none">
+                                <li
                                     v-for="fn in getMappedFunctions(row.id)"
                                     :key="fn.id"
-                                    class="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50/50 pl-2.5 pr-2 py-0.5 text-[11px] font-medium text-slate-700 transition hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10 cursor-help max-w-full"
+                                    class="flex items-start gap-1.5 whitespace-pre-wrap leading-relaxed text-[11px] text-slate-700 dark:text-slate-300"
                                     :title="`${fn.name} (${fn.alias || 'Tanpa Alias'})`"
                                 >
-                                    <span class="truncate" :title="fn.name">{{ fn.name }}</span>
-                                </span>
-                                <span v-if="getMappedFunctions(row.id).length === 0" class="text-xs text-slate-400 italic">
-                                    Function Not Available      
-                                </span>
-                            </div>
+                                    <span class="shrink-0 select-none text-slate-400 dark:text-slate-600">-</span>
+                                    <span>{{ fn.name }}</span>
+                                </li>
+                            </ul>
+                            <span v-else class="text-xs text-slate-400 italic select-none">
+                                Function Not Available      
+                            </span>
                         </td>
                     </tr>
                 </tbody>
