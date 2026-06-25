@@ -75,4 +75,9 @@ class MstFunction extends Model
     {
         return $this->hasMany(TrsMapActorFunction::class, 'function_id');
     }
+
+    public function trsFunctionalStructures(): HasMany
+    {
+        return $this->hasMany(TrsFunctionalStructure::class, 'functional_id');
+    }
 }

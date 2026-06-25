@@ -290,6 +290,13 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::post('/architecture/organization-structure/sk', [ArchitectureOrganizationStructureController::class, 'storeSk'])->name('architecture.organization-structure.sk.store');
     Route::put('/architecture/organization-structure/sk/{id}', [ArchitectureOrganizationStructureController::class, 'updateSk'])->name('architecture.organization-structure.sk.update');
     Route::delete('/architecture/organization-structure/sk/{id}', [ArchitectureOrganizationStructureController::class, 'destroySk'])->name('architecture.organization-structure.sk.destroy');
+    Route::post('/architecture/organization-structure/functional', [ArchitectureOrganizationStructureController::class, 'storeFunctional'])->name('architecture.organization-structure.functional.store');
+    Route::put('/architecture/organization-structure/functional/{id}', [ArchitectureOrganizationStructureController::class, 'updateFunctional'])->name('architecture.organization-structure.functional.update');
+    Route::delete('/architecture/organization-structure/functional/{id}', [ArchitectureOrganizationStructureController::class, 'destroyFunctional'])->name('architecture.organization-structure.functional.destroy');
+    Route::post('/architecture/organization-structure/functional/member', [ArchitectureOrganizationStructureController::class, 'storeFunctionalMember'])->name('architecture.organization-structure.functional.member.store');
+    Route::delete('/architecture/organization-structure/functional/member', [ArchitectureOrganizationStructureController::class, 'destroyFunctionalMember'])->name('architecture.organization-structure.functional.member.destroy');
+    Route::post('/architecture/organization-structure/functional/structure', [ArchitectureOrganizationStructureController::class, 'storeFunctionalStructure'])->name('architecture.organization-structure.functional.structure.store');
+    Route::delete('/architecture/organization-structure/functional/structure', [ArchitectureOrganizationStructureController::class, 'destroyFunctionalStructure'])->name('architecture.organization-structure.functional.structure.destroy');
     Route::get('/architecture/informatic-system', fn () => Inertia::render('Architecture/InformaticSystem/Index'))->name('architecture.informatic-system');
 
     // Proses Bisnis (Business Process) CRUD under Architecture

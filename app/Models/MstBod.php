@@ -49,4 +49,9 @@ class MstBod extends Model
     {
         return $this->belongsTo(MstSkOrganization::class, 'sk_id');
     }
+
+    public function trsFunctionalOrganizations(): HasMany
+    {
+        return $this->hasMany(TrsFunctionalOrganization::class, 'organization_id');
+    }
 }

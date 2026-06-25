@@ -77,6 +77,54 @@
                     </div>
                 </div>
 
+                <!-- Function Filter (Multi-select Dropdown) -->
+                <div class="relative inline-block text-left">
+                    <button 
+                        type="button"
+                        @click="isFunctionDropdownOpen = !isFunctionDropdownOpen"
+                        class="inline-flex items-center justify-between gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white cursor-pointer min-w-[155px] max-w-[240px] text-left select-none active:scale-[0.98] transition-transform duration-100"
+                    >
+                        <span class="truncate">
+                            {{ selectedFunctionIds.length === 0 ? 'Semua Fungsi' : getSelectedFunctionsLabel() }}
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-slate-400 shrink-0">
+                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+
+                    <div v-if="isFunctionDropdownOpen" class="fixed inset-0 z-30" @click="isFunctionDropdownOpen = false"></div>
+
+                    <div v-if="isFunctionDropdownOpen" class="absolute left-0 mt-1 w-72 rounded-lg bg-white border border-slate-200 shadow-lg dark:bg-[#1a1a1a] dark:border-white/10 z-40 p-2 space-y-1 max-h-60 overflow-y-auto">
+                        <label 
+                            v-for="fn in allFunctionOptions" 
+                            :key="fn.id"
+                            class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-white/5 transition duration-150 cursor-pointer select-none text-xs text-slate-700 dark:text-slate-300 font-medium"
+                        >
+                            <input 
+                                type="checkbox" 
+                                :value="fn.id" 
+                                v-model="selectedFunctionIds"
+                                class="rounded border-slate-300 text-[#821f44] focus:ring-[#821f44] dark:border-white/10 dark:bg-black/20"
+                            />
+                            <span class="truncate">
+                                <span v-if="fn.company?.singkatan" class="text-[9px] text-[#821f44] dark:text-[#db588c] font-bold uppercase mr-1">
+                                    [{{ fn.company.singkatan }}]
+                                </span>
+                                <span>{{ getFunctionLevelPrefix(fn.depth) }}{{ fn.name }}</span>
+                            </span>
+                        </label>
+                        <div v-if="selectedFunctionIds.length > 0" class="border-t border-slate-100 dark:border-white/5 pt-1.5 mt-1 flex justify-end">
+                            <button 
+                                type="button" 
+                                @click="selectedFunctionIds = []" 
+                                class="text-[10px] text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white font-bold"
+                            >
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Expand Level Filter -->
                 <select
                     v-model="expandLevel"
@@ -180,8 +228,8 @@
                 <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
                     <tr>
                         <th scope="col" class="px-3 py-3 w-10 text-center border-r border-b border-slate-200 dark:border-white/10">No</th>
-                        <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 w-[700px]">Regulation</th>
-                        <th scope="col" class="px-3 py-3 border-b border-slate-200 dark:border-white/10">Fungsi / Organisasi / Jabatan</th>
+                        <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 w-[600px] max-w-[600px]">Regulation</th>
+                        <th scope="col" class="px-3 py-3 border-b border-slate-200 dark:border-white/10">Fungsi / Unit Organisasi / Jabatan Terkait</th>
                     </tr>
                 </thead>
                 <tbody class="dark:bg-transparent">
@@ -203,7 +251,7 @@
                         </td>
                         
                         <!-- Judul Regulasi -->
-                        <td class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 w-[700px] max-w-[700px] break-words" :style="{ paddingLeft: (row.depth * 24 + 12) + 'px' }">
+                        <td class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 w-[300px] max-w-[300px] break-words" :style="{ paddingLeft: (row.depth * 24 + 12) + 'px' }">
                             <div class="flex items-start gap-2">
                                 <!-- Toggle Button / Indent indicator -->
                                  <div class="w-5 h-5 flex items-center justify-center shrink-0 mt-0.5">
@@ -224,9 +272,13 @@
 
                                 <div class="flex flex-col gap-0.5 min-w-0">
                                     <div class="flex items-center gap-1.5 flex-wrap">
-                                        <span class="font-semibold text-slate-900 dark:text-white text-xs" :title="row.judul">
+                                        <Link 
+                                            :href="route('policy.procedure.index', { regulation_id: row.id })" 
+                                            class="font-semibold text-slate-900 dark:text-white hover:underline hover:text-[#821f44] dark:hover:text-[#db588c] text-xs"
+                                            :title="row.judul"
+                                        >
                                             {{ row.judul }}
-                                        </span>
+                                        </Link>
 
                                         <!-- Status Badge -->
                                         <span v-if="row.status" :class="getStatusBadgeClass(row.status)">
@@ -279,6 +331,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
+import { Link } from '@inertiajs/vue3';
 import FunctionMap from './FunctionMap.vue';
 
 const props = defineProps({
@@ -301,6 +354,8 @@ const isStatusDropdownOpenFunction = ref(false);
 
 // Filters for By Regulation
 const selectedStatuses = ref([]);
+const isFunctionDropdownOpen = ref(false);
+const selectedFunctionIds = ref([]);
 
 // Filters for By Function
 const companyFilterId = ref('');
@@ -325,6 +380,46 @@ const functionOptions = computed(() => {
     });
     
     fns.forEach(item => {
+        const mapped = map[item.id];
+        if (item.parent_id && map[item.parent_id]) {
+            map[item.parent_id].children.push(mapped);
+        } else {
+            roots.push(mapped);
+        }
+    });
+    
+    const sort = (nodes) => {
+        nodes.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        nodes.forEach(n => sort(n.children));
+    };
+    sort(roots);
+    
+    const result = [];
+    const traverse = (node, depth = 0) => {
+        result.push({ ...node, depth });
+        if (node.children && node.children.length > 0) {
+            node.children.forEach(child => traverse(child, depth + 1));
+        }
+    };
+    
+    roots.forEach(root => traverse(root, 0));
+    return result;
+});
+
+const getSelectedFunctionsLabel = () => {
+    const selected = props.functions.filter(fn => selectedFunctionIds.value.includes(fn.id));
+    return selected.map(fn => fn.name).join(', ');
+};
+
+const allFunctionOptions = computed(() => {
+    const map = {};
+    const roots = [];
+    
+    props.functions.forEach(item => {
+        map[item.id] = { ...item, children: [] };
+    });
+    
+    props.functions.forEach(item => {
         const mapped = map[item.id];
         if (item.parent_id && map[item.parent_id]) {
             map[item.parent_id].children.push(mapped);
@@ -479,6 +574,28 @@ const filteredRegulations = computed(() => {
         const includedIds = new Set();
 
         matchedByStatus.forEach(reg => {
+            includedIds.add(reg.id);
+            
+            const ancestors = collectAncestorIds(reg);
+            ancestors.forEach(id => includedIds.add(id));
+
+            const descendants = collectDescendantIds(reg.id);
+            descendants.forEach(id => includedIds.add(id));
+        });
+
+        result = result.filter(reg => includedIds.has(reg.id));
+    }
+
+    // 2. Function Filter
+    if (selectedFunctionIds.value && selectedFunctionIds.value.length > 0) {
+        const matchedByFunction = props.regulations.filter(reg => {
+            const mappedFns = getMappedFunctions(reg.id);
+            return mappedFns.some(fn => selectedFunctionIds.value.includes(fn.id));
+        });
+        
+        const includedIds = new Set();
+
+        matchedByFunction.forEach(reg => {
             includedIds.add(reg.id);
             
             const ancestors = collectAncestorIds(reg);

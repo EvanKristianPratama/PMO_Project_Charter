@@ -1,14 +1,6 @@
 <template>
     <UserLayout title="Architecture - Organization Structure">
         <div class="animate-fade-in-up space-y-4">
-            <!-- Flash Message Alerts -->
-            <div v-if="flash.success" class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300 shadow-sm animate-fade-in">
-                {{ flash.success }}
-            </div>
-            <div v-if="flash.error" class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300 shadow-sm animate-fade-in">
-                {{ flash.error }}
-            </div>
-
             <!-- Capsule Navigation Menu -->
             <div class="flex items-center gap-1.5 rounded-xl bg-slate-100 p-1 dark:bg-white/5 w-fit">
                 <button
@@ -38,12 +30,7 @@
                     :bods="bods"
                 />
 
-                <SkStructure
-                    v-else-if="activeTab === 'sk'"
-                    :sk-organizations="skOrganizations"
-                />
-
-                <OrganizationalStructureTable
+                <StructuralOrganizationalTable
                     v-else-if="activeTab === 'organization'"
                     :organization-structure-rows="organizationStructureRows"
                     :groub-options="groubOptions"
@@ -51,19 +38,36 @@
                     :bods="bods"
                     :sk-organizations="skOrganizations"
                 />
+
+                <FunctionalOrganization
+                    v-else-if="activeTab === 'functional'"
+                    :functional-organizations="functionalOrganizations"
+                    :sk-organizations="skOrganizations"
+                    :companies="companies"
+                    :bods="bods"
+                    :functions="functions"
+                />
+
+                <SkStructure
+                    v-else-if="activeTab === 'sk'"
+                    :sk-organizations="skOrganizations"
+                />
+
             </div>
         </div>
     </UserLayout>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { usePage } from '@inertiajs/vue3';
+import Swal from 'sweetalert2';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import CompanyStructure from '@/Components/Architecture/Organization/CompanyStructure.vue';
 import BoardOfDirector from '@/Components/Architecture/Organization/BoardOfDirector.vue';
-import OrganizationalStructureTable from '@/Components/Architecture/Organization/OrganizationalStructureTable.vue';
+import StructuralOrganizationalTable from '@/Components/Architecture/Organization/StructuralOrganizationalTable.vue';
 import SkStructure from '@/Components/Architecture/Organization/SkStructure.vue';
+import FunctionalOrganization from '@/Components/Architecture/Organization/FunctionalOrganization/FunctionalOrganizationTable.vue';
 
 defineProps({
     organizationStructureRows: {
@@ -86,16 +90,54 @@ defineProps({
         type: Array,
         default: () => [],
     },
+    functionalOrganizations: {
+        type: Array,
+        default: () => [],
+    },
+    functions: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const page = usePage();
-const flash = computed(() => page.props.flash ?? {});
+
+watch(
+    () => page.props.flash,
+    (flashVal) => {
+        if (flashVal?.success) {
+            Swal.fire({
+                title: 'Berhasil!',
+                text: flashVal.success,
+                icon: 'success',
+                confirmButtonText: 'OK',
+                customClass: {
+                    confirmButton: 'bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 rounded-lg px-4 py-2 text-xs font-semibold shadow-sm transition',
+                },
+                buttonsStyling: false,
+            });
+        } else if (flashVal?.error) {
+            Swal.fire({
+                title: 'Gagal!',
+                text: flashVal.error,
+                icon: 'error',
+                confirmButtonText: 'OK',
+                customClass: {
+                    confirmButton: 'bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 rounded-lg px-4 py-2 text-xs font-semibold shadow-sm transition',
+                },
+                buttonsStyling: false,
+            });
+        }
+    },
+    { deep: true, immediate: true }
+);
 
 const tabs = [
     { key: 'company', label: 'Company' },
     { key: 'bod', label: 'BoD' },
+    { key: 'organization', label: 'Structural Organization'},
+    { key: 'functional', label: 'Functional Organization'},
     { key: 'sk', label: 'SK' },
-    { key: 'organization', label: 'Organization Structure' },
 ];
 
 const activeTab = ref('company');

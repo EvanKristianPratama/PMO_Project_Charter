@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Policy;
 
 use App\Http\Controllers\Controller;
+use App\Models\MstCompany;
 use App\Models\MstRegulation;
 use App\Models\TrsOrganization;
 use Illuminate\Http\RedirectResponse;
@@ -18,15 +19,17 @@ class RegulationController extends Controller
      */
     public function index(): Response
     {
-        $regulations = MstRegulation::with(['organization', 'parent', 'master', 'revokedRegulations', 'relatedRegulations'])
+        $regulations = MstRegulation::with(['organization.groub.company', 'parent', 'master', 'revokedRegulations', 'relatedRegulations'])
             ->withCount(['generalPolicies'])
             ->orderBy('id', 'asc')
             ->get();
         $organizations = TrsOrganization::all();
+        $companies = MstCompany::orderBy('name')->get();
 
         return Inertia::render('Policy/Regulation/Index', [
             'regulations' => $regulations,
             'organizations' => $organizations,
+            'companies' => $companies,
         ]);
     }
 

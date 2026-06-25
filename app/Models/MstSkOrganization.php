@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MstSkOrganization extends Model
 {
@@ -15,5 +16,9 @@ class MstSkOrganization extends Model
         'sk',
         'deskripsi',
     ];
-    
+
+    public function functionalOrganizations(): HasMany
+    {
+        return $this->hasMany(MstFunctionalOrganization::class, 'sk_id');
+    }
 }

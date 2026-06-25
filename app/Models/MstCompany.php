@@ -79,4 +79,9 @@ class MstCompany extends Model
             'id'
         );
     }
+
+    public function functionalOrganizations(): HasMany
+    {
+        return $this->hasMany(MstFunctionalOrganization::class, 'company_id');
+    }
 }

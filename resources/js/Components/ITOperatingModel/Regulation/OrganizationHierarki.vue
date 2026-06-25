@@ -10,9 +10,13 @@
         :key="'org-flat-' + reg.id"
         class="group hover:bg-slate-50/50 dark:hover:bg-white/5 transition duration-150 animate-fade-in"
     >
-        <!-- No -->
-        <td class="px-3 py-3 text-center font-medium text-slate-700 dark:text-slate-300 border-r border-b border-slate-200 dark:border-white/10 w-10">
-            {{ index + 1 }}
+        <!-- Company -->
+        <td 
+            v-if="reg.companyRowspan > 0"
+            :rowspan="reg.companyRowspan"
+            class="px-2 py-2 text-slate-600 dark:text-slate-300 text-xs whitespace-normal break-words max-w-[80px] align-top border-r border-b border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-white/[0.02]"
+        >
+            <span class="font-semibold text-slate-700 dark:text-slate-200">{{ reg.organization?.groub?.company?.name || '-' }}</span>
         </td>
 
         <!-- Judul -->
@@ -257,6 +261,21 @@ const regulationsByOrgHierarchy = computed(() => {
             org_depth: 0
         });
     });
+
+    // Compute companyRowspan
+    let i = 0;
+    while (i < orderedRegs.length) {
+        const companyId = orderedRegs[i].organization?.groub?.company_id ?? null;
+        let span = 1;
+        while (i + span < orderedRegs.length && (orderedRegs[i + span].organization?.groub?.company_id ?? null) === companyId) {
+            span++;
+        }
+        orderedRegs[i].companyRowspan = span;
+        for (let j = 1; j < span; j++) {
+            orderedRegs[i + j].companyRowspan = 0;
+        }
+        i += span;
+    }
     
     return orderedRegs;
 });

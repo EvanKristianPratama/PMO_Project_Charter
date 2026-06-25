@@ -14,6 +14,10 @@ use Inertia\Response;
 use App\Models\MstCompany;
 use App\Models\MstBod;
 use App\Models\MstSkOrganization;
+use App\Models\MstFunctionalOrganization;
+use App\Models\TrsFunctionalOrganization;
+use App\Models\TrsFunctionalStructure;
+use App\Models\MstFunction;
 
 class OrganizationController extends Controller
 {
@@ -55,6 +59,31 @@ class OrganizationController extends Controller
                 'id' => $s->id,
                 'sk' => $s->sk,
                 'deskripsi' => $s->deskripsi,
+            ])->values()->all(),
+            'functionalOrganizations' => MstFunctionalOrganization::with(['skOrganization', 'company', 'trsFunctionalStructures', 'trsFunctionalOrganizations.organization'])->orderBy('id', 'asc')->get()->map(fn ($f) => [
+                'id' => $f->id,
+                'company_id' => $f->company_id,
+                'company_name' => $f->company?->name,
+                'sk_id' => $f->sk_id,
+                'sk_name' => $f->skOrganization?->sk,
+                'name' => $f->name,
+                'functions' => $f->trsFunctionalStructures->map(fn ($tfs) => [
+                    'structure_id' => $tfs->id,
+                    'functional_id' => $tfs->functional_id,
+                    'parent_id' => $tfs->parent_id,
+                    'name' => $tfs->name,
+                ])->values()->all(),
+                'members' => $f->trsFunctionalOrganizations->map(fn ($trs) => [
+                    'structure_id' => $trs->structure_id,
+                    'organization_id' => $trs->organization_id,
+                    'name' => $trs->organization?->name,
+                    'pejabat' => $trs->organization?->pejabat,
+                ])->values()->all(),
+            ])->values()->all(),
+            'functions' => MstFunction::orderBy('name')->get()->map(fn ($fun) => [
+                'id' => $fun->id,
+                'name' => $fun->name,
+                'company_id' => $fun->company_id,
             ])->values()->all(),
         ]);
     }
@@ -311,5 +340,132 @@ class OrganizationController extends Controller
         return redirect()
             ->route('architecture.organization-structure')
             ->with('success', 'SK Organisasi berhasil dihapus.');
+    }
+
+    public function storeFunctional(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'company_id' => 'required|integer|exists:mst_company,id',
+            'name' => 'required|string|max:255',
+            'sk_id' => 'required|integer|exists:mst_sk_organization,id',
+        ]);
+
+        MstFunctionalOrganization::create([
+            'company_id' => $validated['company_id'],
+            'name' => $validated['name'],
+            'sk_id' => $validated['sk_id'],
+        ]);
+
+        return redirect()
+            ->route('architecture.organization-structure')
+            ->with('success', 'Organisasi Fungsional berhasil ditambahkan.');
+    }
+
+    public function updateFunctional(Request $request, int $id): RedirectResponse
+    {
+        $functional = MstFunctionalOrganization::findOrFail($id);
+
+        $validated = $request->validate([
+            'company_id' => 'required|integer|exists:mst_company,id',
+            'name' => 'required|string|max:255',
+            'sk_id' => 'required|integer|exists:mst_sk_organization,id',
+        ]);
+
+        $functional->update([
+            'company_id' => $validated['company_id'],
+            'name' => $validated['name'],
+            'sk_id' => $validated['sk_id'],
+        ]);
+
+        return redirect()
+            ->route('architecture.organization-structure')
+            ->with('success', 'Organisasi Fungsional berhasil diperbarui.');
+    }
+
+    public function destroyFunctional(int $id): RedirectResponse
+    {
+        $functional = MstFunctionalOrganization::findOrFail($id);
+
+        $structures = TrsFunctionalStructure::where('functional_id', $functional->id)->get();
+        foreach ($structures as $structure) {
+            TrsFunctionalOrganization::where('structure_id', $structure->id)->delete();
+            $structure->delete();
+        }
+
+        $functional->delete();
+
+        return redirect()
+            ->route('architecture.organization-structure')
+            ->with('success', 'Organisasi Fungsional berhasil dihapus.');
+    }
+
+    public function storeFunctionalMember(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'structure_id' => 'required|integer|exists:trs_functional_structure,id',
+            'organization_id' => 'required|integer|exists:mst_bod,id',
+        ]);
+
+        TrsFunctionalOrganization::firstOrCreate([
+            'structure_id' => $validated['structure_id'],
+            'organization_id' => $validated['organization_id'],
+        ]);
+
+        return redirect()
+            ->route('architecture.organization-structure')
+            ->with('success', 'Anggota berhasil ditambahkan ke Organisasi Fungsional.');
+    }
+
+    public function destroyFunctionalMember(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'structure_id' => 'required|integer|exists:trs_functional_structure,id',
+            'organization_id' => 'required|integer|exists:mst_bod,id',
+        ]);
+
+        TrsFunctionalOrganization::where('structure_id', $validated['structure_id'])
+            ->where('organization_id', $validated['organization_id'])
+            ->delete();
+
+        return redirect()
+            ->route('architecture.organization-structure')
+            ->with('success', 'Anggota berhasil dihapus dari Organisasi Fungsional.');
+    }
+
+    public function storeFunctionalStructure(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'functional_org_id' => 'required|integer|exists:mst_functional_organization,id',
+            'name'              => 'required|string|max:255',
+            'parent_id'         => 'nullable|integer|exists:trs_functional_structure,id',
+        ]);
+
+        TrsFunctionalStructure::firstOrCreate(
+            [
+                'functional_id' => $validated['functional_org_id'],
+                'name'          => $validated['name'],
+                'parent_id'     => $validated['parent_id'] ?? null,
+            ]
+        );
+
+        return redirect()
+            ->route('architecture.organization-structure')
+            ->with('success', 'Struktur Fungsi berhasil ditambahkan.');
+    }
+
+    public function destroyFunctionalStructure(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'structure_id' => 'required|integer|exists:trs_functional_structure,id',
+        ]);
+
+        $structure = TrsFunctionalStructure::findOrFail($validated['structure_id']);
+
+        TrsFunctionalOrganization::where('structure_id', $structure->id)->delete();
+        $structure->delete();
+
+        return redirect()
+            ->route('architecture.organization-structure')
+            ->with('success', 'Struktur Fungsi berhasil dihapus.');
     }
 }
