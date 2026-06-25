@@ -2,11 +2,38 @@
     <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
         <!-- Header -->
         <div class="flex flex-col gap-4 border-b border-slate-200 px-6 py-4 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <h2 class="text-sm font-semibold text-slate-900 dark:text-white">Regulation Map</h2>
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+                <h2 class="text-sm font-semibold text-slate-900 dark:text-white">View Mapping</h2>
+                
+                <!-- View Switcher -->
+                <div class="flex items-center gap-1 rounded-lg bg-slate-100 p-0.5 dark:bg-white/5 w-fit">
+                    <button
+                        @click="activeView = 'regulation'"
+                        :class="[
+                            'px-2.5 py-1 text-[11px] font-bold rounded-md transition-all active:scale-95',
+                            activeView === 'regulation'
+                                ? 'bg-white text-slate-900 shadow-sm dark:bg-[#1a1a1a] dark:text-white'
+                                : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                        ]"
+                    >
+                        By Regulation
+                    </button>
+                    <button
+                        @click="activeView = 'function'"
+                        :class="[
+                            'px-2.5 py-1 text-[11px] font-bold rounded-md transition-all active:scale-95',
+                            activeView === 'function'
+                                ? 'bg-white text-slate-900 shadow-sm dark:bg-[#1a1a1a] dark:text-white'
+                                : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                        ]"
+                    >
+                        By Function
+                    </button>
+                </div>
             </div>
             
-            <div class="flex flex-wrap items-center gap-3">
+            <!-- Filters by Regulation -->
+            <div v-if="activeView === 'regulation'" class="flex flex-wrap items-center gap-3">
                 <!-- Search Input -->
                 <div class="relative">
                     <input
@@ -47,16 +74,69 @@
                     <option value="all">Expand All</option>
                 </select>
             </div>
+
+            <!-- Filters by Function -->
+            <div v-else-if="activeView === 'function'" class="flex flex-wrap items-center gap-3">
+                <!-- Search Input -->
+                <div class="relative">
+                    <input
+                        v-model="searchQueryFunction"
+                        type="text"
+                        placeholder="Cari fungsi atau regulasi..."
+                        class="w-64 rounded-lg border border-slate-300 bg-white pl-8 pr-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    />
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-slate-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Company Filter -->
+                <select
+                    v-model="companyFilterId"
+                    class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white cursor-pointer min-w-[140px] max-w-[200px]"
+                >
+                    <option value="">Semua Perusahaan</option>
+                    <option v-for="comp in availableCompanies" :key="comp.id" :value="comp.id">
+                        {{ comp.name }}
+                    </option>
+                </select>
+
+                <!-- Status Filter -->
+                <select
+                    v-model="selectedStatusFunction"
+                    class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white cursor-pointer min-w-[120px]"
+                >
+                    <option value="">Semua Status</option>
+                    <option v-for="status in availableStatuses" :key="status" :value="status">
+                        {{ status }}
+                    </option>
+                </select>
+
+                <!-- Expand Level Filter -->
+                <select
+                    v-model="expandLevelFunction"
+                    class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white cursor-pointer min-w-[120px]"
+                >
+                    <option value="custom" disabled>Expand Level...</option>
+                    <option value="0">Collapse All</option>
+                    <option v-for="depth in maxDepthFunction + 1" :key="depth" :value="depth">
+                        Level {{ depth }}
+                    </option>
+                    <option value="all">Expand All</option>
+                </select>
+            </div>
         </div>
 
         <!-- Content -->
-        <div class="overflow-x-auto">
+        <div v-if="activeView === 'regulation'" class="overflow-x-auto">
             <table class="w-full border-collapse text-left text-xs text-slate-500 dark:text-slate-400">
                 <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
                     <tr>
                         <th scope="col" class="px-3 py-3 w-10 text-center border-r border-b border-slate-200 dark:border-white/10">No</th>
                         <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Regulasi</th>
-                        <th scope="col" class="px-3 py-3 w-48 border-b border-slate-200 dark:border-white/10">Fungsi Terkait</th>
+                        <th scope="col" class="px-3 py-3 w-48 border-b border-slate-200 dark:border-white/10">Function Mapping</th>
                     </tr>
                 </thead>
                 <tbody class="dark:bg-transparent">
@@ -136,11 +216,24 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- By Function View Component -->
+        <FunctionMap
+            v-else-if="activeView === 'function'"
+            :functions="functions"
+            :regulations="regulations"
+            :search-query="searchQueryFunction"
+            :company-filter-id="companyFilterId"
+            :selected-status="selectedStatusFunction"
+            :expand-level="expandLevelFunction"
+            @update:expand-level="expandLevelFunction = $event"
+        />
     </section>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
+import FunctionMap from './FunctionMap.vue';
 
 const props = defineProps({
     functions: {
@@ -153,8 +246,58 @@ const props = defineProps({
     },
 });
 
+// View switch state
+const activeView = ref('regulation');
+
+// Filters for By Regulation
 const searchQuery = ref('');
 const selectedStatus = ref('');
+
+// Filters for By Function
+const searchQueryFunction = ref('');
+const companyFilterId = ref('');
+const selectedStatusFunction = ref('');
+const expandLevelFunction = ref('all');
+
+// Helper to list companies for Function filter
+const availableCompanies = computed(() => {
+    const compMap = new Map();
+    props.functions.forEach(fn => {
+        if (fn.company) {
+            compMap.set(fn.company.id, fn.company);
+        }
+    });
+    return Array.from(compMap.values()).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+});
+
+// Helper variables for Function expand level depth
+const fnMap = computed(() => new Map(props.functions.map(fn => [fn.id, fn])));
+
+const getFnDepth = (id) => {
+    let depth = 0;
+    let currentId = id;
+    const visited = new Set();
+    while (currentId && !visited.has(currentId)) {
+        visited.add(currentId);
+        const node = fnMap.value.get(currentId);
+        if (node?.parent_id) {
+            depth++;
+            currentId = node.parent_id;
+        } else {
+            break;
+        }
+    }
+    return depth;
+};
+
+const maxDepthFunction = computed(() => {
+    let max = 0;
+    props.functions.forEach(item => {
+        const d = getFnDepth(item.id);
+        if (d > max) max = d;
+    });
+    return max;
+});
 
 // List all available statuses from regulations
 const availableStatuses = computed(() => {
