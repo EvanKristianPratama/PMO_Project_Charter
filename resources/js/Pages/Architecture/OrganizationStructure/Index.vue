@@ -65,7 +65,7 @@ import Swal from 'sweetalert2';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import CompanyStructure from '@/Components/Architecture/Organization/CompanyStructure.vue';
 import BoardOfDirector from '@/Components/Architecture/Organization/BoardOfDirector.vue';
-import StructuralOrganizationalTable from '@/Components/Architecture/Organization/StructuralOrganizationalTable.vue';
+import StructuralOrganizationalTable from '@/Components/Architecture/Organization/StructuralOrganization/StructuralOrganizationalTable.vue';
 import SkStructure from '@/Components/Architecture/Organization/SkStructure.vue';
 import FunctionalOrganization from '@/Components/Architecture/Organization/FunctionalOrganization/FunctionalOrganizationTable.vue';
 

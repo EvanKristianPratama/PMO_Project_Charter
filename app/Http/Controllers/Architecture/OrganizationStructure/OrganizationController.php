@@ -60,7 +60,7 @@ class OrganizationController extends Controller
                 'sk' => $s->sk,
                 'deskripsi' => $s->deskripsi,
             ])->values()->all(),
-            'functionalOrganizations' => MstFunctionalOrganization::with(['skOrganization', 'company', 'trsFunctionalStructures', 'trsFunctionalOrganizations.organization'])->orderBy('id', 'asc')->get()->map(fn ($f) => [
+            'functionalOrganizations' => MstFunctionalOrganization::with(['skOrganization', 'company', 'trsFunctionalStructures', 'trsFunctionalOrganizations.organization.company'])->orderBy('id', 'asc')->get()->map(fn ($f) => [
                 'id' => $f->id,
                 'company_id' => $f->company_id,
                 'company_name' => $f->company?->name,
@@ -74,10 +74,12 @@ class OrganizationController extends Controller
                     'name' => $tfs->name,
                 ])->values()->all(),
                 'members' => $f->trsFunctionalOrganizations->map(fn ($trs) => [
-                    'structure_id' => $trs->structure_id,
+                    'structure_id'    => $trs->structure_id,
                     'organization_id' => $trs->organization_id,
-                    'name' => $trs->organization?->name,
-                    'pejabat' => $trs->organization?->pejabat,
+                    'name'            => $trs->organization?->name,
+                    'pejabat'         => $trs->organization?->pejabat,
+                    'company_name'    => $trs->organization?->company?->name,
+                    'grup_function'   => $trs->organization?->grup_function,
                 ])->values()->all(),
             ])->values()->all(),
             'functions' => MstFunction::orderBy('name')->get()->map(fn ($fun) => [

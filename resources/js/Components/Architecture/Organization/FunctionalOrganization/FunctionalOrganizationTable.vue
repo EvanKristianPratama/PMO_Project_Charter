@@ -73,7 +73,7 @@
                             <th class="px-3 py-2.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-36">Company</th>
                             <th class="px-3 py-2.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-44">Nama Organisasi</th>
                             <th class="px-3 py-2.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-40">SK Organisasi</th>
-                            <th class="px-3 py-2.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-48">Fungsi (Struktur Internal)</th>
+                            <th class="px-3 py-2.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-48">Structure</th>
                             <th class="px-3 py-2.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-56">Anggota</th>
                             <th class="px-3 py-2.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-40">Actions</th>
                         </tr>
@@ -118,74 +118,159 @@
                                 <span v-else class="text-slate-400 dark:text-slate-500">—</span>
                             </td>
                             <td class="px-3 py-2 w-56 align-top">
-                                <!-- Anggota: grouped by fungsi (tree) -->
-                                <div v-if="row.functions && row.functions.length > 0" class="space-y-2">
+                                <!-- Anggota: grouped by grup_function for AD HOC, else plain list -->
+                                <div v-if="row.functions && row.functions.length > 0" class="space-y-1.5">
                                     <template v-for="fun in buildTree(row.functions)" :key="fun.structure_id">
-                                        <!-- Root fungsi -->
-                                        <div class="rounded-xl border border-slate-100 bg-slate-50/50 p-2 dark:border-white/5 dark:bg-white/5">
-                                            <div class="text-[9px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-1.5 flex items-center gap-1">
-                                                <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                                </svg>
-                                                {{ fun.name }}
-                                            </div>
-                                            <!-- Members of root -->
-                                            <div v-if="getMembersForStructure(row.members, fun.structure_id).length > 0" class="space-y-1 pl-1 border-l border-slate-200 dark:border-white/10">
-                                                <div v-for="member in getMembersForStructure(row.members, fun.structure_id)" :key="member.organization_id" class="text-[10px]">
-                                                    <div class="font-semibold text-slate-900 dark:text-white">{{ member.name }}</div>
-                                                    <div v-if="member.pejabat" class="text-[9px] text-slate-500 dark:text-slate-400 font-mono">Pejabat: {{ member.pejabat }}</div>
-                                                </div>
-                                            </div>
-                                            <div v-else class="text-[9px] text-slate-400 dark:text-slate-500 italic pl-1">Belum ada anggota</div>
-                                            <!-- Children fungsi -->
-                                            <div v-if="fun.children && fun.children.length > 0" class="mt-2 pl-3 space-y-2 border-l-2 border-blue-100 dark:border-blue-500/20">
-                                                <div v-for="child in fun.children" :key="child.structure_id" class="rounded-lg border border-slate-100 bg-white p-1.5 dark:border-white/5 dark:bg-[#1a1a1a]">
-                                                    <div class="text-[9px] font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-1 mb-1">
-                                                        <span class="text-slate-300 dark:text-slate-600">└</span>
-                                                        {{ child.name }}
+                                        <!-- Root structure label -->
+                                        <div class="text-[10px] font-bold text-slate-700 dark:text-slate-200">{{ fun.name }}</div>
+
+                                        <!-- === AD HOC: grouped by grup_function === -->
+                                        <template v-if="isAdHocStructure(fun.name)">
+                                            <div class="pl-2 space-y-1">
+                                                <template v-for="grup in groupMembersByGrupFunction(getMembersForStructure(row.members, fun.structure_id))" :key="grup.label">
+                                                    <!-- Group header (collapsible) -->
+                                                    <div
+                                                        @click="toggleGrupCollapse(fun.structure_id, grup.label)"
+                                                        class="flex items-center gap-1 cursor-pointer select-none rounded-md px-1.5 py-0.5 transition hover:bg-slate-100 dark:hover:bg-white/5"
+                                                    >
+                                                        <svg
+                                                            class="h-2.5 w-2.5 shrink-0 text-blue-500 dark:text-blue-400 transition-transform duration-200"
+                                                            :class="isGrupCollapsed(fun.structure_id, grup.label) ? '-rotate-90' : 'rotate-0'"
+                                                            fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"
+                                                        >
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                                        </svg>
+                                                        <span class="text-[10px] font-semibold text-blue-600 dark:text-blue-400">{{ grup.label }}</span>
+                                                        <span class="ml-auto text-[9px] text-slate-400 dark:text-slate-500">{{ grup.members.length }}</span>
                                                     </div>
-                                                    <div v-if="getMembersForStructure(row.members, child.structure_id).length > 0" class="space-y-0.5 pl-1 border-l border-slate-100 dark:border-white/5">
-                                                        <div v-for="member in getMembersForStructure(row.members, child.structure_id)" :key="member.organization_id">
-                                                            <div class="text-[9px] font-semibold text-slate-800 dark:text-slate-200">{{ member.name }}</div>
-                                                            <div v-if="member.pejabat" class="text-[9px] text-slate-400 font-mono">{{ member.pejabat }}</div>
+                                                    <!-- Group members (collapsible body) -->
+                                                    <div
+                                                        v-show="!isGrupCollapsed(fun.structure_id, grup.label)"
+                                                        class="pl-4 space-y-0.5"
+                                                    >
+                                                        <div
+                                                            v-for="member in grup.members"
+                                                            :key="member.organization_id"
+                                                            class="flex items-start gap-1 text-[10px] text-slate-600 dark:text-slate-300"
+                                                        >
+                                                            <span class="shrink-0 text-slate-400 dark:text-slate-500 leading-none mt-px">–</span>
+                                                            <span class="leading-tight">
+                                                                {{ member.name }}
+                                                                <span v-if="member.company_name" class="block text-[9px] text-slate-400 dark:text-slate-500 italic font-normal">{{ member.company_name }}</span>
+                                                            </span>
                                                         </div>
                                                     </div>
-                                                    <div v-else class="text-[9px] text-slate-400 italic pl-1">—</div>
+                                                </template>
+                                                <!-- No members at all -->
+                                                <div v-if="getMembersForStructure(row.members, fun.structure_id).length === 0" class="text-[9px] italic text-slate-400 dark:text-slate-500 pl-1">—</div>
+                                            </div>
+                                        </template>
+
+                                        <!-- === Normal structure: flat indented list === -->
+                                        <template v-else>
+                                            <div v-if="getMembersForStructure(row.members, fun.structure_id).length > 0" class="pl-3 space-y-0.5">
+                                                <div
+                                                    v-for="member in getMembersForStructure(row.members, fun.structure_id)"
+                                                    :key="member.organization_id"
+                                                    class="flex items-start gap-1 text-[10px] text-slate-600 dark:text-slate-300"
+                                                >
+                                                    <span class="shrink-0 text-slate-400 dark:text-slate-500 leading-none mt-px">–</span>
+                                                    <span class="leading-tight">
+                                                        {{ member.name }}
+                                                        <span v-if="member.company_name" class="block text-[9px] text-slate-400 dark:text-slate-500 italic font-normal">{{ member.company_name }}</span>
+                                                    </span>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </template>
+
+                                        <!-- Children structures -->
+                                        <template v-if="fun.children && fun.children.length > 0">
+                                            <div v-for="child in fun.children" :key="child.structure_id" class="pl-3 space-y-0.5">
+                                                <!-- Child label -->
+                                                <div class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                                                    <span class="text-slate-300 dark:text-slate-600">└</span>
+                                                    {{ child.name }}
+                                                </div>
+
+                                                <!-- Child: AD HOC grouped -->
+                                                <template v-if="isAdHocStructure(child.name)">
+                                                    <div class="pl-2 space-y-1">
+                                                        <template v-for="grup in groupMembersByGrupFunction(getMembersForStructure(row.members, child.structure_id))" :key="grup.label">
+                                                            <div
+                                                                @click="toggleGrupCollapse(child.structure_id, grup.label)"
+                                                                class="flex items-center gap-1 cursor-pointer select-none rounded-md px-1.5 py-0.5 transition hover:bg-slate-100 dark:hover:bg-white/5"
+                                                            >
+                                                                <svg
+                                                                    class="h-2.5 w-2.5 shrink-0 text-blue-500 dark:text-blue-400 transition-transform duration-200"
+                                                                    :class="isGrupCollapsed(child.structure_id, grup.label) ? '-rotate-90' : 'rotate-0'"
+                                                                    fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"
+                                                                >
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                                                </svg>
+                                                                <span class="text-[10px] font-semibold text-blue-600 dark:text-blue-400">{{ grup.label }}</span>
+                                                                <span class="ml-auto text-[9px] text-slate-400 dark:text-slate-500">{{ grup.members.length }}</span>
+                                                            </div>
+                                                            <div v-show="!isGrupCollapsed(child.structure_id, grup.label)" class="pl-4 space-y-0.5">
+                                                                <div
+                                                                    v-for="member in grup.members"
+                                                                    :key="member.organization_id"
+                                                                    class="flex items-start gap-1 text-[10px] text-slate-600 dark:text-slate-300"
+                                                                >
+                                                                    <span class="shrink-0 text-slate-400 dark:text-slate-500 leading-none mt-px">–</span>
+                                                                    <span class="leading-tight">
+                                                                        {{ member.name }}
+                                                                        <span v-if="member.company_name" class="block text-[9px] text-slate-400 dark:text-slate-500 italic font-normal">{{ member.company_name }}</span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                        <div v-if="getMembersForStructure(row.members, child.structure_id).length === 0" class="text-[9px] italic text-slate-400 dark:text-slate-500 pl-1">—</div>
+                                                    </div>
+                                                </template>
+
+                                                <!-- Child: normal flat list -->
+                                                <template v-else>
+                                                    <div v-if="getMembersForStructure(row.members, child.structure_id).length > 0" class="pl-4 space-y-0.5">
+                                                        <div
+                                                            v-for="member in getMembersForStructure(row.members, child.structure_id)"
+                                                            :key="member.organization_id"
+                                                            class="flex items-start gap-1 text-[10px] text-slate-600 dark:text-slate-300"
+                                                        >
+                                                            <span class="shrink-0 text-slate-400 dark:text-slate-500 leading-none mt-px">–</span>
+                                                            <span class="leading-tight">
+                                                                {{ member.name }}
+                                                                <span v-if="member.company_name" class="block text-[9px] text-slate-400 dark:text-slate-500 italic font-normal">{{ member.company_name }}</span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div v-else class="pl-4 text-[9px] text-slate-400 dark:text-slate-500 italic">—</div>
+                                                </template>
+                                            </div>
+                                        </template>
                                     </template>
                                 </div>
                                 <span v-else class="text-slate-400 dark:text-slate-500">—</span>
                             </td>
+
                             <td class="px-3 py-2 text-center w-40 align-top">
-                                <div class="flex items-center justify-center gap-1.5">
+                                <div class="flex flex-col gap-1 items-center justify-center">
                                     <button
                                         @click="openFunctionModal(row)"
-                                        class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[10px] font-semibold text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5 transition"
+                                        class="inline-flex items-center justify-center rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 dark:text-blue-400 px-3 py-1 text-[10px] font-semibold transition w-full max-w-[96px]"
                                     >
-                                        <svg class="h-3 w-3 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        Kelola Fungsi
+                                        Structure
                                     </button>
                                     <button
                                         @click="openEditModal(row)"
-                                        class="inline-flex items-center justify-center rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white transition"
-                                        title="Edit Organisasi"
+                                        class="inline-flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-white/10 dark:hover:bg-white/20 dark:text-slate-200 px-3 py-1 text-[10px] font-semibold transition w-full max-w-[96px]"
                                     >
-                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
+                                        Edit
                                     </button>
                                     <button
                                         @click="openDeleteModal(row)"
-                                        class="inline-flex items-center justify-center rounded-lg p-1.5 text-red-500 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-500/10 dark:hover:text-red-300 transition"
-                                        title="Hapus Organisasi"
+                                        class="inline-flex items-center justify-center rounded-full bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-500/10 dark:hover:bg-red-500/20 dark:text-red-400 px-3 py-1 text-[10px] font-semibold transition w-full max-w-[96px]"
                                     >
-                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
+                                        Hapus
                                     </button>
                                 </div>
                             </td>
@@ -265,11 +350,11 @@
         </div>
     </ConfirmationModal>
 
-    <!-- Kelola Fungsi Modal -->
+    <!-- Kelola Structure Modal -->
     <ConfirmationModal
         :show="isFunctionModalOpen"
-        :title="`Kelola Fungsi - ${selectedFunctional?.name}`"
-        message="Berikut adalah daftar fungsi (struktur internal) yang dikaitkan dengan organisasi fungsional ini."
+        :title="`Kelola Structure - ${selectedFunctional?.name}`"
+        message="Berikut adalah daftar structure (struktur internal) yang dikaitkan dengan organisasi fungsional ini."
         confirm-text="Tutup"
         cancel-text=""
         type="info"
@@ -279,11 +364,11 @@
         @confirm="isFunctionModalOpen = false"
     >
         <div class="mt-4 space-y-4 text-left">
-            <!-- Add Function Form -->
+            <!-- Add Structure Form -->
             <form @submit.prevent="submitAddFunction" class="flex flex-col gap-3 p-3 bg-slate-50 rounded-xl dark:bg-white/5 border border-slate-200 dark:border-white/10">
-                <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">Tambah Fungsi Baru</h4>
+                <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">Tambah Structure Baru</h4>
                 <div class="flex flex-col gap-1.5">
-                    <label for="function_name_input" class="text-[10px] font-semibold text-slate-600 dark:text-slate-400">Nama Fungsi / Struktur Internal</label>
+                    <label for="function_name_input" class="text-[10px] font-semibold text-slate-600 dark:text-slate-400">Nama Structure / Struktur Internal</label>
                     <div class="flex gap-2">
                         <input
                             id="function_name_input"
@@ -305,28 +390,68 @@
                 </div>
                 <!-- Parent Selector -->
                 <div class="flex flex-col gap-1">
-                    <label for="function_parent_input" class="text-[10px] font-semibold text-slate-600 dark:text-slate-400">Parent Fungsi <span class="font-normal text-slate-400">(opsional)</span></label>
-                    <select
-                        id="function_parent_input"
-                        v-model="functionForm.parent_id"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
-                    >
-                        <option :value="null">— Tanpa Parent (Root) —</option>
-                        <option
-                            v-for="fun in selectedFunctional?.functions ?? []"
-                            :key="fun.structure_id"
-                            :value="fun.structure_id"
-                        >
-                            {{ fun.name }}
-                        </option>
-                    </select>
+                    <label class="text-[10px] font-semibold text-slate-600 dark:text-slate-400">Parent Structure <span class="font-normal text-slate-400">(opsional)</span></label>
+                    <!-- Custom listbox (scrollable, clickable) -->
+                    <div class="rounded-lg border border-slate-300 bg-white dark:border-white/10 dark:bg-[#1a1a1a] overflow-hidden">
+                        <!-- Search bar -->
+                        <div class="px-2 py-1.5 border-b border-slate-200 dark:border-white/10">
+                            <input
+                                v-model="functionParentSearch"
+                                type="text"
+                                placeholder="Cari parent structure..."
+                                class="w-full rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] text-slate-900 focus:border-slate-400 focus:outline-none dark:border-white/10 dark:bg-white/5 dark:text-white placeholder-slate-400"
+                            />
+                        </div>
+                        <!-- Scrollable list -->
+                        <ul class="max-h-44 overflow-y-auto">
+                            <!-- Option for Root/Tanpa Parent -->
+                            <li
+                                @click="functionForm.parent_id = null"
+                                class="flex items-center cursor-pointer py-1.5 px-3 text-[11px] border-b border-slate-50 dark:border-white/5 transition select-none font-medium text-slate-600 dark:text-slate-400"
+                                :class="functionForm.parent_id === null
+                                    ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 font-semibold'
+                                    : 'hover:bg-slate-50 dark:hover:bg-white/5'"
+                            >
+                                — Tanpa Parent (Root) —
+                            </li>
+                            <li v-if="filteredParentFunctions.length === 0 && functionParentSearch"
+                                class="px-3 py-2 text-[11px] text-slate-400 dark:text-slate-500 text-center italic">
+                                Tidak ada structure tersedia
+                            </li>
+                            <li
+                                v-for="fun in filteredParentFunctions"
+                                :key="fun.structure_id"
+                                @click="functionForm.parent_id = fun.structure_id"
+                                class="flex items-center cursor-pointer py-1.5 pr-3 text-[11px] border-b border-slate-50 dark:border-white/5 last:border-0 transition select-none"
+                                :style="{ paddingLeft: `${8 + (fun._level || 0) * 14}px` }"
+                                :class="functionForm.parent_id === fun.structure_id
+                                    ? 'bg-blue-50 dark:bg-blue-500/10'
+                                    : 'hover:bg-slate-50 dark:hover:bg-white/5'"
+                            >
+                                <!-- — prefix with level-based styling -->
+                                <span
+                                    class="mr-1.5 shrink-0 font-medium"
+                                    :class="fun._level === 0
+                                        ? 'text-slate-600 dark:text-slate-400'
+                                        : 'text-slate-400 dark:text-slate-500'"
+                                >—</span>
+                                <span
+                                    :class="functionForm.parent_id === fun.structure_id
+                                        ? 'font-semibold text-blue-700 dark:text-blue-300'
+                                        : fun._level === 0
+                                            ? 'font-medium text-slate-800 dark:text-slate-200'
+                                            : 'text-slate-600 dark:text-slate-400'"
+                                >{{ fun.name }}</span>
+                            </li>
+                        </ul>
+                    </div>
                     <span v-if="functionForm.errors.parent_id" class="text-[10px] text-red-500 font-medium">{{ functionForm.errors.parent_id }}</span>
                 </div>
             </form>
 
-            <!-- List of Current Functions (tree) -->
+            <!-- List of Current Structures (tree) -->
             <div class="space-y-3">
-                <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">Daftar Fungsi Saat Ini</h4>
+                <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">Daftar Structure Saat Ini</h4>
                 <div v-if="selectedFunctional?.functions && selectedFunctional.functions.length > 0" class="space-y-2 max-h-72 overflow-y-auto pr-1">
                     <template v-for="fun in buildTree(selectedFunctional?.functions ?? [])" :key="fun.structure_id">
                         <!-- Root item -->
@@ -347,7 +472,7 @@
                                     </button>
                                     <button type="button" @click="deleteFunction(fun.structure_id)"
                                         class="inline-flex items-center justify-center rounded-lg p-1.5 text-red-500 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-500/10 transition"
-                                        title="Hapus Fungsi">
+                                        title="Hapus Structure">
                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>
@@ -373,7 +498,7 @@
                                         </button>
                                         <button type="button" @click="deleteFunction(child.structure_id)"
                                             class="inline-flex items-center justify-center rounded-lg p-1.5 text-red-500 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-500/10 transition"
-                                            title="Hapus Sub-Fungsi">
+                                            title="Hapus Sub-Structure">
                                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
@@ -385,7 +510,7 @@
                     </template>
                 </div>
                 <div v-else class="text-xs text-slate-500 dark:text-slate-400 py-6 text-center border border-dashed border-slate-200 rounded-xl dark:border-white/10">
-                    Belum ada fungsi. Silakan ketik nama fungsi di atas untuk menambahkan.
+                    Belum ada structure. Silakan ketik nama structure di atas untuk menambahkan.
                 </div>
             </div>
         </div>
@@ -394,73 +519,142 @@
     <!-- Kelola Anggota Modal -->
     <ConfirmationModal
         :show="isMemberModalOpen"
-        :title="`Kelola Anggota - ${selectedStructure?.name} (${selectedFunctional?.name})`"
-        message="Berikut adalah daftar anggota (jabatan) yang tergabung dalam fungsi ini."
+        :title="`Kelola Anggota — ${selectedStructure?.name}`"
+        :message="selectedFunctional?.name ? `Organisasi: ${selectedFunctional.name}` : 'Berikut adalah daftar anggota yang tergabung dalam structure ini.'"
         confirm-text="Tutup"
         cancel-text=""
         type="info"
         :loading="memberForm.processing"
-        max-width="lg"
-        @close="isMemberModalOpen = false"
-        @confirm="isMemberModalOpen = false"
+        max-width="xl"
+        @close="closeMemberModal"
+        @confirm="closeMemberModal"
     >
         <div class="mt-4 space-y-4 text-left">
             <!-- Add Member Form -->
             <form @submit.prevent="submitAddMember" class="flex flex-col gap-3 p-3 bg-slate-50 rounded-xl dark:bg-white/5 border border-slate-200 dark:border-white/10">
                 <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">Tambah Anggota Baru</h4>
-                <div class="flex flex-col gap-1.5">
+                <!-- Pilih Perusahaan (Company) -->
+                <div class="flex flex-col gap-1">
+                    <label for="member_company_id" class="text-[10px] font-semibold text-slate-600 dark:text-slate-400">Pilih Perusahaan (Company)</label>
+                    <select
+                        id="member_company_id"
+                        v-model="memberCompanyId"
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    >
+                        <option value="">— Pilih Perusahaan —</option>
+                        <option
+                            v-for="company in companies"
+                            :key="company.id"
+                            :value="String(company.id)"
+                        >
+                            {{ company.name }}
+                        </option>
+                    </select>
+                </div>
+                <div class="flex flex-col gap-2">
                     <label for="member_organization_id" class="text-[10px] font-semibold text-slate-600 dark:text-slate-400">Pilih Jabatan (BOD)</label>
-                    <div class="flex gap-2">
-                        <select
-                            id="member_organization_id"
-                            v-model="memberForm.organization_id"
-                            class="flex-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
-                            required
-                        >
-                            <option value="" disabled>Pilih Jabatan...</option>
-                            <option v-for="bod in availableBodsForCompany" :key="bod.id" :value="bod.id">
-                                {{ bod.name }} {{ bod.pejabat ? '(' + bod.pejabat + ')' : '' }}
-                            </option>
-                        </select>
-                        <button
-                            type="submit"
-                            :disabled="memberForm.processing"
-                            class="inline-flex items-center justify-center rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-all focus:outline-none"
-                        >
-                            {{ memberForm.processing ? 'Adding...' : 'Tambah' }}
-                        </button>
+                    <!-- Custom listbox (scrollable, clickable) -->
+                    <div class="rounded-lg border border-slate-300 bg-white dark:border-white/10 dark:bg-[#1a1a1a] overflow-hidden">
+                        <!-- Search bar -->
+                        <div class="px-2 py-1.5 border-b border-slate-200 dark:border-white/10">
+                            <input
+                                v-model="bodSearch"
+                                type="text"
+                                placeholder="Cari jabatan..."
+                                class="w-full rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] text-slate-900 focus:border-slate-400 focus:outline-none dark:border-white/10 dark:bg-white/5 dark:text-white placeholder-slate-400"
+                            />
+                        </div>
+                        <!-- Scrollable list -->
+                        <ul class="max-h-44 overflow-y-auto">
+                            <li v-if="filteredAvailableBods.length === 0"
+                                class="px-3 py-2 text-[11px] text-slate-400 dark:text-slate-500 text-center italic">
+                                Tidak ada jabatan tersedia
+                            </li>
+                            <li
+                                v-for="bod in filteredAvailableBods"
+                                :key="bod.id"
+                                @click="memberForm.organization_id = bod.id"
+                                class="flex items-center cursor-pointer py-1.5 pr-3 text-[11px] border-b border-slate-50 dark:border-white/5 last:border-0 transition select-none"
+                                :style="{ paddingLeft: `${8 + (bod._level || 0) * 14}px` }"
+                                :class="memberForm.organization_id === bod.id
+                                    ? 'bg-blue-50 dark:bg-blue-500/10'
+                                    : 'hover:bg-slate-50 dark:hover:bg-white/5'"
+                            >
+                                <!-- — prefix with level-based styling -->
+                                <span
+                                    class="mr-1.5 shrink-0 font-medium"
+                                    :class="bod._level === 0
+                                        ? 'text-slate-600 dark:text-slate-400'
+                                        : 'text-slate-400 dark:text-slate-500'"
+                                >—</span>
+                                <span
+                                    :class="memberForm.organization_id === bod.id
+                                        ? 'font-semibold text-blue-700 dark:text-blue-300'
+                                        : bod._level === 0
+                                            ? 'font-medium text-slate-800 dark:text-slate-200'
+                                            : 'text-slate-600 dark:text-slate-400'"
+                                >{{ bod.name }}</span>
+                            </li>
+                        </ul>
                     </div>
+                    <!-- Selected label -->
+                    <p v-if="memberForm.organization_id" class="text-[10px] text-blue-600 dark:text-blue-400 font-medium">
+                        ✓ Dipilih: {{ selectedBodName }}
+                    </p>
                     <span v-if="memberForm.errors.organization_id" class="text-[10px] text-red-500 font-medium">{{ memberForm.errors.organization_id }}</span>
+                    <button
+                        type="submit"
+                        :disabled="memberForm.processing || !memberForm.organization_id"
+                        class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 text-xs font-semibold shadow-sm transition-all focus:outline-none"
+                    >
+                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        {{ memberForm.processing ? 'Menambahkan...' : 'Tambah Anggota' }}
+                    </button>
                 </div>
             </form>
 
             <!-- List of Current Members -->
-            <div class="space-y-3">
-                <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">Daftar Anggota Saat Ini</h4>
-                <div v-if="currentMembersForStructure.length > 0" class="space-y-2 max-h-64 overflow-y-auto pr-1">
+            <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">Daftar Anggota Saat Ini</h4>
+                    <span v-if="currentMembersForStructure.length > 0" class="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700 ring-1 ring-inset ring-blue-200 dark:bg-blue-500/10 dark:text-blue-300 dark:ring-blue-500/20">
+                        {{ currentMembersForStructure.length }} anggota
+                    </span>
+                </div>
+                <div v-if="currentMembersForStructure.length > 0" class="space-y-1.5 max-h-56 overflow-y-auto pr-1">
                     <div
                         v-for="member in currentMembersForStructure"
                         :key="member.organization_id"
-                        class="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-white shadow-sm dark:border-white/5 dark:bg-[#1a1a1a] transition hover:shadow-md"
+                        class="flex items-center justify-between px-3 py-2 rounded-lg border border-slate-100 bg-white dark:border-white/5 dark:bg-[#1a1a1a] hover:bg-slate-50 dark:hover:bg-white/5 transition"
                     >
-                        <div>
-                            <div class="text-xs font-semibold text-slate-900 dark:text-white">{{ member.name }}</div>
-                            <div class="text-[9px] text-slate-500 dark:text-slate-400 font-mono mt-0.5" v-if="member.pejabat">Pejabat: {{ member.pejabat }}</div>
+                        <div class="flex items-center gap-2">
+                            <span class="flex h-1.5 w-1.5 rounded-full bg-blue-500 shrink-0"></span>
+                            <div class="text-xs font-medium text-slate-800 dark:text-slate-200">
+                                {{ member.name }}
+                                <span v-if="member.company_name" class="ml-1 text-[10px] text-slate-400 dark:text-slate-500 font-normal">
+                                    ({{ member.company_name }})
+                                </span>
+                            </div>
                         </div>
                         <button
                             type="button"
                             @click="deleteMember(member.organization_id)"
-                            class="inline-flex items-center justify-center rounded-lg p-1.5 text-red-500 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-500/10 dark:hover:text-red-300 transition"
+                            class="inline-flex items-center justify-center rounded-md p-1 text-red-400 hover:bg-red-50 hover:text-red-600 dark:text-red-400 dark:hover:bg-red-500/10 dark:hover:text-red-300 transition shrink-0"
                             title="Hapus Anggota"
                         >
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
                         </button>
                     </div>
                 </div>
-                <div v-else class="text-xs text-slate-500 dark:text-slate-400 py-6 text-center border border-dashed border-slate-200 rounded-xl dark:border-white/10">
-                    Belum ada anggota. Silakan pilih jabatan di atas untuk menambahkan.
+                <div v-else class="flex flex-col items-center justify-center gap-2 py-8 text-center border border-dashed border-slate-200 rounded-xl dark:border-white/10">
+                    <svg class="h-8 w-8 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                    </svg>
+                    <p class="text-xs text-slate-400 dark:text-slate-500">Belum ada anggota.<br>Pilih jabatan di atas untuk menambahkan.</p>
                 </div>
             </div>
         </div>
@@ -516,9 +710,15 @@ const isModalOpen = ref(false);
 const isDeleteModalOpen = ref(false);
 const isFunctionModalOpen = ref(false);
 const isMemberModalOpen = ref(false);
+const memberCompanyId = ref('');
 const selectedFunctional = ref(null);
 const selectedStructure = ref(null);
 const modalMode = ref('create'); // 'create' or 'edit'
+
+watch(memberCompanyId, () => {
+    memberForm.organization_id = '';
+    bodSearch.value = '';
+});
 
 const form = useForm({
     company_id: '',
@@ -546,7 +746,7 @@ const currentMembersForStructure = computed(() => {
 
 const availableBodsForCompany = computed(() => {
     if (!selectedFunctional.value || !selectedStructure.value) return [];
-    const targetCompanyId = selectedFunctional.value.company_id;
+    const targetCompanyId = memberCompanyId.value;
     let list = props.bods;
     if (targetCompanyId) {
         list = list.filter(b => String(b.company_id) === String(targetCompanyId));
@@ -597,6 +797,76 @@ const getFunctionName = (functionsList, structureId) => {
     return fn ? fn.name : '—';
 };
 
+const bodSearch = ref('');
+
+/**
+ * Flatten a parent-child array (with parent_id/id fields) into an ordered
+ * flat list preserving tree order, each item annotated with `_level`.
+ * idKey/parentKey default to 'id' and 'parent_id'.
+ */
+const flattenWithLevel = (items, idKey = 'id', parentKey = 'parent_id') => {
+    if (!items || items.length === 0) return [];
+    const map = {};
+    const roots = [];
+    items.forEach(item => { map[item[idKey]] = { ...item, _children: [], _level: 0 }; });
+    items.forEach(item => {
+        if (item[parentKey] && map[item[parentKey]]) {
+            map[item[parentKey]]._children.push(map[item[idKey]]);
+        } else {
+            roots.push(map[item[idKey]]);
+        }
+    });
+    const result = [];
+    const walk = (node, level) => {
+        node._level = level;
+        result.push(node);
+        node._children.forEach(child => walk(child, level + 1));
+    };
+    roots.forEach(r => walk(r, 0));
+    return result;
+};
+
+const flatAvailableBods = computed(() => flattenWithLevel(availableBodsForCompany.value));
+
+const filteredAvailableBods = computed(() => {
+    const q = bodSearch.value.toLowerCase().trim();
+    if (!q) return flatAvailableBods.value;
+    // When searching, filter flat (ignore hierarchy)
+    return availableBodsForCompany.value
+        .filter(b => b.name.toLowerCase().includes(q))
+        .map(b => ({ ...b, _level: 0 }));
+});
+
+const selectedBodName = computed(() => {
+    if (!memberForm.organization_id) return '';
+    const bod = props.bods.find(b => Number(b.id) === Number(memberForm.organization_id));
+    if (!bod) return '';
+    return bod.company_name ? `${bod.name} (${bod.company_name})` : bod.name;
+});
+
+const functionParentSearch = ref('');
+
+const flatAvailableFunctions = computed(() => {
+    return flattenWithLevel(selectedFunctional.value?.functions ?? [], 'structure_id', 'parent_id');
+});
+
+const filteredParentFunctions = computed(() => {
+    const q = functionParentSearch.value.toLowerCase().trim();
+    if (!q) return flatAvailableFunctions.value;
+    // When searching, filter flat (ignore hierarchy)
+    return (selectedFunctional.value?.functions ?? [])
+        .filter(f => f.name.toLowerCase().includes(q))
+        .map(f => ({ ...f, _level: 0 }));
+});
+
+const selectedParentFunctionName = computed(() => {
+    if (functionForm.parent_id === null || functionForm.parent_id === undefined) {
+        return '— Tanpa Parent (Root) —';
+    }
+    const fn = (selectedFunctional.value?.functions ?? []).find(f => Number(f.structure_id) === Number(functionForm.parent_id));
+    return fn ? fn.name : '';
+});
+
 const getMembersForStructure = (members, structureId) => {
     return (members || []).filter(m => Number(m.structure_id) === Number(structureId));
 };
@@ -621,6 +891,65 @@ const buildTree = (functions) => {
     });
     return roots;
 };
+
+// ─── AD HOC Grouping Helpers ─────────────────────────────────────────────────
+
+/**
+ * Returns true if the structure name contains "ad hoc" (case-insensitive).
+ * Used to trigger grup_function grouping in the Anggota column.
+ */
+const isAdHocStructure = (name) => {
+    return (name || '').toLowerCase().includes('ad hoc');
+};
+
+/**
+ * Groups an array of members by their `grup_function` field.
+ * Members without grup_function are collected under "Lainnya".
+ * Returns [{ label, members[] }, ...] sorted by label.
+ */
+const groupMembersByGrupFunction = (members) => {
+    if (!members || members.length === 0) return [];
+    const grouped = {};
+    members.forEach(member => {
+        const key = (member.grup_function || '').trim() || 'Lainnya';
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(member);
+    });
+    // Sort: prioritize Holding > Subholding > APFS > others > Lainnya
+    const ORDER = ['Holding', 'Subholding', 'APFS'];
+    return Object.keys(grouped)
+        .sort((a, b) => {
+            const ai = ORDER.indexOf(a);
+            const bi = ORDER.indexOf(b);
+            if (a === 'Lainnya') return 1;
+            if (b === 'Lainnya') return -1;
+            if (ai === -1 && bi === -1) return a.localeCompare(b);
+            if (ai === -1) return 1;
+            if (bi === -1) return -1;
+            return ai - bi;
+        })
+        .map(label => ({ label, members: grouped[label] }));
+};
+
+/**
+ * Reactive map: key = `${structureId}__${grupLabel}`, value = true (collapsed).
+ * All groups start expanded (no key = expanded).
+ */
+const collapsedGrups = ref({});
+
+const toggleGrupCollapse = (structureId, grupLabel) => {
+    const key = `${structureId}__${grupLabel}`;
+    collapsedGrups.value = {
+        ...collapsedGrups.value,
+        [key]: !collapsedGrups.value[key],
+    };
+};
+
+const isGrupCollapsed = (structureId, grupLabel) => {
+    const key = `${structureId}__${grupLabel}`;
+    return !!collapsedGrups.value[key];
+};
+
 
 const openCreateModal = () => {
     modalMode.value = 'create';
@@ -650,15 +979,34 @@ const openFunctionModal = (row) => {
     functionForm.reset();
     functionForm.functional_org_id = row.id;
     functionForm.parent_id = null;
+    functionParentSearch.value = '';
     isFunctionModalOpen.value = true;
 };
 
 const openMemberModalForStructure = (fun) => {
+    // Refresh selectedFunctional dari props agar company_id selalu terbaru
+    const freshRow = props.functionalOrganizations.find(f => f.id === selectedFunctional.value?.id);
+    if (freshRow) selectedFunctional.value = freshRow;
+
     selectedStructure.value = fun;
     memberForm.clearErrors();
     memberForm.reset();
     memberForm.structure_id = fun.structure_id;
+    bodSearch.value = '';
+    
+    // Set default company to the current organization's company
+    memberCompanyId.value = selectedFunctional.value?.company_id ? String(selectedFunctional.value.company_id) : '';
+
+    // Tutup modal fungsi sebelum buka modal anggota agar tidak overlap
+    isFunctionModalOpen.value = false;
     isMemberModalOpen.value = true;
+};
+
+const closeMemberModal = () => {
+    isMemberModalOpen.value = false;
+    bodSearch.value = '';
+    // Kembalikan ke modal fungsi agar user dapat terus mengelola fungsi
+    isFunctionModalOpen.value = true;
 };
 
 const submitForm = () => {
@@ -692,6 +1040,7 @@ const submitAddFunction = () => {
         onSuccess: () => {
             functionForm.reset('name');
             functionForm.parent_id = null;
+            functionParentSearch.value = '';
             const updatedRow = props.functionalOrganizations.find(f => f.id === selectedFunctional.value.id);
             if (updatedRow) {
                 selectedFunctional.value = updatedRow;

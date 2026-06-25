@@ -80,4 +80,21 @@ class MstFunction extends Model
     {
         return $this->hasMany(TrsFunctionalStructure::class, 'functional_id');
     }
+
+    /**
+     * Relasi ke MstBod melalui trs_function_organization.
+     */
+    public function organizations(): BelongsToMany
+    {
+        return $this->belongsToMany(MstBod::class, 'trs_function_organization', 'function_id', 'organization_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Relasi ke TrsFunctionOrganization.
+     */
+    public function trsFunctionOrganizations(): HasMany
+    {
+        return $this->hasMany(TrsFunctionOrganization::class, 'function_id');
+    }
 }

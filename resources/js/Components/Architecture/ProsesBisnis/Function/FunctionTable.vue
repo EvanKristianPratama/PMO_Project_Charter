@@ -60,6 +60,7 @@
                         <th class="px-0 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-16">Company</th>
                         <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Function Name</th>
                         <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Alias</th>
+                        <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Organization</th>
                         <th class="px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Description</th>
                         <th class="px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 w-36">Actions</th>
                     </tr>
@@ -107,6 +108,14 @@
                         <td class="px-4 py-2 text-slate-600 dark:text-slate-300 text-xs">
                             {{ displayValue(fn.alias) }}
                         </td>
+                        <td class="px-4 py-2 text-slate-600 dark:text-slate-300 text-xs">
+                            <div v-if="fn.organizations && fn.organizations.length > 0" class="space-y-1">
+                                <div v-for="org in fn.organizations" :key="org.id">
+                                    {{ getBodLabel(org.id) }}
+                                </div>
+                            </div>
+                            <span v-else class="text-slate-400 italic">-</span>
+                        </td>
                         <td class="px-4 py-2 text-slate-500 dark:text-slate-400 text-xs whitespace-pre-wrap break-words">
                             {{ fn.deskripsi || '-' }}
                         </td>
@@ -128,7 +137,7 @@
                         </td>
                     </tr>
                     <tr v-if="visibleRows.length === 0">
-                        <td colspan="5" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+                        <td colspan="6" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
                             Data function tidak ditemukan.
                         </td>
                     </tr>
@@ -183,6 +192,86 @@
                 <span v-if="form.errors.parent_id" class="text-xs text-red-500 font-medium">{{ form.errors.parent_id }}</span>
             </div>
 
+
+            <!-- Organization Input -->
+            <div class="flex flex-col gap-1.5 relative">
+                <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Organization</label>
+                
+                <div class="relative">
+                    <button 
+                        type="button"
+                        @click="toggleBodDropdown"
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-left focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white flex justify-between items-center"
+                    >
+                        <span class="truncate text-slate-400 dark:text-slate-500">
+                            -- Pilih Organization --
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-slate-400 shrink-0">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div v-if="isBodDropdownOpen" class="fixed inset-0 z-30" @click="isBodDropdownOpen = false"></div>
+
+                <div v-if="isBodDropdownOpen" class="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl dark:bg-[#1a1a1a] dark:border-white/10 z-40 max-h-60 overflow-y-auto p-2 space-y-2">
+                    <div class="sticky top-0 bg-white dark:bg-[#1a1a1a] pb-1.5">
+                        <input 
+                            type="text" 
+                            v-model="bodSearchQuery" 
+                            placeholder="Cari organization atau pejabat..." 
+                            class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-slate-500/20 dark:bg-black/20 dark:text-white dark:border-white/10"
+                            ref="bodSearchInput"
+                            @click.stop
+                        />
+                    </div>
+                    
+                    <div class="space-y-0.5">
+                        <button
+                            v-for="bod in filteredBodOptions" 
+                            :key="bod.id"
+                            type="button"
+                            @click="toggleBod(bod.id)"
+                            :class="[
+                                'w-full text-left px-2.5 py-1.5 text-xs rounded hover:bg-slate-100 dark:hover:bg-white/5 transition flex items-center justify-between',
+                                form.organization_ids.includes(bod.id) ? 'bg-slate-100 text-slate-900 dark:bg-white/10 dark:text-white font-semibold' : 'text-slate-700 dark:text-slate-300'
+                            ]"
+                        >
+                            <span class="truncate">
+                                {{ getLevelPrefixForDepth(bod.depth) }}{{ getBodDisplayName(bod) }}
+                            </span>
+                            <svg v-if="form.organization_ids.includes(bod.id)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-slate-900 dark:text-white shrink-0">
+                                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <div v-if="filteredBodOptions.length === 0" class="text-center py-4 text-xs text-slate-400">
+                            Tidak ada hasil ditemukan.
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="form.organization_ids.length > 0" class="mt-2 flex flex-wrap gap-1.5">
+                    <span 
+                        v-for="id in form.organization_ids" 
+                        :key="id"
+                        class="inline-flex items-center gap-1 rounded-lg bg-slate-100 pl-2.5 pr-1.5 py-1 text-xs font-medium text-slate-700 dark:bg-white/5 dark:text-slate-300 border border-slate-200 dark:border-white/10"
+                    >
+                        <span class="max-w-[200px] truncate">
+                            {{ getBodLabel(id) }}
+                        </span>
+                        <button 
+                            type="button" 
+                            @click="removeBodId(id)"
+                            class="rounded-full p-0.5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3">
+                                <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                            </svg>
+                        </button>
+                    </span>
+                </div>
+                <span v-if="form.errors.organization_ids" class="text-xs text-red-500 font-medium">{{ form.errors.organization_ids }}</span>
+            </div>
 
 
             <!-- Name Input -->
@@ -339,6 +428,10 @@ const props = defineProps({
         default: () => [],
     },
     companyOptions: {
+        type: Array,
+        default: () => [],
+    },
+    bodOptions: {
         type: Array,
         default: () => [],
     },
@@ -533,7 +626,10 @@ const matchesSearch = (node) => {
         (reg.judul || '').toLowerCase().includes(q) ||
         (reg.nomor || '').toLowerCase().includes(q)
     );
-    return matchesName || matchesAlias || matchesDesc || matchesReg;
+    const matchesBod = (node.organizations || []).some(org =>
+        getBodLabel(org.id).toLowerCase().includes(q)
+    );
+    return matchesName || matchesAlias || matchesDesc || matchesReg || matchesBod;
 };
 
 const shouldShowNode = (node) => {
@@ -687,10 +783,13 @@ const isDeleteModalOpen = ref(false);
 const selectedFn = ref(null);
 const modalMode = ref('create');
 const regulationSearchQuery = ref('');
+const bodSearchQuery = ref('');
 
 // Dropdown selector state & helpers
 const isRegulationDropdownOpen = ref(false);
 const regulationSearchInput = ref(null);
+const isBodDropdownOpen = ref(false);
+const bodSearchInput = ref(null);
 
 const toggleRegulationDropdown = () => {
     isRegulationDropdownOpen.value = !isRegulationDropdownOpen.value;
@@ -706,6 +805,89 @@ const removeRegulationId = (id) => {
     const index = form.regulation_ids.indexOf(id);
     if (index > -1) {
         form.regulation_ids.splice(index, 1);
+    }
+};
+
+const toggleBodDropdown = () => {
+    isBodDropdownOpen.value = !isBodDropdownOpen.value;
+    if (isBodDropdownOpen.value) {
+        bodSearchQuery.value = '';
+        setTimeout(() => {
+            bodSearchInput.value?.focus();
+        }, 100);
+    }
+};
+
+const getBodDisplayName = (bod) => {
+    const name = bod.name || '-';
+    const alias = bod.alias ? ` (${bod.alias})` : '';
+    return `${name}${alias}`;
+};
+
+const getLevelPrefixForDepth = (depth) => {
+    if (!depth) return '';
+    return '\u00A0\u00A0'.repeat(depth) + '- ';
+};
+
+const bodOptionsWithDepth = computed(() => {
+    const map = new Map(props.bodOptions.map(bod => [bod.id, { ...bod, children: [] }]));
+    const roots = [];
+
+    props.bodOptions.forEach(bod => {
+        const node = map.get(bod.id);
+        if (bod.parent_id && map.has(bod.parent_id)) {
+            map.get(bod.parent_id).children.push(node);
+        } else {
+            roots.push(node);
+        }
+    });
+
+    const sortNodes = (nodes) => {
+        nodes.sort((a, b) => Number(a.order ?? 0) - Number(b.order ?? 0) || (a.name || '').localeCompare(b.name || ''));
+        nodes.forEach(node => sortNodes(node.children));
+    };
+    sortNodes(roots);
+
+    const flattened = [];
+    const traverse = (node, depth = 0) => {
+        flattened.push({ ...node, depth });
+        node.children.forEach(child => traverse(child, depth + 1));
+    };
+    roots.forEach(root => traverse(root));
+
+    return flattened;
+});
+
+const filteredBodOptions = computed(() => {
+    const query = bodSearchQuery.value.toLowerCase().trim();
+    const pool = bodOptionsWithDepth.value;
+    if (!query) return pool;
+    return pool.filter(bod =>
+        (bod.name || '').toLowerCase().includes(query) ||
+        (bod.alias || '').toLowerCase().includes(query) ||
+        (bod.pejabat || '').toLowerCase().includes(query) ||
+        (bod.tipe || '').toLowerCase().includes(query)
+    );
+});
+
+const getBodLabel = (id) => {
+    const bod = props.bodOptions.find(item => Number(item.id) === Number(id));
+    return bod ? getBodDisplayName(bod) : '';
+};
+
+const toggleBod = (id) => {
+    const index = form.organization_ids.indexOf(id);
+    if (index > -1) {
+        form.organization_ids.splice(index, 1);
+    } else {
+        form.organization_ids.push(id);
+    }
+};
+
+const removeBodId = (id) => {
+    const index = form.organization_ids.indexOf(id);
+    if (index > -1) {
+        form.organization_ids.splice(index, 1);
     }
 };
 
@@ -740,6 +922,7 @@ const form = useForm({
     alias: '',
     deskripsi: '',
     regulation_ids: [],
+    organization_ids: [],
 });
 
 /** Opsi parent di modal — exclude diri sendiri & turunannya saat edit, pre-filtered by company if selected */
@@ -810,6 +993,8 @@ const openCreateModal = () => {
     form.reset();
     regulationSearchQuery.value = '';
     isRegulationDropdownOpen.value = false;
+    bodSearchQuery.value = '';
+    isBodDropdownOpen.value = false;
     isModalOpen.value = true;
 };
 
@@ -823,8 +1008,11 @@ const openEditModal = (fn) => {
     form.alias = fn.alias || '';
     form.deskripsi = fn.deskripsi || '';
     form.regulation_ids = fn.regulations ? fn.regulations.map(r => r.id) : [];
+    form.organization_ids = fn.organizations ? fn.organizations.map(o => o.id) : [];
     regulationSearchQuery.value = '';
     isRegulationDropdownOpen.value = false;
+    bodSearchQuery.value = '';
+    isBodDropdownOpen.value = false;
 
     isModalOpen.value = true;
 };

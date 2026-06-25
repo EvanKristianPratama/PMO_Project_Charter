@@ -11,7 +11,7 @@ class FunctionService
      */
     public function getFunctions()
     {
-        return MstFunction::with(['company', 'regulations'])->orderBy('name')->get();
+        return MstFunction::with(['company', 'regulations', 'organizations'])->orderBy('name')->get();
     }
 
     /**
@@ -28,6 +28,7 @@ class FunctionService
         ]);
 
         $function->regulations()->sync($payload['regulation_ids'] ?? []);
+        $function->organizations()->sync($payload['organization_ids'] ?? []);
 
         return $function;
     }
@@ -46,6 +47,7 @@ class FunctionService
         ]);
 
         $function->regulations()->sync($payload['regulation_ids'] ?? []);
+        $function->organizations()->sync($payload['organization_ids'] ?? []);
 
         return $function->refresh();
     }
@@ -57,6 +59,7 @@ class FunctionService
     {
         // Unsync regulations first to avoid orphaned mapping rows
         $function->regulations()->detach();
+        $function->organizations()->detach();
         $function->delete();
     }
 }

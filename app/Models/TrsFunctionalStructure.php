@@ -30,7 +30,7 @@ class TrsFunctionalStructure extends Model
     }
 
     /**
-     * Child structures (recursive children).
+     * Child structures (direct children).
      */
     public function children(): HasMany
     {
@@ -48,16 +48,18 @@ class TrsFunctionalStructure extends Model
 
     // ─── Other Relations ─────────────────────────────────────────────────────
 
-    public function function(): BelongsTo
-    {
-        return $this->belongsTo(MstFunction::class, 'functional_id');
-    }
-
+    /**
+     * Organisasi Fungsional induk.
+     * functional_id → mst_functional_organization.id
+     */
     public function functionalOrganization(): BelongsTo
     {
-        return $this->belongsTo(MstFunctionalOrganization::class, 'functional_id');
+        return $this->belongsTo(MstFunctionalOrganization::class, 'functional_id', 'id');
     }
 
+    /**
+     * Anggota / jabatan yang ditugaskan pada struktur ini.
+     */
     public function trsFunctionalOrganizations(): HasMany
     {
         return $this->hasMany(TrsFunctionalOrganization::class, 'structure_id');

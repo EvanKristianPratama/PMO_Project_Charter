@@ -5,15 +5,15 @@
             <!-- Capsule Page Navigation Menu -->
             <div class="flex flex-wrap items-center gap-1.5 rounded-xl bg-slate-100 p-1 dark:bg-white/5 w-fit print:hidden">
                 <button
-                    @click="activeTab = 'proses-bisnis'"
+                    @click="activeTab = 'apqc'"
                     :class="[
                         'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all duration-200 active:scale-95',
-                        activeTab === 'proses-bisnis'
+                        activeTab === 'apqc' || activeTab === 'apqc-map'
                             ? 'bg-[#821f44] text-white shadow-md shadow-[#821f44]/20'
                             : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
                     ]"
                 >
-                    Business Process
+                    APQC
                 </button>
                 <button
                     @click="activeTab = 'proses-bisnis-v2'"
@@ -49,17 +49,6 @@
                     KPI
                 </button>
                 <button
-                    @click="activeTab = 'apqc'"
-                    :class="[
-                        'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all duration-200 active:scale-95',
-                        activeTab === 'apqc' || activeTab === 'apqc-map'
-                            ? 'bg-[#821f44] text-white shadow-md shadow-[#821f44]/20'
-                            : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
-                    ]"
-                >
-                    APQC
-                </button>
-                <button
                     @click="activeTab = 'regulation-map'"
                     :class="[
                         'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all duration-200 active:scale-95',
@@ -73,10 +62,15 @@
             </div>
 
             <!-- Table Component -->
-            <ProsesBisnisTable
-                v-if="activeTab === 'proses-bisnis'"
-                :proses-bisnis="prosesBisnis"
-                :organizations="organizations"
+            <APQCTable
+                v-if="activeTab === 'apqc'"
+                :apqc-list="apqcList"
+                @switch-to-map="activeTab = 'apqc-map'"
+            />
+            <ApqcMap
+                v-else-if="activeTab === 'apqc-map'"
+                :apqc-list="apqcList"
+                @switch-to-table="activeTab = 'apqc'"
             />
             <BusinessProcessV2
                 v-else-if="activeTab === 'proses-bisnis-v2'"
@@ -89,17 +83,8 @@
                 v-else-if="activeTab === 'function'"
                 :functions="functions"
                 :company-options="companyOptions"
+                :bod-options="bodOptions"
                 :regulations="regulations"
-            />
-            <APQCTable
-                v-else-if="activeTab === 'apqc'"
-                :apqc-list="apqcList"
-                @switch-to-map="activeTab = 'apqc-map'"
-            />
-            <ApqcMap
-                v-else-if="activeTab === 'apqc-map'"
-                :apqc-list="apqcList"
-                @switch-to-table="activeTab = 'apqc'"
             />
             <KpiTable
                 v-else-if="activeTab === 'kpi'"
@@ -118,7 +103,6 @@
 <script setup>
 import { ref } from 'vue';
 import UserLayout from '@/Layouts/UserLayout.vue';
-import ProsesBisnisTable from '@/Components/Architecture/ProsesBisnis/ProsesBisnisTable.vue';
 import BusinessProcessV2 from '@/Components/Architecture/ProsesBisnis/BusinessProcessV2/BusinessProcessV2.vue';
 import FunctionTable from '@/Components/Architecture/ProsesBisnis/Function/FunctionTable.vue';
 import APQCTable from '@/Components/Architecture/ProsesBisnis/APQC/APQCTable.vue';
@@ -127,13 +111,9 @@ import KpiTable from '@/Components/Architecture/ProsesBisnis/Kpi/KpiTable.vue';
 import RegulationMap from '@/Components/Architecture/ProsesBisnis/RegulationMap/RegulationMap.vue';
 
 defineProps({
-    prosesBisnis: {
+    apqcList: {
         type: Array,
-        required: true,
-    },
-    organizations: {
-        type: Array,
-        required: true,
+        default: () => [],
     },
     functions: {
         type: Array,
@@ -143,11 +123,11 @@ defineProps({
         type: Array,
         default: () => [],
     },
-    regulations: {
+    bodOptions: {
         type: Array,
         default: () => [],
     },
-    apqcList: {
+    regulations: {
         type: Array,
         default: () => [],
     },
@@ -161,7 +141,7 @@ defineProps({
     },
 });
 
-const activeTab = ref('proses-bisnis');
+const activeTab = ref('apqc');
 </script>
 
 <style scoped>

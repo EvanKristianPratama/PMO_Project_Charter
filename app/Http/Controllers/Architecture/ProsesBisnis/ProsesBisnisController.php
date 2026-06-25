@@ -7,6 +7,7 @@ use App\Models\TrsOrganization;
 use App\Models\TrsProsesBisnis;
 use App\Models\MstFunction;
 use App\Models\MstApqc;
+use App\Models\MstBod;
 use App\Models\MstCompany;
 use App\Models\MstProsesBisnis;
 use App\Services\Architecture\ApqcService;
@@ -46,6 +47,20 @@ class ProsesBisnisController extends Controller
             'name' => $c->name,
         ])->values()->all();
 
+        $bodOptions = MstBod::orderBy('order')
+            ->orderBy('name')
+            ->get()
+            ->map(fn ($b) => [
+                'id' => $b->id,
+                'company_id' => $b->company_id,
+                'parent_id' => $b->parent_id,
+                'name' => $b->name,
+                'alias' => $b->alias,
+                'pejabat' => $b->pejabat,
+                'tipe' => $b->tipe,
+                'order' => $b->order,
+            ])->values()->all();
+
         $regulations = \App\Models\MstRegulation::orderBy('judul')->get()->map(fn ($r) => [
             'id' => $r->id,
             'judul' => $r->judul,
@@ -66,6 +81,7 @@ class ProsesBisnisController extends Controller
             'organizations' => $organizations,
             'functions' => $functions,
             'companyOptions' => $companyOptions,
+            'bodOptions' => $bodOptions,
             'regulations' => $regulations,
             'apqcList' => $apqcList,
             'prosesBisnisV2' => $prosesBisnisV2,
@@ -221,6 +237,8 @@ class ProsesBisnisController extends Controller
             'deskripsi'      => ['nullable', 'string'],
             'regulation_ids' => ['nullable', 'array'],
             'regulation_ids.*' => ['integer', 'exists:mst_regulation,id'],
+            'organization_ids' => ['nullable', 'array'],
+            'organization_ids.*' => ['integer', 'exists:mst_bod,id'],
         ]);
 
         $functionService->createFunction($validated);
@@ -243,6 +261,8 @@ class ProsesBisnisController extends Controller
             'deskripsi'      => ['nullable', 'string'],
             'regulation_ids' => ['nullable', 'array'],
             'regulation_ids.*' => ['integer', 'exists:mst_regulation,id'],
+            'organization_ids' => ['nullable', 'array'],
+            'organization_ids.*' => ['integer', 'exists:mst_bod,id'],
         ]);
 
         $functionService->updateFunction($function, $validated);
@@ -366,4 +386,3 @@ class ProsesBisnisController extends Controller
         return redirect()->back()->with('success', 'KPI berhasil dihapus.');
     }
 }
-

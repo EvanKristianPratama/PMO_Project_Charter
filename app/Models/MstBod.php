@@ -54,4 +54,21 @@ class MstBod extends Model
     {
         return $this->hasMany(TrsFunctionalOrganization::class, 'organization_id');
     }
+
+    /**
+     * Relasi ke MstFunction melalui trs_function_organization.
+     */
+    public function functions(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(MstFunction::class, 'trs_function_organization', 'organization_id', 'function_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Relasi ke TrsFunctionOrganization.
+     */
+    public function trsFunctionOrganizations(): HasMany
+    {
+        return $this->hasMany(TrsFunctionOrganization::class, 'organization_id');
+    }
 }
