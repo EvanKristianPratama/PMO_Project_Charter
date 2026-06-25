@@ -165,7 +165,12 @@
                                     <span class="shrink-0 select-none">-</span>
                                     <span class="flex flex-col items-start text-left">
                                         <div class="flex items-center gap-1.5 flex-wrap">
-                                            <span class="font-semibold text-slate-900 dark:text-white">{{ reg.judul }}</span>
+                                            <Link 
+                                                :href="route('policy.procedure.index', { regulation_id: reg.id })" 
+                                                class="font-semibold text-slate-900 dark:text-white hover:underline hover:text-[#821f44] dark:hover:text-[#db588c]"
+                                            >
+                                                {{ reg.judul }}
+                                            </Link>
                                             <span v-if="reg.status" :class="getStatusBadgeClass(reg.status)">
                                                 {{ reg.status }}
                                             </span>
@@ -180,7 +185,12 @@
                                                 class="text-[10px] text-black dark:text-slate-300 list-none flex items-start gap-1"
                                             >
                                                 <span class="shrink-0 select-none">-</span>
-                                                <span>{{ cat.tipe }}</span>
+                                                <Link 
+                                                    :href="route('policy.procedure.index', { regulation_id: reg.id }) + '#sop-cat-' + cat.id"
+                                                    class="hover:underline hover:text-[#821f44] dark:hover:text-[#db588c]"
+                                                >
+                                                    {{ cat.tipe }}
+                                                </Link>
                                             </li>
                                         </ul>
                                     </span>
@@ -493,7 +503,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { useForm, Link } from '@inertiajs/vue3';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 
 const props = defineProps({

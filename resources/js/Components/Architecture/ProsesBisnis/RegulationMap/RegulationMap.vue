@@ -4,7 +4,6 @@
         <div class="flex flex-col gap-4 border-b border-slate-200 px-6 py-4 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h2 class="text-sm font-semibold text-slate-900 dark:text-white">Regulation Map</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pemetaan regulasi dengan fungsi bisnis yang terkait.</p>
             </div>
             
             <div class="flex flex-wrap items-center gap-3">
@@ -33,6 +32,20 @@
                         {{ status }}
                     </option>
                 </select>
+
+                <!-- Expand Level Filter -->
+                <select
+                    v-model="expandLevel"
+                    @change="handleExpandLevelChange"
+                    class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white cursor-pointer min-w-[120px]"
+                >
+                    <option value="custom" disabled>Expand Level...</option>
+                    <option value="0">Collapse All (Level 0)</option>
+                    <option v-for="depth in maxDepth + 1" :key="depth" :value="depth">
+                        Level {{ depth }}
+                    </option>
+                    <option value="all">Expand All</option>
+                </select>
             </div>
         </div>
 
@@ -42,7 +55,7 @@
                 <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
                     <tr>
                         <th scope="col" class="px-3 py-3 w-10 text-center border-r border-b border-slate-200 dark:border-white/10">No</th>
-                        <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Judul Regulasi</th>
+                        <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Regulasi</th>
                         <th scope="col" class="px-3 py-3 w-48 border-b border-slate-200 dark:border-white/10">Fungsi Terkait</th>
                     </tr>
                 </thead>
@@ -68,21 +81,21 @@
                         <td class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 max-w-[400px] break-words" :style="{ paddingLeft: (row.depth * 24 + 12) + 'px' }">
                             <div class="flex items-start gap-2">
                                 <!-- Toggle Button / Indent indicator -->
-                                <div class="flex items-center shrink-0 mt-0.5">
-                                    <button 
-                                        v-if="row.hasChildren" 
-                                        @click.stop="toggleDocExpand(row.id)" 
-                                        class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none shrink-0"
-                                    >
-                                        <svg v-if="row.isExpanded" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                                        </svg>
-                                        <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                                        </svg>
-                                    </button>
-                                    <span v-else-if="row.depth > 0" class="text-slate-300 dark:text-white/20 mr-1 font-mono shrink-0">├─</span>
-                                </div>
+                                 <div class="w-5 h-5 flex items-center justify-center shrink-0 mt-0.5">
+                                     <button 
+                                         v-if="row.hasChildren" 
+                                         @click.stop="toggleDocExpand(row.id)" 
+                                         class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none shrink-0 flex items-center justify-center"
+                                     >
+                                         <svg v-if="row.isExpanded" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                         </svg>
+                                         <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+                                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                         </svg>
+                                     </button>
+                                     <span v-else-if="row.depth > 0" class="text-slate-300 dark:text-white/20 font-mono text-xs select-none">├─</span>
+                                 </div>
 
                                 <div class="flex flex-col gap-0.5 min-w-0">
                                     <div class="flex items-center gap-1.5 flex-wrap">
@@ -178,16 +191,60 @@ const getMappedFunctions = (regulationId) => {
 
 // Filter regulations based on search query and status filter
 const filteredRegulations = computed(() => {
-    // Find direct matches first
-    const matched = props.regulations.filter(reg => {
-        // Status filter
-        if (selectedStatus.value && reg.status !== selectedStatus.value) {
-            return false;
+    let result = props.regulations;
+
+    // Helper: collect all descendant IDs recursively
+    const collectDescendantIds = (parentId) => {
+        const ids = new Set();
+        const queue = [parentId];
+        while (queue.length > 0) {
+            const current = queue.shift();
+            props.regulations.forEach(reg => {
+                if (reg.parent_id === current && !ids.has(reg.id)) {
+                    ids.add(reg.id);
+                    queue.push(reg.id);
+                }
+            });
         }
-        
-        // Search query filter (matches regulation title, number, status or mapped function code/name)
-        if (searchQuery.value) {
-            const query = searchQuery.value.toLowerCase().trim();
+        return ids;
+    };
+
+    // Helper: collect all ancestor IDs (walk up parent chain)
+    const collectAncestorIds = (reg) => {
+        const ids = new Set();
+        let current = reg;
+        while (current.parent_id) {
+            const parent = props.regulations.find(r => r.id === current.parent_id);
+            if (!parent) break;
+            if (ids.has(parent.id)) break; // avoid loops
+            ids.add(parent.id);
+            current = parent;
+        }
+        return ids;
+    };
+
+    // 1. Status Filter
+    if (selectedStatus.value) {
+        const matchedByStatus = props.regulations.filter(reg => reg.status === selectedStatus.value);
+        const includedIds = new Set();
+
+        matchedByStatus.forEach(reg => {
+            includedIds.add(reg.id);
+            
+            const ancestors = collectAncestorIds(reg);
+            ancestors.forEach(id => includedIds.add(id));
+
+            const descendants = collectDescendantIds(reg.id);
+            descendants.forEach(id => includedIds.add(id));
+        });
+
+        result = result.filter(reg => includedIds.has(reg.id));
+    }
+
+    // 2. Search Query Filter
+    if (searchQuery.value) {
+        const query = searchQuery.value.toLowerCase().trim();
+        const matchedBySearch = result.filter(reg => {
             const matchesReg = 
                 (reg.judul || '').toLowerCase().includes(query) ||
                 (reg.nomor || '').toLowerCase().includes(query) ||
@@ -195,42 +252,25 @@ const filteredRegulations = computed(() => {
                 
             if (matchesReg) return true;
             
-            // Check mapped functions
             const mappedFns = getMappedFunctions(reg.id);
             return mappedFns.some(fn => 
                 (fn.name || '').toLowerCase().includes(query) ||
                 (fn.alias || '').toLowerCase().includes(query)
             );
-        }
-        
-        return true;
-    });
+        });
 
-    // If there are no active filters, return the full list of regulations
-    if (!searchQuery.value && !selectedStatus.value) {
-        return props.regulations;
+        const includedIds = new Set();
+        matchedBySearch.forEach(reg => {
+            includedIds.add(reg.id);
+            
+            const ancestors = collectAncestorIds(reg);
+            ancestors.forEach(id => includedIds.add(id));
+        });
+
+        result = result.filter(reg => includedIds.has(reg.id));
     }
 
-    // To preserve hierarchy, walk up the parent chain and include all ancestor nodes
-    const includedIds = new Set();
-    
-    const collectAncestorIds = (reg) => {
-        let current = reg;
-        while (current.parent_id) {
-            const parent = props.regulations.find(r => r.id === current.parent_id);
-            if (!parent) break;
-            if (includedIds.has(parent.id)) break; // prevent loops
-            includedIds.add(parent.id);
-            current = parent;
-        }
-    };
-
-    matched.forEach(reg => {
-        includedIds.add(reg.id);
-        collectAncestorIds(reg);
-    });
-
-    return props.regulations.filter(reg => includedIds.has(reg.id));
+    return result;
 });
 
 // Tree hierarchy computing
@@ -257,15 +297,75 @@ const documentTree = computed(() => {
     return roots;
 });
 
+const regMap = computed(() => new Map(props.regulations.map(r => [r.id, r])));
+
+const getDepth = (id) => {
+    let depth = 0;
+    let currentId = id;
+    const visited = new Set();
+    while (currentId && !visited.has(currentId)) {
+        visited.add(currentId);
+        const node = regMap.value.get(currentId);
+        if (node?.parent_id) {
+            depth++;
+            currentId = node.parent_id;
+        } else {
+            break;
+        }
+    }
+    return depth;
+};
+
+const maxDepth = computed(() => {
+    let max = 0;
+    props.regulations.forEach(item => {
+        const d = getDepth(item.id);
+        if (d > max) max = d;
+    });
+    return max;
+});
+
 const expandedDocIds = ref(new Set());
+const expandLevel = ref('all');
 
 const toggleDocExpand = (id) => {
+    expandLevel.value = 'custom';
     if (expandedDocIds.value.has(id)) {
         expandedDocIds.value.delete(id);
     } else {
         expandedDocIds.value.add(id);
     }
     expandedDocIds.value = new Set(expandedDocIds.value);
+};
+
+const handleExpandLevelChange = () => {
+    const val = expandLevel.value;
+    if (val === 'custom') return;
+
+    const ids = new Set();
+
+    if (val === 'all') {
+        filteredRegulations.value.forEach(item => {
+            const isParent = filteredRegulations.value.some(r => r.parent_id === item.id);
+            if (isParent) {
+                ids.add(item.id);
+            }
+        });
+    } else {
+        const targetDepth = parseInt(val, 10);
+        if (targetDepth > 0) {
+            filteredRegulations.value.forEach(item => {
+                const depth = getDepth(item.id);
+                if (depth < targetDepth) {
+                    const isParent = filteredRegulations.value.some(r => r.parent_id === item.id);
+                    if (isParent) {
+                        ids.add(item.id);
+                    }
+                }
+            });
+        }
+    }
+    expandedDocIds.value = ids;
 };
 
 const visibleDocRows = computed(() => {
@@ -305,6 +405,7 @@ const initializeExpandedDocs = () => {
         }
     });
     expandedDocIds.value = ids;
+    expandLevel.value = 'all';
 };
 
 onMounted(() => {

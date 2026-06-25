@@ -180,7 +180,7 @@
                             </h3>
                             <div class="mt-4 space-y-8 font-serif text-[15px] leading-relaxed text-slate-900 dark:text-slate-100 text-justify">
                                 <div v-if="categories.length === 0" class="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-center text-slate-400">Belum ada data SOP untuk regulasi ini.</div>
-                                <div v-for="cat in categories" :key="cat.id" class="space-y-3">
+                                <div v-for="cat in categories" :key="cat.id" :id="'sop-cat-' + cat.id" class="space-y-3 scroll-mt-24">
                                     <h4 class="font-bold text-slate-950 dark:text-white font-sans text-sm">{{ cat.tipe }}</h4>
                                     <div class="space-y-3">
                                         <div v-for="(item, index) in getSopsForCategory(cat.id)" :key="item.id" class="flex gap-3 items-start pl-2">
@@ -256,7 +256,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, onMounted, nextTick } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import FlowChart from '@/Components/Procedure/FlowChart.vue';
@@ -464,6 +464,22 @@ function scrollToTop() {
     window.scrollTo({
         top: 0,
         behavior: 'smooth'
+    });
+}
+
+onMounted(() => {
+    scrollToHash();
+});
+
+function scrollToHash() {
+    nextTick(() => {
+        const hash = window.location.hash;
+        if (hash) {
+            const element = document.querySelector(hash);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
     });
 }
 </script>
