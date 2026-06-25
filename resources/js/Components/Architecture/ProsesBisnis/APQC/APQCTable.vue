@@ -1,5 +1,12 @@
 <template>
-    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+    <div v-if="viewMode === 'map'">
+        <ApqcMap
+            :apqc-list="apqcList"
+            @switch-to-table="viewMode = 'table'"
+        />
+    </div>
+    <div v-else class="space-y-6">
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
         <!-- Header -->
         <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-white/10">
             <h2 class="text-sm font-semibold text-slate-900 dark:text-white">APQC Process List</h2>
@@ -45,7 +52,7 @@
                     </button>
                     <button
                         type="button"
-                        @click="$emit('switch-to-map')"
+                        @click="viewMode = 'map'"
                         class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/10 dark:text-slate-300 dark:hover:bg-white/20 transition"
                     >
                         <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -265,12 +272,14 @@
         @close="isDeleteModalOpen = false"
         @confirm="submitDelete"
     />
+    </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import ApqcMap from './ApqcMap.vue';
 
 const props = defineProps({
     apqcList: {
@@ -279,7 +288,7 @@ const props = defineProps({
     },
 });
 
-const emit = defineEmits(['switch-to-map']);
+const viewMode = ref('map');
 
 const apqcMap = computed(() => new Map(props.apqcList.map(item => [item.id, item])));
 

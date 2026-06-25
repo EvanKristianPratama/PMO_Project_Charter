@@ -8,7 +8,7 @@
                     @click="activeTab = 'apqc'"
                     :class="[
                         'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all duration-200 active:scale-95',
-                        activeTab === 'apqc' || activeTab === 'apqc-map'
+                        activeTab === 'apqc'
                             ? 'bg-[#821f44] text-white shadow-md shadow-[#821f44]/20'
                             : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
                     ]"
@@ -65,12 +65,6 @@
             <APQCTable
                 v-if="activeTab === 'apqc'"
                 :apqc-list="apqcList"
-                @switch-to-map="activeTab = 'apqc-map'"
-            />
-            <ApqcMap
-                v-else-if="activeTab === 'apqc-map'"
-                :apqc-list="apqcList"
-                @switch-to-table="activeTab = 'apqc'"
             />
             <BusinessProcessV2
                 v-else-if="activeTab === 'proses-bisnis-v2'"
@@ -106,7 +100,6 @@ import UserLayout from '@/Layouts/UserLayout.vue';
 import BusinessProcessV2 from '@/Components/Architecture/ProsesBisnis/BusinessProcessV2/BusinessProcessV2.vue';
 import FunctionTable from '@/Components/Architecture/ProsesBisnis/Function/FunctionTable.vue';
 import APQCTable from '@/Components/Architecture/ProsesBisnis/APQC/APQCTable.vue';
-import ApqcMap from '@/Components/Architecture/ProsesBisnis/APQC/ApqcMap.vue';
 import KpiTable from '@/Components/Architecture/ProsesBisnis/Kpi/KpiTable.vue';
 import RegulationMap from '@/Components/Architecture/ProsesBisnis/RegulationMap/RegulationMap.vue';
 
