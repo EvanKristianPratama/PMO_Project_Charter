@@ -68,6 +68,7 @@ class ApqcService
     {
         return [
             'name' => isset($payload['name']) ? trim($payload['name']) : null,
+            'grup' => isset($payload['grup']) ? trim($payload['grup']) : null,
             'deskripsi' => isset($payload['deskripsi']) ? trim($payload['deskripsi']) : null,
             'parent_id' => !empty($payload['parent_id']) ? (int) $payload['parent_id'] : null,
         ];

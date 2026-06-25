@@ -177,7 +177,7 @@
                                             <li 
                                                 v-for="cat in reg.sop_categories" 
                                                 :key="'cat-' + cat.id"
-                                                class="text-[10px] text-slate-500 dark:text-slate-400 list-none flex items-start gap-1"
+                                                class="text-[10px] text-black dark:text-slate-300 list-none flex items-start gap-1"
                                             >
                                                 <span class="shrink-0 select-none">-</span>
                                                 <span>{{ cat.tipe }}</span>

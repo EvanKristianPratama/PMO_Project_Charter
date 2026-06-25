@@ -156,6 +156,7 @@ class ProsesBisnisController extends Controller
         $validated = $request->validate([
             'parent_id' => 'nullable|exists:mst_apqc,id',
             'name' => 'required|string|max:255',
+            'grup' => 'nullable|string|max:255',
             'deskripsi' => 'nullable|string',
         ]);
 
@@ -176,6 +177,7 @@ class ProsesBisnisController extends Controller
         $validated = $request->validate([
             'parent_id' => 'nullable|exists:mst_apqc,id',
             'name' => 'required|string|max:255',
+            'grup' => 'nullable|string|max:255',
             'deskripsi' => 'nullable|string',
         ]);
 
