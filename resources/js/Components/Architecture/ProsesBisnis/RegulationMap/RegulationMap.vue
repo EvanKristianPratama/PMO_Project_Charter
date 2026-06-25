@@ -34,31 +34,48 @@
             
             <!-- Filters by Regulation -->
             <div v-if="activeView === 'regulation'" class="flex flex-wrap items-center gap-3">
-                <!-- Search Input -->
-                <div class="relative">
-                    <input
-                        v-model="searchQuery"
-                        type="text"
-                        placeholder="Cari regulasi atau fungsi..."
-                        class="w-64 rounded-lg border border-slate-300 bg-white pl-8 pr-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
-                    />
-                    <div class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-slate-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                <!-- Status Filter (Multi-select Dropdown) -->
+                <div class="relative inline-block text-left">
+                    <button 
+                        type="button"
+                        @click="isStatusDropdownOpen = !isStatusDropdownOpen"
+                        class="inline-flex items-center justify-between gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white cursor-pointer min-w-[130px] text-left select-none active:scale-[0.98] transition-transform duration-100"
+                    >
+                        <span class="truncate">
+                            {{ selectedStatuses.length === 0 ? 'Semua Status' : selectedStatuses.join(', ') }}
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-slate-400 shrink-0">
+                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                         </svg>
+                    </button>
+
+                    <div v-if="isStatusDropdownOpen" class="fixed inset-0 z-30" @click="isStatusDropdownOpen = false"></div>
+
+                    <div v-if="isStatusDropdownOpen" class="absolute left-0 mt-1 w-44 rounded-lg bg-white border border-slate-200 shadow-lg dark:bg-[#1a1a1a] dark:border-white/10 z-40 p-2 space-y-1">
+                        <label 
+                            v-for="status in availableStatuses" 
+                            :key="status"
+                            class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-white/5 transition duration-150 cursor-pointer select-none text-xs text-slate-700 dark:text-slate-300 font-medium"
+                        >
+                            <input 
+                                type="checkbox" 
+                                :value="status" 
+                                v-model="selectedStatuses"
+                                class="rounded border-slate-300 text-[#821f44] focus:ring-[#821f44] dark:border-white/10 dark:bg-black/20"
+                            />
+                            <span>{{ status }}</span>
+                        </label>
+                        <div v-if="selectedStatuses.length > 0" class="border-t border-slate-100 dark:border-white/5 pt-1.5 mt-1 flex justify-end">
+                            <button 
+                                type="button" 
+                                @click="selectedStatuses = []" 
+                                class="text-[10px] text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white font-bold"
+                            >
+                                Clear
+                            </button>
+                        </div>
                     </div>
                 </div>
-
-                <!-- Status Filter -->
-                <select
-                    v-model="selectedStatus"
-                    class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white cursor-pointer min-w-[120px]"
-                >
-                    <option value="">Semua Status</option>
-                    <option v-for="status in availableStatuses" :key="status" :value="status">
-                        {{ status }}
-                    </option>
-                </select>
 
                 <!-- Expand Level Filter -->
                 <select
@@ -77,21 +94,6 @@
 
             <!-- Filters by Function -->
             <div v-else-if="activeView === 'function'" class="flex flex-wrap items-center gap-3">
-                <!-- Search Input -->
-                <div class="relative">
-                    <input
-                        v-model="searchQueryFunction"
-                        type="text"
-                        placeholder="Cari fungsi atau regulasi..."
-                        class="w-64 rounded-lg border border-slate-300 bg-white pl-8 pr-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
-                    />
-                    <div class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-slate-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                        </svg>
-                    </div>
-                </div>
-
                 <!-- Company Filter -->
                 <select
                     v-model="companyFilterId"
@@ -103,16 +105,59 @@
                     </option>
                 </select>
 
-                <!-- Status Filter -->
+                <!-- Function Filter Select -->
                 <select
-                    v-model="selectedStatusFunction"
-                    class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white cursor-pointer min-w-[120px]"
+                    v-model="functionFilterId"
+                    class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white cursor-pointer min-w-[140px] max-w-[200px] truncate"
                 >
-                    <option value="">Semua Status</option>
-                    <option v-for="status in availableStatuses" :key="status" :value="status">
-                        {{ status }}
+                    <option value="">Semua Fungsi</option>
+                    <option v-for="fn in functionOptions" :key="fn.id" :value="fn.id">
+                        {{ getFunctionLevelPrefix(fn.depth) }}{{ fn.name }}
                     </option>
                 </select>
+
+                <!-- Status Filter (Multi-select Dropdown) -->
+                <div class="relative inline-block text-left">
+                    <button 
+                        type="button"
+                        @click="isStatusDropdownOpenFunction = !isStatusDropdownOpenFunction"
+                        class="inline-flex items-center justify-between gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white cursor-pointer min-w-[130px] text-left select-none active:scale-[0.98] transition-transform duration-100"
+                    >
+                        <span class="truncate">
+                            {{ selectedStatusesFunction.length === 0 ? 'Semua Status' : selectedStatusesFunction.join(', ') }}
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-slate-400 shrink-0">
+                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+
+                    <div v-if="isStatusDropdownOpenFunction" class="fixed inset-0 z-30" @click="isStatusDropdownOpenFunction = false"></div>
+
+                    <div v-if="isStatusDropdownOpenFunction" class="absolute left-0 mt-1 w-44 rounded-lg bg-white border border-slate-200 shadow-lg dark:bg-[#1a1a1a] dark:border-white/10 z-40 p-2 space-y-1">
+                        <label 
+                            v-for="status in availableStatuses" 
+                            :key="status"
+                            class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-white/5 transition duration-150 cursor-pointer select-none text-xs text-slate-700 dark:text-slate-300 font-medium"
+                        >
+                            <input 
+                                type="checkbox" 
+                                :value="status" 
+                                v-model="selectedStatusesFunction"
+                                class="rounded border-slate-300 text-[#821f44] focus:ring-[#821f44] dark:border-white/10 dark:bg-black/20"
+                            />
+                            <span>{{ status }}</span>
+                        </label>
+                        <div v-if="selectedStatusesFunction.length > 0" class="border-t border-slate-100 dark:border-white/5 pt-1.5 mt-1 flex justify-end">
+                            <button 
+                                type="button" 
+                                @click="selectedStatusesFunction = []" 
+                                class="text-[10px] text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white font-bold"
+                            >
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Expand Level Filter -->
                 <select
@@ -222,9 +267,9 @@
             v-else-if="activeView === 'function'"
             :functions="functions"
             :regulations="regulations"
-            :search-query="searchQueryFunction"
             :company-filter-id="companyFilterId"
-            :selected-status="selectedStatusFunction"
+            :function-filter-id="functionFilterId"
+            :selected-statuses="selectedStatusesFunction"
             :expand-level="expandLevelFunction"
             @update:expand-level="expandLevelFunction = $event"
         />
@@ -249,15 +294,76 @@ const props = defineProps({
 // View switch state
 const activeView = ref('regulation');
 
+// Status dropdown open states
+const isStatusDropdownOpen = ref(false);
+const isStatusDropdownOpenFunction = ref(false);
+
 // Filters for By Regulation
-const searchQuery = ref('');
-const selectedStatus = ref('');
+const selectedStatuses = ref([]);
 
 // Filters for By Function
-const searchQueryFunction = ref('');
 const companyFilterId = ref('');
-const selectedStatusFunction = ref('');
+const functionFilterId = ref('');
+const selectedStatusesFunction = ref([]);
 const expandLevelFunction = ref('all');
+
+// Computed option elements for the Function Filter
+const functionOptions = computed(() => {
+    const map = {};
+    const roots = [];
+    
+    // Pre-filter functions by company if companyFilterId is set
+    let fns = props.functions;
+    if (companyFilterId.value) {
+        const compId = Number(companyFilterId.value);
+        fns = fns.filter(fn => Number(fn.company_id) === compId);
+    }
+    
+    fns.forEach(item => {
+        map[item.id] = { ...item, children: [] };
+    });
+    
+    fns.forEach(item => {
+        const mapped = map[item.id];
+        if (item.parent_id && map[item.parent_id]) {
+            map[item.parent_id].children.push(mapped);
+        } else {
+            roots.push(mapped);
+        }
+    });
+    
+    const sort = (nodes) => {
+        nodes.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        nodes.forEach(n => sort(n.children));
+    };
+    sort(roots);
+    
+    const result = [];
+    const traverse = (node, depth = 0) => {
+        result.push({ ...node, depth });
+        if (node.children && node.children.length > 0) {
+            node.children.forEach(child => traverse(child, depth + 1));
+        }
+    };
+    
+    roots.forEach(root => traverse(root, 0));
+    return result;
+});
+
+const getFunctionLevelPrefix = (depth) => {
+    if (depth === 0) return '';
+    return '\u00A0\u00A0'.repeat(depth) + '— ';
+};
+
+// Reset selected function filter if company filter changes and is no longer matching
+watch(companyFilterId, (newCompanyFilterId) => {
+    if (functionFilterId.value) {
+        const selectedFn = props.functions.find(f => Number(f.id) === Number(functionFilterId.value));
+        if (selectedFn && newCompanyFilterId && Number(selectedFn.company_id) !== Number(newCompanyFilterId)) {
+            functionFilterId.value = '';
+        }
+    }
+});
 
 // Helper to list companies for Function filter
 const availableCompanies = computed(() => {
@@ -367,8 +473,8 @@ const filteredRegulations = computed(() => {
     };
 
     // 1. Status Filter
-    if (selectedStatus.value) {
-        const matchedByStatus = props.regulations.filter(reg => reg.status === selectedStatus.value);
+    if (selectedStatuses.value && selectedStatuses.value.length > 0) {
+        const matchedByStatus = props.regulations.filter(reg => reg.status && selectedStatuses.value.includes(reg.status));
         const includedIds = new Set();
 
         matchedByStatus.forEach(reg => {
@@ -379,35 +485,6 @@ const filteredRegulations = computed(() => {
 
             const descendants = collectDescendantIds(reg.id);
             descendants.forEach(id => includedIds.add(id));
-        });
-
-        result = result.filter(reg => includedIds.has(reg.id));
-    }
-
-    // 2. Search Query Filter
-    if (searchQuery.value) {
-        const query = searchQuery.value.toLowerCase().trim();
-        const matchedBySearch = result.filter(reg => {
-            const matchesReg = 
-                (reg.judul || '').toLowerCase().includes(query) ||
-                (reg.nomor || '').toLowerCase().includes(query) ||
-                (reg.status || '').toLowerCase().includes(query);
-                
-            if (matchesReg) return true;
-            
-            const mappedFns = getMappedFunctions(reg.id);
-            return mappedFns.some(fn => 
-                (fn.name || '').toLowerCase().includes(query) ||
-                (fn.alias || '').toLowerCase().includes(query)
-            );
-        });
-
-        const includedIds = new Set();
-        matchedBySearch.forEach(reg => {
-            includedIds.add(reg.id);
-            
-            const ancestors = collectAncestorIds(reg);
-            ancestors.forEach(id => includedIds.add(id));
         });
 
         result = result.filter(reg => includedIds.has(reg.id));

@@ -115,17 +115,17 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
-    searchQuery: {
-        type: String,
-        default: '',
-    },
     companyFilterId: {
         type: [String, Number],
         default: '',
     },
-    selectedStatus: {
-        type: String,
+    functionFilterId: {
+        type: [String, Number],
         default: '',
+    },
+    selectedStatuses: {
+        type: Array,
+        default: () => [],
     },
     expandLevel: {
         type: String,
@@ -158,109 +158,16 @@ const getDepth = (id) => {
     return depth;
 };
 
-// Filter functions based on props
-const filteredFunctions = computed(() => {
-    let result = props.functions;
-
-    // 1. Company Filter
-    if (props.companyFilterId) {
-        const compId = Number(props.companyFilterId);
-        result = result.filter(fn => Number(fn.company_id) === compId);
-    }
-
-    // Helper: collect all descendant IDs recursively
-    const collectDescendantIds = (parentId) => {
-        const ids = new Set();
-        const queue = [parentId];
-        while (queue.length > 0) {
-            const current = queue.shift();
-            props.functions.forEach(fn => {
-                if (fn.parent_id === current && !ids.has(fn.id)) {
-                    ids.add(fn.id);
-                    queue.push(fn.id);
-                }
-            });
-        }
-        return ids;
-    };
-
-    // Helper: collect all ancestor IDs
-    const collectAncestorIds = (fn) => {
-        const ids = new Set();
-        let current = fn;
-        while (current.parent_id) {
-            const parent = props.functions.find(f => f.id === current.parent_id);
-            if (!parent) break;
-            if (ids.has(parent.id)) break;
-            ids.add(parent.id);
-            current = parent;
-        }
-        return ids;
-    };
-
-    // 2. Regulation Status Filter
-    if (props.selectedStatus) {
-        const statusVal = props.selectedStatus.toLowerCase().trim();
-        const matchedByStatus = result.filter(fn => {
-            return (fn.regulations || []).some(reg => 
-                (reg.status || '').toLowerCase().trim() === statusVal
-            );
-        });
-
-        const includedIds = new Set();
-        matchedByStatus.forEach(fn => {
-            includedIds.add(fn.id);
-            collectAncestorIds(fn).forEach(id => includedIds.add(id));
-            collectDescendantIds(fn.id).forEach(id => includedIds.add(id));
-        });
-
-        result = result.filter(fn => includedIds.has(fn.id));
-    }
-
-    // 3. Search Query Filter
-    if (props.searchQuery) {
-        const query = props.searchQuery.toLowerCase().trim();
-        const matchedBySearch = result.filter(fn => {
-            const matchesFn = 
-                (fn.name || '').toLowerCase().includes(query) ||
-                (fn.alias || '').toLowerCase().includes(query) ||
-                (fn.deskripsi || '').toLowerCase().includes(query);
-                
-            if (matchesFn) return true;
-            
-            // Or matches mapped regulations (filtered by status if selectedStatus is set)
-            const regs = fn.regulations || [];
-            return regs.some(reg => {
-                if (props.selectedStatus && (reg.status || '').toLowerCase().trim() !== props.selectedStatus.toLowerCase().trim()) {
-                    return false;
-                }
-                return (reg.judul || '').toLowerCase().includes(query) ||
-                       (reg.nomor || '').toLowerCase().includes(query);
-            });
-        });
-
-        const includedIds = new Set();
-        matchedBySearch.forEach(fn => {
-            includedIds.add(fn.id);
-            collectAncestorIds(fn).forEach(id => includedIds.add(id));
-        });
-
-        result = result.filter(fn => includedIds.has(fn.id));
-    }
-
-    return result;
-});
-
-// Build Tree Hierarchy
+// Build Tree Hierarchy of ALL functions
 const functionTree = computed(() => {
     const map = {};
     const roots = [];
 
-    filteredFunctions.value.forEach(item => {
+    props.functions.forEach(item => {
         map[item.id] = { ...item, children: [] };
     });
 
-    filteredFunctions.value.forEach(item => {
+    props.functions.forEach(item => {
         const mapped = map[item.id];
         if (item.parent_id && map[item.parent_id]) {
             map[item.parent_id].children.push(mapped);
@@ -278,12 +185,61 @@ const functionTree = computed(() => {
     return roots;
 });
 
+// Filtered roots based on company and function filter
+const filteredRoots = computed(() => {
+    let roots = functionTree.value;
+
+    if (props.companyFilterId) {
+        const compId = Number(props.companyFilterId);
+        roots = roots.filter(root => Number(root.company_id) === compId);
+    }
+
+    if (props.functionFilterId) {
+        const filterId = Number(props.functionFilterId);
+        const findNode = (nodes) => {
+            for (const n of nodes) {
+                if (Number(n.id) === filterId) return [n];
+                if (n.children && n.children.length > 0) {
+                    const found = findNode(n.children);
+                    if (found) return found;
+                }
+            }
+            return null;
+        };
+        return findNode(roots) || [];
+    }
+
+    return roots;
+});
+
+// Check if a node matches status filter
+const matchesFilter = (node) => {
+    if (props.selectedStatuses && props.selectedStatuses.length > 0) {
+        const statusVals = props.selectedStatuses.map(s => s.toLowerCase().trim());
+        const hasStatus = (node.regulations || []).some(reg => 
+            reg.status && statusVals.includes(reg.status.toLowerCase().trim())
+        );
+        if (!hasStatus) return false;
+    }
+    return true;
+};
+
+// Helper: determine if a node or any of its descendants should be shown
+const shouldShowNode = (node) => {
+    if (matchesFilter(node)) return true;
+    if (node.children && node.children.length > 0) {
+        return node.children.some(child => shouldShowNode(child));
+    }
+    return false;
+};
+
 // Build active visible rows
 const visibleRows = computed(() => {
     const rows = [];
     
     const traverse = (node, depth = 0) => {
-        const hasChildren = node.children && node.children.length > 0;
+        const visibleChildren = (node.children || []).filter(child => shouldShowNode(child));
+        const hasChildren = visibleChildren.length > 0;
         const isExpanded = expandedIds.value.has(node.id);
         
         rows.push({
@@ -294,14 +250,16 @@ const visibleRows = computed(() => {
         });
         
         if (hasChildren && isExpanded) {
-            node.children.forEach(child => {
+            visibleChildren.forEach(child => {
                 traverse(child, depth + 1);
             });
         }
     };
     
-    functionTree.value.forEach(root => {
-        traverse(root, 0);
+    filteredRoots.value.forEach(root => {
+        if (shouldShowNode(root)) {
+            traverse(root, 0);
+        }
     });
     
     // Compute companyRowspan: for each consecutive group sharing same company_id
@@ -324,9 +282,9 @@ const visibleRows = computed(() => {
 
 const getMappedRegulations = (fn) => {
     let regs = fn.regulations || [];
-    if (props.selectedStatus) {
-        const statusVal = props.selectedStatus.toLowerCase().trim();
-        regs = regs.filter(reg => (reg.status || '').toLowerCase().trim() === statusVal);
+    if (props.selectedStatuses && props.selectedStatuses.length > 0) {
+        const statusVals = props.selectedStatuses.map(s => s.toLowerCase().trim());
+        regs = regs.filter(reg => reg.status && statusVals.includes(reg.status.toLowerCase().trim()));
     }
     return regs;
 };
@@ -349,8 +307,8 @@ const handleExpandLevelChange = (val) => {
     const ids = new Set();
 
     if (val === 'all') {
-        filteredFunctions.value.forEach(item => {
-            const isParent = filteredFunctions.value.some(r => r.parent_id === item.id);
+        props.functions.forEach(item => {
+            const isParent = props.functions.some(r => r.parent_id === item.id);
             if (isParent) {
                 ids.add(item.id);
             }
@@ -358,10 +316,10 @@ const handleExpandLevelChange = (val) => {
     } else {
         const targetDepth = parseInt(val, 10);
         if (targetDepth > 0) {
-            filteredFunctions.value.forEach(item => {
+            props.functions.forEach(item => {
                 const depth = getDepth(item.id);
                 if (depth < targetDepth) {
-                    const isParent = filteredFunctions.value.some(r => r.parent_id === item.id);
+                    const isParent = props.functions.some(r => r.parent_id === item.id);
                     if (isParent) {
                         ids.add(item.id);
                     }
@@ -374,10 +332,16 @@ const handleExpandLevelChange = (val) => {
 
 const initializeExpanded = () => {
     const ids = new Set();
-    filteredFunctions.value.forEach(item => {
-        const isParent = filteredFunctions.value.some(r => r.parent_id === item.id);
-        if (isParent) {
-            ids.add(item.id);
+    const collect = (node) => {
+        const visibleChildren = (node.children || []).filter(child => shouldShowNode(child));
+        if (visibleChildren.length > 0) {
+            ids.add(node.id);
+            visibleChildren.forEach(collect);
+        }
+    };
+    filteredRoots.value.forEach(root => {
+        if (shouldShowNode(root)) {
+            collect(root);
         }
     });
     expandedIds.value = ids;
@@ -396,11 +360,16 @@ watch(
 );
 
 watch(
-    () => filteredFunctions.value,
+    [
+        () => props.companyFilterId,
+        () => props.functionFilterId,
+        () => props.selectedStatuses,
+        () => props.functions
+    ],
     () => {
         initializeExpanded();
     },
-    { deep: false }
+    { deep: true }
 );
 
 const getStatusBadgeClass = (status) => {
