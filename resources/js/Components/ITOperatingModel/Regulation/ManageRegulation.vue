@@ -315,78 +315,6 @@
                                 <div v-if="form.errors.company_id" class="text-xs text-rose-500 font-medium">{{ form.errors.company_id }}</div>
                             </div>
 
-
-                            <!-- Akses Role Selection with Search -->
-                            <div class="space-y-1.5 relative">
-                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Access Roles:</label>
-                                
-                                <!-- Trigger Button -->
-                                <div class="relative">
-                                    <button 
-                                        type="button"
-                                        @click="toggleMasterDropdown"
-                                        class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg px-3.5 py-2 text-sm text-left focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-black/20 dark:text-white dark:border-white/10 flex justify-between items-center"
-                                    >
-                                        <span class="truncate">
-                                            {{ selectedMasterName || '-- Pilih Akses Role --' }}
-                                        </span>
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-slate-400 shrink-0">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                                        </svg>
-                                    </button>
-                                </div>
-
-                                <!-- Overlay for click outside -->
-                                <div v-if="isMasterDropdownOpen" class="fixed inset-0 z-30" @click="isMasterDropdownOpen = false"></div>
-
-                                <!-- Dropdown Content -->
-                                <div v-if="isMasterDropdownOpen" class="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl dark:bg-[#1a1a1a] dark:border-white/10 z-40 max-h-60 overflow-y-auto p-2 space-y-2">
-                                    <!-- Search input inside dropdown -->
-                                    <div class="sticky top-0 bg-white dark:bg-[#1a1a1a] pb-1.5">
-                                        <input 
-                                            type="text" 
-                                            v-model="masterSearchQuery" 
-                                            placeholder="Cari akses role..." 
-                                            class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-black/20 dark:text-white dark:border-white/10"
-                                            ref="masterSearchInput"
-                                            @click.stop
-                                        />
-                                    </div>
-                                    
-                                    <!-- Options list -->
-                                    <div class="space-y-0.5">
-                                        <button
-                                            type="button"
-                                            @click="selectMaster('')"
-                                            class="w-full text-left px-2.5 py-1.5 text-xs rounded hover:bg-slate-100 dark:hover:bg-white/5 text-slate-500 dark:text-slate-400"
-                                        >
-                                            -- Pilih Akses Role --
-                                        </button>
-                                        <button
-                                            v-for="org in filteredMasterOrganizations" 
-                                            :key="org.id"
-                                            type="button"
-                                            @click="selectMaster(org.id)"
-                                            :class="[
-                                                'w-full text-left px-2.5 py-1.5 text-xs rounded hover:bg-slate-100 dark:hover:bg-white/5 transition flex items-center justify-between',
-                                                form.master_id === org.id ? 'bg-[#821f44]/5 text-[#821f44] dark:bg-[#db588c]/10 dark:text-[#db588c] font-semibold' : 'text-slate-700 dark:text-slate-300'
-                                            ]"
-                                        >
-                                            <span class="truncate">
-                                                {{ getLevelPrefix(org) }}{{ org.name }} ({{ org.code }})
-                                            </span>
-                                            <svg v-if="form.master_id === org.id" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-[#821f44] dark:text-[#db588c] shrink-0">
-                                                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
-                                            </svg>
-                                        </button>
-                                        <div v-if="filteredMasterOrganizations.length === 0" class="text-center py-4 text-xs text-slate-400">
-                                            Tidak ada hasil ditemukan.
-                                        </div>
-                                    </div>
-                                </div>
-                                <div v-if="form.errors.master_id" class="text-xs text-rose-500 font-medium">{{ form.errors.master_id }}</div>
-                            </div>
-
                             <!-- Parent Regulation Selection -->
                             <div class="space-y-1.5">
                                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Parent Regulasi (Opsional):</label>
@@ -692,19 +620,16 @@ const editingId = ref(null);
 const isPicDropdownOpen = ref(false);
 const isCompanySelectDropdownOpen = ref(false); // Step-1: pilih Company
 const isBodSelectDropdownOpen = ref(false);     // Step-2: pilih BoD
-const isMasterDropdownOpen = ref(false);
 const isRevokedDropdownOpen = ref(false);
 const isRelatedDropdownOpen = ref(false);
 const picSearchQuery = ref('');
 const companySelectSearchQuery = ref('');  // search di step-1
 const bodSelectSearchQuery = ref('');       // search di step-2
-const masterSearchQuery = ref('');
 const revokedSearchQuery = ref('');
 const relatedSearchQuery = ref('');
 const picSearchInput = ref(null);
 const companySelectSearchInput = ref(null);
 const bodSelectSearchInput = ref(null);
-const masterSearchInput = ref(null);
 const revokedSearchInput = ref(null);
 const relatedSearchInput = ref(null);
 
@@ -719,6 +644,11 @@ function togglePicDropdown() {
             picSearchInput.value?.focus();
         }, 100);
     }
+}
+
+function selectPic(orgId) {
+    form.pic_id = orgId;
+    isPicDropdownOpen.value = false;
 }
 
 function toggleCompanySelectDropdown() {
@@ -758,25 +688,6 @@ function selectBodForForm(bodId) {
     isBodSelectDropdownOpen.value = false;
 }
 
-function toggleMasterDropdown() {
-    isMasterDropdownOpen.value = !isMasterDropdownOpen.value;
-    if (isMasterDropdownOpen.value) {
-        masterSearchQuery.value = '';
-        setTimeout(() => {
-            masterSearchInput.value?.focus();
-        }, 100);
-    }
-}
-
-function selectPic(orgId) {
-    form.pic_id = orgId;
-    isPicDropdownOpen.value = false;
-}
-
-function selectMaster(orgId) {
-    form.master_id = orgId;
-    isMasterDropdownOpen.value = false;
-}
 
 function toggleRevokedDropdown() {
     isRevokedDropdownOpen.value = !isRevokedDropdownOpen.value;
@@ -883,11 +794,6 @@ const selectedCompanyLabel = computed(() => {
     return co ? co.name : '';
 });
 
-const selectedMasterName = computed(() => {
-    if (!form.master_id) return '';
-    const org = props.organizations.find(o => o.id === form.master_id);
-    return org ? `${org.name} (${org.code})` : '';
-});
 
 // Filtered companies for step-1 dropdown
 const filteredCompaniesForSelect = computed(() => {
@@ -953,15 +859,6 @@ const filteredPicOrganizations = computed(() => {
     );
 });
 
-const filteredMasterOrganizations = computed(() => {
-    const query = masterSearchQuery.value.toLowerCase().trim();
-    if (!query) return hierarchicalOrganizations.value;
-    return hierarchicalOrganizations.value.filter(org => 
-        (org.name || '').toLowerCase().includes(query) || 
-        (org.code || '').toLowerCase().includes(query) || 
-        (org.alias || '').toLowerCase().includes(query)
-    );
-});
 
 const form = useForm({
     judul: '',
@@ -975,7 +872,6 @@ const form = useForm({
     berlaku: '',
     pic_id: '',
     company_id: '',
-    master_id: '',
     parent_id: '',
     revoked_ids: [],
     related_ids: [],
@@ -989,14 +885,12 @@ function openAddModal() {
     picSearchQuery.value = '';
     companySelectSearchQuery.value = '';
     bodSelectSearchQuery.value = '';
-    masterSearchQuery.value = '';
     revokedSearchQuery.value = '';
     relatedSearchQuery.value = '';
     selectedCompanyIdForForm.value = '';
     isPicDropdownOpen.value = false;
     isCompanySelectDropdownOpen.value = false;
     isBodSelectDropdownOpen.value = false;
-    isMasterDropdownOpen.value = false;
     isRevokedDropdownOpen.value = false;
     isRelatedDropdownOpen.value = false;
     isModalOpen.value = true;
@@ -1028,7 +922,6 @@ function openEditModal(reg) {
     form.berlaku = berlakuVal;
     form.pic_id = reg.pic_id || '';
     form.company_id = reg.company_id || '';
-    form.master_id = reg.master_id || '';
     form.parent_id = reg.parent_id || '';
     form.revoked_ids = reg.revoked_regulations ? reg.revoked_regulations.map(r => r.id) : [];
     form.related_ids = reg.related_regulations ? reg.related_regulations.map(r => r.id) : [];
@@ -1044,13 +937,11 @@ function openEditModal(reg) {
     picSearchQuery.value = '';
     companySelectSearchQuery.value = '';
     bodSelectSearchQuery.value = '';
-    masterSearchQuery.value = '';
     revokedSearchQuery.value = '';
     relatedSearchQuery.value = '';
     isPicDropdownOpen.value = false;
     isCompanySelectDropdownOpen.value = false;
     isBodSelectDropdownOpen.value = false;
-    isMasterDropdownOpen.value = false;
     isRevokedDropdownOpen.value = false;
     isRelatedDropdownOpen.value = false;
     form.clearErrors();
@@ -1063,7 +954,6 @@ function closeModal() {
     isPicDropdownOpen.value = false;
     isCompanySelectDropdownOpen.value = false;
     isBodSelectDropdownOpen.value = false;
-    isMasterDropdownOpen.value = false;
     isRevokedDropdownOpen.value = false;
     isRelatedDropdownOpen.value = false;
     selectedCompanyIdForForm.value = '';

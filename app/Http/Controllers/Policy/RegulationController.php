@@ -20,7 +20,7 @@ class RegulationController extends Controller
      */
     public function index(): Response
     {
-        $regulations = MstRegulation::with(['organization.groub.company', 'parent', 'master', 'revokedRegulations', 'relatedRegulations', 'company'])
+        $regulations = MstRegulation::with(['organization.groub.company', 'parent', 'revokedRegulations', 'relatedRegulations', 'company.company'])
             ->withCount(['generalPolicies'])
             ->orderBy('id', 'asc')
             ->get();
@@ -53,7 +53,6 @@ class RegulationController extends Controller
             'terbit' => 'nullable|date',
             'berlaku' => 'nullable|date',
             'pic_id' => 'nullable|integer|exists:trs_organization,id',
-            'master_id' => 'nullable|integer|exists:trs_organization,id',
             'company_id' => 'nullable|integer|exists:mst_bod,id',
             'parent_id' => 'nullable|integer|exists:mst_regulation,id',
             'status' => 'nullable|string|max:255',
@@ -104,7 +103,6 @@ class RegulationController extends Controller
             'terbit' => 'nullable|date',
             'berlaku' => 'nullable|date',
             'pic_id' => 'nullable|integer|exists:trs_organization,id',
-            'master_id' => 'nullable|integer|exists:trs_organization,id',
             'company_id' => 'nullable|integer|exists:mst_bod,id',
             'status' => 'nullable|string|max:255',
             'parent_id' => [
@@ -181,7 +179,7 @@ class RegulationController extends Controller
      */
     public function previewData(int $id)
     {
-        $regulation = MstRegulation::with(['organization', 'parent', 'master'])->findOrFail($id);
+        $regulation = MstRegulation::with(['organization', 'parent'])->findOrFail($id);
 
         if (strtolower($regulation->tipe ?? '') === 'procedure') {
             $actors = \App\Models\MstActor::with('organization')

@@ -150,27 +150,6 @@
                     </div>
                 </div>
 
-                <!-- Filter by Akses Role -->
-                <div class="relative shrink-0">
-                    <select
-                        v-model="selectedAksesRoleId"
-                        class="appearance-none bg-white text-slate-700 border border-slate-200 rounded-xl pl-2.5 pr-7 py-1.5 text-[11px] font-bold focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-[#1a1a1a] dark:text-slate-300 dark:border-white/10 transition-all hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer min-w-[130px]"
-                    >
-                        <option value="">Semua Akses Role</option>
-                        <option
-                            v-for="role in uniqueAksesRoles"
-                            :key="role.id"
-                            :value="role.id"
-                        >
-                            {{ role.name }}
-                        </option>
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                        </svg>
-                    </div>
-                </div>
 
                 <!-- Expand Level Filter (only for document hierarchy) -->
                 <div v-if="activeViewMode === 'document'" class="relative shrink-0">
@@ -194,8 +173,8 @@
 
                 <!-- Active filters badge -->
                 <button
-                    v-if="searchQuery || selectedStatuses.length || selectedCompanyId || selectedAksesRoleId"
-                    @click="searchQuery = ''; selectedStatuses = []; selectedCompanyId = ''; selectedAksesRoleId = '';"
+                    v-if="searchQuery || selectedStatuses.length || selectedCompanyId"
+                    @click="searchQuery = ''; selectedStatuses = []; selectedCompanyId = '';"
                     type="button"
                     class="shrink-0 inline-flex items-center gap-1 rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-[11px] font-bold text-rose-600 hover:bg-rose-100 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400 transition"
                 >
@@ -214,10 +193,10 @@
                             <tr>
                                 <th scope="col" class="px-3 py-3 w-28 border-r border-b border-slate-200 dark:border-white/10 text-left">Company</th>
                                 <th scope="col" class="px-3 py-3 text-center border-r border-b border-slate-200 dark:border-white/10">Judul</th>
-                                <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Nomor</th>
-                                <th scope="col" class="px-3 py-3 w-28 border-r border-b border-slate-200 dark:border-white/10">Tipe</th>
-                                <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Pemilik Dokumen</th>
-                                <th scope="col" class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10">Akses Role / Pemilik Dokumen</th>
+                                <th scope="col" class="px-3 py-3 text-center border-r border-b border-slate-200 dark:border-white/10">Nomor</th>
+                                <th scope="col" class="px-3 py-3 text-center w-28 border-r border-b border-slate-200 dark:border-white/10">Tipe</th>
+                                <th scope="col" class="px-3 py-3 text-center border-r border-b border-slate-200 dark:border-white/10">Pemilik Dokumen</th>
+                                <th scope="col" class="px-3 py-3 text-center border-r border-b border-slate-200 dark:border-white/10">Pemilik Dokumen (Mapping)</th>
                                 <th scope="col" class="px-3 py-3 text-center w-24 border-r border-b border-slate-200 dark:border-white/10">Status</th>
                                 <th scope="col" class="px-3 py-3 text-center w-16 border-r border-b border-slate-200 dark:border-white/10">Revisi</th>
                                 <th scope="col" class="px-3 py-3 w-24 border-r border-b border-slate-200 dark:border-white/10">Berlaku</th>
@@ -300,7 +279,6 @@ const activeViewMode = ref('document'); // 'document', 'organization'
 // Filters
 const searchQuery = ref('');
 const selectedCompanyId = ref('');
-const selectedAksesRoleId = ref('');
 const selectedStatuses = ref([]);
 const isStatusDropdownOpen = ref(false);
 const expandLevel = ref('all');
@@ -342,19 +320,6 @@ const uniqueStatuses = computed(() => {
     return Array.from(statusSet).sort((a, b) => a.localeCompare(b));
 });
 
-const uniqueAksesRoles = computed(() => {
-    const rolesMap = new Map();
-    props.regulations.forEach(reg => {
-        if (reg.master_id && reg.master) {
-            rolesMap.set(reg.master_id, {
-                id: reg.master_id,
-                name: reg.master.jabatan || reg.master.name,
-                code: reg.master.code
-            });
-        }
-    });
-    return Array.from(rolesMap.values()).sort((a, b) => a.name.localeCompare(b.name));
-});
 
 const filteredRegulations = computed(() => {
     let result = props.regulations;
@@ -408,37 +373,6 @@ const filteredRegulations = computed(() => {
         result = result.filter(r => includedIds.has(r.id));
     }
 
-    if (selectedAksesRoleId.value) {
-        const targetId = Number(selectedAksesRoleId.value);
-
-        // Helper: collect all descendant IDs (recursively) for a given parent ID
-        const collectDescendantIds = (parentId, allRegs) => {
-            const ids = new Set();
-            const queue = [parentId];
-            while (queue.length > 0) {
-                const current = queue.shift();
-                allRegs.forEach(reg => {
-                    if (reg.parent_id === current && !ids.has(reg.id)) {
-                        ids.add(reg.id);
-                        queue.push(reg.id);
-                    }
-                });
-            }
-            return ids;
-        };
-
-        // Find documents whose access role matches the selected role
-        const matchedRegs = result.filter(reg => reg.master_id === targetId);
-
-        // Collect all descendant IDs for each matched document
-        const allIncludedIds = new Set(matchedRegs.map(r => r.id));
-        matchedRegs.forEach(reg => {
-            const descendantIds = collectDescendantIds(reg.id, props.regulations);
-            descendantIds.forEach(id => allIncludedIds.add(id));
-        });
-
-        result = props.regulations.filter(reg => allIncludedIds.has(reg.id));
-    }
 
     if (selectedStatuses.value && selectedStatuses.value.length > 0) {
         const allRegs = props.regulations;
@@ -526,8 +460,8 @@ const filteredRegulations = computed(() => {
             return ids;
         };
 
-        // Find all docs that match the company
-        const matchedByCompany = result.filter(reg => reg.organization?.groub?.company_id === targetCompanyId);
+        // Find all docs that match the company (via company_id → MstBod → company_id = MstCompany.id)
+        const matchedByCompany = result.filter(reg => reg.company?.company_id === targetCompanyId);
 
         const includedIds = new Set();
         matchedByCompany.forEach(reg => {

@@ -16,7 +16,7 @@
             :rowspan="row.companyRowspan"
             class="px-2 py-2 text-slate-600 dark:text-slate-300 text-xs whitespace-normal break-words max-w-[80px] align-top border-r border-b border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-white/[0.02]"
         >
-            <span class="font-semibold text-slate-700 dark:text-slate-200">{{ row.organization?.groub?.company?.name || '-' }}</span>
+            <span class="font-semibold text-slate-700 dark:text-slate-200">{{ row.company?.company?.name || '-' }}</span>
         </td>
         <!-- Judul -->
         <td class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 max-w-[300px] break-words" :style="{ paddingLeft: (row.depth * 24 + 12) + 'px' }">
@@ -246,9 +246,9 @@ const visibleDocRows = computed(() => {
     // Compute companyRowspan
     let i = 0;
     while (i < rows.length) {
-        const companyId = rows[i].organization?.groub?.company_id ?? null;
+        const companyId = rows[i].company?.company_id ?? null;
         let span = 1;
-        while (i + span < rows.length && (rows[i + span].organization?.groub?.company_id ?? null) === companyId) {
+        while (i + span < rows.length && (rows[i + span].company?.company_id ?? null) === companyId) {
             span++;
         }
         rows[i].companyRowspan = span;
