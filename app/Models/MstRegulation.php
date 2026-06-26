@@ -22,6 +22,7 @@ class MstRegulation extends Model
         'parent_id',
         'pic_id',
         'master_id',
+        'company_id',
         'judul',
         'nomor',
         'tipe',
@@ -38,6 +39,7 @@ class MstRegulation extends Model
         'berlaku' => 'date:Y-m-d',
         'parent_id' => 'integer',
         'master_id' => 'integer',
+        'company_id' => 'integer',
     ];
 
     /**
@@ -78,6 +80,14 @@ class MstRegulation extends Model
     public function master(): BelongsTo
     {
         return $this->belongsTo(TrsOrganization::class, 'master_id');
+    }
+
+    /**
+     * Relasi ke MstBod (Refinement)
+     */
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(MstBod::class, 'company_id');
     }
 
     /**

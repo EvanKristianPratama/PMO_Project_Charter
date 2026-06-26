@@ -89,10 +89,11 @@
                                 <div v-if="form.errors.stk" class="text-xs text-rose-500 font-medium">{{ form.errors.stk }}</div>
                             </div>
 
-                            <!-- 
-                            Internal) Selection with Search -->
+                            <!-- (Old Data) Pemilik Dokumen (Internal) Selection with Search -->
                             <div class="space-y-1.5 relative">
-                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Pemilik Dokumen:</label>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                    Pemilik Dokumen (Internal) <span class="text-rose-500 dark:text-rose-400 font-semibold lowercase">([Data Lama])</span>:
+                                </label>
                                 
                                 <!-- Trigger Button -->
                                 <div class="relative">
@@ -102,7 +103,7 @@
                                         class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg px-3.5 py-2 text-sm text-left focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-black/20 dark:text-white dark:border-white/10 flex justify-between items-center"
                                     >
                                         <span class="truncate">
-                                            {{ selectedPicName || '-- Pilih Pemilik Dokumen (Internal) --' }}
+                                            {{ selectedPicName || '-- Pilih Pemilik Dokumen (Internal - Data Lama) --' }}
                                         </span>
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-slate-400 shrink-0">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
@@ -120,7 +121,7 @@
                                         <input 
                                             type="text" 
                                             v-model="picSearchQuery" 
-                                            placeholder="Cari pemilik dokumen (internal)..." 
+                                            placeholder="Cari pemilik dokumen (internal - data lama)..." 
                                             class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-black/20 dark:text-white dark:border-white/10"
                                             ref="picSearchInput"
                                             @click.stop
@@ -134,7 +135,7 @@
                                             @click="selectPic('')"
                                             class="w-full text-left px-2.5 py-1.5 text-xs rounded hover:bg-slate-100 dark:hover:bg-white/5 text-slate-500 dark:text-slate-400"
                                         >
-                                            -- Pilih Pemilik Dokumen (Internal) --
+                                            -- Pilih Pemilik Dokumen (Internal - Data Lama) --
                                         </button>
                                         <button
                                             v-for="org in filteredPicOrganizations" 
@@ -147,7 +148,7 @@
                                             ]"
                                         >
                                             <span class="truncate">
-                                                {{ getLevelPrefix(org) }}{{ org.name }} ({{ org.code }})
+                                                {{ getLevelPrefix(org) }}{{ org.name }} ({{ org.code }}) <span class="text-rose-500 font-medium">[Data Lama]</span>
                                             </span>
                                             <svg v-if="form.pic_id === org.id" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-[#821f44] dark:text-[#db588c] shrink-0">
                                                 <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
@@ -160,6 +161,160 @@
                                 </div>
                                 <div v-if="form.errors.pic_id" class="text-xs text-rose-500 font-medium">{{ form.errors.pic_id }}</div>
                             </div>
+
+                            <!-- (Refinement) Pemilik Dokumen — Step 1: Pilih Company -->
+                            <div class="space-y-3 p-3 rounded-xl border border-emerald-200 dark:border-emerald-700/40 bg-emerald-50/50 dark:bg-emerald-900/10">
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center rounded-md bg-emerald-100 dark:bg-emerald-700/30 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">Refinement</span>
+                                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Pemilik Dokumen</span>
+                                </div>
+
+                                <!-- Step 1: Pilih Company -->
+                                <div class="space-y-1.5 relative">
+                                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                        Langkah 1 — Pilih Perusahaan:
+                                    </label>
+
+                                    <!-- Trigger Button -->
+                                    <div class="relative">
+                                        <button
+                                            type="button"
+                                            @click="toggleCompanySelectDropdown"
+                                            class="w-full bg-white text-slate-800 border border-emerald-200 rounded-lg px-3.5 py-2 text-sm text-left focus:outline-none focus:ring-2 focus:ring-emerald-500/30 dark:bg-black/20 dark:text-white dark:border-emerald-700/40 flex justify-between items-center"
+                                        >
+                                            <span :class="selectedCompanyLabel ? 'text-slate-800 dark:text-white font-medium' : 'text-slate-400'" class="truncate">
+                                                {{ selectedCompanyLabel || '— Pilih Perusahaan —' }}
+                                            </span>
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-emerald-500 shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <!-- Overlay -->
+                                    <div v-if="isCompanySelectDropdownOpen" class="fixed inset-0 z-30" @click="isCompanySelectDropdownOpen = false"></div>
+
+                                    <!-- Dropdown Content -->
+                                    <div v-if="isCompanySelectDropdownOpen" class="absolute left-0 right-0 mt-1 bg-white border border-emerald-100 rounded-lg shadow-xl dark:bg-[#1a1a1a] dark:border-emerald-700/30 z-40 max-h-56 overflow-y-auto p-2 space-y-2">
+                                        <div class="sticky top-0 bg-white dark:bg-[#1a1a1a] pb-1.5">
+                                            <input
+                                                type="text"
+                                                v-model="companySelectSearchQuery"
+                                                placeholder="Cari perusahaan..."
+                                                class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-400/30 dark:bg-black/20 dark:text-white dark:border-white/10"
+                                                ref="companySelectSearchInput"
+                                                @click.stop
+                                            />
+                                        </div>
+                                        <div class="space-y-0.5">
+                                            <button
+                                                type="button"
+                                                @click="selectCompanyForForm('')"
+                                                class="w-full text-left px-2.5 py-1.5 text-xs rounded hover:bg-slate-100 dark:hover:bg-white/5 text-slate-400"
+                                            >
+                                                — Tidak Dipilih —
+                                            </button>
+                                            <button
+                                                v-for="co in filteredCompaniesForSelect"
+                                                :key="co.id"
+                                                type="button"
+                                                @click="selectCompanyForForm(co.id)"
+                                                :class="[
+                                                    'w-full text-left px-2.5 py-1.5 text-xs rounded hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition flex items-center justify-between',
+                                                    selectedCompanyIdForForm === co.id ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 font-semibold' : 'text-slate-700 dark:text-slate-300'
+                                                ]"
+                                            >
+                                                <span class="truncate">{{ co.name }}</span>
+                                                <svg v-if="selectedCompanyIdForForm === co.id" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0">
+                                                    <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
+                                            <div v-if="filteredCompaniesForSelect.length === 0" class="text-center py-4 text-xs text-slate-400">
+                                                Tidak ada perusahaan ditemukan.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Step 2: Pilih BoD (hanya aktif setelah company dipilih) -->
+                                <div class="space-y-1.5 relative">
+                                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                        Langkah 2 — Pilih Pejabat / BoD:
+                                    </label>
+
+                                    <!-- Trigger Button -->
+                                    <div class="relative">
+                                        <button
+                                            type="button"
+                                            @click="toggleBodSelectDropdown"
+                                            :disabled="!selectedCompanyIdForForm"
+                                            :class="[
+                                                'w-full border rounded-lg px-3.5 py-2 text-sm text-left focus:outline-none focus:ring-2 flex justify-between items-center transition',
+                                                selectedCompanyIdForForm
+                                                    ? 'bg-white text-slate-800 border-emerald-200 focus:ring-emerald-500/30 dark:bg-black/20 dark:text-white dark:border-emerald-700/40'
+                                                    : 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed dark:bg-white/5 dark:text-slate-500 dark:border-white/10'
+                                            ]"
+                                        >
+                                            <span :class="selectedBodLabel ? 'text-slate-800 dark:text-white font-medium' : 'text-slate-400'" class="truncate">
+                                                {{ selectedBodLabel || (selectedCompanyIdForForm ? '— Pilih Pejabat / BoD —' : '← Pilih perusahaan terlebih dahulu') }}
+                                            </span>
+                                            <svg v-if="selectedCompanyIdForForm" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-emerald-500 shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                            </svg>
+                                            <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-slate-300 shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <!-- Overlay -->
+                                    <div v-if="isBodSelectDropdownOpen" class="fixed inset-0 z-30" @click="isBodSelectDropdownOpen = false"></div>
+
+                                    <!-- Dropdown Content -->
+                                    <div v-if="isBodSelectDropdownOpen" class="absolute left-0 right-0 mt-1 bg-white border border-emerald-100 rounded-lg shadow-xl dark:bg-[#1a1a1a] dark:border-emerald-700/30 z-40 max-h-56 overflow-y-auto p-2 space-y-2">
+                                        <div class="sticky top-0 bg-white dark:bg-[#1a1a1a] pb-1.5">
+                                            <input
+                                                type="text"
+                                                v-model="bodSelectSearchQuery"
+                                                placeholder="Cari pejabat / BoD..."
+                                                class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-400/30 dark:bg-black/20 dark:text-white dark:border-white/10"
+                                                ref="bodSelectSearchInput"
+                                                @click.stop
+                                            />
+                                        </div>
+                                        <div class="space-y-0.5">
+                                            <button
+                                                type="button"
+                                                @click="selectBodForForm('')"
+                                                class="w-full text-left px-2.5 py-1.5 text-xs rounded hover:bg-slate-100 dark:hover:bg-white/5 text-slate-400"
+                                            >
+                                                — Tidak Dipilih —
+                                            </button>
+                                            <button
+                                                v-for="bod in filteredBodsBySelectedCompany"
+                                                :key="bod.id"
+                                                type="button"
+                                                @click="selectBodForForm(bod.id)"
+                                                :class="[
+                                                    'w-full text-left px-2.5 py-1.5 text-xs rounded hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition flex items-center justify-between',
+                                                    form.company_id === bod.id ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 font-semibold' : 'text-slate-700 dark:text-slate-300'
+                                                ]"
+                                            >
+                                                <span class="truncate">{{ getBodLevelPrefix(bod.depth) }}{{ bod.name }}{{ bod.alias ? ` (${bod.alias})` : '' }} <span class="text-emerald-600 dark:text-emerald-400 font-medium">[Refinement]</span></span>
+                                                <svg v-if="form.company_id === bod.id" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0">
+                                                    <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
+                                            <div v-if="filteredBodsBySelectedCompany.length === 0" class="text-center py-4 text-xs text-slate-400">
+                                                Tidak ada pejabat/BoD ditemukan untuk perusahaan ini.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div v-if="form.errors.company_id" class="text-xs text-rose-500 font-medium">{{ form.errors.company_id }}</div>
+                            </div>
+
 
                             <!-- Akses Role Selection with Search -->
                             <div class="space-y-1.5 relative">
@@ -515,6 +670,14 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    companies: {
+        type: Array,
+        default: () => [],
+    },
+    bods: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const emit = defineEmits(['success']);
@@ -527,17 +690,26 @@ const editingId = ref(null);
 
 // Searchable select dropdown state and helpers
 const isPicDropdownOpen = ref(false);
+const isCompanySelectDropdownOpen = ref(false); // Step-1: pilih Company
+const isBodSelectDropdownOpen = ref(false);     // Step-2: pilih BoD
 const isMasterDropdownOpen = ref(false);
 const isRevokedDropdownOpen = ref(false);
 const isRelatedDropdownOpen = ref(false);
 const picSearchQuery = ref('');
+const companySelectSearchQuery = ref('');  // search di step-1
+const bodSelectSearchQuery = ref('');       // search di step-2
 const masterSearchQuery = ref('');
 const revokedSearchQuery = ref('');
 const relatedSearchQuery = ref('');
 const picSearchInput = ref(null);
+const companySelectSearchInput = ref(null);
+const bodSelectSearchInput = ref(null);
 const masterSearchInput = ref(null);
 const revokedSearchInput = ref(null);
 const relatedSearchInput = ref(null);
+
+// Intermediate state: company yang dipilih sebelum pilih BoD
+const selectedCompanyIdForForm = ref('');
 
 function togglePicDropdown() {
     isPicDropdownOpen.value = !isPicDropdownOpen.value;
@@ -547,6 +719,43 @@ function togglePicDropdown() {
             picSearchInput.value?.focus();
         }, 100);
     }
+}
+
+function toggleCompanySelectDropdown() {
+    isCompanySelectDropdownOpen.value = !isCompanySelectDropdownOpen.value;
+    if (isCompanySelectDropdownOpen.value) {
+        companySelectSearchQuery.value = '';
+        isBodSelectDropdownOpen.value = false;
+        setTimeout(() => {
+            companySelectSearchInput.value?.focus();
+        }, 100);
+    }
+}
+
+function selectCompanyForForm(companyId) {
+    // Jika company berubah, reset pilihan BoD
+    if (selectedCompanyIdForForm.value !== companyId) {
+        form.company_id = '';
+    }
+    selectedCompanyIdForForm.value = companyId;
+    isCompanySelectDropdownOpen.value = false;
+    companySelectSearchQuery.value = '';
+}
+
+function toggleBodSelectDropdown() {
+    if (!selectedCompanyIdForForm.value) return; // harus pilih company dulu
+    isBodSelectDropdownOpen.value = !isBodSelectDropdownOpen.value;
+    if (isBodSelectDropdownOpen.value) {
+        bodSelectSearchQuery.value = '';
+        setTimeout(() => {
+            bodSelectSearchInput.value?.focus();
+        }, 100);
+    }
+}
+
+function selectBodForForm(bodId) {
+    form.company_id = bodId;
+    isBodSelectDropdownOpen.value = false;
 }
 
 function toggleMasterDropdown() {
@@ -662,11 +871,77 @@ const selectedPicName = computed(() => {
     return org ? `${org.name} (${org.code})` : '';
 });
 
+const selectedBodLabel = computed(() => {
+    if (!form.company_id) return '';
+    const bod = props.bods.find(b => b.id === form.company_id);
+    return bod ? `${bod.name}${bod.alias ? ` (${bod.alias})` : ''}` : '';
+});
+
+const selectedCompanyLabel = computed(() => {
+    if (!selectedCompanyIdForForm.value) return '';
+    const co = props.companies.find(c => c.id === selectedCompanyIdForForm.value);
+    return co ? co.name : '';
+});
+
 const selectedMasterName = computed(() => {
     if (!form.master_id) return '';
     const org = props.organizations.find(o => o.id === form.master_id);
     return org ? `${org.name} (${org.code})` : '';
 });
+
+// Filtered companies for step-1 dropdown
+const filteredCompaniesForSelect = computed(() => {
+    const query = companySelectSearchQuery.value.toLowerCase().trim();
+    if (!query) return props.companies;
+    return props.companies.filter(co =>
+        (co.name || '').toLowerCase().includes(query) ||
+        (co.alias || '').toLowerCase().includes(query)
+    );
+});
+
+// BoD terfilter berdasarkan company yang dipilih di step-1
+const filteredBodsBySelectedCompany = computed(() => {
+    if (!selectedCompanyIdForForm.value) return [];
+    const companyId = Number(selectedCompanyIdForForm.value);
+    const byCompany = props.bods.filter(b => b.company_id === companyId);
+
+    // Build hierarchy dari subset ini
+    const map = new Map(byCompany.map(bod => [bod.id, { ...bod, children: [] }]));
+    const roots = [];
+    byCompany.forEach(bod => {
+        const node = map.get(bod.id);
+        if (bod.parent_id && map.has(bod.parent_id)) {
+            map.get(bod.parent_id).children.push(node);
+        } else {
+            roots.push(node);
+        }
+    });
+    const sortNodes = (nodes) => {
+        nodes.sort((a, b) => Number(a.order ?? 0) - Number(b.order ?? 0) || (a.name || '').localeCompare(b.name || ''));
+        nodes.forEach(node => sortNodes(node.children));
+    };
+    sortNodes(roots);
+    const flattened = [];
+    const traverse = (node, depth = 0) => {
+        flattened.push({ ...node, depth });
+        node.children.forEach(child => traverse(child, depth + 1));
+    };
+    roots.forEach(root => traverse(root));
+
+    // Apply search query
+    const query = bodSelectSearchQuery.value.toLowerCase().trim();
+    if (!query) return flattened;
+    return flattened.filter(bod =>
+        (bod.name || '').toLowerCase().includes(query) ||
+        (bod.alias || '').toLowerCase().includes(query) ||
+        (bod.pejabat || '').toLowerCase().includes(query)
+    );
+});
+
+const getBodLevelPrefix = (depth) => {
+    if (!depth) return '';
+    return '\u00A0\u00A0'.repeat(depth) + '— ';
+};
 
 const filteredPicOrganizations = computed(() => {
     const query = picSearchQuery.value.toLowerCase().trim();
@@ -699,6 +974,7 @@ const form = useForm({
     terbit: '',
     berlaku: '',
     pic_id: '',
+    company_id: '',
     master_id: '',
     parent_id: '',
     revoked_ids: [],
@@ -711,10 +987,15 @@ function openAddModal() {
     form.clearErrors();
     form.tipe = ''; // default empty
     picSearchQuery.value = '';
+    companySelectSearchQuery.value = '';
+    bodSelectSearchQuery.value = '';
     masterSearchQuery.value = '';
     revokedSearchQuery.value = '';
     relatedSearchQuery.value = '';
+    selectedCompanyIdForForm.value = '';
     isPicDropdownOpen.value = false;
+    isCompanySelectDropdownOpen.value = false;
+    isBodSelectDropdownOpen.value = false;
     isMasterDropdownOpen.value = false;
     isRevokedDropdownOpen.value = false;
     isRelatedDropdownOpen.value = false;
@@ -746,16 +1027,29 @@ function openEditModal(reg) {
     form.terbit = terbitVal;
     form.berlaku = berlakuVal;
     form.pic_id = reg.pic_id || '';
+    form.company_id = reg.company_id || '';
     form.master_id = reg.master_id || '';
     form.parent_id = reg.parent_id || '';
     form.revoked_ids = reg.revoked_regulations ? reg.revoked_regulations.map(r => r.id) : [];
     form.related_ids = reg.related_regulations ? reg.related_regulations.map(r => r.id) : [];
     
+    // Set selectedCompanyIdForForm berdasarkan BoD yang sudah tersimpan
+    if (reg.company_id) {
+        const bod = props.bods.find(b => b.id === reg.company_id);
+        selectedCompanyIdForForm.value = bod?.company_id ? bod.company_id : '';
+    } else {
+        selectedCompanyIdForForm.value = '';
+    }
+
     picSearchQuery.value = '';
+    companySelectSearchQuery.value = '';
+    bodSelectSearchQuery.value = '';
     masterSearchQuery.value = '';
     revokedSearchQuery.value = '';
     relatedSearchQuery.value = '';
     isPicDropdownOpen.value = false;
+    isCompanySelectDropdownOpen.value = false;
+    isBodSelectDropdownOpen.value = false;
     isMasterDropdownOpen.value = false;
     isRevokedDropdownOpen.value = false;
     isRelatedDropdownOpen.value = false;
@@ -767,9 +1061,14 @@ function closeModal() {
     isModalOpen.value = false;
     editingId.value = null;
     isPicDropdownOpen.value = false;
+    isCompanySelectDropdownOpen.value = false;
+    isBodSelectDropdownOpen.value = false;
     isMasterDropdownOpen.value = false;
     isRevokedDropdownOpen.value = false;
     isRelatedDropdownOpen.value = false;
+    selectedCompanyIdForForm.value = '';
+    companySelectSearchQuery.value = '';
+    bodSelectSearchQuery.value = '';
     relatedSearchQuery.value = '';
     form.reset();
     form.clearErrors();

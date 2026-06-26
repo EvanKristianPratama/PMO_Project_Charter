@@ -63,9 +63,12 @@
                     {{ reg.master.jabatan || reg.master.name }}
                 </span>
                 <span v-if="reg.organization" class="text-[10px] text-slate-500 dark:text-slate-400">
-                    {{ reg.organization.jabatan || reg.organization.name }}
+                    {{ reg.organization.jabatan || reg.organization.name }} <span class="text-rose-500 font-semibold text-[9px] lowercase">([Data Lama])</span>
                 </span>
-                <span v-if="!reg.master && !reg.organization">-</span>
+                <span v-if="reg.company" class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
+                    {{ reg.company.name }} ({{ reg.company.alias || '' }}) <span class="text-emerald-600 font-semibold text-[9px] lowercase">([Refinement])</span>
+                </span>
+                <span v-if="!reg.master && !reg.organization && !reg.company">-</span>
             </div>
         </td>
 

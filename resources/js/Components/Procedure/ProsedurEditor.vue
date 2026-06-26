@@ -152,7 +152,7 @@
             <!-- V. PROSEDUR Header -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-900/10 pb-2 dark:border-white/10">
                 <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide">
-                    V. PROSEDUR (KATEGORI)
+                    V. PROSEDUR
                 </h3>
                 
                 <div class="flex items-center gap-3 print:hidden">
@@ -171,11 +171,11 @@
             <!-- Categories directory table -->
             <div class="rounded-2xl border border-slate-200 dark:border-white/10 overflow-hidden bg-white dark:bg-[#171717]">
                 <table class="w-full border-collapse text-left text-xs">
-                    <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
+                    <thead class="bg-slate-50 text-[10px] font-bold tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
                         <tr>
                             <th class="px-6 py-3 w-16 text-center">No</th>
                             <th class="px-6 py-3">Kategori Prosedur</th>
-                            <th class="px-6 py-3 w-28 text-center">Jumlah SOP</th>
+                            <th class="px-6 py-3 w-28 text-center">Jumlah Aktivitas</th>
                             <th class="px-6 py-3 w-40 text-center print:hidden">Aksi</th>
                         </tr>
                     </thead>

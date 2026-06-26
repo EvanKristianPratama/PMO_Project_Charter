@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Policy;
 use App\Http\Controllers\Controller;
 use App\Models\MstCompany;
 use App\Models\MstRegulation;
+use App\Models\MstBod;
 use App\Models\TrsOrganization;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,17 +20,19 @@ class RegulationController extends Controller
      */
     public function index(): Response
     {
-        $regulations = MstRegulation::with(['organization.groub.company', 'parent', 'master', 'revokedRegulations', 'relatedRegulations'])
+        $regulations = MstRegulation::with(['organization.groub.company', 'parent', 'master', 'revokedRegulations', 'relatedRegulations', 'company'])
             ->withCount(['generalPolicies'])
             ->orderBy('id', 'asc')
             ->get();
         $organizations = TrsOrganization::all();
         $companies = MstCompany::orderBy('name')->get();
+        $bods = MstBod::orderBy('order')->orderBy('name')->get();
 
         return Inertia::render('Policy/Regulation/Index', [
             'regulations' => $regulations,
             'organizations' => $organizations,
             'companies' => $companies,
+            'bods' => $bods,
         ]);
     }
 
@@ -51,6 +54,7 @@ class RegulationController extends Controller
             'berlaku' => 'nullable|date',
             'pic_id' => 'nullable|integer|exists:trs_organization,id',
             'master_id' => 'nullable|integer|exists:trs_organization,id',
+            'company_id' => 'nullable|integer|exists:mst_bod,id',
             'parent_id' => 'nullable|integer|exists:mst_regulation,id',
             'status' => 'nullable|string|max:255',
             'revoked_ids' => 'nullable|array',
@@ -101,6 +105,7 @@ class RegulationController extends Controller
             'berlaku' => 'nullable|date',
             'pic_id' => 'nullable|integer|exists:trs_organization,id',
             'master_id' => 'nullable|integer|exists:trs_organization,id',
+            'company_id' => 'nullable|integer|exists:mst_bod,id',
             'status' => 'nullable|string|max:255',
             'parent_id' => [
                 'nullable',

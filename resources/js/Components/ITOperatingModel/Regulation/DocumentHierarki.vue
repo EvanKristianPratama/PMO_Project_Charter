@@ -77,9 +77,12 @@
                     {{ row.master.jabatan || row.master.name }}
                 </span>
                 <span v-if="row.organization" class="text-[10px] text-slate-500 dark:text-slate-400">
-                    {{ row.organization.jabatan || row.organization.name }}
+                    {{ row.organization.jabatan || row.organization.name }} <span class="text-rose-500 font-semibold text-[9px] lowercase">([Data Lama])</span>
                 </span>
-                <span v-if="!row.master && !row.organization">-</span>
+                <span v-if="row.company" class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
+                    {{ row.company.name }} ({{ row.company.alias || '' }}) <span class="text-emerald-600 font-semibold text-[9px] lowercase">([Refinement])</span>
+                </span>
+                <span v-if="!row.master && !row.organization && !row.company">-</span>
             </div>
         </td>
 
