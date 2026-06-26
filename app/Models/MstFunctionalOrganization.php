@@ -52,4 +52,9 @@ class MstFunctionalOrganization extends Model
             'id'
         );
     }
+
+    public function trsFunctionalFunctions(): HasMany
+    {
+        return $this->hasMany(TrsFunctionalFunction::class, 'functional_id');
+    }
 }
