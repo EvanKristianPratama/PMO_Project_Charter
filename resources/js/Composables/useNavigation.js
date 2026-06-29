@@ -313,7 +313,7 @@ export function useNavigation() {
                 children: programImplementationChildren,
             },
             {
-                label: "Business Architecture",
+                label: "Business Process",
                 href: safeRoute("business-process.proses-bisnis.index"),
                 icon: CubeIcon,
                 active: (url) =>
