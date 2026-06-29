@@ -7,9 +7,9 @@ use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\DatabaseSwitcherController;
 use App\Http\Controllers\Admin\SyncController;
-use App\Http\Controllers\Architecture\BusinessCapability\BusinessCapabilityController;
-use App\Http\Controllers\Architecture\OrganizationStructure\OrganizationController as ArchitectureOrganizationStructureController;
-use App\Http\Controllers\Architecture\ProsesBisnis\ProsesBisnisController as ArchitectureProsesBisnisController;
+use App\Http\Controllers\BusinessProcess\BusinessCapability\BusinessCapabilityController;
+use App\Http\Controllers\BusinessProcess\OrganizationStructure\OrganizationController as BusinessProcessOrganizationStructureController;
+use App\Http\Controllers\BusinessProcess\ProsesBisnis\ProsesBisnisController as BusinessProcessProsesBisnisController;
 use App\Http\Controllers\ResourceManagement\ResourceManagementController as MainResourceManagementController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\SsoController;
@@ -124,6 +124,7 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::get('/blank', fn () => Inertia::render('BlankPage/Index'))->name('blank');
     Route::get('/program-planning', PlanningDashboardController::class)->name('program-planning');
     // Program Planning → Business Strategy (separate from Strategic House)
     Route::get('/program-planning/business-strategy', ProgramPlanningBusinessStrategyIndexController::class)
@@ -273,57 +274,61 @@ Route::middleware(['auth', 'approved'])->group(function () {
         ->name('program-implementation.resources-management.index');
     Route::get('/program-implementation/budgeting', fn () => redirect()->route('program-implementation.resources-management.index'))
         ->name('program-implementation.budgeting');
-    Route::get('/architecture', fn () => Inertia::render('Architecture/Index'))->name('architecture.index');
-    Route::get('/architecture/organization-structure', [ArchitectureOrganizationStructureController::class, 'index'])->name('architecture.organization-structure');
-    Route::post('/architecture/organization-structure', [ArchitectureOrganizationStructureController::class, 'store'])->name('architecture.organization-structure.store');
-    Route::post('/architecture/organization-structure/company', [ArchitectureOrganizationStructureController::class, 'storeCompany'])->name('architecture.organization-structure.company.store');
-    Route::put('/architecture/organization-structure/company/{id}', [ArchitectureOrganizationStructureController::class, 'updateCompany'])->name('architecture.organization-structure.company.update');
-    Route::delete('/architecture/organization-structure/company/{id}', [ArchitectureOrganizationStructureController::class, 'destroyCompany'])->name('architecture.organization-structure.company.destroy');
-    Route::post('/architecture/organization-structure/group', [ArchitectureOrganizationStructureController::class, 'storeGroup'])->name('architecture.organization-structure.group.store');
-    Route::put('/architecture/organization-structure/group/{id}', [ArchitectureOrganizationStructureController::class, 'updateGroup'])->name('architecture.organization-structure.group.update');
-    Route::delete('/architecture/organization-structure/group/{id}', [ArchitectureOrganizationStructureController::class, 'destroyGroup'])->name('architecture.organization-structure.group.destroy');
-    Route::put('/architecture/organization-structure/{organization}', [ArchitectureOrganizationStructureController::class, 'update'])->name('architecture.organization-structure.update');
-    Route::delete('/architecture/organization-structure/{organization}', [ArchitectureOrganizationStructureController::class, 'destroy'])->name('architecture.organization-structure.destroy');
-    Route::post('/architecture/organization-structure/bod', [ArchitectureOrganizationStructureController::class, 'storeBod'])->name('architecture.organization-structure.bod.store');
-    Route::put('/architecture/organization-structure/bod/{id}', [ArchitectureOrganizationStructureController::class, 'updateBod'])->name('architecture.organization-structure.bod.update');
-    Route::delete('/architecture/organization-structure/bod/{id}', [ArchitectureOrganizationStructureController::class, 'destroyBod'])->name('architecture.organization-structure.bod.destroy');
-    Route::post('/architecture/organization-structure/sk', [ArchitectureOrganizationStructureController::class, 'storeSk'])->name('architecture.organization-structure.sk.store');
-    Route::put('/architecture/organization-structure/sk/{id}', [ArchitectureOrganizationStructureController::class, 'updateSk'])->name('architecture.organization-structure.sk.update');
-    Route::delete('/architecture/organization-structure/sk/{id}', [ArchitectureOrganizationStructureController::class, 'destroySk'])->name('architecture.organization-structure.sk.destroy');
-    Route::post('/architecture/organization-structure/functional', [ArchitectureOrganizationStructureController::class, 'storeFunctional'])->name('architecture.organization-structure.functional.store');
-    Route::put('/architecture/organization-structure/functional/{id}', [ArchitectureOrganizationStructureController::class, 'updateFunctional'])->name('architecture.organization-structure.functional.update');
-    Route::delete('/architecture/organization-structure/functional/{id}', [ArchitectureOrganizationStructureController::class, 'destroyFunctional'])->name('architecture.organization-structure.functional.destroy');
-    Route::post('/architecture/organization-structure/functional/member', [ArchitectureOrganizationStructureController::class, 'storeFunctionalMember'])->name('architecture.organization-structure.functional.member.store');
-    Route::delete('/architecture/organization-structure/functional/member', [ArchitectureOrganizationStructureController::class, 'destroyFunctionalMember'])->name('architecture.organization-structure.functional.member.destroy');
-    Route::post('/architecture/organization-structure/functional/structure', [ArchitectureOrganizationStructureController::class, 'storeFunctionalStructure'])->name('architecture.organization-structure.functional.structure.store');
-    Route::delete('/architecture/organization-structure/functional/structure', [ArchitectureOrganizationStructureController::class, 'destroyFunctionalStructure'])->name('architecture.organization-structure.functional.structure.destroy');
-    Route::get('/architecture/informatic-system', fn () => Inertia::render('Architecture/InformaticSystem/Index'))->name('architecture.informatic-system');
+    Route::get('/business-process', fn () => redirect()->route('business-process.proses-bisnis.index'))->name('business-process.index');
+    Route::get('/business-process/organization-structure', [BusinessProcessOrganizationStructureController::class, 'index'])->name('business-process.organization-structure');
+    Route::post('/business-process/organization-structure', [BusinessProcessOrganizationStructureController::class, 'store'])->name('business-process.organization-structure.store');
+    Route::post('/business-process/organization-structure/company', [BusinessProcessOrganizationStructureController::class, 'storeCompany'])->name('business-process.organization-structure.company.store');
+    Route::put('/business-process/organization-structure/company/{id}', [BusinessProcessOrganizationStructureController::class, 'updateCompany'])->name('business-process.organization-structure.company.update');
+    Route::delete('/business-process/organization-structure/company/{id}', [BusinessProcessOrganizationStructureController::class, 'destroyCompany'])->name('business-process.organization-structure.company.destroy');
+    Route::post('/business-process/organization-structure/group', [BusinessProcessOrganizationStructureController::class, 'storeGroup'])->name('business-process.organization-structure.group.store');
+    Route::put('/business-process/organization-structure/group/{id}', [BusinessProcessOrganizationStructureController::class, 'updateGroup'])->name('business-process.organization-structure.group.update');
+    Route::delete('/business-process/organization-structure/group/{id}', [BusinessProcessOrganizationStructureController::class, 'destroyGroup'])->name('business-process.organization-structure.group.destroy');
+    Route::put('/business-process/organization-structure/{organization}', [BusinessProcessOrganizationStructureController::class, 'update'])->name('business-process.organization-structure.update');
+    Route::delete('/business-process/organization-structure/{organization}', [BusinessProcessOrganizationStructureController::class, 'destroy'])->name('business-process.organization-structure.destroy');
+    Route::post('/business-process/organization-structure/bod', [BusinessProcessOrganizationStructureController::class, 'storeBod'])->name('business-process.organization-structure.bod.store');
+    Route::put('/business-process/organization-structure/bod/{id}', [BusinessProcessOrganizationStructureController::class, 'updateBod'])->name('business-process.organization-structure.bod.update');
+    Route::delete('/business-process/organization-structure/bod/{id}', [BusinessProcessOrganizationStructureController::class, 'destroyBod'])->name('business-process.organization-structure.bod.destroy');
+    Route::post('/business-process/organization-structure/sk', [BusinessProcessOrganizationStructureController::class, 'storeSk'])->name('business-process.organization-structure.sk.store');
+    Route::put('/business-process/organization-structure/sk/{id}', [BusinessProcessOrganizationStructureController::class, 'updateSk'])->name('business-process.organization-structure.sk.update');
+    Route::delete('/business-process/organization-structure/sk/{id}', [BusinessProcessOrganizationStructureController::class, 'destroySk'])->name('business-process.organization-structure.sk.destroy');
+    Route::post('/business-process/organization-structure/functional', [BusinessProcessOrganizationStructureController::class, 'storeFunctional'])->name('business-process.organization-structure.functional.store');
+    Route::put('/business-process/organization-structure/functional/{id}', [BusinessProcessOrganizationStructureController::class, 'updateFunctional'])->name('business-process.organization-structure.functional.update');
+    Route::delete('/business-process/organization-structure/functional/{id}', [BusinessProcessOrganizationStructureController::class, 'destroyFunctional'])->name('business-process.organization-structure.functional.destroy');
+    Route::post('/business-process/organization-structure/functional/member', [BusinessProcessOrganizationStructureController::class, 'storeFunctionalMember'])->name('business-process.organization-structure.functional.member.store');
+    Route::delete('/business-process/organization-structure/functional/member', [BusinessProcessOrganizationStructureController::class, 'destroyFunctionalMember'])->name('business-process.organization-structure.functional.member.destroy');
+    Route::post('/business-process/organization-structure/functional/structure', [BusinessProcessOrganizationStructureController::class, 'storeFunctionalStructure'])->name('business-process.organization-structure.functional.structure.store');
+    Route::delete('/business-process/organization-structure/functional/structure', [BusinessProcessOrganizationStructureController::class, 'destroyFunctionalStructure'])->name('business-process.organization-structure.functional.structure.destroy');
+    Route::get('/business-process/informatic-system', fn () => Inertia::render('BusinessProcess/InformaticSystem/Index'))->name('business-process.informatic-system');
+    Route::get('/business-process/business-capability', [BusinessCapabilityController::class, 'index'])->name('business-process.business-capability.index');
+    Route::post('/business-process/business-capability', [BusinessCapabilityController::class, 'store'])->name('business-process.business-capability.store');
+    Route::put('/business-process/business-capability/{businessCapability}', [BusinessCapabilityController::class, 'update'])->name('business-process.business-capability.update');
+    Route::delete('/business-process/business-capability/{businessCapability}', [BusinessCapabilityController::class, 'destroy'])->name('business-process.business-capability.destroy');
 
     // Proses Bisnis (Business Process) CRUD under Architecture
-    Route::get('/architecture/proses-bisnis', [ArchitectureProsesBisnisController::class, 'index'])->name('architecture.proses-bisnis.index');
-    Route::get('/architecture/proses-bisnis/manage', [ArchitectureProsesBisnisController::class, 'manage'])->name('architecture.proses-bisnis.manage');
-    Route::post('/architecture/proses-bisnis', [ArchitectureProsesBisnisController::class, 'store'])->name('architecture.proses-bisnis.store');
-    Route::put('/architecture/proses-bisnis/{id}', [ArchitectureProsesBisnisController::class, 'update'])->name('architecture.proses-bisnis.update');
-    Route::delete('/architecture/proses-bisnis/{id}', [ArchitectureProsesBisnisController::class, 'destroy'])->name('architecture.proses-bisnis.destroy');
+    Route::get('/business-process/proses-bisnis', [BusinessProcessProsesBisnisController::class, 'index'])->name('business-process.proses-bisnis.index');
+    Route::get('/business-process/proses-bisnis/manage', [BusinessProcessProsesBisnisController::class, 'manage'])->name('business-process.proses-bisnis.manage');
+    Route::post('/business-process/proses-bisnis', [BusinessProcessProsesBisnisController::class, 'store'])->name('business-process.proses-bisnis.store');
+    Route::put('/business-process/proses-bisnis/{id}', [BusinessProcessProsesBisnisController::class, 'update'])->name('business-process.proses-bisnis.update');
+    Route::delete('/business-process/proses-bisnis/{id}', [BusinessProcessProsesBisnisController::class, 'destroy'])->name('business-process.proses-bisnis.destroy');
     // APQC CRUD under Architecture
-    Route::post('/architecture/apqc', [ArchitectureProsesBisnisController::class, 'storeApqc'])->name('architecture.apqc.store');
-    Route::put('/architecture/apqc/{id}', [ArchitectureProsesBisnisController::class, 'updateApqc'])->name('architecture.apqc.update');
-    Route::delete('/architecture/apqc/{id}', [ArchitectureProsesBisnisController::class, 'destroyApqc'])->name('architecture.apqc.destroy');
+    Route::post('/business-process/apqc', [BusinessProcessProsesBisnisController::class, 'storeApqc'])->name('business-process.apqc.store');
+    Route::put('/business-process/apqc/{id}', [BusinessProcessProsesBisnisController::class, 'updateApqc'])->name('business-process.apqc.update');
+    Route::delete('/business-process/apqc/{id}', [BusinessProcessProsesBisnisController::class, 'destroyApqc'])->name('business-process.apqc.destroy');
 
     // Proses Bisnis v2 CRUD under Architecture
-    Route::post('/architecture/proses-bisnis-v2', [ArchitectureProsesBisnisController::class, 'storeProsesBisnisV2'])->name('architecture.proses-bisnis-v2.store');
-    Route::put('/architecture/proses-bisnis-v2/{id}', [ArchitectureProsesBisnisController::class, 'updateProsesBisnisV2'])->name('architecture.proses-bisnis-v2.update');
-    Route::delete('/architecture/proses-bisnis-v2/{id}', [ArchitectureProsesBisnisController::class, 'destroyProsesBisnisV2'])->name('architecture.proses-bisnis-v2.destroy');
+    Route::post('/business-process/proses-bisnis-v2', [BusinessProcessProsesBisnisController::class, 'storeProsesBisnisV2'])->name('business-process.proses-bisnis-v2.store');
+    Route::put('/business-process/proses-bisnis-v2/{id}', [BusinessProcessProsesBisnisController::class, 'updateProsesBisnisV2'])->name('business-process.proses-bisnis-v2.update');
+    Route::delete('/business-process/proses-bisnis-v2/{id}', [BusinessProcessProsesBisnisController::class, 'destroyProsesBisnisV2'])->name('business-process.proses-bisnis-v2.destroy');
 
     // Function CRUD under Architecture
-    Route::post('/architecture/function', [ArchitectureProsesBisnisController::class, 'storeFunction'])->name('architecture.function.store');
-    Route::put('/architecture/function/{id}', [ArchitectureProsesBisnisController::class, 'updateFunction'])->name('architecture.function.update');
-    Route::delete('/architecture/function/{id}', [ArchitectureProsesBisnisController::class, 'destroyFunction'])->name('architecture.function.destroy');
+    Route::post('/business-process/function', [BusinessProcessProsesBisnisController::class, 'storeFunction'])->name('business-process.function.store');
+    Route::put('/business-process/function/{id}', [BusinessProcessProsesBisnisController::class, 'updateFunction'])->name('business-process.function.update');
+    Route::delete('/business-process/function/{id}', [BusinessProcessProsesBisnisController::class, 'destroyFunction'])->name('business-process.function.destroy');
 
     // KPI CRUD under Architecture
-    Route::post('/architecture/kpi', [ArchitectureProsesBisnisController::class, 'storeKpi'])->name('architecture.kpi.store');
-    Route::put('/architecture/kpi/{id}', [ArchitectureProsesBisnisController::class, 'updateKpi'])->name('architecture.kpi.update');
-    Route::delete('/architecture/kpi/{id}', [ArchitectureProsesBisnisController::class, 'destroyKpi'])->name('architecture.kpi.destroy');
+    Route::post('/business-process/kpi', [BusinessProcessProsesBisnisController::class, 'storeKpi'])->name('business-process.kpi.store');
+    Route::put('/business-process/kpi/{id}', [BusinessProcessProsesBisnisController::class, 'updateKpi'])->name('business-process.kpi.update');
+    Route::delete('/business-process/kpi/{id}', [BusinessProcessProsesBisnisController::class, 'destroyKpi'])->name('business-process.kpi.destroy');
 
     Route::get('/resources-management', fn () => redirect()->route('resource-management.index'))
         ->name('resources-management.index');

@@ -1,6 +1,7 @@
 import { computed } from "vue";
 import { usePage } from "@inertiajs/vue3";
 import { routeHelper } from "@/Composables/useRouteHelper";
+import { useModulState } from "@/Composables/useModulState";
 import {
     FlagIcon,
     FolderIcon,
@@ -21,6 +22,7 @@ import {
 
 export function useNavigation() {
     const page = usePage();
+    const { activeModul } = useModulState();
     const authUser = computed(() => page.props.auth?.user || {});
     const appRole = computed(() =>
         String(authUser.value?.app_role || "user").toLowerCase(),
@@ -40,7 +42,7 @@ export function useNavigation() {
 
     const navItems = computed(() => {
         const strategicHouseChildren = [
-    
+
         ];
 
         const programPlanningChildren = [
@@ -185,33 +187,91 @@ export function useNavigation() {
             },
         ];
 
+        const getTab = (url) => new URLSearchParams((url || '').split('?')[1] || '').get('tab');
+
         const architectureChildren = [
             {
+                label: "APQC",
+                href: safeRoute("business-process.proses-bisnis.index", { tab: 'apqc' }),
+                icon: CubeIcon,
+                active: (url) => getTab(url) === 'apqc' || ((url || '').startsWith("/business-process/proses-bisnis") && !getTab(url)),
+            },
+            {
                 label: "Business Capability",
-                href: safeRoute("master-data.business-capabilities.index"),
+                href: safeRoute("business-process.business-capability.index"),
                 icon: CubeIcon,
                 active: (url) =>
-                    (url || '').startsWith("/master-data/business-capabilities"),
+                    (url || '').startsWith("/business-process/business-capability"),
             },
             {
                 label: "Business Process",
-                href: safeRoute("architecture.proses-bisnis.index"),
+                href: safeRoute("business-process.proses-bisnis.index", { tab: 'proses-bisnis-v2' }),
+                icon: CubeIcon,
+                active: (url) => getTab(url) === 'proses-bisnis-v2',
+            },
+            {
+                label: "Function",
+                href: safeRoute("business-process.proses-bisnis.index", { tab: 'function' }),
+                icon: CubeIcon,
+                active: (url) => getTab(url) === 'function',
+            },
+            {
+                label: "KPI",
+                href: safeRoute("business-process.proses-bisnis.index", { tab: 'kpi' }),
+                icon: CubeIcon,
+                active: (url) => getTab(url) === 'kpi',
+            },
+            {
+                label: "Regulation Mapping Function",
+                href: safeRoute("business-process.proses-bisnis.index", { tab: 'regulation-map' }),
                 icon: DocumentTextIcon,
-                active: (url) => (url || '').startsWith("/architecture/proses-bisnis"),
+                active: (url) => getTab(url) === 'regulation-map',
+            },
+            // {
+            //     label: "Information System",
+            //     href: safeRoute("business-process.informatic-system"),
+            //     icon: BuildingOffice2Icon,
+            //     active: (url) =>
+            //         (url || '').startsWith("/business-process/informatic-system"),
+            // },
+        ];
+
+        const organizationChildren = [
+            {
+                label: "Company",
+                href: safeRoute("business-process.organization-structure", { tab: 'company' }),
+                icon: BuildingOffice2Icon,
+                active: (url) => (url || '').includes("tab=company") || ((url || '').startsWith("/business-process/organization-structure") && !(url || '').includes("tab=")),
             },
             {
-                label: "Organization",
-                href: safeRoute("architecture.organization-structure"),
-                icon: BuildingOffice2Icon,
-                active: (url) =>
-                    (url || '').startsWith("/architecture/organization-structure"),
+                label: "BoD",
+                href: safeRoute("business-process.organization-structure", { tab: 'bod' }),
+                icon: UserGroupIcon,
+                active: (url) => (url || '').includes("tab=bod"),
             },
             {
-                label: "Information System",
-                href: safeRoute("architecture.informatic-system"),
+                label: "Structural Organization",
+                href: safeRoute("business-process.organization-structure", { tab: 'organization' }),
                 icon: BuildingOffice2Icon,
-                active: (url) =>
-                    (url || '').startsWith("/architecture/informatic-system"),
+                active: (url) => (url || '').includes("tab=organization"),
+            },
+            {
+                label: "Functional Organization",
+                href: safeRoute("business-process.organization-structure", { tab: 'functional' }),
+                icon: BuildingOffice2Icon,
+                active: (url) => (url || '').includes("tab=functional"),
+            },
+            {
+                label: "SK",
+                href: safeRoute("business-process.organization-structure", { tab: 'sk' }),
+                icon: DocumentTextIcon,
+                active: (url) => (url || '').includes("tab=sk"),
+            },
+            {
+                label: "SDM",
+                href: safeRoute("resource-management.index"),
+                icon: UserGroupIcon,
+                active: (url) => (url || '').startsWith("/resource-management"),
             },
         ];
 
@@ -253,13 +313,19 @@ export function useNavigation() {
                 children: programImplementationChildren,
             },
             {
-                label: "Architecture",
-                href: safeRoute("architecture.index"),
+                label: "Business Architecture",
+                href: safeRoute("business-process.proses-bisnis.index"),
                 icon: CubeIcon,
                 active: (url) =>
-                    (url || '').startsWith("/architecture") ||
-                    (url || '').startsWith("/master-data/business-capabilities"),
+                    (url || '').startsWith("/business-process") && !(url || '').startsWith("/business-process/organization-structure"),
                 children: architectureChildren,
+            },
+            {
+                label: "Organization",
+                href: safeRoute("business-process.organization-structure"),
+                icon: BuildingOffice2Icon,
+                active: (url) => (url || '').startsWith("/business-process/organization-structure") || (url || '').startsWith("/resource-management"),
+                children: organizationChildren,
             },
             {
                 label: "Service Portofolio",
@@ -268,17 +334,11 @@ export function useNavigation() {
                 active: (url) => (url || '').startsWith("/service-portofolio"),
             },
             {
-                label: "IT Operating Model",
+                label: "Regulation",
                 href: safeRoute("policy.regulation.index"),
                 icon: DocumentTextIcon,
                 active: (url) => (url || '').startsWith("/policy") || (url || '').startsWith("/bpmn-workflow"),
                 children: [
-                    {
-                        label: "Regulation",
-                        href: safeRoute("policy.regulation.index"),
-                        icon: DocumentTextIcon,
-                        active: (url) => (url || '').startsWith("/policy/regulation"),
-                    },
                     {
                         label: "Organization",
                         href: safeRoute("policy.organization.index"),
@@ -327,23 +387,18 @@ export function useNavigation() {
                         icon: DocumentTextIcon,
                         active: (url) => (url || '').startsWith("/policy/itsp-infoflow"),
                     },
-                    {
-                        label: "BPMN",
-                        href: safeRoute("bpmn-workflow.index"),
-                        icon: CogIcon,
-                        active: (url) => (url || '').startsWith("/bpmn-workflow"),
-                    },
+                    // {
+                    //     label: "BPMN",
+                    //     href: safeRoute("bpmn-workflow.index"),
+                    //     icon: CogIcon,
+                    //     active: (url) => (url || '').startsWith("/bpmn-workflow"),
+                    // },
 
                 ],
             },
+
             {
-                label: "Resource Management",
-                href: safeRoute("resource-management.index"),
-                icon: UserGroupIcon,
-                active: (url) => (url || '').startsWith("/resource-management"),
-            },
-            {
-                label: "Libary",
+                label: "DMS",
                 href: safeRoute("libary.index"),
                 icon: FolderIcon,
                 active: (url) => (url || '').startsWith("/libary"),
@@ -371,7 +426,36 @@ export function useNavigation() {
             });
         }
 
-        return items;
+        const itspsLabels = ['Strategic House', 'Program Planning', 'Program Evaluation', 'Program Implementation'];
+        const itomLabels = ['Business Process', 'Organization', 'Service Portofolio', 'Regulation', 'DMS', 'Master Data', 'Sinkronisasi Data', 'Admin'];
+
+        const isItspsActive = items.some(item =>
+            itspsLabels.includes(item.label) && typeof item.active === 'function' && item.active(page.url)
+        );
+        const isItomActive = items.some(item =>
+            itomLabels.includes(item.label) && typeof item.active === 'function' && item.active(page.url)
+        );
+
+        return items.filter(item => {
+            const isItspsModul = itspsLabels.includes(item.label);
+            const isItomModul = itomLabels.includes(item.label);
+
+            if (activeModul.value === 'itsps') {
+                return isItspsModul;
+            }
+            if (activeModul.value === 'itom') {
+                return isItomModul;
+            }
+
+            // activeModul is 'all'
+            if (isItspsActive) {
+                return isItspsModul;
+            }
+            if (isItomActive) {
+                return isItomModul;
+            }
+            return true;
+        });
     });
 
     return {

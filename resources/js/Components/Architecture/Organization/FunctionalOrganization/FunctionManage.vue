@@ -127,14 +127,14 @@ const openDelete = (row) => {
 
 const submitForm = () => {
     if (modalMode.value === 'create') {
-        form.post(route('architecture.organization-structure.functional.store'), {
+        form.post(route('business-process.organization-structure.functional.store'), {
             onSuccess: () => {
                 isModalOpen.value = false;
                 form.reset();
             },
         });
     } else {
-        form.put(route('architecture.organization-structure.functional.update', selectedFunctional.value.id), {
+        form.put(route('business-process.organization-structure.functional.update', selectedFunctional.value.id), {
             onSuccess: () => {
                 isModalOpen.value = false;
                 form.reset();
@@ -144,7 +144,7 @@ const submitForm = () => {
 };
 
 const submitDelete = () => {
-    form.delete(route('architecture.organization-structure.functional.destroy', selectedFunctional.value.id), {
+    form.delete(route('business-process.organization-structure.functional.destroy', selectedFunctional.value.id), {
         onSuccess: () => {
             isDeleteModalOpen.value = false;
         },

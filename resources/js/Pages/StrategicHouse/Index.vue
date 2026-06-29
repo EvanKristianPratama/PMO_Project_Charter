@@ -1,5 +1,5 @@
 <template>
-    <UserLayout :title="page.title">
+    <ModulLayout :title="page.title">
         <div class="strategic-house animate-fade-in">
             <!-- View Mode Switcher -->
             <div class="inline-flex items-center gap-1 rounded-xl bg-slate-200/50 p-1 dark:bg-white/5 w-fit mb-2">
@@ -311,7 +311,7 @@
                 </Transition>
             </div>
         </div>
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
@@ -320,7 +320,7 @@ import ProgressBar from "@/Components/Loading/ProgressBar.vue";
 import StrategicHouseSkeleton from "@/Components/Loading/StrategicHouseSkeleton.vue";
 import { Link, router, useRemember } from "@inertiajs/vue3";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/vue/24/outline";
-import UserLayout from "@/Layouts/UserLayout.vue";
+import ModulLayout from "@/Layouts/ModulLayout.vue";
 
 const loadMappingView = () => import("@/Components/StrategicHouse/StretegicHouse.vue");
 const loadBusinessStrategyView = () => import("@/Pages/StrategicHouse/BusinessStrategy/Index.vue");

@@ -7,6 +7,7 @@ import { useRouteHelper } from '@/Composables/useRouteHelper';
 import BreadcrumbLeft from '@/Components/BreadcrumbLeft.vue';
 import BreadcrumbRight from '@/Components/BreadcrumbRight.vue';
 import { useNavigation } from '@/Composables/useNavigation';
+import { useModulState } from '@/Composables/useModulState';
 import {
     Bars3Icon,
     XMarkIcon,
@@ -16,6 +17,7 @@ import {
     TableCellsIcon,
     ArrowRightOnRectangleIcon,
     CircleStackIcon,
+    CogIcon,
 } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
@@ -26,6 +28,30 @@ const props = defineProps({
 });
 
 const { isDark, toggleDarkMode } = useDarkMode();
+const { activeModul, setActiveModul } = useModulState();
+
+const isItspsChecked = computed(() => activeModul.value === 'all' || activeModul.value === 'itsps');
+const isItomChecked = computed(() => activeModul.value === 'all' || activeModul.value === 'itom');
+
+const toggleItsps = () => {
+    if (activeModul.value === 'all') {
+        setActiveModul('itom');
+    } else if (activeModul.value === 'itsps') {
+        // Prevent unchecking the last remaining active module
+    } else {
+        setActiveModul('all');
+    }
+};
+
+const toggleItom = () => {
+    if (activeModul.value === 'all') {
+        setActiveModul('itsps');
+    } else if (activeModul.value === 'itom') {
+        // Prevent unchecking the last remaining active module
+    } else {
+        setActiveModul('all');
+    }
+};
 const route = useRouteHelper();
 const page = usePage();
 const mobileMenuOpen = ref(false);
@@ -33,7 +59,7 @@ const authUser = computed(() => page.props.auth?.user || {});
 const currentUrl = computed(() => page.url || '');
 const displayName = computed(() => authUser.value?.name || authUser.value?.email || 'User');
 const userEmail = computed(() => authUser.value?.email || '-');
-const { navItems } = useNavigation();
+const { navItems, isAdmin } = useNavigation();
 
 const currentDb = computed(() => page.props.currentConnection || 'sqlite');
 
@@ -85,7 +111,7 @@ onUnmounted(() => {
                         />
                         <div class="hidden md:block">
                             <p class="text-sm font-semibold tracking-tight text-slate-900 dark:text-white">Review ITSPS</p>
-                            <p class="text-[11px] text-slate-400 dark:text-slate-500">Review ITSP Pertamina 2025-2029 Collaboration System</p>
+                            <p class="text-[11px] text-slate-400 dark:text-slate-500 leading-none">Review ITSP Pertamina 2025-2029 Collaboration System</p>
                         </div>
                     </Link>
                 </div>
@@ -128,6 +154,55 @@ onUnmounted(() => {
                                     <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">{{ displayName }}</p>
                                     <p class="truncate text-xs text-slate-500 dark:text-slate-400">{{ userEmail }}</p>
                                 </div>
+                                <div class="p-1" v-if="isAdmin">
+                                    <div class="px-3 py-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                                        Kelola Modul
+                                    </div>
+                                    <MenuItem v-slot="{ active }">
+                                        <div
+                                            @click.stop="toggleItsps"
+                                            class="flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-xs font-semibold transition-colors"
+                                            :class="[
+                                                isItspsChecked
+                                                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
+                                                    : 'text-slate-700 dark:text-slate-300',
+                                                active ? 'bg-slate-100 dark:bg-white/5' : ''
+                                            ]"
+                                        >
+                                            <span class="flex items-center gap-2 select-none">
+                                                <input
+                                                    type="checkbox"
+                                                    :checked="isItspsChecked"
+                                                    readonly
+                                                    class="pointer-events-none h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 dark:border-slate-700 dark:bg-[#121212] dark:focus:ring-offset-[#1d1d1d]"
+                                                />
+                                                Review ITSPS
+                                            </span>
+                                        </div>
+                                    </MenuItem>
+                                    <MenuItem v-slot="{ active }">
+                                        <div
+                                            @click.stop="toggleItom"
+                                            class="flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-xs font-semibold transition-colors"
+                                            :class="[
+                                                isItomChecked
+                                                    ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400'
+                                                    : 'text-slate-700 dark:text-slate-300',
+                                                active ? 'bg-slate-100 dark:bg-white/5' : ''
+                                            ]"
+                                        >
+                                            <span class="flex items-center gap-2 select-none">
+                                                <input
+                                                    type="checkbox"
+                                                    :checked="isItomChecked"
+                                                    readonly
+                                                    class="pointer-events-none h-3.5 w-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 dark:border-slate-700 dark:bg-[#121212] dark:focus:ring-offset-[#1d1d1d]"
+                                                />
+                                                ITOM
+                                            </span>
+                                        </div>
+                                    </MenuItem>
+                                </div>
                                 <div class="p-1">
                                     <MenuItem v-slot="{ active }">
                                         <Link
@@ -139,7 +214,6 @@ onUnmounted(() => {
                                             Master Data
                                         </Link>
                                     </MenuItem>
-                                    <!-- Database connection toggle removed -->
                                 </div>
                                 <div class="p-1">
                                     <MenuItem v-slot="{ active }">
@@ -268,10 +342,10 @@ onUnmounted(() => {
             </div>
         </nav>
 
-        <div class="sticky top-16 z-40 print:hidden">
+        <div class="sticky top-16 z-40 print:hidden" v-if="activeModul === 'all' || activeModul === 'itsps' || activeModul === 'itom'">
             <div class="flex flex-col gap-2 border-b border-white/50 bg-white/40 px-4 py-2 backdrop-blur-md dark:border-white/10 dark:bg-white/5 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
                 <!-- Kiri: Program Planning / Program Implementation -->
-                <div class="w-full min-w-0 rounded-2xl border border-white/70 bg-white/60 px-3 py-1.5 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/5 sm:w-auto">
+                <div v-if="activeModul === 'all' || activeModul === 'itsps'" class="w-full min-w-0 rounded-2xl border border-white/70 bg-white/60 px-3 py-1.5 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/5 sm:w-auto">
                     <div class="overflow-x-auto">
                         <div class="min-w-max">
                             <BreadcrumbLeft />
@@ -279,7 +353,7 @@ onUnmounted(() => {
                     </div>
                 </div>
                 <!-- Kanan: Architecture / Policy -->
-                <div class="w-full min-w-0 rounded-2xl border border-white/70 bg-white/60 px-3 py-1.5 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/5 sm:w-auto">
+                <div v-if="activeModul === 'all' || activeModul === 'itom'" class="w-full min-w-0 rounded-2xl border border-white/70 bg-white/60 px-3 py-1.5 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/5 sm:w-auto">
                     <div class="overflow-x-auto sm:flex sm:justify-end">
                         <div class="min-w-max">
                             <BreadcrumbRight />

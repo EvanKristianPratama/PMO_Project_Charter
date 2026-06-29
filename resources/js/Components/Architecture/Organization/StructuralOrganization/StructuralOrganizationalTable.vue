@@ -771,14 +771,14 @@ const openDeleteModal = (org) => {
 
 const submitForm = () => {
     if (modalMode.value === 'create') {
-        form.post(route('architecture.organization-structure.store'), {
+        form.post(route('business-process.organization-structure.store'), {
             onSuccess: () => {
                 isModalOpen.value = false;
                 form.reset();
             },
         });
     } else {
-        form.put(route('architecture.organization-structure.update', selectedOrg.value.organization_id), {
+        form.put(route('business-process.organization-structure.update', selectedOrg.value.organization_id), {
             onSuccess: () => {
                 isModalOpen.value = false;
                 form.reset();
@@ -788,7 +788,7 @@ const submitForm = () => {
 };
 
 const submitDelete = () => {
-    form.delete(route('architecture.organization-structure.destroy', selectedOrg.value.organization_id), {
+    form.delete(route('business-process.organization-structure.destroy', selectedOrg.value.organization_id), {
         onSuccess: () => {
             isDeleteModalOpen.value = false;
         },

@@ -688,14 +688,14 @@ const submitForm = () => {
     };
 
     if (modalMode.value === 'create') {
-        form.transform(() => payload).post(route('architecture.apqc.store'), {
+        form.transform(() => payload).post(route('business-process.apqc.store'), {
             onSuccess: () => {
                 isModalOpen.value = false;
                 form.reset();
             },
         });
     } else {
-        form.transform(() => payload).put(route('architecture.apqc.update', selectedItem.value.id), {
+        form.transform(() => payload).put(route('business-process.apqc.update', selectedItem.value.id), {
             onSuccess: () => {
                 isModalOpen.value = false;
                 form.reset();
@@ -705,7 +705,7 @@ const submitForm = () => {
 };
 
 const submitDelete = () => {
-    form.delete(route('architecture.apqc.destroy', selectedItem.value.id), {
+    form.delete(route('business-process.apqc.destroy', selectedItem.value.id), {
         onSuccess: () => {
             isDeleteModalOpen.value = false;
         },

@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Dokumen Kebijakan Umum">
+    <ModulLayout title="Dokumen Kebijakan Umum">
         <div class="animate-fade-in-up space-y-6">
             <!-- Navigation Top Bar -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 print:hidden">
@@ -237,13 +237,13 @@
                 </svg>
             </Link>
         </div>
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 import PertaminaDocumentHeader from '@/Components/Regulation/PertaminaDocumentHeader.vue';
 import GuidanceChapterNavigation from '@/Components/Regulation/GuidanceChapterNavigation.vue';
 

@@ -450,14 +450,14 @@ const openDeleteEmployeeModal = (employee) => {
 
 const submitEmployeeForm = () => {
     if (employeeModalMode.value === 'create') {
-        employeeForm.post(route('architecture.organization-structure.bod.store'), {
+        employeeForm.post(route('business-process.organization-structure.bod.store'), {
             onSuccess: () => {
                 isEmployeeModalOpen.value = false;
                 employeeForm.reset();
             },
         });
     } else {
-        employeeForm.put(route('architecture.organization-structure.bod.update', selectedEmployee.value.id), {
+        employeeForm.put(route('business-process.organization-structure.bod.update', selectedEmployee.value.id), {
             onSuccess: () => {
                 isEmployeeModalOpen.value = false;
                 employeeForm.reset();
@@ -467,7 +467,7 @@ const submitEmployeeForm = () => {
 };
 
 const submitDeleteEmployee = () => {
-    employeeForm.delete(route('architecture.organization-structure.bod.destroy', selectedEmployee.value.id), {
+    employeeForm.delete(route('business-process.organization-structure.bod.destroy', selectedEmployee.value.id), {
         onSuccess: () => {
             isEmployeeDeleteModalOpen.value = false;
         },

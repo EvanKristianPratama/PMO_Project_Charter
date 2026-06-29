@@ -240,14 +240,14 @@ const openDeleteModal = (kpi) => {
 
 const submitForm = () => {
     if (modalMode.value === 'create') {
-        form.post(route('architecture.kpi.store'), {
+        form.post(route('business-process.kpi.store'), {
             onSuccess: () => {
                 isModalOpen.value = false;
                 form.reset();
             },
         });
     } else {
-        form.put(route('architecture.kpi.update', selectedKpi.value.id), {
+        form.put(route('business-process.kpi.update', selectedKpi.value.id), {
             onSuccess: () => {
                 isModalOpen.value = false;
                 form.reset();
@@ -257,7 +257,7 @@ const submitForm = () => {
 };
 
 const submitDelete = () => {
-    form.delete(route('architecture.kpi.destroy', selectedKpi.value.id), {
+    form.delete(route('business-process.kpi.destroy', selectedKpi.value.id), {
         onSuccess: () => {
             isDeleteModalOpen.value = false;
         },

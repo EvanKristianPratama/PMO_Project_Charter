@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Bab V: Penutup">
+    <ModulLayout title="Bab V: Penutup">
         <div class="animate-fade-in-up space-y-6">
             <!-- Page Header -->
             <section class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717]">
@@ -86,12 +86,12 @@
                 </svg>
             </button>
         </div>
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 import PertaminaDocumentHeader from '@/Components/Regulation/PertaminaDocumentHeader.vue';
 import GuidanceChapterNavigation from '@/Components/Regulation/GuidanceChapterNavigation.vue';
 

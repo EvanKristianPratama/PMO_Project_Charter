@@ -20,7 +20,7 @@ class ResourceManagementController extends Controller
         $resources = MstResource::with('organization')->orderBy('id', 'desc')->get();
         $organizations = TrsOrganization::orderBy('name', 'asc')->get();
 
-        return Inertia::render('ResourceManagement/Index', [
+        return Inertia::render('OrganizationStructure/SDM/Index', [
             'resources' => $resources,
             'organizations' => $organizations,
         ]);

@@ -30,7 +30,7 @@
 
                     <!-- Add button -->
                     <Link
-                        :href="route('architecture.proses-bisnis.manage')"
+                        :href="route('business-process.proses-bisnis.manage')"
                         class="inline-flex items-center gap-1.5 rounded-lg bg-[#821f44] hover:bg-[#9c2552] text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 active:scale-95"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
@@ -83,7 +83,7 @@
                             <td class="px-6 py-4 border-b border-slate-200 dark:border-white/10 print:hidden">
                                 <div class="flex items-center justify-center gap-1.5">
                                     <Link 
-                                        :href="route('architecture.proses-bisnis.manage', { edit_id: item.id })"
+                                        :href="route('business-process.proses-bisnis.manage', { edit_id: item.id })"
                                         class="w-14 inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-bold text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5 active:scale-95"
                                         title="Edit Proses Bisnis"
                                     >
@@ -159,7 +159,7 @@ function deleteProsesBisnis(item) {
         cancelButtonText: 'Batal'
     }).then((result) => {
         if (result.isConfirmed) {
-            router.delete(route('architecture.proses-bisnis.destroy', item.id), {
+            router.delete(route('business-process.proses-bisnis.destroy', item.id), {
                 onSuccess: () => {
                     Swal.fire({
                         title: 'Dihapus!',

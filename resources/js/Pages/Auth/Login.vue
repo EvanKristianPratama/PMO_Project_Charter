@@ -5,12 +5,12 @@
                 <div class="w-full max-w-md">
                     <div class="mb-8 text-center">
                         <img
-                            src="/logo.png"
+                            src="/CISS1.png"
                             alt="Logo"
-                            class="mx-auto h-12 w-auto"
+                            class="mx-auto mb-4 h-16 w-auto"
                         />
-                        <p class="mt-5 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">
-                            IT Strategic Planning System
+                        <p class="mt-5 text-[15px] font-semibold uppercase tracking-[0.16em] text-[#1c3b6e]">
+                            Collaboration Information System
                         </p>
                     </div>
 

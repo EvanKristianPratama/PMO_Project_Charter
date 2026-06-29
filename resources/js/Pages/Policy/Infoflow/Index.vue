@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Information Flow Analysis">
+    <ModulLayout title="Information Flow Analysis">
         <div class="space-y-6 animate-fade-in-up print:m-0 print:p-0">
             <!-- Sleek Action Bar at Top (print:hidden) -->
             <section class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717] print:hidden">
@@ -640,13 +640,13 @@
 
             </div>
         </div>
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { Link } from '@inertiajs/vue3';
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 
 // Selected GAMO ID (e.g. 'EDM01')
 const selectedObjectiveId = ref('');

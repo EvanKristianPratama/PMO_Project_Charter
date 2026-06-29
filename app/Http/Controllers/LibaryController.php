@@ -38,7 +38,7 @@ class LibaryController extends Controller
                 ];
             });
 
-        return Inertia::render('Libary/Index', [
+        return Inertia::render('DMS/Index', [
             'documents' => $documents,
             'selectedDocument' => null,
         ]);
@@ -72,7 +72,7 @@ class LibaryController extends Controller
                 ];
             });
 
-        return Inertia::render('Libary/Index', [
+        return Inertia::render('DMS/Index', [
             'documents' => $documents,
             'selectedDocument' => [
                 'id' => $selectedDoc->id,

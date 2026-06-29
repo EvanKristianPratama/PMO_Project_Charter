@@ -487,14 +487,14 @@ const openDeleteCompanyModal = (company) => {
 
 const submitCompanyForm = () => {
     if (companyModalMode.value === 'create') {
-        companyForm.post(route('architecture.organization-structure.company.store'), {
+        companyForm.post(route('business-process.organization-structure.company.store'), {
             onSuccess: () => {
                 isCompanyModalOpen.value = false;
                 companyForm.reset();
             },
         });
     } else {
-        companyForm.put(route('architecture.organization-structure.company.update', selectedCompany.value.id), {
+        companyForm.put(route('business-process.organization-structure.company.update', selectedCompany.value.id), {
             onSuccess: () => {
                 isCompanyModalOpen.value = false;
                 companyForm.reset();
@@ -504,7 +504,7 @@ const submitCompanyForm = () => {
 };
 
 const submitDeleteCompany = () => {
-    companyForm.delete(route('architecture.organization-structure.company.destroy', selectedCompany.value.id), {
+    companyForm.delete(route('business-process.organization-structure.company.destroy', selectedCompany.value.id), {
         onSuccess: () => {
             isCompanyDeleteModalOpen.value = false;
         },
@@ -513,7 +513,7 @@ const submitDeleteCompany = () => {
 
 // Group CRUD methods
 const submitCreateGroup = () => {
-    groupCreateForm.post(route('architecture.organization-structure.group.store'), {
+    groupCreateForm.post(route('business-process.organization-structure.group.store'), {
         onSuccess: () => {
             groupCreateForm.reset('name');
         },
@@ -531,7 +531,7 @@ const cancelEditGroup = () => {
 };
 
 const submitUpdateGroup = (groupId) => {
-    groupEditForm.put(route('architecture.organization-structure.group.update', groupId), {
+    groupEditForm.put(route('business-process.organization-structure.group.update', groupId), {
         onSuccess: () => {
             editingGroupId.value = null;
             groupEditForm.reset();
@@ -541,7 +541,7 @@ const submitUpdateGroup = (groupId) => {
 
 const submitDeleteGroup = (group) => {
     if (confirm(`Apakah Anda yakin ingin menghapus grup '${group.group_name}'? Seluruh struktur organisasi di dalamnya akan dihapus.`)) {
-        groupDeleteForm.delete(route('architecture.organization-structure.group.destroy', group.id), {
+        groupDeleteForm.delete(route('business-process.organization-structure.group.destroy', group.id), {
             onSuccess: () => {
                 // Success is automatically handled/redirected by Inertia
             },

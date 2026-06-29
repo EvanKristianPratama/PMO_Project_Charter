@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Kelola Master Responsible">
+    <ModulLayout title="Kelola Master Responsible">
         <div class="animate-fade-in-up space-y-6">
             <!-- Page Header -->
             <section class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717]">
@@ -233,13 +233,13 @@
                 </div>
             </div>
         </div>
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
 import { ref, watch, computed } from 'vue';
 import { usePage, useForm, router, Link } from '@inertiajs/vue3';
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 
 const props = defineProps({
     responsibles: {

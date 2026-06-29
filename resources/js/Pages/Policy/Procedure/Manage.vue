@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Kelola Procedure">
+    <ModulLayout title="Kelola Procedure">
         <div class="animate-fade-in-up space-y-6">
             <!-- View Settings Controls (Show/Hide Navbar and Header) -->
             <div class="flex justify-between items-center bg-white dark:bg-[#171717] border border-slate-200 dark:border-white/10 px-4 py-3 rounded-2xl shadow-sm print:hidden">
@@ -296,13 +296,13 @@
                 </main>
             </div>
         </div>
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
 import { Link } from '@inertiajs/vue3';
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 import SectionEditor from '@/Components/Procedure/SectionEditor.vue';
 import ManageSection from '@/Components/ITOperatingModel/Regulation/Procedure/ManageSection.vue';
 import ManageActivity from '@/Components/ITOperatingModel/Regulation/Procedure/ManageActivity.vue';

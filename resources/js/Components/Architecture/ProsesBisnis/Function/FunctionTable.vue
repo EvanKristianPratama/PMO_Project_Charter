@@ -1031,14 +1031,14 @@ const submitForm = () => {
     };
 
     if (modalMode.value === 'create') {
-        form.transform(() => payload).post(route('architecture.function.store'), {
+        form.transform(() => payload).post(route('business-process.function.store'), {
             onSuccess: () => {
                 isModalOpen.value = false;
                 form.reset();
             },
         });
     } else {
-        form.transform(() => payload).put(route('architecture.function.update', selectedFn.value.id), {
+        form.transform(() => payload).put(route('business-process.function.update', selectedFn.value.id), {
             onSuccess: () => {
                 isModalOpen.value = false;
                 form.reset();
@@ -1048,7 +1048,7 @@ const submitForm = () => {
 };
 
 const submitDelete = () => {
-    form.delete(route('architecture.function.destroy', selectedFn.value.id), {
+    form.delete(route('business-process.function.destroy', selectedFn.value.id), {
         onSuccess: () => {
             isDeleteModalOpen.value = false;
         },

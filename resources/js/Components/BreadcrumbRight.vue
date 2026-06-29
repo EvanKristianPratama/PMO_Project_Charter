@@ -8,7 +8,7 @@ const page = usePage();
 const currentUrl = computed(() => page.url || '');
 
 const architectureItem = computed(() => {
-    return navItems.value.find((item) => item.label === 'Architecture') ?? null;
+    return navItems.value.find((item) => item.label === 'Business Process') ?? null;
 });
 
 const architectureChildren = computed(() => {
@@ -23,17 +23,31 @@ const showArchitectureChildren = computed(() => {
     return architectureChildren.value.some((item) => item.active(currentUrl.value));
 });
 
+const organizationItem = computed(() => {
+    return navItems.value.find((item) => item.label === 'Organization') ?? null;
+});
+
+const organizationChildren = computed(() => {
+    return organizationItem.value?.children || [];
+});
+
+const showOrganizationChildren = computed(() => {
+    if (organizationItem.value?.active(currentUrl.value)) {
+        return true;
+    }
+
+    return organizationChildren.value.some((item) => item.active(currentUrl.value));
+});
+
 const policyItem = computed(() => {
-    return navItems.value.find((item) => item.label === 'IT Operating Model') ?? null;
+    return navItems.value.find((item) => item.label === 'Regulation') ?? null;
 });
 
 const libaryItem = computed(() => {
-    return navItems.value.find((item) => item.label === 'Libary') ?? null;
+    return navItems.value.find((item) => item.label === 'DMS') ?? null;
 });
 
-const resourceManagementItem = computed(() => {
-    return navItems.value.find((item) => item.label === 'Resource Management') ?? null;
-});
+
 
 const policyChildren = computed(() => {
     const children = policyItem.value?.children || [];
@@ -84,6 +98,29 @@ const adminItem = computed(() => {
 
             <!-- Separation Dot -->
             <span
+                v-if="organizationItem"
+                class="select-none px-0.5 text-indigo-200 dark:text-indigo-900"
+            >
+                &middot;
+            </span>
+
+            <!-- Organization Link -->
+            <Link
+                v-if="organizationItem"
+                :href="organizationItem.href"
+                class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
+                :class="[
+                    showOrganizationChildren
+                        ? 'bg-indigo-500 text-white shadow-sm'
+                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
+                ]"
+            >
+                <component :is="organizationItem.icon" v-if="organizationItem.icon" class="h-3.5 w-3.5 shrink-0" />
+                <span>{{ organizationItem.label }}</span>
+            </Link>
+
+            <!-- Separation Dot -->
+            <span
                 v-if="policyItem"
                 class="select-none px-0.5 text-indigo-200 dark:text-indigo-900"
             >
@@ -105,28 +142,7 @@ const adminItem = computed(() => {
                 <span>{{ policyItem.label }}</span>
             </Link>
 
-            <!-- Separation Dot -->
-            <span
-                v-if="resourceManagementItem"
-                class="select-none px-0.5 text-indigo-200 dark:text-indigo-900"
-            >
-                &middot;
-            </span>
 
-            <!-- Resource Management Link -->
-            <Link
-                v-if="resourceManagementItem"
-                :href="resourceManagementItem.href"
-                class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
-                :class="[
-                    resourceManagementItem.active(currentUrl.value)
-                        ? 'bg-indigo-500 text-white shadow-sm'
-                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
-                ]"
-            >
-                <component :is="resourceManagementItem.icon" v-if="resourceManagementItem.icon" class="h-3.5 w-3.5 shrink-0" />
-                <span>{{ resourceManagementItem.label }}</span>
-            </Link>
 
             <!-- Separation Dot -->
             <span
@@ -180,6 +196,24 @@ const adminItem = computed(() => {
             <Link
                 v-for="item in architectureChildren"
                 :key="'right-child-' + item.label"
+                :href="item.href"
+                class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all duration-150"
+                :class="[
+                    item.active(currentUrl.value)
+                        ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300'
+                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
+                ]"
+            >
+                <component :is="item.icon" v-if="item.icon" class="h-3.5 w-3.5 shrink-0" />
+                <span>{{ item.label }}</span>
+            </Link>
+        </div>
+
+        <!-- Organization Sub-menus -->
+        <div v-if="showOrganizationChildren" class="ml-2 inline-flex flex-wrap items-center gap-1">
+            <Link
+                v-for="item in organizationChildren"
+                :key="'org-child-' + item.label"
                 :href="item.href"
                 class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all duration-150"
                 :class="[

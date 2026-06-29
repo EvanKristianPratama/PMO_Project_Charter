@@ -218,7 +218,7 @@ const manageMembers = (fun) => {
 };
 
 const submitAddFunction = () => {
-    functionForm.post(route('architecture.organization-structure.functional.structure.store'), {
+    functionForm.post(route('business-process.organization-structure.functional.structure.store'), {
         onSuccess: () => {
             functionForm.reset('name');
             functionForm.parent_id = null;
@@ -231,7 +231,7 @@ const deleteFunction = (structureId) => {
     const delFuncForm = useForm({
         structure_id: structureId,
     });
-    delFuncForm.delete(route('architecture.organization-structure.functional.structure.destroy'), {
+    delFuncForm.delete(route('business-process.organization-structure.functional.structure.destroy'), {
         data: {
             structure_id: structureId,
         },

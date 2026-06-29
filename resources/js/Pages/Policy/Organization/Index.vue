@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Policy - Organization Structure">
+    <ModulLayout title="Policy - Organization Structure">
         <div class="animate-fade-in-up space-y-2">
             <!-- Header & Navigation -->
             <div>
@@ -33,12 +33,12 @@
                 </div>
             </div>
         </div>
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 import EITOrganization from '@/Components/ITOperatingModel/Organization/EITOrganization.vue';
 import ITSteeringComittee from '@/Components/ITOperatingModel/Organization/ITSteeringComittee.vue';
 

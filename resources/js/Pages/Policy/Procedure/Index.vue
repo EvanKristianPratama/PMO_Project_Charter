@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Procedure">
+    <ModulLayout title="Procedure">
         <div class="animate-fade-in-up space-y-6 print:m-0 print:p-0">
             <!-- Navigation Top Bar -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 print:hidden">
@@ -252,13 +252,13 @@
                 </svg>
             </Link>
         </div>
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
 import { computed, ref, watch, onMounted, nextTick } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 import FlowChart from '@/Components/Procedure/FlowChart.vue';
 import PertaminaDocumentHeader from '@/Components/Regulation/PertaminaDocumentHeader.vue';
 

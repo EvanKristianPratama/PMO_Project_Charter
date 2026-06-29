@@ -105,6 +105,6 @@ class AuthController extends Controller
         // Log activity
         ActivityLogService::login($user);
 
-        return redirect()->route('strategic-house.index');
+        return redirect()->route('blank');
     }
 }

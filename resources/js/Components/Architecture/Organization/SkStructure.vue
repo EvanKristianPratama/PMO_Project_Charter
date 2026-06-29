@@ -214,14 +214,14 @@ const openDeleteSkModal = (item) => {
 
 const submitSkForm = () => {
     if (skModalMode.value === 'create') {
-        skForm.post(route('architecture.organization-structure.sk.store'), {
+        skForm.post(route('business-process.organization-structure.sk.store'), {
             onSuccess: () => {
                 isSkModalOpen.value = false;
                 skForm.reset();
             },
         });
     } else {
-        skForm.put(route('architecture.organization-structure.sk.update', selectedSk.value.id), {
+        skForm.put(route('business-process.organization-structure.sk.update', selectedSk.value.id), {
             onSuccess: () => {
                 isSkModalOpen.value = false;
                 skForm.reset();
@@ -231,7 +231,7 @@ const submitSkForm = () => {
 };
 
 const submitDeleteSk = () => {
-    skForm.delete(route('architecture.organization-structure.sk.destroy', selectedSk.value.id), {
+    skForm.delete(route('business-process.organization-structure.sk.destroy', selectedSk.value.id), {
         onSuccess: () => {
             isSkDeleteModalOpen.value = false;
         },

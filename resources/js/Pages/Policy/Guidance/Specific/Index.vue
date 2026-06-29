@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Kebijakan Khusus">
+    <ModulLayout title="Kebijakan Khusus">
         <div class="space-y-6 animate-fade-in-up print:m-0 print:p-0">
             <!-- Page Header -->
             <section class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717]">
@@ -164,13 +164,13 @@
                 </svg>
             </Link>
         </div>
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
 import { usePage, Link } from '@inertiajs/vue3';
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 import PertaminaDocumentHeader from '@/Components/Regulation/PertaminaDocumentHeader.vue';
 import GuidanceChapterNavigation from '@/Components/Regulation/GuidanceChapterNavigation.vue';
 

@@ -471,14 +471,14 @@ const openDeleteBODModal = (bod) => {
 
 const submitBODForm = () => {
     if (bodModalMode.value === 'create') {
-        bodForm.post(route('architecture.organization-structure.bod.store'), {
+        bodForm.post(route('business-process.organization-structure.bod.store'), {
             onSuccess: () => {
                 isBODModalOpen.value = false;
                 bodForm.reset();
             },
         });
     } else {
-        bodForm.put(route('architecture.organization-structure.bod.update', selectedBod.value.id), {
+        bodForm.put(route('business-process.organization-structure.bod.update', selectedBod.value.id), {
             onSuccess: () => {
                 isBODModalOpen.value = false;
                 bodForm.reset();
@@ -488,7 +488,7 @@ const submitBODForm = () => {
 };
 
 const submitDeleteBOD = () => {
-    bodForm.delete(route('architecture.organization-structure.bod.destroy', selectedBod.value.id), {
+    bodForm.delete(route('business-process.organization-structure.bod.destroy', selectedBod.value.id), {
         onSuccess: () => {
             isBODDeleteModalOpen.value = false;
         },

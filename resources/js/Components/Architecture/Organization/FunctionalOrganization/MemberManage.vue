@@ -258,7 +258,7 @@ const selectMemberId = (id) => {
 };
 
 const submitAddMember = () => {
-    memberForm.post(route('architecture.organization-structure.functional.member.store'), {
+    memberForm.post(route('business-process.organization-structure.functional.member.store'), {
         onSuccess: () => {
             selectedItemId.value = null;
             memberForm.reset('organization_id');
@@ -276,7 +276,7 @@ const deleteMember = (member) => {
         organization_id: orgId,
     };
     const delForm = useForm(payload);
-    delForm.delete(route('architecture.organization-structure.functional.member.destroy'), {
+    delForm.delete(route('business-process.organization-structure.functional.member.destroy'), {
         data: payload,
     });
 };

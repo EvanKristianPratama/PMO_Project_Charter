@@ -1047,14 +1047,14 @@ const submitForm = () => {
     };
 
     if (modalMode.value === 'create') {
-        form.transform(() => payload).post(route('architecture.proses-bisnis-v2.store'), {
+        form.transform(() => payload).post(route('business-process.proses-bisnis-v2.store'), {
             onSuccess: () => {
                 isModalOpen.value = false;
                 form.reset();
             },
         });
     } else {
-        form.transform(() => payload).put(route('architecture.proses-bisnis-v2.update', selectedItem.value.id), {
+        form.transform(() => payload).put(route('business-process.proses-bisnis-v2.update', selectedItem.value.id), {
             onSuccess: () => {
                 isModalOpen.value = false;
                 form.reset();
@@ -1064,7 +1064,7 @@ const submitForm = () => {
 };
 
 const submitDelete = () => {
-    form.delete(route('architecture.proses-bisnis-v2.destroy', selectedItem.value.id), {
+    form.delete(route('business-process.proses-bisnis-v2.destroy', selectedItem.value.id), {
         onSuccess: () => {
             isDeleteModalOpen.value = false;
         },
