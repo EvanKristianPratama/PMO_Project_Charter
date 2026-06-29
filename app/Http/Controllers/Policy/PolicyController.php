@@ -66,6 +66,106 @@ class PolicyController extends Controller
         ]);
     }
 
+    public function createObjective(Request $request): Response
+    {
+        $regulations = \App\Models\MstRegulation::orderBy('judul', 'asc')->get();
+
+        $selectedRegulationId = $request->integer('regulation_id');
+        $selectedRegulation = $selectedRegulationId
+            ? $regulations->firstWhere('id', $selectedRegulationId)
+            : $regulations->first();
+
+        $objectives = MstObjective::with(['practices' => function($query) {
+            $query->orderBy('practice_id', 'asc');
+        }, 'cobitMappings'])
+        ->where('regulation_id', $selectedRegulation?->id)
+        ->orderByRaw("
+            CASE
+                WHEN objective_id LIKE 'EDM%' THEN 1
+                WHEN objective_id LIKE 'APO%' THEN 2
+                WHEN objective_id LIKE 'BAI%' THEN 3
+                WHEN objective_id LIKE 'DSS%' THEN 4
+                WHEN objective_id LIKE 'MEA%' THEN 5
+                ELSE 6
+            END ASC
+        ")
+        ->orderBy('objective_id', 'asc')
+        ->get();
+
+        return Inertia::render('Policy/Guidance/Specific/Form', [
+            'objectives' => $objectives,
+            'regulations' => $regulations,
+            'selectedRegulationId' => $selectedRegulation?->id,
+            'initCreate' => true,
+        ]);
+    }
+
+    public function editObjective(Request $request, string $id): Response
+    {
+        $objective = MstObjective::findOrFail($id);
+
+        $regulations = \App\Models\MstRegulation::orderBy('judul', 'asc')->get();
+        $selectedRegulation = $regulations->firstWhere('id', $objective->regulation_id);
+
+        $objectives = MstObjective::with(['practices' => function($query) {
+            $query->orderBy('practice_id', 'asc');
+        }])
+        ->where('regulation_id', $selectedRegulation?->id)
+        ->orderByRaw("
+            CASE
+                WHEN objective_id LIKE 'EDM%' THEN 1
+                WHEN objective_id LIKE 'APO%' THEN 2
+                WHEN objective_id LIKE 'BAI%' THEN 3
+                WHEN objective_id LIKE 'DSS%' THEN 4
+                WHEN objective_id LIKE 'MEA%' THEN 5
+                ELSE 6
+            END ASC
+        ")
+        ->orderBy('objective_id', 'asc')
+        ->get();
+
+        return Inertia::render('Policy/Guidance/Specific/Form', [
+            'objectives' => $objectives,
+            'regulations' => $regulations,
+            'selectedRegulationId' => $selectedRegulation?->id,
+            'initEditObjectiveId' => $objective->objective_id,
+        ]);
+    }
+
+    public function mappingCobit(Request $request): Response
+    {
+        $regulations = \App\Models\MstRegulation::orderBy('judul', 'asc')->get();
+
+        $selectedRegulationId = $request->integer('regulation_id');
+        $selectedRegulation = $selectedRegulationId
+            ? $regulations->firstWhere('id', $selectedRegulationId)
+            : $regulations->first();
+
+        $objectives = MstObjective::with(['cobitMappings', 'practices' => function($q) {
+            $q->orderBy('practice_id', 'asc');
+        }])
+            ->where('regulation_id', $selectedRegulation?->id)
+            ->orderByRaw("
+                CASE
+                    WHEN objective_id LIKE 'EDM%' THEN 1
+                    WHEN objective_id LIKE 'APO%' THEN 2
+                    WHEN objective_id LIKE 'BAI%' THEN 3
+                    WHEN objective_id LIKE 'DSS%' THEN 4
+                    WHEN objective_id LIKE 'MEA%' THEN 5
+                    ELSE 6
+                END ASC
+            ")
+            ->orderBy('objective_id', 'asc')
+            ->get();
+
+        return Inertia::render('Policy/Guidance/Specific/Mapping', [
+            'objectives' => $objectives,
+            'regulations' => $regulations,
+            'selectedRegulationId' => $selectedRegulation?->id,
+            'selectedObjectiveId' => $request->query('objective'),
+        ]);
+    }
+
     /**
      * Display the specific policy management CRUD view.
      */
@@ -127,11 +227,11 @@ class PolicyController extends Controller
             'regulation_id.exists' => 'Regulasi tidak valid.',
         ]);
 
-        MstObjective::create($validated);
+        $objective = MstObjective::create($validated);
 
         return redirect()
-            ->route('policy.specific.manage', ['regulation_id' => $request->regulation_id])
-            ->with('success', 'Governance Objective berhasil ditambahkan.');
+            ->route('policy.specific.edit', ['objective' => $objective->objective_id])
+            ->with('success', 'Kebijakan Khusus berhasil ditambahkan. Silakan kelola Butir Kebijakan.');
     }
 
     /**
@@ -222,11 +322,8 @@ class PolicyController extends Controller
 
         MstPractice::create($validated);
 
-        $objective = MstObjective::find($request->objective_id);
-        $regulationId = $objective?->regulation_id;
-
         return redirect()
-            ->route('policy.specific.manage', ['regulation_id' => $regulationId])
+            ->route('policy.specific.edit', ['objective' => $request->objective_id])
             ->with('success', 'Management Practice berhasil ditambahkan.');
     }
 
@@ -262,11 +359,10 @@ class PolicyController extends Controller
             $practice->update($validated);
         }
 
-        $objective = MstObjective::find($practice->objective_id);
-        $regulationId = $objective?->regulation_id;
+        $objectiveId = $practice->objective_id;
 
         return redirect()
-            ->route('policy.specific.manage', ['regulation_id' => $regulationId])
+            ->route('policy.specific.edit', ['objective' => $objectiveId])
             ->with('success', 'Management Practice berhasil diperbarui.');
     }
 
@@ -276,12 +372,79 @@ class PolicyController extends Controller
     public function destroyPractice(string $id): RedirectResponse
     {
         $practice = MstPractice::findOrFail($id);
-        $objective = MstObjective::find($practice->objective_id);
-        $regulationId = $objective?->regulation_id;
+        $objectiveId = $practice->objective_id;
         $practice->delete();
 
         return redirect()
-            ->route('policy.specific.manage', ['regulation_id' => $regulationId])
+            ->route('policy.specific.edit', ['objective' => $objectiveId])
             ->with('success', 'Management Practice berhasil dihapus.');
+    }
+
+    /**
+     * Store a newly created COBIT mapping.
+     */
+    public function storeCobitMapping(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'objective_id' => 'required|string|exists:mst_objective,objective_id',
+            'cobit_domain' => 'nullable|string|max:255',
+            'cobit_objective' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+
+        \App\Models\TrsMapingKebijakanCobit::create($validated);
+
+        $objective = MstObjective::where('objective_id', $request->objective_id)->first();
+
+        return redirect()
+            ->route('policy.specific.mapping', [
+                'objective' => $request->objective_id,
+                'regulation_id' => $objective ? $objective->regulation_id : null,
+            ])
+            ->with('success', 'Mapping COBIT 2019 berhasil ditambahkan.');
+    }
+
+    /**
+     * Update the specified COBIT mapping.
+     */
+    public function updateCobitMapping(Request $request, string $id): RedirectResponse
+    {
+        $mapping = \App\Models\TrsMapingKebijakanCobit::findOrFail($id);
+
+        $validated = $request->validate([
+            'cobit_domain' => 'nullable|string|max:255',
+            'cobit_objective' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+
+        $mapping->update($validated);
+
+        $objective = MstObjective::where('objective_id', $mapping->objective_id)->first();
+
+        return redirect()
+            ->route('policy.specific.mapping', [
+                'objective' => $mapping->objective_id,
+                'regulation_id' => $objective ? $objective->regulation_id : null,
+            ])
+            ->with('success', 'Mapping COBIT 2019 berhasil diperbarui.');
+    }
+
+    /**
+     * Remove the specified COBIT mapping.
+     */
+    public function destroyCobitMapping(string $id): RedirectResponse
+    {
+        $mapping = \App\Models\TrsMapingKebijakanCobit::findOrFail($id);
+        $objectiveId = $mapping->objective_id;
+        $objective = MstObjective::where('objective_id', $objectiveId)->first();
+
+        $mapping->delete();
+
+        return redirect()
+            ->route('policy.specific.mapping', [
+                'objective' => $objectiveId,
+                'regulation_id' => $objective ? $objective->regulation_id : null,
+            ])
+            ->with('success', 'Mapping COBIT 2019 berhasil dihapus.');
     }
 }

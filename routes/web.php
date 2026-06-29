@@ -366,12 +366,20 @@ Route::middleware(['auth', 'approved'])->group(function () {
             return redirect()->route('policy.general.index');
         })->name('specific.index');
         Route::get('/specific/manage', [PolicyController::class, 'manage'])->name('specific.manage');
+        Route::get('/specific/create', [PolicyController::class, 'createObjective'])->name('specific.create');
+        Route::get('/specific/{objective}/edit', [PolicyController::class, 'editObjective'])->name('specific.edit');
+        Route::get('/specific/mapping-all', [PolicyController::class, 'mappingCobit'])->name('specific.mapping');
         Route::post('/objective', [PolicyController::class, 'storeObjective'])->name('objective.store');
         Route::put('/objective/{objective}', [PolicyController::class, 'updateObjective'])->name('objective.update');
         Route::delete('/objective/{objective}', [PolicyController::class, 'destroyObjective'])->name('objective.destroy');
         Route::post('/practice', [PolicyController::class, 'storePractice'])->name('practice.store');
         Route::put('/practice/{practice}', [PolicyController::class, 'updatePractice'])->name('practice.update');
         Route::delete('/practice/{practice}', [PolicyController::class, 'destroyPractice'])->name('practice.destroy');
+
+        // Mapping COBIT 2019
+        Route::post('/cobit-mapping', [PolicyController::class, 'storeCobitMapping'])->name('cobit-mapping.store');
+        Route::put('/cobit-mapping/{id}', [PolicyController::class, 'updateCobitMapping'])->name('cobit-mapping.update');
+        Route::delete('/cobit-mapping/{id}', [PolicyController::class, 'destroyCobitMapping'])->name('cobit-mapping.destroy');
 
         // Roles & Responsibilities CRUD
         Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');

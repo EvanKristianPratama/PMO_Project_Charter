@@ -1,5 +1,5 @@
 <template>
-    <ModulLayout title="Kelola Kebijakan Khusus">
+    <ModulLayout title="Edit Kebijakan Khusus">
         <div class="animate-fade-in-up space-y-6">
             <!-- Page Header -->
             <section class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717]">
@@ -22,22 +22,11 @@
                             Kembali ke Dokumen
                         </Link>
                         <Link
-                            :href="route('policy.specific.mapping', { regulation_id: props.selectedRegulationId || activeRegulation?.id })"
-                            class="inline-flex items-center gap-2 rounded-xl border border-[#1e40af] bg-blue-50/50 px-4 py-2.5 text-sm font-bold text-[#1e40af] shadow-sm transition-all hover:bg-blue-100 hover:shadow-md focus:ring-2 focus:ring-[#1e40af]/20 active:scale-95 dark:border-[#3b82f6] dark:bg-[#3b82f6]/10 dark:text-[#3b82f6] dark:hover:bg-[#3b82f6]/20"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
-                            </svg>
-                            Mapping COBIT
-                        </Link>
-                        <Link
-                            :href="route('policy.specific.create', { regulation_id: props.selectedRegulationId || activeRegulation?.id })"
+                            :href="route('policy.specific.manage', { regulation_id: props.selectedRegulationId || activeRegulation?.id })"
                             class="inline-flex items-center gap-2 rounded-xl bg-[#1e40af] px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#1e40af]/25 transition-all hover:bg-[#1e3a8a] hover:shadow-[#1e40af]/40 focus:ring-2 focus:ring-[#1e40af]/20 active:scale-95"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                            </svg>
-                            Tambah Kebijakan Khusus
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" /></svg>
+                            Selesai Edit
                         </Link>
                     </div>
                 </div>
@@ -614,7 +603,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, onMounted } from 'vue';
 import { usePage, useForm, router, Link } from '@inertiajs/vue3';
 import ModulLayout from '@/Layouts/ModulLayout.vue';
 
@@ -644,12 +633,25 @@ const props = defineProps({
     selectedRegulationId: {
         type: [Number, String],
         default: null
-    }
+    },
+    initCreate: Boolean,
+    initEditObjectiveId: String,
 });
 
 const activeRegulation = computed(() => {
     if (!props.selectedRegulationId) return props.regulations[0] || null;
     return props.regulations.find(r => r.id === props.selectedRegulationId) || null;
+});
+
+onMounted(() => {
+    if (props.initCreate) {
+        startCreateObjective();
+    } else if (props.initEditObjectiveId) {
+        const obj = props.objectives.find(o => o.objective_id === props.initEditObjectiveId);
+        if (obj) {
+            startEditObjective(obj);
+        }
+    }
 });
 
 const page = usePage();

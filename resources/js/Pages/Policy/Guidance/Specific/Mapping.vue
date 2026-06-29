@@ -1,14 +1,14 @@
 <template>
-    <ModulLayout title="Kelola Kebijakan Khusus">
+    <ModulLayout title="Mapping COBIT Khusus">
         <div class="animate-fade-in-up space-y-6">
             <!-- Page Header -->
             <section class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                <div class="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full bg-[#821f44]/10 blur-2xl"></div>
+                <div class="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full bg-[#152c5b]/10 blur-2xl"></div>
                 <div class="pointer-events-none absolute -bottom-16 -left-12 h-40 w-40 rounded-full bg-blue-500/5 blur-2xl"></div>
 
                 <div class="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#821f44] dark:text-[#a83262]">{{ activeRegulation?.judul }}</p>
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#152c5b] dark:text-[#6084c9]">{{ activeRegulation?.judul }}</p>
                         <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Kelola Dokumen</h1>
                     </div>
                     <div class="flex items-center gap-3">
@@ -22,22 +22,11 @@
                             Kembali ke Dokumen
                         </Link>
                         <Link
-                            :href="route('policy.specific.mapping', { regulation_id: props.selectedRegulationId || activeRegulation?.id })"
-                            class="inline-flex items-center gap-2 rounded-xl border border-[#1e40af] bg-blue-50/50 px-4 py-2.5 text-sm font-bold text-[#1e40af] shadow-sm transition-all hover:bg-blue-100 hover:shadow-md focus:ring-2 focus:ring-[#1e40af]/20 active:scale-95 dark:border-[#3b82f6] dark:bg-[#3b82f6]/10 dark:text-[#3b82f6] dark:hover:bg-[#3b82f6]/20"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
-                            </svg>
-                            Mapping COBIT
-                        </Link>
-                        <Link
-                            :href="route('policy.specific.create', { regulation_id: props.selectedRegulationId || activeRegulation?.id })"
+                            :href="route('policy.specific.manage', { regulation_id: props.selectedRegulationId || activeRegulation?.id })"
                             class="inline-flex items-center gap-2 rounded-xl bg-[#1e40af] px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#1e40af]/25 transition-all hover:bg-[#1e3a8a] hover:shadow-[#1e40af]/40 focus:ring-2 focus:ring-[#1e40af]/20 active:scale-95"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                            </svg>
-                            Tambah Kebijakan Khusus
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" /></svg>
+                            Kembali ke Daftar
                         </Link>
                     </div>
                 </div>
@@ -65,145 +54,6 @@
                 </transition>
             </div>
 
-            <!-- Inline Objective Creator (Shown when isCreatingObjective is true) -->
-            <transition name="slide-down">
-                <div v-if="isCreatingObjective" class="max-w-4xl mx-auto overflow-hidden rounded-2xl border-2 border-dashed border-[#821f44]/30 bg-slate-50/50 p-6 dark:bg-white/5">
-                    <div class="flex items-center justify-between border-b border-slate-200 pb-3 dark:border-white/10 mb-4">
-                        <h3 class="text-base font-bold text-[#821f44] dark:text-[#a83262] flex items-center gap-2">
-                            <span class="inline-block w-2.5 h-2.5 rounded-full bg-[#821f44] animate-ping"></span>
-                            Buat Kebijakan Khusus Baru
-                        </h3>
-                        <button @click="cancelCreateObjective" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
-
-                    <!-- COBIT style Card in Create Mode -->
-                    <form @submit.prevent="submitCreateObjective" class="space-y-4 bg-white rounded-xl border border-slate-200 shadow-lg overflow-hidden dark:border-white/15 dark:bg-[#1a1a1a]">
-                        <!-- COBIT Burgundy Header Band -->
-                        <div class="bg-[#821f44] p-5 text-white">
-                            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-xs font-semibold tracking-wider opacity-90 mb-3">
-                                <div class="flex items-center gap-2">
-                                    <span>Kebijakan (Bahasa Indonesia):</span>
-                                </div>
-                            </div>
-
-                            <div class="mb-4 space-y-1">
-                                <label class="block text-[10px] font-bold uppercase tracking-wider text-white/70">Pilih Regulasi:</label>
-                                <select 
-                                    v-model="objectiveForm.regulation_id" 
-                                    class="w-full bg-white/10 text-white placeholder-white/40 border border-white/20 rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-white/40"
-                                >
-                                    <option value="" class="text-slate-900">-- Pilih Regulasi --</option>
-                                    <option v-for="reg in regulations" :key="reg.id" :value="reg.id" class="text-slate-900">
-                                        {{ reg.judul }}
-                                    </option>
-                                </select>
-                                <div v-if="objectiveForm.errors.regulation_id" class="text-xs text-red-200 font-medium bg-red-900/30 p-2 rounded">{{ objectiveForm.errors.regulation_id }}</div>
-                            </div>
-
-                            <!-- Input Domain Manual -->
-                            <div class="mb-4 space-y-1">
-                                <input 
-                                    type="text" 
-                                    v-model="objectiveForm.domain" 
-                                    placeholder="Masukkan nama kebijakan manual (e.g. Evaluasi, Arahan dan Pemantauan)" 
-                                    class="w-full bg-white/10 text-white placeholder-white/40 border border-white/20 rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-white/40"
-                                />
-                                <div v-if="objectiveForm.errors.domain" class="text-xs text-red-200 font-medium bg-red-900/30 p-2 rounded">{{ objectiveForm.errors.domain }}</div>
-                            </div>
-                            
-                            <div class="space-y-3">
-                                <label class="block text-xs font-bold uppercase tracking-wider text-white/80">Kebijakan Khusus:</label>
-                                <div class="flex flex-col sm:flex-row gap-3">
-                                    <input 
-                                        type="text" 
-                                        v-model="objectiveForm.objective_id" 
-                                        placeholder="Contoh: EDM01" 
-                                        class="w-full sm:w-1/4 bg-white/10 text-white placeholder-white/40 border border-white/20 rounded-lg px-3 py-2 text-sm font-mono font-bold focus:outline-none focus:ring-2 focus:ring-white/40"
-                                        required
-                                    />
-                                    <input 
-                                        type="text" 
-                                        v-model="objectiveForm.objective" 
-                                        placeholder="Nama Kebijakan Khusus (e.g. Ensured Governance Framework Setting...)" 
-                                        class="w-full sm:w-3/4 bg-white/10 text-white placeholder-white/40 border border-white/20 rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-white/40"
-                                        required
-                                    />
-                                </div>
-                                <div v-if="objectiveForm.errors.objective_id" class="text-xs text-red-200 font-medium font-mono bg-red-900/30 p-2 rounded">{{ objectiveForm.errors.objective_id }}</div>
-                                <div v-if="objectiveForm.errors.objective" class="text-xs text-red-200 font-medium bg-red-900/30 p-2 rounded">{{ objectiveForm.errors.objective }}</div>
-                            </div>
-                        </div>
-
-                        <!-- Card Content in Form Mode -->
-                        <div class="p-6 space-y-4">
-                            <!-- Description Box -->
-                            <div class="border border-slate-200 rounded-lg overflow-hidden dark:border-white/10">
-                                <div class="bg-slate-100 px-4 py-2 text-xs font-bold uppercase text-slate-700 dark:bg-white/5 dark:text-slate-300 border-b border-slate-200 dark:border-white/10">
-                                    Deskripsi
-                                </div>
-                                <div class="p-4">
-                                    <textarea 
-                                        v-model="objectiveForm.objective_description" 
-                                        rows="3" 
-                                        placeholder="Masukkan deskripsi lengkap kebijakan khusus di sini..." 
-                                        class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-black/20 dark:text-white dark:border-white/10"
-                                    ></textarea>
-                                </div>
-                            </div>
-
-                            <!-- Purpose Box -->
-                            <div class="border border-slate-200 rounded-lg overflow-hidden dark:border-white/10">
-                                <div class="bg-slate-100 px-4 py-2 text-xs font-bold uppercase text-slate-700 dark:bg-white/5 dark:text-slate-300 border-b border-slate-200 dark:border-white/10">
-                                    Tujuan
-                                </div>
-                                <div class="p-4">
-                                    <textarea 
-                                        v-model="objectiveForm.objective_purpose" 
-                                        rows="3" 
-                                        placeholder="Masukkan tujuan dari kebijakan khusus di sini..." 
-                                        class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-black/20 dark:text-white dark:border-white/10"
-                                    ></textarea>
-                                </div>
-                            </div>
-
-                            <!-- Lock Notice for practices -->
-                            <div class="bg-amber-50 text-amber-800 border border-amber-200 rounded-lg p-4 text-xs dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-300 flex items-start gap-2.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                                </svg>
-                                <div>
-                                    <span class="font-bold">What You See Is What You Get:</span> 
-                                    Isi nama dan informasi Kebijakan Khusus utama terlebih dahulu. Setelah Anda menyimpannya ke database, Anda dapat menambahkan baris <strong>Butir Kebijakan</strong> yang berkaitan dengannya.
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Form Actions -->
-                        <div class="bg-slate-50 px-6 py-4 flex justify-end gap-3 border-t border-slate-100 dark:bg-black/20 dark:border-white/5">
-                            <button 
-                                type="button" 
-                                @click="cancelCreateObjective"
-                                class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5"
-                            >
-                                Batal
-                            </button>
-                            <button 
-                                type="submit" 
-                                class="rounded-xl bg-[#821f44] px-4 py-2 text-sm font-bold text-white shadow-md shadow-[#821f44]/20 transition hover:bg-[#9c2552] disabled:opacity-60"
-                                :disabled="objectiveForm.processing"
-                            >
-                                <span v-if="objectiveForm.processing" class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></span>
-                                Simpan Kebijakan Khusus
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </transition>
-
             <!-- Objectives List -->
             <div class="space-y-8">
                 <!-- If empty -->
@@ -217,23 +67,95 @@
                     </p>
                     <button 
                         @click="startCreateObjective"
-                        class="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#821f44] px-3.5 py-2 text-xs font-bold text-white hover:bg-[#9c2552] transition"
+                        class="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#152c5b] px-3.5 py-2 text-xs font-bold text-white hover:bg-[#1e3f84] transition"
                     >
                         Buat Sekarang
                     </button>
                 </div>
 
+                
+                <!-- View Toggle -->
+                <div v-if="objectives.length > 0" class="flex justify-end mb-4">
+                    <div class="inline-flex rounded-lg bg-slate-100 p-1 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+                        <button 
+                            @click="viewMode = 'table'" 
+                            :class="viewMode === 'table' ? 'bg-white text-[#152c5b] shadow-sm font-semibold dark:bg-black/40 dark:text-white' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'" 
+                            class="px-4 py-1.5 rounded-md text-xs transition-all"
+                        >
+                            <div class="flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0112 18.375m9.75-12.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125m19.5 0v1.5c0 .621-.504 1.125-1.125 1.125M2.25 5.625v1.5c0 .621.504 1.125 1.125 1.125m0 0h17.25m-17.25 0h7.5c.621 0 1.125.504 1.125 1.125M3.375 8.25v1.5c0 .621.504 1.125 1.125 1.125m0 0h17.25m-17.25 0h7.5c.621 0 1.125.504 1.125 1.125m-9.75 0v1.5c0 .621.504 1.125 1.125 1.125m18.375-3.75v1.5c0 .621-.504 1.125-1.125 1.125m0-3.75v-1.5c0-.621-.504-1.125-1.125-1.125m-18.375 3.75V11.25m0 0V9.75m0 1.5c0 .621.504 1.125 1.125 1.125" /></svg>
+                                Tampilan Tabel
+                            </div>
+                        </button>
+                        <button 
+                            @click="viewMode = 'edit'" 
+                            :class="viewMode === 'edit' ? 'bg-white text-[#152c5b] shadow-sm font-semibold dark:bg-black/40 dark:text-white' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'" 
+                            class="px-4 py-1.5 rounded-md text-xs transition-all"
+                        >
+                            <div class="flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+                                Mode Edit/Kelola
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Table View Mode -->
+                <div v-if="viewMode === 'table' && objectives.length > 0" class="bg-white border border-slate-300 dark:bg-black/10 dark:border-white/10 text-sm overflow-hidden mb-8 shadow-sm">
+                    <table class="w-full text-left border-collapse border border-slate-300">
+                        <thead>
+                            <tr class="bg-slate-200 dark:bg-white/10 text-center">
+                                <th class="border border-slate-300 dark:border-white/20 p-3 font-bold w-1/2 uppercase text-[13px] text-slate-800 dark:text-slate-100">Kebijakan Khusus</th>
+                                <th class="border border-slate-300 dark:border-white/20 p-3 font-bold w-1/2 uppercase text-[13px] text-slate-800 dark:text-slate-100">GAMO COBIT 2019</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template v-for="group in groupedObjectives" :key="group.domain">
+                                <!-- Domain Row -->
+                                <tr class="bg-slate-100 dark:bg-white/5 font-bold">
+                                    <td class="border border-slate-300 dark:border-white/20 p-3 text-slate-900 dark:text-white text-[13px]">
+                                        {{ group.metadata.letter }}. {{ group.domain }}
+                                    </td>
+                                    <td class="border border-slate-300 dark:border-white/20 p-3 text-slate-900 dark:text-white text-[13px]">
+                                        {{ group.metadata.cobitName }}
+                                    </td>
+                                </tr>
+                                <!-- Objectives Rows -->
+                                <tr v-for="(obj, index) in group.objectives" :key="obj.objective_id" class="hover:bg-slate-50/50 dark:hover:bg-white/5">
+                                    <td class="border border-slate-300 dark:border-white/20 p-3 pl-6 text-slate-700 dark:text-slate-300 align-top text-[13px]">
+                                        {{ index + 1 }}. {{ obj.objective }}
+                                    </td>
+                                    <td class="border border-slate-300 dark:border-white/20 p-3 text-slate-700 dark:text-slate-300 align-top text-[13px]">
+                                        <div v-if="obj.cobit_mappings && obj.cobit_mappings.length > 0">
+                                            <div v-for="(map, mIdx) in obj.cobit_mappings" :key="map.id" :class="{'mt-2 pt-2 border-t border-slate-200 dark:border-white/10': mIdx > 0}">
+                                                <span class="font-semibold">{{ map.cobit_objective }}</span>
+                                                <span v-if="getCobitName(map.cobit_objective)">
+                                                    - {{ getCobitName(map.cobit_objective) }}
+                                                </span>
+                                                <span v-else-if="parseCobitJson(map.description) && parseCobitJson(map.description).description">
+                                                    - {{ parseCobitJson(map.description).description.split('.')[0] }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div v-else class="text-slate-400 text-[11px] italic">
+                                            -
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+
                 <!-- Loop through actual objectives -->
-                <div 
-                    v-for="obj in objectives" 
-                    :key="obj.objective_id"
-                    class="group relative bg-white rounded-2xl border border-slate-200 shadow-md hover:shadow-xl transition-all duration-300 dark:border-white/10 dark:bg-[#1a1a1a] overflow-hidden"
-                >
+                <div v-show="viewMode === 'edit'">
+                <div v-for="obj in objectives" :key="obj.objective_id" class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative group mb-8">
+                    <div class="lg:col-span-8 relative bg-white rounded-2xl border border-slate-200 shadow-md hover:shadow-xl transition-all duration-300 dark:border-white/10 dark:bg-[#1a1a1a] overflow-hidden flex flex-col h-full">
                     <!-- Mode Input / Edit Mode for Objective -->
                     <div v-if="editingObjectiveId === obj.objective_id">
                         <form @submit.prevent="submitUpdateObjective(obj.objective_id)">
                             <!-- Burgundy Header Band -->
-                            <div class="bg-[#821f44] p-5 text-white">
+                            <div class="bg-[#152c5b] p-5 text-white">
                                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-xs font-semibold tracking-wider opacity-90 mb-3">
                                     <div class="flex items-center gap-2">
                                         <span>Kebijakan (Bahasa Indonesia):</span>
@@ -303,7 +225,7 @@
                                         <textarea 
                                             v-model="editObjectiveForm.objective_description" 
                                             rows="3" 
-                                            class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-black/20 dark:text-white dark:border-white/10"
+                                            class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#152c5b]/20 focus:bg-white dark:bg-black/20 dark:text-white dark:border-white/10"
                                         ></textarea>
                                     </div>
                                 </div>
@@ -317,7 +239,7 @@
                                         <textarea 
                                             v-model="editObjectiveForm.objective_purpose" 
                                             rows="3" 
-                                            class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-black/20 dark:text-white dark:border-white/10"
+                                            class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#152c5b]/20 focus:bg-white dark:bg-black/20 dark:text-white dark:border-white/10"
                                         ></textarea>
                                     </div>
                                 </div>
@@ -346,7 +268,7 @@
                                     </button>
                                     <button 
                                         type="submit" 
-                                        class="rounded-xl bg-[#821f44] px-4 py-2 text-xs font-bold text-white shadow-md shadow-[#821f44]/20 transition hover:bg-[#9c2552] disabled:opacity-60"
+                                        class="rounded-xl bg-[#152c5b] px-4 py-2 text-xs font-bold text-white shadow-md shadow-[#152c5b]/20 transition hover:bg-[#1e3f84] disabled:opacity-60"
                                         :disabled="editObjectiveForm.processing"
                                     >
                                         <span v-if="editObjectiveForm.processing" class="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></span>
@@ -360,7 +282,7 @@
                     <!-- Mode COBIT / Preview Mode for Objective -->
                     <div v-else>
                         <!-- Burgundy Header Band -->
-                        <div class="bg-[#821f44] p-5 text-white flex flex-col gap-1 transition-all duration-300">
+                        <div class="bg-[#152c5b] p-5 text-white flex flex-col gap-1 transition-all duration-300">
                             <!-- Quick floating options visible on card group hover -->
                             <div class="absolute right-4 top-4 opacity-80 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
                                 <button 
@@ -399,7 +321,7 @@
                             <!-- Description Box -->
                             <div class="border border-slate-200 rounded-lg overflow-hidden dark:border-white/10 shadow-sm bg-white dark:bg-[#1f1f1f]">
                                 <div class="bg-slate-50 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300 border-b border-slate-200 dark:border-white/10 flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-[#821f44]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-[#152c5b]">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                                     </svg>
                                     Deskripsi
@@ -412,7 +334,7 @@
                             <!-- Purpose Box -->
                             <div class="border border-slate-200 rounded-lg overflow-hidden dark:border-white/10 shadow-sm bg-white dark:bg-[#1f1f1f]">
                                 <div class="bg-slate-50 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300 border-b border-slate-200 dark:border-white/10 flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-[#821f44]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-[#152c5b]">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 21l8.982-2.01c.784-.176 1.485-.645 1.947-1.3l2.898-4.078a1.534 1.534 0 00-.472-2.186l-4.502-2.602a1.534 1.534 0 00-2.122.441L12.83 13.8a4.117 4.117 0 01-3.017 2.104z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 10l1.25-2 .5-2-2.25 1-1.5 2-1 2-1 2.5" />
                                     </svg>
@@ -424,9 +346,9 @@
                             </div>
 
                             <!-- Butir Kebijakan Section (mst_practice) -->
-                            <div class="border border-[#821f44]/25 rounded-lg overflow-hidden dark:border-[#a83262]/30 shadow-sm">
-                                <div class="bg-[#821f44]/5 px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-800 dark:bg-white/5 dark:text-slate-300 border-b border-[#821f44]/25 dark:border-white/10 flex items-center justify-between">
-                                    <div class="flex items-center gap-2 text-[#821f44] dark:text-[#db588c]">
+                            <div class="border border-[#152c5b]/25 rounded-lg overflow-hidden dark:border-[#6084c9]/30 shadow-sm">
+                                <div class="bg-[#152c5b]/5 px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-800 dark:bg-white/5 dark:text-slate-300 border-b border-[#152c5b]/25 dark:border-white/10 flex items-center justify-between">
+                                    <div class="flex items-center gap-2 text-[#152c5b] dark:text-[#93c5fd]">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                                         </svg>
@@ -434,7 +356,7 @@
                                     </div>
                                     <button 
                                         @click="startCreatePractice(obj.objective_id)"
-                                        class="inline-flex items-center gap-1 rounded bg-[#821f44] px-2.5 py-1 text-[10px] font-bold text-white hover:bg-[#9c2552] transition active:scale-95 shadow-sm shadow-[#821f44]/20"
+                                        class="inline-flex items-center gap-1 rounded bg-[#152c5b] px-2.5 py-1 text-[10px] font-bold text-white hover:bg-[#1e3f84] transition active:scale-95 shadow-sm shadow-[#152c5b]/20"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-3 h-3">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -444,9 +366,9 @@
                                 </div>
 
                                 <!-- Practice Editor Form (Inline row inside the card) -->
-                                <div v-if="activePracticeObjectiveId === obj.objective_id" class="bg-slate-50 p-4 border-b border-dashed border-[#821f44]/20 dark:bg-[#262626]">
-                                    <h4 class="text-xs font-bold text-[#821f44] dark:text-[#a83262] mb-3 flex items-center gap-1.5">
-                                        <span class="inline-block w-1.5 h-1.5 rounded-full bg-[#821f44] animate-pulse"></span>
+                                <div v-if="activePracticeObjectiveId === obj.objective_id" class="bg-slate-50 p-4 border-b border-dashed border-[#152c5b]/20 dark:bg-[#262626]">
+                                    <h4 class="text-xs font-bold text-[#152c5b] dark:text-[#6084c9] mb-3 flex items-center gap-1.5">
+                                        <span class="inline-block w-1.5 h-1.5 rounded-full bg-[#152c5b] animate-pulse"></span>
                                         {{ editingPracticeId ? 'Edit Butir Kebijakan' : 'Tambah Butir Kebijakan Baru' }}
                                     </h4>
                                     
@@ -458,7 +380,7 @@
                                                     type="text" 
                                                     v-model="practiceForm.practice_id" 
                                                     placeholder="Contoh: EDM01.01" 
-                                                    class="w-full bg-white text-slate-800 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-black/20 dark:text-white dark:border-white/10"
+                                                    class="w-full bg-white text-slate-800 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#152c5b]/20 dark:bg-black/20 dark:text-white dark:border-white/10"
                                                     required
                                                 />
                                                 <div v-if="practiceForm.errors.practice_id" class="text-[10px] text-red-500 font-medium font-mono">{{ practiceForm.errors.practice_id }}</div>
@@ -469,7 +391,7 @@
                                                     type="text" 
                                                     v-model="practiceForm.practice_name" 
                                                     placeholder="Nama Butir Kebijakan..." 
-                                                    class="w-full bg-white text-slate-800 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-black/20 dark:text-white dark:border-white/10"
+                                                    class="w-full bg-white text-slate-800 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#152c5b]/20 dark:bg-black/20 dark:text-white dark:border-white/10"
                                                 />
                                             </div>
                                         </div>
@@ -480,7 +402,7 @@
                                                 v-model="practiceForm.practice_description" 
                                                 rows="2" 
                                                 placeholder="Detail aktivitas atau deskripsi butir kebijakan..."
-                                                class="w-full bg-white text-slate-800 border border-slate-300 rounded-lg p-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 dark:bg-black/20 dark:text-white dark:border-white/10"
+                                                class="w-full bg-white text-slate-800 border border-slate-300 rounded-lg p-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#152c5b]/20 dark:bg-black/20 dark:text-white dark:border-white/10"
                                             ></textarea>
                                         </div>
 
@@ -494,7 +416,7 @@
                                             </button>
                                             <button 
                                                 type="submit" 
-                                                class="rounded-lg bg-[#821f44] px-3.5 py-1.5 text-[11px] font-bold text-white hover:bg-[#9c2552] disabled:opacity-60"
+                                                class="rounded-lg bg-[#152c5b] px-3.5 py-1.5 text-[11px] font-bold text-white hover:bg-[#1e3f84] disabled:opacity-60"
                                                 :disabled="practiceForm.processing"
                                             >
                                                 <span v-if="practiceForm.processing" class="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></span>
@@ -519,7 +441,7 @@
                                     >
                                         <!-- ID Column -->
                                         <div class="shrink-0 flex items-center gap-2">
-                                            <span class="inline-block font-mono text-xs font-bold bg-[#821f44]/10 text-[#821f44] px-2 py-0.5 rounded border border-[#821f44]/10 dark:bg-[#a83262]/20 dark:text-[#db588c]">
+                                            <span class="inline-block font-mono text-xs font-bold bg-[#152c5b]/10 text-[#152c5b] px-2 py-0.5 rounded border border-[#152c5b]/10 dark:bg-[#6084c9]/20 dark:text-[#93c5fd]">
                                                 {{ prac.practice_id }}
                                             </span>
                                         </div>
@@ -530,7 +452,7 @@
                                                 {{ prac.practice_name || 'Tanpa Nama Butir Kebijakan' }}
                                             </div>
                                             <div class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed whitespace-pre-line">
-                                                {{ prac.practice_description || 'Belum ada deskripsi detail.' }}
+                                                {{ prac.practice_description }}
                                             </div>
                                         </div>
 
@@ -538,7 +460,7 @@
                                         <div class="shrink-0 flex gap-2 self-end sm:self-start opacity-80 group-hover/row:opacity-100 transition-opacity duration-150">
                                             <button 
                                                 @click="startEditPractice(obj.objective_id, prac)"
-                                                class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-[#821f44] hover:bg-[#821f44]/5 hover:border-[#821f44]/20 transition-all duration-150 active:scale-90 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-400 dark:hover:text-[#db588c] dark:hover:bg-[#db588c]/10"
+                                                class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-[#152c5b] hover:bg-[#152c5b]/5 hover:border-[#152c5b]/20 transition-all duration-150 active:scale-90 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-400 dark:hover:text-[#93c5fd] dark:hover:bg-[#93c5fd]/10"
                                                 title="Edit Butir Kebijakan"
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
@@ -561,6 +483,178 @@
                         </div>
                     </div>
                 </div>
+
+                    <!-- Right Panel (Mapping COBIT 2019) -->
+                <div class="lg:col-span-4 bg-white dark:bg-[#1a1a1a] flex flex-col h-full border border-slate-200 dark:border-white/10 shadow-md rounded-2xl overflow-hidden transition-all duration-300">
+                    <!-- Mapping Section -->
+                        <div class="flex flex-col h-full bg-slate-50 dark:bg-black/20">
+                            <div class="flex-grow overflow-y-auto">
+                                <!-- Header -->
+                                <div class="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-slate-200 p-4 flex items-center justify-between dark:bg-[#111111]/80 dark:border-white/10">
+                                    <div class="flex items-center gap-2">
+                                        <div class="bg-[#1e40af]/10 p-1.5 rounded-lg text-[#1e40af] dark:bg-[#3b82f6]/20 dark:text-[#3b82f6]">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" /></svg>
+                                        </div>
+                                        <h3 class="font-bold text-sm text-slate-800 dark:text-white leading-tight">
+                                            Mapping COBIT 2019
+                                        </h3>
+                                    </div>
+                                    <button 
+                                        @click="startCreateMapping(obj.objective_id)"
+                                        v-if="activeMappingObjectiveId !== obj.objective_id"
+                                        class="text-[10px] font-bold bg-[#1e40af] text-white px-2.5 py-1.5 rounded-lg hover:bg-[#1e3a8a] transition shadow-sm"
+                                    >
+                                        + Tambah
+                                    </button>
+                                </div>
+
+                                <!-- Mapping Editor Form -->
+                                <div v-if="activeMappingObjectiveId === obj.objective_id" class="bg-slate-50 p-4 border-b border-dashed border-[#1e40af]/20 dark:bg-[#262626]">
+                                    <div class="mb-3 flex items-center gap-2">
+                                        <div class="h-1.5 w-1.5 rounded-full bg-[#1e40af] dark:bg-[#3b82f6]"></div>
+                                        <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200">
+                                            {{ editingMappingId ? 'Edit Mapping COBIT' : 'Tambah Mapping COBIT' }}
+                                        </h4>
+                                    </div>
+                                    <form @submit.prevent="submitMappingForm" class="space-y-3">
+                                        <div class="space-y-1">
+                                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Pilih COBIT Objective</label>
+                                            <select 
+                                                v-model="mappingForm.cobit_objective" 
+                                                @change="handleCobitObjectiveChange"
+                                                class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#1e40af] dark:bg-black/20 dark:border-white/20 dark:text-white"
+                                                required
+                                            >
+                                                <option value="" disabled>-- Pilih COBIT Objective --</option>
+                                                <option v-for="cObj in cobitObjectivesList" :key="cObj.id" :value="cObj.id">
+                                                    {{ cObj.id }} - {{ cObj.name }}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div v-if="mappingForm.description">
+                                            <div v-if="parseCobitJson(mappingForm.description)" class="space-y-2 mt-2">
+                                                <div class="bg-white rounded-lg p-3 border border-slate-100 shadow-sm dark:bg-[#262626] dark:border-white/5">
+                                                    <h5 class="text-[10px] font-bold text-slate-400 uppercase mb-1">Deskripsi</h5>
+                                                    <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">{{ parseCobitJson(mappingForm.description).description }}</p>
+                                                </div>
+                                                <div class="bg-white rounded-lg p-3 border border-slate-100 shadow-sm dark:bg-[#262626] dark:border-white/5">
+                                                    <h5 class="text-[10px] font-bold text-slate-400 uppercase mb-1">Tujuan</h5>
+                                                    <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">{{ parseCobitJson(mappingForm.description).purpose }}</p>
+                                                </div>
+                                                <div v-if="isFetchingPractices" class="mt-3 flex items-center justify-center p-4"><span class="inline-block w-4 h-4 border-2 border-[#1e40af] border-t-transparent rounded-full animate-spin"></span><span class="ml-2 text-[10px] font-bold text-slate-500 uppercase">Memuat Practice...</span></div>
+                                                <!-- Practices Section -->
+                                                <div v-else-if="parseCobitJson(mappingForm.description).practices && parseCobitJson(mappingForm.description).practices.length > 0" class="mt-3 bg-white rounded-lg p-3 border border-slate-100 shadow-sm dark:bg-[#262626] dark:border-white/5">
+                                                    <h5 class="text-[10px] font-bold text-slate-400 uppercase mb-2">Butir Kebijakan (COBIT Practices)</h5>
+                                                    <div class="space-y-2">
+                                                        <div v-for="prac in parseCobitJson(mappingForm.description).practices" :key="prac.id" class="flex gap-2">
+                                                            <div class="shrink-0 pt-0.5">
+                                                                <span class="inline-block font-mono text-[10px] font-bold bg-[#1e40af]/10 text-[#1e40af] px-1.5 py-0.5 rounded border border-[#1e40af]/10 dark:bg-[#3b82f6]/20 dark:text-[#60a5fa]">{{ prac.id }}</span>
+                                                            </div>
+                                                            <div class="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">
+                                                                <span class="font-bold text-slate-700 dark:text-slate-200 block mb-0.5">{{ prac.name }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div v-else class="space-y-1 mt-2">
+                                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Deskripsi (Manual)</label>
+                                                <textarea 
+                                                    v-model="mappingForm.description" 
+                                                    rows="3" 
+                                                    class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#1e40af] dark:bg-black/20 dark:border-white/20 dark:text-white"
+                                                ></textarea>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-end gap-2 pt-2">
+                                            <button 
+                                                type="button" 
+                                                @click="cancelMappingForm"
+                                                class="px-3 py-1.5 text-xs font-semibold text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition dark:bg-transparent dark:border-white/20 dark:text-slate-300 dark:hover:bg-white/5"
+                                            >Batal</button>
+                                            <button 
+                                                type="submit" 
+                                                :disabled="mappingForm.processing || isFetchingPractices"
+                                                class="px-3 py-1.5 text-xs font-bold text-white bg-[#1e40af] rounded-lg shadow-sm hover:bg-[#1e3a8a] transition disabled:opacity-50 flex items-center"
+                                            >
+                                                <span v-if="mappingForm.processing" class="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></span>
+                                                Simpan Mapping
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <!-- Mapping Rows Table -->
+                                <div class="p-4 space-y-3">
+                                    <div v-if="!obj.cobit_mappings || obj.cobit_mappings.length === 0" class="p-4 text-center text-xs text-slate-400 dark:text-slate-500 border border-dashed border-slate-300 rounded-xl dark:border-white/10">
+                                        Belum ada data mapping. Klik "+ Tambah" di atas.
+                                    </div>
+                                    
+                                    <div 
+                                        v-for="map in obj.cobit_mappings" 
+                                        :key="map.id"
+                                        class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden dark:bg-[#1a1a1a] dark:border-white/10 relative group/map transition-all hover:border-[#1e40af]/30 dark:hover:border-[#3b82f6]/30"
+                                    >
+                                        <div class="bg-blue-50/50 p-2.5 border-b border-slate-100 flex justify-between items-center dark:bg-blue-900/10 dark:border-white/5">
+                                            <div class="flex items-center gap-2">
+                                                <span class="font-mono font-bold text-[#1e40af] dark:text-[#3b82f6] text-xs">
+                                                    {{ map.cobit_objective || 'Manual' }}
+                                                </span>
+                                            </div>
+                                            <div class="flex gap-1 opacity-0 group-hover/map:opacity-100 transition-opacity">
+                                                <button 
+                                                    @click="startEditMapping(obj.objective_id, map)"
+                                                    class="p-1 text-slate-400 hover:text-[#1e40af] bg-white rounded border border-slate-200 hover:border-[#1e40af]/30 transition dark:bg-black/20 dark:border-white/10 dark:hover:text-[#3b82f6]"
+                                                    title="Edit Mapping"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3"><path d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" /><path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" /></svg>
+                                                </button>
+                                                <button 
+                                                    @click="deleteMapping(map)"
+                                                    class="p-1 text-slate-400 hover:text-rose-600 bg-white rounded border border-slate-200 hover:border-rose-200 transition dark:bg-black/20 dark:border-white/10 dark:hover:text-rose-400"
+                                                    title="Hapus Mapping"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3"><path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.05l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.05a.75.75 0 10-1.5-.05l-.3 7.5a.75.75 0 101.5.06l.3-7.5z" clip-rule="evenodd" /></svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3">
+                                            <div v-if="parseCobitJson(map.description)" class="space-y-2">
+                                                <div>
+                                                    <span class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Deskripsi:</span>
+                                                    <p class="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">{{ parseCobitJson(map.description).description }}</p>
+                                                </div>
+                                                <div>
+                                                    <span class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Tujuan:</span>
+                                                    <p class="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">{{ parseCobitJson(map.description).purpose }}</p>
+                                                </div>
+                                                <div v-if="parseCobitJson(map.description).practices && parseCobitJson(map.description).practices.length > 0" class="mt-3 pt-3 border-t border-slate-100 dark:border-white/5">
+                                                    <span class="text-[9px] font-bold text-slate-400 uppercase block mb-2">Butir Kebijakan (COBIT Practices):</span>
+                                                    <div class="space-y-2">
+                                                        <div v-for="prac in parseCobitJson(map.description).practices" :key="prac.id" class="flex gap-2">
+                                                            <div class="shrink-0 pt-0.5">
+                                                                <span class="inline-block font-mono text-[9px] font-bold bg-[#1e40af]/10 text-[#1e40af] px-1.5 py-0.5 rounded border border-[#1e40af]/10 dark:bg-[#3b82f6]/20 dark:text-[#60a5fa]">{{ prac.id }}</span>
+                                                            </div>
+                                                            <div class="text-[11px] text-slate-700 dark:text-slate-300 leading-snug font-medium">
+                                                                {{ prac.name }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div v-else-if="map.description" class="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-line">
+                                                {{ map.description }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- End Loop Item Wrapper -->
+                </div> <!-- End viewMode === 'edit' -->
             </div>
 
             <!-- Floating Navigation Controls on the Right Side -->
@@ -568,7 +662,7 @@
                 <!-- Add Policy Shortcut Button -->
                 <button 
                     @click="startCreateObjective" 
-                    class="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#821f44] text-white shadow-lg border border-[#821f44]/20 transition-all hover:bg-[#9c2552] active:scale-90 hover:shadow-xl"
+                    class="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#152c5b] text-white shadow-lg border border-[#152c5b]/20 transition-all hover:bg-[#1e3f84] active:scale-90 hover:shadow-xl"
                     title="Tambah Kebijakan Khusus"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-5 h-5">
@@ -614,8 +708,9 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, onMounted } from 'vue';
 import { usePage, useForm, router, Link } from '@inertiajs/vue3';
+import axios from 'axios';
 import ModulLayout from '@/Layouts/ModulLayout.vue';
 
 function scrollToTop() {
@@ -643,13 +738,231 @@ const props = defineProps({
     },
     selectedRegulationId: {
         type: [Number, String],
-        default: null
+        default: null,
+    },
+    selectedObjectiveId: {
+        type: [Number, String],
+        default: null,
+    }
+});
+
+const isMobile = ref(false);
+const showMobileSidebar = ref(false);
+
+const checkMobile = () => {
+    isMobile.value = window.innerWidth < 768;
+    if (!isMobile.value) {
+        showMobileSidebar.value = false;
+    }
+};
+
+onMounted(() => {
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    fetchCobitObjectives();
+    
+    // Automatically open accordion if redirected with selectedObjectiveId
+    if (props.selectedObjectiveId) {
+        mappingToggles.value[props.selectedObjectiveId] = true;
     }
 });
 
 const activeRegulation = computed(() => {
     if (!props.selectedRegulationId) return props.regulations[0] || null;
     return props.regulations.find(r => r.id === props.selectedRegulationId) || null;
+});
+
+
+// COBIT MAPPING: FORM STATE & TOGGLE STATE
+const mappingToggles = ref({}); // Track toggle state per objective_id. Default is false
+const activeMappingObjectiveId = ref(null);
+const editingMappingId = ref(null);
+
+function toggleMappingPanel(objectiveId) {
+    mappingToggles.value[objectiveId] = !mappingToggles.value[objectiveId];
+}
+
+const mappingForm = useForm({
+    objective_id: '',
+    cobit_objective: '',
+    description: '',
+});
+
+function startCreateMapping(objectiveId) {
+    activeMappingObjectiveId.value = objectiveId;
+    editingMappingId.value = null;
+    mappingForm.reset();
+    mappingForm.objective_id = objectiveId;
+}
+
+function startEditMapping(objectiveId, map) {
+    activeMappingObjectiveId.value = objectiveId;
+    editingMappingId.value = map.id;
+    mappingForm.objective_id = objectiveId;
+    mappingForm.cobit_objective = map.cobit_objective || map.cobit_objective_id; // Support both properties
+    mappingForm.description = map.description;
+}
+
+function cancelMappingForm() {
+    activeMappingObjectiveId.value = null;
+    editingMappingId.value = null;
+    mappingForm.reset();
+}
+
+function submitMappingForm() {
+    if (editingMappingId.value) {
+        mappingForm.put(route('policy.cobit-mapping.update', editingMappingId.value), {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => cancelMappingForm(),
+        });
+    } else {
+        mappingForm.post(route('policy.cobit-mapping.store'), {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => cancelMappingForm(),
+        });
+    }
+}
+
+function deleteMapping(map) {
+    if (confirm('Yakin ingin menghapus mapping ini?')) {
+        router.delete(route('policy.cobit-mapping.destroy', map.id), {
+            preserveScroll: true,
+        });
+    }
+}
+
+const parseCobitJson = (jsonStr) => {
+    if (!jsonStr) return null;
+    try {
+        const obj = JSON.parse(jsonStr);
+        if (obj && (obj.description || obj.purpose || (obj.practices && obj.practices.length > 0))) {
+            return {
+                description: obj.description || '',
+                purpose: obj.purpose || '',
+                practices: obj.practices || []
+            };
+        }
+        return null;
+    } catch(e) {
+        return null;
+    }
+};
+
+const cobitObjectivesList = ref([]);
+
+const viewMode = ref('table');
+
+const domainMapping = {
+    'Evaluasi, Arahkan, dan Pantau': { letter: 'A', cobitName: 'EDM (Evaluate, Direct and Monitor)' },
+    'Penyelarasan, Perencanaan, dan Pengaturan': { letter: 'B', cobitName: 'APO (Align, Plan and Organize)' },
+    'Pengembangan, Akuisisi dan Implementasi': { letter: 'C', cobitName: 'BAI (Build, Acquire and Implement)' },
+    'Penyerahan, Pemberian Layanan dan Dukungan': { letter: 'D', cobitName: 'DSS (Deliver, Service and Support)' },
+    'Memantau, Mengevaluasi dan Menilai': { letter: 'E', cobitName: 'MEA (Monitor, Evaluate and Assess)' }
+};
+
+const groupedObjectives = computed(() => {
+    const groups = {};
+    const domainOrder = [
+        'Evaluasi, Arahkan, dan Pantau',
+        'Penyelarasan, Perencanaan, dan Pengaturan',
+        'Pengembangan, Akuisisi dan Implementasi',
+        'Penyerahan, Pemberian Layanan dan Dukungan',
+        'Memantau, Mengevaluasi dan Menilai'
+    ];
+
+    props.objectives.forEach(obj => {
+        const d = obj.domain || 'Lainnya';
+        if (!groups[d]) {
+            groups[d] = [];
+        }
+        groups[d].push(obj);
+    });
+
+    return Object.keys(groups)
+        .sort((a, b) => {
+            const idxA = domainOrder.indexOf(a);
+            const idxB = domainOrder.indexOf(b);
+            if (idxA === -1 && idxB === -1) return a.localeCompare(b);
+            if (idxA === -1) return 1;
+            if (idxB === -1) return -1;
+            return idxA - idxB;
+        })
+        .map(domain => {
+            return {
+                domain: domain,
+                metadata: domainMapping[domain] || { letter: '-', cobitName: domain },
+                objectives: groups[domain]
+            };
+        });
+});
+
+const getCobitName = (cobitObjectiveId) => {
+    const found = cobitObjectivesList.value.find(c => c.id === cobitObjectiveId);
+    return found ? found.name : '';
+};
+
+const isFetchingPractices = ref(false);
+
+const fetchCobitObjectives = async () => {
+    try {
+        const res = await axios.get('https://cobit2019.divusi.co.id/api/cobit/overview');
+        if (res.data && res.data.success) {
+            cobitObjectivesList.value = res.data.data
+                .filter(item => !item.objective_id.includes('.') && /^[A-Z]{3}\d{2}$/.test(item.objective_id))
+                .map(item => ({
+                    id: item.objective_id,
+                    name: item.objective,
+                    description: item.description,
+                    purpose: item.purpose
+                }));
+        }
+    } catch (e) {
+        console.error("Gagal memuat API COBIT Overview:", e);
+    }
+};
+
+const handleCobitObjectiveChange = async (event) => {
+    const selectedValue = event ? event.target.value : mappingForm.cobit_objective;
+    mappingForm.cobit_objective = selectedValue; // sync explicitly just in case
+
+    const selected = cobitObjectivesList.value.find(c => c.id === selectedValue);
+    if (selected) {
+        isFetchingPractices.value = true;
+        try {
+            const res = await axios.get(`https://cobit2019.divusi.co.id/api/cobit/roles-matrix?objective_id=${selected.id}`);
+            let practices = [];
+            if (res.data && res.data.success && res.data.matrix) {
+                practices = res.data.matrix.map(m => ({
+                    id: String(m.practice_id).replace(/"/g, ''),
+                    name: String(m.practice_name).replace(/"/g, ''),
+                    description: String(m.practice_description).replace(/"/g, '')
+                }));
+            }
+            mappingForm.description = JSON.stringify({
+                description: selected.description || '',
+                purpose: selected.purpose || '',
+                practices: practices
+            });
+        } catch (e) {
+            console.error("Gagal memuat API COBIT Roles Matrix:", e);
+            // Fallback tanpa practices
+            mappingForm.description = JSON.stringify({
+                description: selected.description || '',
+                purpose: selected.purpose || '',
+                practices: []
+            });
+        } finally {
+            isFetchingPractices.value = false;
+        }
+    } else {
+        mappingForm.description = ''; // Reset jika tidak ada yang dipilih
+    }
+};
+
+onMounted(() => {
+    fetchCobitObjectives();
 });
 
 const page = usePage();

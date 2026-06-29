@@ -45,4 +45,9 @@ class MstObjective extends Model
             'responsible_id'
         )->withTimestamps();
     }
+
+    public function cobitMappings(): HasMany
+    {
+        return $this->hasMany(TrsMapingKebijakanCobit::class, 'objective_id', 'objective_id');
+    }
 }

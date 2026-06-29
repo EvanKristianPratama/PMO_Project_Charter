@@ -795,7 +795,7 @@
     "src": "node_modules/bpmn-js/dist/assets/bpmn-font/font/bpmn.svg"
   },
   "resources/css/app.css": {
-    "file": "assets/app-CnO6bsps.css",
+    "file": "assets/app-Cch5fWF1.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -1480,7 +1480,7 @@
     ]
   },
   "resources/js/Pages/BpmnWorkflow/Index.vue": {
-    "file": "assets/Index-Cy76nF0x.js",
+    "file": "assets/Index-BTkvVP3d.js",
     "name": "Index",
     "src": "resources/js/Pages/BpmnWorkflow/Index.vue",
     "isDynamicEntry": true,
@@ -1527,7 +1527,7 @@
     ],
     "css": [
       "assets/Index-kOn2803-.css",
-      "assets/app-CnO6bsps.css"
+      "assets/app-Cch5fWF1.css"
     ]
   },
   "resources/js/Pages/BusinessProcess/BusinessCapability/Index.vue": {
@@ -2460,6 +2460,51 @@
       "assets/Manage-tn0RQdqM.css"
     ]
   },
+  "resources/js/Pages/Policy/Guidance/Specific/Form.vue": {
+    "file": "assets/Form-mkHrLQoo.js",
+    "name": "Form",
+    "src": "resources/js/Pages/Policy/Guidance/Specific/Form.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-vue-runtime-dom-Cv5ctN52.js",
+      "_inertia-BAFp9yPk.js",
+      "_ModulLayout-BOZhAAnw.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_vendor-vue-runtime-core-dvwo2OAf.js",
+      "_vendor-vue-reactivity-BTrCj1Uo.js",
+      "_vendor-vue-shared-BC0FtGEN.js",
+      "_vendor-qs-BENwtKv8.js",
+      "_vendor-side-channel-CObUJzLj.js",
+      "_vendor-es-errors-DRNByn_O.js",
+      "_vendor-object-inspect-B_nVp1mo.js",
+      "_vendor-side-channel-list-D-2BtmIs.js",
+      "_vendor-side-channel-map-D1fjGT6N.js",
+      "_vendor-get-intrinsic-CwVZ3Qhl.js",
+      "_vendor-es-object-atoms-BR76m4z7.js",
+      "_vendor-math-intrinsics-DP1tGiab.js",
+      "_vendor-gopd-C1lCZ5Qs.js",
+      "_vendor-es-define-property-D_7cP-M3.js",
+      "_vendor-has-symbols-BaUvM3gb.js",
+      "_vendor-get-proto-DZiXqF4q.js",
+      "_vendor-dunder-proto-5xp6kQrr.js",
+      "_vendor-call-bind-apply-helpers-R8oMH6fk.js",
+      "_vendor-function-bind-CHqF18-c.js",
+      "_vendor-hasown-CH2RbkDu.js",
+      "_vendor-call-bound-BGkfP8QT.js",
+      "_vendor-side-channel-weakmap-yC90O2LV.js",
+      "_vendor-axios-KcFgf-gG.js",
+      "_vendor-lodash-es-Bc66MGl4.js",
+      "_vendor-laravel-precognition-CApEZYE-.js",
+      "_useDarkMode-CzS_SQgs.js",
+      "_useRouteHelper-BIwUgTn2.js",
+      "_BreadcrumbRight-CqcR-WcL.js",
+      "_heroicons-DxLtRi_D.js",
+      "_headlessui-DbEswjdO.js"
+    ],
+    "css": [
+      "assets/Form-GLPrIZoB.css"
+    ]
+  },
   "resources/js/Pages/Policy/Guidance/Specific/Index.vue": {
     "file": "assets/Index-DSJzXqx-.js",
     "name": "Index",
@@ -2508,7 +2553,7 @@
     ]
   },
   "resources/js/Pages/Policy/Guidance/Specific/Manage.vue": {
-    "file": "assets/Manage-BKyBih-M.js",
+    "file": "assets/Manage-CQGPRxCZ.js",
     "name": "Manage",
     "src": "resources/js/Pages/Policy/Guidance/Specific/Manage.vue",
     "isDynamicEntry": true,
@@ -2549,7 +2594,52 @@
       "_headlessui-DbEswjdO.js"
     ],
     "css": [
-      "assets/Manage-BlTx8koK.css"
+      "assets/Manage-C_1d21Wm.css"
+    ]
+  },
+  "resources/js/Pages/Policy/Guidance/Specific/Mapping.vue": {
+    "file": "assets/Mapping-Dc9jrKOt.js",
+    "name": "Mapping",
+    "src": "resources/js/Pages/Policy/Guidance/Specific/Mapping.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-vue-runtime-dom-Cv5ctN52.js",
+      "_inertia-BAFp9yPk.js",
+      "_vendor-axios-KcFgf-gG.js",
+      "_ModulLayout-BOZhAAnw.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_vendor-vue-runtime-core-dvwo2OAf.js",
+      "_vendor-vue-reactivity-BTrCj1Uo.js",
+      "_vendor-vue-shared-BC0FtGEN.js",
+      "_vendor-qs-BENwtKv8.js",
+      "_vendor-side-channel-CObUJzLj.js",
+      "_vendor-es-errors-DRNByn_O.js",
+      "_vendor-object-inspect-B_nVp1mo.js",
+      "_vendor-side-channel-list-D-2BtmIs.js",
+      "_vendor-side-channel-map-D1fjGT6N.js",
+      "_vendor-get-intrinsic-CwVZ3Qhl.js",
+      "_vendor-es-object-atoms-BR76m4z7.js",
+      "_vendor-math-intrinsics-DP1tGiab.js",
+      "_vendor-gopd-C1lCZ5Qs.js",
+      "_vendor-es-define-property-D_7cP-M3.js",
+      "_vendor-has-symbols-BaUvM3gb.js",
+      "_vendor-get-proto-DZiXqF4q.js",
+      "_vendor-dunder-proto-5xp6kQrr.js",
+      "_vendor-call-bind-apply-helpers-R8oMH6fk.js",
+      "_vendor-function-bind-CHqF18-c.js",
+      "_vendor-hasown-CH2RbkDu.js",
+      "_vendor-call-bound-BGkfP8QT.js",
+      "_vendor-side-channel-weakmap-yC90O2LV.js",
+      "_vendor-lodash-es-Bc66MGl4.js",
+      "_vendor-laravel-precognition-CApEZYE-.js",
+      "_useDarkMode-CzS_SQgs.js",
+      "_useRouteHelper-BIwUgTn2.js",
+      "_BreadcrumbRight-CqcR-WcL.js",
+      "_heroicons-DxLtRi_D.js",
+      "_headlessui-DbEswjdO.js"
+    ],
+    "css": [
+      "assets/Mapping-DMU6cVMr.css"
     ]
   },
   "resources/js/Pages/Policy/Infoflow/Index.vue": {
@@ -4831,7 +4921,7 @@
     ]
   },
   "resources/js/Pages/StrategicHouse/Index.vue": {
-    "file": "assets/Index-DLB8ZC1C.js",
+    "file": "assets/Index-CuE-8OvU.js",
     "name": "Index",
     "src": "resources/js/Pages/StrategicHouse/Index.vue",
     "isDynamicEntry": true,
@@ -4889,7 +4979,7 @@
     ],
     "css": [
       "assets/Index-Mygq9mA5.css",
-      "assets/app-CnO6bsps.css"
+      "assets/app-Cch5fWF1.css"
     ]
   },
   "resources/js/Pages/StrategicHouse/InitiativeRelation/Create.vue": {
@@ -5339,7 +5429,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app--GsvzUme.js",
+    "file": "assets/app-BfMWbIh6.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -5404,8 +5494,10 @@
       "resources/js/Pages/Policy/Guidance/Introduction/Index.vue",
       "resources/js/Pages/Policy/Guidance/Role/Index.vue",
       "resources/js/Pages/Policy/Guidance/Role/Manage.vue",
+      "resources/js/Pages/Policy/Guidance/Specific/Form.vue",
       "resources/js/Pages/Policy/Guidance/Specific/Index.vue",
       "resources/js/Pages/Policy/Guidance/Specific/Manage.vue",
+      "resources/js/Pages/Policy/Guidance/Specific/Mapping.vue",
       "resources/js/Pages/Policy/Infoflow/Index.vue",
       "resources/js/Pages/Policy/ItspInfoflow/Index.vue",
       "resources/js/Pages/Policy/ItspInfoflow/Manage.vue",
@@ -5475,7 +5567,7 @@
       "resources/js/Pages/Sync/Index.vue"
     ],
     "css": [
-      "assets/app-CnO6bsps.css"
+      "assets/app-Cch5fWF1.css"
     ]
   }
 }
