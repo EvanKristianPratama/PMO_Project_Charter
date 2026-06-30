@@ -1,14 +1,16 @@
 <script setup>
-import { Link, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
-import { useNavigation } from '@/Composables/useNavigation';
+import { Link, usePage } from "@inertiajs/vue3";
+import { computed } from "vue";
+import { useNavigation } from "@/Composables/useNavigation";
 
 const { navItems } = useNavigation();
 const page = usePage();
-const currentUrl = computed(() => page.url || '');
+const currentUrl = computed(() => page.url || "");
 
 const architectureItem = computed(() => {
-    return navItems.value.find((item) => item.label === 'Business Process') ?? null;
+    return (
+        navItems.value.find((item) => item.label === "Business Process") ?? null
+    );
 });
 
 const architectureChildren = computed(() => {
@@ -20,11 +22,13 @@ const showArchitectureChildren = computed(() => {
         return true;
     }
 
-    return architectureChildren.value.some((item) => item.active(currentUrl.value));
+    return architectureChildren.value.some((item) =>
+        item.active(currentUrl.value),
+    );
 });
 
 const organizationItem = computed(() => {
-    return navItems.value.find((item) => item.label === 'Organization') ?? null;
+    return navItems.value.find((item) => item.label === "Organization") ?? null;
 });
 
 const organizationChildren = computed(() => {
@@ -36,15 +40,19 @@ const showOrganizationChildren = computed(() => {
         return true;
     }
 
-    return organizationChildren.value.some((item) => item.active(currentUrl.value));
+    return organizationChildren.value.some((item) =>
+        item.active(currentUrl.value),
+    );
 });
 
 const policyItem = computed(() => {
-    return navItems.value.find((item) => item.label === 'Regulation') ?? null;
+    return navItems.value.find((item) => item.label === "Regulation") ?? null;
 });
 
 const operatingModelItem = computed(() => {
-    return navItems.value.find((item) => item.label === 'Operating Model') ?? null;
+    return (
+        navItems.value.find((item) => item.label === "Operating Model") ?? null
+    );
 });
 
 const isOperatingModelActive = computed(() => {
@@ -60,27 +68,21 @@ const showOperatingModelChildren = computed(() => {
         return true;
     }
 
-    return operatingModelChildren.value.some((item) => item.active(currentUrl.value));
+    return operatingModelChildren.value.some((item) =>
+        item.active(currentUrl.value),
+    );
 });
 
 const raciAnalysisItem = computed(() => {
-    return navItems.value.find((item) => item.label === 'RACI Analysis') ?? null;
+    return (
+        navItems.value.find((item) => item.label === "RACI Analysis") ?? null
+    );
 });
 
-
-
-
-
 const policyChildren = computed(() => {
-    const children = policyItem.value?.children || [];
-    return children
-        .filter(item => item.label === 'Regulation' || item.label === 'Organization' || item.label === 'Matriks RACI' || item.label === 'BPMN' || item.label === 'DMS' || item.label === 'CMS')
-        .map(item => {
-            if (item.label === 'Matriks RACI') {
-                return { ...item, label: 'RACI' };
-            }
-            return item;
-        });
+    return (policyItem.value?.children || []).filter(
+        (item) => !item.label?.startsWith("Bab "),
+    );
 });
 
 const isPolicyActive = computed(() => {
@@ -108,7 +110,9 @@ const showRaciAnalysisChildren = computed(() => {
         return true;
     }
 
-    return raciAnalysisChildren.value.some((item) => item.active(currentUrl.value));
+    return raciAnalysisChildren.value.some((item) =>
+        item.active(currentUrl.value),
+    );
 });
 
 // adminItem removed
@@ -128,7 +132,11 @@ const showRaciAnalysisChildren = computed(() => {
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
             >
-                <component :is="architectureItem.icon" v-if="architectureItem.icon" class="h-3.5 w-3.5 shrink-0" />
+                <component
+                    :is="architectureItem.icon"
+                    v-if="architectureItem.icon"
+                    class="h-3.5 w-3.5 shrink-0"
+                />
                 <span>{{ architectureItem.label }}</span>
             </Link>
 
@@ -151,7 +159,11 @@ const showRaciAnalysisChildren = computed(() => {
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
             >
-                <component :is="organizationItem.icon" v-if="organizationItem.icon" class="h-3.5 w-3.5 shrink-0" />
+                <component
+                    :is="organizationItem.icon"
+                    v-if="organizationItem.icon"
+                    class="h-3.5 w-3.5 shrink-0"
+                />
                 <span>{{ organizationItem.label }}</span>
             </Link>
 
@@ -174,7 +186,11 @@ const showRaciAnalysisChildren = computed(() => {
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
             >
-                <component :is="operatingModelItem.icon" v-if="operatingModelItem.icon" class="h-3.5 w-3.5 shrink-0" />
+                <component
+                    :is="operatingModelItem.icon"
+                    v-if="operatingModelItem.icon"
+                    class="h-3.5 w-3.5 shrink-0"
+                />
                 <span>{{ operatingModelItem.label }}</span>
             </Link>
 
@@ -197,7 +213,11 @@ const showRaciAnalysisChildren = computed(() => {
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
             >
-                <component :is="policyItem.icon" v-if="policyItem.icon" class="h-3.5 w-3.5 shrink-0" />
+                <component
+                    :is="policyItem.icon"
+                    v-if="policyItem.icon"
+                    class="h-3.5 w-3.5 shrink-0"
+                />
                 <span>{{ policyItem.label }}</span>
             </Link>
 
@@ -220,19 +240,20 @@ const showRaciAnalysisChildren = computed(() => {
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
             >
-                <component :is="raciAnalysisItem.icon" v-if="raciAnalysisItem.icon" class="h-3.5 w-3.5 shrink-0" />
+                <component
+                    :is="raciAnalysisItem.icon"
+                    v-if="raciAnalysisItem.icon"
+                    class="h-3.5 w-3.5 shrink-0"
+                />
                 <span>{{ raciAnalysisItem.label }}</span>
             </Link>
-
-
-
-
-
-
         </div>
 
         <!-- Architecture Sub-menus -->
-        <div v-if="showArchitectureChildren" class="ml-2 inline-flex flex-wrap items-center gap-1">
+        <div
+            v-if="showArchitectureChildren"
+            class="ml-2 inline-flex flex-wrap items-center gap-1"
+        >
             <Link
                 v-for="item in architectureChildren"
                 :key="'right-child-' + item.label"
@@ -244,13 +265,20 @@ const showRaciAnalysisChildren = computed(() => {
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
             >
-                <component :is="item.icon" v-if="item.icon" class="h-3.5 w-3.5 shrink-0" />
+                <component
+                    :is="item.icon"
+                    v-if="item.icon"
+                    class="h-3.5 w-3.5 shrink-0"
+                />
                 <span>{{ item.label }}</span>
             </Link>
         </div>
 
         <!-- Organization Sub-menus -->
-        <div v-if="showOrganizationChildren" class="ml-2 inline-flex flex-wrap items-center gap-1">
+        <div
+            v-if="showOrganizationChildren"
+            class="ml-2 inline-flex flex-wrap items-center gap-1"
+        >
             <Link
                 v-for="item in organizationChildren"
                 :key="'org-child-' + item.label"
@@ -262,13 +290,20 @@ const showRaciAnalysisChildren = computed(() => {
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
             >
-                <component :is="item.icon" v-if="item.icon" class="h-3.5 w-3.5 shrink-0" />
+                <component
+                    :is="item.icon"
+                    v-if="item.icon"
+                    class="h-3.5 w-3.5 shrink-0"
+                />
                 <span>{{ item.label }}</span>
             </Link>
         </div>
 
         <!-- Operating Model Sub-menus -->
-        <div v-if="showOperatingModelChildren" class="ml-2 inline-flex flex-wrap items-center gap-1">
+        <div
+            v-if="showOperatingModelChildren"
+            class="ml-2 inline-flex flex-wrap items-center gap-1"
+        >
             <Link
                 v-for="item in operatingModelChildren"
                 :key="'opmodel-child-' + item.label"
@@ -280,13 +315,20 @@ const showRaciAnalysisChildren = computed(() => {
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
             >
-                <component :is="item.icon" v-if="item.icon" class="h-3.5 w-3.5 shrink-0" />
+                <component
+                    :is="item.icon"
+                    v-if="item.icon"
+                    class="h-3.5 w-3.5 shrink-0"
+                />
                 <span>{{ item.label }}</span>
             </Link>
         </div>
 
-        <!-- Regulation Sub-menus (Regulasi and RACI) -->
-        <div v-if="showPolicyChildren" class="ml-2 inline-flex flex-wrap items-center gap-1">
+        <!-- Regulation Sub-menus -->
+        <div
+            v-if="showPolicyChildren"
+            class="ml-2 inline-flex flex-wrap items-center gap-1"
+        >
             <Link
                 v-for="item in policyChildren"
                 :key="'policy-child-' + item.label"
@@ -298,13 +340,20 @@ const showRaciAnalysisChildren = computed(() => {
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
             >
-                <component :is="item.icon" v-if="item.icon" class="h-3.5 w-3.5 shrink-0" />
+                <component
+                    :is="item.icon"
+                    v-if="item.icon"
+                    class="h-3.5 w-3.5 shrink-0"
+                />
                 <span>{{ item.label }}</span>
             </Link>
         </div>
 
         <!-- Raci Analysis Sub-menus -->
-        <div v-if="showRaciAnalysisChildren" class="ml-2 inline-flex flex-wrap items-center gap-1">
+        <div
+            v-if="showRaciAnalysisChildren"
+            class="ml-2 inline-flex flex-wrap items-center gap-1"
+        >
             <Link
                 v-for="item in raciAnalysisChildren"
                 :key="'raci-child-' + item.label"
@@ -316,7 +365,11 @@ const showRaciAnalysisChildren = computed(() => {
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
             >
-                <component :is="item.icon" v-if="item.icon" class="h-3.5 w-3.5 shrink-0" />
+                <component
+                    :is="item.icon"
+                    v-if="item.icon"
+                    class="h-3.5 w-3.5 shrink-0"
+                />
                 <span>{{ item.label }}</span>
             </Link>
         </div>
