@@ -122,19 +122,63 @@
                                 </tr>
                                 <!-- Objectives Rows -->
                                 <tr v-for="(obj, index) in group.objectives" :key="obj.objective_id" class="hover:bg-slate-50/50 dark:hover:bg-white/5">
-                                    <td class="border border-slate-300 dark:border-white/20 p-3 pl-6 text-slate-700 dark:text-slate-300 align-top text-[13px]">
-                                        {{ index + 1 }}. {{ obj.objective }}
+                                    <td class="border border-slate-300 dark:border-white/20 p-3 pl-4 text-slate-700 dark:text-slate-300 align-top text-[13px]">
+                                        <div class="flex items-start justify-between group cursor-pointer transition-colors hover:text-[#152c5b] dark:hover:text-blue-400" @click="toggleRow(obj.objective_id)">
+                                            <div class="font-semibold">
+                                                {{ index + 1 }}. {{ obj.objective }}
+                                            </div>
+                                            <div v-if="obj.practices && obj.practices.length > 0" class="shrink-0 ml-2 mt-0.5">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': expandedRows.includes(obj.objective_id) }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                            </div>
+                                        </div>
+
+                                        <!-- Expanded Practices for Kebijakan Khusus -->
+                                        <div v-show="expandedRows.includes(obj.objective_id)" class="mt-2.5 pl-4 border-l-2 border-[#152c5b]/30 dark:border-blue-500/30">
+                                            <div v-if="obj.practices && obj.practices.length > 0" class="space-y-2">
+                                                <div v-for="prac in obj.practices" :key="prac.practice_id" class="text-[12px] text-slate-600 dark:text-slate-400 leading-tight flex items-start gap-1.5">
+                                                    <span class="font-bold text-[#152c5b] dark:text-blue-400 font-mono text-[11px] bg-slate-100 dark:bg-white/5 px-1 py-0.5 rounded shrink-0">{{ prac.practice_id }}</span>
+                                                    <span>{{ prac.practice_name }}</span>
+                                                </div>
+                                            </div>
+                                            <div v-else class="text-[11px] text-slate-400 italic mt-1">
+                                                Tidak ada Butir Kebijakan (Practice)
+                                            </div>
+                                        </div>
                                     </td>
                                     <td class="border border-slate-300 dark:border-white/20 p-3 text-slate-700 dark:text-slate-300 align-top text-[13px]">
                                         <div v-if="obj.cobit_mappings && obj.cobit_mappings.length > 0">
                                             <div v-for="(map, mIdx) in obj.cobit_mappings" :key="map.id" :class="{'mt-2 pt-2 border-t border-slate-200 dark:border-white/10': mIdx > 0}">
-                                                <span class="font-semibold">{{ map.cobit_objective }}</span>
-                                                <span v-if="getCobitName(map.cobit_objective)">
-                                                    - {{ getCobitName(map.cobit_objective) }}
-                                                </span>
-                                                <span v-else-if="parseCobitJson(map.description) && parseCobitJson(map.description).description">
-                                                    - {{ parseCobitJson(map.description).description.split('.')[0] }}
-                                                </span>
+                                                <div class="flex items-start justify-between group cursor-pointer transition-colors hover:text-[#152c5b] dark:hover:text-blue-400" @click="toggleRow(obj.objective_id)">
+                                                    <div>
+                                                        <span class="font-semibold">{{ map.cobit_objective }}</span>
+                                                        <span v-if="getCobitName(map.cobit_objective)">
+                                                            - {{ getCobitName(map.cobit_objective) }}
+                                                        </span>
+                                                        <span v-else-if="parseCobitJson(map.description) && parseCobitJson(map.description).description">
+                                                            - {{ parseCobitJson(map.description).description.split('.')[0] }}
+                                                        </span>
+                                                    </div>
+                                                    <div v-if="parseCobitJson(map.description) && parseCobitJson(map.description).practices && parseCobitJson(map.description).practices.length > 0" class="shrink-0 ml-2 mt-0.5">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': expandedRows.includes(obj.objective_id) }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Expanded Practices -->
+                                                <div v-show="expandedRows.includes(obj.objective_id)" class="mt-2.5 pl-3 border-l-2 border-[#152c5b]/30 dark:border-blue-500/30">
+                                                    <div v-if="parseCobitJson(map.description) && parseCobitJson(map.description).practices && parseCobitJson(map.description).practices.length > 0" class="space-y-2">
+                                                        <div v-for="prac in parseCobitJson(map.description).practices" :key="prac.id" class="text-[12px] text-slate-600 dark:text-slate-400 leading-tight">
+                                                            <span class="font-bold text-[#152c5b] dark:text-blue-400 font-mono text-[11px] bg-slate-100 dark:bg-white/5 px-1 py-0.5 rounded">{{ prac.id }}</span>
+                                                            <span class="ml-1.5">{{ prac.name }}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div v-else class="text-[11px] text-slate-400 italic">
+                                                        Tidak ada Butir Kebijakan (Practice) dari COBIT
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                         <div v-else class="text-slate-400 text-[11px] italic">
@@ -853,6 +897,17 @@ const parseCobitJson = (jsonStr) => {
 const cobitObjectivesList = ref([]);
 
 const viewMode = ref('table');
+
+const expandedRows = ref([]);
+
+const toggleRow = (objId) => {
+    const index = expandedRows.value.indexOf(objId);
+    if (index > -1) {
+        expandedRows.value.splice(index, 1);
+    } else {
+        expandedRows.value.push(objId);
+    }
+};
 
 const domainMapping = {
     'Evaluasi, Arahkan, dan Pantau': { letter: 'A', cobitName: 'EDM (Evaluate, Direct and Monitor)' },
