@@ -5,7 +5,37 @@ import { useNavigation } from "@/Composables/useNavigation";
 
 const { navItems } = useNavigation();
 const page = usePage();
-const currentUrl = computed(() => page.url || "");
+const normalizeUrl = (url) => {
+    const value = String(url || "");
+
+    if (!value || value === "#") return value;
+
+    try {
+        const parsed = new URL(value, "http://localhost");
+        return `${parsed.pathname}${parsed.search}`;
+    } catch (error) {
+        return value.startsWith("/") ? value : `/${value}`;
+    }
+};
+
+const currentUrl = computed(() => normalizeUrl(page.url));
+
+const isMenuItemActive = (item, url = currentUrl.value) => {
+    const normalizedUrl = normalizeUrl(url);
+
+    if (typeof item.active === "function" && item.active(normalizedUrl)) {
+        return true;
+    }
+
+    const href = normalizeUrl(item.href);
+    return (
+        !!href &&
+        href !== "#" &&
+        (normalizedUrl === href ||
+            normalizedUrl.startsWith(`${href}?`) ||
+            normalizedUrl.startsWith(`${href}/`))
+    );
+};
 
 const sectionLabels = [
     "Business Process",
@@ -25,16 +55,12 @@ const sections = computed(() => {
         )
         .filter(Boolean)
         .map((item) => {
-            const children = item.children || [];
-            const isActive =
-                typeof item.active === "function"
-                    ? item.active(currentUrl.value)
-                    : false;
-            const hasActiveChild = children.some((child) =>
-                typeof child.active === "function"
-                    ? child.active(currentUrl.value)
-                    : false,
-            );
+            const children = (item.children || []).map((child) => ({
+                ...child,
+                isActive: isMenuItemActive(child),
+            }));
+            const isActive = isMenuItemActive(item);
+            const hasActiveChild = children.some((child) => child.isActive);
 
             return {
                 ...item,
@@ -93,7 +119,7 @@ const sectionsWithChildren = computed(() => {
                 :href="item.href"
                 class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all duration-150"
                 :class="[
-                    item.active(currentUrl.value)
+                    item.isActive
                         ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300'
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"

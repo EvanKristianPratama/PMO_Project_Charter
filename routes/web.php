@@ -812,6 +812,98 @@ Route::middleware(["auth", "approved"])->group(function () {
         ]),
     )->name("service-portofolio.index");
 
+    Route::prefix("/operating-model")
+        ->name("operating-model.")
+        ->group(function () {
+            Route::get("/", [OperatingModelController::class, "index"])->name(
+                "index",
+            );
+            Route::get("/it-governance", [
+                OperatingModelController::class,
+                "itGovernance",
+            ])->name("it-governance.index");
+            Route::get("/it-management", [
+                OperatingModelController::class,
+                "itManagement",
+            ])->name("it-management.index");
+            Route::post("/it-governance/steering", [
+                OperatingModelController::class,
+                "storeSteering",
+            ])->name("it-governance.steering.store");
+            Route::put("/it-governance/steering/{id}", [
+                OperatingModelController::class,
+                "updateSteering",
+            ])->name("it-governance.steering.update");
+            Route::delete("/it-governance/steering/{id}", [
+                OperatingModelController::class,
+                "destroySteering",
+            ])->name("it-governance.steering.destroy");
+        });
+
+    Route::prefix("/raci")
+        ->name("raci.")
+        ->group(function () {
+            Route::get("/", [PracticeRoleController::class, "index"])->name(
+                "index",
+            );
+            Route::get("/manage", [
+                PracticeRoleController::class,
+                "manage",
+            ])->name("manage");
+            Route::post("/", [PracticeRoleController::class, "update"])->name(
+                "update",
+            );
+
+            Route::get("/infoflow", [InfoflowController::class, "index"])->name(
+                "infoflow.index",
+            );
+
+            Route::get("/itsp-infoflow", [
+                ItspInfoflowController::class,
+                "index",
+            ])->name("itsp-infoflow.index");
+            Route::get("/itsp-infoflow/data", [
+                ItspInfoflowController::class,
+                "getData",
+            ])->name("itsp-infoflow.data");
+            Route::post("/itsp-infoflow/save", [
+                ItspInfoflowController::class,
+                "saveData",
+            ])->name("itsp-infoflow.save");
+            Route::get("/itsp-infoflow/manage", [
+                ItspInfoflowController::class,
+                "manage",
+            ])->name("itsp-infoflow.manage");
+            Route::post("/itsp-infoflow/sync", [
+                ItspInfoflowController::class,
+                "syncFromCobit",
+            ])->name("itsp-infoflow.sync");
+            Route::post("/itsp-infoflow/inputs", [
+                ItspInfoflowController::class,
+                "storeInput",
+            ])->name("itsp-infoflow.input.store");
+            Route::put("/itsp-infoflow/inputs/{id}", [
+                ItspInfoflowController::class,
+                "updateInput",
+            ])->name("itsp-infoflow.input.update");
+            Route::delete("/itsp-infoflow/inputs/{id}", [
+                ItspInfoflowController::class,
+                "destroyInput",
+            ])->name("itsp-infoflow.input.destroy");
+            Route::post("/itsp-infoflow/outputs", [
+                ItspInfoflowController::class,
+                "storeOutput",
+            ])->name("itsp-infoflow.output.store");
+            Route::put("/itsp-infoflow/outputs/{id}", [
+                ItspInfoflowController::class,
+                "updateOutput",
+            ])->name("itsp-infoflow.output.update");
+            Route::delete("/itsp-infoflow/outputs/{id}", [
+                ItspInfoflowController::class,
+                "destroyOutput",
+            ])->name("itsp-infoflow.output.destroy");
+        });
+
     // Policy CRUD (mst_general_policy, mst_objective & mst_practice)
     Route::prefix("/policy")
         ->name("policy.")
@@ -1073,6 +1165,10 @@ Route::middleware(["auth", "approved"])->group(function () {
                 OperatingModelController::class,
                 "itGovernance",
             ])->name("organization.index");
+            Route::get("/it-management", [
+                OperatingModelController::class,
+                "itManagement",
+            ])->name("it-management.index");
             Route::post("/organization/steering", [
                 OperatingModelController::class,
                 "storeSteering",

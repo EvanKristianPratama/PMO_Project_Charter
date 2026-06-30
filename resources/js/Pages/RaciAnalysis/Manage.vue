@@ -22,7 +22,7 @@
                             Referensi COBIT 2019
                         </button>
                         <Link
-                            :href="route('policy.raci.index')"
+                            :href="route('raci.index')"
                             class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-4 h-4">
@@ -166,7 +166,7 @@
                 <!-- Sticky bottom save action bar -->
                 <div class="mt-8 flex justify-end gap-3 border-t border-slate-100 dark:border-white/5 pt-6">
                     <Link
-                        :href="route('policy.raci.index')"
+                        :href="route('raci.index')"
                         class="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5"
                     >
                         Batal
@@ -706,7 +706,7 @@ function submit() {
     }
 
     form.mappings = list;
-    form.post(route('policy.raci.update'), {
+    form.post(route('raci.update'), {
         preserveScroll: true,
         onSuccess: () => {
             // Update initial state snapshot to reflect saved state

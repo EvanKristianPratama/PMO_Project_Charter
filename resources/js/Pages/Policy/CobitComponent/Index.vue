@@ -12,7 +12,7 @@
                 
                 <div class="flex items-center gap-2">
                     <Link
-                        href="/policy/infoflow"
+                        href="/raci/infoflow"
                         class="inline-flex items-center gap-2 px-3.5 py-1.5 border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 font-bold text-xs hover:bg-slate-50 dark:hover:bg-zinc-700 transition active:scale-95 shadow-sm rounded-none"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-[#0f2b5c]">

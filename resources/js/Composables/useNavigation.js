@@ -36,7 +36,7 @@ export function useNavigation() {
                 `[useNavigation] Failed to resolve route "${args[0]}".`,
                 error,
             );
-            return page.url || "#";
+            return "#";
         }
     };
 
@@ -447,6 +447,13 @@ export function useNavigation() {
                         icon: FolderIcon,
                         active: (url) => (url || "").startsWith("/policy/CMS"),
                     },
+                    {
+                        label: "COBIT 2019",
+                        href: safeRoute("policy.cobit-component.index"),
+                        icon: DocumentTextIcon,
+                        active: (url) =>
+                            (url || "").startsWith("/policy/cobit-component"),
+                    },
                     // {
                     //     label: "BPMN",
                     //     href: safeRoute("bpmn-workflow.index"),
@@ -457,13 +464,13 @@ export function useNavigation() {
             },
             {
                 label: "RACI Analysis",
-                href: safeRoute("policy.raci.index"),
+                href: safeRoute("raci.index"),
                 icon: DocumentTextIcon,
                 active: (url) => (url || "").startsWith("/raci"),
                 children: [
                     {
                         label: "RACI",
-                        href: safeRoute("policy.raci.index"),
+                        href: safeRoute("raci.index"),
                         icon: DocumentTextIcon,
                         active: (url) => {
                             const current = url || "";
