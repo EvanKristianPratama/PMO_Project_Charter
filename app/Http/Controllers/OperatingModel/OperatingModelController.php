@@ -11,6 +11,11 @@ use Inertia\Response;
 
 class OperatingModelController extends Controller
 {
+    public function index(): Response
+    {
+        return Inertia::render('OperatingModel/Index');
+    }
+
     public function itGovernance(): Response
     {
         $steeringRows = MstItSteeringComittee::with('organization')

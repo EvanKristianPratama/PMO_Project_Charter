@@ -9,92 +9,6 @@
                         Content Manegement System
                     </h1>
                 </div>
-                <!-- Upload Button/Toggle -->
-                <button 
-                    @click="showUploadModal = true" 
-                    class="px-4 py-2.5 bg-[#821f44] hover:bg-[#6b1837] text-white font-bold rounded-xl transition-all shadow-md shadow-[#821f44]/25 flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
-                >
-                    <ArrowUpTrayIcon class="w-4 h-4" />
-                    Upload File Baru
-                </button>
-            </div>
-
-            <!-- Upload Area (Modal / Collapsible Panel) -->
-            <div v-if="showUploadModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-                <div class="bg-white dark:bg-[#171717] rounded-2xl border border-slate-200 dark:border-white/10 w-full max-w-lg shadow-2xl overflow-hidden">
-                    <div class="p-6 border-b border-slate-200 dark:border-white/10 flex items-center justify-between">
-                        <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                            <CloudArrowUpIcon class="w-6 h-6 text-[#821f44]" />
-                            Unggah File Baru
-                        </h3>
-                        <button @click="showUploadModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                            <XMarkIcon class="w-6 h-6" />
-                        </button>
-                    </div>
-                    <form @submit.prevent="submitUpload" class="p-6 space-y-4">
-                        <div 
-                            @dragover.prevent="dragover = true"
-                            @dragleave.prevent="dragover = false"
-                            @drop.prevent="handleDrop"
-                            class="border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all flex flex-col items-center justify-center min-h-[200px]"
-                            :class="dragover 
-                                ? 'border-[#821f44] bg-[#821f44]/5 dark:bg-[#821f44]/10' 
-                                : 'border-slate-300 hover:border-[#821f44] dark:border-white/10 dark:hover:border-[#821f44]'"
-                            @click="$refs.fileInput.click()"
-                        >
-                            <input 
-                                type="file" 
-                                ref="fileInput" 
-                                class="hidden" 
-                                accept=".pdf,.ppt,.pptx" 
-                                @change="handleFileSelect"
-                            />
-                            
-                            <div class="p-4 bg-slate-100 dark:bg-white/5 rounded-full mb-3 text-[#821f44] transition-transform group-hover:scale-110">
-                                <ArrowUpTrayIcon class="w-8 h-8" />
-                            </div>
-
-                            <p class="text-sm font-bold text-slate-900 dark:text-white mb-1">
-                                {{ selectedFileToUpload ? selectedFileToUpload.name : 'Pilih file atau seret ke sini' }}
-                            </p>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">
-                                PDF, PPT, atau PPTX (Maks. 20MB)
-                            </p>
-                        </div>
-
-                        <!-- Progress Bar / Status -->
-                        <div v-if="form.processing" class="space-y-1.5">
-                            <div class="flex justify-between text-xs font-semibold text-slate-600 dark:text-slate-400">
-                                <span>Mengunggah file...</span>
-                                <span>{{ form.progress ? form.progress.percentage : 0 }}%</span>
-                            </div>
-                            <div class="w-full bg-slate-200 dark:bg-white/5 h-2 rounded-full overflow-hidden">
-                                <div class="bg-[#821f44] h-full transition-all duration-300" :style="{ width: (form.progress ? form.progress.percentage : 0) + '%' }"></div>
-                            </div>
-                        </div>
-
-                        <div v-if="form.errors.file" class="p-3 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/20 text-red-600 dark:text-red-400 text-xs rounded-lg font-bold">
-                            {{ form.errors.file }}
-                        </div>
-
-                        <div class="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-white/10">
-                            <button 
-                                type="button" 
-                                @click="showUploadModal = false" 
-                                class="px-4 py-2 border border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 text-sm font-semibold transition-all"
-                            >
-                                Batal
-                            </button>
-                            <button 
-                                type="submit" 
-                                :disabled="!selectedFileToUpload || form.processing" 
-                                class="px-4 py-2 bg-[#821f44] hover:bg-[#6b1837] text-white font-bold rounded-xl text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                Unggah Sekarang
-                            </button>
-                        </div>
-                    </form>
-                </div>
             </div>
 
             <!-- Content Area -->
@@ -184,13 +98,6 @@
                                 </div>
                                 
                                 <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2 shrink-0">
-                                    <button 
-                                        @click.stop="deleteFile(file.uuid)" 
-                                        class="p-1 text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                                        title="Hapus"
-                                    >
-                                        <TrashIcon class="w-4 h-4" />
-                                    </button>
                                     <ChevronRightIcon class="w-4 h-4 text-slate-300 group-hover:text-[#821f44] transition-colors" />
                                 </div>
                             </li>
@@ -202,14 +109,6 @@
                                 <p class="text-xs font-bold text-slate-500 dark:text-slate-400">Tidak ada file yang cocok</p>
                             </li>
                         </ul>
-                        
-                        <div class="p-3 bg-slate-50 dark:bg-white/5 border-t border-slate-200 dark:border-white/10">
-                            <div class="p-2.5 bg-[#821f44]/5 dark:bg-[#821f44]/10 rounded-lg border border-[#821f44]/10">
-                                <p class="text-[10px] text-[#821f44] dark:text-[#db588c] leading-relaxed">
-                                    <strong>Keamanan:</strong> Semua file disimpan secara aman di direktori privat dan tidak dapat diakses publik secara langsung.
-                                </p>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -243,13 +142,6 @@
                                     <ArrowDownTrayIcon class="w-4 h-4" />
                                     Download
                                 </a>
-                                <button 
-                                    @click="deleteFile(selectedDocument.uuid)" 
-                                    class="px-3 py-1.5 text-xs font-bold bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-red-600 dark:text-red-400 rounded-lg transition-all flex items-center gap-1.5"
-                                >
-                                    <TrashIcon class="w-4 h-4" />
-                                    Hapus
-                                </button>
                             </div>
                         </div>
 
@@ -289,7 +181,7 @@
 <script setup>
 import ModulLayout from '@/Layouts/ModulLayout.vue';
 import { ref, computed } from 'vue';
-import { router, useForm } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
 import LibaryClientViewer from '@/Components/Libary/LibaryClientViewer.vue';
 import { 
     PresentationChartBarIcon, 
@@ -298,11 +190,8 @@ import {
     FolderOpenIcon,
     MagnifyingGlassIcon,
     InboxIcon,
-    ArrowUpTrayIcon,
+    ArrowDownTrayIcon,
     DocumentIcon,
-    TrashIcon,
-    CloudArrowUpIcon,
-    XMarkIcon
 } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
@@ -318,14 +207,6 @@ const props = defineProps({
 
 const searchQuery = ref('');
 const activeTab = ref('all'); // 'all', 'ppt', 'pdf'
-const showUploadModal = ref(false);
-const dragover = ref(false);
-const selectedFileToUpload = ref(null);
-const fileInput = ref(null);
-
-const form = useForm({
-    file: null
-});
 
 const isPdf = (file) => {
     return file && (file.extension === 'pdf' || file.mime_type === 'application/pdf');
@@ -362,43 +243,6 @@ const selectFile = (file) => {
     router.visit(route('policy.CMS.show', { uuid: file.uuid }), {
         preserveState: true,
         preserveScroll: true
-    });
-};
-
-const deleteFile = (uuid) => {
-    if (confirm('Apakah Anda yakin ingin menghapus file ini?')) {
-        router.delete(route('policy.CMS.document.destroy', { uuid }), {
-            preserveScroll: true
-        });
-    }
-};
-
-const handleFileSelect = (e) => {
-    const files = e.target.files;
-    if (files.length > 0) {
-        selectedFileToUpload.value = files[0];
-        form.file = files[0];
-    }
-};
-
-const handleDrop = (e) => {
-    dragover.value = false;
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-        selectedFileToUpload.value = files[0];
-        form.file = files[0];
-    }
-};
-
-const submitUpload = () => {
-    if (!form.file) return;
-    form.post(route('policy.CMS.upload'), {
-        forceFormData: true,
-        onSuccess: () => {
-            showUploadModal.value = false;
-            selectedFileToUpload.value = null;
-            form.reset();
-        }
     });
 };
 </script>

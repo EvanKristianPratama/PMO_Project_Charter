@@ -329,7 +329,7 @@ export function useNavigation() {
             },
             {
                 label: "Operating Model",
-                href: safeRoute("operating-model.it-governance.index"),
+                href: safeRoute("operating-model.index"),
                 icon: Squares2X2Icon,
                 active: (url) => (url || '').startsWith("/operating-model"),
                 children: [

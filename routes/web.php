@@ -471,7 +471,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
 
     // Operating Model
     Route::prefix('/operating-model')->name('operating-model.')->group(function () {
-        Route::get('/', fn () => redirect()->route('operating-model.it-governance.index'))->name('index');
+        Route::get('/', [OperatingModelController::class, 'index'])->name('index');
         Route::get('/it-governance', [OperatingModelController::class, 'itGovernance'])->name('it-governance.index');
         Route::post('/it-governance/steering', [OperatingModelController::class, 'storeSteering'])->name('it-governance.steering.store');
         Route::put('/it-governance/steering/{id}', [OperatingModelController::class, 'updateSteering'])->name('it-governance.steering.update');
