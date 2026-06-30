@@ -1,5 +1,5 @@
 <template>
-    <UserLayout :title="pageTitle">
+    <ModulLayout :title="pageTitle">
         <div class="animate-fade-in-up space-y-6 pb-20">
             <section
                 class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
@@ -85,7 +85,7 @@
                 @delete-note="deleteNote"
             />
         </div>
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
@@ -93,7 +93,7 @@ import { computed, ref } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 import Evaluation from './Evaluation.vue';
 import Implementation from './Implementation.vue';
 import Planning from './Planning.vue';

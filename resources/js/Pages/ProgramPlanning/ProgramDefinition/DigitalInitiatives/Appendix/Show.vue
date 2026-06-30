@@ -1,5 +1,5 @@
 <template>
-    <UserLayout :title="pageTitle">
+    <ModulLayout :title="pageTitle">
         <div class="animate-fade-in-up space-y-6 pb-20">
             <section class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="flex flex-wrap items-center gap-3 px-4 py-3">
@@ -183,14 +183,14 @@
                 :organization-options="organizationOptions"
             />
         </div>
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { Link, router, useForm } from '@inertiajs/vue3';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 import AppendixCharterDocument from '@/Components/Appendix/AppendixCharterDocument.vue';
 
 const props = defineProps({

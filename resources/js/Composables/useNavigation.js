@@ -396,7 +396,12 @@ export function useNavigation() {
 
                 ],
             },
-
+            {
+                label: "Raci Analysis",
+                href: safeRoute("blank"),
+                icon: DocumentTextIcon,
+                active: (url) => (url || '').startsWith("/blank"),
+            },
             {
                 label: "DMS",
                 href: safeRoute("libary.index"),
@@ -427,7 +432,7 @@ export function useNavigation() {
         }
 
         const itspsLabels = ['Strategic House', 'Program Planning', 'Program Evaluation', 'Program Implementation'];
-        const itomLabels = ['Business Process', 'Organization', 'Service Portofolio', 'Regulation', 'DMS', 'Master Data', 'Sinkronisasi Data', 'Admin'];
+        const itomLabels = ['Business Process', 'Organization', 'Service Portofolio', 'Regulation', 'Raci Analysis', 'DMS', 'Master Data', 'Sinkronisasi Data', 'Admin'];
 
         const isItspsActive = items.some(item =>
             itspsLabels.includes(item.label) && typeof item.active === 'function' && item.active(page.url)

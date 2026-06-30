@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Program Definition Digital Initiatives">
+    <ModulLayout title="Program Definition Digital Initiatives">
         <div class="animate-fade-in space-y-4">
             <div
                 class="mb-4  flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
@@ -86,14 +86,14 @@
 
         <CreateInitiativeModal :show="showCreateModal" :tipe-initiative="1" :coe-options="coeOptions"
             :organization-options="organizationOptions" @close="showCreateModal = false" />
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
 import { computed, ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 import SummaryCard from '@/Components/DigitalInitiative/SummaryCard.vue';
 import TimelineFlow from '@/Components/DigitalInitiative/TimelineFlow.vue';
 import MasterInitiativeTable from '@/Components/DigitalInitiative/MasterInitiativeTable.vue';

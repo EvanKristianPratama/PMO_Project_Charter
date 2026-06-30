@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Digital Initiatives - Compendium List">
+    <ModulLayout title="Digital Initiatives - Compendium List">
         <div class="animate-fade-in space-y-4">
             <div
                 class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
@@ -468,14 +468,14 @@
                 </form>
             </div>
         </div>
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 
 const props = defineProps({
     compendiumItems: {

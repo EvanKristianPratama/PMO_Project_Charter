@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Program Definition IT Initiatives">
+    <ModulLayout title="Program Definition IT Initiatives">
         <div class="animate-fade-in">
             <section class="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
                 <SummaryCard :total="totalItInitiatives" @create="showCreateModal = true" @show-all="toggleShowAll" />
@@ -33,12 +33,12 @@
             :organization-options="organizationOptions"
             @close="showCreateModal = false"
         />
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
 import { computed, ref } from 'vue';
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 import SummaryCard from '@/Components/ITInitiative/SummaryCard.vue';
 import TimelineFlow from '@/Components/ITInitiative/TimelineFlow.vue';
 import MasterInitiativeTable from '@/Components/ITInitiative/MasterInitiativeTable.vue';

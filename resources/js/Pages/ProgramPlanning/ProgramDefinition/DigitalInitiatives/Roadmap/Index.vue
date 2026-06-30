@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Program Definition Digital Initiatives — Roadmap">
+    <ModulLayout title="Program Definition Digital Initiatives — Roadmap">
         <div class="space-y-6">
             <div
                 class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
@@ -170,7 +170,7 @@
                 </p>
             </section>
         </div>
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
@@ -178,7 +178,7 @@ import { computed, ref } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import DigitalRoadmapComponent from '@/Components/Roadmap/Digital/DigitalRoadmapComponent.vue';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 
 const props = defineProps({
     milestones: { type: Array, default: () => [] },

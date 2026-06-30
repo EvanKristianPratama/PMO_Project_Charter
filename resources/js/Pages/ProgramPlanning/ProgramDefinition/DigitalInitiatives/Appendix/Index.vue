@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Program Definition Digital Initiatives — Appendix List">
+    <ModulLayout title="Program Definition Digital Initiatives — Appendix List">
         <div class="animate-fade-in space-y-4">
             <div
                 class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
@@ -232,14 +232,14 @@
             @close="closeCreateModal"
             @success="closeCreateModal"
         />
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
 import { computed, ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 import AppendixCharterModal from '@/Components/Appendix/AppendixCharterModal.vue';
 
 const route = useRouteHelper();

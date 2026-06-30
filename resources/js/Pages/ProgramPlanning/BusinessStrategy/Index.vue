@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Business Strategy">
+    <ModulLayout title="Business Strategy">
         <div class="w-full max-w-full px-0">
 
             <div class="flex gap-6">
@@ -192,11 +192,11 @@
                 </main>
             </div>
         </div>
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 import BusinessStrategy from '@/Components/ProgramPlanning/BusinessStrategy/BusinessStrategy.vue';
 import KBUMN from '@/Components/ProgramPlanning/BusinessStrategy/KBUMN.vue';
 import ListMisiBumn from '@/Components/ProgramPlanning/BusinessStrategy/ListMisiBumn.vue';

@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Edit Digital Initiative">
+    <ModulLayout title="Edit Digital Initiative">
         <div class="mx-auto max-w-5xl animate-fade-in">
             <div class="mb-6">
                 <Link :href="route('program-planning.program-definition.digital-initiatives')" class="mb-2 flex items-center gap-1 text-sm text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400">
@@ -187,13 +187,13 @@
                 </form>
             </div>
         </div>
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
 import { Link, useForm } from '@inertiajs/vue3';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 
 const props = defineProps({
     initiative: {
