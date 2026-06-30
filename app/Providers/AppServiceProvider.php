@@ -88,7 +88,7 @@ class AppServiceProvider extends ServiceProvider
                         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
                             try {
                                 $connection->disconnect();
-                                $connection->reconnect();
+                                DB::reconnect($connection->getNameWithReadWriteType());
                                 return;
                             } catch (\Throwable $e) {
                                 if ($attempt >= $maxRetries) {

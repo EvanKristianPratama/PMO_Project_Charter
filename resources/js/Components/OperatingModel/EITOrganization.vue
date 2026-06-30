@@ -161,48 +161,7 @@ const handleNodeClick = () => {
 
 
 
-const normalizeCode = (value) => String(value ?? '').trim();
-
-const compareCodes = (left, right) => {
-    const leftCode = normalizeCode(left.code);
-    const rightCode = normalizeCode(right.code);
-
-    if (leftCode.length !== rightCode.length) {
-        return leftCode.length - rightCode.length;
-    }
-
-    return leftCode.localeCompare(rightCode);
-};
-
-const getParentCode = (code) => {
-    const norm = String(code ?? '').trim();
-    if (!norm) return null;
-
-    if (norm.length === 7) {
-        const digits = norm.split('');
-        let lastNonZeroIndex = null;
-        for (let i = digits.length - 1; i >= 0; i--) {
-            if (digits[i] !== '0') {
-                lastNonZeroIndex = i;
-                break;
-            }
-        }
-        if (lastNonZeroIndex === null || lastNonZeroIndex === 0) {
-            return null;
-        }
-
-        digits[lastNonZeroIndex] = '0';
-        for (let i = lastNonZeroIndex + 1; i < digits.length; i++) {
-            digits[i] = '0';
-        }
-        return digits.join('');
-    }
-
-    if (norm.length <= 2) return null;
-    return norm.slice(0, -2);
-};
-
-const buildCodeHierarchy = (items) => {
+const buildParentIdHierarchy = (items) => {
     if (!items.length) {
         return [];
     }
@@ -210,26 +169,25 @@ const buildCodeHierarchy = (items) => {
     const sorted = [...items]
         .map((item) => ({
             ...item,
-            code: normalizeCode(item.code ?? item.organization_code),
             children: [],
         }))
-        .sort(compareCodes);
+        .sort((a, b) => {
+            if (a.order !== null && b.order !== null && a.order !== undefined && b.order !== undefined) {
+                return a.order - b.order;
+            }
+            return String(a.organization_name).localeCompare(String(b.organization_name));
+        });
 
-    const nodeByCode = new Map();
-
+    const nodeById = new Map();
     sorted.forEach((item) => {
-        if (item.code) {
-            nodeByCode.set(item.code, item);
-        }
+        nodeById.set(item.organization_id, item);
     });
 
     const roots = [];
-
     sorted.forEach((item) => {
-        const parentCode = getParentCode(item.code);
-
-        if (parentCode) {
-            const parentNode = nodeByCode.get(parentCode);
+        const parentId = item.parent_id;
+        if (parentId) {
+            const parentNode = nodeById.get(parentId);
             if (parentNode) {
                 parentNode.children.push(item);
             } else {
@@ -240,16 +198,7 @@ const buildCodeHierarchy = (items) => {
         }
     });
 
-    const sortTree = (nodes) => {
-        return nodes
-            .sort(compareCodes)
-            .map((node) => ({
-                ...node,
-                children: node.children ? sortTree(node.children) : [],
-            }));
-    };
-
-    return sortTree(roots);
+    return roots;
 };
 
 const buildFullHierarchy = (items) => {
@@ -292,7 +241,7 @@ const buildFullHierarchy = (items) => {
                     organization_id: `group-${companyKey}-${groupKey}`,
                     organization_name: groupNode.groupName,
                     type: 'sub_holding',
-                    children: buildCodeHierarchy(groupNode.items),
+                    children: buildParentIdHierarchy(groupNode.items),
                 }))
                 .sort((left, right) => left.organization_name.localeCompare(right.organization_name)),
         }))

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\OperatingModel;
 
 use App\Http\Controllers\Controller;
+use App\Models\MstBod;
 use App\Models\MstItSteeringComittee;
 use App\Models\TrsOrganization;
 use Illuminate\Http\Request;
@@ -40,40 +41,50 @@ class OperatingModelController extends Controller
 
     public function itManagement(): Response
     {
-        $organizations = TrsOrganization::query()
-            ->where('code', '1000000')
-            ->orWhere('code', '1700000')
-            ->orWhere('code', 'like', '171%')
-            ->with([
-                'groub.company',
-                'picOrganization' => fn ($query) => $query->select(['id', 'organization_id', 'name'])
-            ])
+        // Target IDs to always include:
+        // 1: Direktur Utama
+        // 5: Direktur Penunjang Bisnis
+        // 67: SVP Enterprise IT
+        $ids = [1, 5, 67];
+
+        // Recursive query to retrieve all descendant IDs of parent 67
+        $getDescendants = function ($parentIds) use (&$getDescendants) {
+            if (empty($parentIds)) {
+                return [];
+            }
+            $children = MstBod::whereIn('parent_id', $parentIds)->pluck('id')->toArray();
+            if (empty($children)) {
+                return [];
+            }
+            return array_merge($children, $getDescendants($children));
+        };
+
+        $descendantIds = $getDescendants([67]);
+        $allIds = array_merge($ids, $descendantIds);
+
+        $bods = MstBod::with('company')
+            ->whereIn('id', $allIds)
             ->get();
 
-        $rows = $organizations->map(function ($org) {
+        $rows = $bods->map(function ($bod) {
             return [
-                'organization_id' => (int) $org->id,
-                'parent_id' => $org->parent_id ? (int) $org->parent_id : null,
-                'code' => trim((string) ($org->code ?? '')),
-                'organization_code' => trim((string) ($org->code ?? '')),
-                'organization_name' => $org->name,
-                'alias' => $org->alias,
-                'jabatan' => $org->jabatan,
-                'pejabat' => $org->pejabat,
-                'groub_id' => (int) ($org->groub_id ?? 0),
-                'groub_name' => $org->groub?->name ?? 'Tanpa Sub Holding',
-                'company_id' => $org->groub?->company?->id ? (int) $org->groub->company->id : null,
-                'company_name' => $org->groub?->company?->name ?? 'Tanpa Holding',
-                'pic_projects' => $org->picOrganization->map(fn ($pic) => [
-                    'id' => $pic->id,
-                    'name' => $pic->name,
-                ])->values()->all(),
+                'organization_id' => (int) $bod->id,
+                'parent_id' => $bod->parent_id ? (int) $bod->parent_id : null,
+                'organization_name' => $bod->name,
+                'alias' => $bod->alias,
+                'pejabat' => $bod->pejabat,
+                'groub_id' => 0,
+                'groub_name' => 'Holding',
+                'company_id' => $bod->company_id ? (int) $bod->company_id : null,
+                'company_name' => $bod->company?->name ?? 'Tanpa Holding',
+                'order' => $bod->order,
             ];
         })
         ->sortBy([
             ['company_name', 'asc'],
             ['groub_name', 'asc'],
-            ['code', 'asc'],
+            ['order', 'asc'],
+            ['organization_name', 'asc'],
         ])
         ->values()
         ->all();
