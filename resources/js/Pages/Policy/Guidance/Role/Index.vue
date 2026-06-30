@@ -60,6 +60,15 @@
                         </svg>
                         <span>Mapping Tanggung Jawab vs Kebijakan</span>
                     </button>
+                    <Link
+                        :href="route('policy.specific.mapping', { regulation_id: activeRegulation?.id })"
+                        class="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-200 text-slate-500 hover:text-[#821f44] hover:bg-slate-200/50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-4 h-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+                        </svg>
+                        <span>Mapping COBIT</span>
+                    </Link>
                 </div>
             </div>
 
@@ -369,8 +378,30 @@
                                 </td>
 
                                 <!-- Kebijakan -->
-                                <td class="p-3.5 border-r border-slate-200 dark:border-white/10 text-left font-sans text-xs leading-relaxed text-slate-900 dark:text-slate-100 font-bold align-top">
-                                    {{ obj.objective_id }} {{ obj.objective }}
+                                <td class="p-3.5 border-r border-slate-200 dark:border-white/10 text-left font-sans text-xs leading-relaxed text-slate-900 dark:text-slate-100 align-top">
+                                    <div class="flex items-start justify-between group cursor-pointer transition-colors hover:text-[#152c5b] dark:hover:text-blue-400" @click="toggleObjective(obj.objective_id)">
+                                        <div class="font-bold">
+                                            {{ obj.objective_id }} {{ obj.objective }}
+                                        </div>
+                                        <div v-if="obj.practices && obj.practices.length > 0" class="shrink-0 ml-2 mt-0.5">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': expandedObjectives.includes(obj.objective_id) }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </div>
+                                    </div>
+
+                                    <!-- Expanded Practices for Kebijakan Khusus -->
+                                    <div v-show="expandedObjectives.includes(obj.objective_id)" class="mt-2.5 pl-4 border-l-2 border-[#152c5b]/30 dark:border-blue-500/30 font-normal">
+                                        <div v-if="obj.practices && obj.practices.length > 0" class="space-y-2">
+                                            <div v-for="prac in obj.practices" :key="prac.practice_id" class="text-[12px] text-slate-600 dark:text-slate-400 leading-tight flex items-start gap-1.5">
+                                                <span class="font-bold text-[#152c5b] dark:text-blue-400 font-mono text-[11px] bg-slate-100 dark:bg-white/5 px-1 py-0.5 rounded shrink-0">{{ prac.practice_id }}</span>
+                                                <span>{{ prac.practice_name }}</span>
+                                            </div>
+                                        </div>
+                                        <div v-else class="text-[11px] text-slate-400 italic mt-1">
+                                            Tidak ada Butir Kebijakan (Practice)
+                                        </div>
+                                    </div>
                                 </td>
 
                                 <!-- Selected Responsibilities Dropdown & Cards (Mapping Tanggung Jawab) -->
@@ -761,6 +792,16 @@ const selectedRegulationId = ref(props.selectedRegulationId);
 
 // Sub menu active state for Bab III (document | matrix | policy_mapping)
 const activeSubMenu = ref('document');
+const expandedObjectives = ref([]);
+
+const toggleObjective = (objId) => {
+    const index = expandedObjectives.value.indexOf(objId);
+    if (index > -1) {
+        expandedObjectives.value.splice(index, 1);
+    } else {
+        expandedObjectives.value.push(objId);
+    }
+};
 
 // Role/position filter state for matrix view ('all' or specific roleId)
 const selectedRoleFilter = ref('all');
