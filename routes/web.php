@@ -21,7 +21,8 @@ use App\Http\Controllers\MasterData\MstInitiative\MstInitiativeController;
 use App\Http\Controllers\MasterData\MstPicProject\MstPicProjectController;
 use App\Http\Controllers\MasterData\ProjectCharter\ProjectCharterController as MasterDataProjectCharterController;
 use App\Http\Controllers\MasterData\ScopeCharter\ScopeCharterController;
-use App\Http\Controllers\Policy\EITOrganizationController;
+use App\Http\Controllers\OperatingModel\OperatingModelController;
+use App\Http\Controllers\Policy\CMSController;
 use App\Http\Controllers\Policy\GeneralPolicyController;
 use App\Http\Controllers\Policy\PolicyController;
 use App\Http\Controllers\Policy\InfoflowController;
@@ -425,42 +426,58 @@ Route::middleware(['auth', 'approved'])->group(function () {
         Route::put('/procedure/section/{id}', [ProcedureController::class, 'updateSection'])->name('procedure.section.update');
         Route::delete('/procedure/section/{id}', [ProcedureController::class, 'destroySection'])->name('procedure.section.destroy');
 
-        Route::get('/organization', [EITOrganizationController::class, 'index'])->name('organization.index');
-        Route::post('/organization/steering', [EITOrganizationController::class, 'storeSteering'])->name('organization.steering.store');
-        Route::put('/organization/steering/{id}', [EITOrganizationController::class, 'updateSteering'])->name('organization.steering.update');
-        Route::delete('/organization/steering/{id}', [EITOrganizationController::class, 'destroySteering'])->name('organization.steering.destroy');
 
-        // Matriks RACI (RACI Matrix) mapping
+        // CMS Policy routes
+        Route::get('/CMS', [CMSController::class, 'index'])->name('CMS.index');
+        Route::post('/CMS/upload', [CMSController::class, 'upload'])->name('CMS.upload');
+        Route::delete('/CMS/document/{uuid}', [CMSController::class, 'destroy'])->name('CMS.document.destroy');
+        Route::get('/CMS/{uuid}', [CMSController::class, 'show'])->name('CMS.show');
+    });
+
+    // Raci Analysis
+    Route::name('policy.')->group(function () {
         Route::get('/raci', [PracticeRoleController::class, 'index'])->name('raci.index');
         Route::get('/raci/manage', [PracticeRoleController::class, 'manage'])->name('raci.manage');
         Route::post('/raci', [PracticeRoleController::class, 'update'])->name('raci.update');
 
-        // GAMO Information Flow
-        Route::get('/infoflow', [InfoflowController::class, 'index'])->name('infoflow.index');
-
-        // ITSP Information Flow
-        Route::get('/itsp-infoflow', [ItspInfoflowController::class, 'index'])->name('itsp-infoflow.index');
-        Route::get('/itsp-infoflow/data', [ItspInfoflowController::class, 'getData'])->name('itsp-infoflow.data');
-        Route::post('/itsp-infoflow/save', [ItspInfoflowController::class, 'saveData'])->name('itsp-infoflow.save');
-        Route::get('/itsp-infoflow/manage', [ItspInfoflowController::class, 'manage'])->name('itsp-infoflow.manage');
-        Route::post('/itsp-infoflow/sync', [ItspInfoflowController::class, 'syncFromCobit'])->name('itsp-infoflow.sync');
-        Route::post('/itsp-infoflow/inputs', [ItspInfoflowController::class, 'storeInput'])->name('itsp-infoflow.input.store');
-        Route::put('/itsp-infoflow/inputs/{id}', [ItspInfoflowController::class, 'updateInput'])->name('itsp-infoflow.input.update');
-        Route::delete('/itsp-infoflow/inputs/{id}', [ItspInfoflowController::class, 'destroyInput'])->name('itsp-infoflow.input.destroy');
-        Route::post('/itsp-infoflow/outputs', [ItspInfoflowController::class, 'storeOutput'])->name('itsp-infoflow.output.store');
-        Route::put('/itsp-infoflow/outputs/{id}', [ItspInfoflowController::class, 'updateOutput'])->name('itsp-infoflow.output.update');
-        Route::delete('/itsp-infoflow/outputs/{id}', [ItspInfoflowController::class, 'destroyOutput'])->name('itsp-infoflow.output.destroy');
-
-        // Master Responsible CRUD
         Route::get('/responsible', [ResponsibleController::class, 'manage'])->name('responsible.manage');
         Route::post('/responsible', [ResponsibleController::class, 'store'])->name('responsible.store');
         Route::put('/responsible/{id}', [ResponsibleController::class, 'update'])->name('responsible.update');
         Route::delete('/responsible/{id}', [ResponsibleController::class, 'destroy'])->name('responsible.destroy');
     });
 
+    // Raci Analysis Infoflow
+    Route::name('raci.')->group(function () {
+        // GAMO Information Flow
+        Route::get('/raci/infoflow', [InfoflowController::class, 'index'])->name('infoflow.index');
+
+        // ITSP Information Flow
+        Route::get('/raci/itsp-infoflow', [ItspInfoflowController::class, 'index'])->name('itsp-infoflow.index');
+        Route::get('/raci/itsp-infoflow/data', [ItspInfoflowController::class, 'getData'])->name('itsp-infoflow.data');
+        Route::post('/raci/itsp-infoflow/save', [ItspInfoflowController::class, 'saveData'])->name('itsp-infoflow.save');
+        Route::get('/raci/itsp-infoflow/manage', [ItspInfoflowController::class, 'manage'])->name('itsp-infoflow.manage');
+        Route::post('/raci/itsp-infoflow/sync', [ItspInfoflowController::class, 'syncFromCobit'])->name('itsp-infoflow.sync');
+        Route::post('/raci/itsp-infoflow/inputs', [ItspInfoflowController::class, 'storeInput'])->name('itsp-infoflow.input.store');
+        Route::put('/raci/itsp-infoflow/inputs/{id}', [ItspInfoflowController::class, 'updateInput'])->name('itsp-infoflow.input.update');
+        Route::delete('/raci/itsp-infoflow/inputs/{id}', [ItspInfoflowController::class, 'destroyInput'])->name('itsp-infoflow.input.destroy');
+        Route::post('/raci/itsp-infoflow/outputs', [ItspInfoflowController::class, 'storeOutput'])->name('itsp-infoflow.output.store');
+        Route::put('/raci/itsp-infoflow/outputs/{id}', [ItspInfoflowController::class, 'updateOutput'])->name('itsp-infoflow.output.update');
+        Route::delete('/raci/itsp-infoflow/outputs/{id}', [ItspInfoflowController::class, 'destroyOutput'])->name('itsp-infoflow.output.destroy');
+    });
+
     Route::get('/program-information', fn () => Inertia::render('Placeholder/Index', [
         'title' => 'Program Information',
     ]))->name('program-information.index');
+
+    // Operating Model
+    Route::prefix('/operating-model')->name('operating-model.')->group(function () {
+        Route::get('/', fn () => redirect()->route('operating-model.it-governance.index'))->name('index');
+        Route::get('/it-governance', [OperatingModelController::class, 'itGovernance'])->name('it-governance.index');
+        Route::post('/it-governance/steering', [OperatingModelController::class, 'storeSteering'])->name('it-governance.steering.store');
+        Route::put('/it-governance/steering/{id}', [OperatingModelController::class, 'updateSteering'])->name('it-governance.steering.update');
+        Route::delete('/it-governance/steering/{id}', [OperatingModelController::class, 'destroySteering'])->name('it-governance.steering.destroy');
+        Route::get('/it-management', [OperatingModelController::class, 'itManagement'])->name('it-management.index');
+    });
 
     // Program Evaluation
     Route::redirect('/program-evalution', '/program-evalution/review-summary');

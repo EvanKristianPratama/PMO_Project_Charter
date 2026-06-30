@@ -328,6 +328,26 @@ export function useNavigation() {
                 children: organizationChildren,
             },
             {
+                label: "Operating Model",
+                href: safeRoute("operating-model.it-governance.index"),
+                icon: Squares2X2Icon,
+                active: (url) => (url || '').startsWith("/operating-model"),
+                children: [
+                    {
+                        label: "IT Governance",
+                        href: safeRoute("operating-model.it-governance.index"),
+                        icon: Squares2X2Icon,
+                        active: (url) => (url || '').startsWith("/operating-model/it-governance"),
+                    },
+                    {
+                        label: "IT Management",
+                        href: safeRoute("operating-model.it-management.index"),
+                        icon: Squares2X2Icon,
+                        active: (url) => (url || '').startsWith("/operating-model/it-management"),
+                    },
+                ],
+            },
+            {
                 label: "Service Portofolio",
                 href: safeRoute("service-portofolio.index"),
                 icon: CubeIcon,
@@ -340,10 +360,10 @@ export function useNavigation() {
                 active: (url) => (url || '').startsWith("/policy") || (url || '').startsWith("/bpmn-workflow"),
                 children: [
                     {
-                        label: "Organization",
-                        href: safeRoute("policy.organization.index"),
-                        icon: BuildingOffice2Icon,
-                        active: (url) => (url || '').startsWith("/policy/organization"),
+                        label: "Regulation",
+                        href: safeRoute("policy.regulation.index"),
+                        icon: DocumentTextIcon,
+                        active: (url) => (url || '').startsWith("/policy/regulation"),
                     },
                     {
                         label: "Bab I: Pendahuluan",
@@ -370,22 +390,10 @@ export function useNavigation() {
                         active: (url) => (url || '').startsWith("/policy/guidance/closing"),
                     },
                     {
-                        label: "Matriks RACI",
-                        href: safeRoute("policy.raci.index"),
-                        icon: DocumentTextIcon,
-                        active: (url) => (url || '').startsWith("/policy/raci"),
-                    },
-                    {
-                        label: "Information Flow",
-                        href: safeRoute("policy.infoflow.index"),
-                        icon: DocumentTextIcon,
-                        active: (url) => (url || '').startsWith("/policy/infoflow"),
-                    },
-                    {
-                        label: "ITSP Info Flow",
-                        href: safeRoute("policy.itsp-infoflow.index"),
-                        icon: DocumentTextIcon,
-                        active: (url) => (url || '').startsWith("/policy/itsp-infoflow"),
+                        label: "CMS",
+                        href: safeRoute("policy.CMS.index"),
+                        icon: FolderIcon,
+                        active: (url) => (url || '').startsWith("/policy/CMS"),
                     },
                     // {
                     //     label: "BPMN",
@@ -397,16 +405,30 @@ export function useNavigation() {
                 ],
             },
             {
-                label: "Raci Analysis",
-                href: safeRoute("blank"),
+                label: "RACI Analysis",
+                href: safeRoute("policy.raci.index"),
                 icon: DocumentTextIcon,
-                active: (url) => (url || '').startsWith("/blank"),
-            },
-            {
-                label: "DMS",
-                href: safeRoute("libary.index"),
-                icon: FolderIcon,
-                active: (url) => (url || '').startsWith("/libary"),
+                active: (url) => (url || '').startsWith("/raci"),
+                children: [
+                    {
+                        label: "RACI",
+                        href: safeRoute("policy.raci.index"),
+                        icon: DocumentTextIcon,
+                        active: (url) => (url || '').startsWith("/raci/index"),
+                    },
+                    {
+                        label: "COBIT 2019 Information Flow",
+                        href: safeRoute("raci.infoflow.index"),
+                        icon: DocumentTextIcon,
+                        active: (url) => (url || '').startsWith("/raci/infoflow"),
+                    },
+                    {
+                        label: "Pedoman TKTI Information Flow",
+                        href: safeRoute("raci.itsp-infoflow.index"),
+                        icon: DocumentTextIcon,
+                        active: (url) => (url || '').startsWith("/raci/itsp-infoflow"),
+                    },
+                ]
             },
             {
                 label: "Master Data",
@@ -422,17 +444,8 @@ export function useNavigation() {
             },
         ];
 
-        if (isAdmin.value) {
-            items.push({
-                label: "Admin",
-                href: safeRoute("admin.dashboard"),
-                icon: ShieldCheckIcon,
-                active: (url) => (url || '').startsWith("/admin"),
-            });
-        }
-
         const itspsLabels = ['Strategic House', 'Program Planning', 'Program Evaluation', 'Program Implementation'];
-        const itomLabels = ['Business Process', 'Organization', 'Service Portofolio', 'Regulation', 'Raci Analysis', 'DMS', 'Master Data', 'Sinkronisasi Data', 'Admin'];
+        const itomLabels = ['Business Process', 'Organization', 'Operating Model', 'Service Portofolio', 'Regulation', 'RACI Analysis', 'Master Data', 'Sinkronisasi Data'];
 
         const isItspsActive = items.some(item =>
             itspsLabels.includes(item.label) && typeof item.active === 'function' && item.active(page.url)

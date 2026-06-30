@@ -43,16 +43,38 @@ const policyItem = computed(() => {
     return navItems.value.find((item) => item.label === 'Regulation') ?? null;
 });
 
-const libaryItem = computed(() => {
-    return navItems.value.find((item) => item.label === 'DMS') ?? null;
+const operatingModelItem = computed(() => {
+    return navItems.value.find((item) => item.label === 'Operating Model') ?? null;
 });
+
+const isOperatingModelActive = computed(() => {
+    return operatingModelItem.value?.active(currentUrl.value) || false;
+});
+
+const operatingModelChildren = computed(() => {
+    return operatingModelItem.value?.children || [];
+});
+
+const showOperatingModelChildren = computed(() => {
+    if (isOperatingModelActive.value) {
+        return true;
+    }
+
+    return operatingModelChildren.value.some((item) => item.active(currentUrl.value));
+});
+
+const raciAnalysisItem = computed(() => {
+    return navItems.value.find((item) => item.label === 'RACI Analysis') ?? null;
+});
+
+
 
 
 
 const policyChildren = computed(() => {
     const children = policyItem.value?.children || [];
     return children
-        .filter(item => item.label === 'Regulation' || item.label === 'Organization' || item.label === 'Matriks RACI' || item.label === 'Information Flow' || item.label === 'ITSP Info Flow' || item.label === 'BPMN')
+        .filter(item => item.label === 'Regulation' || item.label === 'Organization' || item.label === 'Matriks RACI' || item.label === 'BPMN' || item.label === 'DMS' || item.label === 'CMS')
         .map(item => {
             if (item.label === 'Matriks RACI') {
                 return { ...item, label: 'RACI' };
@@ -73,9 +95,23 @@ const showPolicyChildren = computed(() => {
     return policyChildren.value.some((item) => item.active(currentUrl.value));
 });
 
-const adminItem = computed(() => {
-    return navItems.value.find((item) => item.label === 'Admin') ?? null;
+const isRaciAnalysisActive = computed(() => {
+    return raciAnalysisItem.value?.active(currentUrl.value) || false;
 });
+
+const raciAnalysisChildren = computed(() => {
+    return raciAnalysisItem.value?.children || [];
+});
+
+const showRaciAnalysisChildren = computed(() => {
+    if (isRaciAnalysisActive.value) {
+        return true;
+    }
+
+    return raciAnalysisChildren.value.some((item) => item.active(currentUrl.value));
+});
+
+// adminItem removed
 </script>
 
 <template>
@@ -121,6 +157,29 @@ const adminItem = computed(() => {
 
             <!-- Separation Dot -->
             <span
+                v-if="operatingModelItem"
+                class="select-none px-0.5 text-indigo-200 dark:text-indigo-900"
+            >
+                &middot;
+            </span>
+
+            <!-- Operating Model Link -->
+            <Link
+                v-if="operatingModelItem"
+                :href="operatingModelItem.href"
+                class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
+                :class="[
+                    isOperatingModelActive
+                        ? 'bg-indigo-500 text-white shadow-sm'
+                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
+                ]"
+            >
+                <component :is="operatingModelItem.icon" v-if="operatingModelItem.icon" class="h-3.5 w-3.5 shrink-0" />
+                <span>{{ operatingModelItem.label }}</span>
+            </Link>
+
+            <!-- Separation Dot -->
+            <span
                 v-if="policyItem"
                 class="select-none px-0.5 text-indigo-200 dark:text-indigo-900"
             >
@@ -142,53 +201,34 @@ const adminItem = computed(() => {
                 <span>{{ policyItem.label }}</span>
             </Link>
 
-
-
             <!-- Separation Dot -->
             <span
-                v-if="libaryItem"
+                v-if="raciAnalysisItem"
                 class="select-none px-0.5 text-indigo-200 dark:text-indigo-900"
             >
                 &middot;
             </span>
 
-            <!-- Library Link -->
+            <!-- Raci Analysis Link -->
             <Link
-                v-if="libaryItem"
-                :href="libaryItem.href"
+                v-if="raciAnalysisItem"
+                :href="raciAnalysisItem.href"
                 class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
                 :class="[
-                    libaryItem.active(currentUrl.value)
+                    isRaciAnalysisActive
                         ? 'bg-indigo-500 text-white shadow-sm'
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
             >
-                <component :is="libaryItem.icon" v-if="libaryItem.icon" class="h-3.5 w-3.5 shrink-0" />
-                <span>{{ libaryItem.label }}</span>
+                <component :is="raciAnalysisItem.icon" v-if="raciAnalysisItem.icon" class="h-3.5 w-3.5 shrink-0" />
+                <span>{{ raciAnalysisItem.label }}</span>
             </Link>
 
-            <!-- Separation Dot -->
-            <span
-                v-if="adminItem"
-                class="select-none px-0.5 text-indigo-200 dark:text-indigo-900"
-            >
-                &middot;
-            </span>
 
-            <!-- Admin Link -->
-            <Link
-                v-if="adminItem"
-                :href="adminItem.href"
-                class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
-                :class="[
-                    adminItem.active(currentUrl.value)
-                        ? 'bg-indigo-500 text-white shadow-sm'
-                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
-                ]"
-            >
-                <component :is="adminItem.icon" v-if="adminItem.icon" class="h-3.5 w-3.5 shrink-0" />
-                <span>{{ adminItem.label }}</span>
-            </Link>
+
+
+
+
         </div>
 
         <!-- Architecture Sub-menus -->
@@ -200,7 +240,7 @@ const adminItem = computed(() => {
                 class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all duration-150"
                 :class="[
                     item.active(currentUrl.value)
-                        ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300'
+                        ? 'bg-indigo-500 text-white shadow-sm'
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
             >
@@ -218,7 +258,25 @@ const adminItem = computed(() => {
                 class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all duration-150"
                 :class="[
                     item.active(currentUrl.value)
-                        ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300'
+                        ? 'bg-indigo-500 text-white shadow-sm'
+                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
+                ]"
+            >
+                <component :is="item.icon" v-if="item.icon" class="h-3.5 w-3.5 shrink-0" />
+                <span>{{ item.label }}</span>
+            </Link>
+        </div>
+
+        <!-- Operating Model Sub-menus -->
+        <div v-if="showOperatingModelChildren" class="ml-2 inline-flex flex-wrap items-center gap-1">
+            <Link
+                v-for="item in operatingModelChildren"
+                :key="'opmodel-child-' + item.label"
+                :href="item.href"
+                class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all duration-150"
+                :class="[
+                    item.active(currentUrl.value)
+                        ? 'bg-indigo-500 text-white shadow-sm'
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
             >
@@ -236,7 +294,25 @@ const adminItem = computed(() => {
                 class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all duration-150"
                 :class="[
                     item.active(currentUrl.value)
-                        ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300'
+                        ? 'bg-indigo-500 text-white shadow-sm'
+                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
+                ]"
+            >
+                <component :is="item.icon" v-if="item.icon" class="h-3.5 w-3.5 shrink-0" />
+                <span>{{ item.label }}</span>
+            </Link>
+        </div>
+
+        <!-- Raci Analysis Sub-menus -->
+        <div v-if="showRaciAnalysisChildren" class="ml-2 inline-flex flex-wrap items-center gap-1">
+            <Link
+                v-for="item in raciAnalysisChildren"
+                :key="'raci-child-' + item.label"
+                :href="item.href"
+                class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all duration-150"
+                :class="[
+                    item.active(currentUrl.value)
+                        ? 'bg-indigo-500 text-white shadow-sm'
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
             >

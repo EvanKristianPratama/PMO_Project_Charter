@@ -13,6 +13,6 @@ class InfoflowController extends Controller
      */
     public function index(): Response
     {
-        return Inertia::render('Policy/Infoflow/Index');
+        return Inertia::render('RaciAnalysis/Infoflow/Index');
     }
 }

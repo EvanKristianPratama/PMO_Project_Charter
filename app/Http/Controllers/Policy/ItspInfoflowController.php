@@ -41,7 +41,7 @@ class ItspInfoflowController extends Controller
             ];
         }
 
-        return Inertia::render('Policy/ItspInfoflow/Index', [
+        return Inertia::render('RaciAnalysis/ItspInfoflow/Index', [
             'objectiveGroups' => array_values($groupedObjectives),
         ]);
     }
@@ -374,7 +374,7 @@ class ItspInfoflowController extends Controller
         $practices = MstPractice::orderBy('practice_id', 'asc')->get();
         $objectives = MstObjective::orderBy('objective_id', 'asc')->get();
 
-        return Inertia::render('Policy/ItspInfoflow/Manage', [
+        return Inertia::render('RaciAnalysis/ItspInfoflow/Manage', [
             'inputs' => $inputs,
             'outputs' => $outputs,
             'practices' => $practices,
