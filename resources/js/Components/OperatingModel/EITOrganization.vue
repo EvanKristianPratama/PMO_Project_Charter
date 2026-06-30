@@ -21,31 +21,24 @@
         </section>
     </template>
 
-    <!-- Non-root: depth 0-5 = horizontal grid layout, depth >= 6 = vertical command line layout -->
+    <!-- Non-root: semua depth gunakan branching horizontal -->
 
-    <div v-else class="relative min-w-0" :class="depth < 6 ? 'shrink-0' : 'w-full'">
-        <!-- Horizontal line (for grid-based sibling connectors at depth 1 through 6) -->
-        <div v-if="depth >= 1 && depth <= 6 && (!isFirstChild || !isLastChild)"
+    <div v-else class="relative min-w-0 shrink-0">
+        <!-- Horizontal line antar-sibling -->
+        <div v-if="depth >= 1 && (!isFirstChild || !isLastChild)"
             class="absolute top-[-8px] h-px bg-slate-300 dark:bg-white/20" :class="[
                 isFirstChild ? 'left-1/2 -right-1' : '',
                 isLastChild ? '-left-1 right-1/2' : '',
                 !isFirstChild && !isLastChild ? '-left-1 -right-1' : '',
             ]" aria-hidden="true" />
-        <!-- Vertical line going up (for grid-based sibling connectors at depth 1 through 6) -->
-        <div v-if="depth >= 1 && depth <= 6"
+        <!-- Vertical line dari atas ke node -->
+        <div v-if="depth >= 1"
             class="absolute left-1/2 top-[-8px] h-[8px] w-px -translate-x-1/2 bg-slate-300 dark:bg-white/20"
             aria-hidden="true" />
 
-        <div class="flex w-full min-w-0" :class="depth >= 7 ? 'flex-row items-start' : 'flex-col items-center'">
-            <!-- For depth >= 7: vertical command line connector (left side) -->
-            <div v-if="depth >= 7" class="flex flex-col items-start shrink-0" style="width: 24px;">
-                <!-- Horizontal line turning right to node -->
-                <div class="self-stretch border-b border-l border-slate-300 dark:border-white/20 rounded-bl-md"
-                    style="height: 12px;" aria-hidden="true"></div>
-            </div>
-
+        <div class="flex w-full min-w-0 flex-col items-center">
             <!-- Node content + children wrapper -->
-            <div class="flex flex-col min-w-0" :class="depth >= 7 ? 'flex-1' : 'items-center w-full'">
+            <div class="flex flex-col min-w-0 items-center w-full">
                 <!-- The node box -->
                 <div
                     class="relative flex flex-col items-center justify-center rounded border px-1 text-center font-semibold leading-tight shadow-sm transition duration-200"
@@ -73,28 +66,24 @@
                     </span>
                 </div>
 
-                <!-- Children: depth < 6 use horizontal flex layout for their children -->
-                <div v-if="hasChildren && isExpanded && depth < 6" class="relative mt-2 w-full min-w-0 pt-2">
+                <!-- Children: depth < 7 use horizontal flex layout for their children -->
+                <div v-if="hasChildren && isExpanded && depth < 7" class="relative mt-2 w-full min-w-0 pt-2">
                     <div class="absolute left-1/2 top-[-8px] h-[8px] w-px -translate-x-1/2 bg-slate-300 dark:bg-white/20"
                         aria-hidden="true" />
 
-                    <div class="flex flex-row justify-center items-start gap-x-2 gap-y-3 w-full min-w-0">
+                    <div class="flex flex-row justify-center items-start gap-x-2 gap-y-3 w-full min-w-0 flex-wrap">
                         <ThreeView v-for="(child, index) in node.children" :key="child.organization_id" :node="child"
                             :is-root="false" :depth="depth + 1" :is-first-child="index === 0"
                             :is-last-child="index === node.children.length - 1" />
                     </div>
                 </div>
 
-                <!-- Children: depth >= 6 use vertical command line layout -->
-                <div v-if="hasChildren && isExpanded && depth >= 6" class="relative mt-3"
-                    :class="depth === 6 ? 'w-full ml-0' : 'ml-10'">
-                    <!-- Continuous vertical line for all children -->
-                    <div class="absolute w-px bg-slate-300 dark:bg-white/20"
-                        :class="depth === 6 ? 'left-1/2' : 'left-0'"
-                        :style="{ top: '-12px', height: '100%' }"
-                        aria-hidden="true"></div>
+                <!-- Children: depth >= 7 tetap horizontal agar node akhir tidak saling mengganggu -->
+                <div v-if="hasChildren && isExpanded && depth >= 7" class="relative mt-2 min-w-max pt-2">
+                    <div class="absolute left-1/2 top-[-8px] h-[8px] w-px -translate-x-1/2 bg-slate-300 dark:bg-white/20"
+                        aria-hidden="true" />
 
-                    <div class="flex flex-col gap-0" :class="depth === 6 ? 'pl-[50%]' : ''">
+                    <div class="flex flex-row justify-center items-start gap-x-2 gap-y-3 min-w-max">
                         <ThreeView v-for="(child, index) in node.children" :key="child.organization_id" :node="child"
                             :is-root="false" :depth="depth + 1" :is-first-child="index === 0"
                             :is-last-child="index === node.children.length - 1" />
