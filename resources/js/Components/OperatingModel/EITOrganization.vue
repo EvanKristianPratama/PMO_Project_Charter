@@ -24,15 +24,15 @@
     <!-- Non-root: semua depth gunakan branching horizontal -->
 
     <div v-else class="relative min-w-0 shrink-0">
-        <!-- Horizontal line antar-sibling -->
-        <div v-if="depth >= 1 && (!isFirstChild || !isLastChild)"
+        <!-- Horizontal line antar-sibling (hanya area branch horizontal) -->
+        <div v-if="depth >= 1 && depth <= 7 && !isVerticalLayoutChild && (!isFirstChild || !isLastChild)"
             class="absolute top-[-8px] h-px bg-slate-300 dark:bg-white/20" :class="[
                 isFirstChild ? 'left-1/2 -right-1' : '',
                 isLastChild ? '-left-1 right-1/2' : '',
                 !isFirstChild && !isLastChild ? '-left-1 -right-1' : '',
             ]" aria-hidden="true" />
         <!-- Vertical line dari atas ke node -->
-        <div v-if="depth >= 1"
+        <div v-if="depth >= 1 && depth <= 7 && !isVerticalLayoutChild"
             class="absolute left-1/2 top-[-8px] h-[8px] w-px -translate-x-1/2 bg-slate-300 dark:bg-white/20"
             aria-hidden="true" />
 
@@ -66,8 +66,8 @@
                     </span>
                 </div>
 
-                <!-- Children: depth < 7 use horizontal flex layout for their children -->
-                <div v-if="hasChildren && isExpanded && depth < 7" class="relative mt-2 w-full min-w-0 pt-2">
+                <!-- Children: default horizontal branching -->
+                <div v-if="hasChildren && isExpanded && !shouldRenderChildrenVertical" class="relative mt-2 w-full min-w-0 pt-2">
                     <div class="absolute left-1/2 top-[-8px] h-[8px] w-px -translate-x-1/2 bg-slate-300 dark:bg-white/20"
                         aria-hidden="true" />
 
@@ -78,15 +78,15 @@
                     </div>
                 </div>
 
-                <!-- Children: depth >= 7 tetap horizontal agar node akhir tidak saling mengganggu -->
-                <div v-if="hasChildren && isExpanded && depth >= 7" class="relative mt-2 min-w-max pt-2">
-                    <div class="absolute left-1/2 top-[-8px] h-[8px] w-px -translate-x-1/2 bg-slate-300 dark:bg-white/20"
+                <!-- Children: level paling akhir disusun vertikal -->
+                <div v-if="hasChildren && isExpanded && shouldRenderChildrenVertical" class="relative mt-3 w-full">
+                    <div class="absolute left-1/2 top-[-8px] h-full w-px -translate-x-1/2 bg-slate-300 dark:bg-white/20"
                         aria-hidden="true" />
 
-                    <div class="flex flex-row justify-center items-start gap-x-2 gap-y-3 min-w-max">
+                    <div class="relative flex flex-col items-center gap-y-2 pt-1">
                         <ThreeView v-for="(child, index) in node.children" :key="child.organization_id" :node="child"
                             :is-root="false" :depth="depth + 1" :is-first-child="index === 0"
-                            :is-last-child="index === node.children.length - 1" />
+                            :is-last-child="index === node.children.length - 1" :is-vertical-layout-child="true" />
                     </div>
                 </div>
             </div>
@@ -126,12 +126,24 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    isVerticalLayoutChild: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 // Depth 0-4, 6+ auto-expand, depth 5 collapsed by default (show/hide children on click)
 const isExpanded = ref(props.depth !== 5);
 
 const hasChildren = computed(() => Array.isArray(props.node?.children) && props.node.children.length > 0);
+
+const shouldRenderChildrenVertical = computed(() => {
+    if (!hasChildren.value) {
+        return false;
+    }
+
+    return props.node.children.every((child) => !Array.isArray(child?.children) || child.children.length === 0);
+});
 
 const isClickable = computed(() => hasChildren.value && props.depth === 5);
 
