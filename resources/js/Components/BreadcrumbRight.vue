@@ -52,7 +52,7 @@ const libaryItem = computed(() => {
 const policyChildren = computed(() => {
     const children = policyItem.value?.children || [];
     return children
-        .filter(item => item.label === 'Regulation' || item.label === 'Organization' || item.label === 'Matriks RACI' || item.label === 'Information Flow' || item.label === 'ITSP Info Flow' || item.label === 'BPMN')
+        .filter(item => item.label === 'Regulation' || item.label === 'Organization' || item.label === 'Matriks RACI' || item.label === 'Information Flow' || item.label === 'ITSP Info Flow' || item.label === 'BPMN' || item.label === 'COBIT 2019')
         .map(item => {
             if (item.label === 'Matriks RACI') {
                 return { ...item, label: 'RACI' };

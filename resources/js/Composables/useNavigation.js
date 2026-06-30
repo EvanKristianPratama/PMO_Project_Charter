@@ -387,6 +387,12 @@ export function useNavigation() {
                         icon: DocumentTextIcon,
                         active: (url) => (url || '').startsWith("/policy/itsp-infoflow"),
                     },
+                    {
+                        label: "COBIT 2019",
+                        href: safeRoute("policy.cobit-component.index"),
+                        icon: DocumentTextIcon,
+                        active: (url) => (url || '').startsWith("/policy/cobit-component"),
+                    },
                     // {
                     //     label: "BPMN",
                     //     href: safeRoute("bpmn-workflow.index"),
