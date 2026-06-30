@@ -23,8 +23,8 @@ const currentUrl = computed(() => normalizeUrl(page.url));
 const isMenuItemActive = (item, url = currentUrl.value) => {
     const normalizedUrl = normalizeUrl(url);
 
-    if (typeof item.active === "function" && item.active(normalizedUrl)) {
-        return true;
+    if (typeof item.active === "function") {
+        return item.active(normalizedUrl);
     }
 
     const href = normalizeUrl(item.href);
