@@ -153,7 +153,7 @@ const showInformationChildren = computed(() => {
                 class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all duration-150"
                 :class="[
                     item.active(currentUrl.value)
-                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300'
+                        ? 'bg-blue-500 text-white shadow-sm'
                         : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200'
                 ]"
             >

@@ -18,6 +18,7 @@ import {
     ArrowRightOnRectangleIcon,
     CircleStackIcon,
     CogIcon,
+    ShieldCheckIcon,
 } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
@@ -201,6 +202,18 @@ onUnmounted(() => {
                                                 ITOM
                                             </span>
                                         </div>
+                                    </MenuItem>
+                                </div>
+                                <div v-if="isAdmin" class="p-1">
+                                    <MenuItem v-slot="{ active }">
+                                        <Link
+                                            :href="route('admin.dashboard')"
+                                            class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-indigo-600 transition-colors dark:text-indigo-300"
+                                            :class="active ? 'bg-indigo-50 dark:bg-indigo-500/10' : ''"
+                                        >
+                                            <ShieldCheckIcon class="h-4 w-4" />
+                                            Admin
+                                        </Link>
                                     </MenuItem>
                                 </div>
                                 <div class="p-1">

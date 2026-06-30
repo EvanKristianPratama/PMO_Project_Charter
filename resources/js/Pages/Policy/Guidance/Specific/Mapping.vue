@@ -991,7 +991,6 @@ watch(viewMode, (newVal) => {
         fetchRolesForTable();
     }
 });
-
 const expandedRows = ref([]);
 
 const toggleRow = (objId) => {
