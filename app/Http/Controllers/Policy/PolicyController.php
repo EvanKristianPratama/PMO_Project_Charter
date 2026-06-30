@@ -167,6 +167,42 @@ class PolicyController extends Controller
     }
 
     /**
+     * Display the specific policy mapping analysis dashboard.
+     */
+    public function mappingCobitAnalysis(Request $request): Response
+    {
+        $regulations = \App\Models\MstRegulation::orderBy('judul', 'asc')->get();
+
+        $selectedRegulationId = $request->integer('regulation_id');
+        $selectedRegulation = $selectedRegulationId
+            ? $regulations->firstWhere('id', $selectedRegulationId)
+            : $regulations->first();
+
+        $objectives = MstObjective::with(['cobitMappings', 'practices' => function($q) {
+            $q->orderBy('practice_id', 'asc');
+        }])
+            ->where('regulation_id', $selectedRegulation?->id)
+            ->orderByRaw("
+                CASE
+                    WHEN objective_id LIKE 'EDM%' THEN 1
+                    WHEN objective_id LIKE 'APO%' THEN 2
+                    WHEN objective_id LIKE 'BAI%' THEN 3
+                    WHEN objective_id LIKE 'DSS%' THEN 4
+                    WHEN objective_id LIKE 'MEA%' THEN 5
+                    ELSE 6
+                END ASC
+            ")
+            ->orderBy('objective_id', 'asc')
+            ->get();
+
+        return Inertia::render('Policy/Guidance/Specific/Analysis', [
+            'objectives' => $objectives,
+            'regulations' => $regulations,
+            'selectedRegulationId' => $selectedRegulation?->id,
+        ]);
+    }
+
+    /**
      * Display the specific policy management CRUD view.
      */
     public function manage(Request $request): Response

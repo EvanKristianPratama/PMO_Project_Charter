@@ -370,6 +370,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
         Route::get('/specific/create', [PolicyController::class, 'createObjective'])->name('specific.create');
         Route::get('/specific/{objective}/edit', [PolicyController::class, 'editObjective'])->name('specific.edit');
         Route::get('/specific/mapping-all', [PolicyController::class, 'mappingCobit'])->name('specific.mapping');
+        Route::get('/specific/mapping-analysis', [PolicyController::class, 'mappingCobitAnalysis'])->name('specific.mapping.analysis');
         Route::post('/objective', [PolicyController::class, 'storeObjective'])->name('objective.store');
         Route::put('/objective/{objective}', [PolicyController::class, 'updateObjective'])->name('objective.update');
         Route::delete('/objective/{objective}', [PolicyController::class, 'destroyObjective'])->name('objective.destroy');
