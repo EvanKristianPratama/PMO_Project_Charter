@@ -37,6 +37,29 @@ class RegulationController extends Controller
     }
 
 
+    /**
+     * Display Surat Keputusan regulations.
+     */
+    public function skIndex(): Response
+    {
+        $regulations = MstRegulation::with(['organization.groub.company', 'parent', 'revokedRegulations', 'relatedRegulations', 'company.company'])
+            ->withCount(['generalPolicies'])
+            ->where('tipe', 'Surat Keputusan')
+            ->orderBy('id', 'asc')
+            ->get();
+        $organizations = TrsOrganization::all();
+        $companies = MstCompany::orderBy('name')->get();
+        $bods = MstBod::orderBy('order')->orderBy('name')->get();
+
+        return Inertia::render('Policy/SK/Index', [
+            'regulations' => $regulations,
+            'organizations' => $organizations,
+            'companies' => $companies,
+            'bods' => $bods,
+        ]);
+    }
+
+
 
     /**
      * Store a newly created regulation.

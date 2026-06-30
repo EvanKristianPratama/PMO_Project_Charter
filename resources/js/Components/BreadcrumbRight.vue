@@ -7,361 +7,94 @@ const { navItems } = useNavigation();
 const page = usePage();
 const currentUrl = computed(() => page.url || "");
 
-const architectureItem = computed(() => {
-    return (
-        navItems.value.find((item) => item.label === "Business Process") ?? null
+const sectionLabels = [
+    "Business Process",
+    "Organization",
+    "Operating Model",
+    "Regulation",
+    "RACI Analysis",
+    "DMS",
+    "Admin",
+];
+
+const sections = computed(() => {
+    return sectionLabels
+        .map(
+            (label) =>
+                navItems.value.find((item) => item.label === label) ?? null,
+        )
+        .filter(Boolean)
+        .map((item) => {
+            const children = item.children || [];
+            const isActive =
+                typeof item.active === "function"
+                    ? item.active(currentUrl.value)
+                    : false;
+            const hasActiveChild = children.some((child) =>
+                typeof child.active === "function"
+                    ? child.active(currentUrl.value)
+                    : false,
+            );
+
+            return {
+                ...item,
+                children,
+                isActive,
+                showChildren: isActive || hasActiveChild,
+            };
+        });
+});
+
+const sectionsWithChildren = computed(() => {
+    return sections.value.filter(
+        (section) => section.children.length > 0 && section.showChildren,
     );
 });
-
-const architectureChildren = computed(() => {
-    return architectureItem.value?.children || [];
-});
-
-const showArchitectureChildren = computed(() => {
-    if (architectureItem.value?.active(currentUrl.value)) {
-        return true;
-    }
-
-    return architectureChildren.value.some((item) =>
-        item.active(currentUrl.value),
-    );
-});
-
-const organizationItem = computed(() => {
-    return navItems.value.find((item) => item.label === "Organization") ?? null;
-});
-
-const organizationChildren = computed(() => {
-    return organizationItem.value?.children || [];
-});
-
-const showOrganizationChildren = computed(() => {
-    if (organizationItem.value?.active(currentUrl.value)) {
-        return true;
-    }
-
-    return organizationChildren.value.some((item) =>
-        item.active(currentUrl.value),
-    );
-});
-
-const policyItem = computed(() => {
-    return navItems.value.find((item) => item.label === "Regulation") ?? null;
-});
-
-const operatingModelItem = computed(() => {
-    return (
-        navItems.value.find((item) => item.label === "Operating Model") ?? null
-    );
-});
-
-const isOperatingModelActive = computed(() => {
-    return operatingModelItem.value?.active(currentUrl.value) || false;
-});
-
-const operatingModelChildren = computed(() => {
-    return operatingModelItem.value?.children || [];
-});
-
-const showOperatingModelChildren = computed(() => {
-    if (isOperatingModelActive.value) {
-        return true;
-    }
-
-    return operatingModelChildren.value.some((item) =>
-        item.active(currentUrl.value),
-    );
-});
-
-const raciAnalysisItem = computed(() => {
-    return (
-        navItems.value.find((item) => item.label === "RACI Analysis") ?? null
-    );
-});
-
-const policyChildren = computed(() => {
-    return (policyItem.value?.children || []).filter(
-        (item) => !item.label?.startsWith("Bab "),
-    );
-});
-
-const isPolicyActive = computed(() => {
-    return policyItem.value?.active(currentUrl.value) || false;
-});
-
-const showPolicyChildren = computed(() => {
-    if (isPolicyActive.value) {
-        return true;
-    }
-
-    return policyChildren.value.some((item) => item.active(currentUrl.value));
-});
-
-const isRaciAnalysisActive = computed(() => {
-    return raciAnalysisItem.value?.active(currentUrl.value) || false;
-});
-
-const raciAnalysisChildren = computed(() => {
-    return raciAnalysisItem.value?.children || [];
-});
-
-const showRaciAnalysisChildren = computed(() => {
-    if (isRaciAnalysisActive.value) {
-        return true;
-    }
-
-    return raciAnalysisChildren.value.some((item) =>
-        item.active(currentUrl.value),
-    );
-});
-
-// adminItem removed
 </script>
 
 <template>
     <div class="inline-flex flex-col gap-1.5">
         <div class="inline-flex flex-wrap items-center gap-0.5">
-            <!-- Architecture Link -->
-            <Link
-                v-if="architectureItem"
-                :href="architectureItem.href"
-                class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
-                :class="[
-                    showArchitectureChildren
-                        ? 'bg-indigo-500 text-white shadow-sm'
-                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
-                ]"
-            >
-                <component
-                    :is="architectureItem.icon"
-                    v-if="architectureItem.icon"
-                    class="h-3.5 w-3.5 shrink-0"
-                />
-                <span>{{ architectureItem.label }}</span>
-            </Link>
+            <template v-for="(section, index) in sections" :key="section.label">
+                <span
+                    v-if="index > 0"
+                    class="select-none px-0.5 text-indigo-200 dark:text-indigo-900"
+                >
+                    &middot;
+                </span>
 
-            <!-- Separation Dot -->
-            <span
-                v-if="organizationItem"
-                class="select-none px-0.5 text-indigo-200 dark:text-indigo-900"
-            >
-                &middot;
-            </span>
-
-            <!-- Organization Link -->
-            <Link
-                v-if="organizationItem"
-                :href="organizationItem.href"
-                class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
-                :class="[
-                    showOrganizationChildren
-                        ? 'bg-indigo-500 text-white shadow-sm'
-                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
-                ]"
-            >
-                <component
-                    :is="organizationItem.icon"
-                    v-if="organizationItem.icon"
-                    class="h-3.5 w-3.5 shrink-0"
-                />
-                <span>{{ organizationItem.label }}</span>
-            </Link>
-
-            <!-- Separation Dot -->
-            <span
-                v-if="operatingModelItem"
-                class="select-none px-0.5 text-indigo-200 dark:text-indigo-900"
-            >
-                &middot;
-            </span>
-
-            <!-- Operating Model Link -->
-            <Link
-                v-if="operatingModelItem"
-                :href="operatingModelItem.href"
-                class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
-                :class="[
-                    isOperatingModelActive
-                        ? 'bg-indigo-500 text-white shadow-sm'
-                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
-                ]"
-            >
-                <component
-                    :is="operatingModelItem.icon"
-                    v-if="operatingModelItem.icon"
-                    class="h-3.5 w-3.5 shrink-0"
-                />
-                <span>{{ operatingModelItem.label }}</span>
-            </Link>
-
-            <!-- Separation Dot -->
-            <span
-                v-if="policyItem"
-                class="select-none px-0.5 text-indigo-200 dark:text-indigo-900"
-            >
-                &middot;
-            </span>
-
-            <!-- Regulation Link -->
-            <Link
-                v-if="policyItem"
-                :href="policyItem.href"
-                class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
-                :class="[
-                    isPolicyActive
-                        ? 'bg-indigo-500 text-white shadow-sm'
-                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
-                ]"
-            >
-                <component
-                    :is="policyItem.icon"
-                    v-if="policyItem.icon"
-                    class="h-3.5 w-3.5 shrink-0"
-                />
-                <span>{{ policyItem.label }}</span>
-            </Link>
-
-            <!-- Separation Dot -->
-            <span
-                v-if="raciAnalysisItem"
-                class="select-none px-0.5 text-indigo-200 dark:text-indigo-900"
-            >
-                &middot;
-            </span>
-
-            <!-- Raci Analysis Link -->
-            <Link
-                v-if="raciAnalysisItem"
-                :href="raciAnalysisItem.href"
-                class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
-                :class="[
-                    isRaciAnalysisActive
-                        ? 'bg-indigo-500 text-white shadow-sm'
-                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
-                ]"
-            >
-                <component
-                    :is="raciAnalysisItem.icon"
-                    v-if="raciAnalysisItem.icon"
-                    class="h-3.5 w-3.5 shrink-0"
-                />
-                <span>{{ raciAnalysisItem.label }}</span>
-            </Link>
+                <Link
+                    :href="section.href"
+                    class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium transition-all duration-150"
+                    :class="[
+                        section.showChildren || section.isActive
+                            ? 'bg-indigo-500 text-white shadow-sm'
+                            : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
+                    ]"
+                >
+                    <component
+                        :is="section.icon"
+                        v-if="section.icon"
+                        class="h-3.5 w-3.5 shrink-0"
+                    />
+                    <span>{{ section.label }}</span>
+                </Link>
+            </template>
         </div>
 
-        <!-- Architecture Sub-menus -->
         <div
-            v-if="showArchitectureChildren"
+            v-for="section in sectionsWithChildren"
+            :key="`submenu-${section.label}`"
             class="ml-2 inline-flex flex-wrap items-center gap-1"
         >
             <Link
-                v-for="item in architectureChildren"
-                :key="'right-child-' + item.label"
+                v-for="item in section.children"
+                :key="`${section.label}-${item.label}`"
                 :href="item.href"
                 class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all duration-150"
                 :class="[
                     item.active(currentUrl.value)
-                        ? 'bg-indigo-500 text-white shadow-sm'
-                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
-                ]"
-            >
-                <component
-                    :is="item.icon"
-                    v-if="item.icon"
-                    class="h-3.5 w-3.5 shrink-0"
-                />
-                <span>{{ item.label }}</span>
-            </Link>
-        </div>
-
-        <!-- Organization Sub-menus -->
-        <div
-            v-if="showOrganizationChildren"
-            class="ml-2 inline-flex flex-wrap items-center gap-1"
-        >
-            <Link
-                v-for="item in organizationChildren"
-                :key="'org-child-' + item.label"
-                :href="item.href"
-                class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all duration-150"
-                :class="[
-                    item.active(currentUrl.value)
-                        ? 'bg-indigo-500 text-white shadow-sm'
-                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
-                ]"
-            >
-                <component
-                    :is="item.icon"
-                    v-if="item.icon"
-                    class="h-3.5 w-3.5 shrink-0"
-                />
-                <span>{{ item.label }}</span>
-            </Link>
-        </div>
-
-        <!-- Operating Model Sub-menus -->
-        <div
-            v-if="showOperatingModelChildren"
-            class="ml-2 inline-flex flex-wrap items-center gap-1"
-        >
-            <Link
-                v-for="item in operatingModelChildren"
-                :key="'opmodel-child-' + item.label"
-                :href="item.href"
-                class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all duration-150"
-                :class="[
-                    item.active(currentUrl.value)
-                        ? 'bg-indigo-500 text-white shadow-sm'
-                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
-                ]"
-            >
-                <component
-                    :is="item.icon"
-                    v-if="item.icon"
-                    class="h-3.5 w-3.5 shrink-0"
-                />
-                <span>{{ item.label }}</span>
-            </Link>
-        </div>
-
-        <!-- Regulation Sub-menus -->
-        <div
-            v-if="showPolicyChildren"
-            class="ml-2 inline-flex flex-wrap items-center gap-1"
-        >
-            <Link
-                v-for="item in policyChildren"
-                :key="'policy-child-' + item.label"
-                :href="item.href"
-                class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all duration-150"
-                :class="[
-                    item.active(currentUrl.value)
-                        ? 'bg-indigo-500 text-white shadow-sm'
-                        : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
-                ]"
-            >
-                <component
-                    :is="item.icon"
-                    v-if="item.icon"
-                    class="h-3.5 w-3.5 shrink-0"
-                />
-                <span>{{ item.label }}</span>
-            </Link>
-        </div>
-
-        <!-- Raci Analysis Sub-menus -->
-        <div
-            v-if="showRaciAnalysisChildren"
-            class="ml-2 inline-flex flex-wrap items-center gap-1"
-        >
-            <Link
-                v-for="item in raciAnalysisChildren"
-                :key="'raci-child-' + item.label"
-                :href="item.href"
-                class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all duration-150"
-                :class="[
-                    item.active(currentUrl.value)
-                        ? 'bg-indigo-500 text-white shadow-sm'
+                        ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300'
                         : 'text-indigo-500 hover:bg-indigo-100 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-200',
                 ]"
             >

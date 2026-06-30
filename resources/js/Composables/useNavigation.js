@@ -436,6 +436,12 @@ export function useNavigation() {
                             (url || "").startsWith("/policy/regulation"),
                     },
                     {
+                        label: "SK",
+                        href: safeRoute("policy.sk.index"),
+                        icon: DocumentTextIcon,
+                        active: (url) => (url || "").startsWith("/policy/sk"),
+                    },
+                    {
                         label: "CMS",
                         href: safeRoute("policy.CMS.index"),
                         icon: FolderIcon,
@@ -459,7 +465,14 @@ export function useNavigation() {
                         label: "RACI",
                         href: safeRoute("policy.raci.index"),
                         icon: DocumentTextIcon,
-                        active: (url) => (url || "").startsWith("/raci/index"),
+                        active: (url) => {
+                            const current = url || "";
+                            return (
+                                current === "/raci" ||
+                                current.startsWith("/raci?") ||
+                                current.startsWith("/raci/manage")
+                            );
+                        },
                     },
                     {
                         label: "COBIT 2019 Information Flow",

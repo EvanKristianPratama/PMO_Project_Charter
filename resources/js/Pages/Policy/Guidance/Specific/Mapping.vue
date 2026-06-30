@@ -97,6 +97,14 @@
                                 Mode Edit/Kelola
                             </div>
                         </button>
+                        <div class="w-px bg-slate-200 dark:bg-white/10 mx-1"></div>
+                        <Link 
+                            :href="route('policy.specific.mapping.analysis', { regulation_id: selectedRegulationId })" 
+                            class="text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/10 px-4 py-1.5 rounded-md text-xs transition-all flex items-center gap-2"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
+                            Analisis Peran (A)
+                        </Link>
                     </div>
                 </div>
 
@@ -105,8 +113,9 @@
                     <table class="w-full text-left border-collapse border border-slate-300">
                         <thead>
                             <tr class="bg-slate-200 dark:bg-white/10 text-center">
-                                <th class="border border-slate-300 dark:border-white/20 p-3 font-bold w-1/2 uppercase text-[13px] text-slate-800 dark:text-slate-100">Kebijakan Khusus</th>
-                                <th class="border border-slate-300 dark:border-white/20 p-3 font-bold w-1/2 uppercase text-[13px] text-slate-800 dark:text-slate-100">GAMO COBIT 2019</th>
+                                <th class="border border-slate-300 dark:border-white/20 p-3 font-bold w-[35%] uppercase text-[13px] text-slate-800 dark:text-slate-100">Kebijakan Khusus</th>
+                                <th class="border border-slate-300 dark:border-white/20 p-3 font-bold w-[40%] uppercase text-[13px] text-slate-800 dark:text-slate-100">GAMO COBIT 2019</th>
+                                <th class="border border-slate-300 dark:border-white/20 p-3 font-bold w-[25%] uppercase text-[13px] text-slate-800 dark:text-slate-100">Penanggung Jawab (A)</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -116,7 +125,7 @@
                                     <td class="border border-slate-300 dark:border-white/20 p-3 text-slate-900 dark:text-white text-[13px]">
                                         {{ group.metadata.letter }}. {{ group.domain }}
                                     </td>
-                                    <td class="border border-slate-300 dark:border-white/20 p-3 text-slate-900 dark:text-white text-[13px]">
+                                    <td colspan="2" class="border border-slate-300 dark:border-white/20 p-3 text-slate-900 dark:text-white text-[13px]">
                                         {{ group.metadata.cobitName }}
                                     </td>
                                 </tr>
@@ -147,10 +156,10 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="border border-slate-300 dark:border-white/20 p-3 text-slate-700 dark:text-slate-300 align-top text-[13px]">
+                                    <td colspan="2" class="border border-slate-300 dark:border-white/20 p-0 text-slate-700 dark:text-slate-300 align-top text-[13px]">
                                         <div v-if="obj.cobit_mappings && obj.cobit_mappings.length > 0">
-                                            <div v-for="(map, mIdx) in obj.cobit_mappings" :key="map.id" :class="{'mt-2 pt-2 border-t border-slate-200 dark:border-white/10': mIdx > 0}">
-                                                <div class="flex items-start justify-between group cursor-pointer transition-colors hover:text-[#152c5b] dark:hover:text-blue-400" @click="toggleRow(obj.objective_id)">
+                                            <div v-for="(map, mIdx) in obj.cobit_mappings" :key="map.id" :class="{'border-t border-slate-300 dark:border-white/20': mIdx > 0}">
+                                                <div class="p-3 flex items-start justify-between group cursor-pointer transition-colors hover:text-[#152c5b] dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-white/5" @click="toggleRow(obj.objective_id)">
                                                     <div>
                                                         <span class="font-semibold">{{ map.cobit_objective }}</span>
                                                         <span v-if="getCobitName(map.cobit_objective)">
@@ -168,20 +177,38 @@
                                                 </div>
                                                 
                                                 <!-- Expanded Practices -->
-                                                <div v-show="expandedRows.includes(obj.objective_id)" class="mt-2.5 pl-3 border-l-2 border-[#152c5b]/30 dark:border-blue-500/30">
+                                                <div v-show="expandedRows.includes(obj.objective_id)" class="mt-2.5 pb-3">
                                                     <div v-if="parseCobitJson(map.description) && parseCobitJson(map.description).practices && parseCobitJson(map.description).practices.length > 0" class="space-y-2">
-                                                        <div v-for="prac in parseCobitJson(map.description).practices" :key="prac.id" class="text-[12px] text-slate-600 dark:text-slate-400 leading-tight">
-                                                            <span class="font-bold text-[#152c5b] dark:text-blue-400 font-mono text-[11px] bg-slate-100 dark:bg-white/5 px-1 py-0.5 rounded">{{ prac.id }}</span>
-                                                            <span class="ml-1.5">{{ prac.name }}</span>
+                                                        <div v-for="prac in parseCobitJson(map.description).practices" :key="prac.id" class="flex items-start">
+                                                            <div class="w-[61.5%] pl-3 pr-2 border-r border-slate-200 dark:border-white/10 text-[12px] text-slate-600 dark:text-slate-400 leading-tight flex items-start gap-1.5">
+                                                                <span class="font-bold text-[#152c5b] dark:text-blue-400 font-mono text-[11px] bg-slate-100 dark:bg-white/5 px-1 py-0.5 rounded shrink-0">{{ prac.id }}</span>
+                                                                <span>{{ prac.name }}</span>
+                                                            </div>
+                                                            <div class="w-[38.5%] pl-3 text-[12px] text-slate-600 dark:text-slate-400">
+                                                                <template v-if="isFetchingRolesCache">
+                                                                    <div class="flex items-center text-[10px] text-slate-400 italic">
+                                                                        <span class="inline-block w-3 h-3 border-2 border-slate-300 border-t-transparent rounded-full animate-spin mr-1"></span> Memuat...
+                                                                    </div>
+                                                                </template>
+                                                                <template v-else-if="getAccountableRoles(map.cobit_objective, prac.id).length > 0">
+                                                                    <div class="flex flex-wrap gap-1.5">
+                                                                        <div v-for="roleName in getAccountableRoles(map.cobit_objective, prac.id)" :key="roleName" class="flex items-center gap-1">
+                                                                            <span class="shrink-0 font-bold text-[#152c5b] dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-1 py-0.5 rounded border border-blue-100 dark:border-blue-800 text-[10px]">A</span>
+                                                                            <span class="leading-tight">{{ roleName }}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </template>
+                                                                <span v-else class="text-slate-400 italic text-[11px]">-</span>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div v-else class="text-[11px] text-slate-400 italic">
-                                                        Tidak ada Butir Kebijakan (Practice) dari COBIT
+                                                    <div v-else class="pl-3 text-[11px] text-slate-400 italic">
+                                                        Tidak ada Butir Kebijakan (Practice)
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div v-else class="text-slate-400 text-[11px] italic">
+                                        <div v-else class="p-3 text-slate-400 text-[11px] italic">
                                             -
                                         </div>
                                     </td>
@@ -895,8 +922,75 @@ const parseCobitJson = (jsonStr) => {
 };
 
 const cobitObjectivesList = ref([]);
+const rolesMatrixCache = ref({});
+const isFetchingRolesCache = ref(false);
+
+const getAccountableRoles = (cobitObjId, practiceId) => {
+    const data = rolesMatrixCache.value[cobitObjId];
+    if (!data || !data.matrix || !data.roles) return [];
+    const matrixItem = data.matrix.find(m => String(m.practice_id).replace(/"/g, '') === practiceId);
+    if (!matrixItem || !matrixItem.role_assignments) return [];
+    
+    const accountableRoles = [];
+    Object.entries(matrixItem.role_assignments).forEach(([roleId, raci]) => {
+        if (raci === 'A' || raci === 'a') {
+            const role = data.roles.find(r => String(r.role_id) === String(roleId));
+            if (role && role.role_name) {
+                accountableRoles.push(String(role.role_name).replace(/"/g, ''));
+            }
+        }
+    });
+    return accountableRoles;
+};
 
 const viewMode = ref('table');
+
+const fetchRolesForTable = async () => {
+    if (isFetchingRolesCache.value) return;
+    isFetchingRolesCache.value = true;
+    
+    const uniqueCobitObjectives = new Set();
+    if (props.objectives) {
+        props.objectives.forEach(obj => {
+            if (obj.cobit_mappings) {
+                obj.cobit_mappings.forEach(map => {
+                    if (map.cobit_objective) uniqueCobitObjectives.add(map.cobit_objective);
+                });
+            }
+        });
+    }
+    
+    const promises = Array.from(uniqueCobitObjectives).map(async (cobitObj) => {
+        if (!rolesMatrixCache.value[cobitObj]) {
+            try {
+                const res = await axios.get(`https://cobit2019.divusi.co.id/api/cobit/roles-matrix?objective_id=${cobitObj}`);
+                if (res.data && res.data.success && res.data.matrix && res.data.roles) {
+                    rolesMatrixCache.value[cobitObj] = {
+                        matrix: res.data.matrix,
+                        roles: res.data.roles
+                    };
+                }
+            } catch (e) {
+                console.error("Failed to fetch roles for", cobitObj);
+            }
+        }
+    });
+    
+    await Promise.all(promises);
+    isFetchingRolesCache.value = false;
+};
+
+watch(() => props.objectives, () => {
+    if (viewMode.value === 'table') {
+        fetchRolesForTable();
+    }
+}, { deep: true, immediate: true });
+
+watch(viewMode, (newVal) => {
+    if (newVal === 'table') {
+        fetchRolesForTable();
+    }
+});
 
 const expandedRows = ref([]);
 
