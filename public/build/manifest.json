@@ -1943,7 +1943,7 @@
     ]
   },
   "resources/js/Pages/modules/ITOM/BpmnWorkflow/Index.vue": {
-    "file": "assets/Index-BE8nhWtI.js",
+    "file": "assets/Index-Dag91Pvs.js",
     "name": "Index",
     "src": "resources/js/Pages/modules/ITOM/BpmnWorkflow/Index.vue",
     "isDynamicEntry": true,
@@ -2380,145 +2380,8 @@
       "assets/Index-4RH8fvI7.css"
     ]
   },
-  "resources/js/Pages/modules/ITOM/OperatingModel/RaciAnalysis/Infoflow/Index.vue": {
-    "file": "assets/Index-baY1-sDL.js",
-    "name": "Index",
-    "src": "resources/js/Pages/modules/ITOM/OperatingModel/RaciAnalysis/Infoflow/Index.vue",
-    "isDynamicEntry": true,
-    "imports": [
-      "_vendor-vue-runtime-dom-B0tfrm-i.js",
-      "_inertia-DNvC8JNR.js",
-      "_ModulLayout-BM9UgSfA.js",
-      "__plugin-vue_export-helper-DlAUqK2U.js",
-      "_vendor-vue-runtime-core-BGDWNuJN.js",
-      "_vendor-vue-reactivity-BTrCj1Uo.js",
-      "_vendor-vue-shared-BC0FtGEN.js",
-      "_vendor-qs-BENwtKv8.js",
-      "_vendor-side-channel-CObUJzLj.js",
-      "_vendor-es-errors-DRNByn_O.js",
-      "_vendor-object-inspect-B_nVp1mo.js",
-      "_vendor-side-channel-list-D-2BtmIs.js",
-      "_vendor-side-channel-map-D1fjGT6N.js",
-      "_vendor-get-intrinsic-CwVZ3Qhl.js",
-      "_vendor-es-object-atoms-BR76m4z7.js",
-      "_vendor-math-intrinsics-DP1tGiab.js",
-      "_vendor-gopd-C1lCZ5Qs.js",
-      "_vendor-es-define-property-D_7cP-M3.js",
-      "_vendor-has-symbols-BaUvM3gb.js",
-      "_vendor-get-proto-DZiXqF4q.js",
-      "_vendor-dunder-proto-5xp6kQrr.js",
-      "_vendor-call-bind-apply-helpers-R8oMH6fk.js",
-      "_vendor-function-bind-CHqF18-c.js",
-      "_vendor-hasown-CH2RbkDu.js",
-      "_vendor-call-bound-BGkfP8QT.js",
-      "_vendor-side-channel-weakmap-yC90O2LV.js",
-      "_vendor-axios-KcFgf-gG.js",
-      "_vendor-lodash-es-Bc66MGl4.js",
-      "_vendor-laravel-precognition-CApEZYE-.js",
-      "_useDarkMode-yNbHwfc0.js",
-      "_useRouteHelper-DPf4JdEH.js",
-      "_BreadcrumbRight-N-W5d6ko.js",
-      "_heroicons-Bp_OQBx2.js",
-      "_headlessui-BY7XwMWI.js"
-    ],
-    "css": [
-      "assets/Index-hJgEAw25.css"
-    ]
-  },
-  "resources/js/Pages/modules/ITOM/OperatingModel/RaciAnalysis/ItspInfoflow/Index.vue": {
-    "file": "assets/Index-Cx_w-EDL.js",
-    "name": "Index",
-    "src": "resources/js/Pages/modules/ITOM/OperatingModel/RaciAnalysis/ItspInfoflow/Index.vue",
-    "isDynamicEntry": true,
-    "imports": [
-      "_vendor-vue-runtime-dom-B0tfrm-i.js",
-      "_inertia-DNvC8JNR.js",
-      "_sweetalert2-DVN6D7eS.js",
-      "_ModulLayout-BM9UgSfA.js",
-      "__plugin-vue_export-helper-DlAUqK2U.js",
-      "_vendor-vue-runtime-core-BGDWNuJN.js",
-      "_vendor-vue-reactivity-BTrCj1Uo.js",
-      "_vendor-vue-shared-BC0FtGEN.js",
-      "_vendor-qs-BENwtKv8.js",
-      "_vendor-side-channel-CObUJzLj.js",
-      "_vendor-es-errors-DRNByn_O.js",
-      "_vendor-object-inspect-B_nVp1mo.js",
-      "_vendor-side-channel-list-D-2BtmIs.js",
-      "_vendor-side-channel-map-D1fjGT6N.js",
-      "_vendor-get-intrinsic-CwVZ3Qhl.js",
-      "_vendor-es-object-atoms-BR76m4z7.js",
-      "_vendor-math-intrinsics-DP1tGiab.js",
-      "_vendor-gopd-C1lCZ5Qs.js",
-      "_vendor-es-define-property-D_7cP-M3.js",
-      "_vendor-has-symbols-BaUvM3gb.js",
-      "_vendor-get-proto-DZiXqF4q.js",
-      "_vendor-dunder-proto-5xp6kQrr.js",
-      "_vendor-call-bind-apply-helpers-R8oMH6fk.js",
-      "_vendor-function-bind-CHqF18-c.js",
-      "_vendor-hasown-CH2RbkDu.js",
-      "_vendor-call-bound-BGkfP8QT.js",
-      "_vendor-side-channel-weakmap-yC90O2LV.js",
-      "_vendor-axios-KcFgf-gG.js",
-      "_vendor-lodash-es-Bc66MGl4.js",
-      "_vendor-laravel-precognition-CApEZYE-.js",
-      "_useDarkMode-yNbHwfc0.js",
-      "_useRouteHelper-DPf4JdEH.js",
-      "_BreadcrumbRight-N-W5d6ko.js",
-      "_heroicons-Bp_OQBx2.js",
-      "_headlessui-BY7XwMWI.js"
-    ],
-    "css": [
-      "assets/Index-DTsvr02k.css"
-    ]
-  },
-  "resources/js/Pages/modules/ITOM/OperatingModel/RaciAnalysis/ItspInfoflow/Manage.vue": {
-    "file": "assets/Manage-CXCIjCcb.js",
-    "name": "Manage",
-    "src": "resources/js/Pages/modules/ITOM/OperatingModel/RaciAnalysis/ItspInfoflow/Manage.vue",
-    "isDynamicEntry": true,
-    "imports": [
-      "_vendor-vue-runtime-dom-B0tfrm-i.js",
-      "_inertia-DNvC8JNR.js",
-      "_ModulLayout-BM9UgSfA.js",
-      "_sweetalert2-DVN6D7eS.js",
-      "__plugin-vue_export-helper-DlAUqK2U.js",
-      "_vendor-vue-runtime-core-BGDWNuJN.js",
-      "_vendor-vue-reactivity-BTrCj1Uo.js",
-      "_vendor-vue-shared-BC0FtGEN.js",
-      "_vendor-qs-BENwtKv8.js",
-      "_vendor-side-channel-CObUJzLj.js",
-      "_vendor-es-errors-DRNByn_O.js",
-      "_vendor-object-inspect-B_nVp1mo.js",
-      "_vendor-side-channel-list-D-2BtmIs.js",
-      "_vendor-side-channel-map-D1fjGT6N.js",
-      "_vendor-get-intrinsic-CwVZ3Qhl.js",
-      "_vendor-es-object-atoms-BR76m4z7.js",
-      "_vendor-math-intrinsics-DP1tGiab.js",
-      "_vendor-gopd-C1lCZ5Qs.js",
-      "_vendor-es-define-property-D_7cP-M3.js",
-      "_vendor-has-symbols-BaUvM3gb.js",
-      "_vendor-get-proto-DZiXqF4q.js",
-      "_vendor-dunder-proto-5xp6kQrr.js",
-      "_vendor-call-bind-apply-helpers-R8oMH6fk.js",
-      "_vendor-function-bind-CHqF18-c.js",
-      "_vendor-hasown-CH2RbkDu.js",
-      "_vendor-call-bound-BGkfP8QT.js",
-      "_vendor-side-channel-weakmap-yC90O2LV.js",
-      "_vendor-axios-KcFgf-gG.js",
-      "_vendor-lodash-es-Bc66MGl4.js",
-      "_vendor-laravel-precognition-CApEZYE-.js",
-      "_useDarkMode-yNbHwfc0.js",
-      "_useRouteHelper-DPf4JdEH.js",
-      "_BreadcrumbRight-N-W5d6ko.js",
-      "_heroicons-Bp_OQBx2.js",
-      "_headlessui-BY7XwMWI.js"
-    ],
-    "css": [
-      "assets/Manage-B6dCD6CF.css"
-    ]
-  },
   "resources/js/Pages/modules/ITOM/OperatingModel/RaciAnalysis/Manage.vue": {
-    "file": "assets/Manage-Dw_RZFJ1.js",
+    "file": "assets/Manage-BQeiScls.js",
     "name": "Manage",
     "src": "resources/js/Pages/modules/ITOM/OperatingModel/RaciAnalysis/Manage.vue",
     "isDynamicEntry": true,
@@ -2559,11 +2422,11 @@
       "_headlessui-BY7XwMWI.js"
     ],
     "css": [
-      "assets/Manage-G6XZeEGj.css"
+      "assets/Manage-EnExP-Bf.css"
     ]
   },
   "resources/js/Pages/modules/ITOM/OperatingModel/RaciAnalysis/Responsible.vue": {
-    "file": "assets/Responsible-DYAVTrIr.js",
+    "file": "assets/Responsible-D4qtXlI-.js",
     "name": "Responsible",
     "src": "resources/js/Pages/modules/ITOM/OperatingModel/RaciAnalysis/Responsible.vue",
     "isDynamicEntry": true,
@@ -2604,7 +2467,7 @@
       "_headlessui-BY7XwMWI.js"
     ],
     "css": [
-      "assets/Responsible-Da2jMveo.css"
+      "assets/Responsible-D6iYlbGy.css"
     ]
   },
   "resources/js/Pages/modules/ITOM/OrganizationStructure/Index.vue": {
@@ -2739,7 +2602,7 @@
     ]
   },
   "resources/js/Pages/modules/ITOM/Policy/CobitComponent/Index.vue": {
-    "file": "assets/Index-AQxfbS4W.js",
+    "file": "assets/Index-CGb1fnut.js",
     "name": "Index",
     "src": "resources/js/Pages/modules/ITOM/Policy/CobitComponent/Index.vue",
     "isDynamicEntry": true,
@@ -2780,7 +2643,7 @@
       "_headlessui-BY7XwMWI.js"
     ],
     "css": [
-      "assets/Index-C6H2Hb0X.css"
+      "assets/Index-COkPy2Og.css"
     ]
   },
   "resources/js/Pages/modules/ITOM/Policy/Guidance/Closing.vue": {
@@ -5428,7 +5291,7 @@
     ]
   },
   "resources/js/Pages/modules/ITSP/StrategicHouse/Index.vue": {
-    "file": "assets/Index-BN9RMaP_.js",
+    "file": "assets/Index-C6DTeC6z.js",
     "name": "Index",
     "src": "resources/js/Pages/modules/ITSP/StrategicHouse/Index.vue",
     "isDynamicEntry": true,
@@ -5895,7 +5758,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-Cf0WpXKL.js",
+    "file": "assets/app-BWqx35d_.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -5959,9 +5822,6 @@
       "resources/js/Pages/modules/ITOM/OperatingModel/ItGovernance/Index.vue",
       "resources/js/Pages/modules/ITOM/OperatingModel/ItManagement/Index.vue",
       "resources/js/Pages/modules/ITOM/OperatingModel/RaciAnalysis/Index.vue",
-      "resources/js/Pages/modules/ITOM/OperatingModel/RaciAnalysis/Infoflow/Index.vue",
-      "resources/js/Pages/modules/ITOM/OperatingModel/RaciAnalysis/ItspInfoflow/Index.vue",
-      "resources/js/Pages/modules/ITOM/OperatingModel/RaciAnalysis/ItspInfoflow/Manage.vue",
       "resources/js/Pages/modules/ITOM/OperatingModel/RaciAnalysis/Manage.vue",
       "resources/js/Pages/modules/ITOM/OperatingModel/RaciAnalysis/Responsible.vue",
       "resources/js/Pages/modules/ITOM/OrganizationStructure/Index.vue",
