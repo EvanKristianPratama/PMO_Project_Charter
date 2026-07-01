@@ -2,7 +2,7 @@
 
 namespace App\Services\Architecture;
 
-use App\Models\MstProsesBisnis;
+use Modules\ITOM\Models\MstProsesBisnis;
 
 class BusinessProcessV2Service
 {

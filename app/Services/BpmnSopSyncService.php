@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Models\BpmnWorkflow;
-use App\Models\MstActor;
-use App\Models\MstSop;
-use App\Models\TrsMapActorSop;
+use Modules\ITOM\Models\BpmnWorkflow;
+use Modules\ITOM\Models\MstActor;
+use Modules\ITOM\Models\MstSop;
+use Modules\ITOM\Models\TrsMapActorSop;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 

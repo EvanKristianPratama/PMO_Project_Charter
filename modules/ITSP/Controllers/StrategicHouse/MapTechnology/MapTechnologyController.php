@@ -3,7 +3,7 @@
 namespace Modules\ITSP\Controllers\StrategicHouse\MapTechnology;
 
 use App\Http\Controllers\Controller;
-use App\Models\TrsMapTechnology;
+use Modules\ITSP\Models\TrsMapTechnology;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 

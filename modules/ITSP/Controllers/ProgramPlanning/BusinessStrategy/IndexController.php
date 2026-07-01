@@ -3,13 +3,13 @@
 namespace Modules\ITSP\Controllers\ProgramPlanning\BusinessStrategy;
 
 use App\Http\Controllers\Controller;
-use App\Models\Goal;
+use Modules\ITSP\Models\Goal;
 use App\Models\MstBusinessStrategy;
-use App\Models\MstMisiBumn;
-use App\Models\MstPriorityStrategicInitiative;
-use App\Models\MstStrategicHouse;
-use App\Models\Theme;
-use App\Models\TrsPillarStrategy;
+use Modules\ITSP\Models\MstMisiBumn;
+use Modules\ITSP\Models\MstPriorityStrategicInitiative;
+use Modules\ITSP\Models\MstStrategicHouse;
+use Modules\ITSP\Models\Theme;
+use Modules\ITSP\Models\TrsPillarStrategy;
 use App\Services\StrategicHouse\BusinessStrategy\BusinessStrategyService;
 use Inertia\Inertia;
 

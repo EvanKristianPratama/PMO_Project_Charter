@@ -13,10 +13,10 @@ use Inertia\Response;
 
 use App\Models\MstCompany;
 use App\Models\MstBod;
-use App\Models\MstSkOrganization;
-use App\Models\MstFunctionalOrganization;
-use App\Models\TrsFunctionalOrganization;
-use App\Models\TrsFunctionalStructure;
+use Modules\ITOM\Models\MstSkOrganization;
+use Modules\ITOM\Models\MstFunctionalOrganization;
+use Modules\ITOM\Models\TrsFunctionalOrganization;
+use Modules\ITOM\Models\TrsFunctionalStructure;
 use App\Models\MstFunction;
 
 class OrganizationController extends Controller
@@ -432,7 +432,7 @@ class OrganizationController extends Controller
                 'organization_id' => 'required|integer|exists:mst_function,id',
             ]);
 
-            \App\Models\TrsFunctionalFunction::firstOrCreate([
+            \Modules\ITOM\Models\TrsFunctionalFunction::firstOrCreate([
                 'functional_id' => $validated['functional_id'],
                 'function_id' => $validated['organization_id'],
             ]);
@@ -469,7 +469,7 @@ class OrganizationController extends Controller
                 'organization_id' => 'required|integer',
             ]);
 
-            \App\Models\TrsFunctionalFunction::where('functional_id', $validated['functional_id'])
+            \Modules\ITOM\Models\TrsFunctionalFunction::where('functional_id', $validated['functional_id'])
                 ->where('function_id', $validated['organization_id'])
                 ->delete();
 

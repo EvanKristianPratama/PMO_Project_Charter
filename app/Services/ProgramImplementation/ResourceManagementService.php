@@ -2,7 +2,7 @@
 
 namespace App\Services\ProgramImplementation;
 
-use App\Models\TrsProject;
+use Modules\ITSP\Models\TrsProject;
 
 class ResourceManagementService
 {

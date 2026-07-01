@@ -4,8 +4,8 @@ namespace Modules\ITSP\Controllers\ProgramEvaluation;
 
 use App\Http\Controllers\Controller;
 use App\Models\MstInitiative;
-use App\Models\TrsReviewPCStatusImplementation;
-use App\Models\TrsProject;
+use Modules\ITSP\Models\TrsReviewPcStatusImplementation;
+use Modules\ITSP\Models\TrsProject;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Response;
@@ -128,7 +128,7 @@ class ReviewTimelineController extends Controller
     {
         $payload = $this->validateReviewStatusPayload($request);
 
-        TrsReviewPCStatusImplementation::query()->create([
+        TrsReviewPcStatusImplementation::query()->create([
             'project_id' => $project->id,
             'start' => $payload['start'],
             'end' => $payload['end'] ?? null,
@@ -144,7 +144,7 @@ class ReviewTimelineController extends Controller
     {
         $payload = $this->validateReviewStatusPayload($request);
 
-        $statusImplementation = TrsReviewPCStatusImplementation::query()->findOrFail($statusId);
+        $statusImplementation = TrsReviewPcStatusImplementation::query()->findOrFail($statusId);
         $statusImplementation->update([
             'start' => $payload['start'],
             'end' => $payload['end'] ?? null,

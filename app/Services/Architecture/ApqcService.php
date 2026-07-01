@@ -2,7 +2,7 @@
 
 namespace App\Services\Architecture;
 
-use App\Models\MstApqc;
+use Modules\ITOM\Models\MstApqc;
 
 class ApqcService
 {

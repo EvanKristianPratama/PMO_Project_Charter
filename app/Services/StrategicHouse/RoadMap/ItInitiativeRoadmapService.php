@@ -2,7 +2,7 @@
 
 namespace App\Services\StrategicHouse\RoadMap;
 
-use App\Models\Milestone;
+use Modules\ITSP\Models\Milestone;
 use App\Models\MstInitiative;
 use Illuminate\Support\Facades\Cache;
 

@@ -3,14 +3,14 @@
 namespace App\Services\ProgramImplementation\ProjectCharter\ITInitiatives;
 
 use App\Models\MstInitiative;
-use App\Models\TrsPcStatusImplementation;
+use Modules\ITSP\Models\TrsPcStatusImplementation;
 use App\Models\ProjectStatusHistory;
-use App\Models\TrsProject;
+use Modules\ITSP\Models\TrsProject;
 use App\Services\ProgramImplementation\ProjectCharter\ProjectCharterStatusService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-use App\Models\TrsReviewPC;
+use Modules\ITSP\Models\TrsReviewPc;
 
 class ITInitiativeService
 {
@@ -102,7 +102,7 @@ class ITInitiativeService
 
         $initiativeIds = $project->mappedInitiatives->pluck('id');
 
-        $review = TrsReviewPC::query()
+        $review = TrsReviewPc::query()
             ->whereIn('initiative_id', $initiativeIds)
             ->latest('id')
             ->first();

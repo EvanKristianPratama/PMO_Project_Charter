@@ -4,8 +4,8 @@ namespace Modules\ITSP\Controllers\ProgramEvaluation;
 
 use App\Http\Controllers\Controller;
 use App\Models\MstInitiative;
-use App\Models\TrsProject;
-use App\Models\TrsReviewPC;
+use Modules\ITSP\Models\TrsProject;
+use Modules\ITSP\Models\TrsReviewPc;
 use App\Models\TrsOrganization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,12 +18,12 @@ class TrsReviewPCController extends Controller
      */
     public function index()
     {
-        $latestReviewsByInitiative = TrsReviewPC::query()
+        $latestReviewsByInitiative = TrsReviewPc::query()
             ->select(['id', 'initiative_id', 'month', 'year', 'kesimpulan'])
             ->orderByDesc('id')
             ->get()
             ->unique('initiative_id')
-            ->keyBy(static fn (TrsReviewPC $review) => (int) $review->initiative_id);
+            ->keyBy(static fn (TrsReviewPc $review) => (int) $review->initiative_id);
 
         $trsReviewPCs = MstInitiative::query()
             ->select(['id', 'code', 'name', 'description', 'status', 'tipe_initiative', 'coe_id'])
@@ -157,7 +157,7 @@ class TrsReviewPCController extends Controller
             'risk_impact' => 'nullable|string',
         ]);
 
-        $trsReviewPC = TrsReviewPC::create($validated);
+        $trsReviewPC = TrsReviewPc::create($validated);
 
         return redirect()->route('itsp.program-evaluation.show', $trsReviewPC->id)->with('success', 'Review PC berhasil ditambahkan.');
     }
@@ -165,7 +165,7 @@ class TrsReviewPCController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(TrsReviewPC $trsReviewPC)
+    public function show(TrsReviewPc $trsReviewPC)
     {
         $trsReviewPC->load([
             'initiative' => fn ($query) => $query
@@ -199,7 +199,7 @@ class TrsReviewPCController extends Controller
             $initiative->setAttribute('it_building_block', $itBuildingBlock);
         }
 
-        $initiativeReviews = TrsReviewPC::query()
+        $initiativeReviews = TrsReviewPc::query()
             ->with([
                 'initiative' => fn ($query) => $query
                     ->select(['id', 'code', 'name', 'tipe_initiative', 'coe_id'])
@@ -210,7 +210,7 @@ class TrsReviewPCController extends Controller
             ])
             ->where('initiative_id', $trsReviewPC->initiative_id)
             ->get()
-            ->map(static function (TrsReviewPC $review) {
+            ->map(static function (TrsReviewPc $review) {
                 $initiative = $review->initiative;
                 $coe = $initiative?->coe;
                 $itBuildingBlock = null;
@@ -360,7 +360,7 @@ class TrsReviewPCController extends Controller
             }
         }
 
-        $reviewOptions = TrsReviewPC::query()
+        $reviewOptions = TrsReviewPc::query()
             ->select(['id', 'initiative_id'])
             ->with([
                 'initiative' => fn ($query) => $query
@@ -369,7 +369,7 @@ class TrsReviewPCController extends Controller
             ])
             ->orderBy('id')
             ->get()
-            ->map(static fn (TrsReviewPC $item) => [
+            ->map(static fn (TrsReviewPc $item) => [
                 'id' => (int) $item->id,
                 'initiative_id' => $item->initiative_id,
                 'initiative' => $item->initiative
@@ -400,7 +400,7 @@ class TrsReviewPCController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(TrsReviewPC $trsReviewPC)
+    public function edit(TrsReviewPc $trsReviewPC)
     {
         //
     }
@@ -408,7 +408,7 @@ class TrsReviewPCController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, TrsReviewPC $trsReviewPC)
+    public function update(Request $request, TrsReviewPc $trsReviewPC)
     {
         $validated = $request->validate([
             'month' => 'nullable|string',
@@ -433,7 +433,7 @@ class TrsReviewPCController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(TrsReviewPC $trsReviewPC)
+    public function destroy(TrsReviewPc $trsReviewPC)
     {
         //
     }

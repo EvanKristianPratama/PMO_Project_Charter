@@ -4,8 +4,8 @@ namespace Modules\ITSP\Controllers\ProgramEvaluation;
 
 use App\Http\Controllers\Controller;
 use App\Models\MstInitiative;
-use App\Models\TrsPcStatusImplementation;
-use App\Models\TrsMapPicProject;
+use Modules\ITSP\Models\TrsPcStatusImplementation;
+use Modules\ITSP\Models\TrsMapPicProject;
 use App\Models\TrsOrganization;
 use Inertia\Response;
 

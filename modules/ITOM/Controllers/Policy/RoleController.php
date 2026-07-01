@@ -3,11 +3,11 @@
 namespace Modules\ITOM\Controllers\Policy;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstRole;
-use App\Models\TrsResponsibility;
-use App\Models\MstRegulation;
-use App\Models\MstResponsible;
-use App\Models\TrsResponsible;
+use Modules\ITOM\Models\MstRole;
+use Modules\ITOM\Models\TrsResponsibility;
+use Modules\ITOM\Models\MstRegulation;
+use Modules\ITOM\Models\MstResponsible;
+use Modules\ITOM\Models\TrsResponsible;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -105,7 +105,7 @@ class RoleController extends Controller
                 $query->where('regulation_id', $selectedRegulation?->id);
             }])->orderBy('responsible', 'asc')->get();
 
-            $objectives = \App\Models\MstObjective::with('practices')
+            $objectives = \Modules\ITOM\Models\MstObjective::with('practices')
                 ->where('regulation_id', $selectedRegulation?->id)
                 ->orderBy('objective_id', 'asc')
                 ->get();
@@ -454,7 +454,7 @@ class RoleController extends Controller
         }
 
         try {
-            $objective = \App\Models\MstObjective::findOrFail($objectiveId);
+            $objective = \Modules\ITOM\Models\MstObjective::findOrFail($objectiveId);
             $objective->responsibles()->sync($validated['responsible_ids']);
 
             return redirect()

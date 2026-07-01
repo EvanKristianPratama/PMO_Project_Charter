@@ -5,8 +5,8 @@ namespace App\Http\Controllers\MasterData\ProjectCharter;
 use App\Http\Controllers\Controller;
 use App\Models\InitiativeStatus;
 use App\Models\MstInitiative;
-use App\Models\TrsReviewPCStatusImplementation;
-use App\Models\TrsProject;
+use Modules\ITSP\Models\TrsReviewPcStatusImplementation;
+use Modules\ITSP\Models\TrsProject;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -96,7 +96,7 @@ class ProjectCharterController extends Controller
 
         // Auto-create initial PcStatusImplementation
         $statusModel = InitiativeStatus::find($project->status);
-        TrsReviewPCStatusImplementation::create([
+        TrsReviewPcStatusImplementation::create([
             'project_id' => $project->id,
             'review_status' => $statusData['pc_review_status'] ?? 'Not Started',
             'status' => $statusData['pc_status'] ?? ($statusModel?->name ?? ''),
@@ -137,7 +137,7 @@ class ProjectCharterController extends Controller
         // Log new PcStatusImplementation when status changes
         if ((string) $projectCharter->status !== (string) $oldStatus || ($statusData['pc_review_status'] ?? null)) {
             $statusModel = InitiativeStatus::find($projectCharter->status);
-            TrsReviewPCStatusImplementation::updateOrCreate(
+            TrsReviewPcStatusImplementation::updateOrCreate(
                 [
                     'project_id' => $projectCharter->id,
                     'date' => now()->toDateString(),

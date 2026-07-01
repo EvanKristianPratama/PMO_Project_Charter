@@ -3,7 +3,7 @@
 namespace Modules\ITSP\Controllers\ProgramEvaluation;
 
 use App\Http\Controllers\Controller;
-use App\Models\TrsReviewSc;
+use Modules\ITSP\Models\TrsReviewSc;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 

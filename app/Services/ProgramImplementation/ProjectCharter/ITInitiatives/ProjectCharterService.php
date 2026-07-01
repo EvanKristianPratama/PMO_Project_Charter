@@ -2,8 +2,8 @@
 
 namespace App\Services\ProgramImplementation\ProjectCharter\ITInitiatives;
 
-use App\Models\TrsProject;
-use App\Models\TrsProjectCharter;
+use Modules\ITSP\Models\TrsProject;
+use Modules\ITSP\Models\TrsProjectCharter;
 use Illuminate\Support\Arr;
 
 class ProjectCharterService
@@ -53,7 +53,7 @@ class ProjectCharterService
     private function syncPicMappings(TrsProjectCharter $charter, array $payload): void
     {
         // Unified mapping for Sponsor, Owner, Leader at Project level
-        \App\Models\TrsMapPicProject::updateOrCreate(
+        \Modules\ITSP\Models\TrsMapPicProject::updateOrCreate(
             ['project_id' => $charter->project_id],
             [
                 'project_sponsor' => $payload['pic_sponsor_id'] ?? null,

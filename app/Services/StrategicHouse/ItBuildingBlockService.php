@@ -4,7 +4,7 @@ namespace App\Services\StrategicHouse;
 
 use App\Models\MstCoe;
 use App\Models\MstInitiative;
-use App\Models\TrsMapItBuilding;
+use Modules\ITSP\Models\TrsMapItBuilding;
 use App\Models\TrsStatusImplementation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;

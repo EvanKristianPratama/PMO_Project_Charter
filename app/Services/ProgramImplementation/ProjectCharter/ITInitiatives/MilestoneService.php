@@ -2,8 +2,8 @@
 
 namespace App\Services\ProgramImplementation\ProjectCharter\ITInitiatives;
 
-use App\Models\Milestone;
-use App\Models\TrsProjectCharter;
+use Modules\ITSP\Models\Milestone;
+use Modules\ITSP\Models\TrsProjectCharter;
 
 class MilestoneService
 {

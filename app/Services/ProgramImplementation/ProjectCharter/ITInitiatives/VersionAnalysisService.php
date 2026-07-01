@@ -2,8 +2,8 @@
 
 namespace App\Services\ProgramImplementation\ProjectCharter\ITInitiatives;
 
-use App\Models\TrsPcVersionAnalysis;
-use App\Models\TrsProject;
+use Modules\ITSP\Models\TrsPcVersionAnalysis;
+use Modules\ITSP\Models\TrsProject;
 use Illuminate\Support\Arr;
 
 class VersionAnalysisService

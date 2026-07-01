@@ -3,7 +3,7 @@
 namespace App\Services\ProgramPlanning\InitiativeRelation;
 
 use App\Models\MstInitiative;
-use App\Models\MstInitiativeRelation;
+use Modules\ITSP\Models\MstInitiativeRelation;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 

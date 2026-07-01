@@ -2,9 +2,9 @@
 
 namespace App\Services\ProgramImplementation\Roadmap;
 
-use App\Models\Milestone;
+use Modules\ITSP\Models\Milestone;
 use App\Models\MstInitiative;
-use App\Models\TrsProjectCharter;
+use Modules\ITSP\Models\TrsProjectCharter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;

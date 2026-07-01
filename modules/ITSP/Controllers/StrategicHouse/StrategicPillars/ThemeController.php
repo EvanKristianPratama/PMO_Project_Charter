@@ -5,7 +5,7 @@ namespace Modules\ITSP\Controllers\StrategicHouse\StrategicPillars;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProgramPlanning\StrategicPillars\StoreThemeRequest;
 use App\Http\Requests\ProgramPlanning\StrategicPillars\UpdateThemeRequest;
-use App\Models\Theme;
+use Modules\ITSP\Models\Theme;
 use App\Services\StrategicHouse\StrategicPillars\StrategicPillarStructureService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;

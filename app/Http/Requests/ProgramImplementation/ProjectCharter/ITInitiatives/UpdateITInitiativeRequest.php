@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\ProgramImplementation\ProjectCharter\ITInitiatives;
 
-use App\Models\TrsProject;
+use Modules\ITSP\Models\TrsProject;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 

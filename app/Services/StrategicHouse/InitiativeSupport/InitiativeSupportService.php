@@ -3,7 +3,7 @@
 namespace App\Services\StrategicHouse\InitiativeSupport;
 
 use App\Models\MstInitiative;
-use App\Models\TrsInitiativeSupport;
+use Modules\ITSP\Models\TrsInitiativeSupport;
 use App\Services\StrategicHouse\ItBuildingBlockService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;

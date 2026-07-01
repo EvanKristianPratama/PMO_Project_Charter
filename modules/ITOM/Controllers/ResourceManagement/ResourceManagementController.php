@@ -3,7 +3,7 @@
 namespace Modules\ITOM\Controllers\ResourceManagement;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstResource;
+use Modules\ITOM\Models\MstResource;
 use App\Models\TrsOrganization;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

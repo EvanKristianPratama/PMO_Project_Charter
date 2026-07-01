@@ -4,7 +4,7 @@ namespace Modules\ITOM\Controllers\Policy;
 
 use App\Http\Controllers\Controller;
 use App\Models\MstCompany;
-use App\Models\MstRegulation;
+use Modules\ITOM\Models\MstRegulation;
 use App\Models\MstBod;
 use App\Models\TrsOrganization;
 use Illuminate\Http\RedirectResponse;
@@ -205,15 +205,15 @@ class RegulationController extends Controller
         $regulation = MstRegulation::with(['organization', 'parent'])->findOrFail($id);
 
         if (strtolower($regulation->tipe ?? '') === 'procedure') {
-            $actors = \App\Models\MstActor::with('organization')
+            $actors = \Modules\ITOM\Models\MstActor::with('organization')
                 ->where('regulation_id', $regulation->id)
                 ->get();
 
-            $categories = \App\Models\TrsSopCategory::where('regulation_id', $regulation->id)
+            $categories = \Modules\ITOM\Models\TrsSopCategory::where('regulation_id', $regulation->id)
                 ->orderBy('id')
                 ->get();
 
-            $sop = \App\Models\MstSop::with(['category', 'regulation.organization'])
+            $sop = \Modules\ITOM\Models\MstSop::with(['category', 'regulation.organization'])
                 ->whereHas('category', function ($q) use ($regulation) {
                     $q->where('regulation_id', $regulation->id);
                 })
@@ -221,7 +221,7 @@ class RegulationController extends Controller
                 ->orderBy('id')
                 ->get();
 
-            $flowChartSops = \App\Models\MstSop::with(['category', 'mapActorSops.actor.organization'])
+            $flowChartSops = \Modules\ITOM\Models\MstSop::with(['category', 'mapActorSops.actor.organization'])
                 ->whereHas('category', function ($q) use ($regulation) {
                     $q->where('regulation_id', $regulation->id);
                 })
@@ -229,7 +229,7 @@ class RegulationController extends Controller
                 ->orderBy('id')
                 ->get();
 
-            $tkoSections = \App\Models\TrsTkoSections::with(['contents' => function ($q) use ($regulation) {
+            $tkoSections = \Modules\ITOM\Models\TrsTkoSections::with(['contents' => function ($q) use ($regulation) {
                 $q->where('regulation_id', $regulation->id);
             }])
             ->orderBy('order')
@@ -247,7 +247,7 @@ class RegulationController extends Controller
         } else {
             $policies = $regulation->generalPolicies()->orderBy('number')->get();
 
-            $objectives = \App\Models\MstObjective::with(['practices' => function($query) {
+            $objectives = \Modules\ITOM\Models\MstObjective::with(['practices' => function($query) {
                 $query->orderBy('practice_id', 'asc');
             }])
             ->where('regulation_id', $regulation->id)
@@ -265,7 +265,7 @@ class RegulationController extends Controller
             ->get();
 
             if ($objectives->isEmpty()) {
-                $objectives = \App\Models\MstObjective::with(['practices' => function($query) {
+                $objectives = \Modules\ITOM\Models\MstObjective::with(['practices' => function($query) {
                     $query->orderBy('practice_id', 'asc');
                 }])
                 ->orderByRaw("
@@ -282,7 +282,7 @@ class RegulationController extends Controller
                 ->get();
             }
 
-            $roles = \App\Models\MstRole::with(['responsibilities' => function ($query) {
+            $roles = \Modules\ITOM\Models\MstRole::with(['responsibilities' => function ($query) {
                 $query->orderBy('id', 'asc');
             }])->orderBy('id', 'asc')->get();
 

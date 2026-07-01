@@ -2,9 +2,9 @@
 
 namespace App\Services\ProgramPlanning\StrategicPillars;
 
-use App\Models\Goal;
-use App\Models\InitiativeTagging;
-use App\Models\Theme;
+use Modules\ITSP\Models\Goal;
+use Modules\ITSP\Models\InitiativeTagging;
+use Modules\ITSP\Models\Theme;
 use Illuminate\Database\QueryException;
 use Illuminate\Validation\ValidationException;
 

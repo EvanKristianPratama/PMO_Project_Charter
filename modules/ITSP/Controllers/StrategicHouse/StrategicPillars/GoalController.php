@@ -5,7 +5,7 @@ namespace Modules\ITSP\Controllers\StrategicHouse\StrategicPillars;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProgramPlanning\StrategicPillars\StoreGoalRequest;
 use App\Http\Requests\ProgramPlanning\StrategicPillars\UpdateGoalRequest;
-use App\Models\Goal;
+use Modules\ITSP\Models\Goal;
 use App\Services\StrategicHouse\StrategicPillars\StrategicPillarStructureService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;

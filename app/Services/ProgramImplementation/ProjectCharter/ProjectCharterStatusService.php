@@ -4,7 +4,7 @@ namespace App\Services\ProgramImplementation\ProjectCharter;
 
 use App\Models\InitiativeStatus;
 use App\Models\ProjectStatusHistory;
-use App\Models\TrsProject;
+use Modules\ITSP\Models\TrsProject;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 

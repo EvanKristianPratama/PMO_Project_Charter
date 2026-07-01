@@ -2,7 +2,7 @@
 
 namespace App\Services\ProgramEvaluation\ReviewDocument;
 
-use App\Models\TrsProject;
+use Modules\ITSP\Models\TrsProject;
 
 class ItDocumentService
 {

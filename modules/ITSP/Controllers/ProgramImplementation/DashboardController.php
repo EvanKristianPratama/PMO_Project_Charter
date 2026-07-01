@@ -5,7 +5,7 @@ namespace Modules\ITSP\Controllers\ProgramImplementation;
 use App\Http\Controllers\Concerns\ResolvesInitiativeStatus;
 use App\Http\Controllers\Controller;
 use App\Models\MstInitiative;
-use App\Models\TrsProject;
+use Modules\ITSP\Models\TrsProject;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;

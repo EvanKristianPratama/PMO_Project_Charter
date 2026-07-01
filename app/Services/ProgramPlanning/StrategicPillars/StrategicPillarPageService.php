@@ -2,10 +2,10 @@
 
 namespace App\Services\ProgramPlanning\StrategicPillars;
 
-use App\Models\Goal;
-use App\Models\InitiativeTagging;
+use Modules\ITSP\Models\Goal;
+use Modules\ITSP\Models\InitiativeTagging;
 use App\Models\MstInitiative;
-use App\Models\Theme;
+use Modules\ITSP\Models\Theme;
 use App\Models\TrsOrganization;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;

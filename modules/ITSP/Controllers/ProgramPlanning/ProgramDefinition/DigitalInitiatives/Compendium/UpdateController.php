@@ -3,8 +3,8 @@
 namespace Modules\ITSP\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Compendium;
 
 use App\Http\Controllers\Controller;
-use App\Models\RjppTagging;
-use App\Models\TrsScInitiative;
+use Modules\ITSP\Models\RjppTagging;
+use Modules\ITSP\Models\TrsScInitiative;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;

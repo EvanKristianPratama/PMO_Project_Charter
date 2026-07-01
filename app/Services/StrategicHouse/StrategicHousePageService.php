@@ -2,8 +2,8 @@
 
 namespace App\Services\StrategicHouse;
 
-use App\Models\Goal;
-use App\Models\InitiativeTagging;
+use Modules\ITSP\Models\Goal;
+use Modules\ITSP\Models\InitiativeTagging;
 use App\Models\MstCoe;
 use App\Models\MstInitiative;
 use App\Services\StrategicHouse\BusinessStrategy\BusinessStrategyService;

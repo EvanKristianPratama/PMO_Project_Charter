@@ -3,10 +3,10 @@
 namespace Modules\ITOM\Controllers\OperatingModel;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstObjective;
-use App\Models\MstPractice;
-use App\Models\MstRole;
-use App\Models\TrsPracticeRole;
+use Modules\ITOM\Models\MstObjective;
+use Modules\ITOM\Models\MstPractice;
+use Modules\ITOM\Models\MstRole;
+use Modules\ITOM\Models\TrsPracticeRole;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

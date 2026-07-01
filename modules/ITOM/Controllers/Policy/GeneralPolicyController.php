@@ -3,9 +3,9 @@
 namespace Modules\ITOM\Controllers\Policy;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstGeneralPolicy;
-use App\Models\MstObjective;
-use App\Models\MstRegulation;
+use Modules\ITOM\Models\MstGeneralPolicy;
+use Modules\ITOM\Models\MstObjective;
+use Modules\ITOM\Models\MstRegulation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

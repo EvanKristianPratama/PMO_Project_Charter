@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\ProgramPlanning\StrategicPillars;
 
-use App\Models\Theme;
+use Modules\ITSP\Models\Theme;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 

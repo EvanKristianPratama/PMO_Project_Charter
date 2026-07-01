@@ -3,7 +3,7 @@
 namespace App\Services\StrategicHouse\InitiativeRelation;
 
 use App\Models\MstInitiative;
-use App\Models\MstInitiativeRelation;
+use Modules\ITSP\Models\MstInitiativeRelation;
 use Illuminate\Support\Facades\Cache;
 
 class InitiativeRelationService

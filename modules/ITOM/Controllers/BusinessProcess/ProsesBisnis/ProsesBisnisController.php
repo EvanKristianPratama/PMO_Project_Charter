@@ -4,12 +4,12 @@ namespace Modules\ITOM\Controllers\BusinessProcess\ProsesBisnis;
 
 use App\Http\Controllers\Controller;
 use App\Models\TrsOrganization;
-use App\Models\TrsProsesBisnis;
+use Modules\ITOM\Models\TrsProsesBisnis;
 use App\Models\MstFunction;
-use App\Models\MstApqc;
+use Modules\ITOM\Models\MstApqc;
 use App\Models\MstBod;
 use App\Models\MstCompany;
-use App\Models\MstProsesBisnis;
+use Modules\ITOM\Models\MstProsesBisnis;
 use App\Services\Architecture\ApqcService;
 use App\Services\Architecture\FunctionService;
 use App\Services\Architecture\BusinessProcessV2Service;
@@ -61,7 +61,7 @@ class ProsesBisnisController extends Controller
                 'order' => $b->order,
             ])->values()->all();
 
-        $regulations = \App\Models\MstRegulation::orderBy('judul')->get()->map(fn ($r) => [
+        $regulations = \Modules\ITOM\Models\MstRegulation::orderBy('judul')->get()->map(fn ($r) => [
             'id' => $r->id,
             'judul' => $r->judul,
             'nomor' => $r->nomor,

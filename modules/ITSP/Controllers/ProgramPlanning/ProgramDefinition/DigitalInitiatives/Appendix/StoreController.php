@@ -2,11 +2,11 @@
 namespace Modules\ITSP\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Appendix;
 
 use App\Http\Controllers\Controller;
-use App\Models\RjppTagging;
-use App\Models\TrsMapSc;
+use Modules\ITSP\Models\RjppTagging;
+use Modules\ITSP\Models\TrsMapSc;
 use App\Models\TrsScDependency;
-use App\Models\TrsScDetails;
-use App\Models\TrsScInitiative;
+use Modules\ITSP\Models\TrsScDetails;
+use Modules\ITSP\Models\TrsScInitiative;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;

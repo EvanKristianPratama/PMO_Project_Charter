@@ -3,7 +3,7 @@
 namespace Modules\ITOM\Controllers\Policy;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstResponsible;
+use Modules\ITOM\Models\MstResponsible;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

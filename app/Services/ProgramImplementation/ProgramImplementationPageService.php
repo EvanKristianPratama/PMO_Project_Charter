@@ -4,7 +4,7 @@ namespace App\Services\ProgramImplementation;
 
 use App\Models\MstInitiative;
 use App\Models\ProjectStatusHistory;
-use App\Models\TrsProject;
+use Modules\ITSP\Models\TrsProject;
 use App\Services\Shared\InitiativeStatusService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;

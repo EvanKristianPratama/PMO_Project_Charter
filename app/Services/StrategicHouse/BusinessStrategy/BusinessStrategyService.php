@@ -2,11 +2,11 @@
 
 namespace App\Services\StrategicHouse\BusinessStrategy;
 
-use App\Models\Goal;
-use App\Models\Theme;
+use Modules\ITSP\Models\Goal;
+use Modules\ITSP\Models\Theme;
 use App\Models\MstInitiative;
 use App\Models\TrsOrganization;
-use App\Models\TrsBusinessStrategy;
+use Modules\ITSP\Models\TrsBusinessStrategy;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Collection;

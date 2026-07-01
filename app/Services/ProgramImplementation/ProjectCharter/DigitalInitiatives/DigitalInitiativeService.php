@@ -4,7 +4,7 @@ namespace App\Services\ProgramImplementation\ProjectCharter\DigitalInitiatives;
 
 use App\Models\MstInitiative;
 use App\Models\ProjectStatusHistory;
-use App\Models\TrsProject;
+use Modules\ITSP\Models\TrsProject;
 use App\Models\TrsOrganization;
 use App\Models\TrsStatusImplementation;
 use App\Services\ProgramImplementation\ProjectCharter\ProjectCharterStatusService;

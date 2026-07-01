@@ -2,9 +2,9 @@
 
 namespace App\Services\StrategicHouse\StrategicPillars;
 
-use App\Models\Goal;
-use App\Models\InitiativeTagging;
-use App\Models\Theme;
+use Modules\ITSP\Models\Goal;
+use Modules\ITSP\Models\InitiativeTagging;
+use Modules\ITSP\Models\Theme;
 use Illuminate\Validation\ValidationException;
 
 class InitiativeTaggingService

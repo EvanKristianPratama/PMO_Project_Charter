@@ -2,7 +2,7 @@
 
 namespace App\Services\Architecture;
 
-use App\Models\MstBusinessCapability;
+use Modules\ITOM\Models\MstBusinessCapability;
 
 class BusinessCapabilityService
 {

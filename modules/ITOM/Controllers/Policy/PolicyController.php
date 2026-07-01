@@ -3,8 +3,8 @@
 namespace Modules\ITOM\Controllers\Policy;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstObjective;
-use App\Models\MstPractice;
+use Modules\ITOM\Models\MstObjective;
+use Modules\ITOM\Models\MstPractice;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -21,7 +21,7 @@ class PolicyController extends Controller
     public function index(Request $request): Response
     {
         try {
-            $regulations = \App\Models\MstRegulation::orderBy('id', 'desc')->get();
+            $regulations = \Modules\ITOM\Models\MstRegulation::orderBy('id', 'desc')->get();
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::warning('[PolicyController] DB error loading regulations: ' . $e->getMessage());
             $regulations = collect([]);
@@ -68,7 +68,7 @@ class PolicyController extends Controller
 
     public function createObjective(Request $request): Response
     {
-        $regulations = \App\Models\MstRegulation::orderBy('judul', 'asc')->get();
+        $regulations = \Modules\ITOM\Models\MstRegulation::orderBy('judul', 'asc')->get();
 
         $selectedRegulationId = $request->integer('regulation_id');
         $selectedRegulation = $selectedRegulationId
@@ -104,7 +104,7 @@ class PolicyController extends Controller
     {
         $objective = MstObjective::findOrFail($id);
 
-        $regulations = \App\Models\MstRegulation::orderBy('judul', 'asc')->get();
+        $regulations = \Modules\ITOM\Models\MstRegulation::orderBy('judul', 'asc')->get();
         $selectedRegulation = $regulations->firstWhere('id', $objective->regulation_id);
 
         $objectives = MstObjective::with(['practices' => function($query) {
@@ -134,7 +134,7 @@ class PolicyController extends Controller
 
     public function mappingCobit(Request $request): Response
     {
-        $regulations = \App\Models\MstRegulation::orderBy('judul', 'asc')->get();
+        $regulations = \Modules\ITOM\Models\MstRegulation::orderBy('judul', 'asc')->get();
 
         $selectedRegulationId = $request->integer('regulation_id');
         $selectedRegulation = $selectedRegulationId
@@ -171,7 +171,7 @@ class PolicyController extends Controller
      */
     public function mappingCobitAnalysis(Request $request): Response
     {
-        $regulations = \App\Models\MstRegulation::orderBy('judul', 'asc')->get();
+        $regulations = \Modules\ITOM\Models\MstRegulation::orderBy('judul', 'asc')->get();
 
         $selectedRegulationId = $request->integer('regulation_id');
         $selectedRegulation = $selectedRegulationId
@@ -207,7 +207,7 @@ class PolicyController extends Controller
      */
     public function manage(Request $request): Response
     {
-        $regulations = \App\Models\MstRegulation::orderBy('judul', 'asc')->get();
+        $regulations = \Modules\ITOM\Models\MstRegulation::orderBy('judul', 'asc')->get();
         
         $selectedRegulationId = $request->integer('regulation_id');
         $selectedRegulation = null;

@@ -3,14 +3,14 @@
 namespace Modules\ITOM\Controllers\Policy;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstActor;
-use App\Models\MstRegulation;
-use App\Models\MstSop;
-use App\Models\TrsMapActorSop;
+use Modules\ITOM\Models\MstActor;
+use Modules\ITOM\Models\MstRegulation;
+use Modules\ITOM\Models\MstSop;
+use Modules\ITOM\Models\TrsMapActorSop;
 use App\Models\TrsOrganization;
-use App\Models\TrsSopCategory;
-use App\Models\TrsTkoSections;
-use App\Models\TrsTkoContent;
+use Modules\ITOM\Models\TrsSopCategory;
+use Modules\ITOM\Models\TrsTkoSections;
+use Modules\ITOM\Models\TrsTkoContent;
 use App\Models\MstFunction;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

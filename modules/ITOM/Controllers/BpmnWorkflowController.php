@@ -4,7 +4,7 @@ namespace Modules\ITOM\Controllers;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\BpmnWorkflow;
+use Modules\ITOM\Models\BpmnWorkflow;
 use App\Models\MstInitiative;
 use App\Services\ActivityLogService;
 use Illuminate\Http\JsonResponse;

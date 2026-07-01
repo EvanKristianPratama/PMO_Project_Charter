@@ -3,8 +3,8 @@
 namespace App\Services\ProgramEvaluation\ReviewDocument;
 
 use App\Models\MstInitiative;
-use App\Models\TrsProject;
-use App\Models\TrsScInitiative;
+use Modules\ITSP\Models\TrsProject;
+use Modules\ITSP\Models\TrsScInitiative;
 
 class DigitalDocumentService
 {

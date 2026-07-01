@@ -4,7 +4,7 @@ namespace App\Services\ProgramPlanning;
 
 use App\Models\MstCoe;
 use App\Models\MstInitiative;
-use App\Models\TrsMapItBuilding;
+use Modules\ITSP\Models\TrsMapItBuilding;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;

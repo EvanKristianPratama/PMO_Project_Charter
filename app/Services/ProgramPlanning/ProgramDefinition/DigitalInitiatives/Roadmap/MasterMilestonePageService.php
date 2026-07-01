@@ -3,7 +3,7 @@
 namespace App\Services\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Roadmap;
 
 use App\Models\MstInitiative;
-use App\Models\TrsMasterMilestone;
+use Modules\ITSP\Models\TrsMasterMilestone;
 use App\Models\TrsOrganization;
 use Illuminate\Support\Collection;
 

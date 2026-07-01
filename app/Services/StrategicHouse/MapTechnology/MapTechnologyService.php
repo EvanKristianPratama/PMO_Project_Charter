@@ -4,7 +4,7 @@ namespace App\Services\StrategicHouse\MapTechnology;
 
 use App\Models\MstInitiative;
 use App\Models\MstCoe;
-use App\Models\TrsMapTechnology;
+use Modules\ITSP\Models\TrsMapTechnology;
 use Illuminate\Support\Facades\Cache;
 
 class MapTechnologyService
