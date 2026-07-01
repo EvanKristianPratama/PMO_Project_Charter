@@ -124,7 +124,7 @@ const logout = () => {
                         <Bars3Icon class="h-6 w-6" />
                     </button>
 
-                    <Link :href="route('strategic-house.index')" class="inline-flex items-center gap-2">
+                    <Link :href="route('itsp.strategic-house.index')" class="inline-flex items-center gap-2">
                         <img
                             src="/logo.png"
                             alt="Logo"

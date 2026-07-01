@@ -489,7 +489,7 @@ const addTagging = () => {
     if (!goalObj) return;
 
     mappingProcessing.value = true;
-    router.post(route('strategic-pillars.tagging.store'), {
+    router.post(route('itsp.strategic-pillars.tagging.store'), {
         initiative_id: props.initiative.id,
         goal: goalObj.code,
         themes_id: mappingForm.themes_id || null
@@ -508,7 +508,7 @@ const addTagging = () => {
 const removeTagging = (tagId) => {
     if (!window.confirm('Hapus mapping ini?')) return;
     
-    router.delete(route('strategic-pillars.tagging.destroy', tagId), {
+    router.delete(route('itsp.strategic-pillars.tagging.destroy', tagId), {
         preserveScroll: true
     });
 };

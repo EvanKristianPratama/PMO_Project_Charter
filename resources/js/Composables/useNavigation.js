@@ -46,33 +46,33 @@ export function useNavigation() {
         const programPlanningChildren = [
             {
                 label: "Business Strategy",
-                href: "/program-planning/business-strategy",
+                href: "/itsp/program-planning/business-strategy",
                 icon: DocumentTextIcon,
                 // Only mark active when under program-planning routes,
                 // not when viewing Business Strategy inside Strategic House.
                 active: (url) =>
-                    (url || "").startsWith("/program-planning") &&
+                    (url || "").includes("/program-planning") &&
                     (url || "").includes("business-strategy"),
             },
             {
                 label: "Digital Initiative Definition",
                 href: safeRoute(
-                    "program-planning.program-definition.digital-initiatives",
+                    "itsp.program-planning.program-definition.digital-initiatives",
                 ),
                 icon: DocumentTextIcon,
                 active: (url) =>
-                    (url || "").startsWith(
+                    (url || "").includes(
                         "/program-planning/program-definition/digital-initiatives",
                     ) || url === "/program-planning/program-definition",
             },
             {
                 label: "IT Initiative Definition",
                 href: safeRoute(
-                    "program-planning.program-definition.it-initiatives",
+                    "itsp.program-planning.program-definition.it-initiatives",
                 ),
                 icon: DocumentTextIcon,
                 active: (url) =>
-                    (url || "").startsWith(
+                    (url || "").includes(
                         "/program-planning/program-definition/it-initiatives",
                     ),
             },
@@ -81,125 +81,125 @@ export function useNavigation() {
         const programEvaluationChildren = [
             {
                 label: "Dashboard Summary",
-                href: safeRoute("program-evaluation.review-summary"),
+                href: safeRoute("itsp.program-evaluation.review-summary"),
                 icon: ClipboardDocumentCheckIcon,
                 active: (url) =>
-                    (url || "").startsWith("/program-evalution/review-summary"),
+                    (url || "").includes("/program-evalution/review-summary"),
             },
             {
                 label: "Review PC",
-                href: safeRoute("program-evaluation.index"),
+                href: safeRoute("itsp.program-evaluation.index"),
                 icon: ClipboardDocumentCheckIcon,
                 active: (url) =>
-                    (url || "").startsWith("/program-evalution/review") &&
-                    !(url || "").startsWith(
+                    (url || "").includes("/program-evalution/review") &&
+                    !(url || "").includes(
                         "/program-evalution/review-timeline",
                     ) &&
-                    !(url || "").startsWith(
+                    !(url || "").includes(
                         "/program-evalution/review-dashboard",
                     ) &&
-                    !(url || "").startsWith(
+                    !(url || "").includes(
                         "/program-evalution/review-summary",
                     ) &&
-                    !(url || "").startsWith(
+                    !(url || "").includes(
                         "/program-evalution/review-aktor",
                     ) &&
-                    !(url || "").startsWith(
+                    !(url || "").includes(
                         "/program-evalution/review-document",
                     ) &&
-                    !(url || "").startsWith(
+                    !(url || "").includes(
                         "/program-evalution/review-analysis",
                     ),
             },
             {
                 label: "Review Approval",
-                href: safeRoute("program-evaluation.review-dashboard"),
+                href: safeRoute("itsp.program-evaluation.review-dashboard"),
                 icon: ClipboardDocumentCheckIcon,
                 active: (url) =>
-                    (url || "").startsWith(
+                    (url || "").includes(
                         "/program-evalution/review-dashboard",
                     ),
             },
             {
                 label: "Review Status",
-                href: safeRoute("program-evaluation.review-timeline"),
+                href: safeRoute("itsp.program-evaluation.review-timeline"),
                 icon: ClipboardDocumentCheckIcon,
                 active: (url) =>
-                    (url || "").startsWith(
+                    (url || "").includes(
                         "/program-evalution/review-timeline",
                     ),
             },
             {
                 label: "Review Aktor",
-                href: safeRoute("program-evaluation.review-aktor"),
+                href: safeRoute("itsp.program-evaluation.review-aktor"),
                 icon: ClipboardDocumentCheckIcon,
                 active: (url) =>
-                    (url || "").startsWith("/program-evalution/review-aktor"),
+                    (url || "").includes("/program-evalution/review-aktor"),
             },
             {
                 label: "Review Document",
-                href: safeRoute("program-evaluation.review-document"),
+                href: safeRoute("itsp.program-evaluation.review-document"),
                 icon: ClipboardDocumentCheckIcon,
                 active: (url) =>
-                    (url || "").startsWith(
+                    (url || "").includes(
                         "/program-evalution/review-document",
                     ),
             },
             {
                 label: "Report",
-                href: safeRoute("program-evaluation.report"),
+                href: safeRoute("itsp.program-evaluation.report"),
                 icon: DocumentTextIcon,
                 active: (url) =>
-                    (url || "").startsWith("/program-evalution/report"),
+                    (url || "").includes("/program-evalution/report"),
             },
         ];
 
         const programImplementationChildren = [
             {
                 label: "Digital Initiatives",
-                href: safeRoute("digital-initiatives.index"),
+                href: safeRoute("itsp.digital-initiatives.index"),
                 icon: FolderIcon,
-                active: (url) => (url || "").startsWith("/digital-initiatives"),
+                active: (url) => (url || "").includes("/digital-initiatives"),
                 children: [
                     {
                         label: "Status Implementation",
-                        href: safeRoute("digital-initiatives.index", {
+                        href: safeRoute("itsp.digital-initiatives.index", {
                             tableMode: "implementation",
                         }),
                         icon: ClipboardDocumentCheckIcon,
                         active: (url) =>
-                            (url || "").startsWith("/digital-initiatives") &&
+                            (url || "").includes("/digital-initiatives") &&
                             (url || "").includes("tableMode=implementation"),
                     },
                 ],
             },
             {
                 label: "IT Initiatives",
-                href: safeRoute("it-initiatives.index"),
+                href: safeRoute("itsp.it-initiatives.index"),
                 icon: FolderIcon,
                 active: (url) =>
-                    (url || "").startsWith("/it-initiatives") ||
-                    (url || "").startsWith("/roadmap"),
+                    (url || "").includes("/it-initiatives") ||
+                    (url || "").includes("/roadmap"),
                 children: [
                     {
                         label: "Dashboard Summary",
-                        href: safeRoute("program-implementation.index"),
+                        href: safeRoute("itsp.program-implementation.index"),
                         icon: ChartBarIcon,
                         active: (url) => url === "/program-implementation",
                     },
                     {
                         label: "Roadmap Project Charter",
-                        href: safeRoute("roadmap.index"),
+                        href: safeRoute("itsp.roadmap.index"),
                         icon: ClipboardDocumentCheckIcon,
                         active: (url) =>
-                            (url || "").startsWith("/roadmap") &&
-                            !(url || "").startsWith(
+                            (url || "").includes("/roadmap") &&
+                            !(url || "").includes(
                                 "/roadmap/status-implementation",
                             ),
                     },
                     {
                         label: "Status Implementation",
-                        href: safeRoute("it-initiatives.index", {
+                        href: safeRoute("itsp.it-initiatives.index", {
                             tableMode: "implementation",
                         }),
                         icon: ClipboardDocumentCheckIcon,
@@ -216,29 +216,29 @@ export function useNavigation() {
         const architectureChildren = [
             {
                 label: "APQC",
-                href: safeRoute("business-process.proses-bisnis.index", {
+                href: safeRoute("itom.business-process.proses-bisnis.index", {
                     tab: "apqc",
                 }),
                 icon: CubeIcon,
                 active: (url) =>
                     getTab(url) === "apqc" ||
-                    ((url || "").startsWith(
+                    ((url || "").includes(
                         "/business-process/proses-bisnis",
                     ) &&
                         !getTab(url)),
             },
             {
                 label: "Business Capability",
-                href: safeRoute("business-process.business-capability.index"),
+                href: safeRoute("itom.business-process.business-capability.index"),
                 icon: CubeIcon,
                 active: (url) =>
-                    (url || "").startsWith(
+                    (url || "").includes(
                         "/business-process/business-capability",
                     ),
             },
             {
                 label: "Business Process",
-                href: safeRoute("business-process.proses-bisnis.index", {
+                href: safeRoute("itom.business-process.proses-bisnis.index", {
                     tab: "proses-bisnis-v2",
                 }),
                 icon: CubeIcon,
@@ -246,7 +246,7 @@ export function useNavigation() {
             },
             {
                 label: "Function",
-                href: safeRoute("business-process.proses-bisnis.index", {
+                href: safeRoute("itom.business-process.proses-bisnis.index", {
                     tab: "function",
                 }),
                 icon: CubeIcon,
@@ -254,7 +254,7 @@ export function useNavigation() {
             },
             {
                 label: "KPI",
-                href: safeRoute("business-process.proses-bisnis.index", {
+                href: safeRoute("itom.business-process.proses-bisnis.index", {
                     tab: "kpi",
                 }),
                 icon: CubeIcon,
@@ -262,7 +262,7 @@ export function useNavigation() {
             },
             {
                 label: "Regulation Mapping Function",
-                href: safeRoute("business-process.proses-bisnis.index", {
+                href: safeRoute("itom.business-process.proses-bisnis.index", {
                     tab: "regulation-map",
                 }),
                 icon: DocumentTextIcon,
@@ -273,27 +273,27 @@ export function useNavigation() {
             //     href: safeRoute("business-process.informatic-system"),
             //     icon: BuildingOffice2Icon,
             //     active: (url) =>
-            //         (url || '').startsWith("/business-process/informatic-system"),
+            //         (url || '').includes("/business-process/informatic-system"),
             // },
         ];
 
         const organizationChildren = [
             {
                 label: "Company",
-                href: safeRoute("business-process.organization-structure", {
+                href: safeRoute("itom.business-process.organization-structure", {
                     tab: "company",
                 }),
                 icon: BuildingOffice2Icon,
                 active: (url) =>
                     (url || "").includes("tab=company") ||
-                    ((url || "").startsWith(
+                    ((url || "").includes(
                         "/business-process/organization-structure",
                     ) &&
                         !(url || "").includes("tab=")),
             },
             {
                 label: "BoD",
-                href: safeRoute("business-process.organization-structure", {
+                href: safeRoute("itom.business-process.organization-structure", {
                     tab: "bod",
                 }),
                 icon: UserGroupIcon,
@@ -301,7 +301,7 @@ export function useNavigation() {
             },
             {
                 label: "Structural Organization",
-                href: safeRoute("business-process.organization-structure", {
+                href: safeRoute("itom.business-process.organization-structure", {
                     tab: "organization",
                 }),
                 icon: BuildingOffice2Icon,
@@ -309,7 +309,7 @@ export function useNavigation() {
             },
             {
                 label: "Functional Organization",
-                href: safeRoute("business-process.organization-structure", {
+                href: safeRoute("itom.business-process.organization-structure", {
                     tab: "functional",
                 }),
                 icon: BuildingOffice2Icon,
@@ -317,7 +317,7 @@ export function useNavigation() {
             },
             {
                 label: "SK",
-                href: safeRoute("business-process.organization-structure", {
+                href: safeRoute("itom.business-process.organization-structure", {
                     tab: "sk",
                 }),
                 icon: DocumentTextIcon,
@@ -325,112 +325,112 @@ export function useNavigation() {
             },
             {
                 label: "SDM",
-                href: safeRoute("resource-management.index"),
+                href: safeRoute("itom.resource-management.index"),
                 icon: UserGroupIcon,
-                active: (url) => (url || "").startsWith("/resource-management"),
+                active: (url) => (url || "").includes("/resource-management"),
             },
         ];
 
         const items = [
             {
                 label: "Strategic House",
-                href: safeRoute("strategic-house.index"),
+                href: safeRoute("itsp.strategic-house.index"),
                 icon: Squares2X2Icon,
                 active: (url) =>
-                    (url || "").startsWith("/strategic-house") ||
-                    (url || "").startsWith("/strategic-pillars"),
+                    (url || "").includes("/strategic-house") ||
+                    (url || "").includes("/strategic-pillars"),
                 children: strategicHouseChildren,
             },
             {
                 label: "Program Planning",
-                href: safeRoute("program-planning"),
+                href: safeRoute("itsp.program-planning"),
                 icon: FlagIcon,
-                active: (url) => (url || "").startsWith("/program-planning"),
+                active: (url) => (url || "").includes("/program-planning"),
                 children: programPlanningChildren,
             },
             {
                 label: "Program Evaluation",
-                href: safeRoute("program-evaluation.review-summary"),
+                href: safeRoute("itsp.program-evaluation.review-summary"),
                 icon: DocumentTextIcon,
-                active: (url) => (url || "").startsWith("/program-evalution"),
+                active: (url) => (url || "").includes("/program-evalution"),
                 children: programEvaluationChildren,
             },
             {
                 label: "Program Implementation",
-                href: safeRoute("program-implementation.index"),
+                href: safeRoute("itsp.program-implementation.index"),
                 icon: ChartBarIcon,
                 active: (url) =>
-                    (url || "").startsWith("/program-implementation") ||
+                    (url || "").includes("/program-implementation") ||
                     url === "/dashboard" ||
-                    (url || "").startsWith("/digital-initiatives") ||
-                    (url || "").startsWith("/it-initiatives") ||
-                    (url || "").startsWith("/roadmap"),
+                    (url || "").includes("/digital-initiatives") ||
+                    (url || "").includes("/it-initiatives") ||
+                    (url || "").includes("/roadmap"),
                 children: programImplementationChildren,
             },
             {
                 label: "Business Process",
-                href: safeRoute("business-process.proses-bisnis.index"),
+                href: safeRoute("itom.business-process.proses-bisnis.index"),
                 icon: CubeIcon,
                 active: (url) =>
-                    (url || "").startsWith("/business-process") &&
-                    !(url || "").startsWith(
+                    (url || "").includes("/business-process") &&
+                    !(url || "").includes(
                         "/business-process/organization-structure",
                     ),
                 children: architectureChildren,
             },
             {
                 label: "Organization",
-                href: safeRoute("business-process.organization-structure"),
+                href: safeRoute("itom.business-process.organization-structure"),
                 icon: BuildingOffice2Icon,
                 active: (url) =>
-                    (url || "").startsWith(
+                    (url || "").includes(
                         "/business-process/organization-structure",
-                    ) || (url || "").startsWith("/resource-management"),
+                    ) || (url || "").includes("/resource-management"),
                 children: organizationChildren,
             },
             {
                 label: "Operating Model",
-                href: safeRoute("operating-model.index"),
+                href: safeRoute("itom.operating-model.index"),
                 icon: Squares2X2Icon,
                 active: (url) =>
-                    (url || "").startsWith("/operating-model"),
+                    (url || "").includes("/operating-model"),
                 children: [
                     {
                         label: "Framework",
-                        href: safeRoute("operating-model.framework.index"),
+                        href: safeRoute("itom.operating-model.framework.index"),
                         icon: Squares2X2Icon,
                         active: (url) =>
-                            (url || "").startsWith(
+                            (url || "").includes(
                                 "/operating-model/framework",
                             ) ||
-                            (url || "").startsWith(
+                            (url || "").includes(
                                 "/operating-model/cobit-component",
                             ),
                     },
                     {
                         label: "IT Governance",
-                        href: safeRoute("operating-model.it-governance.index"),
+                        href: safeRoute("itom.operating-model.it-governance.index"),
                         icon: Squares2X2Icon,
                         active: (url) =>
-                            (url || "").startsWith(
+                            (url || "").includes(
                                 "/operating-model/it-governance",
                             ),
                     },
                     {
                         label: "IT Management",
-                        href: safeRoute("operating-model.it-management.index"),
+                        href: safeRoute("itom.operating-model.it-management.index"),
                         icon: Squares2X2Icon,
                         active: (url) =>
-                            (url || "").startsWith(
+                            (url || "").includes(
                                 "/operating-model/it-management",
                             ),
                     },
                     {
                         label: "RACI Analysis",
-                        href: safeRoute("operating-model.raci-analysis.index"),
+                        href: safeRoute("itom.operating-model.raci-analysis.index"),
                         icon: DocumentTextIcon,
                         active: (url) =>
-                            (url || "").startsWith(
+                            (url || "").includes(
                                 "/operating-model/raci-analysis",
                             ),
                         children: [],
@@ -439,85 +439,72 @@ export function useNavigation() {
             },
             {
                 label: "Service Portofolio",
-                href: safeRoute("service-portofolio.index"),
+                href: safeRoute("itom.service-portofolio.index"),
                 icon: CubeIcon,
-                active: (url) => (url || "").startsWith("/service-portofolio"),
+                active: (url) => (url || "").includes("/service-portofolio"),
             },
             {
                 label: "Regulation",
-                href: safeRoute("policy.regulation.index"),
+                href: safeRoute("itom.policy.regulation.index"),
                 icon: DocumentTextIcon,
                 active: (url) =>
-                    (url || "").startsWith("/policy") ||
-                    (url || "").startsWith("/bpmn-workflow"),
+                    (url || "").includes("/policy") ||
+                    (url || "").includes("/bpmn-workflow"),
                 children: [
                     {
                         label: "Policy, Standard, Procedure",
-                        href: safeRoute("policy.regulation.index"),
+                        href: safeRoute("itom.policy.regulation.index"),
                         icon: DocumentTextIcon,
                         active: (url) =>
-                            (url || "").startsWith("/policy/regulation"),
+                            (url || "").includes("/policy/regulation"),
                     },
                     {
                         label: "SK",
-                        href: safeRoute("policy.sk.index"),
+                        href: safeRoute("itom.policy.sk.index"),
                         icon: DocumentTextIcon,
-                        active: (url) => (url || "").startsWith("/policy/sk"),
+                        active: (url) => (url || "").includes("/policy/sk"),
                     },
                     {
                         label: "CMS",
-                        href: safeRoute("policy.CMS.index"),
+                        href: safeRoute("itom.policy.CMS.index"),
                         icon: FolderIcon,
-                        active: (url) => (url || "").startsWith("/policy/CMS"),
+                        active: (url) => (url || "").includes("/policy/CMS"),
                     },
                     {
                         label: "COBIT 2019",
-                        href: safeRoute("policy.cobit-component.index"),
+                        href: safeRoute("itom.policy.cobit-component.index"),
                         icon: DocumentTextIcon,
                         active: (url) =>
-                            (url || "").startsWith("/policy/cobit-component"),
+                            (url || "").includes("/policy/cobit-component"),
                     },
                     // {
                     //     label: "BPMN",
                     //     href: safeRoute("bpmn-workflow.index"),
                     //     icon: CogIcon,
-                    //     active: (url) => (url || '').startsWith("/bpmn-workflow"),
+                    //     active: (url) => (url || '').includes("/bpmn-workflow"),
                     // },
                 ],
             },
 
             {
                 label: "RACI Analysis",
-                href: safeRoute("raci.index"),
+                href: safeRoute("itom.raci.infoflow.index"),
                 icon: DocumentTextIcon,
-                active: (url) => (url || "").startsWith("/raci"),
+                active: (url) => (url || "").includes("/raci"),
                 children: [
                     {
-                        label: "RACI",
-                        href: safeRoute("raci.index"),
-                        icon: DocumentTextIcon,
-                        active: (url) => {
-                            const current = url || "";
-                            return (
-                                current === "/raci" ||
-                                current.startsWith("/raci?") ||
-                                current.startsWith("/raci/manage")
-                            );
-                        },
-                    },
-                    {
                         label: "COBIT 2019 Information Flow",
-                        href: safeRoute("raci.infoflow.index"),
+                        href: safeRoute("itom.raci.infoflow.index"),
                         icon: DocumentTextIcon,
                         active: (url) =>
-                            (url || "").startsWith("/raci/infoflow"),
+                            (url || "").includes("/raci/infoflow"),
                     },
                     {
                         label: "Pedoman TKTI Information Flow",
-                        href: safeRoute("raci.itsp-infoflow.index"),
+                        href: safeRoute("itom.raci.itsp-infoflow.index"),
                         icon: DocumentTextIcon,
                         active: (url) =>
-                            (url || "").startsWith("/raci/itsp-infoflow"),
+                            (url || "").includes("/raci/itsp-infoflow"),
                     },
                 ],
             },
@@ -525,13 +512,13 @@ export function useNavigation() {
                 label: "Master Data",
                 href: safeRoute("master-data.index"),
                 icon: TableCellsIcon,
-                active: (url) => (url || "").startsWith("/master-data"),
+                active: (url) => (url || "").includes("/master-data"),
             },
             {
                 label: "Sinkronisasi Data",
                 href: safeRoute("sync.index"),
                 icon: CloudArrowDownIcon,
-                active: (url) => (url || "").startsWith("/sync"),
+                active: (url) => (url || "").includes("/sync"),
             },
         ];
 

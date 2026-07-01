@@ -217,7 +217,7 @@ onUnmounted(() => {
                                             "
                                             :href="
                                                 route(
-                                                    'business-process.proses-bisnis.index',
+                                                    'itom.business-process.proses-bisnis.index',
                                                 )
                                             "
                                             class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wider shadow-sm select-none transition-all duration-205"
