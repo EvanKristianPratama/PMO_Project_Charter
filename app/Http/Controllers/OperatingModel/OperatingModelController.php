@@ -3,172 +3,65 @@
 namespace App\Http\Controllers\OperatingModel;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstBod;
-use App\Models\MstItSteeringComittee;
-use App\Models\TrsOrganization;
+use App\Services\OperatingModel\ItGovernance\ItGovernance;
+use App\Services\OperatingModel\ItManagement\ItManagement;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class OperatingModelController extends Controller
 {
-    public function index(): Response
+    public function framework(): Response
     {
-        return Inertia::render("OperatingModel/Index");
+        return Inertia::render("OperatingModel/Framework/Index");
     }
 
-    public function itGovernance(): Response
+    public function itGovernance(ItGovernance $itGovernanceService): Response
     {
-        $steeringRows = MstItSteeringComittee::with("organization")
-            ->orderBy("code")
-            ->get()
-            ->map(function ($item) {
-                return [
-                    "id" => $item->id,
-                    "code" => trim((string) ($item->code ?? "")),
-                    "organization_id" => $item->organization_id,
-                    "organization_name" => $item->organization?->jabatan ?? "-",
-                ];
-            })
-            ->values()
-            ->all();
-
         return Inertia::render("OperatingModel/ItGovernance/Index", [
-            "steeringRows" => $steeringRows,
-            "organizationOptions" => TrsOrganization::orderBy("name")->get([
-                "id",
-                "name",
-                "jabatan",
-            ]),
+            "steeringRows" => $itGovernanceService->getSteeringRows(),
+            "organizationOptions" => $itGovernanceService->getOrganizationOptions(),
         ]);
     }
 
-    public function itManagement(): Response
+    public function itManagement(ItManagement $itManagementService): Response
     {
-        // Target IDs to always include:
-        // 1: Direktur Utama
-        // 5: Direktur Penunjang Bisnis
-        // 67: SVP Enterprise IT
-        // 100: SVP Shared Services
-        // 103: Manager Shared Service Information and Communication Technology
-        $ids = [1, 5, 67, 100, 103];
-
-        $getDescendants = function ($parentIds) use (&$getDescendants) {
-            if (empty($parentIds)) {
-                return [];
-            }
-
-            $children = MstBod::whereIn("parent_id", $parentIds)
-                ->pluck("id")
-                ->toArray();
-            if (empty($children)) {
-                return [];
-            }
-
-            return array_merge($children, $getDescendants($children));
-        };
-
-        $descendantIds = $getDescendants([67]);
-        $allIds = array_merge($ids, $descendantIds);
-
-        $preferredOrders = [
-            5 => [
-                67 => 10,
-                100 => 20,
-            ],
-            67 => [
-                68 => 10,
-                71 => 20,
-                72 => 30,
-                73 => 40,
-            ],
-            100 => [
-                103 => 10,
-            ],
-        ];
-
-        $resolveOrder = function (MstBod $bod) use ($preferredOrders) {
-            $parentId = $bod->parent_id ? (int) $bod->parent_id : null;
-            $bodId = (int) $bod->id;
-
-            if (
-                $parentId !== null &&
-                isset($preferredOrders[$parentId][$bodId])
-            ) {
-                return $preferredOrders[$parentId][$bodId];
-            }
-
-            return $bod->order;
-        };
-
-        $bods = MstBod::with("company")->whereIn("id", $allIds)->get();
-
-        $rows = $bods
-            ->map(function ($bod) use ($resolveOrder) {
-                return [
-                    "organization_id" => (int) $bod->id,
-                    "parent_id" => $bod->parent_id
-                        ? (int) $bod->parent_id
-                        : null,
-                    "organization_name" => $bod->name,
-                    "alias" => $bod->alias,
-                    "pejabat" => $bod->pejabat,
-                    "groub_id" => 0,
-                    "groub_name" => "Holding",
-                    "company_id" => $bod->company_id
-                        ? (int) $bod->company_id
-                        : null,
-                    "company_name" => $bod->company?->name ?? "Tanpa Holding",
-                    "order" => $resolveOrder($bod),
-                ];
-            })
-            ->sortBy([
-                ["company_name", "asc"],
-                ["groub_name", "asc"],
-                ["order", "asc"],
-                ["organization_name", "asc"],
-            ])
-            ->values()
-            ->all();
-
         return Inertia::render("OperatingModel/ItManagement/Index", [
-            "organizationStructureRows" => $rows,
+            "organizationStructureRows" => $itManagementService->getOrganizationStructureRows(),
         ]);
     }
 
-    public function storeSteering(Request $request)
+    public function storeSteering(Request $request, ItGovernance $itGovernanceService)
     {
         $validated = $request->validate([
             "organization_id" => "required|exists:trs_organization,id",
             "code" => "required|string|size:8",
         ]);
 
-        MstItSteeringComittee::create($validated);
+        $itGovernanceService->storeSteering($validated);
 
         return redirect()
             ->back()
             ->with("success", "Data Steering Committee berhasil ditambahkan.");
     }
 
-    public function updateSteering(Request $request, $id)
+    public function updateSteering(Request $request, $id, ItGovernance $itGovernanceService)
     {
         $validated = $request->validate([
             "organization_id" => "required|exists:trs_organization,id",
             "code" => "required|string|size:8",
         ]);
 
-        $item = MstItSteeringComittee::findOrFail($id);
-        $item->update($validated);
+        $itGovernanceService->updateSteering((int) $id, $validated);
 
         return redirect()
             ->back()
             ->with("success", "Data Steering Committee berhasil diperbarui.");
     }
 
-    public function destroySteering($id)
+    public function destroySteering($id, ItGovernance $itGovernanceService)
     {
-        $item = MstItSteeringComittee::findOrFail($id);
-        $item->delete();
+        $itGovernanceService->destroySteering((int) $id);
 
         return redirect()
             ->back()

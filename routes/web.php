@@ -21,12 +21,12 @@ use App\Http\Controllers\MasterData\MstInitiative\MstInitiativeController;
 use App\Http\Controllers\MasterData\MstPicProject\MstPicProjectController;
 use App\Http\Controllers\MasterData\ProjectCharter\ProjectCharterController as MasterDataProjectCharterController;
 use App\Http\Controllers\MasterData\ScopeCharter\ScopeCharterController;
+use App\Http\Controllers\OperatingModel\CobitComponentController;
 use App\Http\Controllers\OperatingModel\OperatingModelController;
 use App\Http\Controllers\Policy\GeneralPolicyController;
 use App\Http\Controllers\Policy\PolicyController;
 use App\Http\Controllers\Policy\InfoflowController;
 use App\Http\Controllers\Policy\ItspInfoflowController;
-use App\Http\Controllers\Policy\CobitComponentController;
 use App\Http\Controllers\Policy\PracticeRoleController;
 use App\Http\Controllers\Policy\ProcedureController;
 use App\Http\Controllers\Policy\RegulationController;
@@ -826,6 +826,18 @@ Route::middleware(["auth", "approved"])->group(function () {
                 OperatingModelController::class,
                 "itManagement",
             ])->name("it-management.index");
+            Route::get("/framework", [
+                OperatingModelController::class,
+                "framework",
+            ])->name("framework.index");
+            Route::get("/cobit-component", [
+                CobitComponentController::class,
+                "index",
+            ])->name("cobit-component.index");
+            Route::get("/raci-analysis", fn() => Inertia::render("Placeholder/Index", [
+                "title" => "RACI Analysis",
+                "description" => "Halaman RACI Analysis pada modul Operating Model.",
+            ]))->name("raci-analysis.index");
             Route::post("/it-governance/steering", [
                 OperatingModelController::class,
                 "storeSteering",

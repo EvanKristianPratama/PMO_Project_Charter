@@ -392,8 +392,21 @@ export function useNavigation() {
                 label: "Operating Model",
                 href: safeRoute("operating-model.index"),
                 icon: Squares2X2Icon,
-                active: (url) => (url || "").startsWith("/operating-model"),
+                active: (url) =>
+                    (url || "").startsWith("/operating-model"),
                 children: [
+                    {
+                        label: "Framework",
+                        href: safeRoute("operating-model.framework.index"),
+                        icon: Squares2X2Icon,
+                        active: (url) =>
+                            (url || "").startsWith(
+                                "/operating-model/framework",
+                            ) ||
+                            (url || "").startsWith(
+                                "/operating-model/cobit-component",
+                            ),
+                    },
                     {
                         label: "IT Governance",
                         href: safeRoute("operating-model.it-governance.index"),
@@ -411,6 +424,16 @@ export function useNavigation() {
                             (url || "").startsWith(
                                 "/operating-model/it-management",
                             ),
+                    },
+                    {
+                        label: "RACI Analysis",
+                        href: safeRoute("operating-model.raci-analysis.index"),
+                        icon: DocumentTextIcon,
+                        active: (url) =>
+                            (url || "").startsWith(
+                                "/operating-model/raci-analysis",
+                            ),
+                        children: [],
                     },
                 ],
             },
@@ -462,6 +485,7 @@ export function useNavigation() {
                     // },
                 ],
             },
+
             {
                 label: "RACI Analysis",
                 href: safeRoute("raci.index"),
