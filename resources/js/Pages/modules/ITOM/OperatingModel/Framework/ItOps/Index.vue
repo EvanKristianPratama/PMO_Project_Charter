@@ -38,7 +38,7 @@
 
                 <!-- PDF iframe viewer with native toolbar enabled -->
                 <iframe
-                    src="/storage/frameworks/ITOpModell_RIP_final.pdf"
+                    src="/frameworks/ITOpModell_RIP_final.pdf"
                     class="w-full h-[750px] border-0 rounded-none bg-slate-100 dark:bg-zinc-800"
                     @load="onIframeLoad"
                 ></iframe>

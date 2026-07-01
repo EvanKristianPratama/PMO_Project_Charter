@@ -6,6 +6,7 @@ use Inertia\Inertia;
 use Modules\ITOM\Controllers\BusinessProcess\BusinessCapability\BusinessCapabilityController;
 use Modules\ITOM\Controllers\BusinessProcess\OrganizationStructure\OrganizationController as BusinessProcessOrganizationStructureController;
 use Modules\ITOM\Controllers\BusinessProcess\ProsesBisnis\ProsesBisnisController as BusinessProcessProsesBisnisController;
+use Modules\ITOM\Controllers\BusinessProcess\APQC\ApqcController;
 use Modules\ITOM\Controllers\ResourceManagement\ResourceManagementController as MainResourceManagementController;
 use Modules\ITOM\Controllers\OperatingModel\OperatingModelController;
 use Modules\ITOM\Controllers\Policy\CobitComponentController;
@@ -25,7 +26,7 @@ use Modules\ITOM\Controllers\LibaryController;
 Route::middleware(["approved"])->group(function () {
     Route::get(
         "/business-process",
-        fn() => redirect()->route("itom.business-process.proses-bisnis.index"),
+        fn() => redirect()->route("itom.business-process.apqc.index"),
     )->name("business-process.index");
     
     Route::get("/business-process/organization-structure", [
@@ -195,19 +196,24 @@ Route::middleware(["approved"])->group(function () {
     ])->name("business-process.proses-bisnis.destroy");
     
     // APQC CRUD under Architecture
+    Route::get("/business-process/apqc", [
+        ApqcController::class,
+        "index",
+    ])->name("business-process.apqc.index");
+
     Route::post("/business-process/apqc", [
-        BusinessProcessProsesBisnisController::class,
-        "storeApqc",
+        ApqcController::class,
+        "store",
     ])->name("business-process.apqc.store");
     
     Route::put("/business-process/apqc/{id}", [
-        BusinessProcessProsesBisnisController::class,
-        "updateApqc",
+        ApqcController::class,
+        "update",
     ])->name("business-process.apqc.update");
     
     Route::delete("/business-process/apqc/{id}", [
-        BusinessProcessProsesBisnisController::class,
-        "destroyApqc",
+        ApqcController::class,
+        "destroy",
     ])->name("business-process.apqc.destroy");
 
     // Proses Bisnis v2 CRUD under Architecture

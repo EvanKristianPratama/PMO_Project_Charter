@@ -5,7 +5,7 @@ namespace Modules\ITOM\Controllers\BusinessProcess\OrganizationStructure;
 use App\Http\Controllers\Controller;
 use App\Models\Groub;
 use App\Models\TrsOrganization;
-use App\Services\Architecture\OrganizationStructureService;
+use App\Services\BusinessProcess\OrganizationStructureService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

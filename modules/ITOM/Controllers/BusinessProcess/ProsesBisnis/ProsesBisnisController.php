@@ -6,15 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\TrsOrganization;
 use App\Models\TrsProsesBisnis;
 use App\Models\MstFunction;
-use App\Models\MstApqc;
 use App\Models\MstBod;
 use App\Models\MstCompany;
 use App\Models\MstProsesBisnis;
-use App\Services\Architecture\ApqcService;
-use App\Services\Architecture\FunctionService;
-use App\Services\Architecture\BusinessProcessV2Service;
+use App\Services\BusinessProcess\FunctionService;
+use App\Services\BusinessProcess\BusinessProcessV2Service;
 use App\Models\MstKpi;
-use App\Services\Architecture\KpiService;
+use App\Services\BusinessProcess\KpiService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -26,12 +24,17 @@ class ProsesBisnisController extends Controller
      * Display a listing of business processes.
      */
     public function index(
-        ApqcService $apqcService, 
+        Request $request,
         FunctionService $functionService,
         BusinessProcessV2Service $businessProcessV2Service,
         KpiService $kpiService
-    ): Response
+    )
     {
+        $tab = $request->query('tab');
+        if (empty($tab) || $tab === 'apqc') {
+            return redirect()->route('itom.business-process.apqc.index');
+        }
+
         $prosesBisnis = TrsProsesBisnis::with('organization')
             ->orderBy('organization_id')
             ->orderBy('no')
@@ -70,8 +73,6 @@ class ProsesBisnisController extends Controller
             'status' => $r->status,
         ])->values()->all();
 
-        $apqcList = $apqcService->getApqcList();
-        
         $prosesBisnisV2 = $businessProcessV2Service->getProsesBisnisV2List();
 
         $kpis = $kpiService->getKpis();
@@ -83,7 +84,6 @@ class ProsesBisnisController extends Controller
             'companyOptions' => $companyOptions,
             'bodOptions' => $bodOptions,
             'regulations' => $regulations,
-            'apqcList' => $apqcList,
             'prosesBisnisV2' => $prosesBisnisV2,
             'kpiList' => $kpis,
         ]);
@@ -147,65 +147,6 @@ class ProsesBisnisController extends Controller
             ->with('success', 'Proses Bisnis berhasil dihapus.');
     }
 
-    /**
-     * Store a newly created APQC item.
-     */
-    public function storeApqc(Request $request, ApqcService $apqcService): RedirectResponse
-    {
-        $validated = $request->validate([
-            'parent_id' => 'nullable|exists:mst_apqc,id',
-            'name' => 'required|string|max:255',
-            'grup' => 'nullable|string|max:255',
-            'deskripsi' => 'nullable|string',
-        ]);
-
-        $apqcService->createApqc($validated);
-
-        return redirect()
-            ->route('itom.business-process.proses-bisnis.index')
-            ->with('success', 'APQC berhasil ditambahkan.');
-    }
-
-    /**
-     * Update the specified APQC item.
-     */
-    public function updateApqc(Request $request, int $id, ApqcService $apqcService): RedirectResponse
-    {
-        $apqc = MstApqc::findOrFail($id);
-
-        $validated = $request->validate([
-            'parent_id' => 'nullable|exists:mst_apqc,id',
-            'name' => 'required|string|max:255',
-            'grup' => 'nullable|string|max:255',
-            'deskripsi' => 'nullable|string',
-        ]);
-
-        $apqcService->updateApqc($apqc, $validated);
-
-        return redirect()
-            ->route('itom.business-process.proses-bisnis.index')
-            ->with('success', 'APQC berhasil diperbarui.');
-    }
-
-    /**
-     * Remove the specified APQC item.
-     */
-    public function destroyApqc(int $id, ApqcService $apqcService): RedirectResponse
-    {
-        $apqc = MstApqc::findOrFail($id);
-        
-        $success = $apqcService->deleteApqc($apqc);
-
-        if (!$success) {
-            return redirect()
-                ->route('itom.business-process.proses-bisnis.index')
-                ->with('error', 'Tidak dapat menghapus APQC ini karena memiliki sub-proses.');
-        }
-
-        return redirect()
-            ->route('itom.business-process.proses-bisnis.index')
-            ->with('success', 'APQC berhasil dihapus.');
-    }
 
     /**
      * Store a newly created Function item.

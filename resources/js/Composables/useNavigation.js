@@ -216,16 +216,10 @@ export function useNavigation() {
         const architectureChildren = [
             {
                 label: "APQC",
-                href: safeRoute("itom.business-process.proses-bisnis.index", {
-                    tab: "apqc",
-                }),
+                href: safeRoute("itom.business-process.apqc.index"),
                 icon: CubeIcon,
                 active: (url) =>
-                    getTab(url) === "apqc" ||
-                    ((url || "").includes(
-                        "/business-process/proses-bisnis",
-                    ) &&
-                        !getTab(url)),
+                    (url || "").includes("/business-process/apqc"),
             },
             {
                 label: "Business Capability",
@@ -369,7 +363,7 @@ export function useNavigation() {
             },
             {
                 label: "Business Process",
-                href: safeRoute("itom.business-process.proses-bisnis.index"),
+                href: safeRoute("itom.business-process.apqc.index"),
                 icon: CubeIcon,
                 active: (url) =>
                     (url || "").includes("/business-process") &&
@@ -390,7 +384,7 @@ export function useNavigation() {
             },
             {
                 label: "Operating Model",
-                href: safeRoute("itom.operating-model.index"),
+                href: safeRoute("itom.operating-model.framework.index"),
                 icon: Squares2X2Icon,
                 active: (url) =>
                     (url || "").includes("/operating-model"),
@@ -405,7 +399,13 @@ export function useNavigation() {
                             ) ||
                             (url || "").includes(
                                 "/operating-model/cobit-component",
-                            ),
+                            ) ||
+                            [
+                                "/itom/operating-model",
+                                "/itom/operating-model/",
+                                "/operating-model",
+                                "/operating-model/",
+                            ].includes((url || "").split("?")[0]),
                     },
                     {
                         label: "IT Governance",
