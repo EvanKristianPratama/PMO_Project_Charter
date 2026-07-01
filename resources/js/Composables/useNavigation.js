@@ -490,7 +490,7 @@ export function useNavigation() {
                 label: "RACI Analysis",
                 href: safeRoute("itom.raci.infoflow.index"),
                 icon: DocumentTextIcon,
-                active: (url) => (url || "").includes("/raci"),
+                active: (url) => (url || "").includes("/raci/") && !(url || "").includes("operating-model"),
                 children: [
                     {
                         label: "COBIT 2019 Information Flow",
