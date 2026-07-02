@@ -5,8 +5,11 @@ use Inertia\Inertia;
 
 use Modules\ITOM\Controllers\BusinessProcess\BusinessCapability\BusinessCapabilityController;
 use Modules\ITOM\Controllers\BusinessProcess\OrganizationStructure\OrganizationController as BusinessProcessOrganizationStructureController;
-use Modules\ITOM\Controllers\BusinessProcess\ProsesBisnis\ProsesBisnisController as BusinessProcessProsesBisnisController;
+use Modules\ITOM\Controllers\BusinessProcess\BusinessProcess\BusinessProcessController;
 use Modules\ITOM\Controllers\BusinessProcess\APQC\ApqcController;
+use Modules\ITOM\Controllers\BusinessProcess\Kpi\KpiController;
+use Modules\ITOM\Controllers\BusinessProcess\Function\FunctionController;
+use Modules\ITOM\Controllers\BusinessProcess\RegulationMapping\RegulationMappingController;
 use Modules\ITOM\Controllers\ResourceManagement\ResourceManagementController as MainResourceManagementController;
 use Modules\ITOM\Controllers\OperatingModel\OperatingModelController;
 use Modules\ITOM\Controllers\Policy\CobitComponentController;
@@ -169,100 +172,64 @@ Route::middleware(["approved"])->group(function () {
         [BusinessCapabilityController::class, "destroy"],
     )->name("business-process.business-capability.destroy");
 
-    // Proses Bisnis (Business Process) CRUD under Architecture
-    Route::get("/business-process/proses-bisnis", [
-        BusinessProcessProsesBisnisController::class,
-        "index",
-    ])->name("business-process.proses-bisnis.index");
-    
-    Route::get("/business-process/proses-bisnis/manage", [
-        BusinessProcessProsesBisnisController::class,
-        "manage",
-    ])->name("business-process.proses-bisnis.manage");
-    
-    Route::post("/business-process/proses-bisnis", [
-        BusinessProcessProsesBisnisController::class,
-        "store",
-    ])->name("business-process.proses-bisnis.store");
-    
-    Route::put("/business-process/proses-bisnis/{id}", [
-        BusinessProcessProsesBisnisController::class,
-        "update",
-    ])->name("business-process.proses-bisnis.update");
-    
-    Route::delete("/business-process/proses-bisnis/{id}", [
-        BusinessProcessProsesBisnisController::class,
-        "destroy",
-    ])->name("business-process.proses-bisnis.destroy");
-    
-    // APQC CRUD under Architecture
-    Route::get("/business-process/apqc", [
-        ApqcController::class,
-        "index",
-    ])->name("business-process.apqc.index");
 
-    Route::post("/business-process/apqc", [
-        ApqcController::class,
-        "store",
-    ])->name("business-process.apqc.store");
-    
-    Route::put("/business-process/apqc/{id}", [
-        ApqcController::class,
-        "update",
-    ])->name("business-process.apqc.update");
-    
-    Route::delete("/business-process/apqc/{id}", [
-        ApqcController::class,
-        "destroy",
-    ])->name("business-process.apqc.destroy");
+    // Business Process sub-menus route grouping
+    Route::prefix("business-process")
+        ->name("business-process.")
+        ->group(function () {
+            
+            // APQC
+            Route::prefix("apqc")
+                ->name("apqc.")
+                ->controller(ApqcController::class)
+                ->group(function () {
+                    Route::get("/", "index")->name("index");
+                    Route::post("/", "store")->name("store");
+                    Route::put("/{id}", "update")->name("update");
+                    Route::delete("/{id}", "destroy")->name("destroy");
+                });
 
-    // Proses Bisnis v2 CRUD under Architecture
-    Route::post("/business-process/proses-bisnis-v2", [
-        BusinessProcessProsesBisnisController::class,
-        "storeProsesBisnisV2",
-    ])->name("business-process.proses-bisnis-v2.store");
-    
-    Route::put("/business-process/proses-bisnis-v2/{id}", [
-        BusinessProcessProsesBisnisController::class,
-        "updateProsesBisnisV2",
-    ])->name("business-process.proses-bisnis-v2.update");
-    
-    Route::delete("/business-process/proses-bisnis-v2/{id}", [
-        BusinessProcessProsesBisnisController::class,
-        "destroyProsesBisnisV2",
-    ])->name("business-process.proses-bisnis-v2.destroy");
+            // Business Process (Proses Bisnis v2)
+            Route::prefix("proses-bisnis-v2")
+                ->name("proses-bisnis-v2.")
+                ->controller(BusinessProcessController::class)
+                ->group(function () {
+                    Route::get("/", "index")->name("index");
+                    Route::post("/", "storeProsesBisnisV2")->name("store");
+                    Route::put("/{id}", "updateProsesBisnisV2")->name("update");
+                    Route::delete("/{id}", "destroyProsesBisnisV2")->name("destroy");
+                });
 
-    // Function CRUD under Architecture
-    Route::post("/business-process/function", [
-        BusinessProcessProsesBisnisController::class,
-        "storeFunction",
-    ])->name("business-process.function.store");
-    
-    Route::put("/business-process/function/{id}", [
-        BusinessProcessProsesBisnisController::class,
-        "updateFunction",
-    ])->name("business-process.function.update");
-    
-    Route::delete("/business-process/function/{id}", [
-        BusinessProcessProsesBisnisController::class,
-        "destroyFunction",
-    ])->name("business-process.function.destroy");
+            // Function
+            Route::prefix("function")
+                ->name("function.")
+                ->controller(FunctionController::class)
+                ->group(function () {
+                    Route::get("/", "index")->name("index");
+                    Route::post("/", "storeFunction")->name("store");
+                    Route::put("/{id}", "updateFunction")->name("update");
+                    Route::delete("/{id}", "destroyFunction")->name("destroy");
+                });
 
-    // KPI CRUD under Architecture
-    Route::post("/business-process/kpi", [
-        BusinessProcessProsesBisnisController::class,
-        "storeKpi",
-    ])->name("business-process.kpi.store");
-    
-    Route::put("/business-process/kpi/{id}", [
-        BusinessProcessProsesBisnisController::class,
-        "updateKpi",
-    ])->name("business-process.kpi.update");
-    
-    Route::delete("/business-process/kpi/{id}", [
-        BusinessProcessProsesBisnisController::class,
-        "destroyKpi",
-    ])->name("business-process.kpi.destroy");
+            // KPI
+            Route::prefix("kpi")
+                ->name("kpi.")
+                ->controller(KpiController::class)
+                ->group(function () {
+                    Route::get("/", "index")->name("index");
+                    Route::post("/", "storeKpi")->name("store");
+                    Route::put("/{id}", "updateKpi")->name("update");
+                    Route::delete("/{id}", "destroyKpi")->name("destroy");
+                });
+
+            // Regulation Mapping
+            Route::prefix("regulation-mapping")
+                ->name("regulation-mapping.")
+                ->controller(RegulationMappingController::class)
+                ->group(function () {
+                    Route::get("/", "index")->name("index");
+                });
+        });
 
     // Resource Management CRUD
     Route::prefix("/resource-management")

@@ -11,7 +11,11 @@ class FunctionService
      */
     public function getFunctions()
     {
-        return MstFunction::with(['company', 'regulations', 'organizations'])->orderBy('name')->get();
+        return MstFunction::with([
+            'company:id,name,singkatan',
+            'regulations:id,judul,nomor,tipe,status',
+            'organizations:id,name,alias'
+        ])->orderBy('name')->get();
     }
 
     /**
@@ -19,13 +23,7 @@ class FunctionService
      */
     public function createFunction(array $payload): MstFunction
     {
-        $function = MstFunction::create([
-            'company_id' => $payload['company_id'],
-            'parent_id'  => !empty($payload['parent_id']) ? $payload['parent_id'] : null,
-            'name'       => $payload['name'],
-            'alias'      => $payload['alias'] ?? null,
-            'deskripsi'  => $payload['deskripsi'] ?? null,
-        ]);
+        $function = MstFunction::create($this->normalizePayload($payload));
 
         $function->regulations()->sync($payload['regulation_ids'] ?? []);
         $function->organizations()->sync($payload['organization_ids'] ?? []);
@@ -38,13 +36,7 @@ class FunctionService
      */
     public function updateFunction(MstFunction $function, array $payload): MstFunction
     {
-        $function->update([
-            'company_id' => $payload['company_id'],
-            'parent_id'  => !empty($payload['parent_id']) ? $payload['parent_id'] : null,
-            'name'       => $payload['name'],
-            'alias'      => $payload['alias'] ?? null,
-            'deskripsi'  => $payload['deskripsi'] ?? null,
-        ]);
+        $function->update($this->normalizePayload($payload));
 
         $function->regulations()->sync($payload['regulation_ids'] ?? []);
         $function->organizations()->sync($payload['organization_ids'] ?? []);
@@ -61,5 +53,19 @@ class FunctionService
         $function->regulations()->detach();
         $function->organizations()->detach();
         $function->delete();
+    }
+
+    /**
+     * Normalize the payload fields.
+     */
+    private function normalizePayload(array $payload): array
+    {
+        return [
+            'company_id' => isset($payload['company_id']) ? (int) $payload['company_id'] : null,
+            'parent_id'  => !empty($payload['parent_id']) ? (int) $payload['parent_id'] : null,
+            'name'       => isset($payload['name']) ? trim($payload['name']) : null,
+            'alias'      => isset($payload['alias']) && $payload['alias'] !== '' ? trim($payload['alias']) : null,
+            'deskripsi'  => isset($payload['deskripsi']) && $payload['deskripsi'] !== '' ? trim($payload['deskripsi']) : null,
+        ];
     }
 }

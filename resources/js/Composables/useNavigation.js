@@ -232,35 +232,33 @@ export function useNavigation() {
             },
             {
                 label: "Business Process",
-                href: safeRoute("itom.business-process.proses-bisnis.index", {
-                    tab: "proses-bisnis-v2",
-                }),
+                href: safeRoute("itom.business-process.proses-bisnis-v2.index"),
                 icon: CubeIcon,
-                active: (url) => getTab(url) === "proses-bisnis-v2",
+                active: (url) =>
+                    (url || "").includes("/business-process/proses-bisnis-v2"),
             },
             {
                 label: "Function",
-                href: safeRoute("itom.business-process.proses-bisnis.index", {
-                    tab: "function",
-                }),
+                href: safeRoute("itom.business-process.function.index"),
                 icon: CubeIcon,
-                active: (url) => getTab(url) === "function",
+                active: (url) =>
+                    (url || "").includes("/business-process/function"),
             },
             {
                 label: "KPI",
-                href: safeRoute("itom.business-process.proses-bisnis.index", {
-                    tab: "kpi",
-                }),
+                href: safeRoute("itom.business-process.kpi.index"),
                 icon: CubeIcon,
-                active: (url) => getTab(url) === "kpi",
+                active: (url) =>
+                    (url || "").includes("/business-process/kpi"),
             },
             {
                 label: "Regulation Mapping Function",
-                href: safeRoute("itom.business-process.proses-bisnis.index", {
-                    tab: "regulation-map",
-                }),
+                href: safeRoute("itom.business-process.regulation-mapping.index"),
                 icon: DocumentTextIcon,
-                active: (url) => getTab(url) === "regulation-map",
+                active: (url) =>
+                    (url || "").includes(
+                        "/business-process/regulation-mapping",
+                    ),
             },
             // {
             //     label: "Information System",

@@ -9,6 +9,13 @@ class BusinessCapabilityService
     public function getBusinessCapabilities(): array
     {
         return MstBusinessCapability::query()
+            ->select([
+                'id',
+                'group_business',
+                'group_function',
+                'subGroup_function',
+                'subSubGroup_function',
+            ])
             ->orderBy('id')
             ->get()
             ->map(fn (MstBusinessCapability $businessCapability): array => $this->businessCapabilityRow($businessCapability))
@@ -45,15 +52,22 @@ class BusinessCapabilityService
 
     private function normalizedPayload(array $payload): array
     {
-        return collect($payload)
-            ->only([
-                'group_business',
-                'group_function',
-                'subGroup_function',
-                'subSubGroup_function',
-            ])
-            ->map(fn ($value) => is_string($value) ? trim($value) : $value)
-            ->map(fn ($value) => $value === '' ? null : $value)
-            ->all();
+        $keys = [
+            'group_business',
+            'group_function',
+            'subGroup_function',
+            'subSubGroup_function',
+        ];
+
+        $normalized = [];
+        foreach ($keys as $key) {
+            if (array_key_exists($key, $payload)) {
+                $val = $payload[$key];
+                $val = is_string($val) ? trim($val) : $val;
+                $normalized[$key] = $val === '' ? null : $val;
+            }
+        }
+
+        return $normalized;
     }
 }

@@ -11,7 +11,7 @@ class KpiService
      */
     public function getKpis()
     {
-        return MstKpi::with('company')->orderBy('id', 'asc')->get();
+        return MstKpi::with('company:id,name')->orderBy('id', 'asc')->get();
     }
 
     /**
@@ -19,10 +19,7 @@ class KpiService
      */
     public function createKpi(array $payload): MstKpi
     {
-        return MstKpi::create([
-            'deskripsi' => $payload['deskripsi'] ?? null,
-            'company_id' => $payload['company_id'] ?? null,
-        ]);
+        return MstKpi::create($this->normalizePayload($payload));
     }
 
     /**
@@ -30,10 +27,7 @@ class KpiService
      */
     public function updateKpi(MstKpi $kpi, array $payload): MstKpi
     {
-        $kpi->update([
-            'deskripsi' => $payload['deskripsi'] ?? null,
-            'company_id' => $payload['company_id'] ?? null,
-        ]);
+        $kpi->update($this->normalizePayload($payload));
         return $kpi->refresh();
     }
 
@@ -43,5 +37,16 @@ class KpiService
     public function deleteKpi(MstKpi $kpi): void
     {
         $kpi->delete();
+    }
+
+    /**
+     * Normalize the payload fields.
+     */
+    private function normalizePayload(array $payload): array
+    {
+        return [
+            'deskripsi' => isset($payload['deskripsi']) ? trim($payload['deskripsi']) : null,
+            'company_id' => !empty($payload['company_id']) ? (int) $payload['company_id'] : null,
+        ];
     }
 }

@@ -1,9 +1,6 @@
 <template>
     <ModulLayout title="Dokumen Proses Bisnis">
         <div class="animate-fade-in-up space-y-6">
-
-
-            <!-- Table Component -->
             <APQCTable
                 v-if="activeTab === 'apqc'"
                 :apqc-list="apqcList"
@@ -80,7 +77,14 @@ defineProps({
 const page = usePage();
 
 const getTabFromUrl = () => {
-    const params = new URLSearchParams(page.url.split('?')[1] || '');
+    const url = page.url;
+    if (url.includes('/business-process/proses-bisnis-v2')) return 'proses-bisnis-v2';
+    if (url.includes('/business-process/function')) return 'function';
+    if (url.includes('/business-process/kpi')) return 'kpi';
+    if (url.includes('/business-process/regulation-mapping')) return 'regulation-map';
+    if (url.includes('/business-process/apqc')) return 'apqc';
+
+    const params = new URLSearchParams(url.split('?')[1] || '');
     return params.get('tab') || 'apqc';
 };
 
