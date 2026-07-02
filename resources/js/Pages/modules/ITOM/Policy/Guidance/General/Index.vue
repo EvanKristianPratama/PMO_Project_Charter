@@ -274,8 +274,8 @@ function handleFastDocumentSwitch(regId) {
     if (!selectedReg) return;
 
     const targetRoute = String(selectedReg.tipe || '').toLowerCase() === 'procedure'
-        ? 'policy.procedure.index'
-        : 'policy.general.index';
+        ? 'itom.policy.procedure.index'
+        : 'itom.policy.general.index';
 
     router.visit(route(targetRoute, { regulation_id: regId }));
 }

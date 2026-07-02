@@ -666,8 +666,8 @@ function openEditModal(reg) {
 function handleDetailClick(reg) {
     const targetRoute =
         String(reg.tipe || "").toLowerCase() === "procedure"
-            ? "policy.procedure.index"
-            : "policy.general.index";
+            ? "itom.policy.procedure.index"
+            : "itom.policy.general.index";
 
     router.visit(route(targetRoute, { regulation_id: reg.id }));
 }
