@@ -23,6 +23,36 @@
                     <h2 class="text-xs font-semibold uppercase text-slate-800 dark:text-white">
                         {{ company.name }}
                     </h2>
+                    
+                    <div class="flex items-center gap-1.5 ml-4">
+                        <span class="text-[9px] text-slate-500 dark:text-slate-400"></span>
+                        <select
+                            :value="maxExpandDepthMap[company.id] !== undefined && maxExpandDepthMap[company.id] !== null ? maxExpandDepthMap[company.id] : ''"
+                            @change="handleDepthChange(company.id, $event)"
+                            class="rounded border border-slate-300 bg-white px-2 py-0.5 text-[9px] text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white font-medium"
+                        >
+                            <option value="">-- Level --</option>
+                            <option value="0">Level 0 (Hanya Root)</option>
+                            <option value="1">Level 1</option>
+                            <option value="2">Level 2</option>
+                            <option value="3">Level 3</option>
+                            <option value="4">Level 4</option>
+                            <option value="5">Level 5</option>
+                            <option value="99">Expand Semua</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center gap-1.5 ml-4 border-l border-slate-200 dark:border-white/10 pl-4">
+                        <label class="inline-flex items-center gap-1.5 cursor-pointer text-[9px] text-slate-500 dark:text-slate-400 font-medium select-none">
+                            <input
+                                type="checkbox"
+                                v-model="showPejabatLocal"
+                                class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 h-3.5 w-3.5 dark:border-white/10 dark:bg-[#1a1a1a]"
+                            />
+                            Pejabat
+                        </label>
+                    </div>
+
                     <span class="ml-auto text-[9px] text-slate-400 dark:text-slate-500">
                         {{ company.bods.length }} anggota
                     </span>
@@ -55,7 +85,7 @@
                                 <div
                                     class="relative flex flex-col items-center justify-center rounded border-2 border-dashed px-2 py-1.5 text-center leading-tight cursor-default opacity-70"
                                     :class="ghostBoxClass"
-                                    :title="`Referensi eksternal dari ${ghostGroup.ghostCompanyName}`"
+                                    :title="`${ghostGroup.ghostNode.name}${ghostGroup.ghostNode.alias ? ' (' + ghostGroup.ghostNode.alias + ')' : ''}`"
                                 >
                                     <!-- Badge company asal -->
                                     <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-amber-400 text-[7px] font-bold text-slate-900 px-1.5 py-0.5 leading-none shadow">
@@ -65,8 +95,12 @@
                                     <span class="block max-w-full break-words whitespace-normal text-[9px] font-bold mt-1">
                                         {{ ghostGroup.ghostNode.name }}
                                     </span>
+                                    <!-- Alias -->
+                                    <span v-if="ghostGroup.ghostNode.alias" class="block max-w-full break-words whitespace-normal text-[8px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
+                                        ({{ ghostGroup.ghostNode.alias }})
+                                    </span>
                                     <!-- Pejabat -->
-                                    <span v-if="ghostGroup.ghostNode.pejabat" class="block max-w-full break-words whitespace-normal text-[8px] font-normal mt-0.5 opacity-75">
+                                    <span v-if="showPejabat && ghostGroup.ghostNode.pejabat" class="block max-w-full break-words whitespace-normal text-[8px] font-normal mt-0.5 opacity-75">
                                         {{ ghostGroup.ghostNode.pejabat }}
                                     </span>
                                     <!-- Label referensi -->
@@ -93,6 +127,8 @@
                                     :is-first-child="idx === 0"
                                     :is-last-child="idx === ghostGroup.children.length - 1"
                                     :type-label="typeLabel"
+                                    :max-expand-depth="maxExpandDepthMap[company.id]"
+                                    :show-pejabat="showPejabatLocal"
                                 />
                             </div>
                         </div>
@@ -106,15 +142,17 @@
                             class="flex flex-row justify-center items-start gap-4 flex-wrap min-w-max"
                         >
                             <BodThreeView
-                                v-for="rootBod in getLocalRootBods(company)"
-                                :key="rootBod.id"
-                                :node="rootBod"
-                                :all-bods="company.bods"
-                                :all-bods-global="bods"
-                                :companies="companies"
-                                :is-root="false"
-                                :depth="0"
-                                :type-label="typeLabel"
+                                    v-for="rootBod in getLocalRootBods(company)"
+                                    :key="rootBod.id"
+                                    :node="rootBod"
+                                    :all-bods="company.bods"
+                                    :all-bods-global="bods"
+                                    :companies="companies"
+                                    :is-root="false"
+                                    :depth="0"
+                                    :type-label="typeLabel"
+                                    :max-expand-depth="maxExpandDepthMap[company.id]"
+                                    :show-pejabat="showPejabatLocal"
                             />
                         </div>
                     </div>
@@ -126,16 +164,16 @@
     <!-- NODE: render satu kotak jabatan BOD + children-nya -->
     <div v-else class="relative flex flex-col items-center min-w-0 shrink-0">
         <!-- Sibling connectors -->
-        <div v-if="!isWakilStack && depth >= 1 && (!isFirstChild || !isLastChild)"
+        <div v-if="!isWakilStack && depth >= 1 && (!isFirstChild || !isLastChild) && !(node?.role_function && node.role_function.toLowerCase() === 'fungsi')"
             class="absolute top-0 h-px bg-slate-300 dark:bg-white/20" :class="[
                 isFirstChild ? 'left-1/2 -right-2' : '',
                 isLastChild ? '-left-2 right-1/2' : '',
                 !isFirstChild && !isLastChild ? '-left-2 -right-2' : '',
             ]" aria-hidden="true" />
 
-        <!-- Garis vertikal dari atas ke kotak (untuk non-root depth >= 1) -->
+        <!-- Garis vertikal dari atas ke kotak (untuk non-root depth >= 1, kecuali node fungsi) -->
         <div
-            v-if="depth >= 1"
+            v-if="depth >= 1 && !(node?.role_function && node.role_function.toLowerCase() === 'fungsi')"
             class="w-px bg-slate-300 dark:bg-white/20"
             style="height: 16px;"
             aria-hidden="true"
@@ -151,8 +189,12 @@
             <span class="block max-w-full break-words whitespace-normal text-[9px] font-bold">
                 {{ node.name }}
             </span>
+            <!-- Alias -->
+            <span v-if="node.alias" class="block max-w-full break-words whitespace-normal text-[8px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
+                ({{ node.alias }})
+            </span>
             <!-- Pejabat -->
-            <span v-if="node.pejabat" class="block max-w-full break-words whitespace-normal text-[8px] font-normal mt-0.5 opacity-75">
+            <span v-if="showPejabat && node.pejabat" class="block max-w-full break-words whitespace-normal text-[8px] font-normal mt-0.5 opacity-75">
                 {{ node.pejabat }}
             </span>
 
@@ -169,6 +211,41 @@
             </span>
         </div>
 
+        <!-- Fungsi nodes: branch ke kanan dari garis vertikal connector (role_function = 'fungsi') -->
+        <!-- Layout: │──── [Fungsi 1]
+                     │──── [Fungsi 2]
+                  [Wakil / Normal children] -->
+        <template v-if="combinedFungsi.length > 0 && isExpanded">
+            <div
+                v-for="(fungsi, fIdx) in combinedFungsi"
+                :key="'fungsi-' + fungsi.id"
+                class="relative"
+                style="width: 0; overflow: visible;"
+            >
+                <!-- Garis vertikal komando utama (absolute, sejajar center parent karena w-0 + items-center) -->
+                <div
+                    class="absolute top-0 bottom-0 bg-slate-300 dark:bg-white/20"
+                    style="left: 50%; transform: translateX(-50%); width: 1px;"
+                    aria-hidden="true"
+                />
+                <!-- Garis horizontal + node fungsi (dalam flow, menentukan tinggi row) -->
+                <div class="flex items-center py-1" style="white-space: nowrap;">
+                    <div class="bg-slate-300 dark:bg-white/20 flex-shrink-0" style="width: 60px; height: 1px;" aria-hidden="true" />
+                    <BodThreeView
+                        :node="fungsi"
+                        :all-bods="allBods"
+                        :all-bods-global="allBodsGlobal"
+                        :companies="companies"
+                        :is-root="false"
+                        :depth="depth + 1"
+                        :type-label="typeLabel"
+                        :max-expand-depth="maxExpandDepth"
+                        :show-pejabat="showPejabat"
+                    />
+                </div>
+            </div>
+        </template>
+
         <!-- Children (vertical wakil stack) -->
         <template v-if="combinedWakil.length > 0 && isExpanded">
             <BodThreeView
@@ -181,16 +258,18 @@
                 :is-root="false"
                 :depth="depth + 1"
                 :type-label="typeLabel"
+                :max-expand-depth="maxExpandDepth"
+                :show-pejabat="showPejabat"
             />
         </template>
 
         <!-- Children (horizontal branching for normal children) -->
         <template v-if="combinedWakil.length === 0 && combinedNormal.length > 0 && isExpanded">
             <div class="relative mt-4 w-full">
-                <!-- Garis vertikal turun -->
+                <!-- Garis vertikal turun (diperluas jika ada fungsi di atas agar tidak ada gap) -->
                 <div
                     class="absolute left-1/2 -translate-x-1/2 w-px bg-slate-300 dark:bg-white/20"
-                    style="top: -8px; height: 8px;"
+                    :style="combinedFungsi.length > 0 ? 'top: -16px; height: 16px;' : 'top: -8px; height: 8px;'"
                     aria-hidden="true"
                 />
 
@@ -208,6 +287,8 @@
                         :is-first-child="idx === 0"
                         :is-last-child="idx === combinedNormal.length - 1"
                         :type-label="typeLabel"
+                        :max-expand-depth="maxExpandDepth"
+                        :show-pejabat="showPejabat"
                     />
                 </div>
             </div>
@@ -216,7 +297,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 
 defineOptions({ name: 'BodThreeView' });
 
@@ -274,10 +355,40 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    maxExpandDepth: {
+        type: Number,
+        default: null,
+    },
+    showPejabat: {
+        type: Boolean,
+        default: false,
+    },
 });
+
+const showPejabatLocal = ref(false);
 
 // Expand by default kecuali depth >= 3
 const isExpanded = ref(props.depth < 3);
+
+const maxExpandDepthMap = ref({});
+
+const handleDepthChange = (companyId, event) => {
+    const val = event.target.value;
+    if (val === '') {
+        maxExpandDepthMap.value[companyId] = null;
+        return;
+    }
+    const depthVal = Number(val);
+    maxExpandDepthMap.value[companyId] = depthVal;
+};
+
+watch(() => props.maxExpandDepth, (newVal) => {
+    if (newVal !== null && newVal !== undefined) {
+        isExpanded.value = props.depth < newVal;
+    } else {
+        isExpanded.value = props.depth < 3;
+    }
+});
 
 // =====================
 // Root-level computed
@@ -368,20 +479,28 @@ const getLocalRootBods = (company) => {
 
 const combinedWakil = computed(() => {
     if (!props.node) return [];
-    const directWakil = props.allBods.filter(b => Number(b.parent_id) === Number(props.node.id) && b.grup_function && b.grup_function.toLowerCase() === 'wakil');
-    const extraWakil = (props.extraChildren || []).filter(b => b.grup_function && b.grup_function.toLowerCase() === 'wakil');
+    const directWakil = props.allBods.filter(b => Number(b.parent_id) === Number(props.node.id) && b.role_function && b.role_function.toLowerCase() === 'wakil');
+    const extraWakil = (props.extraChildren || []).filter(b => b.role_function && b.role_function.toLowerCase() === 'wakil');
     return [...directWakil, ...extraWakil];
 });
 
 const combinedNormal = computed(() => {
     if (!props.node) return [];
-    const directNormal = props.allBods.filter(b => Number(b.parent_id) === Number(props.node.id) && (!b.grup_function || b.grup_function.toLowerCase() !== 'wakil'));
-    const extraNormal = (props.extraChildren || []).filter(b => !b.grup_function || b.grup_function.toLowerCase() !== 'wakil');
+    const directNormal = props.allBods.filter(b => Number(b.parent_id) === Number(props.node.id) && (!b.role_function || (b.role_function.toLowerCase() !== 'wakil' && b.role_function.toLowerCase() !== 'fungsi')));
+    const extraNormal = (props.extraChildren || []).filter(b => !b.role_function || (b.role_function.toLowerCase() !== 'wakil' && b.role_function.toLowerCase() !== 'fungsi'));
     return [...directNormal, ...extraNormal];
 });
 
+/**
+ * Fungsi nodes: branch ke kanan dari garis vertikal, tidak masuk dalam garis komando utama.
+ */
+const combinedFungsi = computed(() => {
+    if (!props.node) return [];
+    return props.allBods.filter(b => Number(b.parent_id) === Number(props.node.id) && b.role_function && b.role_function.toLowerCase() === 'fungsi');
+});
+
 const hasChildren = computed(() => {
-    return combinedWakil.value.length > 0 || combinedNormal.value.length > 0;
+    return combinedWakil.value.length > 0 || combinedNormal.value.length > 0 || combinedFungsi.value.length > 0;
 });
 
 const wakilChildToRender = computed(() => combinedWakil.value[0]);
@@ -393,7 +512,10 @@ const remainingChildrenToPushDown = computed(() => {
 });
 
 const nodeTitle = computed(() => {
-    const parts = [props.node?.name];
+    const parts = [];
+    if (props.node?.name) {
+        parts.push(props.node.alias ? `${props.node.name} (${props.node.alias})` : props.node.name);
+    }
     if (props.node?.pejabat) parts.push(props.node.pejabat);
     if (props.node?.sumber) parts.push(`Sumber: ${props.node.sumber}`);
     if (hasChildren.value) {
@@ -406,10 +528,13 @@ const toggleExpand = () => {
     isExpanded.value = !isExpanded.value;
 };
 
-/** Style box — node normal */
+/** Style box — node berdasarkan role_function */
 const nodeBoxClass = computed(() => {
-    if (props.node?.grup_function && props.node.grup_function.toLowerCase() === 'wakil') {
+    if (props.node?.role_function && props.node.role_function.toLowerCase() === 'wakil') {
         return 'min-w-[80px] max-w-[120px] bg-slate-50 text-slate-900 border-blue-400 dark:bg-[#1a1a1a] dark:text-slate-100 dark:border-blue-500/40';
+    }
+    if (props.node?.role_function && props.node.role_function.toLowerCase() === 'fungsi') {
+        return 'min-w-[80px] max-w-[120px] bg-violet-50 text-violet-900 border-violet-400 dark:bg-violet-900/20 dark:text-violet-100 dark:border-violet-500/40';
     }
     return 'min-w-[80px] max-w-[120px] bg-white text-slate-900 border-slate-300 dark:bg-[#1a1a1a] dark:text-slate-100 dark:border-white/10';
 });

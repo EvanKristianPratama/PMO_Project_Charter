@@ -1,6 +1,5 @@
 <template>
-    <ModulLayout title="Peran dan Tanggung Jawab">
-        <div class="space-y-6 animate-fade-in-up print:m-0 print:p-0">
+    <div class="space-y-6 animate-fade-in-up print:m-0 print:p-0">
             <!-- Sleek Action Bar at Top (print:hidden) -->
             <section class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white px-5 py-3.5 shadow-sm dark:border-white/10 dark:bg-[#171717] print:hidden">
                 <div class="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full bg-[#821f44]/10 blur-2xl"></div>
@@ -758,13 +757,11 @@
                 </transition>
             </div>
         </div>
-    </ModulLayout>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { usePage, Link, useForm } from '@inertiajs/vue3';
-import ModulLayout from '@/Layouts/ModulLayout.vue';
 import GuidanceChapterNavigation from '@/Components/modules/ITOM/Regulation/GuidanceChapterNavigation.vue';
 import PertaminaDocumentHeader from '@/Components/modules/ITOM/Regulation/PertaminaDocumentHeader.vue';
 

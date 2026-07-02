@@ -2,9 +2,22 @@
     <template v-if="isRoot">
         <section
             class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-            <div class="border-b border-slate-200 px-3 py-2 dark:border-white/10">
-                <h2 class="text-xs font-semibold uppercase text-slate-800 dark:text-white">Struktur Organisasi Holding
-                </h2>
+            <div class="border-b border-slate-200 px-3 py-2 dark:border-white/10 flex items-center justify-between">
+                <h2 class="text-xs font-semibold uppercase text-slate-800 dark:text-white">Struktur Organisasi Holding</h2>
+                <div class="flex items-center gap-1.5">
+                    <button
+                        @click="setForceExpand('holding', true)"
+                        class="inline-flex items-center justify-center rounded bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-700 dark:text-slate-200 px-2 py-0.5 text-[9px] font-semibold transition"
+                    >
+                        Expand All
+                    </button>
+                    <button
+                        @click="setForceExpand('holding', false)"
+                        class="inline-flex items-center justify-center rounded bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-700 dark:text-slate-200 px-2 py-0.5 text-[9px] font-semibold transition"
+                    >
+                        Collapse All
+                    </button>
+                </div>
             </div>
 
             <div class="px-2 py-3">
@@ -15,16 +28,29 @@
 
                 <div v-else class="grid grid-cols-[repeat(auto-fit,minmax(12rem,1fr))] gap-3">
                     <ThreeView v-for="item in holdingTree" :key="item.organization_id" :node="item" :is-root="false"
-                        :depth="0" />
+                        :depth="0" :force-expand-state="forceExpandMap['holding']" />
                 </div>
             </div>
         </section>
 
         <section
             class="mt-4 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-            <div class="border-b border-slate-200 px-3 py-2 dark:border-white/10">
-                <h2 class="text-xs font-semibold uppercase text-slate-800 dark:text-white">Struktur Organisasi
-                    Holding</h2>
+            <div class="border-b border-slate-200 px-3 py-2 dark:border-white/10 flex items-center justify-between">
+                <h2 class="text-xs font-semibold uppercase text-slate-800 dark:text-white">Struktur Organisasi Holding (Subholding)</h2>
+                <div class="flex items-center gap-1.5">
+                    <button
+                        @click="setForceExpand('subholding', true)"
+                        class="inline-flex items-center justify-center rounded bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-700 dark:text-slate-200 px-2 py-0.5 text-[9px] font-semibold transition"
+                    >
+                        Expand All
+                    </button>
+                    <button
+                        @click="setForceExpand('subholding', false)"
+                        class="inline-flex items-center justify-center rounded bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-700 dark:text-slate-200 px-2 py-0.5 text-[9px] font-semibold transition"
+                    >
+                        Collapse All
+                    </button>
+                </div>
             </div>
 
             <div class="px-2 py-3">
@@ -35,15 +61,29 @@
 
                 <div v-else class="grid grid-cols-[repeat(auto-fit,minmax(12rem,1fr))] gap-3">
                     <ThreeView v-for="item in subHoldingTree" :key="item.organization_id" :node="item" :is-root="false"
-                        :depth="0" />
+                        :depth="0" :force-expand-state="forceExpandMap['subholding']" />
                 </div>
             </div>
         </section>
 
         <section
             class="mt-4 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-            <div class="border-b border-slate-200 px-3 py-2 dark:border-white/10">
+            <div class="border-b border-slate-200 px-3 py-2 dark:border-white/10 flex items-center justify-between">
                 <h2 class="text-xs font-semibold uppercase text-slate-800 dark:text-white">Struktur Organisasi Subholding Upstream / CEO</h2>
+                <div class="flex items-center gap-1.5">
+                    <button
+                        @click="setForceExpand('ceo', true)"
+                        class="inline-flex items-center justify-center rounded bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-700 dark:text-slate-200 px-2 py-0.5 text-[9px] font-semibold transition"
+                    >
+                        Expand All
+                    </button>
+                    <button
+                        @click="setForceExpand('ceo', false)"
+                        class="inline-flex items-center justify-center rounded bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-700 dark:text-slate-200 px-2 py-0.5 text-[9px] font-semibold transition"
+                    >
+                        Collapse All
+                    </button>
+                </div>
             </div>
 
             <div class="px-2 py-3 overflow-x-auto w-full">
@@ -54,7 +94,7 @@
 
                 <div v-else class="flex flex-col items-center min-w-max p-4">
                     <UpstreamThreeView v-for="item in ceoTree" :key="item.organization_id" :node="item"
-                        :depth="0" />
+                        :depth="0" :force-expand-state="forceExpandMap['ceo']" />
                 </div>
             </div>
         </section>
@@ -70,6 +110,7 @@
             :depth="depth"
             :is-first-child="index === 0"
             :is-last-child="index === node.children.length - 1"
+            :force-expand-state="forceExpandState"
         />
     </template>
 
@@ -132,9 +173,10 @@
                             aria-hidden="true" />
 
                         <div class="flex flex-row justify-center items-start gap-x-2 gap-y-3 w-full min-w-0">
-                            <ThreeView v-for="(child, index) in node.children" :key="child.organization_id" :node="child"
+                             <ThreeView v-for="(child, index) in node.children" :key="child.organization_id" :node="child"
                                 :is-root="false" :depth="depth + 1" :is-first-child="index === 0"
-                                :is-last-child="index === node.children.length - 1" />
+                                :is-last-child="index === node.children.length - 1"
+                                :force-expand-state="forceExpandState" />
                         </div>
                     </div>
                 </template>
@@ -149,9 +191,10 @@
                         aria-hidden="true"></div>
 
                     <div class="flex flex-col gap-0" :class="depth === 6 ? 'pl-[50%]' : ''">
-                        <ThreeView v-for="(child, index) in node.children" :key="child.organization_id" :node="child"
+                         <ThreeView v-for="(child, index) in node.children" :key="child.organization_id" :node="child"
                             :is-root="false" :depth="depth + 1" :is-first-child="index === 0"
-                            :is-last-child="index === node.children.length - 1" />
+                            :is-last-child="index === node.children.length - 1"
+                            :force-expand-state="forceExpandState" />
                     </div>
                 </div>
             </div>
@@ -160,7 +203,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import UpstreamThreeView from './UpstreamThreeView.vue';
 
 defineOptions({
@@ -192,10 +235,31 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    forceExpandState: {
+        type: Boolean,
+        default: null,
+    },
 });
 
 // Depth 0-4, 6+ auto-expand, depth 5 collapsed by default (show/hide children on click)
 const isExpanded = ref(props.depth !== 5);
+
+const forceExpandMap = ref({});
+
+const setForceExpand = (key, state) => {
+    forceExpandMap.value[key] = state;
+    setTimeout(() => {
+        if (forceExpandMap.value[key] === state) {
+            forceExpandMap.value[key] = null;
+        }
+    }, 100);
+};
+
+watch(() => props.forceExpandState, (newVal) => {
+    if (newVal !== null) {
+        isExpanded.value = newVal;
+    }
+});
 
 const hasChildren = computed(() => Array.isArray(props.node?.children) && props.node.children.length > 0);
 

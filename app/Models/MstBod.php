@@ -21,6 +21,7 @@ class MstBod extends Model
         'alias',
         'sumber',
         'pejabat',
+        'role_function',
         'grup_function',
         'tipe',
         'sk_id',

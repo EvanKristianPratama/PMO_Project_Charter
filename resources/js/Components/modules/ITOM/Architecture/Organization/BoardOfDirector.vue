@@ -67,7 +67,8 @@
                     <tr>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-12">No</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Company</th>
-                        <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Organization Structure</th>
+                        <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Nama Organisasi</th>
+                        <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Alias</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Nama Jabatan</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Parent</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Pejabat</th>
@@ -90,6 +91,9 @@
                         </td>
                         <td class="px-4 py-2.5 text-slate-900 dark:text-white font-medium text-left">
                             {{ bod.name }}
+                        </td>
+                        <td class="px-4 py-2.5 text-slate-900 dark:text-white font-medium text-left">
+                            {{ bod.alias || '-' }}
                         </td>
                         <td class="px-4 py-2.5 text-slate-900 dark:text-white font-medium text-left">
                             {{ bod.nama_jabatan || '-' }}
@@ -132,7 +136,7 @@
                         </td>
                     </tr>
                     <tr v-if="filteredBods.length === 0">
-                        <td colspan="11" class="px-4 py-12 text-center">
+                        <td colspan="12" class="px-4 py-12 text-center">
                             <div class="flex flex-col items-center justify-center text-center">
                                 <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-slate-500 mb-4 border border-slate-200 dark:border-white/10">
                                     <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -285,6 +289,21 @@
                     placeholder="Contoh: Corporate / Operasional"
                 />
                 <span v-if="bodForm.errors.grup_function" class="text-xs text-red-500 font-medium">{{ bodForm.errors.grup_function }}</span>
+            </div>
+
+            <!-- BOD Role Function Input -->
+            <div class="flex flex-col gap-1.5">
+                <label for="bod_role_function" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Role</label>
+                <select
+                    id="bod_role_function"
+                    v-model="bodForm.role_function"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                >
+                    <option value="">-- Tidak ada --</option>
+                    <option value="wakil">Wakil</option>
+                    <option value="fungsi">Fungsi</option>
+                </select>
+                <span v-if="bodForm.errors.role_function" class="text-xs text-red-500 font-medium">{{ bodForm.errors.role_function }}</span>
             </div>
 
             <!-- BOD Order Input -->
@@ -449,6 +468,7 @@ const bodForm = useForm({
     sumber: '',
     pejabat: '',
     grup_function: '',
+    role_function: '',
     tipe: '',
     order: '',
 });
@@ -459,6 +479,7 @@ const openBODModal = () => {
     bodForm.clearErrors();
     bodForm.reset();
     bodForm.tipe = 'bod';
+    bodForm.role_function = '';
     bodForm.order = '';
     if (selectedCompanyId.value) {
         bodForm.company_id = selectedCompanyId.value;
@@ -478,6 +499,7 @@ const openEditBODModal = (bod) => {
     bodForm.sumber = bod.sumber || '';
     bodForm.pejabat = bod.pejabat || '';
     bodForm.grup_function = bod.grup_function || '';
+    bodForm.role_function = bod.role_function || '';
     bodForm.tipe = 'bod';
     bodForm.order = bod.order ?? '';
     isBODModalOpen.value = true;

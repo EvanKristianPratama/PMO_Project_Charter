@@ -8,6 +8,7 @@
             :depth="depth"
             :is-first-child="index === 0"
             :is-last-child="index === node.children.length - 1"
+            :force-expand-state="forceExpandState"
         />
     </template>
 
@@ -93,7 +94,8 @@
                     <div class="flex flex-row justify-center items-start gap-x-4 gap-y-3 w-full min-w-0">
                         <UpstreamThreeView v-for="(child, index) in upstreamDirectors" :key="child.organization_id" :node="child"
                             :depth="depth + 1" :is-first-child="index === 0"
-                            :is-last-child="index === upstreamDirectors.length - 1" />
+                            :is-last-child="index === upstreamDirectors.length - 1"
+                            :force-expand-state="forceExpandState" />
                     </div>
                 </template>
 
@@ -108,7 +110,8 @@
                         <div class="flex flex-col gap-2">
                             <UpstreamThreeView v-for="(child, index) in node.children" :key="child.organization_id" :node="child"
                                 :depth="depth + 1" :is-first-child="index === 0"
-                                :is-last-child="index === node.children.length - 1" />
+                                :is-last-child="index === node.children.length - 1"
+                                :force-expand-state="forceExpandState" />
                         </div>
                     </div>
                 </template>
@@ -122,7 +125,8 @@
                         <div class="flex flex-row justify-center items-start gap-x-2 gap-y-3 w-full min-w-0">
                             <UpstreamThreeView v-for="(child, index) in node.children" :key="child.organization_id" :node="child"
                                 :depth="depth + 1" :is-first-child="index === 0"
-                                :is-last-child="index === node.children.length - 1" />
+                                :is-last-child="index === node.children.length - 1"
+                                :force-expand-state="forceExpandState" />
                         </div>
                     </div>
                 </template>
@@ -137,7 +141,8 @@
                     <div class="flex flex-col gap-2">
                         <UpstreamThreeView v-for="(child, index) in node.children" :key="child.organization_id" :node="child"
                             :depth="depth + 1" :is-first-child="index === 0"
-                            :is-last-child="index === node.children.length - 1" />
+                            :is-last-child="index === node.children.length - 1"
+                            :force-expand-state="forceExpandState" />
                     </div>
                 </div>
             </div>
@@ -147,7 +152,7 @@
 
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import UpstreamThreeView from './UpstreamThreeView.vue';
 
 defineOptions({
@@ -171,10 +176,20 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    forceExpandState: {
+        type: Boolean,
+        default: null,
+    },
 });
 
 // Depth 0-4, 6+ auto-expand, depth 5 collapsed by default (show/hide children on click)
 const isExpanded = ref(props.depth !== 5);
+
+watch(() => props.forceExpandState, (newVal) => {
+    if (newVal !== null) {
+        isExpanded.value = newVal;
+    }
+});
 
 const hasChildren = computed(() => Array.isArray(props.node?.children) && props.node.children.length > 0);
 

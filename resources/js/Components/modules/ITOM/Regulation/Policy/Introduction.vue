@@ -1,6 +1,5 @@
 <template>
-    <ModulLayout title="Bab I: Umum">
-        <div class="animate-fade-in-up space-y-6">
+    <div class="animate-fade-in-up space-y-6">
             <section class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white px-5 py-3.5 shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full bg-[#821f44]/10 blur-2xl"></div>
                 <div class="pointer-events-none absolute -bottom-16 -left-12 h-40 w-40 rounded-full bg-blue-500/5 blur-2xl"></div>
@@ -79,7 +78,6 @@
                     </div>
                 </div>
             </div>
-        </div>
 
         <div class="fixed bottom-8 right-8 z-50 flex flex-col gap-4 print:hidden">
             <button @click="printDocument" title="Cetak PDF"
@@ -94,12 +92,11 @@
                 </svg>
             </button>
         </div>
-    </ModulLayout>
+    </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
-import ModulLayout from '@/Layouts/ModulLayout.vue';
 import PertaminaDocumentHeader from '@/Components/modules/ITOM/Regulation/PertaminaDocumentHeader.vue';
 import GuidanceChapterNavigation from '@/Components/modules/ITOM/Regulation/GuidanceChapterNavigation.vue';
 

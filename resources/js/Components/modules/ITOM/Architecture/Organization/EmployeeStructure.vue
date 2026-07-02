@@ -50,10 +50,10 @@
                     <tr>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-12">No</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Company</th>
-                        <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Organization Structure</th>
+                        <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Nama Organisasi</th>
+                        <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-20">Alias</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Nama Jabatan</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-32">SK</th>
-                        <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-20">Alias</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Parent</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Pejabat</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-24">Tipe</th>
@@ -74,6 +74,9 @@
                         <td class="px-4 py-2.5 text-slate-900 dark:text-white font-medium text-left">
                             {{ employee.name }}
                         </td>
+                        <td class="px-4 py-2.5 text-slate-900 dark:text-white font-medium text-left w-20">
+                            {{ employee.alias || '-' }}
+                        </td>
                         <td class="px-4 py-2.5 text-slate-900 dark:text-white font-medium text-left">
                             {{ employee.nama_jabatan || '-' }}
                         </td>
@@ -81,9 +84,6 @@
                             <div class="break-words whitespace-normal">
                                 {{ getSkName(employee.sk_id) || '-' }}
                             </div>
-                        </td>
-                        <td class="px-4 py-2.5 text-slate-700 dark:text-slate-300 text-left w-20">
-                            {{ employee.alias || '-' }}
                         </td>
                         <td class="px-4 py-2.5 text-slate-900 dark:text-white font-medium text-left">
                             {{ getParentName(employee.parent_id) || '-' }}
@@ -188,7 +188,7 @@
                         :key="parentEmployee.id"
                         :value="parentEmployee.id"
                     >
-                        [{{ getCompanyName(parentEmployee.company_id) }}] {{ parentEmployee.name }}
+                        [{{ getCompanyName(parentEmployee.company_id) }}] {{ parentEmployee.name }}{{ parentEmployee.alias ? ` (${parentEmployee.alias})` : '' }}
                     </option>
                 </select>
                 <span v-if="employeeForm.errors.parent_id" class="text-xs text-red-500 font-medium">{{ employeeForm.errors.parent_id }}</span>
@@ -218,7 +218,7 @@
 
             <!-- Employee Name Input -->
             <div class="flex flex-col gap-1.5">
-                <label for="employee_name" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Jabatan (Organization Structure)</label>
+                <label for="employee_name" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Struktur Organisasi</label>
                 <input
                     id="employee_name"
                     v-model="employeeForm.name"
@@ -269,6 +269,21 @@
                 <span v-if="employeeForm.errors.tipe" class="text-xs text-red-500 font-medium">{{ employeeForm.errors.tipe }}</span>
             </div>
 
+            <!-- Employee Role Input -->
+            <div class="flex flex-col gap-1.5">
+                <label for="employee_role_function" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Role</label>
+                <select
+                    id="employee_role_function"
+                    v-model="employeeForm.role_function"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                >
+                    <option value="">-- Tidak ada --</option>
+                    <option value="wakil">Wakil</option>
+                    <option value="fungsi">Fungsi</option>
+                </select>
+                <span v-if="employeeForm.errors.role_function" class="text-xs text-red-500 font-medium">{{ employeeForm.errors.role_function }}</span>
+            </div>
+
             <!-- Employee Pejabat Input -->
             <div class="flex flex-col gap-1.5">
                 <label for="employee_pejabat" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Nama Pejabat (Official)</label>
@@ -301,7 +316,7 @@
     <ConfirmationModal
         :show="isEmployeeDeleteModalOpen"
         title="Hapus Employee"
-        :message="`Apakah Anda yakin ingin menghapus '${selectedEmployee?.name}' dari Employee Structure?`"
+        :message="`Apakah Anda yakin ingin menghapus '${selectedEmployee?.name}${selectedEmployee?.alias ? ` (${selectedEmployee.alias})` : ''}' dari Employee Structure?`"
         confirm-text="Delete"
         cancel-text="Cancel"
         type="danger"
@@ -404,7 +419,7 @@ const getCompanyName = (companyId) => {
 const getParentName = (parentId) => {
     if (!parentId) return null;
     const parent = employeesOnly.value.find(b => b.id === Number(parentId));
-    return parent ? parent.name : null;
+    return parent ? (parent.alias ? `${parent.name} (${parent.alias})` : parent.name) : null;
 };
 
 /**
@@ -430,6 +445,7 @@ const employeeForm = useForm({
     sumber: '',
     pejabat: '',
     tipe: '',
+    role_function: '',
     sk_id: '',
 });
 
@@ -439,6 +455,7 @@ const openEmployeeModal = () => {
     employeeForm.clearErrors();
     employeeForm.reset();
     employeeForm.tipe = 'employee';
+    employeeForm.role_function = '';
     employeeForm.sk_id = '';
     if (selectedCompanyId.value) {
         employeeForm.company_id = selectedCompanyId.value;
@@ -458,6 +475,7 @@ const openEditEmployeeModal = (employee) => {
     employeeForm.sumber = employee.sumber || '';
     employeeForm.pejabat = employee.pejabat || '';
     employeeForm.tipe = employee.tipe || 'employee';
+    employeeForm.role_function = employee.role_function || '';
     employeeForm.sk_id = employee.sk_id ?? '';
     isEmployeeModalOpen.value = true;
 };
