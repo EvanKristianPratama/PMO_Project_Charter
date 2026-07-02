@@ -17,6 +17,7 @@ class MstBod extends Model
         'company_id',
         'parent_id',
         'name',
+        'nama_jabatan',
         'alias',
         'sumber',
         'pejabat',

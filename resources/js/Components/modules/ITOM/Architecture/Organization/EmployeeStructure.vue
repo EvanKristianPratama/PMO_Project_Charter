@@ -51,6 +51,7 @@
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-12">No</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Company</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Organization Structure</th>
+                        <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Nama Jabatan</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-32">SK</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-20">Alias</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Parent</th>
@@ -72,6 +73,9 @@
                         </td>
                         <td class="px-4 py-2.5 text-slate-900 dark:text-white font-medium text-left">
                             {{ employee.name }}
+                        </td>
+                        <td class="px-4 py-2.5 text-slate-900 dark:text-white font-medium text-left">
+                            {{ employee.nama_jabatan || '-' }}
                         </td>
                         <td class="px-4 py-2.5 text-slate-900 dark:text-white text-left font-medium w-32" :title="getSkName(employee.sk_id) || '-'">
                             <div class="break-words whitespace-normal">
@@ -113,7 +117,7 @@
                         </td>
                     </tr>
                     <tr v-if="filteredEmployees.length === 0">
-                        <td colspan="10" class="px-4 py-12 text-center">
+                        <td colspan="11" class="px-4 py-12 text-center">
                             <div class="flex flex-col items-center justify-center text-center">
                                 <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-slate-500 mb-4 border border-slate-200 dark:border-white/10">
                                     <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -224,6 +228,19 @@
                     required
                 />
                 <span v-if="employeeForm.errors.name" class="text-xs text-red-500 font-medium">{{ employeeForm.errors.name }}</span>
+            </div>
+
+            <!-- Employee Nama Jabatan Input -->
+            <div class="flex flex-col gap-1.5">
+                <label for="employee_nama_jabatan" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Nama Jabatan</label>
+                <input
+                    id="employee_nama_jabatan"
+                    v-model="employeeForm.nama_jabatan"
+                    type="text"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    placeholder="Contoh: Manager Hulu / Supervisor IT"
+                />
+                <span v-if="employeeForm.errors.nama_jabatan" class="text-xs text-red-500 font-medium">{{ employeeForm.errors.nama_jabatan }}</span>
             </div>
 
             <!-- Employee Alias Input -->
@@ -408,6 +425,7 @@ const employeeForm = useForm({
     company_id: '',
     parent_id: '',
     name: '',
+    nama_jabatan: '',
     alias: '',
     sumber: '',
     pejabat: '',
@@ -435,6 +453,7 @@ const openEditEmployeeModal = (employee) => {
     employeeForm.company_id = employee.company_id;
     employeeForm.parent_id = employee.parent_id ?? '';
     employeeForm.name = employee.name;
+    employeeForm.nama_jabatan = employee.nama_jabatan || '';
     employeeForm.alias = employee.alias || '';
     employeeForm.sumber = employee.sumber || '';
     employeeForm.pejabat = employee.pejabat || '';

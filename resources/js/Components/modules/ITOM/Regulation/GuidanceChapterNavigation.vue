@@ -1,23 +1,23 @@
 <template>
     <div class="w-full">
         <!-- Horizontal Segmented Chapter Switcher -->
-        <div class="relative overflow-x-auto pb-2 scrollbar-none">
-            <nav class="flex flex-row gap-1.5 rounded-2xl bg-slate-100 p-1.5 dark:bg-white/5 min-w-[760px] md:min-w-0 md:w-full">
+        <div class="relative overflow-x-auto pb-1 scrollbar-none">
+            <nav class="flex flex-row gap-1 rounded-xl bg-slate-100 p-1 dark:bg-white/5 min-w-[760px] md:min-w-0 md:w-full">
                 <Link
                     v-for="chapter in chapters"
                     :key="chapter.id"
                     :href="chapter.href"
-                    class="flex-1 flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-center text-xs font-black tracking-wide uppercase transition-all duration-300 transform active:scale-[0.98]"
+                    class="flex-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-center text-xs font-semibold transition active:scale-[0.98]"
                     :class="[
                         chapter.active
-                            ? 'bg-white text-[#821f44] shadow-md shadow-[#821f44]/5 scale-[1.01] border border-slate-200/50 dark:bg-[#1a1a1a] dark:text-white dark:border-white/5'
+                            ? 'bg-white text-[#821f44] shadow-sm border border-slate-200/50 dark:bg-[#1a1a1a] dark:text-white dark:border-white/5'
                             : 'text-slate-500 hover:text-slate-900 hover:bg-white/40 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-white/5'
                     ]"
                 >
                     <component
                         :is="chapter.icon"
-                        class="w-4 h-4 shrink-0 transition-transform duration-300"
-                        :class="[chapter.active ? 'text-[#821f44] dark:text-[#db588c] scale-110' : 'text-slate-400 group-hover:text-slate-600']"
+                        class="h-3 w-3 shrink-0 transition"
+                        :class="[chapter.active ? 'text-[#821f44] dark:text-[#db588c]' : 'text-slate-400']"
                     />
                     <span>{{ chapter.label }}</span>
                 </Link>

@@ -68,6 +68,7 @@
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-12">No</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Company</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Organization Structure</th>
+                        <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Nama Jabatan</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Parent</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Pejabat</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-24">Tipe</th>
@@ -89,6 +90,9 @@
                         </td>
                         <td class="px-4 py-2.5 text-slate-900 dark:text-white font-medium text-left">
                             {{ bod.name }}
+                        </td>
+                        <td class="px-4 py-2.5 text-slate-900 dark:text-white font-medium text-left">
+                            {{ bod.nama_jabatan || '-' }}
                         </td>
                         <td class="px-4 py-2.5 text-slate-900 dark:text-white font-medium text-left">
                             {{ getParentName(bod.parent_id) || '-' }}
@@ -128,7 +132,7 @@
                         </td>
                     </tr>
                     <tr v-if="filteredBods.length === 0">
-                        <td colspan="10" class="px-4 py-12 text-center">
+                        <td colspan="11" class="px-4 py-12 text-center">
                             <div class="flex flex-col items-center justify-center text-center">
                                 <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-slate-500 mb-4 border border-slate-200 dark:border-white/10">
                                     <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -229,6 +233,19 @@
                     required
                 />
                 <span v-if="bodForm.errors.name" class="text-xs text-red-500 font-medium">{{ bodForm.errors.name }}</span>
+            </div>
+
+            <!-- BOD Member Nama Jabatan Input -->
+            <div class="flex flex-col gap-1.5">
+                <label for="bod_nama_jabatan" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Nama Jabatan</label>
+                <input
+                    id="bod_nama_jabatan"
+                    v-model="bodForm.nama_jabatan"
+                    type="text"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
+                    placeholder="Contoh: Direktur Utama / Direktur Hulu"
+                />
+                <span v-if="bodForm.errors.nama_jabatan" class="text-xs text-red-500 font-medium">{{ bodForm.errors.nama_jabatan }}</span>
             </div>
 
             <!-- BOD Member Alias Input -->
@@ -427,6 +444,7 @@ const bodForm = useForm({
     company_id: '',
     parent_id: '',
     name: '',
+    nama_jabatan: '',
     alias: '',
     sumber: '',
     pejabat: '',
@@ -455,6 +473,7 @@ const openEditBODModal = (bod) => {
     bodForm.company_id = bod.company_id;
     bodForm.parent_id = bod.parent_id ?? '';
     bodForm.name = bod.name;
+    bodForm.nama_jabatan = bod.nama_jabatan || '';
     bodForm.alias = bod.alias || '';
     bodForm.sumber = bod.sumber || '';
     bodForm.pejabat = bod.pejabat || '';
