@@ -3,10 +3,8 @@
 namespace Modules\ITOM\Controllers\Policy;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstCompany;
 use App\Models\MstRegulation;
-use App\Models\MstBod;
-use App\Models\TrsOrganization;
+use App\Services\Regulation\RegulationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -14,52 +12,30 @@ use Inertia\Response;
 
 class RegulationController extends Controller
 {
+    /**
+     * @var RegulationService
+     */
+    protected $regulationService;
+
+    /**
+     * RegulationController constructor.
+     *
+     * @param RegulationService $regulationService
+     */
+    public function __construct(RegulationService $regulationService)
+    {
+        $this->regulationService = $regulationService;
+    }
 
     /**
      * Display a listing of regulations for CRUD management.
      */
     public function index(): Response
     {
-        $regulations = MstRegulation::with(['organization.groub.company', 'parent', 'revokedRegulations', 'relatedRegulations', 'company.company'])
-            ->withCount(['generalPolicies'])
-            ->orderBy('id', 'asc')
-            ->get();
-        $organizations = TrsOrganization::all();
-        $companies = MstCompany::orderBy('name')->get();
-        $bods = MstBod::orderBy('order')->orderBy('name')->get();
+        $data = $this->regulationService->getIndexData();
 
-        return Inertia::render('modules/ITOM/Policy/Regulation/Index', [
-            'regulations' => $regulations,
-            'organizations' => $organizations,
-            'companies' => $companies,
-            'bods' => $bods,
-        ]);
+        return Inertia::render('modules/ITOM/Policy/Regulation/Index', $data);
     }
-
-
-    /**
-     * Display Surat Keputusan regulations.
-     */
-    public function skIndex(): Response
-    {
-        $regulations = MstRegulation::with(['organization.groub.company', 'parent', 'revokedRegulations', 'relatedRegulations', 'company.company'])
-            ->withCount(['generalPolicies'])
-            ->where('tipe', 'Surat Keputusan')
-            ->orderBy('id', 'asc')
-            ->get();
-        $organizations = TrsOrganization::all();
-        $companies = MstCompany::orderBy('name')->get();
-        $bods = MstBod::orderBy('order')->orderBy('name')->get();
-
-        return Inertia::render('modules/ITOM/Policy/SK/Index', [
-            'regulations' => $regulations,
-            'organizations' => $organizations,
-            'companies' => $companies,
-            'bods' => $bods,
-        ]);
-    }
-
-
 
     /**
      * Store a newly created regulation.
@@ -94,15 +70,7 @@ class RegulationController extends Controller
             'berlaku.date' => 'Tanggal Berlaku harus berupa format tanggal.',
         ]);
 
-        $regulation = MstRegulation::create(\Illuminate\Support\Arr::except($validated, ['revoked_ids', 'related_ids']));
-
-        if ($request->has('revoked_ids')) {
-            $regulation->revokedRegulations()->sync($request->input('revoked_ids'));
-        }
-
-        if ($request->has('related_ids')) {
-            $regulation->relatedRegulations()->sync($request->input('related_ids'));
-        }
+        $this->regulationService->create($validated);
 
         return redirect()
             ->route('itom.policy.regulation.index')
@@ -169,15 +137,7 @@ class RegulationController extends Controller
             'berlaku.date' => 'Tanggal Berlaku harus berupa format tanggal.',
         ]);
 
-        $regulation->update(\Illuminate\Support\Arr::except($validated, ['revoked_ids', 'related_ids']));
-
-        if ($request->has('revoked_ids')) {
-            $regulation->revokedRegulations()->sync($request->input('revoked_ids'));
-        }
-
-        if ($request->has('related_ids')) {
-            $regulation->relatedRegulations()->sync($request->input('related_ids'));
-        }
+        $this->regulationService->update($regulation, $validated);
 
         return redirect()
             ->route('itom.policy.regulation.index')
@@ -190,7 +150,7 @@ class RegulationController extends Controller
     public function destroy(int $id): RedirectResponse
     {
         $regulation = MstRegulation::findOrFail($id);
-        $regulation->delete();
+        $this->regulationService->delete($regulation);
 
         return redirect()
             ->route('itom.policy.regulation.index')
@@ -202,97 +162,9 @@ class RegulationController extends Controller
      */
     public function previewData(int $id)
     {
-        $regulation = MstRegulation::with(['organization', 'parent'])->findOrFail($id);
+        $regulation = MstRegulation::findOrFail($id);
+        $data = $this->regulationService->getPreviewData($regulation);
 
-        if (strtolower($regulation->tipe ?? '') === 'procedure') {
-            $actors = \App\Models\MstActor::with('organization')
-                ->where('regulation_id', $regulation->id)
-                ->get();
-
-            $categories = \App\Models\TrsSopCategory::where('regulation_id', $regulation->id)
-                ->orderBy('id')
-                ->get();
-
-            $sop = \App\Models\MstSop::with(['category', 'regulation.organization'])
-                ->whereHas('category', function ($q) use ($regulation) {
-                    $q->where('regulation_id', $regulation->id);
-                })
-                ->orderBy('category_id')
-                ->orderBy('id')
-                ->get();
-
-            $flowChartSops = \App\Models\MstSop::with(['category', 'mapActorSops.actor.organization'])
-                ->whereHas('category', function ($q) use ($regulation) {
-                    $q->where('regulation_id', $regulation->id);
-                })
-                ->orderBy('category_id')
-                ->orderBy('id')
-                ->get();
-
-            $tkoSections = \App\Models\TrsTkoSections::with(['contents' => function ($q) use ($regulation) {
-                $q->where('regulation_id', $regulation->id);
-            }])
-            ->orderBy('order')
-            ->get();
-
-            return response()->json([
-                'tipe' => 'Procedure',
-                'regulation' => $regulation,
-                'actors' => $actors,
-                'categories' => $categories,
-                'sop' => $sop,
-                'flowChartSops' => $flowChartSops,
-                'tkoSections' => $tkoSections,
-            ]);
-        } else {
-            $policies = $regulation->generalPolicies()->orderBy('number')->get();
-
-            $objectives = \App\Models\MstObjective::with(['practices' => function($query) {
-                $query->orderBy('practice_id', 'asc');
-            }])
-            ->where('regulation_id', $regulation->id)
-            ->orderByRaw("
-                CASE 
-                    WHEN objective_id LIKE 'EDM%' THEN 1
-                    WHEN objective_id LIKE 'APO%' THEN 2
-                    WHEN objective_id LIKE 'BAI%' THEN 3
-                    WHEN objective_id LIKE 'DSS%' THEN 4
-                    WHEN objective_id LIKE 'MEA%' THEN 5
-                    ELSE 6
-                END ASC
-            ")
-            ->orderBy('objective_id', 'asc')
-            ->get();
-
-            if ($objectives->isEmpty()) {
-                $objectives = \App\Models\MstObjective::with(['practices' => function($query) {
-                    $query->orderBy('practice_id', 'asc');
-                }])
-                ->orderByRaw("
-                    CASE 
-                        WHEN objective_id LIKE 'EDM%' THEN 1
-                        WHEN objective_id LIKE 'APO%' THEN 2
-                        WHEN objective_id LIKE 'BAI%' THEN 3
-                        WHEN objective_id LIKE 'DSS%' THEN 4
-                        WHEN objective_id LIKE 'MEA%' THEN 5
-                        ELSE 6
-                    END ASC
-                ")
-                ->orderBy('objective_id', 'asc')
-                ->get();
-            }
-
-            $roles = \App\Models\MstRole::with(['responsibilities' => function ($query) {
-                $query->orderBy('id', 'asc');
-            }])->orderBy('id', 'asc')->get();
-
-            return response()->json([
-                'tipe' => 'Policy',
-                'regulation' => $regulation,
-                'policies' => $policies,
-                'objectives' => $objectives,
-                'roles' => $roles,
-            ]);
-        }
+        return response()->json($data);
     }
 }

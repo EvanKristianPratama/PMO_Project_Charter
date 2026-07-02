@@ -59,7 +59,7 @@ class PolicyController extends Controller
         ->orderBy('objective_id', 'asc')
         ->get();
 
-        return Inertia::render('modules/ITOM/Policy/Guidance/Specific/Index', [
+        return Inertia::render('modules/ITOM/Policy/Regulation/Guidance/Specific/Index', [
             'objectives' => $objectives,
             'regulations' => $regulations,
             'selectedRegulationId' => $selectedRegulation?->id,
@@ -92,7 +92,7 @@ class PolicyController extends Controller
         ->orderBy('objective_id', 'asc')
         ->get();
 
-        return Inertia::render('modules/ITOM/Policy/Guidance/Specific/Form', [
+        return Inertia::render('modules/ITOM/Policy/Regulation/Guidance/Specific/Form', [
             'objectives' => $objectives,
             'regulations' => $regulations,
             'selectedRegulationId' => $selectedRegulation?->id,
@@ -124,7 +124,7 @@ class PolicyController extends Controller
         ->orderBy('objective_id', 'asc')
         ->get();
 
-        return Inertia::render('modules/ITOM/Policy/Guidance/Specific/Form', [
+        return Inertia::render('modules/ITOM/Policy/Regulation/Guidance/Specific/Form', [
             'objectives' => $objectives,
             'regulations' => $regulations,
             'selectedRegulationId' => $selectedRegulation?->id,
@@ -158,7 +158,7 @@ class PolicyController extends Controller
             ->orderBy('objective_id', 'asc')
             ->get();
 
-        return Inertia::render('modules/ITOM/Policy/Guidance/Specific/Mapping', [
+        return Inertia::render('modules/ITOM/Policy/Regulation/Guidance/Specific/Mapping', [
             'objectives' => $objectives,
             'regulations' => $regulations,
             'selectedRegulationId' => $selectedRegulation?->id,
@@ -195,7 +195,7 @@ class PolicyController extends Controller
             ->orderBy('objective_id', 'asc')
             ->get();
 
-        return Inertia::render('modules/ITOM/Policy/Guidance/Specific/Analysis', [
+        return Inertia::render('modules/ITOM/Policy/Regulation/Guidance/Specific/Analysis', [
             'objectives' => $objectives,
             'regulations' => $regulations,
             'selectedRegulationId' => $selectedRegulation?->id,
@@ -237,7 +237,7 @@ class PolicyController extends Controller
         ->orderBy('objective_id', 'asc')
         ->get();
 
-        return Inertia::render('modules/ITOM/Policy/Guidance/Specific/Manage', [
+        return Inertia::render('modules/ITOM/Policy/Regulation/Guidance/Specific/Manage', [
             'objectives' => $objectives,
             'regulations' => $regulations,
             'selectedRegulationId' => $selectedRegulation?->id,

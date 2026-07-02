@@ -4,100 +4,44 @@ namespace Modules\ITOM\Controllers\Policy;
 
 use App\Http\Controllers\Controller;
 use App\Models\MstActor;
-use App\Models\MstRegulation;
 use App\Models\MstSop;
 use App\Models\TrsMapActorSop;
-use App\Models\TrsOrganization;
 use App\Models\TrsSopCategory;
 use App\Models\TrsTkoSections;
-use App\Models\TrsTkoContent;
 use App\Models\MstFunction;
+use App\Services\Regulation\ProcedureService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ProcedureController extends Controller
 {
     /**
+     * @var ProcedureService
+     */
+    protected $procedureService;
+
+    /**
+     * ProcedureController constructor.
+     *
+     * @param ProcedureService $procedureService
+     */
+    public function __construct(ProcedureService $procedureService)
+    {
+        $this->procedureService = $procedureService;
+    }
+
+    /**
      * Display a listing of procedures.
      */
     public function index(Request $request): Response
     {
-        $regulations = MstRegulation::with('organization')->orderBy('id', 'desc')->get();
-        $organizations = TrsOrganization::orderBy('name')->get();
-
         $selectedRegulationId = $request->integer('regulation_id');
-        $selectedRegulation = null;
+        $data = $this->procedureService->getProcedureData($selectedRegulationId);
 
-        if ($selectedRegulationId) {
-            $selectedRegulation = $regulations->firstWhere('id', $selectedRegulationId);
-        }
-
-        if (!$selectedRegulation) {
-            $selectedRegulation = $regulations->firstWhere('tipe', 'Procedure');
-        }
-
-        if (!$selectedRegulation) {
-            $selectedRegulation = $regulations->first();
-        }
-
-        $actorsQuery = MstActor::with(['organization', 'functions', 'organizations']);
-        if ($selectedRegulation) {
-            $actorsQuery->where('regulation_id', $selectedRegulation->id);
-        }
-        $actors = $actorsQuery->get();
-
-        $categories = [];
-        if ($selectedRegulation) {
-            $categories = TrsSopCategory::where('regulation_id', $selectedRegulation->id)
-                ->orderBy('id')
-                ->get();
-        }
-
-        $sopQuery = MstSop::with(['category', 'regulation.organization']);
-        $flowChartSopsQuery = MstSop::with(['category', 'mapActorSops.actor.organization']);
-
-        if ($selectedRegulation) {
-            $sopQuery->whereHas('category', function ($q) use ($selectedRegulation) {
-                $q->where('regulation_id', $selectedRegulation->id);
-            });
-            $flowChartSopsQuery->whereHas('category', function ($q) use ($selectedRegulation) {
-                $q->where('regulation_id', $selectedRegulation->id);
-            });
-        } else {
-            $sopQuery->whereNull('category_id');
-            $flowChartSopsQuery->whereNull('category_id');
-        }
-
-        $sop = $sopQuery->orderBy('category_id')
-            ->orderBy('id')
-            ->get();
-
-        $flowChartSops = $flowChartSopsQuery->orderBy('category_id')
-            ->orderBy('id')
-            ->get();
-
-        $tkoSections = TrsTkoSections::with(['contents' => function ($q) use ($selectedRegulation) {
-            if ($selectedRegulation) {
-                $q->where('regulation_id', $selectedRegulation->id);
-            }
-        }])
-        ->orderBy('order')
-        ->get();
-
-        return Inertia::render('modules/ITOM/Policy/Procedure/Index', [
-            'actors' => $actors,
-            'sop' => $sop,
-            'flowChartSops' => $flowChartSops,
-            'regulations' => $regulations,
-            'organizations' => $organizations,
-            'selectedRegulationId' => $selectedRegulation?->id,
-            'categories' => $categories,
-            'tkoSections' => $tkoSections,
-        ]);
+        return Inertia::render('modules/ITOM/Policy/Procedure/Index', $data);
     }
 
     /**
@@ -105,79 +49,12 @@ class ProcedureController extends Controller
      */
     public function manage(Request $request): Response
     {
-        $regulations = MstRegulation::with('organization')->orderBy('id', 'desc')->get();
-        $organizations = TrsOrganization::orderBy('name')->get();
-
         $selectedRegulationId = $request->integer('regulation_id');
-        $selectedRegulation = null;
+        $data = $this->procedureService->getProcedureData($selectedRegulationId);
+        
+        $data['functions'] = MstFunction::orderBy('name')->get();
 
-        if ($selectedRegulationId) {
-            $selectedRegulation = $regulations->firstWhere('id', $selectedRegulationId);
-        }
-
-        if (!$selectedRegulation) {
-            $selectedRegulation = $regulations->firstWhere('tipe', 'Procedure');
-        }
-
-        if (!$selectedRegulation) {
-            $selectedRegulation = $regulations->first();
-        }
-
-        $actorsQuery = MstActor::with(['organization', 'functions', 'organizations']);
-        if ($selectedRegulation) {
-            $actorsQuery->where('regulation_id', $selectedRegulation->id);
-        }
-        $actors = $actorsQuery->get();
-
-        $categories = [];
-        if ($selectedRegulation) {
-            $categories = TrsSopCategory::where('regulation_id', $selectedRegulation->id)
-                ->orderBy('id')
-                ->get();
-        }
-
-        $sopQuery = MstSop::with(['category', 'regulation.organization']);
-        $flowChartSopsQuery = MstSop::with(['category', 'mapActorSops.actor.organization']);
-
-        if ($selectedRegulation) {
-            $sopQuery->whereHas('category', function ($q) use ($selectedRegulation) {
-                $q->where('regulation_id', $selectedRegulation->id);
-            });
-            $flowChartSopsQuery->whereHas('category', function ($q) use ($selectedRegulation) {
-                $q->where('regulation_id', $selectedRegulation->id);
-            });
-        } else {
-            $sopQuery->whereNull('category_id');
-            $flowChartSopsQuery->whereNull('category_id');
-        }
-
-        $sop = $sopQuery->orderBy('category_id')
-            ->orderBy('id')
-            ->get();
-
-        $flowChartSops = $flowChartSopsQuery->orderBy('category_id')
-            ->orderBy('id')
-            ->get();
-
-        $tkoSections = TrsTkoSections::with(['contents' => function ($q) use ($selectedRegulation) {
-            if ($selectedRegulation) {
-                $q->where('regulation_id', $selectedRegulation->id);
-            }
-        }])
-        ->orderBy('order')
-        ->get();
-
-        return Inertia::render('modules/ITOM/Policy/Procedure/Manage', [
-            'actors' => $actors,
-            'sop' => $sop,
-            'flowChartSops' => $flowChartSops,
-            'regulations' => $regulations,
-            'organizations' => $organizations,
-            'selectedRegulationId' => $selectedRegulation?->id,
-            'categories' => $categories,
-            'tkoSections' => $tkoSections,
-            'functions' => MstFunction::orderBy('name')->get(),
-        ]);
+        return Inertia::render('modules/ITOM/Policy/Procedure/Manage', $data);
     }
 
     /**
@@ -196,15 +73,7 @@ class ProcedureController extends Controller
             'organization_ids.*' => 'exists:trs_organization,id',
         ]);
 
-        $actor = MstActor::create($validated);
-
-        if (!empty($validated['function_ids'])) {
-            $actor->functions()->sync($validated['function_ids']);
-        }
-
-        if (!empty($validated['organization_ids'])) {
-            $actor->organizations()->sync($validated['organization_ids']);
-        }
+        $this->procedureService->createActor($validated);
 
         return back()->with('success', 'Aktor berhasil ditambahkan.');
     }
@@ -226,10 +95,7 @@ class ProcedureController extends Controller
         ]);
 
         $actor = MstActor::findOrFail($id);
-        $actor->update($validated);
-
-        $actor->functions()->sync($request->input('function_ids', []));
-        $actor->organizations()->sync($request->input('organization_ids', []));
+        $this->procedureService->updateActor($actor, $validated);
 
         if ($request->wantsJson()) {
             return response()->json(['message' => 'Aktor berhasil diperbarui.']);
@@ -244,7 +110,7 @@ class ProcedureController extends Controller
     public function destroyActor(int $id): RedirectResponse
     {
         $actor = MstActor::findOrFail($id);
-        $actor->delete();
+        $this->procedureService->deleteActor($actor);
 
         return back()->with('success', 'Aktor berhasil dihapus.');
     }
@@ -259,7 +125,7 @@ class ProcedureController extends Controller
             'tipe' => 'required|string|max:255',
         ]);
 
-        TrsSopCategory::create($validated);
+        $this->procedureService->createCategory($validated);
 
         return back()->with('success', 'Kategori SOP berhasil ditambahkan.');
     }
@@ -274,7 +140,7 @@ class ProcedureController extends Controller
         ]);
 
         $category = TrsSopCategory::findOrFail($id);
-        $category->update($validated);
+        $this->procedureService->updateCategory($category, $validated);
 
         if ($request->wantsJson()) {
             return response()->json(['message' => 'Kategori SOP berhasil diperbarui.']);
@@ -289,13 +155,7 @@ class ProcedureController extends Controller
     public function destroyCategory($id): RedirectResponse
     {
         $category = TrsSopCategory::findOrFail($id);
-
-        foreach ($category->procedure as $sop) {
-            TrsMapActorSop::where('sop_id', $sop->id)->delete();
-            $sop->delete();
-        }
-
-        $category->delete();
+        $this->procedureService->deleteCategory($category);
 
         return back()->with('success', 'Kategori SOP berhasil dihapus.');
     }
@@ -310,7 +170,7 @@ class ProcedureController extends Controller
             'description' => 'required|string',
         ]);
 
-        $sop = MstSop::create($validated);
+        $this->procedureService->createSop($validated);
         $category = TrsSopCategory::findOrFail($validated['category_id']);
 
         return redirect()
@@ -329,7 +189,7 @@ class ProcedureController extends Controller
         ]);
 
         $sop = MstSop::findOrFail($id);
-        $sop->update($validated);
+        $this->procedureService->updateSop($sop, $validated);
 
         if ($request->wantsJson()) {
             return response()->json(['message' => 'SOP berhasil diperbarui.']);
@@ -350,8 +210,7 @@ class ProcedureController extends Controller
         $sop = MstSop::findOrFail($id);
         $regulationId = $sop->category?->regulation_id;
 
-        TrsMapActorSop::where('sop_id', $sop->id)->delete();
-        $sop->delete();
+        $this->procedureService->deleteSop($sop);
 
         return redirect()
             ->route('itom.policy.procedure.manage', $regulationId ? ['regulation_id' => $regulationId] : [])
@@ -365,16 +224,15 @@ class ProcedureController extends Controller
     {
         $validated = $this->validateDiagramMapping($request);
 
-        if ($this->diagramMappingExists($validated)) {
+        $mapping = $this->procedureService->createDiagram($validated);
+
+        if (!$mapping) {
             return back()
                 ->withErrors(['actor_id' => 'Mapping aktor dan SOP untuk kategori ini sudah ada.'])
                 ->withInput();
         }
 
         $sop = MstSop::findOrFail($validated['sop_id']);
-        $validated['tipe'] = $sop->category?->tipe ?? 'A';
-
-        TrsMapActorSop::create($validated);
 
         return redirect()
             ->route('itom.policy.procedure.manage', ['regulation_id' => $sop->category?->regulation_id])
@@ -389,16 +247,15 @@ class ProcedureController extends Controller
         $validated = $this->validateDiagramMapping($request);
         $mapping = TrsMapActorSop::findOrFail($id);
 
-        if ($this->diagramMappingExists($validated, $mapping->id)) {
+        $updated = $this->procedureService->updateDiagram($mapping, $validated);
+
+        if (!$updated) {
             return back()
                 ->withErrors(['actor_id' => 'Mapping aktor dan SOP untuk kategori ini sudah ada.'])
                 ->withInput();
         }
 
         $sop = MstSop::findOrFail($validated['sop_id']);
-        $validated['tipe'] = $sop->category?->tipe ?? 'A';
-
-        $mapping->update($validated);
 
         return redirect()
             ->route('itom.policy.procedure.manage', ['regulation_id' => $sop->category?->regulation_id])
@@ -414,7 +271,7 @@ class ProcedureController extends Controller
         $sop = MstSop::find($mapping->sop_id);
         $regulationId = $sop ? $sop->category?->regulation_id : null;
 
-        $mapping->delete();
+        $this->procedureService->deleteDiagram($mapping);
 
         return redirect()
             ->route('itom.policy.procedure.manage', $regulationId ? ['regulation_id' => $regulationId] : [])
@@ -429,15 +286,6 @@ class ProcedureController extends Controller
         ]);
     }
 
-    private function diagramMappingExists(array $mapping, ?int $ignoreId = null): bool
-    {
-        return TrsMapActorSop::query()
-            ->where('sop_id', $mapping['sop_id'])
-            ->where('actor_id', $mapping['actor_id'])
-            ->when($ignoreId, fn ($query) => $query->where('id', '!=', $ignoreId))
-            ->exists();
-    }
-
     /**
      * Store or update TKO content.
      */
@@ -449,19 +297,14 @@ class ProcedureController extends Controller
             'content' => 'nullable|string',
         ]);
 
-        TrsTkoContent::updateOrCreate(
-            [
-                'regulation_id' => $validated['regulation_id'],
-                'section_id' => $validated['section_id'],
-            ],
-            [
-                'content' => $validated['content'],
-            ]
-        );
+        $this->procedureService->storeOrUpdateTkoContent($validated);
 
         return back()->with('success', 'Konten TKO berhasil disimpan.');
     }
 
+    /**
+     * Store a new TKO section.
+     */
     public function storeSection(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -469,7 +312,7 @@ class ProcedureController extends Controller
             'order' => 'required|integer',
         ]);
 
-        TrsTkoSections::create($validated);
+        $this->procedureService->createSection($validated);
 
         return back()->with('success', 'Section TKO berhasil ditambahkan.');
     }
@@ -485,7 +328,7 @@ class ProcedureController extends Controller
         ]);
 
         $section = TrsTkoSections::findOrFail($id);
-        $section->update($validated);
+        $this->procedureService->updateSection($section, $validated);
 
         if ($request->wantsJson()) {
             return response()->json(['message' => 'Section TKO berhasil diperbarui.']);
@@ -500,11 +343,7 @@ class ProcedureController extends Controller
     public function destroySection($id): RedirectResponse
     {
         $section = TrsTkoSections::findOrFail($id);
-        
-        // Delete associated contents first
-        TrsTkoContent::where('section_id', $section->id)->delete();
-        
-        $section->delete();
+        $this->procedureService->deleteSection($section);
 
         return back()->with('success', 'Section TKO berhasil dihapus.');
     }
@@ -522,90 +361,7 @@ class ProcedureController extends Controller
             'sections.*.content' => 'nullable|string',
         ]);
 
-        $regulationId = $validated['regulation_id'];
-        $sectionsData = $validated['sections'];
-
-        // Get all existing sections to match them cleanly
-        $existingSections = TrsTkoSections::all();
-
-        // Helper function to normalize section names for robust matching
-        $normalize = function ($name) {
-            $name = preg_replace('/^([\d\.]+|[ivxIVX]+|[a-zA-Z])[\.\)\-\s]+/u', '', $name);
-            return strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $name));
-        };
-
-        $processedSectionIds = [];
-
-        DB::transaction(function () use ($regulationId, $sectionsData, $existingSections, $normalize, &$processedSectionIds) {
-            foreach ($sectionsData as $secData) {
-                $name = trim($secData['name']);
-                $order = $secData['order'];
-                $content = $secData['content'] ?? '';
-
-                $normalizedIncoming = $normalize($name);
-                $matchedSection = null;
-
-                // Find match in existing sections by normalized name
-                foreach ($existingSections as $existing) {
-                    if ($normalize($existing->name) === $normalizedIncoming) {
-                        $matchedSection = $existing;
-                        break;
-                    }
-                }
-
-                if ($matchedSection) {
-                    // Update existing section name and order if they differ
-                    $updates = [];
-                    if (strtolower(trim($matchedSection->name)) !== strtolower($name)) {
-                        $updates['name'] = $name;
-                    }
-                    if ($matchedSection->order !== $order) {
-                        $updates['order'] = $order;
-                    }
-                    if (!empty($updates)) {
-                        $matchedSection->update($updates);
-                    }
-                    $section = $matchedSection;
-                } else {
-                    // Create new global section
-                    $section = TrsTkoSections::create([
-                        'name' => $name,
-                        'order' => $order,
-                    ]);
-                }
-
-                $processedSectionIds[] = $section->id;
-
-                // Update or create regulation-specific content using direct DB check to prevent composite key issues
-                $contentExists = DB::table('trs_tko_content')
-                    ->where('regulation_id', $regulationId)
-                    ->where('section_id', $section->id)
-                    ->exists();
-
-                if ($contentExists) {
-                    DB::table('trs_tko_content')
-                        ->where('regulation_id', $regulationId)
-                        ->where('section_id', $section->id)
-                        ->update([
-                            'content' => $content,
-                            'updated_at' => now(),
-                        ]);
-                } else {
-                    DB::table('trs_tko_content')->insert([
-                        'regulation_id' => $regulationId,
-                        'section_id' => $section->id,
-                        'content' => $content,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-                }
-            }
-
-            // Delete content for sections that were not sent in this save for this regulation
-            TrsTkoContent::where('regulation_id', $regulationId)
-                ->whereNotIn('section_id', $processedSectionIds)
-                ->delete();
-        });
+        $this->procedureService->saveStructuredDocument($validated);
 
         if ($request->wantsJson()) {
             return response()->json([
@@ -617,4 +373,3 @@ class ProcedureController extends Controller
         return back()->with('success', 'Dokumen TKO berhasil disimpan.');
     }
 }
-

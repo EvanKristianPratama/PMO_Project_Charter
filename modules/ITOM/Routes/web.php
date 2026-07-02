@@ -12,17 +12,18 @@ use Modules\ITOM\Controllers\BusinessProcess\Function\FunctionController;
 use Modules\ITOM\Controllers\BusinessProcess\RegulationMapping\RegulationMappingController;
 use Modules\ITOM\Controllers\ResourceManagement\ResourceManagementController as MainResourceManagementController;
 use Modules\ITOM\Controllers\OperatingModel\OperatingModelController;
-use Modules\ITOM\Controllers\Policy\CobitComponentController;
+use Modules\ITOM\Controllers\Policy\COBIT\CobitComponentController;
 use Modules\ITOM\Controllers\OperatingModel\PracticeRoleController;
-use Modules\ITOM\Controllers\Policy\InfoflowController;
-use Modules\ITOM\Controllers\Policy\ItspInfoflowController;
+use Modules\ITOM\Controllers\RaciAnalysis\CobitInformationFlow\CobitInformationFlowController;
+use Modules\ITOM\Controllers\RaciAnalysis\TktiInformationFlow\TktiInformationFlowController;
 use Modules\ITOM\Controllers\Policy\GeneralPolicyController;
 use Modules\ITOM\Controllers\Policy\PolicyController;
 use Modules\ITOM\Controllers\Policy\RoleController;
 use Modules\ITOM\Controllers\Policy\RegulationController;
 use Modules\ITOM\Controllers\Policy\ProcedureController;
 use Modules\ITOM\Controllers\Policy\ResponsibleController;
-use Modules\ITOM\Controllers\Policy\CMSController;
+use Modules\ITOM\Controllers\Policy\CMS\CMSController;
+use Modules\ITOM\Controllers\Policy\SK\SKController;
 use Modules\ITOM\Controllers\BpmnWorkflowController;
 use Modules\ITOM\Controllers\LibaryController;
 
@@ -231,6 +232,7 @@ Route::middleware(["approved"])->group(function () {
                 });
         });
 
+    
     // Resource Management CRUD
     Route::prefix("/resource-management")
         ->name("resource-management.")
@@ -299,19 +301,19 @@ Route::middleware(["approved"])->group(function () {
             Route::get("/", function () {
                 return redirect()->route("itom.operating-model.raci-analysis.index");
             })->name("index");
-            Route::get("/infoflow", [InfoflowController::class, "index"])->name("infoflow.index");
+            Route::get("/infoflow", [CobitInformationFlowController::class, "index"])->name("infoflow.index");
 
-            Route::get("/itsp-infoflow", [ItspInfoflowController::class, "index"])->name("itsp-infoflow.index");
-            Route::get("/itsp-infoflow/data", [ItspInfoflowController::class, "getData"])->name("itsp-infoflow.data");
-            Route::post("/itsp-infoflow/save", [ItspInfoflowController::class, "saveData"])->name("itsp-infoflow.save");
-            Route::get("/itsp-infoflow/manage", [ItspInfoflowController::class, "manage"])->name("itsp-infoflow.manage");
-            Route::post("/itsp-infoflow/sync", [ItspInfoflowController::class, "syncFromCobit"])->name("itsp-infoflow.sync");
-            Route::post("/itsp-infoflow/inputs", [ItspInfoflowController::class, "storeInput"])->name("itsp-infoflow.input.store");
-            Route::put("/itsp-infoflow/inputs/{id}", [ItspInfoflowController::class, "updateInput"])->name("itsp-infoflow.input.update");
-            Route::delete("/itsp-infoflow/inputs/{id}", [ItspInfoflowController::class, "destroyInput"])->name("itsp-infoflow.input.destroy");
-            Route::post("/itsp-infoflow/outputs", [ItspInfoflowController::class, "storeOutput"])->name("itsp-infoflow.output.store");
-            Route::put("/itsp-infoflow/outputs/{id}", [ItspInfoflowController::class, "updateOutput"])->name("itsp-infoflow.output.update");
-            Route::delete("/itsp-infoflow/outputs/{id}", [ItspInfoflowController::class, "destroyOutput"])->name("itsp-infoflow.output.destroy");
+            Route::get("/itsp-infoflow", [TktiInformationFlowController::class, "index"])->name("itsp-infoflow.index");
+            Route::get("/itsp-infoflow/data", [TktiInformationFlowController::class, "getData"])->name("itsp-infoflow.data");
+            Route::post("/itsp-infoflow/save", [TktiInformationFlowController::class, "saveData"])->name("itsp-infoflow.save");
+            Route::get("/itsp-infoflow/manage", [TktiInformationFlowController::class, "manage"])->name("itsp-infoflow.manage");
+            Route::post("/itsp-infoflow/sync", [TktiInformationFlowController::class, "syncFromCobit"])->name("itsp-infoflow.sync");
+            Route::post("/itsp-infoflow/inputs", [TktiInformationFlowController::class, "storeInput"])->name("itsp-infoflow.input.store");
+            Route::put("/itsp-infoflow/inputs/{id}", [TktiInformationFlowController::class, "updateInput"])->name("itsp-infoflow.input.update");
+            Route::delete("/itsp-infoflow/inputs/{id}", [TktiInformationFlowController::class, "destroyInput"])->name("itsp-infoflow.input.destroy");
+            Route::post("/itsp-infoflow/outputs", [TktiInformationFlowController::class, "storeOutput"])->name("itsp-infoflow.output.store");
+            Route::put("/itsp-infoflow/outputs/{id}", [TktiInformationFlowController::class, "updateOutput"])->name("itsp-infoflow.output.update");
+            Route::delete("/itsp-infoflow/outputs/{id}", [TktiInformationFlowController::class, "destroyOutput"])->name("itsp-infoflow.output.destroy");
         });
 
     // Policy CRUD (mst_general_policy, mst_objective & mst_practice)
@@ -323,8 +325,8 @@ Route::middleware(["approved"])->group(function () {
             })->name("index");
 
             // Guidance Intro & Outro chapters (Bab I & Bab V)
-            Route::get("/guidance/introduction", [GeneralPolicyController::class, "introduction"])->name("guidance.introduction");
-            Route::get("/guidance/closing", [GeneralPolicyController::class, "closing"])->name("guidance.closing");
+            Route::get("/regulation/guidance/introduction", [GeneralPolicyController::class, "introduction"])->name("guidance.introduction");
+            Route::get("/regulation/guidance/closing", [GeneralPolicyController::class, "closing"])->name("guidance.closing");
 
             // Kebijakan Umum (General Policy) CRUD
             Route::get("/general", [GeneralPolicyController::class, "index"])->name("general.index");
@@ -373,7 +375,7 @@ Route::middleware(["approved"])->group(function () {
             // Regulasi (Regulation) CRUD
             Route::get("/regulation/{id}/preview", [RegulationController::class, "previewData"])->name("regulation.preview");
             Route::get("/regulation", [RegulationController::class, "index"])->name("regulation.index");
-            Route::get("/sk", [RegulationController::class, "skIndex"])->name("sk.index");
+            Route::get("/sk", [SKController::class, "index"])->name("sk.index");
             Route::post("/regulation", [RegulationController::class, "store"])->name("regulation.store");
             Route::put("/regulation/{id}", [RegulationController::class, "update"])->name("regulation.update");
             Route::delete("/regulation/{id}", [RegulationController::class, "destroy"])->name("regulation.destroy");
@@ -414,20 +416,20 @@ Route::middleware(["approved"])->group(function () {
             Route::get("/cobit-component", [CobitComponentController::class, "index"])->name("cobit-component.index");
 
             // GAMO Information Flow
-            Route::get("/infoflow", [InfoflowController::class, "index"])->name("infoflow.index");
+            Route::get("/infoflow", [CobitInformationFlowController::class, "index"])->name("infoflow.index");
 
             // ITSP Information Flow
-            Route::get("/itsp-infoflow", [ItspInfoflowController::class, "index"])->name("itsp-infoflow.index");
-            Route::get("/itsp-infoflow/data", [ItspInfoflowController::class, "getData"])->name("itsp-infoflow.data");
-            Route::post("/itsp-infoflow/save", [ItspInfoflowController::class, "saveData"])->name("itsp-infoflow.save");
-            Route::get("/itsp-infoflow/manage", [ItspInfoflowController::class, "manage"])->name("itsp-infoflow.manage");
-            Route::post("/itsp-infoflow/sync", [ItspInfoflowController::class, "syncFromCobit"])->name("itsp-infoflow.sync");
-            Route::post("/itsp-infoflow/inputs", [ItspInfoflowController::class, "storeInput"])->name("itsp-infoflow.input.store");
-            Route::put("/itsp-infoflow/inputs/{id}", [ItspInfoflowController::class, "updateInput"])->name("itsp-infoflow.input.update");
-            Route::delete("/itsp-infoflow/inputs/{id}", [ItspInfoflowController::class, "destroyInput"])->name("itsp-infoflow.input.destroy");
-            Route::post("/itsp-infoflow/outputs", [ItspInfoflowController::class, "storeOutput"])->name("itsp-infoflow.output.store");
-            Route::put("/itsp-infoflow/outputs/{id}", [ItspInfoflowController::class, "updateOutput"])->name("itsp-infoflow.output.update");
-            Route::delete("/itsp-infoflow/outputs/{id}", [ItspInfoflowController::class, "destroyOutput"])->name("itsp-infoflow.output.destroy");
+            Route::get("/itsp-infoflow", [TktiInformationFlowController::class, "index"])->name("itsp-infoflow.index");
+            Route::get("/itsp-infoflow/data", [TktiInformationFlowController::class, "getData"])->name("itsp-infoflow.data");
+            Route::post("/itsp-infoflow/save", [TktiInformationFlowController::class, "saveData"])->name("itsp-infoflow.save");
+            Route::get("/itsp-infoflow/manage", [TktiInformationFlowController::class, "manage"])->name("itsp-infoflow.manage");
+            Route::post("/itsp-infoflow/sync", [TktiInformationFlowController::class, "syncFromCobit"])->name("itsp-infoflow.sync");
+            Route::post("/itsp-infoflow/inputs", [TktiInformationFlowController::class, "storeInput"])->name("itsp-infoflow.input.store");
+            Route::put("/itsp-infoflow/inputs/{id}", [TktiInformationFlowController::class, "updateInput"])->name("itsp-infoflow.input.update");
+            Route::delete("/itsp-infoflow/inputs/{id}", [TktiInformationFlowController::class, "destroyInput"])->name("itsp-infoflow.input.destroy");
+            Route::post("/itsp-infoflow/outputs", [TktiInformationFlowController::class, "storeOutput"])->name("itsp-infoflow.output.store");
+            Route::put("/itsp-infoflow/outputs/{id}", [TktiInformationFlowController::class, "updateOutput"])->name("itsp-infoflow.output.update");
+            Route::delete("/itsp-infoflow/outputs/{id}", [TktiInformationFlowController::class, "destroyOutput"])->name("itsp-infoflow.output.destroy");
 
             // Master Responsible CRUD
             Route::get("/responsible", [ResponsibleController::class, "manage"])->name("responsible.manage");

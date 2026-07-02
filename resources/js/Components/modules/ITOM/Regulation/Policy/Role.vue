@@ -1,18 +1,5 @@
 <template>
     <div class="space-y-6 animate-fade-in-up print:m-0 print:p-0">
-            <!-- Sleek Action Bar at Top (print:hidden) -->
-            <section class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white px-5 py-3.5 shadow-sm dark:border-white/10 dark:bg-[#171717] print:hidden">
-                <div class="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full bg-[#821f44]/10 blur-2xl"></div>
-                <div class="pointer-events-none absolute -bottom-16 -left-12 h-40 w-40 rounded-full bg-blue-500/5 blur-2xl"></div>
-
-                <div class="relative flex flex-col gap-3">
-                    <div class="flex flex-col gap-1">
-                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#821f44] dark:text-[#a83262]">{{ activeRegulation?.judul || 'PEDOMAN TATA KELOLA TEKNOLOGI INFORMASI' }}</p>
-                        <h2 class="text-sm font-semibold text-slate-900 dark:text-white">Kelola Dokumen</h2>
-                    </div>
-                    <GuidanceChapterNavigation />
-                </div>
-            </section>
 
             <!-- External Sub Menu Switcher (print:hidden) -->
             <div class="print:hidden flex justify-center mb-6">
@@ -761,8 +748,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { usePage, Link, useForm } from '@inertiajs/vue3';
-import GuidanceChapterNavigation from '@/Components/modules/ITOM/Regulation/GuidanceChapterNavigation.vue';
+import { usePage } from '@inertiajs/vue3';
 import PertaminaDocumentHeader from '@/Components/modules/ITOM/Regulation/PertaminaDocumentHeader.vue';
 
 const props = defineProps({

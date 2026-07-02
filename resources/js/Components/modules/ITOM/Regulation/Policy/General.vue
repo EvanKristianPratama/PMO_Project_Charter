@@ -1,19 +1,5 @@
 <template>
     <div class="animate-fade-in-up space-y-6">
-        <!-- Page Header -->
-            <section class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white px-5 py-3.5 shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                <div class="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full bg-[#821f44]/10 blur-2xl"></div>
-                <div class="pointer-events-none absolute -bottom-16 -left-12 h-40 w-40 rounded-full bg-blue-500/5 blur-2xl"></div>
-
-                <div class="relative flex flex-col gap-3">
-                    <div class="flex flex-col gap-1">
-                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#821f44] dark:text-[#a83262]">{{ activeRegulation?.judul }}</p>
-                        <h2 class="text-sm font-semibold text-slate-900 dark:text-white">Kelola Dokumen</h2>
-                    </div>
-                    <GuidanceChapterNavigation />
-                </div>
-            </section>
-
 
             <!-- A4 Document Page Preview -->
             <div
@@ -205,7 +191,6 @@
 import { ref, computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import PertaminaDocumentHeader from '@/Components/modules/ITOM/Regulation/PertaminaDocumentHeader.vue';
-import GuidanceChapterNavigation from '@/Components/modules/ITOM/Regulation/GuidanceChapterNavigation.vue';
 
 const props = defineProps({
     policies: {
