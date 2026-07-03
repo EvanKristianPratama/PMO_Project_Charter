@@ -1,5 +1,5 @@
 <template>
-    <UserLayout :title="`IT Initiative - ${itInitiative.name}`">
+    <ModulLayout :title="`IT Initiative - ${itInitiative.name}`">
         <div class="space-y-4 print:space-y-0">
             <!-- Top Bar -->
             <section
@@ -218,14 +218,14 @@
                 </div>
             </div>
         </div>
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 import ItCharterDocument from '@/Components/modules/ITSP/ProjectCharter/ItCharterDocument.vue';
 import AprovedCharterDocument from '@/Components/modules/ITSP/ProjectCharter/AprovedCharterDocument.vue';
 import ProjectRoadmap from '@/Components/modules/ITSP/Roadmap/ProjectRoadmap.vue';

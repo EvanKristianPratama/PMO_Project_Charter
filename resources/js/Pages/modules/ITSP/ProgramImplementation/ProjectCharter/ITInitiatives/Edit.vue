@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Edit IT Initiative">
+    <ModulLayout title="Edit IT Initiative">
         <div class="mx-auto max-w-[1860px] animate-fade-in space-y-6">
             <div>
                 <Link
@@ -245,14 +245,14 @@
                 @confirm="confirmDeleteHistory"
             />
         </div>
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
 import { computed, reactive, ref } from 'vue';
 import { Link, router, useForm } from '@inertiajs/vue3';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import { statusBadgeClassById, statusLabelFromOptions } from '@/Composables/initiativeStatus';
 

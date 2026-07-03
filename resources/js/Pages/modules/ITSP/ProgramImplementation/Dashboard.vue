@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Dashboard">
+    <ModulLayout title="Dashboard">
         <div class="space-y-6 animate-fade-in-up">
             <section class="rounded-xl bg-gradient-to-r from-red-600 to-rose-700 p-6 shadow-md dark:from-[#8C1D13] dark:to-[#A42518] dark:border dark:border-white/10">
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -151,12 +151,12 @@
                 />
             </section>
         </div>
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
 import { computed, ref } from 'vue';
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 import ScopeCharterFlowSection from '@/Components/modules/ITSP/Dashboard/ScopeCharterFlowSection.vue';
 import ScopeCharterDigitalTable from '@/Components/modules/ITSP/Dashboard/ScopeCharterDigitalTable.vue';
 import ScopeCharterItTable from '@/Components/modules/ITSP/Dashboard/ScopeCharterItTable.vue';

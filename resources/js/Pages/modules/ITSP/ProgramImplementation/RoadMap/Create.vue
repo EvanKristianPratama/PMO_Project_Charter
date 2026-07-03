@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Create Roadmap">
+    <ModulLayout title="Create Roadmap">
         <div class="space-y-5 print:space-y-0">
             <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
@@ -87,14 +87,14 @@
                 </p>
             </section>
         </div>
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 import ActivityQuarterManager from '@/Components/modules/ITSP/Roadmap/ActivityQuarterManager.vue';
 import ProjectRoadmap from '@/Components/modules/ITSP/Roadmap/ProjectRoadmap.vue';
 

@@ -186,7 +186,7 @@ import InitiativeDetailsWithRelations from './InitiativeDetailsWithRelations.vue
 import { useRouteHelper } from '@/Composables/useRouteHelper';
 
 const route = useRouteHelper();
-const initiativeRelationIndexPath = route('initiative-relations.index');
+const initiativeRelationIndexPath = route('itsp.initiative-relations.index');
 
 const props = defineProps({
     form: {

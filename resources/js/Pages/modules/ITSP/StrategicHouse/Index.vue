@@ -305,7 +305,7 @@
                             :all-organizations="allOrganizations"
                             :pilar-options="pilarOptions"
                             :filters="pillarFilters"
-                            base-url-route="strategic-house.index"
+                            base-url-route="itsp.strategic-house.index"
                         />
                     </div>
                 </Transition>

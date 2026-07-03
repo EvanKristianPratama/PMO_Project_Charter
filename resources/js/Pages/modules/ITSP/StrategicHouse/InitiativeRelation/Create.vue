@@ -31,7 +31,7 @@ import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
 const route = useRouteHelper();
-const initiativeRelationIndexPath = route('initiative-relations.index');
+const initiativeRelationIndexPath = route('itsp.initiative-relations.index');
 
 const props = defineProps({
     initiativeOptions: {
@@ -61,6 +61,6 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route('initiative-relations.store'));
+    form.post(route('itsp.initiative-relations.store'));
 };
 </script>

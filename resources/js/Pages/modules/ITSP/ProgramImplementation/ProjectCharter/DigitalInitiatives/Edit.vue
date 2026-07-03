@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Edit Digital Initiative">
+    <ModulLayout title="Edit Digital Initiative">
         <div class="mx-auto max-w-[1860px] animate-fade-in space-y-6">
             <div>
                 <Link
@@ -227,14 +227,14 @@
                 </div>
             </article>
         </div>
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
 import { computed, reactive, ref } from 'vue';
 import { Link, router, useForm } from '@inertiajs/vue3';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 import { statusBadgeClassById, statusLabelFromOptions } from '@/Composables/initiativeStatus';
 
 const route = useRouteHelper();

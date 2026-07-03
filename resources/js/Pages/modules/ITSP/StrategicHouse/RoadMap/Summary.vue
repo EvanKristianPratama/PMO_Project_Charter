@@ -2,7 +2,7 @@
 import { computed } from "vue";
 import { Link } from "@inertiajs/vue3";
 import { useRouteHelper } from "@/Composables/useRouteHelper";
-import UserLayout from "@/Layouts/UserLayout.vue";
+import ModulLayout from "@/Layouts/ModulLayout.vue";
 import RoadmapSummaryTable from "@/Components/modules/ITSP/StrategicHouse/RoadMap/RoadmapSummaryTable.vue";
 
 const route = useRouteHelper();
@@ -76,7 +76,7 @@ function yearLabel(year) {
 </script>
 
 <template>
-    <UserLayout title="Program Initiative Roadmap Summary">
+    <ModulLayout title="Program Initiative Roadmap Summary">
         <div class="summary-page">
             <!-- Back link -->
             <section
@@ -204,7 +204,7 @@ function yearLabel(year) {
                 </table>
             </div>
         </div>
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <style scoped>

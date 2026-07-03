@@ -575,7 +575,7 @@ const savePositions = () => {
         };
     }).filter(pos => !isNaN(pos.initiative_id) && pos.initiative_id > 0);
 
-    router.post(route('initiative-relations.sync-positions'), {
+    router.post(route('itsp.initiative-relations.sync-positions'), {
         positions: positionsToSync,
     }, {
         preserveScroll: true,
@@ -601,7 +601,7 @@ const toggleLockPositions = () => {
     // Flip state
     isPositionsLocked.value = nextLockState;
 
-    router.post(route('initiative-relations.sync-positions'), {
+    router.post(route('itsp.initiative-relations.sync-positions'), {
         positions: positionsToSync,
     }, {
         preserveScroll: true,

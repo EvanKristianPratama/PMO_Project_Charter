@@ -344,7 +344,7 @@ const props = defineProps({
     allOrganizations: { type: Array, default: () => [] },
     filters:          { type: Object, default: () => ({}) },
     pilarOptions:     { type: Array, default: () => [] },
-    baseUrlRoute:     { type: String, default: 'strategic-pillars.index' },
+    baseUrlRoute:     { type: String, default: 'itsp.strategic-pillars.index' },
 });
 
 // --- Filters (client-side only) ---

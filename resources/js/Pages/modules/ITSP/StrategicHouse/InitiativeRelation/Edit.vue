@@ -50,8 +50,8 @@ import { useRouteHelper } from '@/Composables/useRouteHelper';
 import UserLayout from '@/Layouts/UserLayout.vue';
 
 const route = useRouteHelper();
-const initiativeRelationIndexPath = route('initiative-relations.index');
-const initiativeRelationEditPath = (initiativeRelationId) => route('initiative-relations.edit', initiativeRelationId);
+const initiativeRelationIndexPath = route('itsp.initiative-relations.index');
+const initiativeRelationEditPath = (initiativeRelationId) => route('itsp.initiative-relations.edit', initiativeRelationId);
 
 const props = defineProps({
     initiativeRelation: {
@@ -147,6 +147,6 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.put(route('initiative-relations.update', props.initiativeRelation.id));
+    form.put(route('itsp.initiative-relations.update', props.initiativeRelation.id));
 };
 </script>

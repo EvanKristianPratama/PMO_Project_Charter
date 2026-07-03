@@ -60,8 +60,8 @@ const props = defineProps({
     },
 });
 
-const initiativeRelationCreatePath = route('initiative-relations.create');
-const initiativeRelationEditPath = (initiativeRelationId) => route('initiative-relations.edit', initiativeRelationId);
+const initiativeRelationCreatePath = route('itsp.initiative-relations.create');
+const initiativeRelationEditPath = (initiativeRelationId) => route('itsp.initiative-relations.edit', initiativeRelationId);
 const pageContainer = computed(() => (props.embedded ? 'div' : UserLayout));
 const pageContainerProps = computed(() => (props.embedded ? {} : { title: 'Initiative Relation' }));
 

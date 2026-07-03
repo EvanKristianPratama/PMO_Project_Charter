@@ -1,5 +1,5 @@
 <template>
-    <UserLayout :title="`Digital Initiative - ${initiative.code}`">
+    <ModulLayout :title="`Digital Initiative - ${initiative.code}`">
         <div class="space-y-4 print:space-y-0">
             <section class="print:hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="flex flex-wrap items-center gap-2 px-3 py-2.5">
@@ -79,14 +79,14 @@
                 </main>
             </template>
         </div>
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 import DigitalCharterDocument from './Partials/DigitalCharterDocument.vue';
 import StatusImplementationTable from '@/Components/modules/ITSP/ITInitiative/ReviewStatusImplementationTable.vue';
 

@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Roadmap">
+    <ModulLayout title="Roadmap">
         <div class="space-y-6 print:space-y-0">
             <section class="print:hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -99,13 +99,13 @@
             </section>
 
         </div>
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
 import { computed, reactive, ref, watch } from 'vue';
 import { Link } from '@inertiajs/vue3';
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 import ProjectRoadmap from '@/Components/modules/ITSP/Roadmap/ProjectRoadmap.vue';
 import ProjectRoadmapSummary from '@/Components/modules/ITSP/Roadmap/ProjectRoadmapSummary.vue';
 

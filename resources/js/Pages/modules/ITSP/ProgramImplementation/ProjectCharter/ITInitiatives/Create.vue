@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Create IT Initiative">
+    <ModulLayout title="Create IT Initiative">
         <div class="mx-auto max-w-[1860px] animate-fade-in space-y-6">
             <div>
                 <Link
@@ -98,14 +98,13 @@
                 </article>
             </form>
         </div>
-    </UserLayout>
-
+    </ModulLayout>
 </template>
 
 <script setup>
 import { useForm, Link } from '@inertiajs/vue3';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 
 const props = defineProps({
     statusOptions: {

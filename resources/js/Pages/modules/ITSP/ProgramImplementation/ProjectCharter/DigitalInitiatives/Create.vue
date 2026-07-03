@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Create Digital Initiative">
+    <ModulLayout title="Create Digital Initiative">
         <div class="mx-auto max-w-[1860px] animate-fade-in space-y-6">
             <div>
                 <Link
@@ -97,13 +97,13 @@
                 </article>
             </form>
         </div>
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
 import { Link, useForm } from '@inertiajs/vue3';
 import { useRouteHelper } from '@/Composables/useRouteHelper';
-import UserLayout from '@/Layouts/UserLayout.vue';
+import ModulLayout from '@/Layouts/ModulLayout.vue';
 
 const props = defineProps({
     statusOptions: {

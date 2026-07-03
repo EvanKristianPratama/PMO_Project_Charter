@@ -159,7 +159,9 @@ export function useNavigation() {
                 label: "Digital Initiatives",
                 href: safeRoute("itsp.digital-initiatives.index"),
                 icon: FolderIcon,
-                active: (url) => (url || "").includes("/digital-initiatives"),
+                active: (url) =>
+                    (url || "").includes("/digital-initiatives") &&
+                    !(url || "").includes("/program-planning"),
                 children: [
                     {
                         label: "Status Implementation",
@@ -169,7 +171,8 @@ export function useNavigation() {
                         icon: ClipboardDocumentCheckIcon,
                         active: (url) =>
                             (url || "").includes("/digital-initiatives") &&
-                            (url || "").includes("tableMode=implementation"),
+                            (url || "").includes("tableMode=implementation") &&
+                            !(url || "").includes("/program-planning"),
                     },
                 ],
             },
@@ -177,9 +180,16 @@ export function useNavigation() {
                 label: "IT Initiatives",
                 href: safeRoute("itsp.it-initiatives.index"),
                 icon: FolderIcon,
-                active: (url) =>
-                    (url || "").includes("/it-initiatives") ||
-                    (url || "").includes("/roadmap"),
+                active: (url) => {
+                    const normalized = url || "";
+                    if (normalized.includes("/program-planning") || normalized.includes("/strategic-house")) {
+                        return false;
+                    }
+                    return (
+                        normalized.includes("/it-initiatives") ||
+                        normalized.includes("/roadmap")
+                    );
+                },
                 children: [
                     {
                         label: "Dashboard Summary",
@@ -191,11 +201,18 @@ export function useNavigation() {
                         label: "Roadmap Project Charter",
                         href: safeRoute("itsp.roadmap.index"),
                         icon: ClipboardDocumentCheckIcon,
-                        active: (url) =>
-                            (url || "").includes("/roadmap") &&
-                            !(url || "").includes(
-                                "/roadmap/status-implementation",
-                            ),
+                        active: (url) => {
+                            const normalized = url || "";
+                            if (normalized.includes("/program-planning") || normalized.includes("/strategic-house")) {
+                                return false;
+                            }
+                            return (
+                                normalized.includes("/roadmap") &&
+                                !normalized.includes(
+                                    "/roadmap/status-implementation",
+                                )
+                            );
+                        },
                     },
                     {
                         label: "Status Implementation",
@@ -204,7 +221,8 @@ export function useNavigation() {
                         }),
                         icon: ClipboardDocumentCheckIcon,
                         active: (url) =>
-                            (url || "").includes("tableMode=implementation"),
+                            (url || "").includes("tableMode=implementation") &&
+                            !(url || "").includes("/program-planning"),
                     },
                 ],
             },
@@ -351,12 +369,22 @@ export function useNavigation() {
                 label: "Program Implementation",
                 href: safeRoute("itsp.program-implementation.index"),
                 icon: ChartBarIcon,
-                active: (url) =>
-                    (url || "").includes("/program-implementation") ||
-                    url === "/dashboard" ||
-                    (url || "").includes("/digital-initiatives") ||
-                    (url || "").includes("/it-initiatives") ||
-                    (url || "").includes("/roadmap"),
+                active: (url) => {
+                    const normalized = url || "";
+                    if (
+                        normalized.includes("/program-planning") ||
+                        normalized.includes("/strategic-house")
+                    ) {
+                        return false;
+                    }
+                    return (
+                        normalized.includes("/program-implementation") ||
+                        normalized === "/dashboard" ||
+                        normalized.includes("/digital-initiatives") ||
+                        normalized.includes("/it-initiatives") ||
+                        normalized.includes("/roadmap")
+                    );
+                },
                 children: programImplementationChildren,
             },
             {

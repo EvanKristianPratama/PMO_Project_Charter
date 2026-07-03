@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="Digital Initiatives">
+    <ModulLayout title="Digital Initiatives">
         <div class="animate-fade-in">
             <div
                 class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
@@ -170,12 +170,12 @@
                 />
             </section>
         </div>
-    </UserLayout>
+    </ModulLayout>
 </template>
 
 <script setup>
 import { computed, onMounted, ref } from "vue";
-import UserLayout from "@/Layouts/UserLayout.vue";
+import ModulLayout from "@/Layouts/ModulLayout.vue";
 import { statusFlowClassByIndex } from "@/Composables/initiativeStatus";
 import { useFlowFilter } from "@/Composables/useFlowFilter";
 import FlowStatusTable from "@/Components/modules/ITSP/DigitalInitiative/FlowStatusTable.vue";

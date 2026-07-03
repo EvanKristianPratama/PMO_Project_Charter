@@ -1,5 +1,5 @@
 <template>
-    <UserLayout title="IT Initiatives">
+    <ModulLayout title="IT Initiatives">
         <div class="animate-fade-in">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between" :class="tableMode === TABLE_MODE.ROADMAP ||
                     tableMode === TABLE_MODE.IMPLEMENTATION
@@ -416,14 +416,14 @@ initiative, initiativeIndex
                 />
             </section>
             </div>
-            </UserLayout>
+            </ModulLayout>
 </template>
 
 <script setup>
 import { computed, ref, reactive, onMounted } from "vue";
 import { Link, usePage, router } from "@inertiajs/vue3";
 import { useRouteHelper } from "@/Composables/useRouteHelper";
-import UserLayout from "@/Layouts/UserLayout.vue";
+import ModulLayout from "@/Layouts/ModulLayout.vue";
 import { statusFlowClassByIndex } from "@/Composables/initiativeStatus";
 import { useFlowFilter } from "@/Composables/useFlowFilter";
 import FlowStatusTable from "@/Components/modules/ITSP/ITInitiative/FlowStatusTable.vue";
