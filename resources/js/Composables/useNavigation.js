@@ -1,4 +1,4 @@
-import { computed } from "vue";
+import { computed, watch } from "vue";
 import { usePage } from "@inertiajs/vue3";
 import { routeHelper } from "@/Composables/useRouteHelper";
 import { useModulState } from "@/Composables/useModulState";
@@ -22,7 +22,39 @@ import {
 
 export function useNavigation() {
     const page = usePage();
-    const { activeModul } = useModulState();
+    const { activeModul, setActiveModul } = useModulState();
+
+    // Auto-adjust activeModul filter based on current URL path
+    watch(
+        () => page.url,
+        (url) => {
+            const path = url || "";
+            const isItomPath =
+                path.includes("/policy") ||
+                path.includes("/regulation") ||
+                path.includes("/bpmn-workflow") ||
+                path.includes("/operating-model") ||
+                path.includes("/service-portofolio") ||
+                path.includes("/raci-analysis") ||
+                path.includes("/master-data") ||
+                path.includes("/sync") ||
+                path.includes("/itom");
+
+            const isItspsPath =
+                path.includes("/itsp") ||
+                path.includes("/strategic-house") ||
+                path.includes("/program-planning") ||
+                path.includes("/program-evaluation") ||
+                path.includes("/program-implementation");
+
+            if (isItomPath && activeModul.value === "itsps") {
+                setActiveModul("itom");
+            } else if (isItspsPath && activeModul.value === "itom") {
+                setActiveModul("itsps");
+            }
+        },
+        { immediate: true }
+    );
     const authUser = computed(() => page.props.auth?.user || {});
     const appRole = computed(() =>
         String(authUser.value?.app_role || "user").toLowerCase(),
@@ -410,11 +442,26 @@ export function useNavigation() {
             },
             {
                 label: "Operating Model",
-                href: safeRoute("itom.operating-model.framework.index"),
+                href: safeRoute("itom.operating-model.model.index"),
                 icon: Squares2X2Icon,
                 active: (url) =>
                     (url || "").includes("/operating-model"),
                 children: [
+                    {
+                        label: "Model Structure",
+                        href: safeRoute("itom.operating-model.model.index"),
+                        icon: Squares2X2Icon,
+                        active: (url) =>
+                            (url || "").includes(
+                                "/operating-model/model",
+                            ) ||
+                            [
+                                "/itom/operating-model",
+                                "/itom/operating-model/",
+                                "/operating-model",
+                                "/operating-model/",
+                            ].includes((url || "").split("?")[0]),
+                    },
                     {
                         label: "Framework",
                         href: safeRoute("itom.operating-model.framework.index"),
@@ -425,13 +472,7 @@ export function useNavigation() {
                             ) ||
                             (url || "").includes(
                                 "/operating-model/cobit-component",
-                            ) ||
-                            [
-                                "/itom/operating-model",
-                                "/itom/operating-model/",
-                                "/operating-model",
-                                "/operating-model/",
-                            ].includes((url || "").split("?")[0]),
+                            ),
                     },
                     {
                         label: "IT Governance",
@@ -475,6 +516,7 @@ export function useNavigation() {
                 icon: DocumentTextIcon,
                 active: (url) =>
                     (url || "").includes("/policy") ||
+                    (url || "").includes("/regulation") ||
                     (url || "").includes("/bpmn-workflow"),
                 children: [
                     {
@@ -482,7 +524,8 @@ export function useNavigation() {
                         href: safeRoute("itom.policy.regulation.index"),
                         icon: DocumentTextIcon,
                         active: (url) =>
-                            (url || "").includes("/policy/regulation"),
+                            (url || "").includes("/policy/regulation") ||
+                            (url || "").includes("/regulation/procedure"),
                     },
                     {
                         label: "SK",
@@ -495,6 +538,12 @@ export function useNavigation() {
                         href: safeRoute("itom.policy.CMS.index"),
                         icon: FolderIcon,
                         active: (url) => (url || "").includes("/policy/CMS"),
+                    },
+                    {
+                        label: "Definition",
+                        href: safeRoute("itom.policy.definition.index"),
+                        icon: DocumentTextIcon,
+                        active: (url) => (url || "").includes("/policy/definition"),
                     },
                     {
                         label: "COBIT 2019",

@@ -243,7 +243,7 @@
             </button>
 
             <!-- Go to Management CRUD page -->
-            <Link :href="route('itom.policy.procedure.manage', activeRegulation ? { regulation_id: activeRegulation.id } : {})" title="Editor"
+            <Link :href="route('itom.regulation.procedure.manage', activeRegulation ? { regulation_id: activeRegulation.id } : {})" title="Editor"
                 class="group flex h-12 w-12 items-center justify-center rounded-full bg-[#821f44]/80 text-white shadow-2xl shadow-[#821f44]/30 backdrop-blur-md transition-all hover:bg-[#821f44] hover:shadow-[#821f44]/40 active:scale-95">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2"
                     stroke="currentColor" class="w-5 h-5 transition-transform group-hover:rotate-12">
@@ -259,7 +259,7 @@
 import { computed, ref, watch, onMounted, nextTick } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import ModulLayout from '@/Layouts/ModulLayout.vue';
-import FlowChart from '@/Components/modules/ITOM/Procedure/FlowChart.vue';
+import FlowChart from '@/Components/modules/ITOM/Regulation/Procedure/FlowChart.vue';
 import PertaminaDocumentHeader from '@/Components/modules/ITOM/Regulation/PertaminaDocumentHeader.vue';
 
 const props = defineProps({
@@ -346,7 +346,7 @@ function handleFastDocumentSwitch(regId) {
     if (!selectedReg) return;
 
     const targetRoute = String(selectedReg.tipe || '').toLowerCase() === 'procedure'
-        ? 'itom.policy.procedure.index'
+        ? 'itom.regulation.procedure.index'
         : 'itom.policy.general.index';
 
     router.visit(route(targetRoute, { regulation_id: regId }));

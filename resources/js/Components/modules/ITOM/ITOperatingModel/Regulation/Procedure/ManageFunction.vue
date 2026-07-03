@@ -10,7 +10,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import FungsiEditor from '@/Components/modules/ITOM/Procedure/FungsiEditor.vue';
+import FungsiEditor from '@/Components/modules/ITOM/Regulation/Procedure/FungsiEditor.vue';
 
 const props = defineProps({
     actors: {

@@ -24,29 +24,11 @@
                 </div>
             </div>
 
-            <div v-if="activeTab === 'framework'" class="px-4 sm:px-6 lg:px-8">
-                <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-4 shadow-sm">
-                    <div class="flex items-center justify-between border-b border-slate-150 dark:border-zinc-800 pb-3 mb-4">
-                        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-zinc-100 flex items-center gap-2">
-                            <Squares2X2Icon class="h-5 w-5 text-[#0b2545] dark:text-blue-450" />
-                            Operating Model Framework
-                        </h2>
-                    </div>
-                    <div class="flex justify-center overflow-hidden rounded-lg bg-slate-50 dark:bg-zinc-950 p-2 border border-slate-100 dark:border-zinc-800/50">
-                        <img 
-                            src="/frameworks/framework.jpeg" 
-                            alt="Operating Model Framework" 
-                            class="max-w-full max-h-[750px] object-contain"
-                        />
-                    </div>
-                </div>
+            <div v-if="activeTab === 'itops'" class="px-4 sm:px-6 lg:px-8">
+                <ItOpsIndex embedded />
             </div>
 
             <CobitComponentIndex v-else-if="activeTab === 'cobit'" class="px-4 sm:px-6 lg:px-8" embedded />
-
-            <div v-else-if="activeTab === 'itops'" class="px-4 sm:px-6 lg:px-8">
-                <ItOpsIndex embedded />
-            </div>
         </div>
     </ModulLayout>
 </template>
@@ -58,13 +40,9 @@ import CobitComponentIndex from "./CobitComponent/Index.vue";
 import ItOpsIndex from "./ItOps/Index.vue";
 import { Squares2X2Icon } from "@heroicons/vue/24/outline";
 
-const activeTab = ref("framework");
+const activeTab = ref("itops");
 
 const tabs = [
-    {
-        key: "framework",
-        label: "Framework",
-    },
     {
         key: "itops",
         label: "IT Ops",

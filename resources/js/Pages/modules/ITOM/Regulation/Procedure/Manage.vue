@@ -23,26 +23,27 @@
             </div>
 
             <!-- Page Header (sama untuk manage & view) -->
-            <section v-if="isHeaderVisible" class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717] print:hidden">
-                <div class="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full bg-[#821f44]/10 blur-2xl"></div>
-                <div class="pointer-events-none absolute -bottom-16 -left-12 h-40 w-40 rounded-full bg-blue-500/5 blur-2xl"></div>
+            <div v-if="isHeaderVisible" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717] print:hidden">
+                <div class="flex flex-col gap-3 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
+                    <!-- Bagian Kiri: Judul Konten -->
+                    <div>
+                        <h2 class="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                            <svg class="h-4 w-4 text-[#821f44]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                            </svg>
+                            Kelola Procedure
+                            <span class="text-slate-400 dark:text-slate-500 font-normal">| {{ activeRegulation?.judul || 'Belum ada regulasi aktif' }}</span>
+                        </h2>
+                    </div>
 
-                <div class="relative flex flex-col gap-4">
-                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#821f44] dark:text-[#a83262]">
-                                {{ activeRegulation?.judul || 'Belum ada regulasi aktif' }}
-                            </p>
-                            <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                                Kelola Procedure
-                            </h1>
-                        </div>
-                        <div class="flex flex-wrap items-center gap-3">
+                    <!-- Bagian Kanan: Aksi / Navigasi / Button / Filter -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="flex shrink-0 gap-1">
                             <Link
-                                :href="route('itom.policy.procedure.index', activeRegulation ? { regulation_id: activeRegulation.id } : {})"
-                                class="inline-flex items-center gap-2 rounded-xl bg-[#821f44] px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#821f44]/25 transition-all hover:bg-[#9c2552] hover:shadow-[#821f44]/40 focus:ring-2 focus:ring-[#821f44]/20 active:scale-95"
+                                :href="route('itom.regulation.procedure.index', activeRegulation ? { regulation_id: activeRegulation.id } : {})"
+                                class="inline-flex items-center gap-1.5 rounded-lg bg-[#821f44] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#9c2552]"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-3 w-3">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
                                 </svg>
                                 Lihat Dokumen
@@ -50,7 +51,7 @@
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
 
             <!-- Word-style Navigation & Editor Layout -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -303,7 +304,7 @@
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import ModulLayout from '@/Layouts/ModulLayout.vue';
-import SectionEditor from '@/Components/modules/ITOM/Procedure/SectionEditor.vue';
+import SectionEditor from '@/Components/modules/ITOM/Regulation/Procedure/SectionEditor.vue';
 import ManageSection from '@/Components/modules/ITOM/ITOperatingModel/Regulation/Procedure/ManageSection.vue';
 import ManageActivity from '@/Components/modules/ITOM/ITOperatingModel/Regulation/Procedure/ManageActivity.vue';
 import ManageFunction from '@/Components/modules/ITOM/ITOperatingModel/Regulation/Procedure/ManageFunction.vue';

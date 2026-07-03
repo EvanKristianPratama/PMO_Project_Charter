@@ -13,7 +13,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import ProsedurEditor from '@/Components/modules/ITOM/Procedure/ProsedurEditor.vue';
+import ProsedurEditor from '@/Components/modules/ITOM/Regulation/Procedure/ProsedurEditor.vue';
 
 const props = defineProps({
     categories: {

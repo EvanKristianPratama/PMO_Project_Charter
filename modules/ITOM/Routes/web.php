@@ -265,6 +265,11 @@ Route::middleware(["approved"])->group(function () {
                 "itManagement",
             ])->name("it-management.index");
             
+            Route::get("/model", [
+                OperatingModelController::class,
+                "model",
+            ])->name("model.index");
+
             Route::get("/framework", [
                 OperatingModelController::class,
                 "framework",
@@ -380,26 +385,7 @@ Route::middleware(["approved"])->group(function () {
             Route::put("/regulation/{id}", [PolicyStandartProcedureController::class, "update"])->name("regulation.update");
             Route::delete("/regulation/{id}", [PolicyStandartProcedureController::class, "destroy"])->name("regulation.destroy");
 
-            // Prosedur (Procedure) placeholder
-            Route::get("/procedure", [ProcedureController::class, "index"])->name("procedure.index");
-            Route::get("/procedure/manage", [ProcedureController::class, "manage"])->name("procedure.manage");
-            Route::post("/procedure/actor", [ProcedureController::class, "storeActor"])->name("procedure.actor.store");
-            Route::put("/procedure/actor/{id}", [ProcedureController::class, "updateActor"])->name("procedure.actor.update");
-            Route::delete("/procedure/actor/{id}", [ProcedureController::class, "destroyActor"])->name("procedure.actor.destroy");
-            Route::post("/procedure/category", [ProcedureController::class, "storeCategory"])->name("procedure.category.store");
-            Route::put("/procedure/category/{id}", [ProcedureController::class, "updateCategory"])->name("procedure.category.update");
-            Route::delete("/procedure/category/{id}", [ProcedureController::class, "destroyCategory"])->name("procedure.category.destroy");
-            Route::post("/procedure/sop", [ProcedureController::class, "storeSop"])->name("procedure.sop.store");
-            Route::put("/procedure/sop/{id}", [ProcedureController::class, "updateSop"])->name("procedure.sop.update");
-            Route::delete("/procedure/sop/{id}", [ProcedureController::class, "destroySop"])->name("procedure.sop.destroy");
-            Route::post("/procedure/diagram", [ProcedureController::class, "storeDiagram"])->name("procedure.diagram.store");
-            Route::put("/procedure/diagram/{id}", [ProcedureController::class, "updateDiagram"])->name("procedure.diagram.update");
-            Route::delete("/procedure/diagram/{id}", [ProcedureController::class, "destroyDiagram"])->name("procedure.diagram.destroy");
-            Route::post("/procedure/tko-content", [ProcedureController::class, "storeOrUpdateTkoContent"])->name("procedure.tko-content.store");
-            Route::post("/procedure/tko-content/save-structured", [ProcedureController::class, "saveStructuredDocument"])->name("procedure.tko-content.save-structured");
-            Route::post("/procedure/section", [ProcedureController::class, "storeSection"])->name("procedure.section.store");
-            Route::put("/procedure/section/{id}", [ProcedureController::class, "updateSection"])->name("procedure.section.update");
-            Route::delete("/procedure/section/{id}", [ProcedureController::class, "destroySection"])->name("procedure.section.destroy");
+            // Prosedur (Procedure) routes moved to regulation prefix group below
 
             Route::get("/organization", [OperatingModelController::class, "itGovernance"])->name("organization.index");
             Route::get("/it-management", [OperatingModelController::class, "itManagement"])->name("it-management.index");
@@ -442,6 +428,36 @@ Route::middleware(["approved"])->group(function () {
             Route::post('/CMS/upload', [CMSController::class, 'upload'])->name('CMS.upload');
             Route::delete('/CMS/document/{uuid}', [CMSController::class, 'destroy'])->name('CMS.document.destroy');
             Route::get('/CMS/{uuid}', [CMSController::class, 'show'])->name('CMS.show');
+
+            // Definition placeholder
+            Route::get('/definition', fn() => Inertia::render("Placeholder/Index", [
+                "title" => "Definition",
+            ]))->name('definition.index');
+        });
+
+    // Prosedur (Procedure) routes
+    Route::prefix("/regulation/procedure")
+        ->name("regulation.procedure.")
+        ->group(function () {
+            Route::get("/", [ProcedureController::class, "index"])->name("index");
+            Route::get("/manage", [ProcedureController::class, "manage"])->name("manage");
+            Route::post("/actor", [ProcedureController::class, "storeActor"])->name("actor.store");
+            Route::put("/actor/{id}", [ProcedureController::class, "updateActor"])->name("actor.update");
+            Route::delete("/actor/{id}", [ProcedureController::class, "destroyActor"])->name("actor.destroy");
+            Route::post("/category", [ProcedureController::class, "storeCategory"])->name("category.store");
+            Route::put("/category/{id}", [ProcedureController::class, "updateCategory"])->name("category.update");
+            Route::delete("/category/{id}", [ProcedureController::class, "destroyCategory"])->name("category.destroy");
+            Route::post("/sop", [ProcedureController::class, "storeSop"])->name("sop.store");
+            Route::put("/sop/{id}", [ProcedureController::class, "updateSop"])->name("sop.update");
+            Route::delete("/sop/{id}", [ProcedureController::class, "destroySop"])->name("sop.destroy");
+            Route::post("/diagram", [ProcedureController::class, "storeDiagram"])->name("diagram.store");
+            Route::put("/diagram/{id}", [ProcedureController::class, "updateDiagram"])->name("diagram.update");
+            Route::delete("/diagram/{id}", [ProcedureController::class, "destroyDiagram"])->name("diagram.destroy");
+            Route::post("/tko-content", [ProcedureController::class, "storeOrUpdateTkoContent"])->name("tko-content.store");
+            Route::post("/tko-content/save-structured", [ProcedureController::class, "saveStructuredDocument"])->name("tko-content.save-structured");
+            Route::post("/section", [ProcedureController::class, "storeSection"])->name("section.store");
+            Route::put("/section/{id}", [ProcedureController::class, "updateSection"])->name("section.update");
+            Route::delete("/section/{id}", [ProcedureController::class, "destroySection"])->name("section.destroy");
         });
 
     Route::get("/libary", [LibaryController::class, "index"])->name("libary.index");

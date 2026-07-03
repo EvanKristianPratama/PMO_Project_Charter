@@ -13,7 +13,12 @@ class OperatingModelController extends Controller
 {
     public function index(): Response
     {
-        return Inertia::render("modules/ITOM/OperatingModel/Framework/Index");
+        return Inertia::render("modules/ITOM/OperatingModel/Model/Index");
+    }
+
+    public function model(): Response
+    {
+        return Inertia::render('modules/ITOM/OperatingModel/Model/Index');
     }
 
     public function framework(): Response
