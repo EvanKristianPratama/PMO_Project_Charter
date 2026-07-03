@@ -12,18 +12,18 @@ use Modules\ITOM\Controllers\BusinessProcess\Function\FunctionController;
 use Modules\ITOM\Controllers\BusinessProcess\RegulationMapping\RegulationMappingController;
 use Modules\ITOM\Controllers\ResourceManagement\ResourceManagementController as MainResourceManagementController;
 use Modules\ITOM\Controllers\OperatingModel\OperatingModelController;
-use Modules\ITOM\Controllers\Policy\COBIT\CobitComponentController;
+use Modules\ITOM\Controllers\Regulation\COBIT\CobitComponentController;
 use Modules\ITOM\Controllers\OperatingModel\PracticeRoleController;
 use Modules\ITOM\Controllers\RaciAnalysis\CobitInformationFlow\CobitInformationFlowController;
 use Modules\ITOM\Controllers\RaciAnalysis\TktiInformationFlow\TktiInformationFlowController;
-use Modules\ITOM\Controllers\Policy\GeneralPolicyController;
-use Modules\ITOM\Controllers\Policy\PolicyController;
-use Modules\ITOM\Controllers\Policy\RoleController;
-use Modules\ITOM\Controllers\Policy\RegulationController;
-use Modules\ITOM\Controllers\Policy\ProcedureController;
-use Modules\ITOM\Controllers\Policy\ResponsibleController;
-use Modules\ITOM\Controllers\Policy\CMS\CMSController;
-use Modules\ITOM\Controllers\Policy\SK\SKController;
+use Modules\ITOM\Controllers\Regulation\GeneralPolicyController;
+use Modules\ITOM\Controllers\Regulation\PolicyController;
+use Modules\ITOM\Controllers\Regulation\RoleController;
+use Modules\ITOM\Controllers\Regulation\PolicyStandartProcedureController;
+use Modules\ITOM\Controllers\Regulation\ProcedureController;
+use Modules\ITOM\Controllers\Regulation\ResponsibleController;
+use Modules\ITOM\Controllers\Regulation\CMS\CMSController;
+use Modules\ITOM\Controllers\Regulation\SK\SKController;
 use Modules\ITOM\Controllers\BpmnWorkflowController;
 use Modules\ITOM\Controllers\LibaryController;
 
@@ -373,12 +373,12 @@ Route::middleware(["approved"])->group(function () {
             Route::post("/roles/objective-responsible/{objectiveId}", [RoleController::class, "updateObjectiveResponsibles"])->name("roles.objective-responsible.update");
 
             // Regulasi (Regulation) CRUD
-            Route::get("/regulation/{id}/preview", [RegulationController::class, "previewData"])->name("regulation.preview");
-            Route::get("/regulation", [RegulationController::class, "index"])->name("regulation.index");
+            Route::get("/regulation/{id}/preview", [PolicyStandartProcedureController::class, "previewData"])->name("regulation.preview");
+            Route::get("/regulation", [PolicyStandartProcedureController::class, "index"])->name("regulation.index");
             Route::get("/sk", [SKController::class, "index"])->name("sk.index");
-            Route::post("/regulation", [RegulationController::class, "store"])->name("regulation.store");
-            Route::put("/regulation/{id}", [RegulationController::class, "update"])->name("regulation.update");
-            Route::delete("/regulation/{id}", [RegulationController::class, "destroy"])->name("regulation.destroy");
+            Route::post("/regulation", [PolicyStandartProcedureController::class, "store"])->name("regulation.store");
+            Route::put("/regulation/{id}", [PolicyStandartProcedureController::class, "update"])->name("regulation.update");
+            Route::delete("/regulation/{id}", [PolicyStandartProcedureController::class, "destroy"])->name("regulation.destroy");
 
             // Prosedur (Procedure) placeholder
             Route::get("/procedure", [ProcedureController::class, "index"])->name("procedure.index");

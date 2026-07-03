@@ -748,7 +748,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { usePage } from '@inertiajs/vue3';
+import { usePage, useForm, Link } from '@inertiajs/vue3';
 import PertaminaDocumentHeader from '@/Components/modules/ITOM/Regulation/PertaminaDocumentHeader.vue';
 
 const props = defineProps({
