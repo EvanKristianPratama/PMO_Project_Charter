@@ -184,7 +184,7 @@ function addSectionDirectly() {
     }
     
     router.post(
-        route('itom.policy.procedure.section.store'),
+        route('itom.regulation.procedure.section.store'),
         {
             name: 'Section Baru',
             order: nextOrder,
@@ -205,7 +205,7 @@ function deleteSectionDirectly(sec) {
         cancelButtonText: 'Batal'
     }).then((result) => {
         if (result.isConfirmed) {
-            router.delete(route('itom.policy.procedure.section.destroy', sec.id), { preserveScroll: true });
+            router.delete(route('itom.regulation.procedure.section.destroy', sec.id), { preserveScroll: true });
         }
     });
 }
@@ -221,7 +221,7 @@ async function saveAll() {
             const secData = sectionLocal.value[secId];
             promises.push(
                 axios.put(
-                    route('itom.policy.procedure.section.update', secId),
+                    route('itom.regulation.procedure.section.update', secId),
                     { name: secData.name, order: secData.order },
                     { headers: { 'Accept': 'application/json' } }
                 )

@@ -166,7 +166,7 @@
                                     <span class="flex flex-col items-start text-left">
                                         <div class="flex items-center gap-1.5 flex-wrap">
                                             <Link 
-                                                :href="route('itom.policy.procedure.index', { regulation_id: reg.id })" 
+                                                :href="route('itom.regulation.procedure.index', { regulation_id: reg.id })" 
                                                 class="font-semibold text-slate-900 dark:text-white hover:underline hover:text-[#821f44] dark:hover:text-[#db588c]"
                                             >
                                                 {{ reg.judul }}
@@ -186,7 +186,7 @@
                                             >
                                                 <span class="shrink-0 select-none">-</span>
                                                 <Link 
-                                                    :href="route('itom.policy.procedure.index', { regulation_id: reg.id }) + '#sop-cat-' + cat.id"
+                                                    :href="route('itom.regulation.procedure.index', { regulation_id: reg.id }) + '#sop-cat-' + cat.id"
                                                     class="hover:underline hover:text-[#821f44] dark:hover:text-[#db588c]"
                                                 >
                                                     {{ cat.tipe }}
@@ -702,15 +702,8 @@ const handleExpandLevelChange = () => {
 };
 
 const initializeExpanded = () => {
-    const ids = new Set();
-    props.prosesBisnisV2.forEach(item => {
-        const isParent = props.prosesBisnisV2.some(r => r.parent_id === item.id);
-        if (isParent) {
-            ids.add(item.id);
-        }
-    });
-    expandedIds.value = ids;
-    expandLevel.value = 'all';
+    expandedIds.value = new Set();
+    expandLevel.value = '0';
 };
 
 onMounted(() => {

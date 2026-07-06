@@ -717,7 +717,7 @@ function submitActorForm() {
     }
 
     if (editingActorId.value) {
-        actorForm.put(route('itom.policy.procedure.actor.update', editingActorId.value), {
+        actorForm.put(route('itom.regulation.procedure.actor.update', editingActorId.value), {
             preserveScroll: true,
             onSuccess: () => {
                 closeActorModal();
@@ -731,7 +731,7 @@ function submitActorForm() {
             },
         });
     } else {
-        actorForm.post(route('itom.policy.procedure.actor.store'), {
+        actorForm.post(route('itom.regulation.procedure.actor.store'), {
             preserveScroll: true,
             onSuccess: () => {
                 closeActorModal();
@@ -759,7 +759,7 @@ function deleteActor(actor) {
         cancelButtonText: 'Batal',
     }).then(result => {
         if (result.isConfirmed) {
-            router.delete(route('itom.policy.procedure.actor.destroy', actor.id), { preserveScroll: true });
+            router.delete(route('itom.regulation.procedure.actor.destroy', actor.id), { preserveScroll: true });
         }
     });
 }

@@ -456,31 +456,6 @@ Route::middleware(["approved"])->group(function () {
             Route::delete("/section/{id}", [ProcedureController::class, "destroySection"])->name("section.destroy");
         });
 
-    // Prosedur (Procedure) routes (as policy.procedure for compatibility)
-    Route::prefix("/regulation/procedure")
-        ->name("policy.procedure.")
-        ->group(function () {
-            Route::get("/", [ProcedureController::class, "index"])->name("index");
-            Route::get("/manage", [ProcedureController::class, "manage"])->name("manage");
-            Route::post("/actor", [ProcedureController::class, "storeActor"])->name("actor.store");
-            Route::put("/actor/{id}", [ProcedureController::class, "updateActor"])->name("actor.update");
-            Route::delete("/actor/{id}", [ProcedureController::class, "destroyActor"])->name("actor.destroy");
-            Route::post("/category", [ProcedureController::class, "storeCategory"])->name("category.store");
-            Route::put("/category/{id}", [ProcedureController::class, "updateCategory"])->name("category.update");
-            Route::delete("/category/{id}", [ProcedureController::class, "destroyCategory"])->name("category.destroy");
-            Route::post("/sop", [ProcedureController::class, "storeSop"])->name("sop.store");
-            Route::put("/sop/{id}", [ProcedureController::class, "updateSop"])->name("sop.update");
-            Route::delete("/sop/{id}", [ProcedureController::class, "destroySop"])->name("sop.destroy");
-            Route::post("/diagram", [ProcedureController::class, "storeDiagram"])->name("diagram.store");
-            Route::put("/diagram/{id}", [ProcedureController::class, "updateDiagram"])->name("diagram.update");
-            Route::delete("/diagram/{id}", [ProcedureController::class, "destroyDiagram"])->name("diagram.destroy");
-            Route::post("/tko-content", [ProcedureController::class, "storeOrUpdateTkoContent"])->name("tko-content.store");
-            Route::post("/tko-content/save-structured", [ProcedureController::class, "saveStructuredDocument"])->name("tko-content.save-structured");
-            Route::post("/section", [ProcedureController::class, "storeSection"])->name("section.store");
-            Route::put("/section/{id}", [ProcedureController::class, "updateSection"])->name("section.update");
-            Route::delete("/section/{id}", [ProcedureController::class, "destroySection"])->name("section.destroy");
-        });
-
     Route::get("/libary", [LibaryController::class, "index"])->name("libary.index");
     Route::post("/libary/upload", [LibaryController::class, "upload"])->name("libary.upload");
     Route::get("/libary/document/{uuid}/preview", [LibaryController::class, "previewFile"])->name("libary.document.preview");

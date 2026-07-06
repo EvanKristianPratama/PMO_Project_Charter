@@ -403,15 +403,8 @@ const handleExpandLevelChange = () => {
 };
 
 const initializeExpandedApqc = () => {
-    const ids = new Set();
-    props.apqcList.forEach(item => {
-        const isParent = props.apqcList.some(r => r.parent_id === item.id);
-        if (isParent) {
-            ids.add(item.id);
-        }
-    });
-    expandedApqcIds.value = ids;
-    expandLevel.value = 'all';
+    expandedApqcIds.value = new Set();
+    expandLevel.value = '0';
 };
 
 onMounted(() => {

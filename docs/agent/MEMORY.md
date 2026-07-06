@@ -134,7 +134,7 @@ Untuk memindahkan modul:
 
 ## 🎯 Target Utama Sesi Ini
 - [x] Refaktor referensi `Architecture/ProsesBisnis` ke `BusinessProcess` (baik di backend, routes, controller, maupun frontend)
-- [x] Menyelesaikan error routing Ziggy `itom.policy.procedure.index`
+- [x] Menyelesaikan error routing Ziggy `itom.policy.procedure.index` dan `itom.regulation.procedure.manage`
 - [x] Update dokumentasi `docs/agent/MEMORY.md`
 
 ---
@@ -143,7 +143,7 @@ Untuk memindahkan modul:
 - [x] Mengubah prefiks route dan nama dari `proses-bisnis-v2` menjadi `business-process-v2` di `modules/ITOM/Routes/web.php`
 - [x] Mengubah nama method controller (`storeProsesBisnisV2`, `updateProsesBisnisV2`, `destroyProsesBisnisV2` -> `storeBusinessProcessV2`, `updateBusinessProcessV2`, `destroyBusinessProcessV2`) di `BusinessProcessController.php`
 - [x] Memindahkan komponen frontend dari `Architecture/ProsesBisnis` ke `BusinessProcess` dan memperbarui semua import/pemanggilan komponen terkait
-- [x] Menyelesaikan error Ziggy route `itom.policy.procedure.index` dengan mendaftarkan alias route group duplikat di `web.php` agar tetap kompatibel dengan komponen frontend lama yang masih merujuk ke prefix `policy.procedure`
+- [x] Menyelesaikan error Ziggy route `itom.regulation.procedure.manage` dengan melakukan refaktorisasi penuh pada 10 komponen frontend Vue agar menggunakan route prefix `itom.regulation.procedure.*` secara konsisten, lalu menghapus grup route duplikat `policy.procedure.` di `web.php` yang sebelumnya menyebabkan konflik penimpaan route.
 - [x] Melakukan verifikasi dengan `php artisan route:list` dan build frontend `npm run build` sukses tanpa error ✅
 
 ---
@@ -157,16 +157,43 @@ Untuk memindahkan modul:
 ### File Dimodifikasi
 **`modules/ITOM/Routes/web.php`**
 - Mengubah route name/prefix `proses-bisnis-v2` ke `business-process-v2`
-- Menambahkan route group duplikat dengan prefix name `policy.procedure.` untuk backward compatibility / alias bagi `regulation.procedure.` guna menyelesaikan error Ziggy.
+- Menghapus grup route duplikat `policy.procedure.` yang menimpa `regulation.procedure.` di Laravel RouteCollection.
+
+**`resources/js/Pages/modules/ITOM/Regulation/PolicyStandartProcedure/Guidance/Index.vue`**
+- Mengubah route target `itom.policy.procedure.index` menjadi `itom.regulation.procedure.index`.
+
+**`resources/js/Components/modules/ITOM/Regulation/Procedure/FlowChart.vue`**
+- Mengubah route target `itom.policy.procedure.diagram.*` menjadi `itom.regulation.procedure.diagram.*`.
+
+**`resources/js/Components/modules/ITOM/Regulation/Procedure/FungsiEditor.vue`**
+- Mengubah route target `itom.policy.procedure.actor.*` menjadi `itom.regulation.procedure.actor.*`.
+
+**`resources/js/Components/modules/ITOM/Regulation/Procedure/ProsedurEditor.vue`**
+- Mengubah route target `itom.policy.procedure.category.*` dan `itom.policy.procedure.sop.*` menjadi `itom.regulation.procedure.category.*` dan `itom.regulation.procedure.sop.*`.
+
+**`resources/js/Components/modules/ITOM/Regulation/Procedure/SectionEditor.vue`**
+- Mengubah route target `itom.policy.procedure.section.*` menjadi `itom.regulation.procedure.section.*`.
+
+**`resources/js/Components/modules/ITOM/Regulation/Policy/General.vue`**
+- Mengubah route target `itom.policy.procedure.index` menjadi `itom.regulation.procedure.index`.
+
+**`resources/js/Components/modules/ITOM/BusinessProcess/RegulationMap/RegulationMap.vue`**
+- Mengubah route target `itom.policy.procedure.index` menjadi `itom.regulation.procedure.index`.
+
+**`resources/js/Components/modules/ITOM/BusinessProcess/RegulationMap/FunctionMap.vue`**
+- Mengubah route target `itom.policy.procedure.index` menjadi `itom.regulation.procedure.index`.
+
+**`resources/js/Components/modules/ITOM/BusinessProcess/BusinessProcessV2/BusinessProcessV2.vue`**
+- Mengubah route target `itom.policy.procedure.index` menjadi `itom.regulation.procedure.index`.
+
+**`resources/js/Components/modules/ITOM/ITOperatingModel/Regulation/Procedure/ManageSection.vue`**
+- Mengubah route target `itom.policy.procedure.tko-content.store` menjadi `itom.regulation.procedure.tko-content.store`.
 
 **`modules/ITOM/Controllers/BusinessProcess/BusinessProcess/BusinessProcessController.php`**
 - Mengubah penamaan method controller agar sesuai dengan konvensi nama bahasa Inggris (`BusinessProcess`).
 
 **`resources/js/Pages/modules/ITOM/BusinessProcess/Index.vue`**
 - Mengubah referensi route/prefiks komponen Vue agar menggunakan `business-process-v2`.
-
-**`resources/js/Components/modules/ITOM/BusinessProcess/BusinessProcessV2/BusinessProcessV2.vue`**
-- Memperbarui path import dan pemanggilan API/route yang relevan.
 
 **`resources/js/Composables/useNavigation.js`**
 - Mengubah navigasi sidebar menu dari `proses-bisnis-v2` menjadi `business-process-v2`.
@@ -181,9 +208,9 @@ Untuk memindahkan modul:
 ---
 
 ## ⚠️ Kendala & Solusi
-1. **Ziggy Route Error (`itom.policy.procedure.index` not in route list)**:
-   - **Penyebab**: Perubahan grup route dari `/policy` ke `/regulation` menyebabkan nama route di Ziggy berubah, sementara komponen frontend lama/shared masih memanggil route lama.
-   - **Solusi**: Mendaftarkan kembali grup route duplikat/alias di `web.php` dengan prefix `policy.procedure.` agar kompatibilitas ke belakang tetap terjaga tanpa merusak frontend.
+1. **Ziggy Route Error (`itom.policy.procedure.index` / `itom.regulation.procedure.manage` not in route list)**:
+   - **Penyebab**: Definisi route alias duplikat dengan URI yang sama persis di `web.php` menyebabkan Laravel menimpa route sebelumnya (`regulation.procedure.`) dan hanya mendaftarkan yang terakhir (`policy.procedure.`). Hal ini memicu error ketika kode memanggil route name yang tertimpa.
+   - **Solusi**: Menyelesaikan refaktorisasi penuh pada sisi frontend (10 file Vue) agar konsisten merujuk ke prefix baru `itom.regulation.procedure.*` lalu menghapus total route duplikat `policy.procedure.*` dari backend.
 2. **Inkonsistensi Prefiks Bahasa Indonesia & Inggris**:
    - **Penyebab**: Percampuran istilah `ProsesBisnis` dengan `BusinessProcess` pada modul ITOM.
    - **Solusi**: Melakukan refactoring menyeluruh agar konsisten menggunakan penamaan bahasa Inggris (`BusinessProcess` dan `business-process-v2`).

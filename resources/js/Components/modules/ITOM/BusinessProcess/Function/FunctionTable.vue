@@ -588,15 +588,8 @@ const handleExpandLevelChange = () => {
 };
 
 const initializeExpanded = () => {
-    const ids = new Set();
-    props.functions.forEach(item => {
-        const isParent = props.functions.some(r => r.parent_id === item.id);
-        if (isParent) {
-            ids.add(item.id);
-        }
-    });
-    expandedIds.value = ids;
-    expandLevel.value = 'all';
+    expandedIds.value = new Set();
+    expandLevel.value = '0';
 };
 
 onMounted(() => {

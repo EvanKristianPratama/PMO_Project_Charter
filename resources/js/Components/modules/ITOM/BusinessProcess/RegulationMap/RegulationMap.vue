@@ -273,7 +273,7 @@
                                 <div class="flex flex-col gap-0.5 min-w-0">
                                     <div class="flex items-center gap-1.5 flex-wrap">
                                         <Link 
-                                            :href="route('itom.policy.procedure.index', { regulation_id: row.id })" 
+                                            :href="route('itom.regulation.procedure.index', { regulation_id: row.id })" 
                                             class="font-semibold text-slate-900 dark:text-white hover:underline hover:text-[#821f44] dark:hover:text-[#db588c] text-xs"
                                             :title="row.judul"
                                         >
@@ -735,15 +735,8 @@ const visibleDocRows = computed(() => {
 });
 
 const initializeExpandedDocs = () => {
-    const ids = new Set();
-    filteredRegulations.value.forEach(reg => {
-        const isParent = filteredRegulations.value.some(r => r.parent_id === reg.id);
-        if (isParent) {
-            ids.add(reg.id);
-        }
-    });
-    expandedDocIds.value = ids;
-    expandLevel.value = 'all';
+    expandedDocIds.value = new Set();
+    expandLevel.value = '0';
 };
 
 onMounted(() => {

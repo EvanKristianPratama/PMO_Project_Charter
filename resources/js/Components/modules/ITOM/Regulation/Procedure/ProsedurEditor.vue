@@ -321,7 +321,7 @@ function markSopModified(sopId) {
 // ─── CRUD Actions ─────────────────────────────────────────────────────────────
 function addCategory() {
     router.post(
-        route('itom.policy.procedure.category.store'),
+        route('itom.regulation.procedure.category.store'),
         {
             regulation_id: props.activeRegulation?.id || '',
             tipe: 'Kategori Baru',
@@ -342,14 +342,14 @@ function deleteCategory(cat) {
         cancelButtonText: 'Batal',
     }).then(result => {
         if (result.isConfirmed) {
-            router.delete(route('itom.policy.procedure.category.destroy', cat.id), { preserveScroll: true });
+            router.delete(route('itom.regulation.procedure.category.destroy', cat.id), { preserveScroll: true });
         }
     });
 }
 
 function addSop(categoryId) {
     router.post(
-        route('itom.policy.procedure.sop.store'),
+        route('itom.regulation.procedure.sop.store'),
         {
             category_id: categoryId,
             description: 'Aktivitas SOP Baru',
@@ -370,7 +370,7 @@ function deleteSop(item) {
         cancelButtonText: 'Batal',
     }).then(result => {
         if (result.isConfirmed) {
-            router.delete(route('itom.policy.procedure.sop.destroy', item.id), { preserveScroll: true });
+            router.delete(route('itom.regulation.procedure.sop.destroy', item.id), { preserveScroll: true });
         }
     });
 }
@@ -387,7 +387,7 @@ async function saveAll() {
         for (const catId of modifiedCategories.value) {
             promises.push(
                 axios.put(
-                    route('itom.policy.procedure.category.update', catId),
+                    route('itom.regulation.procedure.category.update', catId),
                     { tipe: categoryLocal.value[catId].tipe },
                     { headers: { 'Accept': 'application/json' } }
                 )
@@ -398,7 +398,7 @@ async function saveAll() {
             const data = sopLocal.value[sopId];
             promises.push(
                 axios.put(
-                    route('itom.policy.procedure.sop.update', sopId),
+                    route('itom.regulation.procedure.sop.update', sopId),
                     { category_id: data.category_id, description: data.description },
                     { headers: { 'Accept': 'application/json' } }
                 )

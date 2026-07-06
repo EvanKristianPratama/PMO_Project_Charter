@@ -189,7 +189,7 @@ async function saveAll() {
 
     return new Promise((resolve, reject) => {
         router.post(
-            route('itom.policy.procedure.tko-content.store'),
+            route('itom.regulation.procedure.tko-content.store'),
             {
                 regulation_id: props.activeRegulation.id,
                 section_id: secDbId,

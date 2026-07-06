@@ -79,3 +79,38 @@ defineProps({
 ## 4. Keuntungan Arsitektur
 - **FCP & LCP Instan**: Browser dapat merender shell halaman, sidebar, dan header tanpa harus menunggu pemrosesan database selesai di sisi server.
 - **Sleek UX**: Transisi loading terasa premium karena *skeleton pulse* menyamai struktur layout asli daripada blank screen atau spinner melingkar standar.
+
+---
+
+## 5. Optimasi Main-Thread Work (Pohon Tree/Table)
+Untuk mencegah main-thread blocking yang parah (>30 detik) akibat pemuatan terlalu banyak komponen secara rekursif saat inisiasi awal halaman (*mounting/hydration*), ikuti aturan berikut:
+1. **Collapsed by Default**: Komponen data berbentuk pohon (seperti `prosesBisnisV2`, `apqcList`, atau `regulations`) harus dinonaktifkan perluasan penuhnya saat dimuat pertama kali.
+2. Inisialisasikan `expandLevel` ke nilai `'0'` (Collapse All) dan set `expandedIds` sebagai `new Set()` kosong saat komponen me-mount.
+
+### Contoh Standar Inisialisasi:
+```javascript
+const expandedIds = ref(new Set());
+const expandLevel = ref('0');
+
+const initializeExpanded = () => {
+    // Biarkan semua child tertutup secara default saat halaman dimuat pertama kali
+    expandedIds.value = new Set();
+    expandLevel.value = '0';
+};
+
+onMounted(() => {
+    initializeExpanded();
+});
+```
+
+---
+
+## 6. Build Aset Produksi (Minifikasi, Unused JS, & Render Blocking)
+Jika hasil audit Lighthouse mendeteksi masalah ukuran aset JavaScript tidak diminifikasi atau terdapat JavaScript yang tidak digunakan:
+1. **Lighthouse Dev Server Warning**: Evaluasi performa yang dilakukan pada dev server (`npm run dev`) akan selalu menampilkan skor performa yang rendah karena berkas JavaScript disajikan secara mentah (unminified) lengkap dengan Hot Module Replacement (HMR) script.
+2. **Standard Production Build**: Untuk meluncurkan halaman ke tahap produksi dan mendapatkan hasil audit Lighthouse yang valid, lakukan build aset dengan perintah:
+   ```bash
+   npm run build
+   ```
+   Langkah ini akan secara otomatis memicu proses minifikasi kode menggunakan Vite, melakukan eliminasi kode mati (*tree-shaking*), serta melakukan pembagian aset (*code splitting*) sehingga file JS tidak menghambat render awal (*non-blocking*).
+
