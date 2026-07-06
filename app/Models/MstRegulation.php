@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Models\MstSop;
 use App\Models\TrsOrganization;
 use App\Models\TrsTkoContent;
+use App\Models\MstDefinition;
+use App\Models\TrsDefinitionRegulation;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -186,5 +188,22 @@ class MstRegulation extends Model
     public function probisRegulations(): HasMany
     {
         return $this->hasMany(TrsProbisRegulation::class, 'regulation_id');
+    }
+
+    /**
+     * Relasi ke MstDefinition via trs_definition_regulation.
+     */
+    public function definitions(): BelongsToMany
+    {
+        return $this->belongsToMany(MstDefinition::class, 'trs_definition_regulation', 'regulation_id', 'definition_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Relasi ke TrsDefinitionRegulation.
+     */
+    public function definitionRegulations(): HasMany
+    {
+        return $this->hasMany(TrsDefinitionRegulation::class, 'regulation_id');
     }
 }

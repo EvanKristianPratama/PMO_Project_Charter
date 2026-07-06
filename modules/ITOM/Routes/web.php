@@ -425,10 +425,16 @@ Route::middleware(["approved"])->group(function () {
             Route::delete('/CMS/document/{uuid}', [CMSController::class, 'destroy'])->name('CMS.document.destroy');
             Route::get('/CMS/{uuid}', [CMSController::class, 'show'])->name('CMS.show');
 
-            // Definition placeholder
-            Route::get('/definition', fn() => Inertia::render("Placeholder/Index", [
-                "title" => "Definition",
-            ]))->name('definition.index');
+            // Definition CRUD
+            Route::prefix('definition')
+                ->name('definition.')
+                ->controller(\Modules\ITOM\Controllers\Regulation\Definition\DefinitionController::class)
+                ->group(function () {
+                    Route::get('/', 'index')->name('index');
+                    Route::post('/', 'store')->name('store');
+                    Route::put('/{id}', 'update')->name('update');
+                    Route::delete('/{id}', 'destroy')->name('destroy');
+                });
         });
 
     // Prosedur (Procedure) routes (as regulation.procedure)
