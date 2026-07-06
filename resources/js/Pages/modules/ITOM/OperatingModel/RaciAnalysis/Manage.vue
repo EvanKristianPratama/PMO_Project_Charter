@@ -67,7 +67,11 @@
             </div>
 
             <!-- Mapping Grid Editor -->
-            <div class="bg-white dark:bg-[#1a1a1a] rounded-2xl border border-slate-200 dark:border-white/10 p-6 shadow-sm overflow-visible">
+            <Deferred :data="['objectives', 'roles', 'mappings']">
+                <template #fallback>
+                    <TableSkeleton />
+                </template>
+                <div class="bg-white dark:bg-[#1a1a1a] rounded-2xl border border-slate-200 dark:border-white/10 p-6 shadow-sm overflow-visible">
                 <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
                     <h2 class="text-lg font-bold text-slate-800 dark:text-white">Matriks Input Pemetaan RACI</h2>
                     
@@ -182,6 +186,7 @@
                 </div>
 
             </div>
+            </Deferred>
 
             <!-- Floating Navigation Controls on the Right Side -->
             <div class="fixed right-6 bottom-24 z-[9999] flex flex-col gap-3 pointer-events-none">
@@ -431,8 +436,9 @@
 
 <script setup>
 import { ref, watch, computed } from 'vue';
-import { usePage, useForm, Link } from '@inertiajs/vue3';
+import { usePage, useForm, Link, Deferred } from '@inertiajs/vue3';
 import ModulLayout from '@/Layouts/ModulLayout.vue';
+import TableSkeleton from '@/Components/Shared/TableSkeleton.vue';
 
 const props = defineProps({
     objectives: {
@@ -663,20 +669,34 @@ const matrixState = ref({});
 const initialState = {}; // Snapshot of the original state for dirty-tracking
 
 // Initialize 2D grid matrix state from current DB mapping
-props.objectives.forEach(obj => {
-    obj.practices.forEach(pr => {
-        matrixState.value[pr.practice_id] = {};
-        initialState[pr.practice_id] = {};
-        props.roles.forEach(role => {
-            const map = props.mappings.find(
-                m => String(m.practice_id) === String(pr.practice_id) && String(m.role_id) === String(role.id)
-            );
-            const val = map ? map.r_a : '';
-            matrixState.value[pr.practice_id][role.id] = val;
-            initialState[pr.practice_id][role.id] = val;
+const initializeMatrixState = () => {
+    if (!props.objectives || !props.roles || !props.mappings || props.objectives.length === 0) {
+        return;
+    }
+    props.objectives.forEach(obj => {
+        if (!obj.practices) return;
+        obj.practices.forEach(pr => {
+            matrixState.value[pr.practice_id] = matrixState.value[pr.practice_id] || {};
+            initialState[pr.practice_id] = initialState[pr.practice_id] || {};
+            props.roles.forEach(role => {
+                const map = props.mappings.find(
+                    m => String(m.practice_id) === String(pr.practice_id) && String(m.role_id) === String(role.id)
+                );
+                const val = map ? map.r_a : '';
+                matrixState.value[pr.practice_id][role.id] = val;
+                initialState[pr.practice_id][role.id] = val;
+            });
         });
     });
-});
+};
+
+watch(
+    () => [props.objectives, props.roles, props.mappings],
+    () => {
+        initializeMatrixState();
+    },
+    { deep: true, immediate: true }
+);
 
 const form = useForm({
     mappings: []

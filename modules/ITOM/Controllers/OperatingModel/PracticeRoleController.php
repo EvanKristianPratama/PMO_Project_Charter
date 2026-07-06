@@ -21,21 +21,17 @@ class PracticeRoleController extends Controller
      */
     public function index(): Response
     {
-        $objectives = MstObjective::with(['practices' => function($query) {
-            $query->orderBy('practice_id', 'asc');
-        }, 'practices.roles'])
-        ->orderBy('objective_id', 'asc')
-        ->get();
-
-        $roles = MstRole::orderBy('id', 'asc')->get();
-
-        // Load all direct mappings to make frontend lookups super simple
-        $mappings = TrsPracticeRole::all();
-
         return Inertia::render('modules/ITOM/OperatingModel/RaciAnalysis/Index', [
-            'objectives' => $objectives,
-            'roles' => $roles,
-            'mappings' => $mappings,
+            'objectives' => Inertia::defer(fn() => MstObjective::select(['objective_id', 'objective'])
+                ->with(['practices' => function($query) {
+                    $query->select(['practice_id', 'objective_id', 'practice_name', 'practice_description'])
+                        ->orderBy('practice_id', 'asc');
+                }])
+                ->orderBy('objective_id', 'asc')
+                ->get()
+            ),
+            'roles' => Inertia::defer(fn() => MstRole::select(['id', 'name'])->orderBy('id', 'asc')->get()),
+            'mappings' => Inertia::defer(fn() => TrsPracticeRole::select(['practice_id', 'role_id', 'r_a'])->get()),
         ]);
     }
 
@@ -44,20 +40,17 @@ class PracticeRoleController extends Controller
      */
     public function manage(): Response
     {
-        $objectives = MstObjective::with(['practices' => function($query) {
-            $query->orderBy('practice_id', 'asc');
-        }])
-        ->orderBy('objective_id', 'asc')
-        ->get();
-
-        $roles = MstRole::orderBy('id', 'asc')->get();
-        
-        $mappings = TrsPracticeRole::all();
-
         return Inertia::render('modules/ITOM/OperatingModel/RaciAnalysis/Manage', [
-            'objectives' => $objectives,
-            'roles' => $roles,
-            'mappings' => $mappings,
+            'objectives' => Inertia::defer(fn() => MstObjective::select(['objective_id', 'objective'])
+                ->with(['practices' => function($query) {
+                    $query->select(['practice_id', 'objective_id', 'practice_name', 'practice_description'])
+                        ->orderBy('practice_id', 'asc');
+                }])
+                ->orderBy('objective_id', 'asc')
+                ->get()
+            ),
+            'roles' => Inertia::defer(fn() => MstRole::select(['id', 'name'])->orderBy('id', 'asc')->get()),
+            'mappings' => Inertia::defer(fn() => TrsPracticeRole::select(['practice_id', 'role_id', 'r_a'])->get()),
         ]);
     }
 

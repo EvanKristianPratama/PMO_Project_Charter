@@ -2,9 +2,37 @@
     <template v-if="isRoot">
         <section
             class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-            <div class="border-b border-slate-200 px-3 py-2 dark:border-white/10">
+            <div class="border-b border-slate-200 px-3 py-2 dark:border-white/10 flex items-center gap-2">
                 <h2 class="text-xs font-semibold uppercase text-slate-800 dark:text-white">Organisasi Fungsi TI
                 </h2>
+
+                <div class="flex items-center gap-1.5 ml-4 border-l border-slate-200 dark:border-white/10 pl-4">
+                    <label class="inline-flex items-center gap-1.5 cursor-pointer text-[9px] text-slate-500 dark:text-slate-400 font-medium select-none">
+                        <input
+                            type="checkbox"
+                            v-model="showPejabatLocal"
+                            class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 h-3.5 w-3.5 dark:border-white/10 dark:bg-[#1a1a1a]"
+                        />
+                        Pejabat
+                    </label>
+                </div>
+
+                <div class="flex items-center gap-1.5 ml-4">
+                    <select
+                        :value="maxExpandDepthLocal !== null ? maxExpandDepthLocal : ''"
+                        @change="handleDepthChange"
+                        class="rounded border border-slate-300 bg-white px-2 py-0.5 text-[9px] text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white font-medium"
+                    >
+                        <option value="">-- Level --</option>
+                        <option value="0">Level 0 (Hanya Root)</option>
+                        <option value="1">Level 1</option>
+                        <option value="2">Level 2</option>
+                        <option value="3">Level 3</option>
+                        <option value="4">Level 4</option>
+                        <option value="5">Level 5</option>
+                        <option value="99">Expand Semua</option>
+                    </select>
+                </div>
             </div>
 
             <div class="px-2 py-3">
@@ -15,7 +43,9 @@
 
                 <div v-else class="grid grid-cols-[repeat(auto-fit,minmax(12rem,1fr))] gap-3">
                     <ThreeView v-for="item in organizationTree" :key="item.organization_id" :node="item" :is-root="false"
-                        :depth="0" />
+                        :depth="0"
+                        :max-expand-depth="maxExpandDepthLocal"
+                        :show-pejabat="showPejabatLocal" />
                 </div>
             </div>
         </section>
@@ -24,15 +54,15 @@
     <!-- Non-root: semua depth gunakan branching horizontal -->
 
     <div v-else class="relative min-w-0 shrink-0">
-        <!-- Horizontal line antar-sibling (hanya area branch horizontal) -->
-        <div v-if="depth >= 1 && depth <= 7 && !isVerticalLayoutChild && (!isFirstChild || !isLastChild)"
+        <!-- Horizontal line antar-sibling (hanya area branch horizontal, skip fungsi) -->
+        <div v-if="!isWakilStack && depth >= 1 && depth <= 7 && !isVerticalLayoutChild && (!isFirstChild || !isLastChild) && !(node?.role_function && node.role_function.toLowerCase() === 'fungsi')"
             class="absolute top-[-8px] h-px bg-slate-300 dark:bg-white/20" :class="[
                 isFirstChild ? 'left-1/2 -right-1' : '',
                 isLastChild ? '-left-1 right-1/2' : '',
                 !isFirstChild && !isLastChild ? '-left-1 -right-1' : '',
             ]" aria-hidden="true" />
-        <!-- Vertical line dari atas ke node -->
-        <div v-if="depth >= 1 && depth <= 7 && !isVerticalLayoutChild"
+        <!-- Vertical line dari atas ke node (kecuali fungsi) -->
+        <div v-if="depth >= 1 && depth <= 7 && !isVerticalLayoutChild && !(node?.role_function && node.role_function.toLowerCase() === 'fungsi')"
             class="absolute left-1/2 top-[-8px] h-[8px] w-px -translate-x-1/2 bg-slate-300 dark:bg-white/20"
             aria-hidden="true" />
 
@@ -53,6 +83,14 @@
                     <span class="block max-w-full break-words whitespace-normal">
                         {{ node.organization_name }}
                     </span>
+                    <!-- Alias -->
+                    <span v-if="node.alias" class="block max-w-full break-words whitespace-normal text-[7px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">
+                        ({{ node.alias }})
+                    </span>
+                    <!-- Pejabat -->
+                    <span v-if="showPejabat && node.pejabat" class="block max-w-full break-words whitespace-normal text-[7px] font-normal mt-0.5 opacity-75">
+                        {{ node.pejabat }}
+                    </span>
 
                     <!-- Expand/collapse indicator for nodes with children at depth 5 -->
                     <span v-if="hasChildren && depth === 5"
@@ -66,27 +104,73 @@
                     </span>
                 </div>
 
-                <!-- Children: default horizontal branching -->
-                <div v-if="hasChildren && isExpanded && !shouldRenderChildrenVertical" class="relative mt-2 w-full min-w-0 pt-2">
+                <!-- Fungsi nodes: branch ke kanan dari garis vertikal connector (role_function = 'fungsi') -->
+                <template v-if="combinedFungsi.length > 0 && isExpanded">
+                    <div
+                        v-for="fungsi in combinedFungsi"
+                        :key="'fungsi-' + fungsi.organization_id"
+                        class="relative"
+                        style="width: 0; overflow: visible;"
+                    >
+                        <!-- Garis vertikal komando utama -->
+                        <div
+                            class="absolute top-0 bottom-0 bg-slate-300 dark:bg-white/20"
+                            style="left: 50%; transform: translateX(-50%); width: 1px;"
+                            aria-hidden="true"
+                        />
+                        <!-- Garis horizontal + node fungsi -->
+                        <div class="flex items-center py-1" style="white-space: nowrap;">
+                            <div class="bg-slate-300 dark:bg-white/20 flex-shrink-0" style="width: 60px; height: 1px;" aria-hidden="true" />
+                            <ThreeView
+                                :node="fungsi"
+                                :is-root="false"
+                                :depth="depth + 1"
+                                :max-expand-depth="maxExpandDepth"
+                                :show-pejabat="showPejabat"
+                            />
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Children (vertical wakil stack) -->
+                <template v-if="combinedWakil.length > 0 && isExpanded">
+                    <div class="w-px bg-slate-300 dark:bg-white/20" style="height: 8px;" aria-hidden="true" />
+                    <ThreeView
+                        :node="wakilChildToRender"
+                        :extra-children="remainingChildrenToPushDown"
+                        :is-wakil-stack="true"
+                        :is-root="false"
+                        :depth="depth + 1"
+                        :max-expand-depth="maxExpandDepth"
+                        :show-pejabat="showPejabat"
+                    />
+                </template>
+
+                <!-- Children: default horizontal branching (hanya jika tidak ada wakil) -->
+                <div v-if="combinedWakil.length === 0 && hasChildren && isExpanded && !shouldRenderChildrenVertical" class="relative mt-2 w-full min-w-0 pt-2">
                     <div class="absolute left-1/2 top-[-8px] h-[8px] w-px -translate-x-1/2 bg-slate-300 dark:bg-white/20"
                         aria-hidden="true" />
 
                     <div class="flex flex-row justify-center items-start gap-x-2 gap-y-3 w-full min-w-0 flex-wrap">
-                        <ThreeView v-for="(child, index) in node.children" :key="child.organization_id" :node="child"
+                        <ThreeView v-for="(child, index) in combinedNormal" :key="child.organization_id" :node="child"
                             :is-root="false" :depth="depth + 1" :is-first-child="index === 0"
-                            :is-last-child="index === node.children.length - 1" />
+                            :is-last-child="index === combinedNormal.length - 1"
+                            :max-expand-depth="maxExpandDepth"
+                            :show-pejabat="showPejabat" />
                     </div>
                 </div>
 
-                <!-- Children: level paling akhir disusun vertikal -->
-                <div v-if="hasChildren && isExpanded && shouldRenderChildrenVertical" class="relative mt-3 w-full">
+                <!-- Children: level paling akhir disusun vertikal (hanya jika tidak ada wakil) -->
+                <div v-if="combinedWakil.length === 0 && hasChildren && isExpanded && shouldRenderChildrenVertical" class="relative mt-3 w-full">
                     <div class="absolute left-1/2 top-[-8px] h-full w-px -translate-x-1/2 bg-slate-300 dark:bg-white/20"
                         aria-hidden="true" />
 
                     <div class="relative flex flex-col items-center gap-y-2 pt-1">
-                        <ThreeView v-for="(child, index) in node.children" :key="child.organization_id" :node="child"
+                        <ThreeView v-for="(child, index) in combinedNormal" :key="child.organization_id" :node="child"
                             :is-root="false" :depth="depth + 1" :is-first-child="index === 0"
-                            :is-last-child="index === node.children.length - 1" :is-vertical-layout-child="true" />
+                            :is-last-child="index === combinedNormal.length - 1" :is-vertical-layout-child="true"
+                            :max-expand-depth="maxExpandDepth"
+                            :show-pejabat="showPejabat" />
                     </div>
                 </div>
             </div>
@@ -95,7 +179,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 defineOptions({
     name: 'ThreeView',
@@ -130,28 +214,107 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    extraChildren: {
+        type: Array,
+        default: () => [],
+    },
+    isWakilStack: {
+        type: Boolean,
+        default: false,
+    },
+    maxExpandDepth: {
+        type: Number,
+        default: null,
+    },
+    showPejabat: {
+        type: Boolean,
+        default: false,
+    },
 });
+
+const showPejabatLocal = ref(false);
 
 // Depth 0-4, 6+ auto-expand, depth 5 collapsed by default (show/hide children on click)
 const isExpanded = ref(props.depth !== 5);
 
-const hasChildren = computed(() => Array.isArray(props.node?.children) && props.node.children.length > 0);
+const maxExpandDepthLocal = ref(null);
+
+const handleDepthChange = (event) => {
+    const val = event.target.value;
+    if (val === '') {
+        maxExpandDepthLocal.value = null;
+        return;
+    }
+    maxExpandDepthLocal.value = Number(val);
+};
+
+watch(() => props.maxExpandDepth, (newVal) => {
+    if (newVal !== null && newVal !== undefined) {
+        isExpanded.value = props.depth < newVal;
+    } else {
+        isExpanded.value = props.depth !== 5;
+    }
+});
+
+// =====================
+// Node-level computed
+// =====================
+
+/** Wakil children: role_function === 'wakil' */
+const combinedWakil = computed(() => {
+    if (!props.node || !Array.isArray(props.node.children)) return [];
+    const directWakil = props.node.children.filter(b => b.role_function && b.role_function.toLowerCase() === 'wakil');
+    const extraWakil = (props.extraChildren || []).filter(b => b.role_function && b.role_function.toLowerCase() === 'wakil');
+    return [...directWakil, ...extraWakil];
+});
+
+/** Fungsi children: role_function === 'fungsi' — branch ke kanan */
+const combinedFungsi = computed(() => {
+    if (!props.node || !Array.isArray(props.node.children)) return [];
+    return props.node.children.filter(b => b.role_function && b.role_function.toLowerCase() === 'fungsi');
+});
+
+/** Normal children: bukan wakil, bukan fungsi */
+const combinedNormal = computed(() => {
+    if (!props.node || !Array.isArray(props.node.children)) return [];
+    const directNormal = props.node.children.filter(b => !b.role_function || (b.role_function.toLowerCase() !== 'wakil' && b.role_function.toLowerCase() !== 'fungsi'));
+    const extraNormal = (props.extraChildren || []).filter(b => !b.role_function || (b.role_function.toLowerCase() !== 'wakil' && b.role_function.toLowerCase() !== 'fungsi'));
+    return [...directNormal, ...extraNormal];
+});
+
+const hasChildren = computed(() => {
+    return combinedWakil.value.length > 0 || combinedNormal.value.length > 0 || combinedFungsi.value.length > 0;
+});
 
 const shouldRenderChildrenVertical = computed(() => {
-    if (!hasChildren.value) {
+    if (combinedNormal.value.length === 0) {
         return false;
     }
 
-    return props.node.children.every((child) => !Array.isArray(child?.children) || child.children.length === 0);
+    return combinedNormal.value.every((child) => !Array.isArray(child?.children) || child.children.length === 0);
 });
 
 const isClickable = computed(() => hasChildren.value && props.depth === 5);
+
+/** Wakil pertama untuk vertical stack */
+const wakilChildToRender = computed(() => combinedWakil.value[0]);
+
+/** Sisa wakil + semua normal, di-push ke bawah sebagai extraChildren */
+const remainingChildrenToPushDown = computed(() => {
+    return [
+        ...combinedWakil.value.slice(1),
+        ...combinedNormal.value,
+    ];
+});
 
 const nodeTitle = computed(() => {
     if (hasChildren.value && props.depth === 5) {
         return `${props.node?.organization_name} (Klik untuk ${isExpanded.value ? 'menyembunyikan' : 'menampilkan'} anak organisasi)`;
     }
-    return props.node?.organization_name ?? '';
+    const parts = [props.node?.organization_name ?? ''];
+    if (props.node?.alias) parts[0] += ` (${props.node.alias})`;
+    if (props.node?.pejabat) parts.push(props.node.pejabat);
+    return parts.filter(Boolean).join(' · ');
 });
 
 const handleNodeClick = () => {
@@ -160,7 +323,9 @@ const handleNodeClick = () => {
     }
 };
 
-
+// =====================
+// Root-level: build hierarchy
+// =====================
 
 const buildParentIdHierarchy = (items) => {
     if (!items.length) {
@@ -260,13 +425,15 @@ const nodeSizeClass = computed(() => {
 });
 
 const nodeToneClass = computed(() => {
+    // Wakil: blue accent
+    if (props.node?.role_function && props.node.role_function.toLowerCase() === 'wakil') {
+        return 'bg-slate-50 text-slate-900 border-blue-400 dark:bg-slate-50 dark:text-slate-900 dark:border-blue-400';
+    }
+    // Fungsi: violet accent
+    if (props.node?.role_function && props.node.role_function.toLowerCase() === 'fungsi') {
+        return 'bg-violet-50 text-violet-900 border-violet-400 dark:bg-violet-50 dark:text-violet-900 dark:border-violet-400';
+    }
     return 'bg-white text-slate-900 border-slate-300 dark:bg-white dark:text-slate-900 dark:border-slate-300';
-});
-
-const childGridStyle = computed(() => {
-    return {
-        gridTemplateColumns: 'repeat(auto-fit, minmax(5rem, 1fr))',
-    };
 });
 
 const toggleExpand = () => {

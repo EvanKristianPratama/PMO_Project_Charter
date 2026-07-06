@@ -41,7 +41,7 @@ class ProcedureController extends Controller
         $selectedRegulationId = $request->integer('regulation_id');
         $data = $this->procedureService->getProcedureData($selectedRegulationId);
 
-        return Inertia::render('modules/ITOM/Regulation/Procedure/Index', $data);
+        return Inertia::render('modules/ITOM/Regulation/PolicyStandartProcedure/Procedure/Index', $data);
     }
 
     /**
@@ -54,7 +54,7 @@ class ProcedureController extends Controller
         
         $data['functions'] = MstFunction::orderBy('name')->get();
 
-        return Inertia::render('modules/ITOM/Regulation/Procedure/Manage', $data);
+        return Inertia::render('modules/ITOM/Regulation/PolicyStandartProcedure/Procedure/Manage', $data);
     }
 
     /**
@@ -174,7 +174,7 @@ class ProcedureController extends Controller
         $category = TrsSopCategory::findOrFail($validated['category_id']);
 
         return redirect()
-            ->route('itom.regulation.procedure.manage', ['regulation_id' => $category->regulation_id])
+            ->route('itom.policy.regulation.procedure.manage', ['regulation_id' => $category->regulation_id])
             ->with('success', 'SOP berhasil ditambahkan.');
     }
 
@@ -198,7 +198,7 @@ class ProcedureController extends Controller
         $category = TrsSopCategory::findOrFail($validated['category_id']);
 
         return redirect()
-            ->route('itom.regulation.procedure.manage', ['regulation_id' => $category->regulation_id])
+            ->route('itom.policy.regulation.procedure.manage', ['regulation_id' => $category->regulation_id])
             ->with('success', 'SOP berhasil diperbarui.');
     }
 
@@ -213,7 +213,7 @@ class ProcedureController extends Controller
         $this->procedureService->deleteSop($sop);
 
         return redirect()
-            ->route('itom.regulation.procedure.manage', $regulationId ? ['regulation_id' => $regulationId] : [])
+            ->route('itom.policy.regulation.procedure.manage', $regulationId ? ['regulation_id' => $regulationId] : [])
             ->with('success', 'SOP berhasil dihapus.');
     }
 
@@ -235,7 +235,7 @@ class ProcedureController extends Controller
         $sop = MstSop::findOrFail($validated['sop_id']);
 
         return redirect()
-            ->route('itom.regulation.procedure.manage', ['regulation_id' => $sop->category?->regulation_id])
+            ->route('itom.policy.regulation.procedure.manage', ['regulation_id' => $sop->category?->regulation_id])
             ->with('success', 'Mapping diagram berhasil ditambahkan.');
     }
 
@@ -258,7 +258,7 @@ class ProcedureController extends Controller
         $sop = MstSop::findOrFail($validated['sop_id']);
 
         return redirect()
-            ->route('itom.regulation.procedure.manage', ['regulation_id' => $sop->category?->regulation_id])
+            ->route('itom.policy.regulation.procedure.manage', ['regulation_id' => $sop->category?->regulation_id])
             ->with('success', 'Mapping diagram berhasil diperbarui.');
     }
 
@@ -274,7 +274,7 @@ class ProcedureController extends Controller
         $this->procedureService->deleteDiagram($mapping);
 
         return redirect()
-            ->route('itom.regulation.procedure.manage', $regulationId ? ['regulation_id' => $regulationId] : [])
+            ->route('itom.policy.regulation.procedure.manage', $regulationId ? ['regulation_id' => $regulationId] : [])
             ->with('success', 'Mapping diagram berhasil dihapus.');
     }
 

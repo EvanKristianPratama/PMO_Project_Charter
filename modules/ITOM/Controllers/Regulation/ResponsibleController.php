@@ -16,10 +16,8 @@ class ResponsibleController extends Controller
      */
     public function manage(): Response
     {
-        $responsibles = MstResponsible::orderBy('id', 'asc')->get();
-
         return Inertia::render('modules/ITOM/OperatingModel/RaciAnalysis/Responsible', [
-            'responsibles' => $responsibles,
+            'responsibles' => Inertia::defer(fn() => MstResponsible::select(['id', 'responsible'])->orderBy('id', 'asc')->get()),
         ]);
     }
 

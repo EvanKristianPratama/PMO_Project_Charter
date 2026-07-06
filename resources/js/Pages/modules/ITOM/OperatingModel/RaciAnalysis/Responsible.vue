@@ -108,7 +108,11 @@
             </transition>
 
             <!-- Full-Width Spreadsheet-Style Table -->
-            <div class="w-full">
+            <Deferred data="responsibles">
+                <template #fallback>
+                    <TableSkeleton />
+                </template>
+                <div class="w-full">
                 <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
                     <div class="bg-slate-50/70 border-b border-slate-200 px-5 py-4 dark:bg-white/5 dark:border-white/10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <h3 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-white flex items-center gap-2">
@@ -232,14 +236,16 @@
                     </div>
                 </div>
             </div>
+            </Deferred>
         </div>
     </ModulLayout>
 </template>
 
 <script setup>
 import { ref, watch, computed } from 'vue';
-import { usePage, useForm, router, Link } from '@inertiajs/vue3';
+import { usePage, useForm, router, Link, Deferred } from '@inertiajs/vue3';
 import ModulLayout from '@/Layouts/ModulLayout.vue';
+import TableSkeleton from '@/Components/Shared/TableSkeleton.vue';
 
 const props = defineProps({
     responsibles: {

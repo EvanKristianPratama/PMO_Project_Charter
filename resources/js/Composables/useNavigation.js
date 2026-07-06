@@ -519,7 +519,7 @@ export function useNavigation() {
                         icon: DocumentTextIcon,
                         active: (url) =>
                             (url || "").includes("/policy/regulation") ||
-                            (url || "").includes("/regulation/procedure"),
+                            (url || "").includes("/policy/regulation/procedure"),
                     },
                     {
                         label: "SK",

@@ -14,7 +14,7 @@ class ItGovernance
      */
     public function getSteeringRows(): array
     {
-        return MstItSteeringComittee::with("organization")
+        return MstItSteeringComittee::with("organization:id,jabatan")
             ->orderBy("code")
             ->get()
             ->map(function ($item) {

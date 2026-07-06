@@ -214,6 +214,26 @@ Untuk memindahkan modul:
 2. **Inkonsistensi Prefiks Bahasa Indonesia & Inggris**:
    - **Penyebab**: Percampuran istilah `ProsesBisnis` dengan `BusinessProcess` pada modul ITOM.
    - **Solusi**: Melakukan refactoring menyeluruh agar konsisten menggunakan penamaan bahasa Inggris (`BusinessProcess` dan `business-process-v2`).
+3. **Restorasi Standar Service**:
+   - **Penyebab**: File `docs/standart/service.md` terdeteksi kosong karena tidak sengaja terhapus dalam commit sebelumnya (`c1f63c0d`).
+   - **Solusi**: Mengembalikan konten standar optimasi service dari riwayat Git (commit `f28ada7c`) agar dapat dijadikan referensi.
+
+---
+
+## 🚀 Progres Terbaru (Optimasi Halaman & Service ITOM Operating Model)
+- [x] Restorasi file dokumentasi standar `docs/standart/service.md` dari riwayat Git.
+- [x] Refaktorisasi 5 halaman frontend di bawah `resources/js/Pages/modules/ITOM/OperatingModel/` agar menggunakan standar **Inertia v2 Deferred Loading** dan komponen **TableSkeleton**:
+  - `ItGovernance/Index.vue`
+  - `ItManagement/Index.vue`
+  - `RaciAnalysis/Index.vue`
+  - `RaciAnalysis/Manage.vue` (Dilengkapi dengan `watch` untuk inisialisasi reactive state saat deferred props terisi)
+  - `RaciAnalysis/Responsible.vue`
+- [x] Penerapan standard query di backend controller & service layer:
+  - Defer props (`steeringRows`, `organizationOptions`, `organizationStructureRows`, `objectives`, `roles`, `mappings`, `responsibles`) di `OperatingModelController`, `PracticeRoleController`, dan `ResponsibleController`.
+  - Optimasi **Selective Columns Eager Loading** untuk relasi `organization` di `ItGovernance.php` dan `company` di `ItManagement.php`.
+  - Penghapusan **Redundant Eager Loading** `practices.roles` di `PracticeRoleController.php` (karena data lookup di frontend langsung menggunakan mapping array).
+  - Pembatasan select kolom spesifik untuk `MstObjective`, `MstPractice`, dan `MstResponsible`.
+- [x] Melakukan build aset produksi (`npm run build`) dengan sukses tanpa error compile ✅
 
 ---
 

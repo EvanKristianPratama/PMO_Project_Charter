@@ -531,6 +531,7 @@
                                         <option value="Draft Dicabut">Draft Dicabut</option>
                                         <option value="Berlaku">Berlaku</option>
                                         <option value="Dicabut">Dicabut</option>
+                                        <option value="Expired">Expired</option>
                                     </select>
                                     <div v-if="form.errors.status" class="text-xs text-rose-500 font-medium">{{ form.errors.status }}</div>
                                 </div>

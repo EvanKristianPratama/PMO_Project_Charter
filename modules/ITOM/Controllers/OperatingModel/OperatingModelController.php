@@ -29,15 +29,15 @@ class OperatingModelController extends Controller
     public function itGovernance(ItGovernance $itGovernanceService): Response
     {
         return Inertia::render('modules/ITOM/OperatingModel/ItGovernance/Index', [
-            "steeringRows" => $itGovernanceService->getSteeringRows(),
-            "organizationOptions" => $itGovernanceService->getOrganizationOptions(),
+            "steeringRows" => Inertia::defer(fn() => $itGovernanceService->getSteeringRows()),
+            "organizationOptions" => Inertia::defer(fn() => $itGovernanceService->getOrganizationOptions()),
         ]);
     }
 
     public function itManagement(ItManagement $itManagementService): Response
     {
         return Inertia::render('modules/ITOM/OperatingModel/ItManagement/Index', [
-            "organizationStructureRows" => $itManagementService->getOrganizationStructureRows(),
+            "organizationStructureRows" => Inertia::defer(fn() => $itManagementService->getOrganizationStructureRows()),
         ]);
     }
 

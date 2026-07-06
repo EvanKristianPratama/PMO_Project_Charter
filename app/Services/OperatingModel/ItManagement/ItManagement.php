@@ -39,6 +39,28 @@ class ItManagement
         $descendantIds = $getDescendants([67]);
         $allIds = array_merge($ids, $descendantIds);
 
+        $findWakilFungsiDescendants = function ($parentIds) use (&$findWakilFungsiDescendants, $getDescendants) {
+            if (empty($parentIds)) {
+                return [];
+            }
+            $specialChildren = MstBod::whereIn("parent_id", $parentIds)
+                ->whereIn("role_function", ["wakil", "fungsi"])
+                ->pluck("id")
+                ->toArray();
+            
+            if (empty($specialChildren)) {
+                return [];
+            }
+            
+            $theirDescendants = $getDescendants($specialChildren);
+            $allNewIds = array_merge($specialChildren, $theirDescendants);
+            
+            return array_merge($allNewIds, $findWakilFungsiDescendants($allNewIds));
+        };
+
+        $specialIds = $findWakilFungsiDescendants($allIds);
+        $allIds = array_unique(array_merge($allIds, $specialIds));
+
         $preferredOrders = [
             5 => [
                 67 => 10,
@@ -69,7 +91,7 @@ class ItManagement
             return $bod->order;
         };
 
-        $bods = MstBod::with("company")->whereIn("id", $allIds)->get();
+        $bods = MstBod::with("company:id,name")->whereIn("id", $allIds)->get();
 
         return $bods
             ->map(function ($bod) use ($resolveOrder) {
@@ -88,6 +110,7 @@ class ItManagement
                         : null,
                     "company_name" => $bod->company?->name ?? "Tanpa Holding",
                     "order" => $resolveOrder($bod),
+                    "role_function" => $bod->role_function,
                 ];
             })
             ->sortBy([

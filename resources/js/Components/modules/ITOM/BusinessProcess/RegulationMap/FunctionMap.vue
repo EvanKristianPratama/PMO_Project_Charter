@@ -77,7 +77,7 @@
                                 <span class="flex flex-col items-start text-left">
                                     <div class="flex items-center gap-1.5 flex-wrap">
                                         <Link 
-                                            :href="route('itom.regulation.procedure.index', { regulation_id: reg.id })" 
+                                            :href="route('itom.policy.regulation.procedure.index', { regulation_id: reg.id })" 
                                             class="font-semibold text-slate-900 dark:text-white hover:underline hover:text-[#821f44] dark:hover:text-[#db588c]"
                                         >
                                             {{ reg.judul }}
