@@ -56,7 +56,6 @@
                 <!-- Category Title Input -->
                 <div class="flex items-center justify-between gap-4 group/cat">
                     <div class="flex-1">
-                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 font-sans">Nama Kategori</label>
                         <input
                             v-if="categoryLocal[activeCategory.id]"
                             v-model="categoryLocal[activeCategory.id].tipe"
@@ -69,7 +68,7 @@
 
                 <!-- SOP items list -->
                 <div class="mt-6">
-                    <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 font-sans">Daftar Aktivitas SOP</label>
+                    <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 font-sans">Tahapan Aktivitas</label>
                     
                     <div class="space-y-3">
                         <div
@@ -178,7 +177,7 @@
                                 {{ cat.tipe }}
                             </td>
                             <td class="px-6 py-4 text-center align-middle font-medium text-slate-600 dark:text-slate-300">
-                                {{ getSopsForCategory(cat.id).length }} SOP
+                                {{ getSopsForCategory(cat.id).length }}
                             </td>
                             <td class="px-6 py-3 align-middle text-center print:hidden">
                                 <div class="flex items-center justify-center gap-2">
