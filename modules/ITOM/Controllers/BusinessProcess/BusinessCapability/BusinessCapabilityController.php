@@ -15,7 +15,7 @@ class BusinessCapabilityController extends Controller
     public function index(BusinessCapabilityService $businessCapabilityService): Response
     {
         return Inertia::render('modules/ITOM/BusinessProcess/BusinessCapability/Index', [
-            'businessCapabilities' => $businessCapabilityService->getBusinessCapabilities(),
+            'businessCapabilities' => Inertia::defer(fn() => $businessCapabilityService->getBusinessCapabilities()),
         ]);
     }
 

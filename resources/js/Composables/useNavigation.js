@@ -282,10 +282,10 @@ export function useNavigation() {
             },
             {
                 label: "Business Process",
-                href: safeRoute("itom.business-process.proses-bisnis-v2.index"),
+                href: safeRoute("itom.business-process.business-process-v2.index"),
                 icon: CubeIcon,
                 active: (url) =>
-                    (url || "").includes("/business-process/proses-bisnis-v2"),
+                    (url || "").includes("/business-process/business-process-v2"),
             },
             {
                 label: "Function",
@@ -310,13 +310,6 @@ export function useNavigation() {
                         "/business-process/regulation-mapping",
                     ),
             },
-            // {
-            //     label: "Information System",
-            //     href: safeRoute("business-process.informatic-system"),
-            //     icon: BuildingOffice2Icon,
-            //     active: (url) =>
-            //         (url || '').includes("/business-process/informatic-system"),
-            // },
         ];
 
         const organizationChildren = [
@@ -515,9 +508,10 @@ export function useNavigation() {
                 href: safeRoute("itom.policy.regulation.index"),
                 icon: DocumentTextIcon,
                 active: (url) =>
-                    (url || "").includes("/policy") ||
+                    ((url || "").includes("/policy") ||
                     (url || "").includes("/regulation") ||
-                    (url || "").includes("/bpmn-workflow"),
+                    (url || "").includes("/bpmn-workflow")) &&
+                    !(url || "").includes("/business-process/regulation-mapping"),
                 children: [
                     {
                         label: "Policy, Standard, Procedure",

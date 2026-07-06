@@ -148,11 +148,7 @@ Route::middleware(["approved"])->group(function () {
         [BusinessProcessOrganizationStructureController::class, "destroyFunctionalStructure"],
     )->name("business-process.organization-structure.functional.structure.destroy");
     
-    Route::get(
-        "/business-process/informatic-system",
-        fn() => Inertia::render('modules/ITOM/BusinessProcess/InformaticSystem/Index'),
-    )->name("business-process.informatic-system");
-    
+
     Route::get("/business-process/business-capability", [
         BusinessCapabilityController::class,
         "index",
@@ -191,14 +187,14 @@ Route::middleware(["approved"])->group(function () {
                 });
 
             // Business Process (Proses Bisnis v2)
-            Route::prefix("proses-bisnis-v2")
-                ->name("proses-bisnis-v2.")
+            Route::prefix("business-process-v2")
+                ->name("business-process-v2.")
                 ->controller(BusinessProcessController::class)
                 ->group(function () {
                     Route::get("/", "index")->name("index");
-                    Route::post("/", "storeProsesBisnisV2")->name("store");
-                    Route::put("/{id}", "updateProsesBisnisV2")->name("update");
-                    Route::delete("/{id}", "destroyProsesBisnisV2")->name("destroy");
+                    Route::post("/", "storeBusinessProcessV2")->name("store");
+                    Route::put("/{id}", "updateBusinessProcessV2")->name("update");
+                    Route::delete("/{id}", "destroyBusinessProcessV2")->name("destroy");
                 });
 
             // Function
@@ -435,9 +431,34 @@ Route::middleware(["approved"])->group(function () {
             ]))->name('definition.index');
         });
 
-    // Prosedur (Procedure) routes
+    // Prosedur (Procedure) routes (as regulation.procedure)
     Route::prefix("/regulation/procedure")
         ->name("regulation.procedure.")
+        ->group(function () {
+            Route::get("/", [ProcedureController::class, "index"])->name("index");
+            Route::get("/manage", [ProcedureController::class, "manage"])->name("manage");
+            Route::post("/actor", [ProcedureController::class, "storeActor"])->name("actor.store");
+            Route::put("/actor/{id}", [ProcedureController::class, "updateActor"])->name("actor.update");
+            Route::delete("/actor/{id}", [ProcedureController::class, "destroyActor"])->name("actor.destroy");
+            Route::post("/category", [ProcedureController::class, "storeCategory"])->name("category.store");
+            Route::put("/category/{id}", [ProcedureController::class, "updateCategory"])->name("category.update");
+            Route::delete("/category/{id}", [ProcedureController::class, "destroyCategory"])->name("category.destroy");
+            Route::post("/sop", [ProcedureController::class, "storeSop"])->name("sop.store");
+            Route::put("/sop/{id}", [ProcedureController::class, "updateSop"])->name("sop.update");
+            Route::delete("/sop/{id}", [ProcedureController::class, "destroySop"])->name("sop.destroy");
+            Route::post("/diagram", [ProcedureController::class, "storeDiagram"])->name("diagram.store");
+            Route::put("/diagram/{id}", [ProcedureController::class, "updateDiagram"])->name("diagram.update");
+            Route::delete("/diagram/{id}", [ProcedureController::class, "destroyDiagram"])->name("diagram.destroy");
+            Route::post("/tko-content", [ProcedureController::class, "storeOrUpdateTkoContent"])->name("tko-content.store");
+            Route::post("/tko-content/save-structured", [ProcedureController::class, "saveStructuredDocument"])->name("tko-content.save-structured");
+            Route::post("/section", [ProcedureController::class, "storeSection"])->name("section.store");
+            Route::put("/section/{id}", [ProcedureController::class, "updateSection"])->name("section.update");
+            Route::delete("/section/{id}", [ProcedureController::class, "destroySection"])->name("section.destroy");
+        });
+
+    // Prosedur (Procedure) routes (as policy.procedure for compatibility)
+    Route::prefix("/regulation/procedure")
+        ->name("policy.procedure.")
         ->group(function () {
             Route::get("/", [ProcedureController::class, "index"])->name("index");
             Route::get("/manage", [ProcedureController::class, "manage"])->name("manage");

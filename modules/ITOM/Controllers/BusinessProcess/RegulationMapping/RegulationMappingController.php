@@ -16,20 +16,16 @@ class RegulationMappingController extends Controller
      */
     public function index(Request $request, FunctionService $functionService): Response
     {
-        $functions = $functionService->getFunctions();
-
-        $regulations = MstRegulation::orderBy('judul')->get()->map(fn ($r) => [
-            'id' => $r->id,
-            'judul' => $r->judul,
-            'nomor' => $r->nomor,
-            'tipe' => $r->tipe,
-            'parent_id' => $r->parent_id,
-            'status' => $r->status,
-        ])->values()->all();
-
-        return Inertia::render('modules/ITOM/BusinessProcess/Index', [
-            'functions' => $functions,
-            'regulations' => $regulations,
+        return Inertia::render('modules/ITOM/BusinessProcess/RegulationMappingFunction/Index', [
+            'functions' => Inertia::defer(fn() => $functionService->getFunctions()),
+            'regulations' => Inertia::defer(fn() => MstRegulation::orderBy('judul')->get()->map(fn ($r) => [
+                'id' => $r->id,
+                'judul' => $r->judul,
+                'nomor' => $r->nomor,
+                'tipe' => $r->tipe,
+                'parent_id' => $r->parent_id,
+                'status' => $r->status,
+            ])->values()->all()),
         ]);
     }
 }

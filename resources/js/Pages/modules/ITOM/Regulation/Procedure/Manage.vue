@@ -1,44 +1,48 @@
 <template>
     <ModulLayout title="Kelola Procedure">
         <div class="animate-fade-in-up space-y-6">
-            <!-- View Settings Controls (Show/Hide Navbar and Header) -->
-            <div class="flex justify-between items-center bg-white dark:bg-[#171717] border border-slate-200 dark:border-white/10 px-4 py-3 rounded-2xl shadow-sm print:hidden">
-                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Pengaturan Tampilan</span>
-                <div class="flex items-center gap-2">
-                    <button
-                        @click="isHeaderVisible = !isHeaderVisible"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 dark:border-white/10 bg-transparent rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 transition active:scale-95 cursor-pointer"
-                    >
-                        <span class="w-1.5 h-1.5 rounded-full animate-pulse-slow" :class="isHeaderVisible ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-zinc-700'"></span>
-                        Header
-                    </button>
-                    <button
-                        @click="isSidebarVisible = !isSidebarVisible"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 dark:border-white/10 bg-transparent rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 transition active:scale-95 cursor-pointer"
-                    >
-                        <span class="w-1.5 h-1.5 rounded-full animate-pulse-slow" :class="isSidebarVisible ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-zinc-700'"></span>
-                        Navigasi Pane
-                    </button>
-                </div>
-            </div>
-
-            <!-- Page Header (sama untuk manage & view) -->
-            <div v-if="isHeaderVisible" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717] print:hidden">
+            <!-- Unified Page Header -->
+            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717] print:hidden">
                 <div class="flex flex-col gap-3 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
                     <!-- Bagian Kiri: Judul Konten -->
-                    <div>
-                        <h2 class="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                    <div class="flex-1 min-w-0">
+                        <h2 v-if="isHeaderVisible" class="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2 flex-wrap">
                             <svg class="h-4 w-4 text-[#821f44]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                             </svg>
                             Kelola Procedure
                             <span class="text-slate-400 dark:text-slate-500 font-normal">| {{ activeRegulation?.judul || 'Belum ada regulasi aktif' }}</span>
                         </h2>
+                        <h2 v-else class="text-[11px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                            <svg class="h-3.5 w-3.5 text-[#821f44]/85" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                            </svg>
+                            Kelola Procedure
+                        </h2>
                     </div>
 
-                    <!-- Bagian Kanan: Aksi / Navigasi / Button / Filter -->
-                    <div class="flex flex-wrap items-center gap-2">
-                        <div class="flex shrink-0 gap-1">
+                    <!-- Bagian Kanan: Aksi & Pengaturan Tampilan -->
+                    <div class="flex flex-wrap items-center gap-3">
+                        <!-- View Settings Controls (Header and Navigation Pane toggles) -->
+                        <div class="flex items-center gap-1.5 border-r border-slate-200 dark:border-white/10 pr-3 mr-1">
+                            <button
+                                @click="isHeaderVisible = !isHeaderVisible"
+                                class="inline-flex items-center gap-1.5 px-2.5 py-1.25 border border-slate-200 dark:border-white/10 bg-transparent rounded-lg text-[11px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 transition active:scale-95 cursor-pointer"
+                            >
+                                <span class="w-1.5 h-1.5 rounded-full animate-pulse-slow" :class="isHeaderVisible ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-zinc-700'"></span>
+                                Header
+                            </button>
+                            <button
+                                @click="isSidebarVisible = !isSidebarVisible"
+                                class="inline-flex items-center gap-1.5 px-2.5 py-1.25 border border-slate-200 dark:border-white/10 bg-transparent rounded-lg text-[11px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 transition active:scale-95 cursor-pointer"
+                            >
+                                <span class="w-1.5 h-1.5 rounded-full animate-pulse-slow" :class="isSidebarVisible ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-zinc-700'"></span>
+                                Navigasi Pane
+                            </button>
+                        </div>
+
+                        <!-- Action Button (Tampil hanya jika isHeaderVisible true) -->
+                        <div v-if="isHeaderVisible" class="flex shrink-0 gap-1">
                             <Link
                                 :href="route('itom.regulation.procedure.index', activeRegulation ? { regulation_id: activeRegulation.id } : {})"
                                 class="inline-flex items-center gap-1.5 rounded-lg bg-[#821f44] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#9c2552]"

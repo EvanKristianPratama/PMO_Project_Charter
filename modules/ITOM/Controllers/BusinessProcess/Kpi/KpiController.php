@@ -17,10 +17,9 @@ class KpiController extends Controller
      */
     public function index(KpiService $kpiService): Response
     {
-        $kpis = $kpiService->getKpis();
-
-        return Inertia::render('modules/ITOM/BusinessProcess/Index', [
-            'kpiList' => $kpis,
+        return Inertia::render('modules/ITOM/BusinessProcess/KPI/Index', [
+            'kpiList' => Inertia::defer(fn() => $kpiService->getKpis()),
+            'companyOptions' => Inertia::defer(fn() => \App\Models\MstCompany::orderBy('name')->get(['id', 'name'])),
         ]);
     }
 

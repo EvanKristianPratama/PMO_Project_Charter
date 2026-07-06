@@ -17,10 +17,8 @@ class ApqcController extends Controller
      */
     public function index(ApqcService $apqcService): Response
     {
-        $apqcList = $apqcService->getApqcList();
-
-        return Inertia::render('modules/ITOM/BusinessProcess/Index', [
-            'apqcList' => $apqcList,
+        return Inertia::render('modules/ITOM/BusinessProcess/APQC/Index', [
+            'apqcList' => Inertia::defer(fn() => $apqcService->getApqcList()),
         ]);
     }
 

@@ -1,6 +1,6 @@
 # Standar UI Header Konten (Header Content UI Standard)
 
-Dokumen ini menjelaskan standar desain, ukuran, dan class utility Tailwind CSS yang digunakan untuk header konten/modul dalam aplikasi PMO Project Charter. Acuan ini diambil dari komponen [ApqcMap.vue](file:///c:/Users/user/Documents/PMO_Project_Charter-main/resources/js/Components/modules/ITOM/Architecture/ProsesBisnis/APQC/ApqcMap.vue).
+Dokumen ini menjelaskan standar desain, ukuran, dan class utility Tailwind CSS yang digunakan untuk header konten/modul dalam aplikasi PMO Project Charter. Acuan ini diambil dari komponen [ApqcMap.vue](file:///c:/Users/user/Documents/PMO_Project_Charter-main/resources/js/Components/modules/ITOM/BusinessProcess/APQC/ApqcMap.vue).
 
 ---
 

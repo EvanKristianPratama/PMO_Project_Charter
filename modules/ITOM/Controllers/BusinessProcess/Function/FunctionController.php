@@ -17,10 +17,11 @@ class FunctionController extends Controller
      */
     public function index(FunctionService $functionService): Response
     {
-        $functions = $functionService->getFunctions();
-
-        return Inertia::render('modules/ITOM/BusinessProcess/Index', [
-            'functions' => $functions,
+        return Inertia::render('modules/ITOM/BusinessProcess/Function/Index', [
+            'functions' => Inertia::defer(fn() => $functionService->getFunctions()),
+            'companyOptions' => Inertia::defer(fn() => \App\Models\MstCompany::orderBy('name')->get(['id', 'name'])),
+            'bodOptions' => Inertia::defer(fn() => \App\Models\MstBod::orderBy('order')->orderBy('name')->get(['id', 'name', 'alias', 'parent_id', 'order', 'pejabat', 'tipe'])),
+            'regulations' => Inertia::defer(fn() => \App\Models\MstRegulation::orderBy('judul')->get(['id', 'judul', 'nomor', 'tipe', 'parent_id', 'status'])),
         ]);
     }
 

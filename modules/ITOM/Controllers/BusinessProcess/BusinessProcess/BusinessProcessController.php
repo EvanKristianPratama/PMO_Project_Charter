@@ -18,23 +18,18 @@ class BusinessProcessController extends Controller
      */
     public function index(BusinessProcessV2Service $businessProcessV2Service): Response
     {
-        $prosesBisnis = TrsProsesBisnis::with('organization')
-            ->orderBy('organization_id')
-            ->orderBy('no')
-            ->get();
-
-        $prosesBisnisV2 = $businessProcessV2Service->getProsesBisnisV2List();
-
-        return Inertia::render('modules/ITOM/BusinessProcess/Index', [
-            'prosesBisnis' => $prosesBisnis,
-            'prosesBisnisV2' => $prosesBisnisV2,
+        return Inertia::render('modules/ITOM/BusinessProcess/BusinessProcess/Index', [
+            'prosesBisnisV2' => Inertia::defer(fn() => $businessProcessV2Service->getProsesBisnisV2List()),
+            'companyOptions' => Inertia::defer(fn() => \App\Models\MstCompany::orderBy('name')->get(['id', 'name'])),
+            'kpiList' => Inertia::defer(fn() => \App\Models\MstKpi::orderBy('deskripsi')->get(['id', 'deskripsi'])),
+            'regulations' => Inertia::defer(fn() => \App\Models\MstRegulation::orderBy('judul')->get(['id', 'judul', 'nomor', 'tipe', 'parent_id', 'status'])),
         ]);
     }
 
     /**
      * Store a newly created Business Process v2 item.
      */
-    public function storeProsesBisnisV2(Request $request, BusinessProcessV2Service $service): RedirectResponse
+    public function storeBusinessProcessV2(Request $request, BusinessProcessV2Service $service): RedirectResponse
     {
         $validated = $request->validate([
             'company_id' => 'required|integer|exists:mst_company,id',
@@ -56,7 +51,7 @@ class BusinessProcessController extends Controller
     /**
      * Update the specified Business Process v2 item.
      */
-    public function updateProsesBisnisV2(Request $request, int $id, BusinessProcessV2Service $service): RedirectResponse
+    public function updateBusinessProcessV2(Request $request, int $id, BusinessProcessV2Service $service): RedirectResponse
     {
         $item = MstProsesBisnis::findOrFail($id);
 
@@ -80,7 +75,7 @@ class BusinessProcessController extends Controller
     /**
      * Remove the specified Business Process v2 item.
      */
-    public function destroyProsesBisnisV2(int $id, BusinessProcessV2Service $service): RedirectResponse
+    public function destroyBusinessProcessV2(int $id, BusinessProcessV2Service $service): RedirectResponse
     {
         $item = MstProsesBisnis::findOrFail($id);
         
