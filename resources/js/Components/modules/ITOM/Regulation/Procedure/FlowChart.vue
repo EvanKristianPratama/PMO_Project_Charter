@@ -472,7 +472,7 @@ function submitDiagramForm() {
     const savedType = diagramForm.tipe;
 
     if (editingDiagramId.value) {
-        diagramForm.put(route('itom.regulation.procedure.diagram.update', editingDiagramId.value), {
+        diagramForm.put(route('itom.policy.regulation.procedure.diagram.update', editingDiagramId.value), {
             preserveScroll: true,
             onSuccess: () => {
                 activeFlowType.value = savedType;
@@ -487,7 +487,7 @@ function submitDiagramForm() {
             },
         });
     } else {
-        diagramForm.post(route('itom.regulation.procedure.diagram.store'), {
+        diagramForm.post(route('itom.policy.regulation.procedure.diagram.store'), {
             preserveScroll: true,
             onSuccess: () => {
                 activeFlowType.value = savedType;
@@ -507,7 +507,7 @@ function submitDiagramForm() {
 function submitDeleteDiagram() {
     if (!selectedDiagramMapping.value?.id) return;
 
-    diagramForm.delete(route('itom.regulation.procedure.diagram.destroy', selectedDiagramMapping.value.id), {
+    diagramForm.delete(route('itom.policy.regulation.procedure.diagram.destroy', selectedDiagramMapping.value.id), {
         preserveScroll: true,
         onSuccess: () => {
             isDeleteDiagramModalOpen.value = false;

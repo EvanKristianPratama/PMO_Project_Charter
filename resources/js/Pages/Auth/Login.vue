@@ -30,17 +30,17 @@
 
                     <form @submit.prevent="submit" class="space-y-5">
                         <div>
-                            <label for="login_identity" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama</label>
+                            <label for="email" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Email</label>
                             <input
-                                v-model="form.login_identity"
-                                type="text"
-                                id="login_identity"
-                                placeholder="Masukkan nama Anda"
+                                v-model="form.email"
+                                type="email"
+                                id="email"
+                                placeholder="Masukkan email Anda"
                                 required
-                                autocomplete="username"
+                                autocomplete="email"
                                 class="block w-full rounded-2xl border-slate-200 bg-white px-4 py-3 text-sm shadow-sm placeholder:text-slate-300 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                             />
-                            <p v-if="form.errors.login_identity" class="mt-1 text-sm text-red-500">{{ form.errors.login_identity }}</p>
+                            <p v-if="form.errors.email" class="mt-1 text-sm text-red-500">{{ form.errors.email }}</p>
                         </div>
 
                         <div>
@@ -170,7 +170,7 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 
 const form = useForm({
-    login_identity: '',
+    email: '',
     password: '',
     remember: false,
 });

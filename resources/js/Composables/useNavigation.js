@@ -518,8 +518,8 @@ export function useNavigation() {
                         href: safeRoute("itom.policy.regulation.index"),
                         icon: DocumentTextIcon,
                         active: (url) =>
-                            (url || "").includes("/policy/regulation") ||
-                            (url || "").includes("/policy/regulation/procedure"),
+                            (url || "").includes("/policy/regulation") &&
+                            !(url || "").includes("/policy/regulation/procedure"),
                     },
                     {
                         label: "SK",
@@ -531,10 +531,12 @@ export function useNavigation() {
                         label: "CMS",
                         href: safeRoute("itom.policy.CMS.index"),
                         icon: FolderIcon,
-                        active: (url) => (url || "").includes("/policy/CMS"),
+                        active: (url) =>
+                            (url || "").includes("/policy/CMS") ||
+                            (url || "").includes("/policy/regulation/procedure"),
                     },
                     {
-                        label: "Definition",
+                        label: "Glossary",
                         href: safeRoute("itom.policy.definition.index"),
                         icon: DocumentTextIcon,
                         active: (url) => (url || "").includes("/policy/definition"),

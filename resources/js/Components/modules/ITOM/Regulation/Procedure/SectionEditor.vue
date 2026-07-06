@@ -1,6 +1,6 @@
 <template>
     <div class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 md:p-16 rounded-2xl font-sans animate-fade-in-up">
-        <PertaminaDocumentHeader :activeRegulation="activeRegulation" />
+        <PertaminaDocumentHeader v-if="isHeaderVisible" :activeRegulation="activeRegulation" />
 
         <div class="mt-10 flex items-center justify-between gap-4 border-b border-slate-900/10 pb-2 dark:border-white/10">
             <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide">
@@ -139,6 +139,10 @@ const props = defineProps({
         type: Object,
         default: null,
     },
+    isHeaderVisible: {
+        type: Boolean,
+        default: true,
+    },
 });
 
 // ─── State ────────────────────────────────────────────────────────────────────
@@ -184,7 +188,7 @@ function addSectionDirectly() {
     }
     
     router.post(
-        route('itom.regulation.procedure.section.store'),
+        route('itom.policy.regulation.procedure.section.store'),
         {
             name: 'Section Baru',
             order: nextOrder,
@@ -205,7 +209,7 @@ function deleteSectionDirectly(sec) {
         cancelButtonText: 'Batal'
     }).then((result) => {
         if (result.isConfirmed) {
-            router.delete(route('itom.regulation.procedure.section.destroy', sec.id), { preserveScroll: true });
+            router.delete(route('itom.policy.regulation.procedure.section.destroy', sec.id), { preserveScroll: true });
         }
     });
 }
@@ -221,7 +225,7 @@ async function saveAll() {
             const secData = sectionLocal.value[secId];
             promises.push(
                 axios.put(
-                    route('itom.regulation.procedure.section.update', secId),
+                    route('itom.policy.regulation.procedure.section.update', secId),
                     { name: secData.name, order: secData.order },
                     { headers: { 'Accept': 'application/json' } }
                 )

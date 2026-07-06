@@ -6,18 +6,11 @@
                 <div class="flex flex-col gap-3 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
                     <!-- Bagian Kiri: Judul Konten -->
                     <div class="flex-1 min-w-0">
-                        <h2 v-if="isHeaderVisible" class="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2 flex-wrap">
+                        <h2 class="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2 flex-wrap">
                             <svg class="h-4 w-4 text-[#821f44]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                             </svg>
-                            Kelola Procedure
-                            <span class="text-slate-400 dark:text-slate-500 font-normal">| {{ activeRegulation?.judul || 'Belum ada regulasi aktif' }}</span>
-                        </h2>
-                        <h2 v-else class="text-[11px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                            <svg class="h-3.5 w-3.5 text-[#821f44]/85" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                            </svg>
-                            Kelola Procedure
+                            Manage Procedure
                         </h2>
                     </div>
 
@@ -41,8 +34,8 @@
                             </button>
                         </div>
 
-                        <!-- Action Button (Tampil hanya jika isHeaderVisible true) -->
-                        <div v-if="isHeaderVisible" class="flex shrink-0 gap-1">
+                        <!-- Action Button -->
+                        <div class="flex shrink-0 gap-1">
                             <Link
                                 :href="route('itom.policy.regulation.procedure.index', activeRegulation ? { regulation_id: activeRegulation.id } : {})"
                                 class="inline-flex items-center gap-1.5 rounded-lg bg-[#821f44] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#9c2552]"
@@ -262,6 +255,7 @@
                             ref="manageSectionRef"
                             :activeSection="activeSection"
                             :activeRegulation="activeRegulation"
+                            :isHeaderVisible="isHeaderVisible"
                         />
                     </template>
 
@@ -273,6 +267,7 @@
                             :organizations="organizations"
                             :activeRegulation="activeRegulation"
                             :functions="functions"
+                            :isHeaderVisible="isHeaderVisible"
                         />
                     </template>
 
@@ -286,6 +281,7 @@
                             :actors="actors"
                             :activeRegulation="activeRegulation"
                             :activeCategoryId="activeCategoryId"
+                            :isHeaderVisible="isHeaderVisible"
                             @select-category="id => activeSubId = id ? `category_${id}` : null"
                         />
                     </template>
@@ -296,6 +292,7 @@
                             ref="sectionEditorRef"
                             :tkoSections="tkoSections"
                             :activeRegulation="activeRegulation"
+                            :isHeaderVisible="isHeaderVisible"
                         />
                     </template>
                 </main>
@@ -309,9 +306,9 @@ import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import ModulLayout from '@/Layouts/ModulLayout.vue';
 import SectionEditor from '@/Components/modules/ITOM/Regulation/Procedure/SectionEditor.vue';
-import ManageSection from '@/Components/modules/ITOM/ITOperatingModel/Regulation/Procedure/ManageSection.vue';
-import ManageActivity from '@/Components/modules/ITOM/ITOperatingModel/Regulation/Procedure/ManageActivity.vue';
-import ManageFunction from '@/Components/modules/ITOM/ITOperatingModel/Regulation/Procedure/ManageFunction.vue';
+import ManageSection from '@/Components/modules/ITOM/Regulation/Procedure/ManageSection.vue';
+import ManageActivity from '@/Components/modules/ITOM/Regulation/Procedure/ManageActivity.vue';
+import ManageFunction from '@/Components/modules/ITOM/Regulation/Procedure/ManageFunction.vue';
 import Swal from 'sweetalert2';
 
 const props = defineProps({
@@ -531,10 +528,18 @@ const headingTree = computed(() => {
                 children: []
             };
 
+            const categoryCounters = {};
             (props.sop || []).forEach(s => {
+                const catId = s.category_id || 'uncategorized';
+                if (!categoryCounters[catId]) {
+                    categoryCounters[catId] = 0;
+                }
+                categoryCounters[catId]++;
+                const count = categoryCounters[catId];
+
                 const item = {
                     id: `sop_${s.id}`,
-                    label: s.name || s.judul || `SOP ${s.id}`,
+                    label: s.name || s.judul || `Activity ${count}`,
                     level: 2,
                     type: 'sop',
                     targetTab: 'prosedur',

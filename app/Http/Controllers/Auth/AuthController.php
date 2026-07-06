@@ -64,12 +64,12 @@ class AuthController extends Controller
     public function login(Request $request): RedirectResponse
     {
         $input = $request->validate([
-            'login_identity' => ['required', 'string'], // Replaces email conceptually with Name field
+            'email' => ['required', 'string', 'email'],
             'password' => ['required'],
         ]);
 
         $credentials = [
-            'name' => $input['login_identity'],
+            'email' => $input['email'],
             'password' => $input['password'],
         ];
 
@@ -83,8 +83,8 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'login_identity' => 'Kredensial yang Anda berikan tidak cocok dengan data kami.',
-        ])->onlyInput('login_identity');
+            'email' => 'Kredensial yang Anda berikan tidak cocok dengan data kami.',
+        ])->onlyInput('email');
     }
 
     private function redirectByStatus(User $user): RedirectResponse

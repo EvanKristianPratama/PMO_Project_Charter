@@ -13,7 +13,7 @@
 
 <script setup>
 import ModulLayout from '@/Layouts/ModulLayout.vue';
-import BusinessCapabilityTable from '@/Components/modules/ITOM/BusinessArchitecture/BusinessCapability/BusinessCapabilityTable.vue';
+import BusinessCapabilityTable from '@/Components/modules/ITOM/BusinessProcess/BusinessCapability/BusinessCapabilityTable.vue';
 import TableSkeleton from '@/Components/Shared/TableSkeleton.vue';
 import { Deferred } from '@inertiajs/vue3';
 

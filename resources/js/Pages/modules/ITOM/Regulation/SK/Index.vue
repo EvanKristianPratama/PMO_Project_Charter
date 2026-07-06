@@ -418,9 +418,9 @@ import { ref, computed } from "vue";
 import { Link, router } from "@inertiajs/vue3";
 import ModulLayout from "@/Layouts/ModulLayout.vue";
 import Swal from "sweetalert2";
-import DocumentHierarki from "@/Components/modules/ITOM/ITOperatingModel/Regulation/DocumentHierarki.vue";
-import OrganizationHierarki from "@/Components/modules/ITOM/ITOperatingModel/Regulation/OrganizationHierarki.vue";
-import ManageRegulation from "@/Components/modules/ITOM/ITOperatingModel/Regulation/ManageRegulation.vue";
+import DocumentHierarki from "@/Components/modules/ITOM/Regulation/DocumentHierarki.vue";
+import OrganizationHierarki from "@/Components/modules/ITOM/Regulation/OrganizationHierarki.vue";
+import ManageRegulation from "@/Components/modules/ITOM/Regulation/ManageRegulation.vue";
 
 const props = defineProps({
     regulations: {

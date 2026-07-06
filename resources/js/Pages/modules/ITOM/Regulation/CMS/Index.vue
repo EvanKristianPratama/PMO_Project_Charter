@@ -155,9 +155,14 @@
                                 type="application/pdf"
                             ></iframe>
                         </div>
-                        <div v-else class="space-y-6">
-                            <!-- PPT Slides rendering using LibaryClientViewer component -->
-                            <LibaryClientViewer :ppt="selectedDocument" :key="selectedDocument.uuid" />
+                        <div v-else class="flex flex-col items-center justify-center min-h-[500px] bg-white dark:bg-[#171717] rounded-xl border border-slate-200 dark:border-white/10 shadow-sm text-center p-8">
+                            <div class="w-16 h-16 bg-slate-50 dark:bg-white/5 rounded-2xl flex items-center justify-center border border-slate-100 dark:border-white/10 mb-4">
+                                <PresentationChartBarIcon class="w-8 h-8 text-slate-400 dark:text-slate-500" />
+                            </div>
+                            <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-1">Pratinjau Tidak Tersedia</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto leading-relaxed">
+                                Pratinjau langsung tidak tersedia untuk format {{ selectedDocument.extension.toUpperCase() }}. Silakan unduh dokumen untuk melihat isinya.
+                            </p>
                         </div>
                     </div>
                     
@@ -184,7 +189,6 @@
 import ModulLayout from '@/Layouts/ModulLayout.vue';
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
-import LibaryClientViewer from '@/Components/modules/ITOM/Libary/LibaryClientViewer.vue';
 import { 
     PresentationChartBarIcon, 
     ChevronRightIcon, 

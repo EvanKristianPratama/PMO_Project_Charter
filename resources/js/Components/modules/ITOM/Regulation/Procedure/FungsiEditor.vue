@@ -1,6 +1,6 @@
 <template>
     <div class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 md:p-16 rounded-2xl font-sans animate-fade-in-up">
-        <PertaminaDocumentHeader :activeRegulation="activeRegulation" />
+        <PertaminaDocumentHeader v-if="isHeaderVisible" :activeRegulation="activeRegulation" />
 
         <div class="mt-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-900/10 pb-2 dark:border-white/10">
             <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide">
@@ -360,6 +360,10 @@ const props = defineProps({
     functions: {
         type: Array,
         default: () => [],
+    },
+    isHeaderVisible: {
+        type: Boolean,
+        default: true,
     },
 });
 

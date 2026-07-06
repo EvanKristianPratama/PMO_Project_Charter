@@ -1,20 +1,9 @@
 <template>
     <div class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 md:p-16 rounded-2xl font-sans animate-fade-in-up">
-        <PertaminaDocumentHeader :activeRegulation="activeRegulation" />
+        <PertaminaDocumentHeader v-if="isHeaderVisible" :activeRegulation="activeRegulation" />
 
         <!-- 1. VIEW: SINGLE CATEGORY EDITOR -->
         <div v-if="activeCategory" class="mt-8 space-y-6">
-            <!-- Back to Categories list button -->
-            <button
-                @click="$emit('select-category', null)"
-                class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 mb-2 transition active:scale-[0.97]"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                </svg>
-                Kembali ke Daftar Kategori
-            </button>
-
             <!-- V. PROSEDUR Header -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-900/10 pb-2 dark:border-white/10">
                 <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide">
@@ -249,6 +238,10 @@ const props = defineProps({
         type: Number,
         default: null,
     },
+    isHeaderVisible: {
+        type: Boolean,
+        default: true,
+    },
 });
 
 const emit = defineEmits(['select-category']);
@@ -321,7 +314,7 @@ function markSopModified(sopId) {
 // ─── CRUD Actions ─────────────────────────────────────────────────────────────
 function addCategory() {
     router.post(
-        route('itom.regulation.procedure.category.store'),
+        route('itom.policy.regulation.procedure.category.store'),
         {
             regulation_id: props.activeRegulation?.id || '',
             tipe: 'Kategori Baru',
@@ -342,14 +335,14 @@ function deleteCategory(cat) {
         cancelButtonText: 'Batal',
     }).then(result => {
         if (result.isConfirmed) {
-            router.delete(route('itom.regulation.procedure.category.destroy', cat.id), { preserveScroll: true });
+            router.delete(route('itom.policy.regulation.procedure.category.destroy', cat.id), { preserveScroll: true });
         }
     });
 }
 
 function addSop(categoryId) {
     router.post(
-        route('itom.regulation.procedure.sop.store'),
+        route('itom.policy.regulation.procedure.sop.store'),
         {
             category_id: categoryId,
             description: 'Aktivitas SOP Baru',
@@ -370,7 +363,7 @@ function deleteSop(item) {
         cancelButtonText: 'Batal',
     }).then(result => {
         if (result.isConfirmed) {
-            router.delete(route('itom.regulation.procedure.sop.destroy', item.id), { preserveScroll: true });
+            router.delete(route('itom.policy.regulation.procedure.sop.destroy', item.id), { preserveScroll: true });
         }
     });
 }
@@ -387,7 +380,7 @@ async function saveAll() {
         for (const catId of modifiedCategories.value) {
             promises.push(
                 axios.put(
-                    route('itom.regulation.procedure.category.update', catId),
+                    route('itom.policy.regulation.procedure.category.update', catId),
                     { tipe: categoryLocal.value[catId].tipe },
                     { headers: { 'Accept': 'application/json' } }
                 )
@@ -398,7 +391,7 @@ async function saveAll() {
             const data = sopLocal.value[sopId];
             promises.push(
                 axios.put(
-                    route('itom.regulation.procedure.sop.update', sopId),
+                    route('itom.policy.regulation.procedure.sop.update', sopId),
                     { category_id: data.category_id, description: data.description },
                     { headers: { 'Accept': 'application/json' } }
                 )

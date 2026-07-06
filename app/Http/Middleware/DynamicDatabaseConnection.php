@@ -27,14 +27,7 @@ class DynamicDatabaseConnection
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Jangan paksa koneksi cloud/master di halaman login & guest routes.
-        // Ini mencegah hang saat admin pindah ke master lalu diarahkan ke login.
-        $isLoginPage = $request->routeIs('login')
-            || $request->is('login')
-            || $request->is('auth/google*')
-            || $request->is('public/sync-master');
-
-        if (! $isLoginPage && $request->hasSession() && $request->session()->has('active_db_connection')) {
+        if ($request->hasSession() && $request->session()->has('active_db_connection')) {
             $connection = $request->session()->get('active_db_connection');
 
             // Pastikan koneksi terdefinisi di config sebelum switch
