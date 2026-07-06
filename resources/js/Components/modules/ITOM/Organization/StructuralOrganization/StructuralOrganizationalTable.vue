@@ -410,9 +410,9 @@
 import { ref, computed, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
-import ThreeView from '@/Components/modules/ITOM/Architecture/Organization/ThreeView.vue';
-import BodThreeView from '@/Components/modules/ITOM/Architecture/Organization/BodThreeView.vue';
-import EmployeeStructure from '@/Components/modules/ITOM/Architecture/Organization/EmployeeStructure.vue';
+import ThreeView from '@/Components/modules/ITOM/Organization/ThreeView.vue';
+import BodThreeView from '@/Components/modules/ITOM/Organization/BodThreeView.vue';
+import EmployeeStructure from '@/Components/modules/ITOM/Organization/EmployeeStructure.vue';
 
 const props = defineProps({
     organizationStructureRows: {

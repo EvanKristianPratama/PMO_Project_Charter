@@ -3,7 +3,7 @@
         <section
             class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
             <div class="border-b border-slate-200 px-3 py-2 dark:border-white/10">
-                <h2 class="text-xs font-semibold uppercase text-slate-800 dark:text-white">Struktur Organisasi EIT
+                <h2 class="text-xs font-semibold uppercase text-slate-800 dark:text-white">Organisasi Fungsi TI
                 </h2>
             </div>
 

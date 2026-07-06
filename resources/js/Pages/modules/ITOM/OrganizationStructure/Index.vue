@@ -48,11 +48,11 @@ import { computed, ref, watch } from 'vue';
 import { usePage, Link } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import ModulLayout from '@/Layouts/ModulLayout.vue';
-import CompanyStructure from '@/Components/modules/ITOM/Architecture/Organization/CompanyStructure.vue';
-import BoardOfDirector from '@/Components/modules/ITOM/Architecture/Organization/BoardOfDirector.vue';
-import StructuralOrganizationalTable from '@/Components/modules/ITOM/Architecture/Organization/StructuralOrganization/StructuralOrganizationalTable.vue';
-import SkStructure from '@/Components/modules/ITOM/Architecture/Organization/SkStructure.vue';
-import FunctionalOrganization from '@/Components/modules/ITOM/Architecture/Organization/FunctionalOrganization/FunctionalOrganizationTable.vue';
+import CompanyStructure from '@/Components/modules/ITOM/Organization/CompanyStructure.vue';
+import BoardOfDirector from '@/Components/modules/ITOM/Organization/BoardOfDirector.vue';
+import StructuralOrganizationalTable from '@/Components/modules/ITOM/Organization/StructuralOrganization/StructuralOrganizationalTable.vue';
+import SkStructure from '@/Components/modules/ITOM/Organization/SkStructure.vue';
+import FunctionalOrganization from '@/Components/modules/ITOM/Organization/FunctionalOrganization/FunctionalOrganizationTable.vue';
 
 defineProps({
     organizationStructureRows: {

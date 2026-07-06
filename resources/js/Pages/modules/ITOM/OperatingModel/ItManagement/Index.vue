@@ -13,7 +13,7 @@
 
 <script setup>
 import ModulLayout from '@/Layouts/ModulLayout.vue';
-import EITOrganization from '@/Components/modules/ITOM/OperatingModel/EITOrganization.vue';
+import EITOrganization from '@/Components/modules/ITOM/OperatingModel/ItManagement/EITOrganization.vue';
 
 defineProps({
     organizationStructureRows: {

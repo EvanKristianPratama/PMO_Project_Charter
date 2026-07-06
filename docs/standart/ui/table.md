@@ -38,3 +38,40 @@ Tabel seringkali memiliki tombol aksi seperti "Edit" atau "Delete/Hapus". Tombol
 
 ### B. Tombol Delete/Hapus (Danger / Red-bordered)
 - **Tailwind Classes:** `inline-flex items-center justify-center rounded-lg border border-red-200 bg-white px-2.5 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50 hover:border-red-300 active:scale-95 dark:border-red-500/20 dark:bg-[#1a1a1a] dark:text-red-400 dark:hover:bg-red-500/10`
+
+---
+
+## 4. Standar List Data di Kolom Tabel (Inline List in Table Cell)
+
+Ketika sebuah kolom tabel perlu menampilkan **daftar/list data** (misalnya: daftar regulasi, daftar tag, dsb), gunakan pola berikut agar teks yang panjang tetap rapi dan sejajar.
+
+**Jangan gunakan** `list-disc list-inside` (bawaan CSS) karena teks yang wrap akan turun ke bawah bullet, bukan sejajar dengan baris pertama.
+
+### A. Struktur HTML
+Gunakan `<ul>` dengan item `<li>` berbasis **flex layout** dan dot bullet manual:
+
+```html
+<ul class="space-y-0.5">
+    <li
+        v-for="item in items"
+        :key="item.id"
+        class="flex items-start gap-1.5 text-[10px] text-slate-600 dark:text-slate-300 leading-snug"
+    >
+        <span class="shrink-0 mt-[3px] h-1 w-1 rounded-full bg-slate-400 dark:bg-slate-500"></span>
+        <span>{{ item.name }}</span>
+    </li>
+</ul>
+```
+
+### B. Spesifikasi Komponen
+- **Container (`ul`):** `space-y-0.5`
+- **Item (`li`):** `flex items-start gap-1.5 text-[10px] text-slate-600 dark:text-slate-300 leading-snug`
+- **Dot Bullet (`span`):** `shrink-0 mt-[3px] h-1 w-1 rounded-full bg-slate-400 dark:bg-slate-500`
+  - `shrink-0` memastikan bullet tidak mengecil.
+  - `mt-[3px]` menyelaraskan bullet dengan baris pertama teks.
+- **Teks (`span`):** Teks biasa tanpa class tambahan; akan otomatis wrap dan tetap sejajar dengan baris pertama.
+
+### C. Jika Tidak Ada Data
+Tampilkan dash (`—`) sebagai fallback:
+- **Tailwind Classes:** `text-[10px] text-slate-400 italic`
+

@@ -366,8 +366,8 @@
 import { ref, computed, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
-import BodThreeView from '@/Components/modules/ITOM/Architecture/Organization/BodThreeView.vue';
-import CompanyThreeView from '@/Components/modules/ITOM/Architecture/Organization/CompanyThreeView.vue';
+import BodThreeView from '@/Components/modules/ITOM/Organization/BodThreeView.vue';
+import CompanyThreeView from '@/Components/modules/ITOM/Organization/CompanyThreeView.vue';
 
 const props = defineProps({
     companies: {

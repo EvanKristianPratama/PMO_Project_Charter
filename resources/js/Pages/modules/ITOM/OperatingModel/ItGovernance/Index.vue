@@ -13,7 +13,7 @@
 
 <script setup>
 import ModulLayout from '@/Layouts/ModulLayout.vue';
-import ITSteeringComittee from '@/Components/modules/ITOM/OperatingModel/ITSteeringComittee.vue';
+import ITSteeringComittee from '@/Components/modules/ITOM/OperatingModel/ItGovarnance/ITSteeringComittee.vue';
 
 defineProps({
     steeringRows: {
