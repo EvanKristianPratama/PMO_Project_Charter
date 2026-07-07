@@ -475,6 +475,15 @@ export function useNavigation() {
                             ),
                     },
                     {
+                        label: "STK",
+                        href: safeRoute("itom.operating-model.stk.index"),
+                        icon: Squares2X2Icon,
+                        active: (url) =>
+                            (url || "").includes(
+                                "/operating-model/stk",
+                            ),
+                    },
+                    {
                         label: "RACI Analysis",
                         href: safeRoute("itom.operating-model.raci-analysis.index"),
                         icon: DocumentTextIcon,

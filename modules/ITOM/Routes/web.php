@@ -224,6 +224,11 @@ Route::middleware(["approved"])->group(function () {
                 "index",
             ])->name("it-function.index");
             
+            Route::get("/stk", [
+                \Modules\ITOM\Controllers\OperatingModel\STK\StkController::class,
+                "index",
+            ])->name("stk.index");
+            
             Route::get("/model", [
                 ModelController::class,
                 "index",
