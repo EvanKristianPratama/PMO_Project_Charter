@@ -1,254 +1,262 @@
 <template>
-    <ModulLayout title="CMS">
-        <div class="space-y-6 animate-fade-in-up">
-            <!-- Header Section -->
-            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
-                <div class="flex flex-col gap-3 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <h2 class="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                            <FolderIcon class="w-4 h-4 text-[#821f44]" />
-                            Content Management System
-                        </h2>
-                    </div>
-                </div>
-            </div>
+    <ModulLayout title="CMS - Document Management">
+        <div class="animate-fade-in-up space-y-6">
+            <!-- Table with Deferred Loading -->
+            <Deferred data="documents">
+                <template #fallback>
+                    <TableSkeleton />
+                </template>
 
-            <!-- Content Area -->
-            <div class="grid grid-cols-1 gap-6 lg:grid-cols-4 items-start">
-                
-                <!-- Sidebar: List of Files -->
-                <div class="lg:col-span-1 space-y-4">
-                    
-                    <!-- Search Input -->
-                    <div class="relative bg-white dark:bg-[#171717] rounded-xl border border-slate-200 dark:border-white/10 shadow-sm p-3">
-                        <input 
-                            v-model="searchQuery" 
-                            type="text" 
-                            placeholder="Cari file..." 
-                            class="w-full pl-9 pr-4 py-2 text-sm bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg focus:outline-none focus:border-[#821f44] dark:focus:border-[#821f44] text-slate-900 dark:text-white placeholder-slate-400"
-                        />
-                        <MagnifyingGlassIcon class="w-4 h-4 absolute left-6 top-[22px] text-slate-400" />
-                    </div>
-
-                    <!-- Category Tab Switches -->
-                    <div class="flex rounded-xl bg-slate-100 p-1 dark:bg-white/5 w-full">
-                        <button 
-                            @click="activeTab = 'all'" 
-                            class="flex-1 py-2 text-xs font-bold rounded-lg transition-all"
-                            :class="activeTab === 'all' 
-                                ? 'bg-white dark:bg-[#2c2c2c] text-slate-900 dark:text-white shadow-sm' 
-                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
-                        >
-                            Semua
-                        </button>
-                        <button 
-                            @click="activeTab = 'ppt'" 
-                            class="flex-1 py-2 text-xs font-bold rounded-lg transition-all"
-                            :class="activeTab === 'ppt' 
-                                ? 'bg-white dark:bg-[#2c2c2c] text-[#821f44] dark:text-[#db588c] shadow-sm' 
-                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
-                        >
-                            PPT
-                        </button>
-                        <button 
-                            @click="activeTab = 'pdf'" 
-                            class="flex-1 py-2 text-xs font-bold rounded-lg transition-all"
-                            :class="activeTab === 'pdf' 
-                                ? 'bg-white dark:bg-[#2c2c2c] text-blue-600 dark:text-blue-400 shadow-sm' 
-                                : 'text-slate-500 dark:text-slate-400 hover:text-[#821f44] dark:hover:text-white'"
-                        >
-                            PDF
-                        </button>
-                    </div>
-
-                    <!-- File List Card -->
-                    <div class="bg-white dark:bg-[#171717] rounded-xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden flex flex-col max-h-[600px]">
-                        <div class="p-4 border-b border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 flex items-center justify-between">
-                            <h2 class="font-bold text-slate-900 dark:text-white flex items-center gap-2 text-sm">
-                                <FolderIcon class="w-4 h-4 text-[#821f44]" />
-                                File Tersedia
+                <!-- Table Card -->
+                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
+                    <!-- Table Header / Search & Filter -->
+                    <div class="flex flex-row items-center justify-between gap-3 border-b border-slate-200 px-5 py-3 dark:border-white/10 flex-wrap">
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-sm font-semibold text-slate-900 dark:text-white">
+                                Content Management System
                             </h2>
-                            <span class="px-2 py-0.5 bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 rounded text-xs font-bold">
-                                {{ filteredFiles.length }}
-                            </span>
-                        </div>  
-
-                        <ul class="divide-y divide-slate-100 dark:divide-white/5 overflow-y-auto flex-1">
-                            <li v-for="file in filteredFiles" :key="file.uuid" 
-                                @click="selectFile(file)"
-                                class="p-4 hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer transition-all relative group flex items-center justify-between"
-                                :class="{'bg-[#821f44]/5 dark:bg-[#821f44]/10': selectedDocument && selectedDocument.uuid === file.uuid}"
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <div class="relative">
+                                <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                                <input
+                                    v-model="searchQuery"
+                                    type="text"
+                                    placeholder="Search documents..."
+                                    class="w-56 rounded-lg border border-slate-300 bg-white py-1.5 pl-8 pr-3 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white placeholder-slate-400 transition"
+                                />
+                            </div>
+                            <button
+                                type="button"
+                                @click="openCreateModal"
+                                class="inline-flex items-center gap-1.5 rounded-lg bg-[#821f44] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#a02854]"
                             >
-                                <div v-if="selectedDocument && selectedDocument.uuid === file.uuid" class="absolute left-0 top-0 bottom-0 w-1 bg-[#821f44]"></div>
-                                <div class="flex items-center gap-3 min-w-0 flex-1">
-                                    <div class="p-2 rounded transition-transform group-hover:scale-110 shrink-0"
-                                        :class="isPdf(file) 
-                                            ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' 
-                                            : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'"
-                                    >
-                                        <DocumentIcon v-if="isPdf(file)" class="w-4 h-4" />
-                                        <PresentationChartBarIcon v-else class="w-4 h-4" />
-                                    </div>
-                                    <div class="min-w-0 flex-1">
-                                        <p class="text-xs font-bold text-slate-900 dark:text-white truncate" :class="{'text-[#821f44] dark:text-[#db588c]': selectedDocument && selectedDocument.uuid === file.uuid}">
-                                            {{ file.name }}
-                                        </p>
-                                        <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium uppercase">
-                                            {{ file.extension }} • {{ formatSize(file.size) }}
-                                        </p>
-                                    </div>
-                                </div>
-                                
-                                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2 shrink-0">
-                                    <ChevronRightIcon class="w-4 h-4 text-slate-300 group-hover:text-[#821f44] transition-colors" />
-                                </div>
-                            </li>
-                            
-                            <li v-if="filteredFiles.length === 0" class="p-12 text-center">
-                                <div class="w-12 h-12 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-3">
-                                    <InboxIcon class="w-6 h-6 text-slate-300" />
-                                </div>
-                                <p class="text-xs font-bold text-slate-500 dark:text-slate-400">Tidak ada file yang cocok</p>
-                            </li>
-                        </ul>
+                                <PlusIcon class="h-3 w-3" />
+                                Add Document
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-200 bg-slate-50/70 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:border-white/5 dark:bg-[#1f1f1f]/50 dark:text-slate-400">
+                                    <th class="px-5 py-3 w-12">No</th>
+                                    <th class="px-5 py-3">Document</th>
+                                    <th class="px-5 py-3">URL</th>
+                                    <th class="px-5 py-3 text-center w-36">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-xs font-medium text-slate-700 dark:divide-white/5 dark:text-slate-300">
+                                <tr
+                                    v-for="(doc, index) in filteredDocuments"
+                                    :key="doc.id"
+                                    class="hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition duration-150"
+                                >
+                                    <td class="px-5 py-3.5 text-slate-400">{{ index + 1 }}</td>
+                                    <td class="px-5 py-3.5 font-semibold text-slate-900 dark:text-white max-w-[200px] truncate">
+                                        {{ doc.name }}
+                                    </td>
+                                    <td class="px-5 py-3.5 max-w-[250px] truncate">
+                                        <a
+                                            v-if="doc.url"
+                                            :href="doc.url"
+                                            target="_blank"
+                                            class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline underline-offset-2"
+                                        >
+                                            {{ doc.url }}
+                                        </a>
+                                        <span v-else class="text-slate-400 italic">—</span>
+                                    </td>
+                                    <td class="px-5 py-3.5">
+                                        <div class="flex items-center justify-center gap-1.5">
+                                            <button
+                                                type="button"
+                                                @click="openEditModal(doc)"
+                                                class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5"
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                type="button"
+                                                @click="openDeleteModal(doc)"
+                                                class="inline-flex items-center justify-center rounded-full border border-red-200 bg-white px-3 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50 hover:border-red-300 active:scale-95 dark:border-red-500/20 dark:bg-[#1a1a1a] dark:text-red-400 dark:hover:bg-red-500/10"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr v-if="filteredDocuments.length === 0">
+                                    <td colspan="4" class="px-5 py-12 text-center">
+                                        <div class="flex flex-col items-center justify-center gap-2">
+                                            <DocumentTextIcon class="h-8 w-8 text-slate-300 dark:text-slate-600" />
+                                            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">
+                                                {{ searchQuery ? 'No documents match your search' : 'No documents available' }}
+                                            </p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
+            </Deferred>
 
-                <!-- Main Content: File Viewer / Detail -->
-                <div class="lg:col-span-3">
-                    <div v-if="selectedDocument" class="space-y-4 animate-fade-in">
-                        <!-- Viewer Header Info -->
-                        <div class="bg-white dark:bg-[#171717] rounded-xl border border-slate-200 dark:border-white/10 p-4 shadow-sm flex items-center justify-between gap-4">
-                            <div class="flex items-center gap-3 min-w-0">
-                                <div class="p-2.5 rounded shrink-0"
-                                    :class="isPdf(selectedDocument) 
-                                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' 
-                                        : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'"
-                                >
-                                    <DocumentIcon v-if="isPdf(selectedDocument)" class="w-6 h-6" />
-                                    <PresentationChartBarIcon v-else class="w-6 h-6" />
-                                </div>
-                                <div class="min-w-0">
-                                    <h2 class="font-bold text-base text-slate-900 dark:text-white truncate">{{ selectedDocument.name }}</h2>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                                        Ukuran: {{ formatSize(selectedDocument.size) }} • Tipe: {{ selectedDocument.extension.toUpperCase() }}
-                                    </p>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-center gap-2 shrink-0">
-                                <a 
-                                    :href="route('itom.libary.document.download', { uuid: selectedDocument.uuid })" 
-                                    class="px-3 py-1.5 text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-800 dark:text-white rounded-lg transition-all flex items-center gap-1.5"
-                                >
-                                    <ArrowDownTrayIcon class="w-4 h-4" />
-                                    Download
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- Viewer Component Selection -->
-                        <div v-if="isPdf(selectedDocument)" class="bg-white dark:bg-[#171717] rounded-xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden p-2">
-                            <iframe 
-                                :src="selectedDocument.url" 
-                                class="w-full h-[650px] rounded-lg border border-slate-100 dark:border-white/5" 
-                                type="application/pdf"
-                            ></iframe>
-                        </div>
-                        <div v-else class="flex flex-col items-center justify-center min-h-[500px] bg-white dark:bg-[#171717] rounded-xl border border-slate-200 dark:border-white/10 shadow-sm text-center p-8">
-                            <div class="w-16 h-16 bg-slate-50 dark:bg-white/5 rounded-2xl flex items-center justify-center border border-slate-100 dark:border-white/10 mb-4">
-                                <PresentationChartBarIcon class="w-8 h-8 text-slate-400 dark:text-slate-500" />
-                            </div>
-                            <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-1">Pratinjau Tidak Tersedia</h3>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto leading-relaxed">
-                                Pratinjau langsung tidak tersedia untuk format {{ selectedDocument.extension.toUpperCase() }}. Silakan unduh dokumen untuk melihat isinya.
-                            </p>
-                        </div>
+            <!-- Create / Edit Modal -->
+            <ConfirmationModal
+                :show="formModal.show"
+                :title="formModal.isEditing ? 'Edit Document' : 'Add New Document'"
+                :message="formModal.isEditing ? 'Update the document details below.' : 'Fill in the document details below.'"
+                :confirm-text="formModal.isEditing ? 'Save' : 'Add'"
+                cancel-text="Cancel"
+                type="info"
+                :loading="form.processing"
+                @close="closeFormModal"
+                @confirm="submitForm"
+            >
+                <div class="mt-4 space-y-4 text-left">
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                            Document Name <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            v-model="form.name"
+                            type="text"
+                            placeholder="Enter document name"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white transition"
+                        />
+                        <p v-if="form.errors.name" class="text-[10px] text-red-500">{{ form.errors.name }}</p>
                     </div>
-                    
-                    <!-- Selection Empty State -->
-                    <div v-else class="flex flex-col items-center justify-center min-h-[550px] bg-white dark:bg-[#171717] rounded-xl border border-slate-200 dark:border-white/10 shadow-sm text-center p-12">
-                        <div class="relative mb-6">
-                            <div class="absolute inset-0 bg-[#821f44] blur-3xl opacity-10 rounded-full animate-pulse"></div>
-                            <div class="relative w-28 h-28 bg-slate-50 dark:bg-white/5 rounded-3xl flex items-center justify-center border border-slate-100 dark:border-white/10">
-                                <FolderOpenIcon class="w-14 h-14 text-slate-300 dark:text-slate-700" />
-                            </div>
-                        </div>
-                        <h2 class="text-xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">Belum Ada File Terpilih</h2>
-                        <p class="text-slate-500 dark:text-slate-400 max-w-sm mx-auto leading-relaxed text-sm">
-                            Pilih salah satu file dari daftar di samping untuk melihat pratinjau dokumen regulasi PDF atau slide PowerPoint.
-                        </p>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                            Document URL
+                        </label>
+                        <input
+                            v-model="form.url"
+                            type="url"
+                            placeholder="https://example.com/document.pdf"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white transition"
+                        />
+                        <p v-if="form.errors.url" class="text-[10px] text-red-500">{{ form.errors.url }}</p>
                     </div>
                 </div>
-            </div>
+            </ConfirmationModal>
+
+            <!-- Delete Confirmation Modal -->
+            <ConfirmationModal
+                :show="deleteModal.show"
+                title="Delete Document"
+                :message="'Are you sure you want to delete document ' + (deleteModal.document?.name ? '\u201C' + deleteModal.document.name + '\u201D' : '') + '?'"
+                confirm-text="Yes, Delete"
+                cancel-text="Cancel"
+                type="danger"
+                :loading="formDelete.processing"
+                @close="closeDeleteModal"
+                @confirm="confirmDelete"
+            />
         </div>
     </ModulLayout>
 </template>
 
 <script setup>
 import ModulLayout from '@/Layouts/ModulLayout.vue';
+import TableSkeleton from '@/Components/Shared/TableSkeleton.vue';
+import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import { Deferred, useForm } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
-import { router } from '@inertiajs/vue3';
-import { 
-    PresentationChartBarIcon, 
-    ChevronRightIcon, 
-    FolderIcon,
-    FolderOpenIcon,
+import {
+    DocumentTextIcon,
+    PlusIcon,
     MagnifyingGlassIcon,
-    InboxIcon,
-    ArrowDownTrayIcon,
-    DocumentIcon,
 } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
     documents: {
         type: Array,
-        default: () => []
+        default: () => [],
     },
-    selectedDocument: {
-        type: Object,
-        default: null
-    }
 });
 
 const searchQuery = ref('');
-const activeTab = ref('all'); // 'all', 'ppt', 'pdf'
 
-const isPdf = (file) => {
-    return file && (file.extension === 'pdf' || file.mime_type === 'application/pdf');
-};
-
-const formatSize = (bytes) => {
-    if (!bytes) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-};
-
-const filteredFiles = computed(() => {
-    let list = props.documents;
-    
-    // Filter by tab
-    if (activeTab.value === 'ppt') {
-        list = list.filter(f => ['ppt', 'pptx'].includes(f.extension.toLowerCase()));
-    } else if (activeTab.value === 'pdf') {
-        list = list.filter(f => f.extension.toLowerCase() === 'pdf');
-    }
-
-    // Filter by query
-    if (searchQuery.value) {
-        const query = searchQuery.value.toLowerCase();
-        list = list.filter(file => file.name.toLowerCase().includes(query));
-    }
-
-    return list;
+const filteredDocuments = computed(() => {
+    if (!searchQuery.value) return props.documents;
+    const q = searchQuery.value.toLowerCase();
+    return props.documents.filter(
+        (doc) =>
+            (doc.name && doc.name.toLowerCase().includes(q)) ||
+            (doc.url && doc.url.toLowerCase().includes(q))
+    );
 });
 
-const selectFile = (file) => {
-    router.visit(route('itom.policy.CMS.show', { uuid: file.uuid }), {
-        preserveState: true,
-        preserveScroll: true
+// ---------- Create / Edit ----------
+const formModal = ref({
+    show: false,
+    isEditing: false,
+    editingId: null,
+});
+
+const form = useForm({
+    name: '',
+    url: '',
+});
+
+const openCreateModal = () => {
+    form.reset();
+    form.clearErrors();
+    formModal.value = { show: true, isEditing: false, editingId: null };
+};
+
+const openEditModal = (doc) => {
+    form.reset();
+    form.clearErrors();
+    form.name = doc.name;
+    form.url = doc.url || '';
+    formModal.value = { show: true, isEditing: true, editingId: doc.id };
+};
+
+const closeFormModal = () => {
+    formModal.value = { show: false, isEditing: false, editingId: null };
+    form.reset();
+};
+
+const submitForm = () => {
+    if (formModal.value.isEditing) {
+        form.put(route('itom.policy.CMS.update', formModal.value.editingId), {
+            preserveScroll: true,
+            onSuccess: () => closeFormModal(),
+        });
+    } else {
+        form.post(route('itom.policy.CMS.store'), {
+            preserveScroll: true,
+            onSuccess: () => closeFormModal(),
+        });
+    }
+};
+
+// ---------- Delete ----------
+const deleteModal = ref({
+    show: false,
+    document: null,
+});
+
+const formDelete = useForm({});
+
+const openDeleteModal = (doc) => {
+    deleteModal.value = { show: true, document: doc };
+};
+
+const closeDeleteModal = () => {
+    deleteModal.value = { show: false, document: null };
+};
+
+const confirmDelete = () => {
+    if (!deleteModal.value.document) return;
+    formDelete.delete(route('itom.policy.CMS.destroy', deleteModal.value.document.id), {
+        preserveScroll: true,
+        onSuccess: () => closeDeleteModal(),
     });
 };
 </script>
@@ -266,19 +274,6 @@ const selectFile = (file) => {
     to {
         opacity: 1;
         transform: translateY(0);
-    }
-}
-
-.animate-fade-in {
-    animation: fadeIn 0.25s ease-out;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
     }
 }
 </style>

@@ -3,166 +3,59 @@
 namespace Modules\ITOM\Controllers\Regulation\CMS;
 
 use App\Http\Controllers\Controller;
-use App\Models\Document;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Inertia\Response;
+use App\Models\MstDocument;
 
 class CMSController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): Response
     {
-        // Ensure private directory exists
-        if (!Storage::disk('local')->exists('Regulation')) {
-            Storage::disk('local')->makeDirectory('Regulation');
-        }
-
-        $this->initializeDemoFiles();
-
-        // Fetch documents
-        $documents = Document::where('entity_type', 'regulation')
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($doc) {
+        return Inertia::render('modules/ITOM/Regulation/CMS/Index', [
+            'documents' => Inertia::defer(fn() => MstDocument::all()->map(function ($doc) {
                 return [
                     'id' => $doc->id,
-                    'uuid' => $doc->uuid,
-                    'name' => $doc->original_name,
-                    'extension' => $doc->extension,
-                    'size' => $doc->size,
-                    'mime_type' => $doc->mime_type,
-                    'path' => $doc->path,
-                    'created_at' => $doc->created_at->toISOString(),
-                    'url' => route('itom.libary.document.preview', ['uuid' => $doc->uuid]),
+                    'name' => $doc->name,
+                    'url' => $doc->url,
+                    'created_at' => $doc->created_at ? $doc->created_at->format('d M Y') : '-',
+                    'updated_at' => $doc->updated_at ? $doc->updated_at->format('d M Y') : '-',
                 ];
-            });
-
-        return Inertia::render('modules/ITOM/Regulation/CMS/Index', [
-            'documents' => $documents,
-            'selectedDocument' => null,
+            })),
         ]);
     }
 
-    public function show(Request $request, $uuid)
+    public function store(Request $request)
     {
-        // Ensure private directory exists
-        if (!Storage::disk('local')->exists('Regulation')) {
-            Storage::disk('local')->makeDirectory('Regulation');
-        }
-
-        $this->initializeDemoFiles();
-
-        $selectedDoc = Document::where('uuid', $uuid)->firstOrFail();
-
-        $documents = Document::where('entity_type', 'regulation')
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($doc) {
-                return [
-                    'id' => $doc->id,
-                    'uuid' => $doc->uuid,
-                    'name' => $doc->original_name,
-                    'extension' => $doc->extension,
-                    'size' => $doc->size,
-                    'mime_type' => $doc->mime_type,
-                    'path' => $doc->path,
-                    'created_at' => $doc->created_at->toISOString(),
-                    'url' => route('itom.libary.document.preview', ['uuid' => $doc->uuid]),
-                ];
-            });
-
-        return Inertia::render('modules/ITOM/Regulation/CMS/Index', [
-            'documents' => $documents,
-            'selectedDocument' => [
-                'id' => $selectedDoc->id,
-                'uuid' => $selectedDoc->uuid,
-                'name' => $selectedDoc->original_name,
-                'extension' => $selectedDoc->extension,
-                'size' => $selectedDoc->size,
-                'mime_type' => $selectedDoc->mime_type,
-                'path' => $selectedDoc->path,
-                'url' => route('itom.libary.document.preview', ['uuid' => $selectedDoc->uuid]),
-            ]
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'url' => 'nullable|string',
         ]);
+
+        MstDocument::create($validated);
+
+        return redirect()->back()->with('success', 'Dokumen berhasil ditambahkan.');
     }
 
-    public function upload(Request $request)
+    public function update(Request $request, $id)
     {
-        $request->validate([
-            'file' => 'required|file|mimes:pdf,ppt,pptx|max:20480', // max 20MB
+        $document = MstDocument::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'url' => 'nullable|string',
         ]);
 
-        $file = $request->file('file');
-        $originalName = $file->getClientOriginalName();
-        $extension = strtolower($file->getClientOriginalExtension());
-        $mimeType = $file->getMimeType();
-        $size = $file->getSize();
-        
-        $uuid = (string) Str::uuid();
-        $storedName = $uuid . '.' . $extension;
-        
-        // Save to private storage Regulation/
-        $path = $file->storeAs('Regulation', $storedName, 'local');
+        $document->update($validated);
 
-        Document::create([
-            'uuid' => $uuid,
-            'entity_type' => 'regulation',
-            'original_name' => $originalName,
-            'stored_name' => $storedName,
-            'path' => $path,
-            'mime_type' => $mimeType,
-            'extension' => $extension,
-            'size' => $size,
-            'uploaded_by' => auth()->id(),
-        ]);
-
-        return redirect()->route('itom.policy.CMS.show', ['uuid' => $uuid])
-            ->with('success', 'File berhasil diunggah.');
+        return redirect()->back()->with('success', 'Dokumen berhasil diperbarui.');
     }
 
-    public function destroy($uuid)
+    public function destroy($id)
     {
-        $document = Document::where('uuid', $uuid)->firstOrFail();
-
-        // Delete file from storage
-        if (Storage::disk('local')->exists($document->path)) {
-            Storage::disk('local')->delete($document->path);
-        }
-
-        // Delete from database
+        $document = MstDocument::findOrFail($id);
         $document->delete();
 
-        return redirect()->route('itom.policy.CMS.index')
-            ->with('success', 'File berhasil dihapus.');
-    }
-
-    private function initializeDemoFiles()
-    {
-        if (Document::where('entity_type', 'regulation')->count() === 0) {
-            // Check if public demo PPTX file exists
-            if (Storage::disk('public')->exists('ppt/IT_Operating_Model_a776c8ce.pptx')) {
-                $uuid = (string) Str::uuid();
-                $storedName = $uuid . '.pptx';
-                $privatePath = 'Regulation/' . $storedName;
-                
-                // Copy to private storage
-                $content = Storage::disk('public')->get('ppt/IT_Operating_Model_a776c8ce.pptx');
-                Storage::disk('local')->put($privatePath, $content);
-                
-                // Create document entry
-                Document::create([
-                    'uuid' => $uuid,
-                    'entity_type' => 'regulation',
-                    'original_name' => 'IT_Operating_Model_a776c8ce.pptx',
-                    'stored_name' => $storedName,
-                    'path' => $privatePath,
-                    'mime_type' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-                    'extension' => 'pptx',
-                    'size' => strlen($content),
-                    'uploaded_by' => null,
-                ]);
-            }
-        }
+        return redirect()->back()->with('success', 'Dokumen berhasil dihapus.');
     }
 }

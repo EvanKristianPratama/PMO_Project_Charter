@@ -325,53 +325,56 @@ Route::middleware(["approved"])->group(function () {
                 return redirect()->route("itom.policy.regulation.index");
             })->name("index");
 
-            // Guidance Intro & Outro chapters (Bab I & Bab V)
-            Route::get("/regulation/guidance/introduction", [GeneralPolicyController::class, "introduction"])->name("guidance.introduction");
-            Route::get("/regulation/guidance/closing", [GeneralPolicyController::class, "closing"])->name("guidance.closing");
+            // Guidance (Kebijakan) CRUD under regulation/guidance prefix
+            Route::prefix("/regulation/guidance")->group(function () {
+                // Guidance Intro & Outro chapters (Bab I & Bab V)
+                Route::get("/introduction", [GeneralPolicyController::class, "introduction"])->name("guidance.introduction");
+                Route::get("/closing", [GeneralPolicyController::class, "closing"])->name("guidance.closing");
 
-            // Kebijakan Umum (General Policy) CRUD
-            Route::get("/general", [GeneralPolicyController::class, "index"])->name("general.index");
-            Route::get("/general/manage", [GeneralPolicyController::class, "manage"])->name("general.manage");
-            Route::post("/general", [GeneralPolicyController::class, "store"])->name("general.store");
-            Route::put("/general/{id}", [GeneralPolicyController::class, "update"])->name("general.update");
-            Route::delete("/general/{id}", [GeneralPolicyController::class, "destroy"])->name("general.destroy");
+                // Kebijakan Umum (General Policy) CRUD
+                Route::get("/general", [GeneralPolicyController::class, "index"])->name("general.index");
+                Route::get("/general/manage", [GeneralPolicyController::class, "manage"])->name("general.manage");
+                Route::post("/general", [GeneralPolicyController::class, "store"])->name("general.store");
+                Route::put("/general/{id}", [GeneralPolicyController::class, "update"])->name("general.update");
+                Route::delete("/general/{id}", [GeneralPolicyController::class, "destroy"])->name("general.destroy");
 
-            // Kebijakan Khusus (Specific Policy) CRUD
-            Route::get("/specific", function () {
-                return redirect()->route("itom.policy.general.index");
-            })->name("specific.index");
-            Route::get("/specific/manage", [PolicyController::class, "manage"])->name("specific.manage");
-            Route::get("/specific/create", [PolicyController::class, "createObjective"])->name("specific.create");
-            Route::get("/specific/{objective}/edit", [PolicyController::class, "editObjective"])->name("specific.edit");
-            Route::get("/specific/mapping-all", [PolicyController::class, "mappingCobit"])->name("specific.mapping");
-            Route::get("/specific/mapping-analysis", [PolicyController::class, "mappingCobitAnalysis"])->name("specific.mapping.analysis");
-            Route::post("/objective", [PolicyController::class, "storeObjective"])->name("objective.store");
-            Route::put("/objective/{objective}", [PolicyController::class, "updateObjective"])->name("objective.update");
-            Route::delete("/objective/{objective}", [PolicyController::class, "destroyObjective"])->name("objective.destroy");
-            Route::post("/practice", [PolicyController::class, "storePractice"])->name("practice.store");
-            Route::put("/practice/{practice}", [PolicyController::class, "updatePractice"])->name("practice.update");
-            Route::delete("/practice/{practice}", [PolicyController::class, "destroyPractice"])->name("practice.destroy");
+                // Kebijakan Khusus (Specific Policy) CRUD
+                Route::get("/specific", function () {
+                    return redirect()->route("itom.policy.general.index");
+                })->name("specific.index");
+                Route::get("/specific/manage", [PolicyController::class, "manage"])->name("specific.manage");
+                Route::get("/specific/create", [PolicyController::class, "createObjective"])->name("specific.create");
+                Route::get("/specific/{objective}/edit", [PolicyController::class, "editObjective"])->name("specific.edit");
+                Route::get("/specific/mapping-all", [PolicyController::class, "mappingCobit"])->name("specific.mapping");
+                Route::get("/specific/mapping-analysis", [PolicyController::class, "mappingCobitAnalysis"])->name("specific.mapping.analysis");
+                Route::post("/objective", [PolicyController::class, "storeObjective"])->name("objective.store");
+                Route::put("/objective/{objective}", [PolicyController::class, "updateObjective"])->name("objective.update");
+                Route::delete("/objective/{objective}", [PolicyController::class, "destroyObjective"])->name("objective.destroy");
+                Route::post("/practice", [PolicyController::class, "storePractice"])->name("practice.store");
+                Route::put("/practice/{practice}", [PolicyController::class, "updatePractice"])->name("practice.update");
+                Route::delete("/practice/{practice}", [PolicyController::class, "destroyPractice"])->name("practice.destroy");
 
-            // Mapping COBIT 2019
-            Route::post("/cobit-mapping", [PolicyController::class, "storeCobitMapping"])->name("cobit-mapping.store");
-            Route::put("/cobit-mapping/{id}", [PolicyController::class, "updateCobitMapping"])->name("cobit-mapping.update");
-            Route::delete("/cobit-mapping/{id}", [PolicyController::class, "destroyCobitMapping"])->name("cobit-mapping.destroy");
+                // Mapping COBIT 2019
+                Route::post("/cobit-mapping", [PolicyController::class, "storeCobitMapping"])->name("cobit-mapping.store");
+                Route::put("/cobit-mapping/{id}", [PolicyController::class, "updateCobitMapping"])->name("cobit-mapping.update");
+                Route::delete("/cobit-mapping/{id}", [PolicyController::class, "destroyCobitMapping"])->name("cobit-mapping.destroy");
 
-            // Roles & Responsibilities CRUD
-            Route::get("/roles", [RoleController::class, "index"])->name("roles.index");
-            Route::get("/roles/manage", [RoleController::class, "manage"])->name("roles.manage");
-            Route::post("/roles/role", [RoleController::class, "storeRole"])->name("roles.role.store");
-            Route::put("/roles/role/{role}", [RoleController::class, "updateRole"])->name("roles.role.update");
-            Route::delete("/roles/role/{role}", [RoleController::class, "destroyRole"])->name("roles.role.destroy");
-            Route::post("/roles/responsibility", [RoleController::class, "storeResponsibility"])->name("roles.responsibility.store");
-            Route::put("/roles/responsibility/{responsibility}", [RoleController::class, "updateResponsibility"])->name("roles.responsibility.update");
-            Route::delete("/roles/responsibility/{responsibility}", [RoleController::class, "destroyResponsibility"])->name("roles.responsibility.destroy");
+                // Roles & Responsibilities CRUD
+                Route::get("/roles", [RoleController::class, "index"])->name("roles.index");
+                Route::get("/roles/manage", [RoleController::class, "manage"])->name("roles.manage");
+                Route::post("/roles/role", [RoleController::class, "storeRole"])->name("roles.role.store");
+                Route::put("/roles/role/{role}", [RoleController::class, "updateRole"])->name("roles.role.update");
+                Route::delete("/roles/role/{role}", [RoleController::class, "destroyRole"])->name("roles.role.destroy");
+                Route::post("/roles/responsibility", [RoleController::class, "storeResponsibility"])->name("roles.responsibility.store");
+                Route::put("/roles/responsibility/{responsibility}", [RoleController::class, "updateResponsibility"])->name("roles.responsibility.update");
+                Route::delete("/roles/responsibility/{responsibility}", [RoleController::class, "destroyResponsibility"])->name("roles.responsibility.destroy");
 
-            // Mapped Responsibles from Master Data
-            Route::post("/roles/mapped-responsible", [RoleController::class, "storeMappedResponsible"])->name("roles.mapped-responsible.store");
-            Route::delete("/roles/mapped-responsible/{roleId}/{responsibleId}", [RoleController::class, "destroyMappedResponsible"])->name("roles.mapped-responsible.destroy");
-            Route::post("/roles/responsible-practice", [RoleController::class, "updateResponsiblePractice"])->name("roles.responsible-practice.update");
-            Route::post("/roles/objective-responsible/{objectiveId}", [RoleController::class, "updateObjectiveResponsibles"])->name("roles.objective-responsible.update");
+                // Mapped Responsibles from Master Data
+                Route::post("/roles/mapped-responsible", [RoleController::class, "storeMappedResponsible"])->name("roles.mapped-responsible.store");
+                Route::delete("/roles/mapped-responsible/{roleId}/{responsibleId}", [RoleController::class, "destroyMappedResponsible"])->name("roles.mapped-responsible.destroy");
+                Route::post("/roles/responsible-practice", [RoleController::class, "updateResponsiblePractice"])->name("roles.responsible-practice.update");
+                Route::post("/roles/objective-responsible/{objectiveId}", [RoleController::class, "updateObjectiveResponsibles"])->name("roles.objective-responsible.update");
+            });
 
             // Regulasi (Regulation) CRUD
             Route::get("/regulation/{id}/preview", [PolicyStandartProcedureController::class, "previewData"])->name("regulation.preview");
@@ -420,10 +423,15 @@ Route::middleware(["approved"])->group(function () {
             Route::delete("/responsible/{id}", [ResponsibleController::class, "destroy"])->name("responsible.destroy");
 
             // CMS Policy routes
-            Route::get('/CMS', [CMSController::class, 'index'])->name('CMS.index');
-            Route::post('/CMS/upload', [CMSController::class, 'upload'])->name('CMS.upload');
-            Route::delete('/CMS/document/{uuid}', [CMSController::class, 'destroy'])->name('CMS.document.destroy');
-            Route::get('/CMS/{uuid}', [CMSController::class, 'show'])->name('CMS.show');
+            Route::prefix('CMS')
+                ->name('CMS.')
+                ->controller(CMSController::class)
+                ->group(function () {
+                    Route::get('/', 'index')->name('index');
+                    Route::post('/', 'store')->name('store');
+                    Route::put('/{id}', 'update')->name('update');
+                    Route::delete('/{id}', 'destroy')->name('destroy');
+                });
 
             // Definition CRUD
             Route::prefix('definition')

@@ -519,7 +519,8 @@ export function useNavigation() {
                         icon: DocumentTextIcon,
                         active: (url) =>
                             (url || "").includes("/policy/regulation") &&
-                            !(url || "").includes("/policy/regulation/procedure"),
+                            !(url || "").includes("/policy/regulation/procedure") &&
+                            !(url || "").includes("/policy/regulation/guidance"),
                     },
                     {
                         label: "SK",
@@ -533,7 +534,9 @@ export function useNavigation() {
                         icon: FolderIcon,
                         active: (url) =>
                             (url || "").includes("/policy/CMS") ||
-                            (url || "").includes("/policy/regulation/procedure"),
+                            (url || "").includes("/policy/regulation/procedure") ||
+                            (url || "").includes("/policy/regulation/guidance") ||
+                            (url || "").includes("/policy/regulation/general")
                     },
                     {
                         label: "Glossary",
