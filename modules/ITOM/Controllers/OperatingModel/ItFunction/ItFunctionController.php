@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MstBod;
 use App\Models\MstCompany;
 use App\Models\MstRegulation;
-use App\Services\BusinessProcess\FunctionService;
+use App\Services\BusinessProcess\Function\FunctionService;
 use Inertia\Inertia;
 use Inertia\Response;
 

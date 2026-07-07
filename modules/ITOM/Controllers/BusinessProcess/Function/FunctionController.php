@@ -4,7 +4,7 @@ namespace Modules\ITOM\Controllers\BusinessProcess\Function;
 
 use App\Http\Controllers\Controller;
 use App\Models\MstFunction;
-use App\Services\BusinessProcess\FunctionService;
+use App\Services\BusinessProcess\Function\FunctionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

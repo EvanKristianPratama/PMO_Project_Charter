@@ -16,32 +16,40 @@ class BodController extends Controller
     public function index(): Response
     {
         return Inertia::render('modules/ITOM/OrganizationStructure/BOD/Index', [
-            'companies' => Inertia::defer(fn () => MstCompany::with('parent')->orderBy('id', 'asc')->get()->map(fn ($c) => [
-                'id' => $c->id,
-                'parent_id' => $c->parent_id,
-                'parent_name' => $c->parent?->name,
-                'name' => $c->name,
-                'organization' => $c->organization,
-                'singkatan' => $c->singkatan,
-                'grup' => $c->grup,
-                'level' => $c->level,
-            ])->values()->all()),
-            'bods' => Inertia::defer(fn () => MstBod::with('company')->orderBy('id', 'asc')->get()->map(fn ($b) => [
-                'id' => $b->id,
-                'company_id' => $b->company_id,
-                'parent_id' => $b->parent_id,
-                'company_name' => $b->company?->name,
-                'name' => $b->name,
-                'nama_jabatan' => $b->nama_jabatan,
-                'alias' => $b->alias,
-                'sumber' => $b->sumber,
-                'pejabat' => $b->pejabat,
-                'grup_function' => $b->grup_function,
-                'role_function' => $b->role_function,
-                'tipe' => $b->tipe,
-                'regulation_id' => $b->regulation_id,
-                'order' => $b->order,
-            ])->values()->all()),
+            'companies' => Inertia::defer(fn () => MstCompany::select(['id', 'parent_id', 'name', 'organization', 'singkatan', 'grup', 'level'])
+                ->with('parent:id,name')
+                ->orderBy('id', 'asc')
+                ->get()
+                ->map(fn ($c) => [
+                    'id' => $c->id,
+                    'parent_id' => $c->parent_id,
+                    'parent_name' => $c->parent?->name,
+                    'name' => $c->name,
+                    'organization' => $c->organization,
+                    'singkatan' => $c->singkatan,
+                    'grup' => $c->grup,
+                    'level' => $c->level,
+                ])->values()->all()),
+            'bods' => Inertia::defer(fn () => MstBod::select(['id', 'company_id', 'parent_id', 'name', 'nama_jabatan', 'alias', 'sumber', 'pejabat', 'grup_function', 'role_function', 'tipe', 'regulation_id', 'order'])
+                ->with('company:id,name')
+                ->orderBy('id', 'asc')
+                ->get()
+                ->map(fn ($b) => [
+                    'id' => $b->id,
+                    'company_id' => $b->company_id,
+                    'parent_id' => $b->parent_id,
+                    'company_name' => $b->company?->name,
+                    'name' => $b->name,
+                    'nama_jabatan' => $b->nama_jabatan,
+                    'alias' => $b->alias,
+                    'sumber' => $b->sumber,
+                    'pejabat' => $b->pejabat,
+                    'grup_function' => $b->grup_function,
+                    'role_function' => $b->role_function,
+                    'tipe' => $b->tipe,
+                    'regulation_id' => $b->regulation_id,
+                    'order' => $b->order,
+                ])->values()->all()),
         ]);
     }
 

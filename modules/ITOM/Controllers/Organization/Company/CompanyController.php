@@ -17,22 +17,30 @@ class CompanyController extends Controller
     public function index(): Response
     {
         return Inertia::render('modules/ITOM/OrganizationStructure/Company/Index', [
-            'companies' => Inertia::defer(fn () => MstCompany::with('parent')->orderBy('id', 'asc')->get()->map(fn ($c) => [
-                'id' => $c->id,
-                'parent_id' => $c->parent_id,
-                'parent_name' => $c->parent?->name,
-                'name' => $c->name,
-                'organization' => $c->organization,
-                'singkatan' => $c->singkatan,
-                'grup' => $c->grup,
-                'level' => $c->level,
-            ])->values()->all()),
-            'groubOptions' => Inertia::defer(fn () => Groub::with('company')->orderBy('name')->get()->map(fn ($g) => [
-                'id' => $g->id,
-                'name' => $g->company ? "{$g->company->name} - {$g->name}" : $g->name,
-                'company_id' => $g->company_id,
-                'group_name' => $g->name,
-            ])->values()->all()),
+            'companies' => Inertia::defer(fn () => MstCompany::select(['id', 'parent_id', 'name', 'organization', 'singkatan', 'grup', 'level'])
+                ->with('parent:id,name')
+                ->orderBy('id', 'asc')
+                ->get()
+                ->map(fn ($c) => [
+                    'id' => $c->id,
+                    'parent_id' => $c->parent_id,
+                    'parent_name' => $c->parent?->name,
+                    'name' => $c->name,
+                    'organization' => $c->organization,
+                    'singkatan' => $c->singkatan,
+                    'grup' => $c->grup,
+                    'level' => $c->level,
+                ])->values()->all()),
+            'groubOptions' => Inertia::defer(fn () => Groub::select(['id', 'company_id', 'name'])
+                ->with('company:id,name')
+                ->orderBy('name')
+                ->get()
+                ->map(fn ($g) => [
+                    'id' => $g->id,
+                    'name' => $g->company ? "{$g->company->name} - {$g->name}" : $g->name,
+                    'company_id' => $g->company_id,
+                    'group_name' => $g->name,
+                ])->values()->all()),
         ]);
     }
 

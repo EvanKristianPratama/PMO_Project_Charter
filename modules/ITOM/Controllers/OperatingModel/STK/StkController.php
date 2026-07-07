@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MstCompany;
 use App\Models\MstKpi;
 use App\Models\MstRegulation;
-use App\Services\BusinessProcess\BusinessProcessV2Service;
+use App\Services\BusinessProcess\BusinessProcess\BusinessProcessV2Service;
 use Inertia\Inertia;
 use Inertia\Response;
 

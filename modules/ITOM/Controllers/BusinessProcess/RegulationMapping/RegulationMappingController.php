@@ -3,7 +3,7 @@
 namespace Modules\ITOM\Controllers\BusinessProcess\RegulationMapping;
 
 use App\Http\Controllers\Controller;
-use App\Services\BusinessProcess\FunctionService;
+use App\Services\BusinessProcess\Function\FunctionService;
 use App\Models\MstRegulation;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

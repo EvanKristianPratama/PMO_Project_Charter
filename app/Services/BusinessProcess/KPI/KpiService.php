@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\BusinessProcess;
+namespace App\Services\BusinessProcess\KPI;
 
 use App\Models\MstKpi;
 

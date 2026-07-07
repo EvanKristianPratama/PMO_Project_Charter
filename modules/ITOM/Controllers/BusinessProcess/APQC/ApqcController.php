@@ -4,7 +4,7 @@ namespace Modules\ITOM\Controllers\BusinessProcess\APQC;
 
 use App\Http\Controllers\Controller;
 use App\Models\MstApqc;
-use App\Services\BusinessProcess\ApqcService;
+use App\Services\BusinessProcess\APQC\ApqcService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

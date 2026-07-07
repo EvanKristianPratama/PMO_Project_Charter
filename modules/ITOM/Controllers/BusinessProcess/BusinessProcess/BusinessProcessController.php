@@ -5,7 +5,7 @@ namespace Modules\ITOM\Controllers\BusinessProcess\BusinessProcess;
 use App\Http\Controllers\Controller;
 use App\Models\TrsProsesBisnis;
 use App\Models\MstProsesBisnis;
-use App\Services\BusinessProcess\BusinessProcessV2Service;
+use App\Services\BusinessProcess\BusinessProcess\BusinessProcessV2Service;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

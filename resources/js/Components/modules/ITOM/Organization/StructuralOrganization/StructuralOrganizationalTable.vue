@@ -771,14 +771,14 @@ const openDeleteModal = (org) => {
 
 const submitForm = () => {
     if (modalMode.value === 'create') {
-        form.post(route('itom.business-process.organization-structure.store'), {
+        form.post(route('itom.business-process.organization-structure.structural.store'), {
             onSuccess: () => {
                 isModalOpen.value = false;
                 form.reset();
             },
         });
     } else {
-        form.put(route('itom.business-process.organization-structure.update', selectedOrg.value.organization_id), {
+        form.put(route('itom.business-process.organization-structure.structural.update', selectedOrg.value.organization_id), {
             onSuccess: () => {
                 isModalOpen.value = false;
                 form.reset();
@@ -788,7 +788,7 @@ const submitForm = () => {
 };
 
 const submitDelete = () => {
-    form.delete(route('itom.business-process.organization-structure.destroy', selectedOrg.value.organization_id), {
+    form.delete(route('itom.business-process.organization-structure.structural.destroy', selectedOrg.value.organization_id), {
         onSuccess: () => {
             isDeleteModalOpen.value = false;
         },

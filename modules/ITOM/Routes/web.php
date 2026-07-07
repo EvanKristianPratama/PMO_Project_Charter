@@ -6,7 +6,7 @@ use Inertia\Inertia;
 use Modules\ITOM\Controllers\BusinessProcess\BusinessCapability\BusinessCapabilityController;
 use Modules\ITOM\Controllers\Organization\Company\CompanyController;
 use Modules\ITOM\Controllers\Organization\BOD\BodController;
-use Modules\ITOM\Controllers\Organization\StrukturalOrganization\StrukturalOrganizationController;
+use Modules\ITOM\Controllers\Organization\StructuralOrganization\StructuralOrganizationController;
 use Modules\ITOM\Controllers\Organization\FunctionalOrganization\FunctionalOrganizationController;
 
 use Modules\ITOM\Controllers\BusinessProcess\BusinessProcess\BusinessProcessController;
@@ -69,12 +69,15 @@ Route::middleware(["approved"])->group(function () {
                 });
 
             // Structural Organization Sub-menu
-            Route::controller(StrukturalOrganizationController::class)->group(function () {
-                Route::get("/structural", "index")->name("structural.index");
-                Route::post("/", "store")->name("store");
-                Route::put("/{organization}", "update")->name("update");
-                Route::delete("/{organization}", "destroy")->name("destroy");
-            });
+            Route::prefix("structural")
+                ->name("structural.")
+                ->controller(StructuralOrganizationController::class)
+                ->group(function () {
+                    Route::get("/", "index")->name("index");
+                    Route::post("/", "store")->name("store");
+                    Route::put("/{id}", "update")->name("update");
+                    Route::delete("/{id}", "destroy")->name("destroy");
+                });
 
             // Functional Organization Sub-menu
             Route::prefix("functional")
@@ -188,13 +191,14 @@ Route::middleware(["approved"])->group(function () {
 
     
     // Resource Management CRUD
-    Route::prefix("/resource-management")
+    Route::prefix("resource-management")
         ->name("resource-management.")
+        ->controller(MainResourceManagementController::class)
         ->group(function () {
-            Route::get("/", [MainResourceManagementController::class, "index"])->name("index");
-            Route::post("/", [MainResourceManagementController::class, "store"])->name("store");
-            Route::put("/{resource}", [MainResourceManagementController::class, "update"])->name("update");
-            Route::delete("/{resource}", [MainResourceManagementController::class, "destroy"])->name("destroy");
+            Route::get("/", "index")->name("index");
+            Route::post("/", "store")->name("store");
+            Route::put("/{id}", "update")->name("update");
+            Route::delete("/{id}", "destroy")->name("destroy");
         });
 
     Route::get(

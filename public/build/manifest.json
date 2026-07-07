@@ -2015,7 +2015,7 @@
     ]
   },
   "resources/js/Pages/modules/ITOM/BpmnWorkflow/Index.vue": {
-    "file": "assets/Index-DtaHsEJq.js",
+    "file": "assets/Index-tYx-TrTi.js",
     "name": "Index",
     "src": "resources/js/Pages/modules/ITOM/BpmnWorkflow/Index.vue",
     "isDynamicEntry": true,
@@ -2971,23 +2971,19 @@
     ]
   },
   "resources/js/Pages/modules/ITOM/OrganizationStructure/SDM/Index.vue": {
-    "file": "assets/Index-CXsmhppG.js",
+    "file": "assets/Index-CCHJFzvP.js",
     "name": "Index",
     "src": "resources/js/Pages/modules/ITOM/OrganizationStructure/SDM/Index.vue",
     "isDynamicEntry": true,
     "imports": [
+      "_inertia-Ca0NRTmw.js",
       "_ModulLayout-C7J1kslO.js",
       "_vendor-vue-runtime-dom-BgatCPeT.js",
-      "_inertia-Ca0NRTmw.js",
       "_ConfirmationModal-Uh3bXx4I.js",
       "_vendor-vue-runtime-core-BGDWNuJN.js",
       "_vendor-vue-shared-BC0FtGEN.js",
       "_vendor-vue-reactivity-BTrCj1Uo.js",
-      "_useDarkMode-yNbHwfc0.js",
-      "_useRouteHelper-DPf4JdEH.js",
-      "_BreadcrumbRight-BVN2UD-B.js",
-      "_heroicons-DzdA291O.js",
-      "_headlessui-BY7XwMWI.js",
+      "_TableSkeleton-CiYn8a0p.js",
       "_vendor-qs-Cj-FTvzp.js",
       "_vendor-side-channel-BJMJn77Y.js",
       "_vendor-es-errors-vszLt91P.js",
@@ -3009,11 +3005,16 @@
       "_vendor-side-channel-weakmap-DIj7-2ms.js",
       "_vendor-axios-KcFgf-gG.js",
       "_vendor-lodash-es-Bc66MGl4.js",
-      "_vendor-laravel-precognition-CApEZYE-.js"
+      "_vendor-laravel-precognition-CApEZYE-.js",
+      "_useDarkMode-yNbHwfc0.js",
+      "_useRouteHelper-DPf4JdEH.js",
+      "_BreadcrumbRight-BVN2UD-B.js",
+      "_heroicons-DzdA291O.js",
+      "_headlessui-BY7XwMWI.js"
     ]
   },
   "resources/js/Pages/modules/ITOM/OrganizationStructure/StrukturalOrganization/Index.vue": {
-    "file": "assets/Index-BNO6clri.js",
+    "file": "assets/Index-CWU0t5TE.js",
     "name": "Index",
     "src": "resources/js/Pages/modules/ITOM/OrganizationStructure/StrukturalOrganization/Index.vue",
     "isDynamicEntry": true,
@@ -5700,7 +5701,7 @@
     ]
   },
   "resources/js/Pages/modules/ITSP/StrategicHouse/Index.vue": {
-    "file": "assets/Index-B77QFbxf.js",
+    "file": "assets/Index-BQUYEYFv.js",
     "name": "Index",
     "src": "resources/js/Pages/modules/ITSP/StrategicHouse/Index.vue",
     "isDynamicEntry": true,
@@ -6167,7 +6168,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-B3fDzkCT.js",
+    "file": "assets/app-DCI1mXN2.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,

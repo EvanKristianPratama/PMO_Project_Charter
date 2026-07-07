@@ -4,7 +4,7 @@ namespace Modules\ITOM\Controllers\BusinessProcess\Kpi;
 
 use App\Http\Controllers\Controller;
 use App\Models\MstKpi;
-use App\Services\BusinessProcess\KpiService;
+use App\Services\BusinessProcess\KPI\KpiService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

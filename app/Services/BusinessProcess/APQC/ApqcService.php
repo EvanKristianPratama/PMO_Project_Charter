@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Services\BusinessProcess;
+namespace App\Services\BusinessProcess\APQC;
 
-use App\Models\MstProsesBisnis;
+use App\Models\MstApqc;
 
-class BusinessProcessV2Service
+class ApqcService
 {
     /**
-     * Retrieve all business process v2 items with their parent relations.
+     * Retrieve all APQC items with their parent relations.
      */
-    public function getProsesBisnisV2List()
+    public function getApqcList()
     {
-        $items = MstProsesBisnis::with(['company', 'kpis', 'regulations.sopCategories'])->orderBy('id')->get();
+        $items = MstApqc::orderBy('id')->get();
         
         // Build map for efficient parent lookup in memory
         $itemsMap = $items->keyBy('id');
@@ -53,45 +53,33 @@ class BusinessProcessV2Service
     }
 
     /**
-     * Store a newly created item.
+     * Store a newly created APQC item.
      */
-    public function create(array $payload): MstProsesBisnis
+    public function createApqc(array $payload): MstApqc
     {
-        $item = MstProsesBisnis::create($this->normalizePayload($payload));
-        if (isset($payload['kpi_ids'])) {
-            $item->kpis()->sync($payload['kpi_ids']);
-        }
-        if (isset($payload['regulation_ids'])) {
-            $item->regulations()->sync($payload['regulation_ids']);
-        }
-        return $item;
+        return MstApqc::create($this->normalizePayload($payload));
     }
 
     /**
-     * Update the specified item.
+     * Update the specified APQC item.
      */
-    public function update(MstProsesBisnis $item, array $payload): MstProsesBisnis
+    public function updateApqc(MstApqc $apqc, array $payload): MstApqc
     {
-        $item->update($this->normalizePayload($payload));
-        if (isset($payload['kpi_ids'])) {
-            $item->kpis()->sync($payload['kpi_ids']);
-        }
-        if (isset($payload['regulation_ids'])) {
-            $item->regulations()->sync($payload['regulation_ids']);
-        }
-        return $item->refresh();
+        $apqc->update($this->normalizePayload($payload));
+        return $apqc->refresh();
     }
 
     /**
-     * Remove the specified item.
+     * Remove the specified APQC item.
+     * Returns true on success, false if the item has children and cannot be deleted.
      */
-    public function delete(MstProsesBisnis $item): bool
+    public function deleteApqc(MstApqc $apqc): bool
     {
-        if ($item->children()->exists()) {
+        if ($apqc->children()->exists()) {
             return false;
         }
 
-        $item->delete();
+        $apqc->delete();
         return true;
     }
 
@@ -101,11 +89,10 @@ class BusinessProcessV2Service
     private function normalizePayload(array $payload): array
     {
         return [
-            'company_id' => !empty($payload['company_id']) ? (int) $payload['company_id'] : null,
             'name' => isset($payload['name']) ? trim($payload['name']) : null,
+            'grup' => isset($payload['grup']) ? trim($payload['grup']) : null,
             'deskripsi' => isset($payload['deskripsi']) ? trim($payload['deskripsi']) : null,
             'parent_id' => !empty($payload['parent_id']) ? (int) $payload['parent_id'] : null,
-            'order' => isset($payload['order']) && $payload['order'] !== '' && $payload['order'] !== null ? (int) $payload['order'] : null,
         ];
     }
 }

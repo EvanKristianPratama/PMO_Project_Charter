@@ -18,34 +18,30 @@ class SdmController extends Controller
      */
     public function index(): Response
     {
-        $resources = MstResource::select([
-            'id',
-            'name',
-            'jabatan',
-            'internal_id',
-            'sk',
-            'start',
-            'end',
-        ])
-        ->with([
-            'organization:id,name,jabatan'
-        ])
-        ->orderBy('id', 'desc')
-        ->get();
-
-        $organizations = TrsOrganization::select([
-            'id',
-            'parent_id',
-            'code',
-            'jabatan',
-            'name',
-        ])
-        ->orderBy('name', 'asc')
-        ->get();
-
         return Inertia::render('modules/ITOM/OrganizationStructure/SDM/Index', [
-            'resources' => $resources,
-            'organizations' => $organizations,
+            'resources' => Inertia::defer(fn () => MstResource::select([
+                'id',
+                'name',
+                'jabatan',
+                'internal_id',
+                'sk',
+                'start',
+                'end',
+            ])
+            ->with([
+                'organization:id,name,jabatan'
+            ])
+            ->orderBy('id', 'desc')
+            ->get()),
+            'organizations' => Inertia::defer(fn () => TrsOrganization::select([
+                'id',
+                'parent_id',
+                'code',
+                'jabatan',
+                'name',
+            ])
+            ->orderBy('name', 'asc')
+            ->get()),
         ]);
     }
 
