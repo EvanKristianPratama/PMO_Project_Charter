@@ -15,9 +15,12 @@ use Modules\ITOM\Controllers\BusinessProcess\Kpi\KpiController;
 use Modules\ITOM\Controllers\BusinessProcess\Function\FunctionController;
 use Modules\ITOM\Controllers\BusinessProcess\RegulationMapping\RegulationMappingController;
 use Modules\ITOM\Controllers\Organization\SDM\SdmController as MainResourceManagementController;
-use Modules\ITOM\Controllers\OperatingModel\OperatingModelController;
+use Modules\ITOM\Controllers\OperatingModel\ItGovarnence\ItGovarnenceController;
+use Modules\ITOM\Controllers\OperatingModel\ItManagement\ItManagementController;
+use Modules\ITOM\Controllers\OperatingModel\Model\ModelController;
+use Modules\ITOM\Controllers\OperatingModel\Framework\FrameworkController;
 use Modules\ITOM\Controllers\Regulation\COBIT\CobitComponentController;
-use Modules\ITOM\Controllers\OperatingModel\PracticeRoleController;
+use Modules\ITOM\Controllers\OperatingModel\RaciAnalysis\RaciAnalysisController;
 use Modules\ITOM\Controllers\RaciAnalysis\CobitInformationFlow\CobitInformationFlowController;
 use Modules\ITOM\Controllers\RaciAnalysis\TktiInformationFlow\TktiInformationFlowController;
 use Modules\ITOM\Controllers\Regulation\GeneralPolicyController;
@@ -204,26 +207,26 @@ Route::middleware(["approved"])->group(function () {
     Route::prefix("/operating-model")
         ->name("operating-model.")
         ->group(function () {
-            Route::get("/", [OperatingModelController::class, "index"])->name("index");
+            Route::get("/", [ModelController::class, "index"])->name("index");
             
             Route::get("/it-governance", [
-                OperatingModelController::class,
-                "itGovernance",
+                ItGovarnenceController::class,
+                "index",
             ])->name("it-governance.index");
             
             Route::get("/it-management", [
-                OperatingModelController::class,
-                "itManagement",
+                ItManagementController::class,
+                "index",
             ])->name("it-management.index");
             
             Route::get("/model", [
-                OperatingModelController::class,
-                "model",
+                ModelController::class,
+                "index",
             ])->name("model.index");
 
             Route::get("/framework", [
-                OperatingModelController::class,
-                "framework",
+                FrameworkController::class,
+                "index",
             ])->name("framework.index");
             
             Route::get("/cobit-component", [
@@ -231,22 +234,22 @@ Route::middleware(["approved"])->group(function () {
                 "index",
             ])->name("cobit-component.index");
             
-            Route::get("/raci-analysis", [PracticeRoleController::class, "index"])->name("raci-analysis.index");
-            Route::get("/raci-analysis/manage", [PracticeRoleController::class, "manage"])->name("raci-analysis.manage");
-            Route::post("/raci-analysis", [PracticeRoleController::class, "update"])->name("raci-analysis.update");
+            Route::get("/raci-analysis", [RaciAnalysisController::class, "index"])->name("raci-analysis.index");
+            Route::get("/raci-analysis/manage", [RaciAnalysisController::class, "manage"])->name("raci-analysis.manage");
+            Route::post("/raci-analysis", [RaciAnalysisController::class, "update"])->name("raci-analysis.update");
             
             Route::post("/it-governance/steering", [
-                OperatingModelController::class,
+                ItGovarnenceController::class,
                 "storeSteering",
             ])->name("it-governance.steering.store");
             
             Route::put("/it-governance/steering/{id}", [
-                OperatingModelController::class,
+                ItGovarnenceController::class,
                 "updateSteering",
             ])->name("it-governance.steering.update");
             
             Route::delete("/it-governance/steering/{id}", [
-                OperatingModelController::class,
+                ItGovarnenceController::class,
                 "destroySteering",
             ])->name("it-governance.steering.destroy");
         });
@@ -341,16 +344,16 @@ Route::middleware(["approved"])->group(function () {
 
             // Prosedur (Procedure) routes moved to regulation prefix group below
 
-            Route::get("/organization", [OperatingModelController::class, "itGovernance"])->name("organization.index");
-            Route::get("/it-management", [OperatingModelController::class, "itManagement"])->name("it-management.index");
-            Route::post("/organization/steering", [OperatingModelController::class, "storeSteering"])->name("organization.steering.store");
-            Route::put("/organization/steering/{id}", [OperatingModelController::class, "updateSteering"])->name("organization.steering.update");
-            Route::delete("/organization/steering/{id}", [OperatingModelController::class, "destroySteering"])->name("organization.steering.destroy");
+            Route::get("/organization", [ItGovarnenceController::class, "index"])->name("organization.index");
+            Route::get("/it-management", [ItManagementController::class, "index"])->name("it-management.index");
+            Route::post("/organization/steering", [ItGovarnenceController::class, "storeSteering"])->name("organization.steering.store");
+            Route::put("/organization/steering/{id}", [ItGovarnenceController::class, "updateSteering"])->name("organization.steering.update");
+            Route::delete("/organization/steering/{id}", [ItGovarnenceController::class, "destroySteering"])->name("organization.steering.destroy");
 
             // Matriks RACI (RACI Matrix) mapping
-            Route::get("/raci", [PracticeRoleController::class, "index"])->name("raci.index");
-            Route::get("/raci/manage", [PracticeRoleController::class, "manage"])->name("raci.manage");
-            Route::post("/raci", [PracticeRoleController::class, "update"])->name("raci.update");
+            Route::get("/raci", [RaciAnalysisController::class, "index"])->name("raci.index");
+            Route::get("/raci/manage", [RaciAnalysisController::class, "manage"])->name("raci.manage");
+            Route::post("/raci", [RaciAnalysisController::class, "update"])->name("raci.update");
 
             // COBIT Component API Documentation
             Route::get("/cobit-component", [CobitComponentController::class, "index"])->name("cobit-component.index");

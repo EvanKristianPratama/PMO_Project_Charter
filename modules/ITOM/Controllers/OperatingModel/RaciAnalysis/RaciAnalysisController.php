@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\ITOM\Controllers\OperatingModel;
+namespace Modules\ITOM\Controllers\OperatingModel\RaciAnalysis;
 
 use App\Http\Controllers\Controller;
 use App\Models\MstObjective;
@@ -14,7 +14,7 @@ use Inertia\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class PracticeRoleController extends Controller
+class RaciAnalysisController extends Controller
 {
     /**
      * Display the RACI Matrix.

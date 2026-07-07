@@ -702,8 +702,15 @@ const handleExpandLevelChange = () => {
 };
 
 const initializeExpanded = () => {
-    expandedIds.value = new Set();
-    expandLevel.value = '0';
+    const ids = new Set();
+    props.prosesBisnisV2.forEach(item => {
+        const isParent = props.prosesBisnisV2.some(r => r.parent_id === item.id);
+        if (isParent) {
+            ids.add(item.id);
+        }
+    });
+    expandedIds.value = ids;
+    expandLevel.value = 'all';
 };
 
 onMounted(() => {
