@@ -315,49 +315,29 @@ export function useNavigation() {
         const organizationChildren = [
             {
                 label: "Company",
-                href: safeRoute("itom.business-process.organization-structure", {
-                    tab: "company",
-                }),
+                href: safeRoute("itom.business-process.organization-structure.company.index"),
                 icon: BuildingOffice2Icon,
-                active: (url) =>
-                    (url || "").includes("tab=company") ||
-                    ((url || "").includes(
-                        "/business-process/organization-structure",
-                    ) &&
-                        !(url || "").includes("tab=")),
+                active: (url) => (url || "").includes("/business-process/organization-structure/company"),
             },
             {
                 label: "BoD",
-                href: safeRoute("itom.business-process.organization-structure", {
-                    tab: "bod",
-                }),
+                href: safeRoute("itom.business-process.organization-structure.bod.index"),
                 icon: UserGroupIcon,
-                active: (url) => (url || "").includes("tab=bod"),
+                active: (url) => (url || "").includes("/business-process/organization-structure/bod"),
             },
             {
                 label: "Structural Organization",
-                href: safeRoute("itom.business-process.organization-structure", {
-                    tab: "organization",
-                }),
+                href: safeRoute("itom.business-process.organization-structure.structural.index"),
                 icon: BuildingOffice2Icon,
-                active: (url) => (url || "").includes("tab=organization"),
+                active: (url) => (url || "").includes("/business-process/organization-structure/structural"),
             },
             {
                 label: "Functional Organization",
-                href: safeRoute("itom.business-process.organization-structure", {
-                    tab: "functional",
-                }),
+                href: safeRoute("itom.business-process.organization-structure.functional.index"),
                 icon: BuildingOffice2Icon,
-                active: (url) => (url || "").includes("tab=functional"),
+                active: (url) => (url || "").includes("/business-process/organization-structure/functional"),
             },
-            {
-                label: "SK",
-                href: safeRoute("itom.business-process.organization-structure", {
-                    tab: "sk",
-                }),
-                icon: DocumentTextIcon,
-                active: (url) => (url || "").includes("tab=sk"),
-            },
+
             {
                 label: "SDM",
                 href: safeRoute("itom.resource-management.index"),

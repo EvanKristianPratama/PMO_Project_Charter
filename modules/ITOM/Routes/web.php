@@ -4,13 +4,17 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 use Modules\ITOM\Controllers\BusinessProcess\BusinessCapability\BusinessCapabilityController;
-use Modules\ITOM\Controllers\BusinessProcess\OrganizationStructure\OrganizationController as BusinessProcessOrganizationStructureController;
+use Modules\ITOM\Controllers\Organization\Company\CompanyController;
+use Modules\ITOM\Controllers\Organization\BOD\BodController;
+use Modules\ITOM\Controllers\Organization\StrukturalOrganization\StrukturalOrganizationController;
+use Modules\ITOM\Controllers\Organization\FunctionalOrganization\FunctionalOrganizationController;
+
 use Modules\ITOM\Controllers\BusinessProcess\BusinessProcess\BusinessProcessController;
 use Modules\ITOM\Controllers\BusinessProcess\APQC\ApqcController;
 use Modules\ITOM\Controllers\BusinessProcess\Kpi\KpiController;
 use Modules\ITOM\Controllers\BusinessProcess\Function\FunctionController;
 use Modules\ITOM\Controllers\BusinessProcess\RegulationMapping\RegulationMappingController;
-use Modules\ITOM\Controllers\ResourceManagement\ResourceManagementController as MainResourceManagementController;
+use Modules\ITOM\Controllers\Organization\SDM\SdmController as MainResourceManagementController;
 use Modules\ITOM\Controllers\OperatingModel\OperatingModelController;
 use Modules\ITOM\Controllers\Regulation\COBIT\CobitComponentController;
 use Modules\ITOM\Controllers\OperatingModel\PracticeRoleController;
@@ -33,120 +37,71 @@ Route::middleware(["approved"])->group(function () {
         fn() => redirect()->route("itom.business-process.apqc.index"),
     )->name("business-process.index");
     
-    Route::get("/business-process/organization-structure", [
-        BusinessProcessOrganizationStructureController::class,
-        "index",
-    ])->name("business-process.organization-structure");
-    
-    Route::post("/business-process/organization-structure", [
-        BusinessProcessOrganizationStructureController::class,
-        "store",
-    ])->name("business-process.organization-structure.store");
-    
-    Route::post("/business-process/organization-structure/company", [
-        BusinessProcessOrganizationStructureController::class,
-        "storeCompany",
-    ])->name("business-process.organization-structure.company.store");
-    
-    Route::put("/business-process/organization-structure/company/{id}", [
-        BusinessProcessOrganizationStructureController::class,
-        "updateCompany",
-    ])->name("business-process.organization-structure.company.update");
-    
-    Route::delete("/business-process/organization-structure/company/{id}", [
-        BusinessProcessOrganizationStructureController::class,
-        "destroyCompany",
-    ])->name("business-process.organization-structure.company.destroy");
-    
-    Route::post("/business-process/organization-structure/group", [
-        BusinessProcessOrganizationStructureController::class,
-        "storeGroup",
-    ])->name("business-process.organization-structure.group.store");
-    
-    Route::put("/business-process/organization-structure/group/{id}", [
-        BusinessProcessOrganizationStructureController::class,
-        "updateGroup",
-    ])->name("business-process.organization-structure.group.update");
-    
-    Route::delete("/business-process/organization-structure/group/{id}", [
-        BusinessProcessOrganizationStructureController::class,
-        "destroyGroup",
-    ])->name("business-process.organization-structure.group.destroy");
-    
-    Route::put("/business-process/organization-structure/{organization}", [
-        BusinessProcessOrganizationStructureController::class,
-        "update",
-    ])->name("business-process.organization-structure.update");
-    
-    Route::delete("/business-process/organization-structure/{organization}", [
-        BusinessProcessOrganizationStructureController::class,
-        "destroy",
-    ])->name("business-process.organization-structure.destroy");
-    
-    Route::post("/business-process/organization-structure/bod", [
-        BusinessProcessOrganizationStructureController::class,
-        "storeBod",
-    ])->name("business-process.organization-structure.bod.store");
-    
-    Route::put("/business-process/organization-structure/bod/{id}", [
-        BusinessProcessOrganizationStructureController::class,
-        "updateBod",
-    ])->name("business-process.organization-structure.bod.update");
-    
-    Route::delete("/business-process/organization-structure/bod/{id}", [
-        BusinessProcessOrganizationStructureController::class,
-        "destroyBod",
-    ])->name("business-process.organization-structure.bod.destroy");
-    
-    Route::post("/business-process/organization-structure/sk", [
-        BusinessProcessOrganizationStructureController::class,
-        "storeSk",
-    ])->name("business-process.organization-structure.sk.store");
-    
-    Route::put("/business-process/organization-structure/sk/{id}", [
-        BusinessProcessOrganizationStructureController::class,
-        "updateSk",
-    ])->name("business-process.organization-structure.sk.update");
-    
-    Route::delete("/business-process/organization-structure/sk/{id}", [
-        BusinessProcessOrganizationStructureController::class,
-        "destroySk",
-    ])->name("business-process.organization-structure.sk.destroy");
-    
-    Route::post("/business-process/organization-structure/functional", [
-        BusinessProcessOrganizationStructureController::class,
-        "storeFunctional",
-    ])->name("business-process.organization-structure.functional.store");
-    
-    Route::put("/business-process/organization-structure/functional/{id}", [
-        BusinessProcessOrganizationStructureController::class,
-        "updateFunctional",
-    ])->name("business-process.organization-structure.functional.update");
-    
-    Route::delete("/business-process/organization-structure/functional/{id}", [
-        BusinessProcessOrganizationStructureController::class,
-        "destroyFunctional",
-    ])->name("business-process.organization-structure.functional.destroy");
-    
-    Route::post("/business-process/organization-structure/functional/member", [
-        BusinessProcessOrganizationStructureController::class,
-        "storeFunctionalMember",
-    ])->name("business-process.organization-structure.functional.member.store");
-    
-    Route::delete(
-        "/business-process/organization-structure/functional/member",
-        [BusinessProcessOrganizationStructureController::class, "destroyFunctionalMember"],
-    )->name("business-process.organization-structure.functional.member.destroy");
-    
-    Route::post(
-        "/business-process/organization-structure/functional/structure",
-        [BusinessProcessOrganizationStructureController::class, "storeFunctionalStructure"],
-    )->name("business-process.organization-structure.functional.structure.store");
-    
-    Route::delete(
-        "/business-process/organization-structure/functional/structure",
-        [BusinessProcessOrganizationStructureController::class, "destroyFunctionalStructure"],
-    )->name("business-process.organization-structure.functional.structure.destroy");
+    Route::get("/business-process/organization-structure", fn() => redirect()->route("itom.business-process.organization-structure.company.index"))
+        ->name("business-process.organization-structure");
+
+    Route::prefix("business-process/organization-structure")
+        ->name("business-process.organization-structure.")
+        ->group(function () {
+            // Company Sub-menu
+            Route::prefix("company")
+                ->name("company.")
+                ->controller(CompanyController::class)
+                ->group(function () {
+                    Route::get("/", "index")->name("index");
+                    Route::post("/", "storeCompany")->name("store");
+                    Route::put("/{id}", "updateCompany")->name("update");
+                    Route::delete("/{id}", "destroyCompany")->name("destroy");
+                });
+
+            // BOD Sub-menu
+            Route::prefix("bod")
+                ->name("bod.")
+                ->controller(BodController::class)
+                ->group(function () {
+                    Route::get("/", "index")->name("index");
+                    Route::post("/", "storeBod")->name("store");
+                    Route::put("/{id}", "updateBod")->name("update");
+                    Route::delete("/{id}", "destroyBod")->name("destroy");
+                });
+
+            // Structural Organization Sub-menu
+            Route::controller(StrukturalOrganizationController::class)->group(function () {
+                Route::get("/structural", "index")->name("structural.index");
+                Route::post("/", "store")->name("store");
+                Route::put("/{organization}", "update")->name("update");
+                Route::delete("/{organization}", "destroy")->name("destroy");
+            });
+
+            // Functional Organization Sub-menu
+            Route::prefix("functional")
+                ->name("functional.")
+                ->controller(FunctionalOrganizationController::class)
+                ->group(function () {
+                    Route::get("/", "index")->name("index");
+                    Route::post("/", "storeFunctional")->name("store");
+                    Route::put("/{id}", "updateFunctional")->name("update");
+                    Route::delete("/{id}", "destroyFunctional")->name("destroy");
+
+                    Route::post("/member", "storeFunctionalMember")->name("member.store");
+                    Route::delete("/member", "destroyFunctionalMember")->name("member.destroy");
+
+                    Route::post("/structure", "storeFunctionalStructure")->name("structure.store");
+                    Route::delete("/structure", "destroyFunctionalStructure")->name("structure.destroy");
+                });
+
+
+
+            // Group CRUD Actions
+            Route::prefix("group")
+                ->name("group.")
+                ->controller(CompanyController::class)
+                ->group(function () {
+                    Route::post("/", "storeGroup")->name("store");
+                    Route::put("/{id}", "updateGroup")->name("update");
+                    Route::delete("/{id}", "destroyGroup")->name("destroy");
+                });
+        });
     
 
     Route::get("/business-process/business-capability", [

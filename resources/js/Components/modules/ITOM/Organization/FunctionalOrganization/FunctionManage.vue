@@ -42,22 +42,21 @@
                 />
                 <span v-if="form.errors.name" class="text-xs text-red-500 font-medium">{{ form.errors.name }}</span>
             </div>
-
-            <!-- SK Select -->
+            <!-- Regulation Select -->
             <div class="flex flex-col gap-1.5">
-                <label for="sk_id" class="text-xs font-semibold text-slate-700 dark:text-slate-300">SK Organisasi</label>
+                <label for="regulation_id" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Regulasi / Dasar Hukum</label>
                 <select
-                    id="sk_id"
-                    v-model="form.sk_id"
+                    id="regulation_id"
+                    v-model="form.regulation_id"
                     class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
                     required
                 >
-                    <option value="" disabled>Pilih SK...</option>
-                    <option v-for="sk in skOrganizations" :key="sk.id" :value="sk.id">
-                        {{ sk.sk }}
+                    <option value="" disabled>Pilih Regulasi...</option>
+                    <option v-for="reg in regulations" :key="reg.id" :value="reg.id">
+                        {{ reg.nomor ? `${reg.nomor} - ${reg.judul}` : reg.judul }}
                     </option>
                 </select>
-                <span v-if="form.errors.sk_id" class="text-xs text-red-500 font-medium">{{ form.errors.sk_id }}</span>
+                <span v-if="form.errors.regulation_id" class="text-xs text-red-500 font-medium">{{ form.errors.regulation_id }}</span>
             </div>
         </div>
     </ConfirmationModal>
@@ -86,7 +85,7 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
-    skOrganizations: {
+    regulations: {
         type: Array,
         default: () => [],
     },
@@ -100,7 +99,7 @@ const modalMode = ref('create');
 const form = useForm({
     company_id: '',
     name: '',
-    sk_id: '',
+    regulation_id: '',
 });
 
 const openCreate = () => {
@@ -116,7 +115,7 @@ const openEdit = (row) => {
     form.clearErrors();
     form.company_id = String(row.company_id || '');
     form.name = row.name || '';
-    form.sk_id = String(row.sk_id || '');
+    form.regulation_id = String(row.regulation_id || '');
     isModalOpen.value = true;
 };
 

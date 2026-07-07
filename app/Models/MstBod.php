@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MstBod extends Model
@@ -16,6 +17,7 @@ class MstBod extends Model
     protected $fillable = [
         'company_id',
         'parent_id',
+        'regulation_id',
         'name',
         'nama_jabatan',
         'alias',
@@ -24,7 +26,6 @@ class MstBod extends Model
         'role_function',
         'grup_function',
         'tipe',
-        'sk_id',
         'order',
     ];
 
@@ -47,9 +48,9 @@ class MstBod extends Model
         return $this->hasMany(MstBod::class, 'parent_id');
     }
 
-    public function skOrganization(): BelongsTo
+    public function regulation(): BelongsTo
     {
-        return $this->belongsTo(MstSkOrganization::class, 'sk_id');
+        return $this->belongsTo(MstRegulation::class, 'regulation_id');
     }
 
     public function trsFunctionalOrganizations(): HasMany
@@ -60,7 +61,7 @@ class MstBod extends Model
     /**
      * Relasi ke MstFunction melalui trs_function_organization.
      */
-    public function functions(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function functions(): BelongsToMany
     {
         return $this->belongsToMany(MstFunction::class, 'trs_function_organization', 'organization_id', 'function_id')
             ->withTimestamps();

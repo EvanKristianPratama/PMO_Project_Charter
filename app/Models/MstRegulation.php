@@ -129,6 +129,14 @@ class MstRegulation extends Model
     }
 
     /**
+     * Relasi ke MstBod
+     */
+    public function bods(): HasMany
+    {
+        return $this->hasMany(MstBod::class, 'regulation_id');
+    }
+
+    /**
      * Regulations revoked by this regulation (Many-to-Many via trs_record_regulation)
      */
     public function revokedRegulations(): BelongsToMany

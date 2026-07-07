@@ -29,10 +29,10 @@
                 :companies="companies"
                 :bods="bods"
                 :initial-company-id="selectedCompanyId"
-                :sk-organizations="skOrganizations"
+                :regulations="regulations"
             />
         </div>
-
+        
         <!-- Organization Structure Main Card -->
         <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
             <!-- Header Section containing: Group Filter, Organization Filter, Add Button, Table/Tree Toggle -->
@@ -431,7 +431,7 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
-    skOrganizations: {
+    regulations: {
         type: Array,
         default: () => [],
     },

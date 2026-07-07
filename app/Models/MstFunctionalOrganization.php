@@ -17,7 +17,7 @@ class MstFunctionalOrganization extends Model
 
     protected $fillable = [
         'company_id',
-        'sk_id',
+        'regulation_id',
         'name',
     ];
 
@@ -26,9 +26,9 @@ class MstFunctionalOrganization extends Model
         return $this->belongsTo(MstCompany::class, 'company_id');
     }
 
-    public function skOrganization(): BelongsTo
+    public function regulation(): BelongsTo
     {
-        return $this->belongsTo(MstSkOrganization::class, 'sk_id');
+        return $this->belongsTo(MstRegulation::class, 'regulation_id');
     }
 
     public function trsFunctionalStructure(): HasOne

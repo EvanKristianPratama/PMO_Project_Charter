@@ -35,16 +35,15 @@
                             </option>
                         </select>
                     </div>
-
-                    <!-- SK Filter -->
+                    <!-- Regulation Filter -->
                     <div class="w-full sm:w-40 flex flex-col gap-1.5">
                         <select
-                            v-model="selectedSkId"
+                            v-model="selectedRegulationId"
                             class="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
                         >
-                            <option value="">Semua SK</option>
-                            <option v-for="sk in skOrganizations" :key="sk.id" :value="sk.id">
-                                {{ sk.sk }}
+                            <option value="">Semua Regulasi</option>
+                            <option v-for="reg in regulations" :key="reg.id" :value="reg.id">
+                                {{ reg.nomor ? `${reg.nomor} - ${reg.judul}` : reg.judul }}
                             </option>
                         </select>
                     </div>
@@ -72,7 +71,7 @@
                             <th class="px-3 py-2.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-10 text-center">No</th>
                             <th class="px-3 py-2.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-36">Company</th>
                             <th class="px-3 py-2.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-44">Nama Organisasi</th>
-                            <th class="px-3 py-2.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-40">SK Organisasi</th>
+                            <th class="px-3 py-2.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-40">Regulasi / Dasar Hukum</th>
                             <th class="px-3 py-2.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-48">Structure</th>
                             <th class="px-3 py-2.5 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-56">Anggota</th>
                             <th class="px-3 py-2.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-40">Actions</th>
@@ -92,7 +91,7 @@
                                 <div class="truncate max-w-[11rem]" :title="row.name">{{ row.name }}</div>
                             </td>
                             <td class="px-3 py-2 text-slate-600 dark:text-slate-300 w-40 align-top">
-                                <div class="truncate max-w-[10rem]" :title="row.sk_name">{{ row.sk_name || '-' }}</div>
+                                <div class="truncate max-w-[10rem]" :title="row.regulation_name">{{ row.regulation_name || '-' }}</div>
                             </td>
                             <td class="px-3 py-2 w-48 align-top">
                                 <!-- Fungsi: tree structure (root + indented children) -->
@@ -324,7 +323,7 @@
     <FunctionManage
         ref="functionManageRef"
         :companies="companies"
-        :sk-organizations="skOrganizations"
+        :regulations="regulations"
     />
 
     <StructureManage
@@ -354,11 +353,11 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
-    skOrganizations: {
+    companies: {
         type: Array,
         default: () => [],
     },
-    companies: {
+    regulations: {
         type: Array,
         default: () => [],
     },
@@ -374,7 +373,7 @@ const props = defineProps({
 
 const searchQuery = ref('');
 const selectedCompanyId = ref('');
-const selectedSkId = ref('');
+const selectedRegulationId = ref('');
 
 // Template refs for child modals
 const functionManageRef = ref(null);
@@ -389,9 +388,9 @@ const filteredRows = computed(() => {
         rows = rows.filter(row => String(row.company_id) === String(selectedCompanyId.value));
     }
 
-    // Filter by SK Organization
-    if (selectedSkId.value) {
-        rows = rows.filter(row => String(row.sk_id) === String(selectedSkId.value));
+    // Filter by Regulation
+    if (selectedRegulationId.value) {
+        rows = rows.filter(row => String(row.regulation_id) === String(selectedRegulationId.value));
     }
 
     // Filter by search query
@@ -400,7 +399,7 @@ const filteredRows = computed(() => {
         rows = rows.filter(row => 
             (row.name || '').toLowerCase().includes(query) ||
             (row.company_name || '').toLowerCase().includes(query) ||
-            (row.sk_name || '').toLowerCase().includes(query)
+            (row.regulation_name || '').toLowerCase().includes(query)
         );
     }
 

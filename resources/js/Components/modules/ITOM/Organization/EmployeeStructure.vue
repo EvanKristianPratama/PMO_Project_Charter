@@ -53,7 +53,7 @@
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Nama Organisasi</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-20">Alias</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Nama Jabatan</th>
-                        <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-32">SK</th>
+                        <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-32">Regulation</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Parent</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Pejabat</th>
                         <th class="px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500 w-24">Tipe</th>
@@ -80,9 +80,9 @@
                         <td class="px-4 py-2.5 text-slate-900 dark:text-white font-medium text-left">
                             {{ employee.nama_jabatan || '-' }}
                         </td>
-                        <td class="px-4 py-2.5 text-slate-900 dark:text-white text-left font-medium w-32" :title="getSkName(employee.sk_id) || '-'">
+                        <td class="px-4 py-2.5 text-slate-900 dark:text-white text-left font-medium w-32" :title="getRegulationName(employee.regulation_id) || '-'">
                             <div class="break-words whitespace-normal">
-                                {{ getSkName(employee.sk_id) || '-' }}
+                                {{ getRegulationName(employee.regulation_id) || '-' }}
                             </div>
                         </td>
                         <td class="px-4 py-2.5 text-slate-900 dark:text-white font-medium text-left">
@@ -194,26 +194,26 @@
                 <span v-if="employeeForm.errors.parent_id" class="text-xs text-red-500 font-medium">{{ employeeForm.errors.parent_id }}</span>
             </div>
 
-            <!-- SK Selection -->
+            <!-- Regulation Selection -->
             <div class="flex flex-col gap-1.5">
-                <label for="employee_sk" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    SK Organisasi <span class="text-slate-400 font-normal">(Opsional)</span>
+                <label for="employee_regulation" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Regulation <span class="text-slate-400 font-normal">(Opsional)</span>
                 </label>
                 <select
-                    id="employee_sk"
-                    v-model="employeeForm.sk_id"
+                    id="employee_regulation"
+                    v-model="employeeForm.regulation_id"
                     class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white"
                 >
-                    <option value="">-- Tanpa SK --</option>
+                    <option value="">-- Tanpa Regulation --</option>
                     <option
-                        v-for="skOrg in skOrganizations"
-                        :key="skOrg.id"
-                        :value="skOrg.id"
+                        v-for="reg in regulations"
+                        :key="reg.id"
+                        :value="reg.id"
                     >
-                        {{ skOrg.sk }}
+                        {{ reg.nomor ? `${reg.nomor} - ${reg.judul}` : reg.judul }}
                     </option>
                 </select>
-                <span v-if="employeeForm.errors.sk_id" class="text-xs text-red-500 font-medium">{{ employeeForm.errors.sk_id }}</span>
+                <span v-if="employeeForm.errors.regulation_id" class="text-xs text-red-500 font-medium">{{ employeeForm.errors.regulation_id }}</span>
             </div>
 
             <!-- Employee Name Input -->
@@ -344,7 +344,7 @@ const props = defineProps({
         type: [String, Number],
         default: '',
     },
-    skOrganizations: {
+    regulations: {
         type: Array,
         default: () => [],
     },
@@ -423,12 +423,12 @@ const getParentName = (parentId) => {
 };
 
 /**
- * Dapatkan nomor SK berdasarkan sk_id.
+ * Dapatkan nama/nomor regulation berdasarkan regulation_id.
  */
-const getSkName = (skId) => {
-    if (!skId) return null;
-    const sk = props.skOrganizations.find(s => Number(s.id) === Number(skId));
-    return sk ? sk.sk : null;
+const getRegulationName = (regulationId) => {
+    if (!regulationId) return null;
+    const reg = props.regulations.find(r => Number(r.id) === Number(regulationId));
+    return reg ? (reg.nomor ? `${reg.nomor} - ${reg.judul}` : reg.judul) : null;
 };
 
 const isEmployeeModalOpen = ref(false);
@@ -446,7 +446,7 @@ const employeeForm = useForm({
     pejabat: '',
     tipe: '',
     role_function: '',
-    sk_id: '',
+    regulation_id: '',
 });
 
 const openEmployeeModal = () => {
@@ -456,7 +456,7 @@ const openEmployeeModal = () => {
     employeeForm.reset();
     employeeForm.tipe = 'employee';
     employeeForm.role_function = '';
-    employeeForm.sk_id = '';
+    employeeForm.regulation_id = '';
     if (selectedCompanyId.value) {
         employeeForm.company_id = selectedCompanyId.value;
     }
@@ -476,7 +476,7 @@ const openEditEmployeeModal = (employee) => {
     employeeForm.pejabat = employee.pejabat || '';
     employeeForm.tipe = employee.tipe || 'employee';
     employeeForm.role_function = employee.role_function || '';
-    employeeForm.sk_id = employee.sk_id ?? '';
+    employeeForm.regulation_id = employee.regulation_id ?? '';
     isEmployeeModalOpen.value = true;
 };
 
