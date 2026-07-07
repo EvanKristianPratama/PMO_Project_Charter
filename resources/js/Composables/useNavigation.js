@@ -466,6 +466,15 @@ export function useNavigation() {
                             ),
                     },
                     {
+                        label: "IT Function",
+                        href: safeRoute("itom.operating-model.it-function.index"),
+                        icon: Squares2X2Icon,
+                        active: (url) =>
+                            (url || "").includes(
+                                "/operating-model/it-function",
+                            ),
+                    },
+                    {
                         label: "RACI Analysis",
                         href: safeRoute("itom.operating-model.raci-analysis.index"),
                         icon: DocumentTextIcon,

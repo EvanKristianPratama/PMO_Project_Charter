@@ -219,6 +219,11 @@ Route::middleware(["approved"])->group(function () {
                 "index",
             ])->name("it-management.index");
             
+            Route::get("/it-function", [
+                \Modules\ITOM\Controllers\OperatingModel\ItFunction\ItFunctionController::class,
+                "index",
+            ])->name("it-function.index");
+            
             Route::get("/model", [
                 ModelController::class,
                 "index",
