@@ -72,10 +72,10 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 dark:divide-white/10">
-                    <tr v-if="tkoSections.length === 0">
+                    <tr v-if="filteredTkoSections.length === 0">
                         <td colspan="4" class="px-6 py-8 text-center text-slate-400">Belum ada section.</td>
                     </tr>
-                    <tr v-for="(sec, index) in tkoSections" :key="sec.id" class="group hover:bg-slate-50/50 dark:hover:bg-white/5">
+                    <tr v-for="(sec, index) in filteredTkoSections" :key="sec.id" class="group hover:bg-slate-50/50 dark:hover:bg-white/5">
                         <td class="px-6 py-3 text-center align-middle font-medium text-slate-500 dark:text-slate-400">{{ index + 1 }}</td>
                         <td class="px-6 py-2 align-middle">
                             <input
@@ -113,8 +113,9 @@
         <div class="mt-6 text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-white/5 p-4 rounded-xl">
             <p class="font-semibold text-slate-700 dark:text-slate-300 mb-1">Catatan Pengaturan Section:</p>
             <ul class="list-disc pl-4 space-y-1">
-                <li>Secara default, bab **IV (Fungsi Terkait)** diisi otomatis oleh data Aktor di Urutan **4**.</li>
-                <li>Bab **V (Prosedur)** diisi otomatis oleh data SOP & Diagram di Urutan **5**.</li>
+                <li>Secara default, Bab IV (Fungsi Terkait) diisi otomatis oleh data Aktor di Urutan 4.</li>
+                <li>Bab V (Prosedur) diisi otomatis oleh data SOP & Diagram di Urutan 5.</li>
+                <li>Secara default, Bab IX (Pengertian / Glossary) diisi otomatis oleh data Glossary di Urutan 9.</li>
                 <li>Anda bebas mengubah nama dan urutan section lainnya (seperti Tujuan, Ruang Lingkup, Lampiran, dll).</li>
                 <li>Perubahan nama section atau urutan section akan secara otomatis memperbarui tata letak halaman dan menu navigasi.</li>
             </ul>
@@ -153,6 +154,9 @@ const saveStatus = ref(null); // null | 'saving' | 'saved' | 'error'
 
 // ─── Computed ─────────────────────────────────────────────────────────────────
 const hasUnsavedChanges = computed(() => modifiedSections.value.size > 0);
+const filteredTkoSections = computed(() => {
+    return (props.tkoSections || []).filter(s => s.name.trim().toLowerCase() !== 'pengertian');
+});
 
 // ─── Init local state ─────────────────────────────────────────────────────────
 function initLocal() {
@@ -185,6 +189,9 @@ function addSectionDirectly() {
     let nextOrder = maxOrder + 1;
     if (nextOrder === 4 || nextOrder === 5) {
         nextOrder = 6;
+    }
+    if (nextOrder === 9) {
+        nextOrder = 10;
     }
     
     router.post(

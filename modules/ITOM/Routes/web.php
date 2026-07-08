@@ -439,6 +439,8 @@ Route::middleware(["approved"])->group(function () {
                     Route::post("/section", [ProcedureController::class, "storeSection"])->name("section.store");
                     Route::put("/section/{id}", [ProcedureController::class, "updateSection"])->name("section.update");
                     Route::delete("/section/{id}", [ProcedureController::class, "destroySection"])->name("section.destroy");
+                    Route::post("/glossary/map", [ProcedureController::class, "mapGlossary"])->name("glossary.map");
+                    Route::post("/glossary/unmap", [ProcedureController::class, "unmapGlossary"])->name("glossary.unmap");
                 });
         });
 

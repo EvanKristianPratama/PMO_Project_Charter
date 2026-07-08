@@ -372,4 +372,43 @@ class ProcedureController extends Controller
 
         return back()->with('success', 'Dokumen TKO berhasil disimpan.');
     }
+
+    /**
+     * Map an existing glossary to a regulation.
+     */
+    public function mapGlossary(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'definition_id' => 'required|integer|exists:mst_definition,id',
+            'regulation_id' => 'required|integer|exists:mst_regulation,id',
+        ], [
+            'definition_id.required' => 'Glossary wajib dipilih.',
+            'regulation_id.required' => 'Regulasi tujuan wajib dipilih.',
+        ]);
+
+        try {
+            $this->procedureService->mapGlossary($validated);
+            return back()->with('success', 'Glossary berhasil dipetakan ke regulasi.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['definition_id' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Unmap a glossary from a regulation.
+     */
+    public function unmapGlossary(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'definition_id' => 'required|integer|exists:mst_definition,id',
+            'regulation_id' => 'required|integer|exists:mst_regulation,id',
+        ]);
+
+        try {
+            $this->procedureService->unmapGlossary($validated);
+            return back()->with('success', 'Glossary berhasil dilepas dari regulasi.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['definition_id' => $e->getMessage()]);
+        }
+    }
 }

@@ -87,12 +87,33 @@
                     </div>
                 </div>
 
-                <!-- Right Section: Add Button -->
-                <div v-if="!readonly" class="flex items-center shrink-0">
+                <!-- Right Section: Actions -->
+                <div v-if="!readonly" class="flex items-center gap-2 shrink-0">
+                    <button
+                        @click="openMapModal"
+                        type="button"
+                        class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#1a1a1a] px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm transition hover:bg-slate-50 dark:hover:bg-white/5 active:scale-95 cursor-pointer"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="2.5"
+                            stroke="currentColor"
+                            class="w-3.5 h-3.5 text-[#821f44]"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"
+                            />
+                        </svg>
+                        Map Existing Glossary
+                    </button>
                     <button
                         @click="openAddModal"
                         type="button"
-                        class="inline-flex items-center gap-1.5 rounded-lg bg-[#821f44] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#6b1937] active:scale-95"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-[#821f44] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#6b1937] active:scale-95 cursor-pointer"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -122,7 +143,6 @@
                             <th class="px-1 py-3 w-10 text-center">No</th>
                             <th class="px-1 py-3 w-64">Term</th>
                             <th class="px-1 py-3">Definition</th>
-                            <th class="px-1 py-3 w-72">Regulation</th>
                             <th v-if="!readonly" class="px-1 py-3 w-28 text-center print:hidden">Action</th>
                         </tr>
                     </thead>
@@ -131,7 +151,7 @@
                     >
                         <tr v-if="filteredDefinitions.length === 0">
                             <td
-                                :colspan="readonly ? 4 : 5"
+                                :colspan="readonly ? 3 : 4"
                                 class="px-1 py-8 text-center text-slate-400 font-medium"
                             >
                                 Tidak ada data definisi ditemukan.
@@ -157,39 +177,13 @@
                             >
                                 {{ item.definition }}
                             </td>
-                            <td class="px-1 py-3 align-middle text-slate-700 dark:text-slate-300">
-                                <span
-                                    v-if="!item.regulations || item.regulations.length === 0"
-                                    class="text-slate-400 italic"
-                                >—</span>
-                                <ul v-else class="space-y-0.5">
-                                    <li
-                                        v-for="reg in item.regulations"
-                                        :key="reg.id"
-                                        class="flex items-start gap-1.5 text-[10px] text-slate-600 dark:text-slate-300 leading-snug"
-                                    >
-                                        <span class="shrink-0 mt-[3px] h-1 w-1 rounded-full bg-slate-400 dark:bg-slate-500"></span>
-                                        <span>{{ reg.judul || reg.nomor || 'Regulation #' + reg.id }}</span>
-                                    </li>
-                                </ul>
-                            </td>
                             <td v-if="!readonly" class="px-1 py-2 align-middle text-center print:hidden">
-                                <div
-                                    class="flex flex-col items-center justify-center gap-1"
+                                <button
+                                    @click="confirmUnmap(item)"
+                                    class="inline-flex items-center justify-center rounded-full border border-amber-200 bg-white px-3 py-1 text-[10px] font-bold text-amber-700 transition hover:bg-amber-50 hover:border-amber-300 dark:border-amber-500/30 dark:bg-[#1a1a1a] dark:text-amber-400 dark:hover:bg-amber-500/10 active:scale-95 cursor-pointer"
                                 >
-                                    <button
-                                        @click="openEditModal(item)"
-                                        class="w-14 inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-bold text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-slate-300 dark:hover:bg-white/5 active:scale-95"
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        @click="confirmDelete(item)"
-                                        class="w-14 inline-flex items-center justify-center rounded-full border border-rose-200 bg-white px-2 py-0.5 text-[10px] font-bold text-rose-700 transition hover:bg-rose-50 hover:border-rose-300 dark:border-rose-500/30 dark:bg-[#1a1a1a] dark:text-rose-400 dark:hover:bg-rose-500/10 active:scale-95"
-                                    >
-                                        Delete
-                                    </button>
-                                </div>
+                                    Unmap
+                                </button>
                             </td>
                         </tr>
                     </tbody>
@@ -327,6 +321,81 @@
                 </div>
             </div>
         </ConfirmationModal>
+
+        <!-- Dialog Modal: Map Existing Glossary -->
+        <ConfirmationModal
+            :show="isMapModalOpen"
+            title="Map Existing Glossary"
+            message="Pilih glossary yang sudah tersedia untuk dipetakan ke regulasi saat ini."
+            confirm-text="Map Glossary"
+            cancel-text="Cancel"
+            type="info"
+            :loading="mapForm.processing"
+            @close="closeMapModal"
+            @confirm="submitMapForm"
+        >
+            <div class="mt-4 space-y-4 text-left">
+                <!-- Selected Regulation (Disabled / Informational) -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                        Regulasi Tujuan
+                    </label>
+                    <input
+                        type="text"
+                        disabled
+                        :value="activeRegulationName"
+                        class="w-full rounded-lg border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/5 px-3 py-2 text-xs text-slate-500 transition font-medium"
+                    />
+                </div>
+
+                <!-- Search and Select Existing Glossary -->
+                <div class="flex flex-col gap-2">
+                    <label class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                        Pilih Glossary Existing <span class="text-red-500">*</span>
+                    </label>
+                    <div class="rounded-lg border border-slate-300 bg-white dark:border-white/10 dark:bg-[#1a1a1a] overflow-hidden">
+                        <!-- Search bar -->
+                        <div class="px-2 py-1.5 border-b border-slate-200 dark:border-white/10">
+                            <input
+                                v-model="mapGlossarySearchQuery"
+                                type="text"
+                                placeholder="Cari istilah atau definisi..."
+                                class="w-full rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] text-slate-900 focus:border-slate-400 focus:outline-none dark:border-white/10 dark:bg-white/5 dark:text-white placeholder-slate-400 font-medium"
+                            />
+                        </div>
+                        <!-- Scrollable list -->
+                        <ul class="max-h-48 overflow-y-auto divide-y divide-slate-100 dark:divide-white/5">
+                            <li v-if="filteredMappableDefinitions.length === 0"
+                                class="px-3 py-4 text-[11px] text-slate-400 dark:text-slate-500 text-center italic">
+                                Tidak ada glossary existing yang belum dipetakan
+                            </li>
+                            <li
+                                v-for="def in filteredMappableDefinitions"
+                                :key="def.id"
+                                @click="mapForm.definition_id = def.id"
+                                class="flex flex-col cursor-pointer py-2 px-3 text-[11px] transition select-none"
+                                :class="mapForm.definition_id === def.id
+                                    ? 'bg-blue-50 dark:bg-blue-500/10 border-l-4 border-blue-500'
+                                    : 'hover:bg-slate-50 dark:hover:bg-white/5 border-l-4 border-transparent'"
+                            >
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-slate-900 dark:text-white">{{ def.name }}</span>
+                                    <span class="text-[10px] text-slate-400 dark:text-slate-500">
+                                        Mapped to {{ def.regulations?.length || 0 }} reg(s)
+                                    </span>
+                                </div>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2 leading-relaxed">
+                                    {{ def.definition }}
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div v-if="mapForm.errors.definition_id" class="text-xs text-red-500 mt-1">
+                        {{ mapForm.errors.definition_id }}
+                    </div>
+                </div>
+            </div>
+        </ConfirmationModal>
     </div>
 </template>
 
@@ -334,9 +403,14 @@
 import { useForm } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import Swal from 'sweetalert2';
 
 const props = defineProps({
     definitions: {
+        type: Array,
+        default: () => [],
+    },
+    allDefinitions: {
         type: Array,
         default: () => [],
     },
@@ -362,16 +436,35 @@ const props = defineProps({
 const searchQuery = ref('');
 const selectedRegulationId = ref('');
 
-// Modal Form State
+// Modal Form State (Add Definition)
 const isModalOpen = ref(false);
-const isEditing = ref(false);
-const editingId = ref(null);
 const modalRegQuery = ref('');
 
 const form = useForm({
     name: '',
     definition: '',
     regulation_ids: [],
+});
+
+// Modal Form State (Map Existing Glossary)
+const isMapModalOpen = ref(false);
+const mapGlossarySearchQuery = ref('');
+
+const mapForm = useForm({
+    definition_id: '',
+    regulation_id: null,
+});
+
+// Form for Unmapping
+const unmapForm = useForm({
+    definition_id: null,
+    regulation_id: null,
+});
+
+// Active Regulation Name computed property
+const activeRegulationName = computed(() => {
+    const reg = (props.regulations || []).find((r) => r.id === Number(props.activeRegulationId));
+    return reg ? `${reg.nomor ? reg.nomor + ' - ' : ''}${reg.judul}` : 'Regulasi Aktif';
 });
 
 // Computed filtering for definitions
@@ -391,6 +484,26 @@ const filteredDefinitions = computed(() => {
         const regId = Number(selectedRegulationId.value);
         result = result.filter((item) =>
             item.regulations && item.regulations.some((r) => r.id === regId)
+        );
+    }
+
+    return result;
+});
+
+// Computed filtering for definitions that can be mapped to active regulation
+const filteredMappableDefinitions = computed(() => {
+    const activeRegId = Number(props.activeRegulationId);
+    
+    // Filter out those that are ALREADY mapped to the active regulation.
+    let result = (props.allDefinitions || []).filter((def) => {
+        const alreadyMapped = def.regulations && def.regulations.some((r) => r.id === activeRegId);
+        return !alreadyMapped;
+    });
+
+    if (mapGlossarySearchQuery.value) {
+        const q = mapGlossarySearchQuery.value.toLowerCase();
+        result = result.filter(
+            (def) => (def.name || '').toLowerCase().includes(q)
         );
     }
 
@@ -437,10 +550,8 @@ function removeRegulation(id) {
     }
 }
 
-// Modal Operations
+// Add Modal Operations
 function openAddModal() {
-    isEditing.value = false;
-    editingId.value = null;
     modalRegQuery.value = '';
     form.reset();
     form.clearErrors();
@@ -450,73 +561,82 @@ function openAddModal() {
     isModalOpen.value = true;
 }
 
-function openEditModal(item) {
-    isEditing.value = true;
-    editingId.value = item.id;
-    modalRegQuery.value = '';
-    form.clearErrors();
-
-    form.name = item.name;
-    form.definition = item.definition;
-    form.regulation_ids = item.regulations ? item.regulations.map((r) => r.id) : [];
-
-    isModalOpen.value = true;
-}
-
 function closeModal() {
     isModalOpen.value = false;
     form.reset();
 }
 
 function submitForm() {
-    if (isEditing.value) {
-        form.put(route('itom.policy.definition.update', editingId.value), {
-            onSuccess: () => {
-                closeModal();
-                Swal.fire({
-                    title: 'Success!',
-                    text: 'Definition updated successfully.',
-                    icon: 'success',
-                    confirmButtonColor: '#821f44',
-                    timer: 2000,
-                    timerProgressBar: true,
-                });
-            },
-        });
-    } else {
-        form.post(route('itom.policy.definition.store'), {
-            onSuccess: () => {
-                closeModal();
-                Swal.fire({
-                    title: 'Success!',
-                    text: 'Definition added successfully.',
-                    icon: 'success',
-                    confirmButtonColor: '#821f44',
-                    timer: 2000,
-                    timerProgressBar: true,
-                });
-            },
-        });
-    }
+    form.post(route('itom.policy.definition.store'), {
+        onSuccess: () => {
+            closeModal();
+            Swal.fire({
+                title: 'Success!',
+                text: 'Definition added successfully.',
+                icon: 'success',
+                confirmButtonColor: '#821f44',
+                timer: 2000,
+                timerProgressBar: true,
+            });
+        },
+    });
 }
 
-function confirmDelete(item) {
+// Map Modal Operations
+function openMapModal() {
+    mapForm.reset();
+    mapForm.clearErrors();
+    mapForm.regulation_id = Number(props.activeRegulationId);
+    mapGlossarySearchQuery.value = '';
+    isMapModalOpen.value = true;
+}
+
+function closeMapModal() {
+    isMapModalOpen.value = false;
+    mapForm.reset();
+}
+
+function submitMapForm() {
+    if (!mapForm.definition_id) {
+        mapForm.setError('definition_id', 'Silakan pilih salah satu glossary.');
+        return;
+    }
+    
+    mapForm.post(route('itom.policy.regulation.procedure.glossary.map'), {
+        onSuccess: () => {
+            closeMapModal();
+            Swal.fire({
+                title: 'Success!',
+                text: 'Glossary mapped successfully.',
+                icon: 'success',
+                confirmButtonColor: '#821f44',
+                timer: 2000,
+                timerProgressBar: true,
+            });
+        },
+    });
+}
+
+// Unmap confirmation
+function confirmUnmap(item) {
     Swal.fire({
-        title: 'Are you sure?',
-        text: `You are about to delete the term: "${item.name}". This action cannot be undone!`,
+        title: 'Hapus Pemetaan?',
+        text: `Apakah Anda yakin ingin melepas pemetaan istilah "${item.name}" dari regulasi ini?`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
         cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, delete!',
-        cancelButtonText: 'Cancel',
+        confirmButtonText: 'Ya, Lepas!',
+        cancelButtonText: 'Batal',
     }).then((result) => {
         if (result.isConfirmed) {
-            form.delete(route('itom.policy.definition.destroy', item.id), {
+            unmapForm.definition_id = item.id;
+            unmapForm.regulation_id = Number(props.activeRegulationId);
+            unmapForm.post(route('itom.policy.regulation.procedure.glossary.unmap'), {
                 onSuccess: () => {
                     Swal.fire({
-                        title: 'Deleted!',
-                        text: 'Definition deleted successfully.',
+                        title: 'Berhasil!',
+                        text: 'Pemetaan glossary berhasil dilepas.',
                         icon: 'success',
                         confirmButtonColor: '#821f44',
                         timer: 2000,

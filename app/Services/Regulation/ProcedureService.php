@@ -8,9 +8,10 @@ use App\Models\MstSop;
 use App\Models\TrsMapActorSop;
 use App\Models\TrsOrganization;
 use App\Models\TrsSopCategory;
-use App\Models\TrsTkoSections;
 use App\Models\TrsTkoContent;
-use App\Models\MstFunction;
+use App\Models\TrsTkoSections;
+use App\Models\TrsDefinitionRegulation;
+use App\Services\Regulation\DefinitionService;
 use Illuminate\Support\Facades\DB;
 
 class ProcedureService
@@ -83,6 +84,13 @@ class ProcedureService
         ->orderBy('order')
         ->get();
 
+        $definitions = [];
+        if ($selectedRegulation) {
+            $definitions = app(DefinitionService::class)->getByRegulation($selectedRegulation->id);
+        }
+
+        $allDefinitions = app(DefinitionService::class)->getExistingDefinitionsWithMapping();
+
         return [
             'actors' => $actors,
             'sop' => $sop,
@@ -92,6 +100,8 @@ class ProcedureService
             'selectedRegulationId' => $selectedRegulation?->id,
             'categories' => $categories,
             'tkoSections' => $tkoSections,
+            'definitions' => $definitions,
+            'allDefinitions' => $allDefinitions,
         ];
     }
 
@@ -437,5 +447,48 @@ class ProcedureService
         });
 
         return true;
+    }
+
+    /**
+     * Map an existing glossary (definition) to a regulation.
+     *
+     * @param array $data
+     * @return TrsDefinitionRegulation
+     * @throws \Exception
+     */
+    public function mapGlossary(array $data): TrsDefinitionRegulation
+    {
+        return DB::transaction(function () use ($data) {
+            $definitionId = $data['definition_id'];
+            $regulationId = $data['regulation_id'];
+
+            $exists = TrsDefinitionRegulation::where('definition_id', $definitionId)
+                ->where('regulation_id', $regulationId)
+                ->exists();
+
+            if ($exists) {
+                throw new \Exception('Mapping glossary dan regulasi ini sudah ada.');
+            }
+
+            return TrsDefinitionRegulation::create([
+                'definition_id' => $definitionId,
+                'regulation_id' => $regulationId,
+            ]);
+        });
+    }
+
+    /**
+     * Unmap a glossary from a regulation.
+     *
+     * @param array $data
+     * @return void
+     */
+    public function unmapGlossary(array $data): void
+    {
+        DB::transaction(function () use ($data) {
+            TrsDefinitionRegulation::where('definition_id', $data['definition_id'])
+                ->where('regulation_id', $data['regulation_id'])
+                ->delete();
+        });
     }
 }

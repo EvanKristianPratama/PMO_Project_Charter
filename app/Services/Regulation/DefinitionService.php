@@ -29,6 +29,22 @@ class DefinitionService
     }
 
     /**
+     * Get definitions mapped to a specific regulation.
+     *
+     * @param int $regulationId
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getByRegulation(int $regulationId)
+    {
+        return MstDefinition::with('regulations')
+            ->whereHas('regulations', function ($query) use ($regulationId) {
+                $query->where('mst_regulation.id', $regulationId);
+            })
+            ->orderBy('name')
+            ->get();
+    }
+
+    /**
      * Create a new definition and sync its regulations.
      *
      * @param array $data
@@ -87,5 +103,15 @@ class DefinitionService
             $definition->regulations()->detach();
             $definition->delete();
         });
+    }
+
+    /**
+     * Get all definitions for mapping options.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getExistingDefinitionsWithMapping()
+    {
+        return MstDefinition::with('regulations')->orderBy('name')->get();
     }
 }

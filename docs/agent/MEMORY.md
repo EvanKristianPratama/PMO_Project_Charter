@@ -222,18 +222,13 @@ Untuk memindahkan modul:
 
 ## 🚀 Progres Terbaru (Optimasi Halaman & Service ITOM Operating Model)
 - [x] Restorasi file dokumentasi standar `docs/standart/service.md` dari riwayat Git.
-- [x] Refaktorisasi 5 halaman frontend di bawah `resources/js/Pages/modules/ITOM/OperatingModel/` agar menggunakan standar **Inertia v2 Deferred Loading** dan komponen **TableSkeleton**:
-  - `ItGovernance/Index.vue`
-  - `ItManagement/Index.vue`
-  - `RaciAnalysis/Index.vue`
-  - `RaciAnalysis/Manage.vue` (Dilengkapi dengan `watch` untuk inisialisasi reactive state saat deferred props terisi)
-  - `RaciAnalysis/Responsible.vue`
-- [x] Penerapan standard query di backend controller & service layer:
-  - Defer props (`steeringRows`, `organizationOptions`, `organizationStructureRows`, `objectives`, `roles`, `mappings`, `responsibles`) di `OperatingModelController`, `PracticeRoleController`, dan `ResponsibleController`.
-  - Optimasi **Selective Columns Eager Loading** untuk relasi `organization` di `ItGovernance.php` dan `company` di `ItManagement.php`.
-  - Penghapusan **Redundant Eager Loading** `practices.roles` di `PracticeRoleController.php` (karena data lookup di frontend langsung menggunakan mapping array).
-  - Pembatasan select kolom spesifik untuk `MstObjective`, `MstPractice`, dan `MstResponsible`.
-- [x] Melakukan build aset produksi (`npm run build`) dengan sukses tanpa error compile ✅
+- [x] Refaktorisasi 5 halaman frontend di bawah `resources/js/Pages/modules/ITOM/OperatingModel/` agar menggunakan standar **Inertia v2 Deferred Loading** dan komponen **TableSkeleton**
+- [x] Penerapan standard query di backend controller & service layer
+- [x] Implementasi fitur **Glossary Reuse Mapping** pada modul Prosedur (ITOM) untuk memungkinkan consultant memetakan glossary existing (`MstDefinition`) ke regulation (`MstRegulation`) lain tanpa duplikasi data:
+  - Penambahan backend logic check duplikasi & CRUD mapping di `ProcedureService` & `DefinitionService`
+  - Penambahan endpoint `mapGlossary` & `unmapGlossary` di `ProcedureController` & `web.php`
+  - Refaktor komponen `ManageGlossary.vue` untuk menambahkan modal map existing glossary (dilengkapi live-search) dan mengganti tombol Edit & Delete dengan **Unmap** (untuk keamanan data sesuai scope PRD)
+  - Integrasi props di `Manage.vue` dan build produksi frontend compile sukses 100% tanpa error ✅
 
 ---
 

@@ -22,20 +22,20 @@
         <div class="mt-6 rounded-2xl border border-slate-200 dark:border-white/10">
             <table class="w-full border-collapse text-left text-[11px]">
                 <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
-                    <tr>
-                        <th class="px-6 py-3 w-20 text-center">No</th>
-                        <th class="px-6 py-3">Fungsi / Unit Organisasi / Jabatan</th>
-                        <th class="px-6 py-3">Mapping Master</th>
-                        <th class="px-6 py-3 w-24 text-center print:hidden">Aksi</th>
+                    <tr class="divide-x divide-slate-200 dark:divide-white/10">
+                        <th class="px-1 py-3 w-10 text-center">No</th>
+                        <th class="px-1 py-3">Fungsi / Unit Organisasi / Jabatan</th>
+                        <th class="px-1 py-3">Mapping Master</th>
+                        <th class="px-1 py-3 w-24 text-center print:hidden">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 dark:divide-white/10">
                     <tr v-if="actors.length === 0">
-                        <td colspan="4" class="px-6 py-8 text-center text-slate-400">Belum ada data peran terkait.</td>
+                        <td colspan="4" class="px-1 py-8 text-center text-slate-400">Belum ada data peran terkait.</td>
                     </tr>
-                    <tr :id="`actor-row-${actor.id}`" v-for="(actor, index) in actors" :key="actor.id" class="group hover:bg-slate-50/50 dark:hover:bg-white/5 transition-all duration-500">
-                        <td class="px-6 py-3 text-center align-middle font-medium text-slate-500 dark:text-slate-400">{{ index + 1 }}</td>
-                        <td class="px-6 py-3 align-middle font-medium text-slate-900 dark:text-white">
+                    <tr :id="`actor-row-${actor.id}`" v-for="(actor, index) in actors" :key="actor.id" class="group hover:bg-slate-50/50 dark:hover:bg-white/5 transition-all duration-500 divide-x divide-slate-200 dark:divide-white/10">
+                        <td class="px-1 py-3 text-center align-middle font-medium text-slate-500 dark:text-slate-400">{{ index + 1 }}</td>
+                        <td class="px-1 py-3 align-middle font-medium text-slate-900 dark:text-white">
                             <div class="flex items-center gap-2">
                                 <span>{{ actor.name }}</span>
                                 <span 
@@ -52,7 +52,7 @@
                             </div>
                         </td>
                         <!-- Kolom Mapping Master -->
-                        <td class="px-6 py-3 align-middle text-slate-700 dark:text-slate-300">
+                        <td class="px-1 py-3 align-middle text-slate-700 dark:text-slate-300">
                             <template v-if="actor.tipe === 'jabatan'">
                                 <span v-if="actor.organization">
                                     {{ actor.organization.jabatan }} ({{ actor.organization.name || '-' }} - {{ actor.organization.code || '-' }})
@@ -77,7 +77,7 @@
                             </template>
                             <span v-else class="text-slate-400 italic">—</span>
                         </td>
-                        <td class="px-6 py-2 align-middle text-center print:hidden">
+                        <td class="px-1 py-2 align-middle text-center print:hidden">
                             <div class="flex flex-col items-center justify-center gap-1">
                                 <button
                                     @click="openEditActorModal(actor)"

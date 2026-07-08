@@ -55,9 +55,7 @@ class DefinitionController extends Controller
 
         $this->definitionService->createDefinition($validated);
 
-        return redirect()
-            ->route('itom.policy.definition.index')
-            ->with('success', 'Definisi berhasil ditambahkan.');
+        return back()->with('success', 'Definisi berhasil ditambahkan.');
     }
 
     /**
@@ -79,9 +77,7 @@ class DefinitionController extends Controller
 
         $this->definitionService->updateDefinition($definition, $validated);
 
-        return redirect()
-            ->route('itom.policy.definition.index')
-            ->with('success', 'Definisi berhasil diperbarui.');
+        return back()->with('success', 'Definisi berhasil diperbarui.');
     }
 
     /**
@@ -92,8 +88,6 @@ class DefinitionController extends Controller
         $definition = MstDefinition::findOrFail($id);
         $this->definitionService->deleteDefinition($definition);
 
-        return redirect()
-            ->route('itom.policy.definition.index')
-            ->with('success', 'Definisi berhasil dihapus.');
+        return back()->with('success', 'Definisi berhasil dihapus.');
     }
 }

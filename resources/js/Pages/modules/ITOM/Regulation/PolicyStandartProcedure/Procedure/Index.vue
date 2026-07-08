@@ -40,23 +40,6 @@
                 </div>
             </div>
 
-            <!-- Page Header -->
-            <section class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717] print:hidden">
-                <div class="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full bg-[#821f44]/10 blur-2xl"></div>
-                <div class="pointer-events-none absolute -bottom-16 -left-12 h-40 w-40 rounded-full bg-blue-500/5 blur-2xl"></div>
-
-                <div class="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#821f44] dark:text-[#a83262]">
-                            {{ activeRegulation?.judul || 'Belum ada regulasi aktif' }}
-                        </p>
-                        <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                            Kelola Dokumen
-                        </h1>
-                    </div>
-                </div>
-            </section>
-
             <!-- A4 Document Page Preview (Pure Word Style Document, NO watermark) -->
             <div
                 class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 md:p-16 rounded-2xl relative font-sans text-slate-800 dark:text-slate-200 print:shadow-none print:border-none print:p-0 print:m-0"
@@ -105,27 +88,43 @@
                             </div>
                         </template>
 
+                        <!-- 1b. Render Glossary (DefinitionTable) -->
+                        <template v-else-if="section.type === 'glossary'">
+                            <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide border-b border-slate-900/10 pb-2 dark:border-white/10 uppercase font-sans">
+                                {{ section.label }}
+                            </h3>
+                            <div class="mt-4 font-sans text-xs">
+                                <ManageGlossary
+                                    :definitions="definitions"
+                                    :regulations="regulations"
+                                    :hide-regulation-filter="true"
+                                    :readonly="true"
+                                    :active-regulation-id="activeRegulation?.id"
+                                />
+                            </div>
+                        </template>
+
                         <!-- 2. Render Fungsi (Actors) -->
                         <template v-else-if="section.id === 'fungsi'">
                             <h3 class="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-wide border-b border-slate-900/10 pb-2 dark:border-white/10 uppercase font-sans">
                                 {{ section.label }}
                             </h3>
                             <div class="overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 mt-4 font-sans text-xs">
-                                <table class="w-full border-collapse text-left">
+                                <table class="w-full border-collapse text-left text-[11px]">
                                     <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-white/5 dark:text-slate-300">
-                                        <tr>
-                                            <th class="px-6 py-3 w-20 text-center border-b border-slate-200 dark:border-white/10">No</th>
-                                            <th class="px-6 py-3 border-b border-slate-200 dark:border-white/10">Fungsi / Unit Organisasi / Jabatan</th>
-                                            <th class="px-6 py-3 border-b border-slate-200 dark:border-white/10">Mapping Master</th>
+                                        <tr class="divide-x divide-slate-200 dark:divide-white/10">
+                                            <th class="px-1 py-3 w-10 text-center border-b border-slate-200 dark:border-white/10">No</th>
+                                            <th class="px-1 py-3 border-b border-slate-200 dark:border-white/10">Fungsi / Unit Organisasi / Jabatan</th>
+                                            <th class="px-1 py-3 border-b border-slate-200 dark:border-white/10">Mapping Master</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-200 dark:divide-white/10">
                                         <tr v-if="actors.length === 0">
-                                            <td colspan="3" class="px-6 py-8 text-center text-slate-400">Belum ada data aktor terkait.</td>
+                                            <td colspan="3" class="px-1 py-8 text-center text-slate-400">Belum ada data aktor terkait.</td>
                                         </tr>
-                                        <tr v-for="(actor, index) in actors" :key="actor.id">
-                                            <td class="px-6 py-3 text-center font-medium">{{ index + 1 }}</td>
-                                            <td class="px-6 py-3 font-semibold text-slate-900 dark:text-white">
+                                        <tr v-for="(actor, index) in actors" :key="actor.id" class="divide-x divide-slate-200 dark:divide-white/10">
+                                            <td class="px-1 py-3 text-center font-medium">{{ index + 1 }}</td>
+                                            <td class="px-1 py-3 font-semibold text-slate-900 dark:text-white">
                                                 <div class="flex items-center gap-2">
                                                     <span class="line-clamp-2 whitespace-normal break-words">{{ actor.name }}</span>
                                                     <span 
@@ -142,7 +141,7 @@
                                                 </div>
                                             </td>
                                             <!-- Kolom Mapping Master -->
-                                            <td class="px-6 py-3 text-slate-700 dark:text-slate-300 font-sans">
+                                            <td class="px-1 py-3 text-slate-700 dark:text-slate-300 font-sans">
                                                 <template v-if="actor.tipe === 'jabatan'">
                                                     <span v-if="actor.organization && actor.organization.jabatan" class="line-clamp-2 whitespace-normal break-words">
                                                         {{ actor.organization.jabatan }} ({{ actor.organization.name || '-' }} - {{ actor.organization.code || '-' }})
@@ -261,6 +260,7 @@ import { Link, router } from '@inertiajs/vue3';
 import ModulLayout from '@/Layouts/ModulLayout.vue';
 import FlowChart from '@/Components/modules/ITOM/Regulation/Procedure/FlowChart.vue';
 import PertaminaDocumentHeader from '@/Components/modules/ITOM/Regulation/PertaminaDocumentHeader.vue';
+import ManageGlossary from '@/Components/modules/ITOM/Regulation/Procedure/ManageGlossary.vue';
 
 const props = defineProps({
     actors: { type: Array, default: () => [] },
@@ -271,6 +271,7 @@ const props = defineProps({
     selectedRegulationId: { type: Number, default: null },
     categories: { type: Array, default: () => [] },
     tkoSections: { type: Array, default: () => [] },
+    definitions: { type: Array, default: () => [] },
 });
 
 const allSections = computed(() => {
@@ -287,8 +288,11 @@ const allSections = computed(() => {
         9: 'IX'
     };
 
+    // Filter out "Pengertian" section from tkoSections, but keep it for reference
+    const pengertianSec = (props.tkoSections || []).find(s => s.name.trim().toLowerCase() === 'pengertian');
+
     // 1. TKO Sections before Fungsi
-    const tkoBefore = (props.tkoSections || []).filter(s => s.order < 4);
+    const tkoBefore = (props.tkoSections || []).filter(s => s.order < 4 && s.name.trim().toLowerCase() !== 'pengertian');
     tkoBefore.forEach(s => {
         list.push({
             id: `tko_${s.id}`,
@@ -320,7 +324,7 @@ const allSections = computed(() => {
     });
 
     // 4. TKO Sections after Prosedur
-    const tkoAfter = (props.tkoSections || []).filter(s => s.order > 5);
+    const tkoAfter = (props.tkoSections || []).filter(s => s.order > 5 && s.name.trim().toLowerCase() !== 'pengertian');
     tkoAfter.forEach(s => {
         list.push({
             id: `tko_${s.id}`,
@@ -331,6 +335,18 @@ const allSections = computed(() => {
             name: s.name,
             content: s.contents?.[0]?.content || ''
         });
+    });
+
+    // 5. Glossary / Pengertian (virtual section)
+    const glossaryOrder = pengertianSec ? pengertianSec.order : 9;
+    list.push({
+        id: 'glossary',
+        order: glossaryOrder,
+        label: pengertianSec
+            ? `${romanNumerals[glossaryOrder] || glossaryOrder}. ${pengertianSec.name.trim().toUpperCase()}`
+            : `${romanNumerals[glossaryOrder] || glossaryOrder}. PENGERTIAN`,
+        labelShort: romanNumerals[glossaryOrder] || glossaryOrder,
+        type: 'glossary',
     });
 
     return list.sort((a, b) => a.order - b.order);
