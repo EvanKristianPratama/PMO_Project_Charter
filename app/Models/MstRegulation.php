@@ -32,6 +32,7 @@ class MstRegulation extends Model
         'terbit',
         'berlaku',
         'status',
+        'source'
     ];
 
     protected $casts = [

@@ -55,6 +55,7 @@ class PolicyStandartProcedureController extends Controller
             'owner_id' => 'nullable|integer|exists:mst_bod,id',
             'parent_id' => 'nullable|integer|exists:mst_regulation,id',
             'status' => 'nullable|string|max:255',
+            'source' => 'nullable|string',
             'revoked_ids' => 'nullable|array',
             'revoked_ids.*' => 'integer|exists:mst_regulation,id',
             'related_ids' => 'nullable|array',
@@ -96,6 +97,7 @@ class PolicyStandartProcedureController extends Controller
             'company_id' => 'nullable|integer|exists:mst_company,id',
             'owner_id' => 'nullable|integer|exists:mst_bod,id',
             'status' => 'nullable|string|max:255',
+            'source' => 'nullable|string',
             'parent_id' => [
                 'nullable',
                 'integer',

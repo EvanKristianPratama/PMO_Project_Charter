@@ -9,7 +9,7 @@ use App\Models\TrsMapActorSop;
 use App\Models\TrsSopCategory;
 use App\Models\TrsTkoSections;
 use App\Models\MstFunction;
-use App\Services\Regulation\ProcedureService;
+use App\Services\Regulation\Procedure\ProcedureService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;

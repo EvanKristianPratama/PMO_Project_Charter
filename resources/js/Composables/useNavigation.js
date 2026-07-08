@@ -482,7 +482,7 @@ export function useNavigation() {
                             ),
                     },
                     {
-                        label: "STK",
+                        label: "TKO",
                         href: safeRoute("itom.operating-model.stk.index"),
                         icon: Squares2X2Icon,
                         active: (url) =>

@@ -402,6 +402,18 @@
                                     <div v-if="form.errors.berlaku" class="text-xs text-rose-500 font-medium">{{ form.errors.berlaku }}</div>
                                 </div>
                             </div>
+
+                            <!-- Source / Sumber -->
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Sumber / Source (Opsional):</label>
+                                <textarea 
+                                    v-model="form.source" 
+                                    placeholder="Masukkan Sumber Regulasi..." 
+                                    rows="3"
+                                    class="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#821f44]/20 focus:bg-white dark:bg-black/20 dark:text-white dark:border-white/10 placeholder-slate-400"
+                                ></textarea>
+                                <div v-if="form.errors.source" class="text-xs text-rose-500 font-medium">{{ form.errors.source }}</div>
+                            </div>
                         </div>
 
                         <!-- Modal Footer Actions -->
@@ -639,6 +651,7 @@ const form = useForm({
     parent_id: '',
     revoked_ids: [],
     related_ids: [],
+    source: '',
 });
 
 function openAddModal() {
@@ -683,6 +696,7 @@ function openEditModal(reg) {
     form.company_id = reg.company_id || '';
     form.owner_id = reg.owner_id || '';
     form.parent_id = reg.parent_id || '';
+    form.source = reg.source || '';
     form.revoked_ids = reg.revoked_regulations ? reg.revoked_regulations.map(r => r.id) : [];
     form.related_ids = reg.related_regulations ? reg.related_regulations.map(r => r.id) : [];
     
