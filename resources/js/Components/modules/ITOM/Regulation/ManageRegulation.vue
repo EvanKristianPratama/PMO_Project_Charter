@@ -371,6 +371,7 @@
                                     >
                                         <option value="">-- Pilih Status --</option>
                                         <option value="Draft">Draft</option>
+                                        <option value="Draft Usulan">Draft Usulan</option>
                                         <option value="Draft Dicabut">Draft Dicabut</option>
                                         <option value="Berlaku">Berlaku</option>
                                         <option value="Dicabut">Dicabut</option>
@@ -487,6 +488,7 @@ function selectCompanyForForm(companyId) {
         form.owner_id = '';
     }
     selectedCompanyIdForForm.value = companyId;
+    form.company_id = companyId;
     isCompanySelectDropdownOpen.value = false;
     companySelectSearchQuery.value = '';
 }
@@ -616,6 +618,12 @@ const getBodLevelPrefix = (depth) => {
     return '\u00A0\u00A0'.repeat(depth) + '— ';
 };
 
+const getRegulationTitle = (id) => {
+    const reg = props.regulations.find(r => r.id === id);
+    if (!reg) return '';
+    return `[${reg.tipe}] ${reg.judul}${reg.nomor ? ` (${reg.nomor})` : ''}`;
+};
+
 const form = useForm({
     judul: '',
     nomor: '',
@@ -626,6 +634,7 @@ const form = useForm({
     status: '',
     terbit: '',
     berlaku: '',
+    company_id: '',
     owner_id: '',
     parent_id: '',
     revoked_ids: [],
@@ -671,13 +680,16 @@ function openEditModal(reg) {
     form.status = reg.status || '';
     form.terbit = terbitVal;
     form.berlaku = berlakuVal;
+    form.company_id = reg.company_id || '';
     form.owner_id = reg.owner_id || '';
     form.parent_id = reg.parent_id || '';
     form.revoked_ids = reg.revoked_regulations ? reg.revoked_regulations.map(r => r.id) : [];
     form.related_ids = reg.related_regulations ? reg.related_regulations.map(r => r.id) : [];
     
-    // Set selectedCompanyIdForForm berdasarkan BoD yang sudah tersimpan
-    if (reg.owner_id) {
+    // Set selectedCompanyIdForForm berdasarkan data company_id regulasi atau BoD yang sudah tersimpan
+    if (reg.company_id) {
+        selectedCompanyIdForForm.value = reg.company_id;
+    } else if (reg.owner_id) {
         const bod = props.bods.find(b => b.id === reg.owner_id);
         selectedCompanyIdForForm.value = bod?.company_id ? bod.company_id : '';
     } else {

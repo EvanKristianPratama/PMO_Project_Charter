@@ -557,7 +557,7 @@ const getStatusBadgeClass = (status) => {
     if (formatted === 'aktif' || formatted === 'active' || formatted === 'berlaku') {
         return `${base} bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400`;
     }
-    if (formatted === 'draft') {
+    if (formatted === 'draft' || formatted === 'draft usulan' || formatted === 'draft dicabut') {
         return `${base} bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400`;
     }
     if (formatted === 'dicabut' || formatted === 'revisi' || formatted === 'expired' || formatted === 'tidak berlaku') {

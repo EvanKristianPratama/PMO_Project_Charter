@@ -213,6 +213,11 @@ Route::middleware(["approved"])->group(function () {
         ->group(function () {
             Route::get("/", [ModelController::class, "index"])->name("index");
             
+            Route::get("/policy", fn() => Inertia::render("Placeholder/Index", [
+                "title" => "Policy",
+                "description" => "Halaman ini disiapkan sebagai placeholder untuk modul policy.",
+            ]))->name("policy.index");
+            
             Route::get("/it-governance", [
                 ItGovarnenceController::class,
                 "index",

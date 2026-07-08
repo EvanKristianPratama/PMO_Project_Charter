@@ -22,7 +22,7 @@ class RegulationService
      */
     public function getIndexData(): array
     {
-        $regulations = MstRegulation::with(['parent', 'revokedRegulations', 'relatedRegulations', 'mstBod.company'])
+        $regulations = MstRegulation::with(['parent', 'revokedRegulations', 'relatedRegulations', 'mstBod.company', 'mstCompany'])
             ->withCount(['generalPolicies'])
             ->orderBy('id', 'asc')
             ->get();

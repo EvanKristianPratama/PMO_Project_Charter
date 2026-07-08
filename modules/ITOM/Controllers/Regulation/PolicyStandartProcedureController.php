@@ -51,6 +51,7 @@ class PolicyStandartProcedureController extends Controller
             'revisi' => 'required|string|max:255',
             'terbit' => 'nullable|date',
             'berlaku' => 'nullable|date',
+            'company_id' => 'nullable|integer|exists:mst_company,id',
             'owner_id' => 'nullable|integer|exists:mst_bod,id',
             'parent_id' => 'nullable|integer|exists:mst_regulation,id',
             'status' => 'nullable|string|max:255',
@@ -92,6 +93,7 @@ class PolicyStandartProcedureController extends Controller
             'revisi' => 'required|string|max:255',
             'terbit' => 'nullable|date',
             'berlaku' => 'nullable|date',
+            'company_id' => 'nullable|integer|exists:mst_company,id',
             'owner_id' => 'nullable|integer|exists:mst_bod,id',
             'status' => 'nullable|string|max:255',
             'parent_id' => [

@@ -16,7 +16,7 @@
             :rowspan="row.companyRowspan"
             class="px-2 py-2 text-slate-600 dark:text-slate-300 text-xs whitespace-normal break-words max-w-[80px] align-top border-r border-b border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-white/[0.02]"
         >
-            <span class="font-semibold text-slate-700 dark:text-slate-200">{{ row.mst_bod?.company?.name || '-' }}</span>
+            <span class="font-semibold text-slate-700 dark:text-slate-200">{{ row.mst_company?.name || row.mst_bod?.company?.name || '-' }}</span>
         </td>
         <!-- Judul -->
         <td class="px-3 py-3 border-r border-b border-slate-200 dark:border-white/10 max-w-[300px] break-words" :style="{ paddingLeft: (row.depth * 24 + 12) + 'px' }">
@@ -94,7 +94,7 @@
                     'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold border uppercase tracking-wider',
                     row.status.toLowerCase() === 'aktif' || row.status.toLowerCase() === 'active' || row.status.toLowerCase() === 'berlaku'
                         ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400'
-                        : row.status.toLowerCase() === 'draft'
+                        : row.status.toLowerCase() === 'draft' || row.status.toLowerCase() === 'draft usulan' || row.status.toLowerCase() === 'draft dicabut'
                             ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400'
                             : row.status.toLowerCase() === 'dicabut' || row.status.toLowerCase() === 'expired'
                                 ? 'bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400'

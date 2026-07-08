@@ -418,9 +418,7 @@ export function useNavigation() {
                 href: safeRoute("itom.operating-model.model.index"),
                 icon: Squares2X2Icon,
                 active: (url) =>
-                    (url || "").includes("/operating-model") ||
-                    (url || "").includes("/policy") ||
-                    (url || "").includes("/regulation"),
+                    (url || "").includes("/operating-model"),
                 children: [
                     {
                         label: "Model Structure",
@@ -451,11 +449,10 @@ export function useNavigation() {
                     },
                     {
                         label: "Policy",
-                        href: safeRoute("itom.policy.regulation.index"),
+                        href: safeRoute("itom.operating-model.policy.index"),
                         icon: DocumentTextIcon,
                         active: (url) =>
-                            (url || "").includes("/policy") ||
-                            (url || "").includes("/regulation"),
+                            (url || "").includes("/operating-model/policy"),
                     },
                     {
                         label: "IT Governance",
@@ -516,10 +513,11 @@ export function useNavigation() {
                 href: safeRoute("itom.policy.regulation.index"),
                 icon: DocumentTextIcon,
                 active: (url) =>
-                    ((url || "").includes("/policy") ||
+                    (((url || "").includes("/policy") ||
                     (url || "").includes("/regulation") ||
                     (url || "").includes("/bpmn-workflow")) &&
-                    !(url || "").includes("/business-process/regulation-mapping"),
+                    !(url || "").includes("/business-process/regulation-mapping")) &&
+                    !(url || "").includes("/operating-model/policy"),
                 children: [
                     {
                         label: "Policy, Standard, Procedure",
