@@ -1,187 +1,393 @@
 # PRD: Manage Regulation
 
-## Feature: Manage Regulation
+# Feature: Manage Regulation
 
 ## Goal
 
--   Merubah mekanisme `TrsTkoSection === 'REFERENSI'` dan
-    `TrsTkoContent` pada page Manage Procedure menggunakan mekanisme
-    mapping `MstRegulation` di `TrsRelatedRegulation`.
+Merubah mekanisme referensi dokumen pada page **Manage Procedure** yang sebelumnya menggunakan:
 
-## Model
+- `TrsTkoSection === 'REFERENSI'`
+- `TrsTkoContent`
 
--   TrsTkoSection
--   TrsTkoContent
--   MstRegulation
--   TrsRelatedRegulation
+menjadi menggunakan mekanisme mapping regulation melalui:
+
+- `MstRegulation`
+- `TrsRelatedRegulation`
+
+Tujuan utama adalah membuat referensi dokumen dapat digunakan secara otomatis berdasarkan regulation yang sudah dimapping.
+
+---
 
 ## Problem Statement
 
-Saat ini referensi dokumen pada Manage Procedure masih ditambahkan
-secara manual melalui `TrsTkoSection` dan `TrsTkoContent`.
+Saat ini referensi dokumen pada Manage Procedure masih menggunakan mekanisme manual.
 
-Permasalahan: - Data referensi harus dibuat ulang secara manual. - Tidak
-memanfaatkan data regulation yang sudah tersedia. - Risiko duplikasi
-data meningkat.
+Flow existing:
+
+```
+User
+ |
+Tambah referensi dokumen
+ |
+TrsTkoSection
+ |
+TrsTkoContent
+ |
+Referensi tampil di Procedure
+```
+
+Permasalahan:
+- Referensi harus dibuat secara manual.
+- Data regulation yang sudah tersedia belum dapat digunakan kembali.
+- Potensi duplikasi data referensi.
+- Maintenance data menjadi lebih sulit.
+
+---
 
 ## Objective
 
--   Menggunakan kembali data regulation existing melalui mekanisme
-    mapping.
--   Menampilkan referensi dokumen secara otomatis.
--   Menjaga konsistensi data antar regulation.
+Menyediakan mekanisme mapping regulation untuk mengelola referensi dokumen.
+
+Target:
+- Mengambil data regulation existing.
+- Menampilkan referensi berdasarkan mapping.
+- Mengurangi input manual.
+- Menjaga konsistensi data referensi.
+
+---
+
+## Model
+
+### TrsTkoSection
+
+Digunakan pada mekanisme lama untuk menyimpan section referensi.
+
+---
+
+### TrsTkoContent
+
+Digunakan pada mekanisme lama untuk menyimpan content referensi.
+
+---
+
+### MstRegulation
+
+Master data regulation.
+
+Fungsi:
+- Menyimpan data regulation yang tersedia.
+- Menjadi sumber referensi dokumen.
+
+---
+
+### TrsRelatedRegulation
+
+Table mapping regulation.
+
+Fungsi:
+- Menyimpan relasi regulation yang digunakan pada procedure.
+
+Relationship:
+
+```
+MstRegulation
+        |
+        |
+TrsRelatedRegulation
+        |
+        |
+Procedure
+```
+
+---
 
 ## Business Rules
 
 ### Rule 1
 
-System hanya menampilkan data `MstRegulation` yang sudah memiliki
-mapping melalui `TrsRelatedRegulation`.
+System hanya menampilkan data:
 
-Relationship:
+```
+MstRegulation
+```
 
-    MstRegulation
-          |
-    TrsRelatedRegulation
-          |
-    MstRegulation
+yang sudah memiliki mapping melalui:
+
+```
+TrsRelatedRegulation
+```
+
+---
 
 ### Rule 2
 
-Referensi dokumen tidak lagi bergantung pada input manual melalui:
+Data regulation yang belum memiliki mapping tidak ditampilkan sebagai referensi.
 
-    TrsTkoSection
-    TrsTkoContent
+---
 
 ### Rule 3
 
-Regulation existing dapat digunakan kembali melalui mekanisme mapping.
+Referensi dokumen tidak lagi ditambahkan secara manual melalui:
+
+```
+TrsTkoSection
+TrsTkoContent
+```
+
+melainkan berasal dari hasil mapping regulation.
+
+---
 
 ## Existing Files
 
 ### Controller
 
-    ProcedureController.php
+```
+ProcedureController.php
+```
 
-Responsibility: - Handle request Manage Procedure. - Menyediakan data
-untuk frontend.
+Responsibility:
+- Handle request terkait Procedure.
+- Menyediakan endpoint data Manage Procedure.
+
+---
 
 ### Services
 
-    ProcedureService.php
+```
+ProcedureService.php
+```
 
-Responsibility: - Mengelola business logic procedure. - Mengambil data
-regulation reference.
+Responsibility:
+- Mengatur business logic procedure.
+- Mengambil data regulation berdasarkan mapping.
+- Menyediakan data referensi untuk frontend.
+
+---
 
 ### Component
 
-    ManageRefrence.vue
+```
+ManageRefrence.vue
+```
 
-Responsibility: - Menampilkan referensi regulation. - Menampilkan hasil
-mapping.
+Responsibility:
+- Menampilkan daftar referensi regulation.
+- Menampilkan hasil mapping regulation.
+
+---
+
+### Page
+
+```
+Procedure/Manage.vue
+```
+
+Responsibility:
+- Halaman utama Manage Procedure.
+- Mengintegrasikan component ManageReference.
+
+---
 
 ## Development Standard
 
-Implementasi mengikuti standar:
+Implementasi wajib mengikuti standar dokumentasi:
 
--   `pageComponent.md`
--   `service.md`
--   `modal.md`
+```
+pageComponent.md
+service.md
+modal.md
+```
 
-## Current Flow (Before)
+Standard digunakan untuk memastikan:
+- Struktur component konsisten.
+- Service layer sesuai pattern.
+- Modal mengikuti standar existing project.
 
-    Consultant
-        |
-    Tambah referensi manual
-        |
-    TrsTkoSection
-        |
-    TrsTkoContent
-        |
-    Referensi tampil
+---
 
-## Expected Flow (After)
+# Current Flow (Before)
 
-    Consultant
+```
+Consultant
         |
-    Mapping Regulation
         |
-    TrsRelatedRegulation
+Tambah Referensi Manual
         |
-    MstRegulation
         |
-    Referensi otomatis tampil
+TrsTkoSection
+        |
+        |
+TrsTkoContent
+        |
+        |
+Referensi tampil
+```
+
+Keterbatasan:
+- Tidak menggunakan mapping regulation.
+- Data harus dibuat ulang.
+- Risiko duplicate reference.
+
+---
+
+# Expected Flow (After)
+
+```
+Consultant
+        |
+        |
+Mapping Regulation
+        |
+        |
+TrsRelatedRegulation
+        |
+        |
+MstRegulation
+        |
+        |
+Referensi otomatis tampil
+```
+
+---
 
 ## Functional Requirement
 
-### FR-01 Display Related Regulation
+### FR-01 Display Regulation Reference
 
-System menampilkan regulation yang sudah memiliki mapping pada
-`TrsRelatedRegulation`.
+System harus dapat mengambil data regulation yang sudah memiliki mapping.
+
+Source:
+
+```
+MstRegulation
+JOIN
+TrsRelatedRegulation
+```
+
+Expected:
+- Regulation dengan mapping tampil.
+- Regulation tanpa mapping tidak tampil.
+
+---
 
 ### FR-02 Automatic Reference Loading
 
-System mengambil referensi dokumen berdasarkan hasil mapping regulation.
+System menampilkan referensi dokumen berdasarkan hasil mapping regulation.
 
-### FR-03 Remove Manual Dependency
+Expected:
+- User tidak perlu memasukkan referensi secara manual.
 
-System tidak lagi membutuhkan input manual untuk menampilkan referensi
-regulation.
+---
+
+### FR-03 Remove Manual Reference Dependency
+
+System tidak lagi bergantung pada:
+
+```
+TrsTkoSection
+TrsTkoContent
+```
+
+untuk menampilkan referensi regulation.
+
+---
 
 ## Non Functional Requirement
 
 ### Performance
 
-Pastikan query menggunakan relationship yang optimal dan indexing
-tersedia pada:
+- Query menggunakan relationship antar model.
+- Hindari query berulang pada frontend.
+- Pastikan indexing tersedia pada:
 
-    TrsRelatedRegulation.regulation_id
+```
+TrsRelatedRegulation.regulation_id
+```
+
+---
 
 ### Maintainability
 
-Business logic berada pada Service Layer.
+Business logic wajib berada pada:
 
-Controller hanya menangani: - Request - Validation - Response
+```
+ProcedureService.php
+```
+
+Controller hanya bertanggung jawab terhadap:
+- Request handling.
+- Validation.
+- Response.
+
+---
 
 ## Acceptance Criteria
 
 ### Scenario 1 - Regulation Has Mapping
 
-Given: - Regulation memiliki mapping pada `TrsRelatedRegulation`.
+Given:
+- Regulation sudah memiliki data pada `TrsRelatedRegulation`.
 
-When: - Consultant membuka Manage Procedure.
+When:
+- User membuka halaman Manage Procedure.
 
-Then: - Regulation tampil sebagai referensi.
+Then:
+- Regulation tampil sebagai referensi dokumen.
+
+---
 
 ### Scenario 2 - Regulation Without Mapping
 
-Given: - Regulation tidak memiliki mapping.
+Given:
+- Regulation tidak memiliki mapping.
 
-When: - Consultant membuka Manage Procedure.
+When:
+- User membuka halaman Manage Procedure.
 
-Then: - Regulation tidak ditampilkan.
+Then:
+- Regulation tidak ditampilkan.
+
+---
 
 ### Scenario 3 - Automatic Reference
 
-Given: - Regulation sudah dimapping.
+Given:
+- Regulation sudah dimapping.
 
-When: - Procedure dibuka.
+When:
+- Procedure dibuka.
 
-Then: - Referensi dokumen tampil otomatis.
+Then:
+- Referensi dokumen tampil otomatis tanpa input manual.
+
+---
 
 ## Result
 
-### Before
+## Before
 
--   Referensi dokumen hanya dapat ditambahkan manual melalui:
-    -   `TrsTkoSection`
-    -   `TrsTkoContent`
+- Referensi dokumen hanya dapat ditambahkan manual melalui:
 
-### After
+```
+TrsTkoSection
+TrsTkoContent
+```
 
--   Referensi dokumen menggunakan:
-    -   `MstRegulation`
-    -   `TrsRelatedRegulation`
--   Data referensi otomatis.
--   Data lebih konsisten.
--   Mengurangi duplikasi.
+---
+
+## After
+
+- Referensi dokumen menggunakan mekanisme:
+
+```
+MstRegulation
+        |
+TrsRelatedRegulation
+```
+
+Hasil:
+- Referensi otomatis.
+- Data lebih konsisten.
+- Mengurangi duplikasi.
+- Maintenance lebih mudah.

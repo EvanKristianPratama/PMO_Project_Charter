@@ -27,6 +27,17 @@ Setiap tabel harus dibungkus dalam Card Kontainer yang rapi dengan spesifikasi b
 - **Row Hover Effect (`tr`):** `hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition duration-150`
 - **Cell Padding (`td`):** `px-5 py-3.5` (Padding horizontal 20px, vertical 14px).
 
+### C. Kolom Nomor (No)
+Untuk kolom nomor urut (`No`), gunakan lebar tetap (fixed width) yang kecil dan sejajarkan teks ke tengah:
+- **Styling Utility:** `w-10 text-center`
+
+### D. Varian Tabel Padat (Compact Table)
+Untuk tabel dengan konten padat atau jumlah kolom yang banyak (seperti pada modul manajemen glossary/referensi), gunakan ukuran yang lebih kecil dan padding minimal:
+- **Ukuran Teks:** `text-[11px]` pada tabel, dan `text-[10px]` pada header (`thead`).
+- **Cell Padding (`th`):** `px-1 py-3`
+- **Cell Padding (`td`):** `px-1 py-3` (atau `px-1 py-2` pada kolom tindakan/actions).
+- **Kolom Nomor:** `w-10 text-center`
+
 ---
 
 ## 3. Standar Tombol Aksi di Kolom Tabel (Table Action Buttons)

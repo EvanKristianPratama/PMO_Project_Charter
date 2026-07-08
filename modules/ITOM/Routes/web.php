@@ -441,6 +441,8 @@ Route::middleware(["approved"])->group(function () {
                     Route::delete("/section/{id}", [ProcedureController::class, "destroySection"])->name("section.destroy");
                     Route::post("/glossary/map", [ProcedureController::class, "mapGlossary"])->name("glossary.map");
                     Route::post("/glossary/unmap", [ProcedureController::class, "unmapGlossary"])->name("glossary.unmap");
+                    Route::post("/regulation/map", [ProcedureController::class, "mapRegulation"])->name("regulation.map");
+                    Route::post("/regulation/unmap", [ProcedureController::class, "unmapRegulation"])->name("regulation.unmap");
                 });
         });
 

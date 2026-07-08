@@ -343,7 +343,7 @@
                                     scope="col"
                                     class="px-3 py-3 text-center border-r border-b border-slate-200 dark:border-white/10"
                                 >
-                                    Pemilik Dokumen (Mapping)
+                                    Pemilik Dokumen (Refinement)
                                 </th>
                                 <th
                                     scope="col"
@@ -631,7 +631,7 @@ const filteredRegulations = computed(() => {
 
         // Find all docs that match the company (via company_id → MstBod → company_id = MstCompany.id)
         const matchedByCompany = result.filter(
-            (reg) => reg.company?.company_id === targetCompanyId,
+            (reg) => reg.mst_bod?.company_id === targetCompanyId,
         );
 
         const includedIds = new Set();

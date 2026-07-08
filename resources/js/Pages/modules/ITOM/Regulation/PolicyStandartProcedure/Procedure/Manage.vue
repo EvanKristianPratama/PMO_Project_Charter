@@ -177,6 +177,15 @@
                         />
                     </template>
 
+                    <!-- Tab: REFERENSI -->
+                    <template v-if="activeSection?.type === 'reference'">
+                        <ManageRefrence
+                            :relatedRegulations="relatedRegulations"
+                            :regulations="regulations"
+                            :active-regulation-id="activeRegulation?.id"
+                        />
+                    </template>
+
                     <!-- Tab: KELOLA SECTION -->
                     <template v-if="activeSection?.id === 'manage_sections'">
                         <SectionEditor
@@ -202,6 +211,7 @@ import ManageSection from "@/Components/modules/ITOM/Regulation/Procedure/Manage
 import ManageActivity from "@/Components/modules/ITOM/Regulation/Procedure/ManageActivity.vue";
 import ManageFunction from "@/Components/modules/ITOM/Regulation/Procedure/ManageFunction.vue";
 import ManageGlossary from "@/Components/modules/ITOM/Regulation/Procedure/ManageGlossary.vue";
+import ManageRefrence from "@/Components/modules/ITOM/Regulation/Procedure/ManageRefrence.vue";
 import Swal from "sweetalert2";
 
 const props = defineProps({
@@ -249,6 +259,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    relatedRegulations: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const allSections = computed(() => {
@@ -272,13 +286,14 @@ const allSections = computed(() => {
     // 1. TKO Sections before Fungsi (order < 4)
     const tkoBefore = (props.tkoSections || []).filter((s) => s.order < 4 && s.name.trim().toLowerCase() !== "pengertian");
     tkoBefore.forEach((s) => {
+        const isReference = s.name.trim().toLowerCase() === "referensi";
         list.push({
-            id: `tko_${s.id}`,
+            id: isReference ? "reference" : `tko_${s.id}`,
             section_id: s.id,
             order: s.order,
             label: `${romanNumerals[s.order] || s.order}. ${s.name.toUpperCase()}`,
             labelShort: romanNumerals[s.order] || s.order,
-            type: "tko",
+            type: isReference ? "reference" : "tko",
             name: s.name,
             content: s.contents?.[0]?.content || "",
         });
@@ -305,13 +320,14 @@ const allSections = computed(() => {
     // 4. TKO Sections after Prosedur (order > 5)
     const tkoAfter = (props.tkoSections || []).filter((s) => s.order > 5 && s.name.trim().toLowerCase() !== "pengertian");
     tkoAfter.forEach((s) => {
+        const isReference = s.name.trim().toLowerCase() === "referensi";
         list.push({
-            id: `tko_${s.id}`,
+            id: isReference ? "reference" : `tko_${s.id}`,
             section_id: s.id,
             order: s.order,
             label: `${romanNumerals[s.order] || s.order}. ${s.name.toUpperCase()}`,
             labelShort: romanNumerals[s.order] || s.order,
-            type: "tko",
+            type: isReference ? "reference" : "tko",
             name: s.name,
             content: s.contents?.[0]?.content || "",
         });

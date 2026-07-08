@@ -418,7 +418,9 @@ export function useNavigation() {
                 href: safeRoute("itom.operating-model.model.index"),
                 icon: Squares2X2Icon,
                 active: (url) =>
-                    (url || "").includes("/operating-model"),
+                    (url || "").includes("/operating-model") ||
+                    (url || "").includes("/policy") ||
+                    (url || "").includes("/regulation"),
                 children: [
                     {
                         label: "Model Structure",
@@ -446,6 +448,14 @@ export function useNavigation() {
                             (url || "").includes(
                                 "/operating-model/cobit-component",
                             ),
+                    },
+                    {
+                        label: "Policy",
+                        href: safeRoute("itom.policy.regulation.index"),
+                        icon: DocumentTextIcon,
+                        active: (url) =>
+                            (url || "").includes("/policy") ||
+                            (url || "").includes("/regulation"),
                     },
                     {
                         label: "IT Governance",

@@ -11,6 +11,7 @@ use App\Models\TrsSopCategory;
 use App\Models\TrsTkoContent;
 use App\Models\TrsTkoSections;
 use App\Models\TrsDefinitionRegulation;
+use App\Models\TrsRelatedRegulation;
 use App\Services\Regulation\DefinitionService;
 use Illuminate\Support\Facades\DB;
 
@@ -24,7 +25,7 @@ class ProcedureService
      */
     public function getProcedureData(?int $selectedRegulationId): array
     {
-        $regulations = MstRegulation::with('organization')->orderBy('id', 'desc')->get();
+        $regulations = MstRegulation::orderBy('id', 'desc')->get();
         $organizations = TrsOrganization::orderBy('name')->get();
 
         $selectedRegulation = null;
@@ -53,7 +54,7 @@ class ProcedureService
                 ->get();
         }
 
-        $sopQuery = MstSop::with(['category', 'regulation.organization']);
+        $sopQuery = MstSop::with(['category', 'regulation']);
         $flowChartSopsQuery = MstSop::with(['category', 'mapActorSops.actor.organization']);
 
         if ($selectedRegulation) {
@@ -85,8 +86,10 @@ class ProcedureService
         ->get();
 
         $definitions = [];
+        $relatedRegulations = [];
         if ($selectedRegulation) {
             $definitions = app(DefinitionService::class)->getByRegulation($selectedRegulation->id);
+            $relatedRegulations = $selectedRegulation->relatedRegulations()->get();
         }
 
         $allDefinitions = app(DefinitionService::class)->getExistingDefinitionsWithMapping();
@@ -102,6 +105,7 @@ class ProcedureService
             'tkoSections' => $tkoSections,
             'definitions' => $definitions,
             'allDefinitions' => $allDefinitions,
+            'relatedRegulations' => $relatedRegulations,
         ];
     }
 
@@ -488,6 +492,53 @@ class ProcedureService
         DB::transaction(function () use ($data) {
             TrsDefinitionRegulation::where('definition_id', $data['definition_id'])
                 ->where('regulation_id', $data['regulation_id'])
+                ->delete();
+        });
+    }
+
+    /**
+     * Map an existing regulation as a reference to the active regulation.
+     *
+     * @param array $data
+     * @return TrsRelatedRegulation
+     * @throws \Exception
+     */
+    public function mapRegulation(array $data): TrsRelatedRegulation
+    {
+        return DB::transaction(function () use ($data) {
+            $regulationId = $data['regulation_id'];
+            $relatedId = $data['related_id'];
+
+            if ($regulationId === $relatedId) {
+                throw new \Exception('Tidak bisa memetakan regulasi ke dirinya sendiri.');
+            }
+
+            $exists = TrsRelatedRegulation::where('regulation', $regulationId)
+                ->where('related', $relatedId)
+                ->exists();
+
+            if ($exists) {
+                throw new \Exception('Mapping regulasi referensi ini sudah ada.');
+            }
+
+            return TrsRelatedRegulation::create([
+                'regulation' => $regulationId,
+                'related' => $relatedId,
+            ]);
+        });
+    }
+
+    /**
+     * Unmap a regulation reference from the active regulation.
+     *
+     * @param array $data
+     * @return void
+     */
+    public function unmapRegulation(array $data): void
+    {
+        DB::transaction(function () use ($data) {
+            TrsRelatedRegulation::where('regulation', $data['regulation_id'])
+                ->where('related', $data['related_id'])
                 ->delete();
         });
     }

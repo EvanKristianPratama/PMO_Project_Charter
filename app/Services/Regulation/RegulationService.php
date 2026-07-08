@@ -22,7 +22,7 @@ class RegulationService
      */
     public function getIndexData(): array
     {
-        $regulations = MstRegulation::with(['organization.groub.company', 'parent', 'revokedRegulations', 'relatedRegulations', 'company.company'])
+        $regulations = MstRegulation::with(['parent', 'revokedRegulations', 'relatedRegulations', 'mstBod.company'])
             ->withCount(['generalPolicies'])
             ->orderBy('id', 'asc')
             ->get();
@@ -104,7 +104,7 @@ class RegulationService
      */
     public function getPreviewData(MstRegulation $regulation): array
     {
-        $regulation->load(['organization', 'parent']);
+        $regulation->load(['parent']);
 
         if (strtolower($regulation->tipe ?? '') === 'procedure') {
             $actors = MstActor::with('organization')
@@ -115,7 +115,7 @@ class RegulationService
                 ->orderBy('id')
                 ->get();
 
-            $sop = MstSop::with(['category', 'regulation.organization'])
+            $sop = MstSop::with(['category', 'regulation'])
                 ->whereHas('category', function ($q) use ($regulation) {
                     $q->where('regulation_id', $regulation->id);
                 })

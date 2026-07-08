@@ -229,6 +229,28 @@ Untuk memindahkan modul:
   - Penambahan endpoint `mapGlossary` & `unmapGlossary` di `ProcedureController` & `web.php`
   - Refaktor komponen `ManageGlossary.vue` untuk menambahkan modal map existing glossary (dilengkapi live-search) dan mengganti tombol Edit & Delete dengan **Unmap** (untuk keamanan data sesuai scope PRD)
   - Integrasi props di `Manage.vue` dan build produksi frontend compile sukses 100% tanpa error ✅
+- [x] Fitur **Manage Regulation (Reference Documents Mapping)** pada modul Prosedur (ITOM):
+  - Penambahan backend logic & CRUD mapping (`mapRegulation` & `unmapRegulation`) di `ProcedureService`
+  - Penambahan endpoint map/unmap di `ProcedureController` & `web.php`
+  - Penyesuaian `getProcedureData` di `ProcedureService` untuk me-load `relatedRegulations`
+  - Pembuatan komponen `ManageRefrence.vue` (mendukung mode edit dan `readonly`)
+  - Refaktorisasi halaman `Manage.vue` & `Index.vue` serta `NavigationPane.vue` untuk mengintegrasikan tab/section referensi secara dinamis dan otomatis berdasarkan mapping data
+  - Build produksi frontend compile sukses 100% tanpa error ✅
+- [x] Pembersihan data lama: Menghapus penggunaan kolom `pic_id` (Pemilik Dokumen - Internal [Data Lama]) dari sistem karena sudah tidak relevan dan digantikan oleh refinement:
+  - Hapus `'pic_id'` fillable dan relasi `organization()` di `MstRegulation`
+  - Hapus dropdown form & state terkait di `ManageRegulation.vue`
+  - Bersihkan load eager/lazy relasi `organization` di `ProcedureService`, `RegulationService`, dan `SKController`
+  - Hapus rules validasi `pic_id` di `PolicyStandartProcedureController`
+- [x] Penggantian nama kolom `company_id` menjadi `owner_id` pada model `MstRegulation` untuk menghindari kebingungan (karena isinya menunjuk ke `mst_bod` sebagai pemilik/owner, bukan `mst_company` langsung):
+  - Ubah `company_id` menjadi `owner_id` di `$fillable`, `$casts`, dan foreign key relasi `company()` di `MstRegulation.php`
+  - Ubah nama field input, error state, dan binding dari `company_id` menjadi `owner_id` pada form `ManageRegulation.vue`
+  - Sesuaikan aturan validasi di `PolicyStandartProcedureController.php` (dari `company_id` ke `owner_id`)
+- [x] Penambahan kolom `company_id` pada model `MstRegulation` (relasi ke `MstCompany`):
+  - Tambah `'company_id'` ke `$fillable` (sebelum `'owner_id'`) dan `$casts` di `MstRegulation.php`
+  - Buat relasi `mstCompany()` di `MstRegulation.php`
+  - Buat relasi `regulations()` di `MstCompany.php`
+  - Rename relasi `company()` di `MstRegulation.php` (relasi lama yang mengarah ke `MstBod`) menjadi `mstBod()` untuk menghindari kebingungan nama relasi
+  - Sesuaikan eager loading dan reference di `SKController.php`, `RegulationService.php`, `SK/Index.vue`, `PolicyStandartProcedure/Index.vue`, dan `OrganizationHierarki.vue` dari `company` ke `mstBod`/`mst_bod`
 
 ---
 

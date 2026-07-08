@@ -549,16 +549,17 @@ const searchMatches = computed(() => {
             10: "X",
         };
         const sectionLabel = `${romanNumerals[sec.order] || sec.order}. ${sec.name.toUpperCase()}`;
+        const isReference = sec.name.trim().toLowerCase() === 'referensi';
 
         if (sec.name.toLowerCase().includes(query)) {
             matches.push({
-                sectionId: `tko_${sec.id}`,
+                sectionId: isReference ? 'reference' : `tko_${sec.id}`,
                 sectionName: sectionLabel,
                 title: sec.name,
-                preview: sec.contents?.[0]?.content || "Dokumen kosong",
-                targetTab: `tko_${sec.id}`,
+                preview: isReference ? "Daftar referensi regulasi" : (sec.contents?.[0]?.content || "Dokumen kosong"),
+                targetTab: isReference ? 'reference' : `tko_${sec.id}`,
             });
-        } else {
+        } else if (!isReference) {
             const content = sec.contents?.[0]?.content || "";
             const idx = content.toLowerCase().indexOf(query);
             if (idx > -1) {

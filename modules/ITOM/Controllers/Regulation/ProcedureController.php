@@ -411,4 +411,43 @@ class ProcedureController extends Controller
             return back()->withErrors(['definition_id' => $e->getMessage()]);
         }
     }
+
+    /**
+     * Map an existing regulation as a reference.
+     */
+    public function mapRegulation(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'related_id' => 'required|integer|exists:mst_regulation,id',
+            'regulation_id' => 'required|integer|exists:mst_regulation,id',
+        ], [
+            'related_id.required' => 'Regulasi referensi wajib dipilih.',
+            'regulation_id.required' => 'Regulasi tujuan wajib dipilih.',
+        ]);
+
+        try {
+            $this->procedureService->mapRegulation($validated);
+            return back()->with('success', 'Regulasi referensi berhasil dipetakan.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['related_id' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Unmap a regulation reference.
+     */
+    public function unmapRegulation(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'related_id' => 'required|integer|exists:mst_regulation,id',
+            'regulation_id' => 'required|integer|exists:mst_regulation,id',
+        ]);
+
+        try {
+            $this->procedureService->unmapRegulation($validated);
+            return back()->with('success', 'Regulasi referensi berhasil dilepas.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['related_id' => $e->getMessage()]);
+        }
+    }
 }

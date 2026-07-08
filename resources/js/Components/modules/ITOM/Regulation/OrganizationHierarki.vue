@@ -16,7 +16,7 @@
             :rowspan="reg.companyRowspan"
             class="px-2 py-2 text-slate-600 dark:text-slate-300 text-xs whitespace-normal break-words max-w-[80px] align-top border-r border-b border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-white/[0.02]"
         >
-            <span class="font-semibold text-slate-700 dark:text-slate-200">{{ reg.company?.company?.name || '-' }}</span>
+            <span class="font-semibold text-slate-700 dark:text-slate-200">{{ reg.mst_bod?.company?.name || '-' }}</span>
         </td>
 
         <!-- Judul -->
@@ -65,10 +65,10 @@
                 <span v-if="reg.organization" class="text-[10px] text-slate-500 dark:text-slate-400">
                     {{ reg.organization.jabatan || reg.organization.name }} <span class="text-rose-500 font-semibold text-[9px] lowercase">([Data Lama])</span>
                 </span>
-                <span v-if="reg.company" class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
-                    {{ reg.company.name }} ({{ reg.company.alias || '' }}) <span class="text-emerald-600 font-semibold text-[9px] lowercase">([Refinement])</span>
+                <span v-if="reg.mst_bod" class="text-[10px] text-slate-700 dark:text-slate-300 font-semibold">
+                    {{ reg.mst_bod.name }} ({{ reg.mst_bod.alias || '' }}) <span class="text-slate-500 dark:text-slate-400 font-semibold text-[9px] lowercase">([Refinement])</span>
                 </span>
-                <span v-if="!reg.master && !reg.organization && !reg.company">-</span>
+                <span v-if="!reg.master && !reg.organization && !reg.mst_bod">-</span>
             </div>
         </td>
 
@@ -268,9 +268,9 @@ const regulationsByOrgHierarchy = computed(() => {
     // Compute companyRowspan
     let i = 0;
     while (i < orderedRegs.length) {
-        const companyId = orderedRegs[i].company?.company_id ?? null;
+        const companyId = orderedRegs[i].mst_bod?.company_id ?? null;
         let span = 1;
-        while (i + span < orderedRegs.length && (orderedRegs[i + span].company?.company_id ?? null) === companyId) {
+        while (i + span < orderedRegs.length && (orderedRegs[i + span].mst_bod?.company_id ?? null) === companyId) {
             span++;
         }
         orderedRegs[i].companyRowspan = span;

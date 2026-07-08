@@ -17,7 +17,7 @@ class SKController extends Controller
      */
     public function index(): Response
     {
-        $regulations = MstRegulation::with(['organization.groub.company', 'parent', 'revokedRegulations', 'relatedRegulations', 'company.company'])
+        $regulations = MstRegulation::with(['parent', 'revokedRegulations', 'relatedRegulations', 'mstBod.company'])
             ->withCount(['generalPolicies'])
             ->where('tipe', 'Surat Keputusan')
             ->orderBy('id', 'asc')

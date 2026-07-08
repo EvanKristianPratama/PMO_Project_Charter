@@ -631,7 +631,7 @@ const filteredRegulations = computed(() => {
 
         // Find all docs that match the company (via company_id → MstBod → company_id = MstCompany.id)
         const matchedByCompany = result.filter(
-            (reg) => reg.company?.company_id === targetCompanyId,
+            (reg) => reg.mst_bod?.company_id === targetCompanyId,
         );
 
         const includedIds = new Set();

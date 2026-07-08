@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Models\MstSop;
-use App\Models\TrsOrganization;
 use App\Models\TrsTkoContent;
 use App\Models\MstDefinition;
 use App\Models\TrsDefinitionRegulation;
@@ -22,8 +21,8 @@ class MstRegulation extends Model
 
     protected $fillable = [
         'parent_id',
-        'pic_id',
         'company_id',
+        'owner_id',
         'judul',
         'nomor',
         'tipe',
@@ -40,6 +39,7 @@ class MstRegulation extends Model
         'berlaku' => 'date:Y-m-d',
         'parent_id' => 'integer',
         'company_id' => 'integer',
+        'owner_id' => 'integer',
     ];
 
     /**
@@ -67,21 +67,19 @@ class MstRegulation extends Model
     }
 
     /**
-     * Relasi ke TrsOrganization
+     * Relasi ke MstCompany
      */
-    public function organization(): BelongsTo
+    public function mstCompany(): BelongsTo
     {
-        return $this->belongsTo(TrsOrganization::class, 'pic_id');
+        return $this->belongsTo(MstCompany::class, 'company_id');
     }
-
-
 
     /**
      * Relasi ke MstBod (Refinement)
      */
-    public function company(): BelongsTo
+    public function mstBod(): BelongsTo
     {
-        return $this->belongsTo(MstBod::class, 'company_id');
+        return $this->belongsTo(MstBod::class, 'owner_id');
     }
 
     /**
