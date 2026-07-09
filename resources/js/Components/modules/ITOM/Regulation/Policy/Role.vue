@@ -81,10 +81,10 @@
 
                 <!-- 2. Document Title Section -->
                 <div class="mt-8 text-center space-y-2 relative z-10">
-                    <h2 class="text-lg sm:text-xl font-extrabold tracking-[0.15em] text-slate-950 dark:text-white uppercase">
+                    <h2 class="text-lg sm:text-xl font-bold tracking-[0.15em] text-slate-950 dark:text-white uppercase">
                         BAB III
                     </h2>
-                    <h2 class="text-xl sm:text-2xl font-extrabold tracking-[0.2em] text-slate-950 dark:text-white uppercase">
+                    <h2 class="text-xl sm:text-2xl font-bold tracking-[0.2em] text-slate-950 dark:text-white uppercase">
                         TUGAS, KEBIJAKAN DAN TANGGUNG JAWAB
                     </h2>
                 </div>
