@@ -3,12 +3,14 @@
 namespace Modules\ITOM\Controllers\Regulation\CMS;
 
 use App\Http\Controllers\Controller;
+use App\Models\MstCompany;
+use App\Models\MstDocument;
+use App\Models\MstProsesBisnis;
+use App\Models\MstRegulation;
+use App\Services\BusinessProcess\BusinessProcess\BusinessProcessV2Service;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use App\Models\MstDocument;
-use App\Models\MstProsesBisnis;
-use App\Services\BusinessProcess\BusinessProcess\BusinessProcessV2Service;
 
 class CMSController extends Controller
 {
@@ -65,57 +67,8 @@ class CMSController extends Controller
     {
         return Inertia::render('modules/ITOM/Regulation/CMS/Regulation/Index', [
             'prosesBisnisV2' => Inertia::defer(fn() => $service->getProsesBisnisV2List()),
-            'companyOptions' => Inertia::defer(fn() => \App\Models\MstCompany::orderBy('name')->get(['id', 'name'])),
-            'regulations' => Inertia::defer(fn() => \App\Models\MstRegulation::orderBy('judul')->get(['id', 'judul', 'nomor', 'tipe', 'parent_id', 'status'])),
+            'companyOptions' => Inertia::defer(fn() => MstCompany::orderBy('name')->get(['id', 'name'])),
+            'regulations' => Inertia::defer(fn() => MstRegulation::orderBy('judul')->get(['id', 'judul', 'nomor', 'tipe', 'parent_id', 'status'])),
         ]);
-    }
-
-    public function storeRegulation(Request $request, BusinessProcessV2Service $service)
-    {
-        $validated = $request->validate([
-            'company_id' => 'required|integer|exists:mst_company,id',
-            'parent_id' => 'nullable|exists:mst_proses_bisnis,id',
-            'name' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string',
-            'order' => 'nullable|integer',
-            'regulation_ids' => 'nullable|array',
-            'regulation_ids.*' => 'integer|exists:mst_regulation,id',
-        ]);
-
-        $service->create($validated);
-
-        return redirect()->back()->with('success', 'Proses Bisnis v2 berhasil ditambahkan.');
-    }
-
-    public function updateRegulation(Request $request, int $id, BusinessProcessV2Service $service)
-    {
-        $item = MstProsesBisnis::findOrFail($id);
-
-        $validated = $request->validate([
-            'company_id' => 'required|integer|exists:mst_company,id',
-            'parent_id' => 'nullable|exists:mst_proses_bisnis,id',
-            'name' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string',
-            'order' => 'nullable|integer',
-            'regulation_ids' => 'nullable|array',
-            'regulation_ids.*' => 'integer|exists:mst_regulation,id',
-        ]);
-
-        $service->update($item, $validated);
-
-        return redirect()->back()->with('success', 'Proses Bisnis v2 berhasil diperbarui.');
-    }
-
-    public function destroyRegulation(int $id, BusinessProcessV2Service $service)
-    {
-        $item = MstProsesBisnis::findOrFail($id);
-        
-        $success = $service->delete($item);
-
-        if (!$success) {
-            return redirect()->back()->with('error', 'Tidak dapat menghapus Proses Bisnis ini karena memiliki sub-proses.');
-        }
-
-        return redirect()->back()->with('success', 'Proses Bisnis v2 berhasil dihapus.');
     }
 }

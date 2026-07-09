@@ -5,8 +5,12 @@ namespace Modules\ITOM\Controllers\Regulation;
 use App\Http\Controllers\Controller;
 use App\Models\MstObjective;
 use App\Models\MstPractice;
+use App\Models\MstRegulation;
+use App\Models\TrsMapingKebijakanCobit;
+use DB;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -18,9 +22,9 @@ class PolicyController extends Controller
     public function index(Request $request): Response
     {
         try {
-            $regulations = \App\Models\MstRegulation::orderBy('id', 'desc')->get();
+            $regulations = MstRegulation::orderBy('id', 'desc')->get();
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('[PolicyController] DB error loading regulations: ' . $e->getMessage());
+            Log::warning('[PolicyController] DB error loading regulations: ' . $e->getMessage());
             $regulations = collect([]);
         }
 
@@ -65,7 +69,7 @@ class PolicyController extends Controller
 
     public function createObjective(Request $request): Response
     {
-        $regulations = \App\Models\MstRegulation::orderBy('judul', 'asc')->get();
+        $regulations = MstRegulation::orderBy('judul', 'asc')->get();
 
         $selectedRegulationId = $request->integer('regulation_id');
         $selectedRegulation = $selectedRegulationId
@@ -101,7 +105,7 @@ class PolicyController extends Controller
     {
         $objective = MstObjective::findOrFail($id);
 
-        $regulations = \App\Models\MstRegulation::orderBy('judul', 'asc')->get();
+        $regulations = MstRegulation::orderBy('judul', 'asc')->get();
         $selectedRegulation = $regulations->firstWhere('id', $objective->regulation_id);
 
         $objectives = MstObjective::with(['practices' => function($query) {
@@ -131,7 +135,7 @@ class PolicyController extends Controller
 
     public function mappingCobit(Request $request): Response
     {
-        $regulations = \App\Models\MstRegulation::orderBy('judul', 'asc')->get();
+        $regulations = MstRegulation::orderBy('judul', 'asc')->get();
 
         $selectedRegulationId = $request->integer('regulation_id');
         $selectedRegulation = $selectedRegulationId
@@ -168,7 +172,7 @@ class PolicyController extends Controller
      */
     public function mappingCobitAnalysis(Request $request): Response
     {
-        $regulations = \App\Models\MstRegulation::orderBy('judul', 'asc')->get();
+        $regulations = MstRegulation::orderBy('judul', 'asc')->get();
 
         $selectedRegulationId = $request->integer('regulation_id');
         $selectedRegulation = $selectedRegulationId
@@ -204,7 +208,7 @@ class PolicyController extends Controller
      */
     public function manage(Request $request): Response
     {
-        $regulations = \App\Models\MstRegulation::orderBy('judul', 'asc')->get();
+        $regulations = MstRegulation::orderBy('judul', 'asc')->get();
         
         $selectedRegulationId = $request->integer('regulation_id');
         $selectedRegulation = null;
@@ -294,10 +298,10 @@ class PolicyController extends Controller
                 'objective_id.required' => 'Objective ID wajib diisi.',
             ]);
 
-            \DB::transaction(function() use ($id, $newId, $request) {
-                \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+            DB::transaction(function() use ($id, $newId, $request) {
+                DB::statement('SET FOREIGN_KEY_CHECKS=0;');
                 
-                \DB::table('mst_objective')
+                DB::table('mst_objective')
                     ->where('objective_id', $id)
                     ->update([
                         'objective_id' => $newId,
@@ -308,11 +312,11 @@ class PolicyController extends Controller
                         'objective_purpose' => $request->input('objective_purpose'),
                     ]);
                     
-                \DB::table('mst_practice')
+                DB::table('mst_practice')
                     ->where('objective_id', $id)
                     ->update(['objective_id' => $newId]);
                     
-                \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+                DB::statement('SET FOREIGN_KEY_CHECKS=1;');
             });
         } else {
             $objective->update($validated);
@@ -425,7 +429,7 @@ class PolicyController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        \App\Models\TrsMapingKebijakanCobit::create($validated);
+        TrsMapingKebijakanCobit::create($validated);
 
         $objective = MstObjective::where('objective_id', $request->objective_id)->first();
 
@@ -442,7 +446,7 @@ class PolicyController extends Controller
      */
     public function updateCobitMapping(Request $request, string $id): RedirectResponse
     {
-        $mapping = \App\Models\TrsMapingKebijakanCobit::findOrFail($id);
+        $mapping = TrsMapingKebijakanCobit::findOrFail($id);
 
         $validated = $request->validate([
             'cobit_domain' => 'nullable|string|max:255',
@@ -467,7 +471,7 @@ class PolicyController extends Controller
      */
     public function destroyCobitMapping(string $id): RedirectResponse
     {
-        $mapping = \App\Models\TrsMapingKebijakanCobit::findOrFail($id);
+        $mapping = TrsMapingKebijakanCobit::findOrFail($id);
         $objectiveId = $mapping->objective_id;
         $objective = MstObjective::where('objective_id', $objectiveId)->first();
 

@@ -12,6 +12,7 @@
                 <div class="mt-8 text-center space-y-2 relative z-10">
                     <h2
                         class="text-lg sm:text-xl font-bold tracking-[0.15em] text-slate-950 dark:text-white uppercase">
+                        BAB II
                     </h2>
                     <h2
                         class="text-xl sm:text-2xl font-bold tracking-[0.2em] text-slate-950 dark:text-white uppercase">
@@ -166,7 +167,7 @@
             </button>
 
             <!-- Go to Management CRUD page -->
-            <Link :href="route('itom.policy.general.manage', { regulation_id: selectedRegulationId })" title="Kelola Kebijakan"
+            <Link v-if="!readonly" :href="route('itom.policy.general.manage', { regulation_id: selectedRegulationId })" title="Kelola Kebijakan"
                 class="group flex h-12 w-12 items-center justify-center rounded-full bg-[#821f44]/80 text-white shadow-2xl shadow-[#821f44]/30 backdrop-blur-md transition-all hover:bg-[#821f44] hover:shadow-[#821f44]/40 active:scale-95">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2"
                     stroke="currentColor" class="w-5 h-5 transition-transform group-hover:rotate-12">
@@ -175,7 +176,7 @@
             </Link>
 
             <!-- Go to Specific Policy CRUD page -->
-            <Link :href="route('itom.policy.specific.manage', { regulation_id: selectedRegulationId })" title="Kelola Kebijakan Khusus"
+            <Link v-if="!readonly" :href="route('itom.policy.specific.manage', { regulation_id: selectedRegulationId })" title="Kelola Kebijakan Khusus"
                 class="group flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/80 text-[#821f44] shadow-2xl shadow-yellow-500/30 backdrop-blur-md transition-all hover:bg-amber-50 hover:shadow-yellow-500/40 active:scale-95">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2"
                     stroke="currentColor" class="w-5 h-5 transition-transform group-hover:rotate-12">
@@ -208,6 +209,10 @@ const props = defineProps({
     selectedRegulationId: {
         type: Number,
         default: null,
+    },
+    readonly: {
+        type: Boolean,
+        default: false,
     },
 });
 

@@ -2,140 +2,125 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-
-use Modules\ITOM\Controllers\BusinessProcess\BusinessCapability\BusinessCapabilityController;
-use Modules\ITOM\Controllers\Organization\Company\CompanyController;
-use Modules\ITOM\Controllers\Organization\BOD\BodController;
-use Modules\ITOM\Controllers\Organization\StructuralOrganization\StructuralOrganizationController;
-use Modules\ITOM\Controllers\Organization\FunctionalOrganization\FunctionalOrganizationController;
-
-use Modules\ITOM\Controllers\BusinessProcess\BusinessProcess\BusinessProcessController;
+use Modules\ITOM\Controllers\BpmnWorkflowController;
 use Modules\ITOM\Controllers\BusinessProcess\APQC\ApqcController;
-use Modules\ITOM\Controllers\BusinessProcess\Kpi\KpiController;
+use Modules\ITOM\Controllers\BusinessProcess\BusinessCapability\BusinessCapabilityController;
+use Modules\ITOM\Controllers\BusinessProcess\BusinessProcess\BusinessProcessController;
 use Modules\ITOM\Controllers\BusinessProcess\Function\FunctionController;
+use Modules\ITOM\Controllers\BusinessProcess\Kpi\KpiController;
 use Modules\ITOM\Controllers\BusinessProcess\RegulationMapping\RegulationMappingController;
-use Modules\ITOM\Controllers\Organization\SDM\SdmController as MainResourceManagementController;
+use Modules\ITOM\Controllers\OperatingModel\Framework\FrameworkController;
+use Modules\ITOM\Controllers\OperatingModel\ItFunction\ItFunctionController;
 use Modules\ITOM\Controllers\OperatingModel\ItGovarnence\ItGovarnenceController;
 use Modules\ITOM\Controllers\OperatingModel\ItManagement\ItManagementController;
 use Modules\ITOM\Controllers\OperatingModel\Model\ModelController;
-use Modules\ITOM\Controllers\OperatingModel\Framework\FrameworkController;
-use Modules\ITOM\Controllers\Regulation\COBIT\CobitComponentController;
 use Modules\ITOM\Controllers\OperatingModel\RaciAnalysis\RaciAnalysisController;
+use Modules\ITOM\Controllers\OperatingModel\STK\StkController;
+use Modules\ITOM\Controllers\Organization\BOD\BodController;
+use Modules\ITOM\Controllers\Organization\Company\CompanyController;
+use Modules\ITOM\Controllers\Organization\FunctionalOrganization\FunctionalOrganizationController;
+use Modules\ITOM\Controllers\Organization\SDM\SdmController as MainResourceManagementController;
+use Modules\ITOM\Controllers\Organization\StructuralOrganization\StructuralOrganizationController;
 use Modules\ITOM\Controllers\RaciAnalysis\CobitInformationFlow\CobitInformationFlowController;
 use Modules\ITOM\Controllers\RaciAnalysis\TktiInformationFlow\TktiInformationFlowController;
+use Modules\ITOM\Controllers\Regulation\CMS\CMSController;
+use Modules\ITOM\Controllers\Regulation\COBIT\CobitComponentController;
 use Modules\ITOM\Controllers\Regulation\GeneralPolicyController;
 use Modules\ITOM\Controllers\Regulation\PolicyController;
-use Modules\ITOM\Controllers\Regulation\RoleController;
 use Modules\ITOM\Controllers\Regulation\PolicyStandartProcedureController;
 use Modules\ITOM\Controllers\Regulation\ProcedureController;
 use Modules\ITOM\Controllers\Regulation\ResponsibleController;
-use Modules\ITOM\Controllers\Regulation\CMS\CMSController;
+use Modules\ITOM\Controllers\Regulation\RoleController;
 use Modules\ITOM\Controllers\Regulation\SK\SKController;
-use Modules\ITOM\Controllers\BpmnWorkflowController;
-use Modules\ITOM\Controllers\LibaryController;
+
 
 Route::middleware(["approved"])->group(function () {
-    Route::get(
-        "/business-process",
-        fn() => redirect()->route("itom.business-process.apqc.index"),
-    )->name("business-process.index");
-    
-    Route::get("/business-process/organization-structure", fn() => redirect()->route("itom.business-process.organization-structure.company.index"))
-        ->name("business-process.organization-structure");
-
-    Route::prefix("business-process/organization-structure")
-        ->name("business-process.organization-structure.")
-        ->group(function () {
-            // Company Sub-menu
-            Route::prefix("company")
-                ->name("company.")
-                ->controller(CompanyController::class)
-                ->group(function () {
-                    Route::get("/", "index")->name("index");
-                    Route::post("/", "storeCompany")->name("store");
-                    Route::put("/{id}", "updateCompany")->name("update");
-                    Route::delete("/{id}", "destroyCompany")->name("destroy");
-                });
-
-            // BOD Sub-menu
-            Route::prefix("bod")
-                ->name("bod.")
-                ->controller(BodController::class)
-                ->group(function () {
-                    Route::get("/", "index")->name("index");
-                    Route::post("/", "storeBod")->name("store");
-                    Route::put("/{id}", "updateBod")->name("update");
-                    Route::delete("/{id}", "destroyBod")->name("destroy");
-                });
-
-            // Structural Organization Sub-menu
-            Route::prefix("structural")
-                ->name("structural.")
-                ->controller(StructuralOrganizationController::class)
-                ->group(function () {
-                    Route::get("/", "index")->name("index");
-                    Route::post("/", "store")->name("store");
-                    Route::put("/{id}", "update")->name("update");
-                    Route::delete("/{id}", "destroy")->name("destroy");
-                });
-
-            // Functional Organization Sub-menu
-            Route::prefix("functional")
-                ->name("functional.")
-                ->controller(FunctionalOrganizationController::class)
-                ->group(function () {
-                    Route::get("/", "index")->name("index");
-                    Route::post("/", "storeFunctional")->name("store");
-                    Route::put("/{id}", "updateFunctional")->name("update");
-                    Route::delete("/{id}", "destroyFunctional")->name("destroy");
-
-                    Route::post("/member", "storeFunctionalMember")->name("member.store");
-                    Route::delete("/member", "destroyFunctionalMember")->name("member.destroy");
-
-                    Route::post("/structure", "storeFunctionalStructure")->name("structure.store");
-                    Route::delete("/structure", "destroyFunctionalStructure")->name("structure.destroy");
-                });
-
-
-
-            // Group CRUD Actions
-            Route::prefix("group")
-                ->name("group.")
-                ->controller(CompanyController::class)
-                ->group(function () {
-                    Route::post("/", "storeGroup")->name("store");
-                    Route::put("/{id}", "updateGroup")->name("update");
-                    Route::delete("/{id}", "destroyGroup")->name("destroy");
-                });
-        });
-    
-
-    Route::get("/business-process/business-capability", [
-        BusinessCapabilityController::class,
-        "index",
-    ])->name("business-process.business-capability.index");
-    
-    Route::post("/business-process/business-capability", [
-        BusinessCapabilityController::class,
-        "store",
-    ])->name("business-process.business-capability.store");
-    
-    Route::put("/business-process/business-capability/{businessCapability}", [
-        BusinessCapabilityController::class,
-        "update",
-    ])->name("business-process.business-capability.update");
-    
-    Route::delete(
-        "/business-process/business-capability/{businessCapability}",
-        [BusinessCapabilityController::class, "destroy"],
-    )->name("business-process.business-capability.destroy");
-
-
-    // Business Process sub-menus route grouping
     Route::prefix("business-process")
         ->name("business-process.")
         ->group(function () {
-            
+            Route::get(
+                "/",
+                fn() => redirect()->route("itom.business-process.apqc.index"),
+            )->name("index");
+
+            Route::get("/organization-structure", fn() => redirect()->route("itom.business-process.organization-structure.company.index"))
+                ->name("organization-structure");
+
+            Route::prefix("organization-structure")
+                ->name("organization-structure.")
+                ->group(function () {
+                    // Company Sub-menu
+                    Route::prefix("company")
+                        ->name("company.")
+                        ->controller(CompanyController::class)
+                        ->group(function () {
+                            Route::get("/", "index")->name("index");
+                            Route::post("/", "storeCompany")->name("store");
+                            Route::put("/{id}", "updateCompany")->name("update");
+                            Route::delete("/{id}", "destroyCompany")->name("destroy");
+                        });
+
+                    // BOD Sub-menu
+                    Route::prefix("bod")
+                        ->name("bod.")
+                        ->controller(BodController::class)
+                        ->group(function () {
+                            Route::get("/", "index")->name("index");
+                            Route::post("/", "storeBod")->name("store");
+                            Route::put("/{id}", "updateBod")->name("update");
+                            Route::delete("/{id}", "destroyBod")->name("destroy");
+                        });
+
+                    // Structural Organization Sub-menu
+                    Route::prefix("structural")
+                        ->name("structural.")
+                        ->controller(StructuralOrganizationController::class)
+                        ->group(function () {
+                            Route::get("/", "index")->name("index");
+                            Route::post("/", "store")->name("store");
+                            Route::put("/{id}", "update")->name("update");
+                            Route::delete("/{id}", "destroy")->name("destroy");
+                        });
+
+                    // Functional Organization Sub-menu
+                    Route::prefix("functional")
+                        ->name("functional.")
+                        ->controller(FunctionalOrganizationController::class)
+                        ->group(function () {
+                            Route::get("/", "index")->name("index");
+                            Route::post("/", "storeFunctional")->name("store");
+                            Route::put("/{id}", "updateFunctional")->name("update");
+                            Route::delete("/{id}", "destroyFunctional")->name("destroy");
+
+                            Route::post("/member", "storeFunctionalMember")->name("member.store");
+                            Route::delete("/member", "destroyFunctionalMember")->name("member.destroy");
+
+                            Route::post("/structure", "storeFunctionalStructure")->name("structure.store");
+                            Route::delete("/structure", "destroyFunctionalStructure")->name("structure.destroy");
+                        });
+
+                    // Group CRUD Actions
+                    Route::prefix("group")
+                        ->name("group.")
+                        ->controller(CompanyController::class)
+                        ->group(function () {
+                            Route::post("/", "storeGroup")->name("store");
+                            Route::put("/{id}", "updateGroup")->name("update");
+                            Route::delete("/{id}", "destroyGroup")->name("destroy");
+                        });
+                });
+
+            // Business Capability
+            Route::prefix("business-capability")
+                ->name("business-capability.")
+                ->controller(BusinessCapabilityController::class)
+                ->group(function () {
+                    Route::get("/", "index")->name("index");
+                    Route::post("/", "store")->name("store");
+                    Route::put("/{businessCapability}", "update")->name("update");
+                    Route::delete("/{businessCapability}", "destroy")->name("destroy");
+                });
+
             // APQC
             Route::prefix("apqc")
                 ->name("apqc.")
@@ -201,27 +186,36 @@ Route::middleware(["approved"])->group(function () {
             Route::delete("/{id}", "destroy")->name("destroy");
         });
 
-    Route::get(
-        "/service-portofolio",
-        fn() => Inertia::render("Placeholder/Index", [
-            "title" => "Service Portofolio",
-        ]),
-    )->name("service-portofolio.index");
 
     Route::prefix("/operating-model")
         ->name("operating-model.")
         ->group(function () {
             Route::get("/", [ModelController::class, "index"])->name("index");
             
-            Route::get("/policy", fn() => Inertia::render("Placeholder/Index", [
-                "title" => "Policy",
-                "description" => "Halaman ini disiapkan sebagai placeholder untuk modul policy.",
-            ]))->name("policy.index");
+            Route::get("/policy", [
+                \Modules\ITOM\Controllers\OperatingModel\Policy\PolicyController::class,
+                "index"
+            ])->name("policy.index");
             
             Route::get("/it-governance", [
                 ItGovarnenceController::class,
                 "index",
             ])->name("it-governance.index");
+
+            Route::post("/it-governance/steering", [
+                ItGovarnenceController::class,
+                "storeSteering",
+            ])->name("it-governance.steering.store");
+            
+            Route::put("/it-governance/steering/{id}", [
+                ItGovarnenceController::class,
+                "updateSteering",
+            ])->name("it-governance.steering.update");
+            
+            Route::delete("/it-governance/steering/{id}", [
+                ItGovarnenceController::class,
+                "destroySteering",
+            ])->name("it-governance.steering.destroy");
             
             Route::get("/it-management", [
                 ItManagementController::class,
@@ -229,12 +223,12 @@ Route::middleware(["approved"])->group(function () {
             ])->name("it-management.index");
             
             Route::get("/it-function", [
-                \Modules\ITOM\Controllers\OperatingModel\ItFunction\ItFunctionController::class,
+                ItFunctionController::class,
                 "index",
             ])->name("it-function.index");
             
             Route::get("/stk", [
-                \Modules\ITOM\Controllers\OperatingModel\STK\StkController::class,
+                StkController::class,
                 "index",
             ])->name("stk.index");
             
@@ -257,20 +251,7 @@ Route::middleware(["approved"])->group(function () {
             Route::get("/raci-analysis/manage", [RaciAnalysisController::class, "manage"])->name("raci-analysis.manage");
             Route::post("/raci-analysis", [RaciAnalysisController::class, "update"])->name("raci-analysis.update");
             
-            Route::post("/it-governance/steering", [
-                ItGovarnenceController::class,
-                "storeSteering",
-            ])->name("it-governance.steering.store");
             
-            Route::put("/it-governance/steering/{id}", [
-                ItGovarnenceController::class,
-                "updateSteering",
-            ])->name("it-governance.steering.update");
-            
-            Route::delete("/it-governance/steering/{id}", [
-                ItGovarnenceController::class,
-                "destroySteering",
-            ])->name("it-governance.steering.destroy");
         });
 
     Route::prefix("/raci")
@@ -456,14 +437,12 @@ Route::middleware(["approved"])->group(function () {
                 });
         });
 
-    Route::get("/libary", [LibaryController::class, "index"])->name("libary.index");
-    Route::post("/libary/upload", [LibaryController::class, "upload"])->name("libary.upload");
-    Route::get("/libary/document/{uuid}/preview", [LibaryController::class, "previewFile"])->name("libary.document.preview");
-    Route::get("/libary/document/{uuid}/download", [LibaryController::class, "downloadFile"])->name("libary.document.download");
-    Route::delete("/libary/document/{uuid}", [LibaryController::class, "destroy"])->name("libary.document.destroy");
-    Route::get("/libary/{uuid}", [LibaryController::class, "show"])->name("libary.show");
+
 
     // BPMN Workflow Controller (Proof of Concept)
+    
+    
+    
     Route::prefix("/bpmn-workflow")
         ->name("bpmn-workflow.")
         ->group(function () {

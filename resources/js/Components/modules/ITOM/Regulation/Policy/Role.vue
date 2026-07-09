@@ -46,7 +46,7 @@
                         </svg>
                         <span>Mapping Tanggung Jawab vs Kebijakan</span>
                     </button>
-                    <Link
+                    <Link v-if="!readonly"
                         :href="route('itom.policy.specific.mapping', { regulation_id: activeRegulation?.id })"
                         class="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-200 text-slate-500 hover:text-[#821f44] hover:bg-slate-200/50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5"
                     >
@@ -80,7 +80,7 @@
                 <PertaminaDocumentHeader :activeRegulation="activeRegulation" class="mb-8" />
 
                 <!-- 2. Document Title Section -->
-                <div class="mt-16 text-center space-y-2 relative z-10">
+                <div class="mt-8 text-center space-y-2 relative z-10">
                     <h2 class="text-lg sm:text-xl font-extrabold tracking-[0.15em] text-slate-950 dark:text-white uppercase">
                         BAB III
                     </h2>
@@ -306,7 +306,7 @@
                         </div>
 
                         <!-- Single Edit / Save & Cancel Button Group -->
-                        <div class="flex items-center gap-2">
+                        <div v-if="!readonly" class="flex items-center gap-2">
                             <!-- If not editing -->
                             <button 
                                 v-if="!isEditing"
@@ -518,7 +518,7 @@
                         </div>
 
                         <!-- Single Edit / Save & Cancel Button Group -->
-                        <div class="flex items-center gap-2 shrink-0">
+                        <div v-if="!readonly" class="flex items-center gap-2 shrink-0">
                             <!-- If not editing -->
                             <button 
                                 v-if="!isEditing"
@@ -771,6 +771,10 @@ const props = defineProps({
     selectedRegulationId: {
         type: Number,
         default: null,
+    },
+    readonly: {
+        type: Boolean,
+        default: false,
     },
 });
 

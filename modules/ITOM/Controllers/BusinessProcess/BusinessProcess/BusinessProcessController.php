@@ -3,8 +3,11 @@
 namespace Modules\ITOM\Controllers\BusinessProcess\BusinessProcess;
 
 use App\Http\Controllers\Controller;
-use App\Models\TrsProsesBisnis;
+use App\Models\MstCompany;
+use App\Models\MstKpi;
 use App\Models\MstProsesBisnis;
+use App\Models\MstRegulation;
+use App\Models\TrsProsesBisnis;
 use App\Services\BusinessProcess\BusinessProcess\BusinessProcessV2Service;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,9 +23,9 @@ class BusinessProcessController extends Controller
     {
         return Inertia::render('modules/ITOM/BusinessProcess/BusinessProcess/Index', [
             'prosesBisnisV2' => Inertia::defer(fn() => $businessProcessV2Service->getProsesBisnisV2List()),
-            'companyOptions' => Inertia::defer(fn() => \App\Models\MstCompany::orderBy('name')->get(['id', 'name'])),
-            'kpiList' => Inertia::defer(fn() => \App\Models\MstKpi::orderBy('deskripsi')->get(['id', 'deskripsi'])),
-            'regulations' => Inertia::defer(fn() => \App\Models\MstRegulation::orderBy('judul')->get(['id', 'judul', 'nomor', 'tipe', 'parent_id', 'status'])),
+            'companyOptions' => Inertia::defer(fn() => MstCompany::orderBy('name')->get(['id', 'name'])),
+            'kpiList' => Inertia::defer(fn() => MstKpi::orderBy('deskripsi')->get(['id', 'deskripsi'])),
+            'regulations' => Inertia::defer(fn() => MstRegulation::orderBy('judul')->get(['id', 'judul', 'nomor', 'tipe', 'parent_id', 'status'])),
         ]);
     }
 

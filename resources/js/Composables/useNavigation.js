@@ -502,12 +502,7 @@ export function useNavigation() {
                     },
                 ],
             },
-            {
-                label: "Service Portofolio",
-                href: safeRoute("itom.service-portofolio.index"),
-                icon: CubeIcon,
-                active: (url) => (url || "").includes("/service-portofolio"),
-            },
+
             {
                 label: "Regulation",
                 href: safeRoute("itom.policy.regulation.index"),
@@ -612,7 +607,6 @@ export function useNavigation() {
             "Business Process",
             "Organization",
             "Operating Model",
-            "Service Portofolio",
             "Regulation",
             "RACI Analysis",
             "Master Data",

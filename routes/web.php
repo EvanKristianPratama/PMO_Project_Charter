@@ -261,10 +261,7 @@ Route::middleware(["auth", "approved"])->group(function () {
         return redirect('/itom/bpmn-workflow' . ($any ? '/' . $any : '') . ($query ? '?' . $query : ''), 301);
     })->where('any', '.*');
 
-    Route::any('/libary/{any?}', function ($any = null) {
-        $query = request()->getQueryString();
-        return redirect('/itom/libary' . ($any ? '/' . $any : '') . ($query ? '?' . $query : ''), 301);
-    })->where('any', '.*');
+
 });
 
 /*

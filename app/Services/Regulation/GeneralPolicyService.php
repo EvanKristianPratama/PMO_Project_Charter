@@ -5,10 +5,13 @@ namespace App\Services\Regulation;
 use App\Models\MstGeneralPolicy;
 use App\Models\MstObjective;
 use App\Models\MstRegulation;
+use Exception;
 use Illuminate\Support\Facades\Log;
 
 class GeneralPolicyService
 {
+    protected static $cachedData = [];
+
     /**
      * Get general policy list, objectives, and regulations data (with auto-seeding).
      *
@@ -17,6 +20,10 @@ class GeneralPolicyService
      */
     public function getGeneralPolicyData(?int $selectedRegulationId): array
     {
+        if (isset(self::$cachedData[$selectedRegulationId])) {
+            return self::$cachedData[$selectedRegulationId];
+        }
+
         try {
             // Auto-seed default items if table is empty
             if (MstGeneralPolicy::count() === 0) {
@@ -152,7 +159,7 @@ class GeneralPolicyService
             $policies = $selectedRegulation
                 ? $selectedRegulation->generalPolicies->sortBy('number')->values()
                 : collect([]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::warning('[GeneralPolicyService] DB error on active connection: ' . $e->getMessage());
             $policies = collect([]);
             $regulations = collect([]);
@@ -176,12 +183,14 @@ class GeneralPolicyService
         ->orderBy('objective_id', 'asc')
         ->get();
 
-        return [
+        self::$cachedData[$selectedRegulationId] = [
             'policies' => $policies,
             'objectives' => $objectives,
             'regulations' => $regulations,
             'selectedRegulationId' => $selectedRegulation?->id,
         ];
+
+        return self::$cachedData[$selectedRegulationId];
     }
 
     /**
@@ -232,7 +241,7 @@ class GeneralPolicyService
                 return str_contains(strtoupper($r->judul ?? ''), 'PEDOMAN TATA KELOLA');
             });
             $selectedRegulation = $pedoman ?? $regulations->first();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $regulations = collect([]);
             $selectedRegulation = null;
         }

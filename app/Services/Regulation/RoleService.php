@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Log;
 
 class RoleService
 {
+    protected static $cachedData = [];
+
     /**
      * Get all data for the role index (with auto-seeding).
      *
@@ -20,6 +22,10 @@ class RoleService
      */
     public function getRoleIndexData(?int $selectedRegulationId): array
     {
+        if (isset(self::$cachedData[$selectedRegulationId])) {
+            return self::$cachedData[$selectedRegulationId];
+        }
+
         try {
             // Auto-seed default roles & responsibilities if the table is empty
             if (MstRole::count() === 0) {
@@ -116,13 +122,15 @@ class RoleService
             $selectedRegulation = null;
         }
 
-        return [
+        self::$cachedData[$selectedRegulationId] = [
             'roles' => $roles,
             'regulations' => $regulations,
             'responsibles' => $responsibles,
             'objectives' => $objectives,
             'selectedRegulationId' => $selectedRegulation?->id,
         ];
+
+        return self::$cachedData[$selectedRegulationId];
     }
 
     /**
