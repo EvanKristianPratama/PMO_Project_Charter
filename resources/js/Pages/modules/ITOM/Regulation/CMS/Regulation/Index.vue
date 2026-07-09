@@ -35,7 +35,7 @@
 
             <div class="px-4 sm:px-6 lg:px-8 space-y-6">
                 <!-- Table with Deferred Loading -->
-                <Deferred data="prosesBisnisV2">
+                <Deferred :data="['prosesBisnisV2', 'regulationDocuments']">
                     <template #fallback>
                         <TableSkeleton />
                     </template>
@@ -44,6 +44,7 @@
                         :proses-bisnis-v2="prosesBisnisV2"
                         :company-options="companyOptions"
                         :regulations="regulations"
+                        :regulation-documents="regulationDocuments"
                     />
                 </Deferred>
             </div>
@@ -67,6 +68,10 @@ defineProps({
         default: () => [],
     },
     regulations: {
+        type: Array,
+        default: () => [],
+    },
+    regulationDocuments: {
         type: Array,
         default: () => [],
     },

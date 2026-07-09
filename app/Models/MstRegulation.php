@@ -6,6 +6,7 @@ use App\Models\MstSop;
 use App\Models\TrsTkoContent;
 use App\Models\MstDefinition;
 use App\Models\TrsDefinitionRegulation;
+use App\Models\TrsDocumentRegulation;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -212,5 +213,22 @@ class MstRegulation extends Model
     public function definitionRegulations(): HasMany
     {
         return $this->hasMany(TrsDefinitionRegulation::class, 'regulation_id');
+    }
+
+    /**
+     * Relasi ke TrsDocumentRegulation.
+     */
+    public function documentRegulations(): HasMany
+    {
+        return $this->hasMany(TrsDocumentRegulation::class, 'regulation_id');
+    }
+
+    /**
+     * Relasi many-to-many ke MstDocument via trs_document_regulation.
+     */
+    public function documents(): BelongsToMany
+    {
+        return $this->belongsToMany(MstDocument::class, 'trs_document_regulation', 'regulation_id', 'document_id')
+            ->withTimestamps();
     }
 }

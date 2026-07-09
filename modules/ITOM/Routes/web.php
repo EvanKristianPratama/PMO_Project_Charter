@@ -393,7 +393,7 @@ Route::middleware(["approved"])->group(function () {
                     Route::get('/regulation', 'regulationIndex')->name('regulation.index');
                     Route::post('/regulation', 'storeRegulation')->name('regulation.store');
                     Route::put('/regulation/{id}', 'updateRegulation')->name('regulation.update');
-                    Route::delete('/regulation/{id}', 'destroyRegulation')->name('regulation.destroy');
+                    Route::delete('/regulation/{document_id}/{regulation_id}', 'destroyRegulation')->name('regulation.destroy');
                 });
 
             // Definition CRUD

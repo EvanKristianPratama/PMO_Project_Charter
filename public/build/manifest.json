@@ -2043,7 +2043,7 @@
     ]
   },
   "resources/js/Pages/modules/ITOM/BpmnWorkflow/Index.vue": {
-    "file": "assets/Index-D6KBPjqu.js",
+    "file": "assets/Index-CGTrpH2x.js",
     "name": "Index",
     "src": "resources/js/Pages/modules/ITOM/BpmnWorkflow/Index.vue",
     "isDynamicEntry": true,
@@ -3274,16 +3274,16 @@
     ]
   },
   "resources/js/Pages/modules/ITOM/Regulation/CMS/Index.vue": {
-    "file": "assets/Index-Buk6-GMc.js",
+    "file": "assets/Index-DKEu9pWm.js",
     "name": "Index",
     "src": "resources/js/Pages/modules/ITOM/Regulation/CMS/Index.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-vue-runtime-dom-BgatCPeT.js",
       "_ModulLayout-COMVMRTi.js",
       "_TableSkeleton-CiYn8a0p.js",
-      "_ConfirmationModal-Uh3bXx4I.js",
+      "_vendor-vue-runtime-dom-BgatCPeT.js",
       "_inertia-Ca0NRTmw.js",
+      "_ConfirmationModal-Uh3bXx4I.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
       "_heroicons-DuizHj-o.js",
       "_vendor-vue-runtime-core-BGDWNuJN.js",
@@ -3317,11 +3317,11 @@
       "_vendor-laravel-precognition-CApEZYE-.js"
     ],
     "css": [
-      "assets/Index-DmkGU1sJ.css"
+      "assets/Index-3jjL28gY.css"
     ]
   },
   "resources/js/Pages/modules/ITOM/Regulation/CMS/Regulation/Index.vue": {
-    "file": "assets/Index-yP8Vw1V4.js",
+    "file": "assets/Index-qfzVvlEq.js",
     "name": "Index",
     "src": "resources/js/Pages/modules/ITOM/Regulation/CMS/Regulation/Index.vue",
     "isDynamicEntry": true,
@@ -3363,7 +3363,7 @@
       "_headlessui-BY7XwMWI.js"
     ],
     "css": [
-      "assets/Index-Bt_rq_Zv.css"
+      "assets/Index-8hTZO68t.css"
     ]
   },
   "resources/js/Pages/modules/ITOM/Regulation/CobitComponent/Index.vue": {
@@ -5789,7 +5789,7 @@
     ]
   },
   "resources/js/Pages/modules/ITSP/StrategicHouse/Index.vue": {
-    "file": "assets/Index-CqQjjNah.js",
+    "file": "assets/Index-BNciXkCO.js",
     "name": "Index",
     "src": "resources/js/Pages/modules/ITSP/StrategicHouse/Index.vue",
     "isDynamicEntry": true,
@@ -6256,7 +6256,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-CNl_2_lT.js",
+    "file": "assets/app-D258C6FH.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
