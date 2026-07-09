@@ -14,7 +14,7 @@
 <script setup>
 import { Deferred } from '@inertiajs/vue3';
 import ModulLayout from '@/Layouts/ModulLayout.vue';
-import ResourceMangementTable from '@/Components/modules/ITOM/Resourcemanagement/ResourceMangementTable.vue';
+import ResourceMangementTable from '@/Components/modules/ITOM/Organization/SDM/ResourceMangementTable.vue';
 import TableSkeleton from '@/Components/Shared/TableSkeleton.vue';
 
 defineProps({

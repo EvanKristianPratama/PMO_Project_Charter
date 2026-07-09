@@ -2,7 +2,7 @@
     <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#171717]">
         <!-- Header -->
         <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-white/10">
-            <h2 class="text-sm font-semibold text-slate-900 dark:text-white">SDM List</h2>
+            <h2 class="text-sm font-semibold text-slate-900 dark:text-white">Daftar SDM</h2>
             <div class="flex items-center gap-3">
                 <input
                     v-model="searchQuery"
