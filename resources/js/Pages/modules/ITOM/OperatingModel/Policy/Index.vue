@@ -71,7 +71,7 @@ import {
 const props = defineProps({
     regulations: {
         type: Array,
-        required: true,
+        default: () => [],
     },
     selectedRegulationId: {
         type: Number,

@@ -472,6 +472,17 @@ const headingTree = computed(() => {
             if (uncategorized.children.length > 0) {
                 node.children.push(uncategorized);
             }
+        } else if (sec.children && sec.children.length > 0) {
+            sec.children.forEach((child) => {
+                node.children.push({
+                    id: child.id,
+                    label: child.label,
+                    level: 1,
+                    type: "sub-section",
+                    targetTab: child.targetTab,
+                    targetId: child.targetId || null,
+                });
+            });
         }
 
         list.push(node);

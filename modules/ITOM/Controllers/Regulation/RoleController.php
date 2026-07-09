@@ -19,13 +19,17 @@ class RoleController extends Controller
     protected $roleService;
 
     /**
-     * RoleController constructor.
-     *
-     * @param RoleService $roleService
+     * @var \App\Services\Regulation\GeneralPolicyService
      */
-    public function __construct(RoleService $roleService)
+    protected $generalPolicyService;
+
+    /**
+     * RoleController constructor.
+     */
+    public function __construct(RoleService $roleService, \App\Services\Regulation\GeneralPolicyService $generalPolicyService)
     {
         $this->roleService = $roleService;
+        $this->generalPolicyService = $generalPolicyService;
     }
 
     /**
@@ -34,9 +38,21 @@ class RoleController extends Controller
     public function index(Request $request): Response
     {
         $selectedRegulationId = $request->integer('regulation_id');
-        $data = $this->roleService->getRoleIndexData($selectedRegulationId);
+        if (!$selectedRegulationId) {
+            $selectedRegulationId = null;
+        }
 
-        return Inertia::render('modules/ITOM/Regulation/PolicyStandartProcedure/Guidance/Index', $data);
+        $policyData = $this->generalPolicyService->getGeneralPolicyData($selectedRegulationId);
+        $resolvedRegId = $policyData['selectedRegulationId'] ?? $selectedRegulationId;
+
+        return Inertia::render('modules/ITOM/Regulation/PolicyStandartProcedure/Guidance/Index', [
+            'selectedRegulationId' => $resolvedRegId,
+            'regulations' => Inertia::defer(fn() => $policyData['regulations']),
+            'policies' => Inertia::defer(fn() => $policyData['policies']),
+            'objectives' => Inertia::defer(fn() => $policyData['objectives']),
+            'roles' => Inertia::defer(fn() => $this->roleService->getRoleIndexData($resolvedRegId)['roles']),
+            'responsibles' => Inertia::defer(fn() => $this->roleService->getRoleIndexData($resolvedRegId)['responsibles']),
+        ]);
     }
 
     /**

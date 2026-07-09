@@ -143,31 +143,9 @@
             </div>
 
         <!-- Floating Action Buttons (Fixed Bottom Right) -->
-        <div class="fixed bottom-8 right-8 z-50 flex flex-col gap-4 print:hidden">
-            <!-- Scroll to Top Button -->
-            <button @click="scrollToTop" title="Kembali ke Atas"
-                class="group flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white/40 shadow-2xl backdrop-blur-md transition-all hover:bg-white hover:text-[#821f44] dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-[#1a1a1a] active:scale-95">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
-                    stroke="currentColor" class="w-5 h-5 transition-transform group-hover:-translate-y-0.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" />
-                </svg>
-            </button>
-
-            <!-- Print Button -->
-            <button @click="printDocument" title="Cetak PDF"
-                class="group flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white/40 shadow-2xl backdrop-blur-md transition-all hover:bg-white hover:text-[#821f44] dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-[#1a1a1a] active:scale-95">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                    stroke="currentColor" class="w-5 h-5 transition-transform group-hover:-translate-y-0.5">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M6.72 13.897l-1.2-6.82a2.25 2.25 0 012.23-2.64h9.5c1.12 0 2.07.82 2.23 1.94l.8 4.54a2.25 2.25 0 01-2.23 2.64H6.72z" />
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M19.5 12h-15m15 0a2.25 2.25 0 012.25 2.25v3a2.25 2.25 0 01-2.25 2.25h-15A2.25 2.25 0 013 17.25v-3A2.25 2.25 0 015.25 12h14.25z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 16.5h6m-6 3h6m-6-10.5h6m-6-3h6" />
-                </svg>
-            </button>
-
+        <div v-if="!readonly" class="fixed bottom-8 right-8 z-50 flex flex-col gap-4 print:hidden">
             <!-- Go to Management CRUD page -->
-            <Link v-if="!readonly" :href="route('itom.policy.general.manage', { regulation_id: selectedRegulationId })" title="Kelola Kebijakan"
+            <Link :href="route('itom.policy.general.manage', { regulation_id: selectedRegulationId })" title="Kelola Kebijakan"
                 class="group flex h-12 w-12 items-center justify-center rounded-full bg-[#821f44]/80 text-white shadow-2xl shadow-[#821f44]/30 backdrop-blur-md transition-all hover:bg-[#821f44] hover:shadow-[#821f44]/40 active:scale-95">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2"
                     stroke="currentColor" class="w-5 h-5 transition-transform group-hover:rotate-12">
@@ -176,7 +154,7 @@
             </Link>
 
             <!-- Go to Specific Policy CRUD page -->
-            <Link v-if="!readonly" :href="route('itom.policy.specific.manage', { regulation_id: selectedRegulationId })" title="Kelola Kebijakan Khusus"
+            <Link :href="route('itom.policy.specific.manage', { regulation_id: selectedRegulationId })" title="Kelola Kebijakan Khusus"
                 class="group flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/80 text-[#821f44] shadow-2xl shadow-yellow-500/30 backdrop-blur-md transition-all hover:bg-amber-50 hover:shadow-yellow-500/40 active:scale-95">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2"
                     stroke="currentColor" class="w-5 h-5 transition-transform group-hover:rotate-12">
@@ -230,6 +208,9 @@ function handleFastDocumentSwitch(regId) {
 }
 
 const activeRegulation = computed(() => {
+    if (!props.regulations) {
+        return null;
+    }
     if (!selectedRegulationId.value || props.regulations.length === 0) {
         return props.regulations[0] || null;
     }
@@ -238,6 +219,9 @@ const activeRegulation = computed(() => {
 
 const groupedObjectives = computed(() => {
     const groups = {};
+    if (!props.objectives) {
+        return groups;
+    }
     props.objectives.forEach(obj => {
         const domain = obj.domain || 'Domain Lainnya';
         if (!groups[domain]) {
@@ -290,17 +274,6 @@ function getLetterNumbering(index) {
 function formatDescription(text) {
     if (!text) return '';
     return text.replace(/\s+([a-z])([\.\)])\s+/g, '\n   $1$2 ');
-}
-
-function printDocument() {
-    window.print();
-}
-
-function scrollToTop() {
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
 }
 </script>
 

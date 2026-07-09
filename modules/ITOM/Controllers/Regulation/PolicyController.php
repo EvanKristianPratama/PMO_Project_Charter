@@ -209,7 +209,6 @@ class PolicyController extends Controller
     public function manage(Request $request): Response
     {
         $regulations = MstRegulation::orderBy('judul', 'asc')->get();
-        
         $selectedRegulationId = $request->integer('regulation_id');
         $selectedRegulation = null;
 
@@ -221,27 +220,15 @@ class PolicyController extends Controller
             $selectedRegulation = $regulations->first();
         }
 
-        $objectives = MstObjective::with(['practices' => function($query) {
-            $query->orderBy('practice_id', 'asc');
-        }])
-        ->where('regulation_id', $selectedRegulation?->id)
-        ->orderByRaw("
-            CASE 
-                WHEN objective_id LIKE 'EDM%' THEN 1
-                WHEN objective_id LIKE 'APO%' THEN 2
-                WHEN objective_id LIKE 'BAI%' THEN 3
-                WHEN objective_id LIKE 'DSS%' THEN 4
-                WHEN objective_id LIKE 'MEA%' THEN 5
-                ELSE 6
-            END ASC
-        ")
-        ->orderBy('objective_id', 'asc')
-        ->get();
+        $generalPolicyService = app(\App\Services\Regulation\GeneralPolicyService::class);
+        $policyData = $generalPolicyService->getGeneralPolicyData($selectedRegulation?->id);
 
-        return Inertia::render('modules/ITOM/Regulation/PolicyStandartProcedure/Guidance/Specific/Manage', [
-            'objectives' => $objectives,
-            'regulations' => $regulations,
+        return Inertia::render('modules/ITOM/Regulation/PolicyStandartProcedure/Guidance/Manage', [
             'selectedRegulationId' => $selectedRegulation?->id,
+            'activeTab' => 'specific',
+            'regulations' => Inertia::defer(fn() => $regulations),
+            'policies' => Inertia::defer(fn() => $policyData['policies']),
+            'objectives' => Inertia::defer(fn() => $policyData['objectives']),
         ]);
     }
 

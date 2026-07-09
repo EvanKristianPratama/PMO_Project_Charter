@@ -5,6 +5,7 @@ namespace Modules\ITOM\Controllers\Regulation;
 use App\Http\Controllers\Controller;
 use App\Models\MstGeneralPolicy;
 use App\Services\Regulation\GeneralPolicyService;
+use App\Services\Regulation\RoleService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -18,13 +19,17 @@ class GeneralPolicyController extends Controller
     protected $generalPolicyService;
 
     /**
-     * GeneralPolicyController constructor.
-     *
-     * @param GeneralPolicyService $generalPolicyService
+     * @var RoleService
      */
-    public function __construct(GeneralPolicyService $generalPolicyService)
+    protected $roleService;
+
+    /**
+     * GeneralPolicyController constructor.
+     */
+    public function __construct(GeneralPolicyService $generalPolicyService, RoleService $roleService)
     {
         $this->generalPolicyService = $generalPolicyService;
+        $this->roleService = $roleService;
     }
 
     /**
@@ -33,9 +38,21 @@ class GeneralPolicyController extends Controller
     public function index(Request $request): Response
     {
         $selectedRegulationId = $request->integer('regulation_id');
-        $data = $this->generalPolicyService->getGeneralPolicyData($selectedRegulationId);
+        if (!$selectedRegulationId) {
+            $selectedRegulationId = null;
+        }
 
-        return Inertia::render('modules/ITOM/Regulation/PolicyStandartProcedure/Guidance/Index', $data);
+        $policyData = $this->generalPolicyService->getGeneralPolicyData($selectedRegulationId);
+        $resolvedRegId = $policyData['selectedRegulationId'] ?? $selectedRegulationId;
+
+        return Inertia::render('modules/ITOM/Regulation/PolicyStandartProcedure/Guidance/Index', [
+            'selectedRegulationId' => $resolvedRegId,
+            'regulations' => Inertia::defer(fn() => $policyData['regulations']),
+            'policies' => Inertia::defer(fn() => $policyData['policies']),
+            'objectives' => Inertia::defer(fn() => $policyData['objectives']),
+            'roles' => Inertia::defer(fn() => $this->roleService->getRoleIndexData($resolvedRegId)['roles']),
+            'responsibles' => Inertia::defer(fn() => $this->roleService->getRoleIndexData($resolvedRegId)['responsibles']),
+        ]);
     }
 
     /**
@@ -44,9 +61,14 @@ class GeneralPolicyController extends Controller
     public function manage(Request $request): Response
     {
         $selectedRegulationId = $request->integer('regulation_id');
-        $data = $this->generalPolicyService->getGeneralPolicyData($selectedRegulationId);
+        $policyData = $this->generalPolicyService->getGeneralPolicyData($selectedRegulationId);
+        $resolvedRegId = $policyData['selectedRegulationId'] ?? $selectedRegulationId;
 
-        return Inertia::render('modules/ITOM/Regulation/PolicyStandartProcedure/Guidance/General/Manage', $data);
+        return Inertia::render('modules/ITOM/Regulation/PolicyStandartProcedure/Guidance/Manage', [
+            'selectedRegulationId' => $resolvedRegId,
+            'regulations' => Inertia::defer(fn() => $policyData['regulations']),
+            'policies' => Inertia::defer(fn() => $policyData['policies']),
+        ]);
     }
 
     /**
@@ -114,20 +136,46 @@ class GeneralPolicyController extends Controller
     /**
      * Display the Introduction chapter (Bab I).
      */
-    public function introduction(): Response
+    public function introduction(Request $request): Response
     {
-        $data = $this->generalPolicyService->getGuidanceChapterData();
+        $selectedRegulationId = $request->integer('regulation_id');
+        if (!$selectedRegulationId) {
+            $selectedRegulationId = null;
+        }
 
-        return Inertia::render('modules/ITOM/Regulation/PolicyStandartProcedure/Guidance/Index', $data);
+        $policyData = $this->generalPolicyService->getGeneralPolicyData($selectedRegulationId);
+        $resolvedRegId = $policyData['selectedRegulationId'] ?? $selectedRegulationId;
+
+        return Inertia::render('modules/ITOM/Regulation/PolicyStandartProcedure/Guidance/Index', [
+            'selectedRegulationId' => $resolvedRegId,
+            'regulations' => Inertia::defer(fn() => $policyData['regulations']),
+            'policies' => Inertia::defer(fn() => $policyData['policies']),
+            'objectives' => Inertia::defer(fn() => $policyData['objectives']),
+            'roles' => Inertia::defer(fn() => $this->roleService->getRoleIndexData($resolvedRegId)['roles']),
+            'responsibles' => Inertia::defer(fn() => $this->roleService->getRoleIndexData($resolvedRegId)['responsibles']),
+        ]);
     }
 
     /**
      * Display the Closing chapter (Bab V).
      */
-    public function closing(): Response
+    public function closing(Request $request): Response
     {
-        $data = $this->generalPolicyService->getGuidanceChapterData();
+        $selectedRegulationId = $request->integer('regulation_id');
+        if (!$selectedRegulationId) {
+            $selectedRegulationId = null;
+        }
 
-        return Inertia::render('modules/ITOM/Regulation/PolicyStandartProcedure/Guidance/Index', $data);
+        $policyData = $this->generalPolicyService->getGeneralPolicyData($selectedRegulationId);
+        $resolvedRegId = $policyData['selectedRegulationId'] ?? $selectedRegulationId;
+
+        return Inertia::render('modules/ITOM/Regulation/PolicyStandartProcedure/Guidance/Index', [
+            'selectedRegulationId' => $resolvedRegId,
+            'regulations' => Inertia::defer(fn() => $policyData['regulations']),
+            'policies' => Inertia::defer(fn() => $policyData['policies']),
+            'objectives' => Inertia::defer(fn() => $policyData['objectives']),
+            'roles' => Inertia::defer(fn() => $this->roleService->getRoleIndexData($resolvedRegId)['roles']),
+            'responsibles' => Inertia::defer(fn() => $this->roleService->getRoleIndexData($resolvedRegId)['responsibles']),
+        ]);
     }
 }
