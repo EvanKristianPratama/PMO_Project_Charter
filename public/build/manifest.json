@@ -2043,7 +2043,7 @@
     ]
   },
   "resources/js/Pages/modules/ITOM/BpmnWorkflow/Index.vue": {
-    "file": "assets/Index-CGTrpH2x.js",
+    "file": "assets/Index-kZuJBmtz.js",
     "name": "Index",
     "src": "resources/js/Pages/modules/ITOM/BpmnWorkflow/Index.vue",
     "isDynamicEntry": true,
@@ -2635,16 +2635,18 @@
     ]
   },
   "resources/js/Pages/modules/ITOM/OperatingModel/Model/Index.vue": {
-    "file": "assets/Index-BWuiVjjr.js",
+    "file": "assets/Index-D_oJ6yK4.js",
     "name": "Index",
     "src": "resources/js/Pages/modules/ITOM/OperatingModel/Model/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "_ModulLayout-COMVMRTi.js",
+      "resources/js/Pages/Placeholder/Index.vue",
       "__plugin-vue_export-helper-DlAUqK2U.js",
       "_vendor-vue-runtime-core-BGDWNuJN.js",
-      "_vendor-vue-runtime-dom-BgatCPeT.js",
       "_vendor-vue-shared-BC0FtGEN.js",
+      "_vendor-vue-reactivity-BTrCj1Uo.js",
+      "_vendor-vue-runtime-dom-BgatCPeT.js",
       "_inertia-Ca0NRTmw.js",
       "_vendor-qs-Cj-FTvzp.js",
       "_vendor-side-channel-BJMJn77Y.js",
@@ -2668,7 +2670,6 @@
       "_vendor-axios-KcFgf-gG.js",
       "_vendor-lodash-es-Bc66MGl4.js",
       "_vendor-laravel-precognition-CApEZYE-.js",
-      "_vendor-vue-reactivity-BTrCj1Uo.js",
       "_useDarkMode-yNbHwfc0.js",
       "_useRouteHelper-DPf4JdEH.js",
       "_BreadcrumbRight-DAOilO70.js",
@@ -2676,7 +2677,7 @@
       "_headlessui-BY7XwMWI.js"
     ],
     "css": [
-      "assets/Index-BG948G6y.css"
+      "assets/Index-5YZD63OP.css"
     ]
   },
   "resources/js/Pages/modules/ITOM/OperatingModel/Policy/Index.vue": {
@@ -5789,7 +5790,7 @@
     ]
   },
   "resources/js/Pages/modules/ITSP/StrategicHouse/Index.vue": {
-    "file": "assets/Index-BNciXkCO.js",
+    "file": "assets/Index-BZ-jXxH-.js",
     "name": "Index",
     "src": "resources/js/Pages/modules/ITSP/StrategicHouse/Index.vue",
     "isDynamicEntry": true,
@@ -6256,7 +6257,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-D258C6FH.js",
+    "file": "assets/app-Dw52vXhU.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,

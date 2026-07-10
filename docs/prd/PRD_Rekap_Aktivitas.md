@@ -2,7 +2,7 @@ Saya ingin membuat rekap aktivitas berdasarkan commit Git.
 
 Ambil semua commit dari SELURUH branch dalam repository, dengan kriteria berikut:
 
-* Range tanggal: [01/04/2026] sampai [30/04/2026] 
+* Range tanggal: [01/06/2026] sampai [30/06/2026] 
 * Author: "jethroGIT"
 
 Kemudian olah data commit tersebut menjadi laporan harian dengan format:

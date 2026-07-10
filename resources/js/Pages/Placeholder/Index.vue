@@ -1,5 +1,4 @@
 <template>
-    <ModulLayout :title="title">
         <div class="space-y-6 animate-fade-in-up">
             <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#171717]">
                 <h1 class="text-2xl font-bold text-slate-900 dark:text-white">{{ title }}</h1>
@@ -13,11 +12,9 @@
                 </p>
             </section>
         </div>
-    </ModulLayout>
 </template>
 
 <script setup>
-import ModulLayout from '@/Layouts/ModulLayout.vue';
 
 defineProps({
     title: {
