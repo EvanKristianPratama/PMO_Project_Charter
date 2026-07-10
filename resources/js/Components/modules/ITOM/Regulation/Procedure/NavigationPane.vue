@@ -8,7 +8,7 @@
             <div
                 class="p-3 border-b border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#1b1b1b]"
             >
-                <div class="relative flex items-center">
+                <div class="relative flex items-center gap-1.5">
                     <input
                         type="text"
                         v-model="searchQuery"
@@ -17,6 +17,7 @@
                     />
                     <div
                         class="absolute right-0 flex items-center pr-2.5 space-x-1 text-slate-400 dark:text-slate-500"
+                        :class="isHeaderVisible !== undefined ? 'right-8' : 'right-0'"
                     >
                         <svg
                             class="w-3.5 h-3.5 cursor-pointer hover:text-slate-600 dark:hover:text-slate-300"
@@ -48,6 +49,59 @@
                             />
                         </svg>
                     </div>
+                    <!-- Document Header Toggle (compact) -->
+                    <button
+                        @click="toggleHeaderVisibility"
+                        class="shrink-0 inline-flex items-center justify-center w-7 h-7 border border-slate-200 dark:border-white/10 bg-transparent rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 transition active:scale-95 cursor-pointer"
+                        :title="effectiveHeaderVisible ? 'Hide Document Header' : 'Show Document Header'"
+                    >
+                        <span
+                            class="w-1.5 h-1.5 rounded-full"
+                            :class="
+                                effectiveHeaderVisible
+                                    ? 'bg-emerald-500'
+                                    : 'bg-slate-300 dark:bg-zinc-700'
+                            "
+                        ></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Related Documents Tree (Parent/Child Hierarchy) -->
+            <div
+                v-if="relatedRegulationTree.length > 0"
+                class="border-b border-slate-200 dark:border-white/10"
+            >
+                <button
+                    @click="isRelatedDocsExpanded = !isRelatedDocsExpanded"
+                    class="w-full flex items-center justify-between px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 transition select-none"
+                >
+                    <span class="flex items-center gap-1.5">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                        </svg>
+                        Dokumen Terkait
+                        <span class="rounded-full bg-slate-200 dark:bg-white/10 px-1.5 py-0 text-[9px] font-extrabold text-slate-600 dark:text-slate-300">{{ flatRegulationCount }}</span>
+                    </span>
+                    <svg
+                        class="w-2.5 h-2.5 transition-transform duration-200"
+                        :class="{ 'rotate-180': isRelatedDocsExpanded }"
+                        fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"
+                    >
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    </svg>
+                </button>
+                <div v-show="isRelatedDocsExpanded" class="px-2 pb-2 space-y-0.5 max-h-48 overflow-y-auto">
+                    <template v-for="node in relatedRegulationTree" :key="node.id">
+                        <RegTreeNode
+                            :node="node"
+                            :depth="0"
+                            :active-regulation-id="activeRegulationId"
+                            :expanded-reg-nodes="expandedRegNodes"
+                            @toggle="toggleRegNode"
+                            @navigate="handleRegNavigate"
+                        />
+                    </template>
                 </div>
             </div>
 
@@ -330,7 +384,98 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, watch, defineComponent, h } from "vue";
+import { router } from "@inertiajs/vue3";
+
+// Recursive tree node component for regulation hierarchy
+const RegTreeNode = defineComponent({
+    name: 'RegTreeNode',
+    props: {
+        node: { type: Object, required: true },
+        depth: { type: Number, default: 0 },
+        activeRegulationId: { type: Number, default: null },
+        expandedRegNodes: { type: Object, default: () => ({}) },
+    },
+    emits: ['toggle', 'navigate'],
+    setup(props, { emit }) {
+        const isActive = computed(() => props.node.id === props.activeRegulationId);
+        const isExpanded = computed(() => !!props.expandedRegNodes[props.node.id]);
+        const hasChildren = computed(() => props.node.children && props.node.children.length > 0);
+
+        return () => {
+            const children = [];
+
+            // The row itself
+            children.push(
+                h('div', {
+                    class: [
+                        'flex items-center py-1.5 px-2 rounded cursor-pointer transition-colors group select-none text-[11px]',
+                        isActive.value
+                            ? 'bg-blue-50/70 text-blue-900 font-semibold dark:bg-blue-950/20 dark:text-blue-200'
+                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5',
+                    ],
+                    style: { paddingLeft: `${props.depth * 12 + 6}px` },
+                    onClick: () => emit('navigate', props.node.id),
+                }, [
+                    // Toggle icon
+                    hasChildren.value
+                        ? h('span', {
+                            class: 'w-4 h-4 flex items-center justify-center mr-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded shrink-0',
+                            onClick: (e) => { e.stopPropagation(); emit('toggle', props.node.id); },
+                        }, [
+                            h('svg', {
+                                class: ['w-2.5 h-2.5 fill-current transition-transform duration-150', isExpanded.value ? '' : '-rotate-90'],
+                                viewBox: '0 0 24 24',
+                            }, [h('path', { d: 'M7 10l5 5 5-5z' })])
+                        ])
+                        : h('span', {
+                            class: 'w-4 h-4 flex items-center justify-center mr-1 shrink-0',
+                        }, [
+                            h('span', { class: 'w-1 h-1 rounded-full bg-slate-300 dark:bg-zinc-700' })
+                        ]),
+                    // Tipe badge
+                    props.node.tipe
+                        ? h('span', {
+                            class: [
+                                'shrink-0 mr-1.5 rounded px-1 py-0 text-[8px] font-bold uppercase leading-tight',
+                                props.node.tipe === 'Policy'
+                                    ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-400'
+                                    : props.node.tipe === 'Procedure'
+                                        ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400'
+                                        : props.node.tipe === 'Standart'
+                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400'
+                                            : 'bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-400',
+                            ],
+                        }, props.node.tipe.substring(0, 3).toUpperCase())
+                        : null,
+                    // Label
+                    h('span', {
+                        class: ['whitespace-normal flex-1 leading-tight', isActive.value ? 'font-semibold' : 'font-medium'],
+                        title: props.node.judul,
+                    }, props.node.judul || 'Untitled'),
+                ])
+            );
+
+            // Recursively render children
+            if (hasChildren.value && isExpanded.value) {
+                props.node.children.forEach(child => {
+                    children.push(
+                        h(RegTreeNode, {
+                            node: child,
+                            depth: props.depth + 1,
+                            activeRegulationId: props.activeRegulationId,
+                            expandedRegNodes: props.expandedRegNodes,
+                            onToggle: (id) => emit('toggle', id),
+                            onNavigate: (id) => emit('navigate', id),
+                        })
+                    );
+                });
+            }
+
+            return h('div', null, children);
+        };
+    },
+});
 
 const props = defineProps({
     actors: {
@@ -361,13 +506,48 @@ const props = defineProps({
         type: [String, Number],
         default: null,
     },
+    isHeaderVisible: {
+        type: Boolean,
+        default: undefined,
+    },
+    regulations: {
+        type: Array,
+        default: () => [],
+    },
+    activeRegulationId: {
+        type: Number,
+        default: null,
+    },
 });
 
-const emit = defineEmits(["update:activeTab", "update:activeSubId"]);
+const emit = defineEmits(["update:activeTab", "update:activeSubId", "update:isHeaderVisible"]);
 
 const searchQuery = ref("");
 const activeNavTab = ref("headings");
 const expandedNodes = ref({});
+
+// ── Internal Header Visibility State ──
+// Jika parent tidak mengirim prop isHeaderVisible (undefined), kelola secara internal
+// Jika parent mengirim prop, sync dengan parent via v-model
+const internalHeaderVisible = ref(true);
+const effectiveHeaderVisible = computed(() => {
+    if (props.isHeaderVisible !== undefined) {
+        return props.isHeaderVisible;
+    }
+    return internalHeaderVisible.value;
+});
+function toggleHeaderVisibility() {
+    const newVal = !effectiveHeaderVisible.value;
+    if (props.isHeaderVisible !== undefined) {
+        emit('update:isHeaderVisible', newVal);
+    } else {
+        internalHeaderVisible.value = newVal;
+    }
+}
+
+// ── Related Regulations Tree State ──
+const isRelatedDocsExpanded = ref(true);
+const expandedRegNodes = ref({});
 
 const initExpandedNodes = () => {
     props.allSections.forEach((sec) => {
@@ -383,14 +563,133 @@ const initExpandedNodes = () => {
     expandedNodes.value["category_uncategorized"] = true;
 };
 
+// ── Related Regulations Tree ──
+// Hanya menampilkan tree dari regulasi yang terkait dengan activeRegulationId
+// melalui relasi parent/child (seluruh hirarki)
+const relatedRegulationTree = computed(() => {
+    if (!props.activeRegulationId || props.regulations.length === 0) return [];
+
+    // 1. Kumpulkan semua ID dalam hirarki (ancestors + descendants) dari activeRegulation
+    const allRegs = props.regulations;
+    const relatedIds = new Set();
+
+    // Traverse ke atas (ancestors)
+    let currentId = props.activeRegulationId;
+    while (currentId) {
+        relatedIds.add(currentId);
+        const reg = allRegs.find(r => r.id === currentId);
+        if (reg?.parent_id) {
+            currentId = reg.parent_id;
+        } else {
+            break;
+        }
+    }
+
+    // Traverse ke bawah (descendants) dari setiap node yang sudah dikumpulkan
+    const collectDescendants = (parentId) => {
+        allRegs.forEach(reg => {
+            if (reg.parent_id === parentId && !relatedIds.has(reg.id)) {
+                relatedIds.add(reg.id);
+                collectDescendants(reg.id);
+            }
+        });
+    };
+    // Collect descendants dari semua node yang sudah ada di relatedIds
+    [...relatedIds].forEach(id => collectDescendants(id));
+
+    // 2. Filter hanya regulasi yang termasuk dalam hirarki
+    const filteredRegs = allRegs.filter(reg => relatedIds.has(reg.id));
+
+    // 3. Build tree dari filteredRegs
+    const map = {};
+    const roots = [];
+
+    filteredRegs.forEach(reg => {
+        map[reg.id] = {
+            id: reg.id,
+            judul: reg.judul,
+            tipe: reg.tipe,
+            nomor: reg.nomor,
+            children: [],
+        };
+    });
+
+    filteredRegs.forEach(reg => {
+        const node = map[reg.id];
+        if (reg.parent_id && map[reg.parent_id]) {
+            map[reg.parent_id].children.push(node);
+        } else {
+            roots.push(node);
+        }
+    });
+
+    return roots;
+});
+
+const flatRegulationCount = computed(() => {
+    let count = 0;
+    const countNodes = (nodes) => {
+        nodes.forEach(node => {
+            count++;
+            if (node.children && node.children.length > 0) {
+                countNodes(node.children);
+            }
+        });
+    };
+    countNodes(relatedRegulationTree.value);
+    return count;
+});
+
+function toggleRegNode(id) {
+    expandedRegNodes.value = {
+        ...expandedRegNodes.value,
+        [id]: !expandedRegNodes.value[id],
+    };
+}
+
+function handleRegNavigate(id) {
+    const reg = props.regulations.find(r => r.id === id);
+    if (!reg) return;
+
+    const isProcedure = String(reg.tipe || "").toLowerCase() === "procedure";
+    const routeName = isProcedure
+        ? "itom.policy.regulation.procedure.index"
+        : "itom.policy.general.index";
+
+    router.visit(route(routeName, { regulation_id: reg.id }));
+}
+
+const initExpandedRegNodes = () => {
+    const expanded = {};
+    const expandParents = (nodes) => {
+        nodes.forEach(node => {
+            if (node.children && node.children.length > 0) {
+                expanded[node.id] = true;
+                expandParents(node.children);
+            }
+        });
+    };
+    expandParents(relatedRegulationTree.value);
+    expandedRegNodes.value = expanded;
+};
+
 onMounted(() => {
     initExpandedNodes();
+    initExpandedRegNodes();
 });
 
 watch(
     () => [props.allSections, props.categories],
     () => {
         initExpandedNodes();
+    },
+    { deep: true }
+);
+
+watch(
+    () => props.regulations,
+    () => {
+        initExpandedRegNodes();
     },
     { deep: true }
 );

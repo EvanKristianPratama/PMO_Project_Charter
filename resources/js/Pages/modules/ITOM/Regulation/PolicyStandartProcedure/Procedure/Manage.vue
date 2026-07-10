@@ -113,6 +113,8 @@
                     :categories="categories"
                     :tko-sections="tkoSections"
                     :all-sections="allSections"
+                    :regulations="regulations"
+                    :active-regulation-id="activeRegulation?.id"
                     v-model:active-tab="activeTab"
                     v-model:active-sub-id="activeSubId"
                 />

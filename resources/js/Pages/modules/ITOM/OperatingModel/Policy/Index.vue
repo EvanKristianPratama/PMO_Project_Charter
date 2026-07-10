@@ -1,48 +1,39 @@
 <template>
     <ModulLayout :title="layoutTitle">
         <div class="space-y-6">
-            <Deferred :data="['policies', 'objectives', 'roles', 'responsibles', 'regulations']">
+            <Deferred :data="['policies', 'objectives', 'roles', 'responsibles', 'regulations', 'allRegulations']">
                 <template #fallback>
                     <TableSkeleton />
                 </template>
 
                 <!-- Regulation Tabs Switcher -->
                 <div class="flex flex-col justify-between dark:border-white/10 sm:flex-row sm:items-center -mt-5">
-                    <div class="flex items-center gap-1.5 rounded-lg bg-slate-100 p-1 dark:bg-white/5 self-start sm:self-auto">
-                        <button
-                            v-for="reg in regulations"
-                            :key="reg.id"
-                            type="button"
-                            class="rounded-md px-4 py-1.5 text-xs font-semibold transition-all duration-200"
-                            :class="
-                                reg.id === selectedRegulationId
+                    <div
+                        class="flex items-center gap-1.5 rounded-lg bg-slate-100 p-1 dark:bg-white/5 self-start sm:self-auto">
+                        <button v-for="reg in regulations" :key="reg.id" type="button"
+                            class="rounded-md px-4 py-1.5 text-xs font-semibold transition-all duration-200" :class="reg.id === selectedRegulationId
                                     ? 'bg-white text-[#0b2545] shadow-sm dark:bg-[#1A1A1A] dark:text-blue-400'
                                     : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
-                            "
-                            @click="switchRegulation(reg.id)"
-                        >
+                                " @click="switchRegulation(reg.id)">
                             {{ toTitleCase(reg.judul) }}
                         </button>
                     </div>
                 </div>
 
                 <!-- Word-style Navigation & Document Layout -->
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start mt-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start -mt-4">
                     <!-- Sidebar: MS Word Style Navigation Pane -->
-                    <NavigationPane
-                        :all-sections="chapters"
-                        :active-tab="activeChapter"
+                    <NavigationPane :all-sections="chapters" :active-tab="activeChapter"
+                        :regulations="allRegulations"
+                        :active-regulation-id="activeReg?.id"
                         @update:active-tab="switchChapter"
-                    />
+                        v-model:isHeaderVisible="showHeader" />
 
                     <!-- Main Document View -->
                     <main class="lg:col-span-8 xl:col-span-9 space-y-6 w-full">
                         <!-- Content Area -->
                         <div class="animate-fade-in-up">
-                            <component
-                                :is="activeComponent"
-                                v-bind="componentProps"
-                            />
+                            <component :is="activeComponent" v-bind="componentProps" />
                         </div>
                     </main>
                 </div>
@@ -61,15 +52,19 @@ import Introduction from '@/Components/modules/ITOM/Regulation/Policy/Introducti
 import General from '@/Components/modules/ITOM/Regulation/Policy/General.vue';
 import Role from '@/Components/modules/ITOM/Regulation/Policy/Role.vue';
 import Closing from '@/Components/modules/ITOM/Regulation/Policy/Closing.vue';
-import { 
-    BookOpenIcon, 
-    ShieldCheckIcon, 
-    UsersIcon, 
-    FlagIcon 
+import {
+    BookOpenIcon,
+    ShieldCheckIcon,
+    UsersIcon,
+    FlagIcon
 } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
     regulations: {
+        type: Array,
+        default: () => [],
+    },
+    allRegulations: {
         type: Array,
         default: () => [],
     },
@@ -113,6 +108,7 @@ const layoutTitle = computed(() => {
     const regTitle = activeReg.value ? activeReg.value.judul : 'Policy';
     return `Operating Model - Policy: ${regTitle}`;
 });
+const showHeader = ref(true);
 const activeChapter = ref(props.activeChapter || 'bab1');
 
 watch(() => props.activeChapter, (newVal) => {
@@ -151,6 +147,7 @@ const componentProps = computed(() => {
         regulations: props.regulations,
         selectedRegulationId: props.selectedRegulationId,
         readonly: true,
+        isHeaderVisible: showHeader.value,
     };
 });
 
@@ -179,6 +176,7 @@ function switchChapter(chapterKey) {
         opacity: 0;
         transform: translateY(12px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -189,6 +187,7 @@ function switchChapter(chapterKey) {
 .scrollbar-none::-webkit-scrollbar {
     display: none;
 }
+
 .scrollbar-none {
     -ms-overflow-style: none;
     scrollbar-width: none;

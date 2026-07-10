@@ -66,6 +66,8 @@
                     <NavigationPane
                         v-if="isSidebarVisible"
                         :all-sections="chapters"
+                        :regulations="regulations"
+                        :active-regulation-id="activeReg?.id"
                         :active-tab="activeChapter"
                         @update:active-tab="switchChapter"
                     />

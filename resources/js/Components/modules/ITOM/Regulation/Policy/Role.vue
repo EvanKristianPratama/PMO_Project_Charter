@@ -73,11 +73,11 @@
             </component>
 
             <!-- 1. A4 Portrait Document Page Preview -->
-            <div v-show="activeSubMenu === 'document'" class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 md:p-16 rounded-2xl relative text-justify print:shadow-none print:border-none print:p-0 print:m-0"
+            <div v-show="activeSubMenu === 'document'" class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-4 rounded-2xl relative text-justify print:shadow-none print:border-none print:p-0 print:m-0"
                 style="font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.5; color: #1e293b;">
                 
                 <!-- Formal Pertamina Document Grid Header -->
-                <PertaminaDocumentHeader :activeRegulation="activeRegulation" class="mb-8" />
+                <PertaminaDocumentHeader v-if="isHeaderVisible" :activeRegulation="activeRegulation" class="mb-8" />
 
                 <!-- 2. Document Title Section -->
                 <div class="mt-8 text-center space-y-2 relative z-10">
@@ -775,6 +775,10 @@ const props = defineProps({
     readonly: {
         type: Boolean,
         default: false,
+    },
+    isHeaderVisible: {
+        type: Boolean,
+        default: true,
     },
 });
 

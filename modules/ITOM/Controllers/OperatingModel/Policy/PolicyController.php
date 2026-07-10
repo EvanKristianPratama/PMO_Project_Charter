@@ -53,8 +53,12 @@ class PolicyController extends Controller
             'activeChapter' => $activeChapter,
 
             // Defer all database-bound data
-            'regulations' => Inertia::defer(fn () => MstRegulation::select(['id', 'judul', 'nomor', 'tipe', 'owner', 'revisi', 'berlaku'])
+            'regulations' => Inertia::defer(fn () => MstRegulation::select(['id', 'judul', 'nomor', 'tipe', 'owner', 'revisi', 'berlaku', 'parent_id'])
                 ->whereIn('id', [1, 4])
+                ->orderBy('id', 'asc')
+                ->get()),
+            // Data lengkap semua regulasi untuk tree dokumen terkait di NavigationPane
+            'allRegulations' => Inertia::defer(fn () => MstRegulation::select(['id', 'judul', 'nomor', 'tipe', 'owner', 'revisi', 'berlaku', 'parent_id'])
                 ->orderBy('id', 'asc')
                 ->get()),
             'policies' => Inertia::defer(fn () => $this->generalPolicyService->getGeneralPolicyData($selectedRegulationId)['policies']),

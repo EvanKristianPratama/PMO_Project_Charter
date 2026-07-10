@@ -31,6 +31,8 @@
                     v-slot:default
                     v-if="isSidebarVisible"
                     :all-sections="navigationSections"
+                    :regulations="regulations"
+                    :active-regulation-id="Number(selectedRegulationId)"
                     v-model:active-tab="activeTab"
                     :active-sub-id="null"
                 />
