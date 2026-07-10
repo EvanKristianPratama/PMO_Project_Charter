@@ -21,7 +21,7 @@
                             "
                             @click="switchRegulation(reg.id)"
                         >
-                            {{ reg.judul }}
+                            {{ toTitleCase(reg.judul) }}
                         </button>
                     </div>
                 </div>
@@ -98,6 +98,11 @@ const props = defineProps({
         default: () => [],
     },
 });
+
+function toTitleCase(str) {
+    if (!str) return '';
+    return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase());
+}
 
 const activeReg = computed(() => {
     if (!props.regulations) return null;

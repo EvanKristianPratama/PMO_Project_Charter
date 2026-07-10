@@ -1,7 +1,7 @@
 <template>
     <!-- Sidebar: MS Word Style Navigation Pane -->
     <aside
-        class="lg:col-span-4 xl:col-span-3 bg-white dark:bg-[#171717] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm overflow-hidden lg:sticky lg:top-32 z-10 print:hidden"
+        class="lg:col-span-3 xl:col-span-2 bg-white dark:bg-[#171717] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm overflow-hidden lg:sticky lg:top-32 z-10 print:hidden"
     >
         <div class="flex flex-col h-[580px] max-h-[calc(100vh-14rem)]">
             <!-- Search Bar -->
@@ -136,7 +136,7 @@
                                 </template>
                             </span>
                             <span
-                                class="truncate flex-1 font-medium"
+                                class="whitespace-normal flex-1 font-medium"
                                 :title="node.label"
                                 >{{ node.label }}</span
                             >
@@ -201,7 +201,7 @@
                                         </template>
                                     </span>
                                     <span
-                                        class="truncate flex-1 text-[11px]"
+                                        class="whitespace-normal flex-1 text-[11px]"
                                         :title="child.label"
                                         >{{ child.label }}</span
                                     >
@@ -239,7 +239,7 @@
                                             ></span>
                                         </span>
                                         <span
-                                            class="truncate flex-1 text-[10px]"
+                                            class="whitespace-normal flex-1 text-[10px]"
                                             :title="gchild.label"
                                             >{{ gchild.label }}</span
                                         >
@@ -270,7 +270,7 @@
                             class="flex-1 flex items-center justify-center overflow-hidden"
                         >
                             <span
-                                class="text-[9px] font-medium text-slate-700 dark:text-slate-300 line-clamp-3 leading-tight"
+                                class="text-[9px] font-medium text-slate-700 dark:text-slate-300 leading-tight"
                             >
                                 {{ sec.labelShort || sec.label }}
                             </span>
@@ -308,19 +308,19 @@
                             class="w-full text-left p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded border border-slate-100 dark:border-white/5 transition-colors block"
                         >
                             <div
-                                class="text-[9px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider truncate"
+                                class="text-[9px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider whitespace-normal"
                             >
                                 {{ match.sectionName }}
                             </div>
                             <div
-                                class="text-[11px] text-slate-700 dark:text-slate-300 font-semibold truncate mt-0.5"
+                                class="text-[11px] text-slate-700 dark:text-slate-300 font-semibold whitespace-normal mt-0.5"
                             >
                                 {{ match.title }}
                             </div>
-                            <div
-                                class="text-[10px] text-slate-500 dark:text-slate-400 italic mt-0.5 line-clamp-2 leading-relaxed"
-                                v-html="highlightText(match.preview, searchQuery)"
-                            ></div>
+                                <div
+                                    class="text-[10px] text-slate-500 dark:text-slate-400 italic mt-0.5 leading-relaxed"
+                                    v-html="highlightText(match.preview, searchQuery)"
+                                ></div>
                         </button>
                     </div>
                 </div>
