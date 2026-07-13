@@ -1,5 +1,5 @@
 <template>
-    <div class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 md:p-16 rounded-2xl font-sans animate-fade-in-up">
+    <div class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-6 sm:p-8 md:p-10 rounded-2xl font-sans animate-fade-in-up">
         <PertaminaDocumentHeader v-if="isHeaderVisible" :activeRegulation="activeRegulation" />
 
         <div class="mt-10 flex items-center justify-between gap-4 border-b border-slate-900/10 pb-2 dark:border-white/10">

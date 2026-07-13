@@ -1,7 +1,7 @@
 <template>
     <!-- Sidebar: MS Word Style Navigation Pane -->
     <aside
-        class="lg:col-span-3 xl:col-span-2 bg-white dark:bg-[#171717] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm overflow-hidden lg:sticky lg:top-32 z-10 print:hidden"
+        class="lg:col-span-3 bg-white dark:bg-[#171717] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm overflow-hidden lg:sticky lg:top-32 z-10 print:hidden"
     >
         <div class="flex flex-col h-[580px] max-h-[calc(100vh-14rem)]">
             <!-- Search Bar -->

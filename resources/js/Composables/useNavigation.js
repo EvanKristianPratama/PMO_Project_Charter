@@ -490,16 +490,6 @@ export function useNavigation() {
                                 "/operating-model/stk",
                             ),
                     },
-                    {
-                        label: "RACI Analysis",
-                        href: safeRoute("itom.operating-model.raci-analysis.index"),
-                        icon: DocumentTextIcon,
-                        active: (url) =>
-                            (url || "").includes(
-                                "/operating-model/raci-analysis",
-                            ),
-                        children: [],
-                    },
                 ],
             },
 

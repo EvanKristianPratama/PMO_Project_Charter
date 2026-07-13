@@ -18,7 +18,7 @@
 
             <!-- A4 Document Page Preview (Pure Word Style Document, NO watermark) -->
             <div
-                class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 md:p-16 rounded-2xl relative font-sans text-slate-800 dark:text-slate-200 print:shadow-none print:border-none print:p-0 print:m-0">
+                class="max-w-4xl mx-auto bg-white dark:bg-[#1a1a1a] shadow-xl border border-slate-200 dark:border-white/10 p-6 sm:p-8 md:p-10 rounded-2xl relative font-sans text-slate-800 dark:text-slate-200 print:shadow-none print:border-none print:p-0 print:m-0">
                 <!-- Formal Pertamina Document Grid Header -->
                 <PertaminaDocumentHeader :activeRegulation="activeRegulation" class="flex-1" />
 

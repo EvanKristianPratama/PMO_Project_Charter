@@ -14,7 +14,7 @@ use Modules\ITOM\Controllers\OperatingModel\ItFunction\ItFunctionController;
 use Modules\ITOM\Controllers\OperatingModel\ItGovarnence\ItGovarnenceController;
 use Modules\ITOM\Controllers\OperatingModel\ItManagement\ItManagementController;
 use Modules\ITOM\Controllers\OperatingModel\Model\ModelController;
-use Modules\ITOM\Controllers\OperatingModel\RaciAnalysis\RaciAnalysisController;
+use Modules\ITOM\Controllers\OperatingModel\Policy\RaciAnalysis\RaciAnalysisController;
 use Modules\ITOM\Controllers\OperatingModel\STK\StkController;
 use Modules\ITOM\Controllers\Organization\BOD\BodController;
 use Modules\ITOM\Controllers\Organization\Company\CompanyController;

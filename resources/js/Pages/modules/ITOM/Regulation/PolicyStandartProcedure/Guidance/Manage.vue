@@ -38,7 +38,7 @@
                 />
 
                 <!-- Main Editor/Table Content -->
-                <div :class="isSidebarVisible ? 'lg:col-span-8 xl:col-span-9' : 'lg:col-span-12'" class="space-y-6">
+                <div :class="isSidebarVisible ? 'lg:col-span-9' : 'lg:col-span-12'" class="space-y-6">
                     <!-- Navigation Tabs (Only visible when Navigasi Pane is hidden) -->
                     <div v-if="!isSidebarVisible" class="border-b border-slate-200 dark:border-white/10 flex gap-6 px-1">
                         <button @click="activeTab = 'general'" :class="[

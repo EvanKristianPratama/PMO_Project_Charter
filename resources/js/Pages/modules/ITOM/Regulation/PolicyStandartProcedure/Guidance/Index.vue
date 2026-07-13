@@ -73,7 +73,7 @@
                     />
 
                     <!-- Main Document View -->
-                    <main :class="isSidebarVisible ? 'lg:col-span-8 xl:col-span-9' : 'lg:col-span-12'" class="space-y-6 w-full">
+                    <main :class="isSidebarVisible ? 'lg:col-span-9' : 'lg:col-span-12'" class="space-y-6 w-full">
                         <!-- Content Area -->
                         <div class="animate-fade-in-up">
                             <component :is="activeComponent" v-bind="$props" />

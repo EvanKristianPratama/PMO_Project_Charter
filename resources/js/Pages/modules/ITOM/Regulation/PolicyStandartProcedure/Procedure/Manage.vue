@@ -123,7 +123,7 @@
                 <main
                     :class="
                         isSidebarVisible
-                            ? 'lg:col-span-8 xl:col-span-9'
+                            ? 'lg:col-span-9'
                             : 'lg:col-span-12'
                     "
                     class="space-y-6"
