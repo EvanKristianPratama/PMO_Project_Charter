@@ -3,11 +3,11 @@
 namespace Modules\ITOM\Controllers\Organization\StructuralOrganization;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstCompany;
+use Modules\ITOM\Models\MstCompany;
 use App\Models\Groub;
-use App\Models\MstBod;
-use App\Models\MstRegulation;
-use App\Services\Organization\StructuralOrganization\StructuralOrganizationService;
+use Modules\ITOM\Models\MstBod;
+use Modules\ITOM\Models\MstRegulation;
+use Modules\ITOM\Services\Organization\StructuralOrganization\StructuralOrganizationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

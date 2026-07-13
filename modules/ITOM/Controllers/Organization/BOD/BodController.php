@@ -3,9 +3,9 @@
 namespace Modules\ITOM\Controllers\Organization\BOD;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstCompany;
-use App\Models\MstBod;
-use App\Services\Organization\BOD\BodService;
+use Modules\ITOM\Models\MstCompany;
+use Modules\ITOM\Models\MstBod;
+use Modules\ITOM\Services\Organization\BOD\BodService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

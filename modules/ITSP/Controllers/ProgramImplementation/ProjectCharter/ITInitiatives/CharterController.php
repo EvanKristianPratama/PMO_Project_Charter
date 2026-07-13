@@ -4,9 +4,9 @@ namespace Modules\ITSP\Controllers\ProgramImplementation\ProjectCharter\ITInitia
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProgramImplementation\ProjectCharter\ITInitiatives\StoreProjectCharterRequest;
-use App\Models\TrsProjectCharter;
-use App\Models\TrsProject;
-use App\Services\ProgramImplementation\ProjectCharter\ITInitiatives\ProjectCharterService;
+use Modules\ITSP\Models\TrsProjectCharter;
+use Modules\ITSP\Models\TrsProject;
+use Modules\ITSP\Services\ProgramImplementation\ProjectCharter\ITInitiatives\ProjectCharterService;
 use Illuminate\Http\RedirectResponse;
 
 class CharterController extends Controller

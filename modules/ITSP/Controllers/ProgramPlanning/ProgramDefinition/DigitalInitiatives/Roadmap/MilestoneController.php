@@ -3,7 +3,7 @@
 namespace Modules\ITSP\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Roadmap;
 
 use App\Http\Controllers\Controller;
-use App\Models\TrsMasterMilestone;
+use Modules\ITSP\Models\TrsMasterMilestone;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;

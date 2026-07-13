@@ -3,11 +3,11 @@
 namespace Modules\ITSP\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Appendix;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstCoe;
-use App\Models\MstInitiative;
-use App\Models\MstScSource;
-use App\Models\Theme;
-use App\Models\TrsScInitiative;
+use Modules\ITSP\Models\MstCoe;
+use Modules\ITSP\Models\MstInitiative;
+use Modules\ITSP\Models\MstScSource;
+use Modules\ITSP\Models\Theme;
+use Modules\ITSP\Models\TrsScInitiative;
 use App\Models\TrsOrganization;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;

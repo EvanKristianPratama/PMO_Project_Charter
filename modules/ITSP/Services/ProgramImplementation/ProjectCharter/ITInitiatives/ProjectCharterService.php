@@ -1,0 +1,147 @@
+<?php
+
+namespace Modules\ITSP\Services\ProgramImplementation\ProjectCharter\ITInitiatives;
+
+use Modules\ITSP\Models\TrsProject;
+use Modules\ITSP\Models\TrsProjectCharter;
+use Illuminate\Support\Arr;
+
+class ProjectCharterService
+{
+    public function storeProjectCharter(TrsProject $project, array $payload): string
+    {
+        $versionLabel = $this->resolveVersionLabel(
+            trim((string) ($payload['version_label'] ?? '')),
+            sprintf('v%d', $project->charters()->count() + 1)
+        );
+        $charterPayload = $this->charterPayload($payload);
+
+        $this->syncProjectSummaryFields($project, $payload);
+
+        $charter = $project->charters()->create([
+            ...$charterPayload,
+            'version_label' => $versionLabel,
+        ]);
+
+        $this->syncPicMappings($charter, $payload);
+
+        return $versionLabel;
+    }
+
+    public function updateProjectCharter(TrsProject $project, TrsProjectCharter $charter, array $payload): string
+    {
+        abort_if((int) $charter->project_id !== (int) $project->id, 403, 'Charter does not belong to this project.');
+
+        $versionLabel = $this->resolveVersionLabel(
+            trim((string) ($payload['version_label'] ?? '')),
+            $charter->version_label ?? sprintf('v%d', $project->charters()->count())
+        );
+        $charterPayload = $this->charterPayload($payload);
+
+        $this->syncProjectSummaryFields($project, $payload);
+
+        $charter->update([
+            ...$charterPayload,
+            'version_label' => $versionLabel,
+        ]);
+
+        $this->syncPicMappings($charter, $payload);
+
+        return $versionLabel;
+    }
+
+    private function syncPicMappings(TrsProjectCharter $charter, array $payload): void
+    {
+        // Unified mapping for Sponsor, Owner, Leader at Project level
+        \Modules\ITSP\Models\TrsMapPicProject::updateOrCreate(
+            ['project_id' => $charter->project_id],
+            [
+                'project_sponsor' => $payload['pic_sponsor_id'] ?? null,
+                'project_owner'   => $payload['pic_owner_id'] ?? null,
+                'project_leader'  => $payload['pic_leader_id'] ?? null,
+            ]
+        );
+
+        // Cross Function mapping at Project level (pc_id = project_id)
+        if (isset($payload['pic_cross_function_ids']) && is_array($payload['pic_cross_function_ids'])) {
+            $crossFunctionStatus = $this->crossFunctionStatusForCharter($charter);
+
+            \Modules\ITOM\Models\TrsMapCrossFunction::query()
+                ->where('pc_id', $charter->project_id)
+                ->where('status', $crossFunctionStatus)
+                ->delete();
+
+            $mappings = array_map(function ($orgId) use ($charter, $crossFunctionStatus) {
+                return [
+                    'pc_id' => $charter->project_id,
+                    'organization_id' => $orgId,
+                    'status' => $crossFunctionStatus,
+                ];
+            }, array_filter($payload['pic_cross_function_ids']));
+
+            if (!empty($mappings)) {
+                \Modules\ITOM\Models\TrsMapCrossFunction::insert($mappings);
+            }
+        }
+    }
+
+    private function crossFunctionStatusForCharter(TrsProjectCharter $charter): int
+    {
+        return (int) $charter->status === 4 ? 2 : 1;
+    }
+
+    private function syncProjectSummaryFields(TrsProject $project, array $payload): void
+    {
+        $projectFields = Arr::only($payload, ['owner_name', 'status']);
+        $projectFields = array_filter($projectFields, static fn ($value) => $value !== null && $value !== '');
+
+        if ($projectFields !== []) {
+            $project->update($projectFields);
+        }
+    }
+
+    private function resolveVersionLabel(string $versionLabel, string $fallbackVersionLabel): string
+    {
+        return $versionLabel !== '' ? $versionLabel : $fallbackVersionLabel;
+    }
+
+    private function charterPayload(array $payload): array
+    {
+        $charterPayload = Arr::only($payload, [
+            'sponsor',
+            'owner',
+            'leader',
+            'status',
+            'tgl_dokumen',
+            'category',
+            'duration',
+            'start_year',
+            'end_year',
+            'background',
+            'objectives',
+            'impact_value',
+            'key_personnel',
+            'key_items',
+            'budget',
+            'key_milestone',
+            'risks_identified',
+            'risk_mitigation',
+            'notes',
+        ]);
+
+        $metadata = is_array($payload['metadata'] ?? null) ? $payload['metadata'] : [];
+        $targetKpi = trim((string) ($payload['target_kpi'] ?? ''));
+
+        unset($metadata['targetKpi'], $metadata['kpi_target'], $metadata['kpi']);
+
+        if ($targetKpi !== '') {
+            $metadata['target_kpi'] = $targetKpi;
+        } else {
+            unset($metadata['target_kpi']);
+        }
+
+        $charterPayload['metadata'] = $metadata !== [] ? $metadata : null;
+
+        return $charterPayload;
+    }
+}

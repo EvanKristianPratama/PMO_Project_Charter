@@ -3,10 +3,10 @@
 namespace Modules\ITSP\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Compendium;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstInitiative;
-use App\Models\MstScSource;
-use App\Models\Theme;
-use App\Models\TrsScInitiative;
+use Modules\ITSP\Models\MstInitiative;
+use Modules\ITSP\Models\MstScSource;
+use Modules\ITSP\Models\Theme;
+use Modules\ITSP\Models\TrsScInitiative;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -56,7 +56,7 @@ class CreateController extends Controller
 
         return Inertia::render('modules/ITSP/ProgramPlanning/ProgramDefinition/DigitalInitiatives/Compendium/Show', [
             'initiativeOptions' => $initiativeOptions,
-            'coeOptions' => \App\Models\MstCoe::orderBy('name')->get(['id', 'name'])->values(),
+            'coeOptions' => \Modules\ITSP\Models\MstCoe::orderBy('name')->get(['id', 'name'])->values(),
             'sourceOptions' => MstScSource::orderBy('name')->get(['id', 'name', 'month', 'year'])->map(fn ($s) => [
                 'id' => $s->id,
                 'name' => $s->name,

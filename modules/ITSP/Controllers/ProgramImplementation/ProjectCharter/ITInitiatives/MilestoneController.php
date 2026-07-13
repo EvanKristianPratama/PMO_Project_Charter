@@ -4,9 +4,9 @@ namespace Modules\ITSP\Controllers\ProgramImplementation\ProjectCharter\ITInitia
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProgramImplementation\ProjectCharter\ITInitiatives\StoreMilestoneRequest;
-use App\Models\Milestone;
-use App\Models\TrsProjectCharter;
-use App\Services\ProgramImplementation\ProjectCharter\ITInitiatives\MilestoneService;
+use Modules\ITSP\Models\Milestone;
+use Modules\ITSP\Models\TrsProjectCharter;
+use Modules\ITSP\Services\ProgramImplementation\ProjectCharter\ITInitiatives\MilestoneService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 

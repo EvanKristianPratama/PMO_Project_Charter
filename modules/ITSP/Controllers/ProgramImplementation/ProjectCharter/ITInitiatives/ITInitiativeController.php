@@ -8,9 +8,9 @@ use App\Http\Requests\ProgramImplementation\ProjectCharter\ITInitiatives\UpdateI
 use App\Http\Requests\ProgramImplementation\ProjectCharter\ITInitiatives\UpdateInitiativeMappingRequest;
 use App\Http\Requests\ProgramImplementation\ProjectCharter\ITInitiatives\UpsertImplementationStatusRequest;
 use App\Http\Requests\ProgramImplementation\ProjectCharter\UpdateProjectStatusHistoryRequest;
-use App\Models\ProjectStatusHistory;
-use App\Models\TrsProject;
-use App\Services\ProgramImplementation\ProjectCharter\ITInitiatives\ITInitiativeService;
+use Modules\ITSP\Models\ProjectStatusHistory;
+use Modules\ITSP\Models\TrsProject;
+use Modules\ITSP\Services\ProgramImplementation\ProjectCharter\ITInitiatives\ITInitiativeService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;

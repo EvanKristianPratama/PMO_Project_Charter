@@ -3,11 +3,11 @@
 namespace Modules\ITOM\Controllers\OperatingModel\Policy\RaciAnalysis;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstObjective;
-use App\Models\MstPractice;
-use App\Models\MstRole;
-use App\Models\TrsPracticeRole;
-use App\Models\MstRegulation;
+use Modules\ITOM\Models\MstObjective;
+use Modules\ITOM\Models\MstPractice;
+use Modules\ITOM\Models\MstRole;
+use Modules\ITOM\Models\TrsPracticeRole;
+use Modules\ITOM\Models\MstRegulation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

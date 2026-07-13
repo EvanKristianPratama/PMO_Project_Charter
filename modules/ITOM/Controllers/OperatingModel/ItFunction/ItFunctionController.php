@@ -3,10 +3,10 @@
 namespace Modules\ITOM\Controllers\OperatingModel\ItFunction;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstBod;
-use App\Models\MstCompany;
-use App\Models\MstRegulation;
-use App\Services\BusinessProcess\Function\FunctionService;
+use Modules\ITOM\Models\MstBod;
+use Modules\ITOM\Models\MstCompany;
+use Modules\ITOM\Models\MstRegulation;
+use Modules\ITOM\Services\BusinessProcess\Function\FunctionService;
 use Inertia\Inertia;
 use Inertia\Response;
 

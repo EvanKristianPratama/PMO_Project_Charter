@@ -4,8 +4,8 @@ namespace Modules\ITSP\Controllers\StrategicHouse\StrategicPillars;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProgramPlanning\StrategicPillars\StoreInitiativeTaggingRequest;
-use App\Models\InitiativeTagging;
-use App\Services\StrategicHouse\StrategicPillars\InitiativeTaggingService;
+use Modules\ITSP\Models\InitiativeTagging;
+use Modules\ITSP\Services\StrategicHouse\StrategicPillars\InitiativeTaggingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

@@ -3,7 +3,7 @@
 namespace Modules\ITSP\Controllers\StrategicHouse\InitiativeSupport;
 
 use App\Http\Controllers\Controller;
-use App\Services\StrategicHouse\InitiativeSupport\InitiativeSupportService;
+use Modules\ITSP\Services\StrategicHouse\InitiativeSupport\InitiativeSupportService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;

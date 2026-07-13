@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\MasterData\ScopeCharter;
 
 use App\Http\Controllers\Controller;
-use App\Models\DataSource;
-use App\Models\TrsScInitiative;
-use App\Models\UseCase;
+use Modules\ITSP\Models\DataSource;
+use Modules\ITSP\Models\TrsScInitiative;
+use Modules\ITSP\Models\UseCase;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

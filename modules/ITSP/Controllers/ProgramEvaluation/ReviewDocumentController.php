@@ -3,8 +3,8 @@
 namespace Modules\ITSP\Controllers\ProgramEvaluation;
 
 use App\Http\Controllers\Controller;
-use App\Services\ProgramEvaluation\ReviewDocument\ItDocumentService;
-use App\Services\ProgramEvaluation\ReviewDocument\DigitalDocumentService;
+use Modules\ITSP\Services\ProgramEvaluation\ReviewDocument\ItDocumentService;
+use Modules\ITSP\Services\ProgramEvaluation\ReviewDocument\DigitalDocumentService;
 use Inertia\Inertia;
 use Inertia\Response;
 

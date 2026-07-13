@@ -3,7 +3,7 @@
 namespace Modules\ITSP\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Appendix;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstInitiative;
+use Modules\ITSP\Models\MstInitiative;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;

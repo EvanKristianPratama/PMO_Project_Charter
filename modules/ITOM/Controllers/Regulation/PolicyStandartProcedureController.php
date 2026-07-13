@@ -3,8 +3,8 @@
 namespace Modules\ITOM\Controllers\Regulation;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstRegulation;
-use App\Services\Regulation\RegulationService;
+use Modules\ITOM\Models\MstRegulation;
+use Modules\ITOM\Services\Regulation\RegulationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\ProgramImplementation\ProjectCharter\ITInitiatives;
 
-use App\Models\TrsProject;
+use Modules\ITSP\Models\TrsProject;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -31,7 +31,7 @@ class UpdateITInitiativeRequest extends FormRequest
 
             if (
                 $statusId === null
-                || ! \App\Models\InitiativeStatus::query()->whereKey($statusId)->exists()
+                || ! \Modules\ITSP\Models\InitiativeStatus::query()->whereKey($statusId)->exists()
             ) {
                 $fail('Status project charter tidak valid.');
             }

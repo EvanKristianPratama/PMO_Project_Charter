@@ -3,12 +3,12 @@
 namespace Modules\ITOM\Controllers\BusinessProcess\BusinessProcess;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstCompany;
-use App\Models\MstKpi;
-use App\Models\MstProsesBisnis;
-use App\Models\MstRegulation;
-use App\Models\TrsProsesBisnis;
-use App\Services\BusinessProcess\BusinessProcess\BusinessProcessV2Service;
+use Modules\ITOM\Models\MstCompany;
+use Modules\ITOM\Models\MstKpi;
+use Modules\ITOM\Models\MstProsesBisnis;
+use Modules\ITOM\Models\MstRegulation;
+use Modules\ITOM\Models\TrsProsesBisnis;
+use Modules\ITOM\Services\BusinessProcess\BusinessProcess\BusinessProcessV2Service;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

@@ -3,10 +3,10 @@
 namespace Modules\ITSP\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\Compendium;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstInitiative;
-use App\Models\MstScSource;
-use App\Models\Theme;
-use App\Models\TrsScInitiative;
+use Modules\ITSP\Models\MstInitiative;
+use Modules\ITSP\Models\MstScSource;
+use Modules\ITSP\Models\Theme;
+use Modules\ITSP\Models\TrsScInitiative;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -109,7 +109,7 @@ class EditController extends Controller
                 'description' => $appendixInitiative->description,
             ] : null,
             'initiativeOptions' => $this->initiativeOptions(),
-            'coeOptions' => \App\Models\MstCoe::orderBy('name')->get(['id', 'name'])->values(),
+            'coeOptions' => \Modules\ITSP\Models\MstCoe::orderBy('name')->get(['id', 'name'])->values(),
             'sourceOptions' => MstScSource::orderBy('name')->get(['id', 'name', 'month', 'year'])->map(fn ($s) => [
                 'id' => $s->id,
                 'name' => $s->name,

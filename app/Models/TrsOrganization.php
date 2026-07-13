@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\ITOM\Models\MstActor;
+use Modules\ITOM\Models\MstResource;
+use Modules\ITOM\Models\TrsMapActorOrganization;
+use Modules\ITOM\Models\TrsProsesBisnis;
+use Modules\ITOM\Models\MstItSteeringComittee;
 
 class TrsOrganization extends Model
 {

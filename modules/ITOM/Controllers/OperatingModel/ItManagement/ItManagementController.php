@@ -3,7 +3,7 @@
 namespace Modules\ITOM\Controllers\OperatingModel\ItManagement;
 
 use App\Http\Controllers\Controller;
-use App\Services\OperatingModel\ItManagement\ItManagement;
+use Modules\ITOM\Services\OperatingModel\ItManagement\ItManagement;
 use Inertia\Inertia;
 use Inertia\Response;
 

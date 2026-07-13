@@ -3,7 +3,7 @@
 namespace Modules\ITSP\Controllers\ProgramPlanning;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstInitiative;
+use Modules\ITSP\Models\MstInitiative;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 

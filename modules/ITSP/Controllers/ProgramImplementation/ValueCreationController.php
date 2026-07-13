@@ -3,8 +3,8 @@
 namespace Modules\ITSP\Controllers\ProgramImplementation;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstInitiative;
-use App\Services\ProgramImplementation\ProjectCharter\ITInitiatives\ITInitiativeService;
+use Modules\ITSP\Models\MstInitiative;
+use Modules\ITSP\Services\ProgramImplementation\ProjectCharter\ITInitiatives\ITInitiativeService;
 use Inertia\Inertia;
 use Inertia\Response;
 

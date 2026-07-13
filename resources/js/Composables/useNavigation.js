@@ -41,7 +41,8 @@ export function useNavigation() {
                 path.includes("/itom");
 
             const isItspsPath =
-                path.includes("/itsp") ||
+                path.startsWith("/itsp") ||
+                path.includes("/itsp/") ||
                 path.includes("/strategic-house") ||
                 path.includes("/program-planning") ||
                 path.includes("/program-evaluation") ||

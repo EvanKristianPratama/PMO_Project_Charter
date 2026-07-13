@@ -3,9 +3,9 @@
 namespace Modules\ITSP\Controllers\StrategicHouse\ItBuildingBlock;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstCoe;
-use App\Models\MstInitiative;
-use App\Services\StrategicHouse\ItBuildingBlockService;
+use Modules\ITSP\Models\MstCoe;
+use Modules\ITSP\Models\MstInitiative;
+use Modules\ITSP\Services\StrategicHouse\ItBuildingBlockService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

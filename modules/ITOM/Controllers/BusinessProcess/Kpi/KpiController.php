@@ -3,8 +3,8 @@
 namespace Modules\ITOM\Controllers\BusinessProcess\Kpi;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstKpi;
-use App\Services\BusinessProcess\KPI\KpiService;
+use Modules\ITOM\Models\MstKpi;
+use Modules\ITOM\Services\BusinessProcess\KPI\KpiService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -19,7 +19,7 @@ class KpiController extends Controller
     {
         return Inertia::render('modules/ITOM/BusinessProcess/KPI/Index', [
             'kpiList' => Inertia::defer(fn() => $kpiService->getKpis()),
-            'companyOptions' => Inertia::defer(fn() => \App\Models\MstCompany::orderBy('name')->get(['id', 'name'])),
+            'companyOptions' => Inertia::defer(fn() => \Modules\ITOM\Models\MstCompany::orderBy('name')->get(['id', 'name'])),
         ]);
     }
 

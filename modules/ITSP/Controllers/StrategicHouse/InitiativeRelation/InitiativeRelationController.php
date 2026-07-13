@@ -5,9 +5,9 @@ namespace Modules\ITSP\Controllers\StrategicHouse\InitiativeRelation;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProgramPlanning\InitiativeRelation\StoreInitiativeRelationRequest;
 use App\Http\Requests\ProgramPlanning\InitiativeRelation\UpdateInitiativeRelationRequest;
-use App\Models\MstInitiativeRelation;
+use Modules\ITSP\Models\MstInitiativeRelation;
 use App\Services\Shared\CacheManager;
-use App\Services\StrategicHouse\InitiativeRelation\InitiativeRelationService;
+use Modules\ITSP\Services\StrategicHouse\InitiativeRelation\InitiativeRelationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -92,7 +92,7 @@ class InitiativeRelationController extends Controller
         }
 
         if (!empty($upsertData)) {
-            \App\Models\TrsInitiativeRelationPosition::upsert(
+            \Modules\ITSP\Models\TrsInitiativeRelationPosition::upsert(
                 $upsertData,
                 ['initiative_id'],
                 ['x', 'y', 'is_locked']

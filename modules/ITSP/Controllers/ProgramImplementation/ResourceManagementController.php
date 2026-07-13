@@ -3,7 +3,7 @@
 namespace Modules\ITSP\Controllers\ProgramImplementation;
 
 use App\Http\Controllers\Controller;
-use App\Services\ProgramImplementation\ResourceManagementService;
+use Modules\ITSP\Services\ProgramImplementation\ResourceManagementService;
 use Inertia\Inertia;
 use Inertia\Response;
 

@@ -4,7 +4,7 @@ namespace Modules\ITSP\Controllers\StrategicHouse;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProgramPlanning\StrategicHouse\IndexRequest;
-use App\Services\StrategicHouse\StrategicHousePageService;
+use Modules\ITSP\Services\StrategicHouse\StrategicHousePageService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;

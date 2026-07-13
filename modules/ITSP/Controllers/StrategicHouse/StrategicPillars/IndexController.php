@@ -3,7 +3,7 @@
 namespace Modules\ITSP\Controllers\StrategicHouse\StrategicPillars;
 
 use App\Http\Controllers\Controller;
-use App\Services\StrategicHouse\StrategicPillars\StrategicPillarPageService;
+use Modules\ITSP\Services\StrategicHouse\StrategicPillars\StrategicPillarPageService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;

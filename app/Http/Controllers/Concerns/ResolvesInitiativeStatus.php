@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Concerns;
 
-use App\Models\InitiativeStatus;
+use Modules\ITSP\Models\InitiativeStatus;
 use Illuminate\Support\Collection;
 
 trait ResolvesInitiativeStatus

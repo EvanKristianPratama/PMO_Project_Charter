@@ -3,9 +3,9 @@
 namespace Modules\ITSP\Controllers\ProgramPlanning\ProgramDefinition\ITInitiatives;
 
 use App\Http\Controllers\Controller;
-use App\Models\InitiativeStatus;
-use App\Models\MstCoe;
-use App\Models\MstInitiative;
+use Modules\ITSP\Models\InitiativeStatus;
+use Modules\ITSP\Models\MstCoe;
+use Modules\ITSP\Models\MstInitiative;
 use App\Models\TrsOrganization;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Schema;
@@ -53,7 +53,7 @@ class IndexController extends Controller
             ->values();
 
         // Build statusCounts from the loaded collection so every initiative
-        // is accounted for — even those without a trs_status_mstinitiative row.
+        // is accounted for â€” even those without a trs_status_mstinitiative row.
         $aliasMap = [
             'draft' => 'drafting',
             'approve' => 'approved',

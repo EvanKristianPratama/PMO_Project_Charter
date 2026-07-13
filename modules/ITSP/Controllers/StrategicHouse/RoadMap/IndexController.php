@@ -3,7 +3,7 @@
 namespace Modules\ITSP\Controllers\StrategicHouse\RoadMap;
 
 use App\Http\Controllers\Controller;
-use App\Services\StrategicHouse\RoadMap\ItInitiativeRoadmapService;
+use Modules\ITSP\Services\StrategicHouse\RoadMap\ItInitiativeRoadmapService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;

@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\MasterData\ProjectCharter;
 
 use App\Http\Controllers\Controller;
-use App\Models\InitiativeStatus;
-use App\Models\MstInitiative;
-use App\Models\TrsReviewPCStatusImplementation;
-use App\Models\TrsProject;
+use Modules\ITSP\Models\InitiativeStatus;
+use Modules\ITSP\Models\MstInitiative;
+use Modules\ITSP\Models\TrsReviewPCStatusImplementation;
+use Modules\ITSP\Models\TrsProject;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -15,7 +15,7 @@ use Inertia\Response;
 
 class ProjectCharterController extends Controller
 {
-    /* ── Validation rules (DRY) ────────────────────── */
+    /* â”€â”€ Validation rules (DRY) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
     private function projectRules(): array
     {
@@ -36,7 +36,7 @@ class ProjectCharterController extends Controller
         ];
     }
 
-    /* ── Shared dropdown options (DRY) ─────────────── */
+    /* â”€â”€ Shared dropdown options (DRY) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
     private function dropdownOptions(): array
     {
@@ -58,7 +58,7 @@ class ProjectCharterController extends Controller
         ];
     }
 
-    /* ── CRUD ──────────────────────────────────────── */
+    /* â”€â”€ CRUD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
     public function index(): Response
     {

@@ -3,13 +3,13 @@
 namespace Modules\ITOM\Controllers\Organization\FunctionalOrganization;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstFunctionalOrganization;
-use App\Models\MstRegulation;
+use Modules\ITOM\Models\MstFunctionalOrganization;
+use Modules\ITOM\Models\MstRegulation;
 
-use App\Models\MstCompany;
-use App\Models\MstBod;
-use App\Models\MstFunction;
-use App\Services\Organization\FunctionalOrganization\FunctionalOrganizationService;
+use Modules\ITOM\Models\MstCompany;
+use Modules\ITOM\Models\MstBod;
+use Modules\ITOM\Models\MstFunction;
+use Modules\ITOM\Services\Organization\FunctionalOrganization\FunctionalOrganizationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

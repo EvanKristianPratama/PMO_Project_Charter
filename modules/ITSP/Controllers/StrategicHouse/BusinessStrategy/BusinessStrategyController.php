@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ProgramPlanning\StrategicHouse\BusinessStrategy\BulkUpdateBusinessStrategyRequest;
 use App\Http\Requests\ProgramPlanning\StrategicHouse\BusinessStrategy\StoreBusinessStrategyRequest;
 use App\Http\Requests\ProgramPlanning\StrategicHouse\BusinessStrategy\UpdateBusinessStrategyRequest;
-use App\Models\TrsBusinessStrategy;
-use App\Services\StrategicHouse\BusinessStrategy\BusinessStrategyService;
+use Modules\ITSP\Models\TrsBusinessStrategy;
+use Modules\ITSP\Services\StrategicHouse\BusinessStrategy\BusinessStrategyService;
 use Illuminate\Http\RedirectResponse;
 
 class BusinessStrategyController extends Controller

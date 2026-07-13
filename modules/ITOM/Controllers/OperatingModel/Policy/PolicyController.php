@@ -3,9 +3,9 @@
 namespace Modules\ITOM\Controllers\OperatingModel\Policy;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstRegulation;
-use App\Services\Regulation\GeneralPolicyService;
-use App\Services\Regulation\RoleService;
+use Modules\ITOM\Models\MstRegulation;
+use Modules\ITOM\Services\Regulation\GeneralPolicyService;
+use Modules\ITOM\Services\Regulation\RoleService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;

@@ -3,10 +3,10 @@
 namespace Modules\ITOM\Controllers\OperatingModel\STK;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstCompany;
-use App\Models\MstKpi;
-use App\Models\MstRegulation;
-use App\Services\BusinessProcess\BusinessProcess\BusinessProcessV2Service;
+use Modules\ITOM\Models\MstCompany;
+use Modules\ITOM\Models\MstKpi;
+use Modules\ITOM\Models\MstRegulation;
+use Modules\ITOM\Services\BusinessProcess\BusinessProcess\BusinessProcessV2Service;
 use Inertia\Inertia;
 use Inertia\Response;
 

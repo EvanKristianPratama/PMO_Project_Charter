@@ -2,15 +2,15 @@
 
 namespace App\Providers;
 
-use App\Models\Goal;
-use App\Models\InitiativeTagging;
-use App\Models\Milestone;
-use App\Models\MstInitiative;
-use App\Models\ProjectStatusHistory;
-use App\Models\Theme;
-use App\Models\TrsProject;
-use App\Models\TrsProjectCharter;
-use App\Models\TrsStatusImplementation;
+use Modules\ITSP\Models\Goal;
+use Modules\ITSP\Models\InitiativeTagging;
+use Modules\ITSP\Models\Milestone;
+use Modules\ITSP\Models\MstInitiative;
+use Modules\ITSP\Models\ProjectStatusHistory;
+use Modules\ITSP\Models\Theme;
+use Modules\ITSP\Models\TrsProject;
+use Modules\ITSP\Models\TrsProjectCharter;
+use Modules\ITSP\Models\TrsStatusImplementation;
 use App\Observers\InitiativeObserver;
 use App\Observers\RoadmapObserver;
 use App\Observers\StrategicPillarObserver;
@@ -99,7 +99,7 @@ class AppServiceProvider extends ServiceProvider
                         }
                     });
                 } catch (\Throwable) {
-                    // Connection not configured — skip.
+                    // Connection not configured â€” skip.
                 }
             }
         });

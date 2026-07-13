@@ -2,7 +2,7 @@
 
 namespace App\Observers;
 
-use App\Models\MstInitiative;
+use Modules\ITSP\Models\MstInitiative;
 use App\Services\Shared\CacheManager;
 
 class InitiativeObserver

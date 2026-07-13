@@ -3,12 +3,12 @@
 namespace Modules\ITOM\Controllers\OperatingModel\ItGovarnence;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstBod;
-use App\Models\MstCompany;
-use App\Models\MstFunction;
-use App\Models\MstFunctionalOrganization;
-use App\Models\MstRegulation;
-use App\Services\OperatingModel\ItGovernance\ItGovernance;
+use Modules\ITOM\Models\MstBod;
+use Modules\ITOM\Models\MstCompany;
+use Modules\ITOM\Models\MstFunction;
+use Modules\ITOM\Models\MstFunctionalOrganization;
+use Modules\ITOM\Models\MstRegulation;
+use Modules\ITOM\Services\OperatingModel\ItGovernance\ItGovernance;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -104,7 +104,7 @@ class ItGovarnenceController extends Controller
         ]);
     }
 
-    // ─── Steering Committee CRUD ─────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Steering Committee CRUD Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
     public function storeSteering(Request $request, ItGovernance $itGovernanceService)
     {

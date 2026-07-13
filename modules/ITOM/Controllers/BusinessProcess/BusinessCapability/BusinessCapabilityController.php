@@ -4,8 +4,8 @@ namespace Modules\ITOM\Controllers\BusinessProcess\BusinessCapability;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MasterData\BusinessCapability\UpsertBusinessCapabilityRequest;
-use App\Models\MstBusinessCapability;
-use App\Services\BusinessProcess\BusinessCapability\BusinessCapabilityService;
+use Modules\ITOM\Models\MstBusinessCapability;
+use Modules\ITOM\Services\BusinessProcess\BusinessCapability\BusinessCapabilityService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;

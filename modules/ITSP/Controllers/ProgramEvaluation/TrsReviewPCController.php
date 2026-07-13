@@ -3,9 +3,9 @@
 namespace Modules\ITSP\Controllers\ProgramEvaluation;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstInitiative;
-use App\Models\TrsProject;
-use App\Models\TrsReviewPC;
+use Modules\ITSP\Models\MstInitiative;
+use Modules\ITSP\Models\TrsProject;
+use Modules\ITSP\Models\TrsReviewPC;
 use App\Models\TrsOrganization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

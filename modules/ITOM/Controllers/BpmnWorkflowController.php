@@ -4,8 +4,8 @@ namespace Modules\ITOM\Controllers;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\BpmnWorkflow;
-use App\Models\MstInitiative;
+use Modules\ITOM\Models\BpmnWorkflow;
+use Modules\ITSP\Models\MstInitiative;
 use App\Services\ActivityLogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -69,7 +69,7 @@ class BpmnWorkflowController extends Controller
 
         // Jika workflow terasosiasi dengan tipe SOP, lakukan sinkronisasi otomatis ke database SOP
         if ($workflow->sop_type && $workflow->bpmn_xml) {
-            \App\Services\BpmnSopSyncService::syncBpmnToSop($workflow);
+            \Modules\ITOM\Services\BpmnSopSyncService::syncBpmnToSop($workflow);
         }
 
         ActivityLogService::log(
@@ -195,7 +195,7 @@ class BpmnWorkflowController extends Controller
         }
 
         try {
-            $generatedXml = \App\Services\BpmnSopSyncService::generateXmlFromSop($sopType);
+            $generatedXml = \Modules\ITOM\Services\BpmnSopSyncService::generateXmlFromSop($sopType);
             
             if ($generatedXml) {
                 $bpmnWorkflow->update([

@@ -3,10 +3,10 @@
 namespace Modules\ITOM\Controllers\RaciAnalysis\TktiInformationFlow;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstObjective;
-use App\Models\MstPractice;
-use App\Models\TrsItspInfoflowInput;
-use App\Models\TrsItspInfoflowOutput;
+use Modules\ITOM\Models\MstObjective;
+use Modules\ITOM\Models\MstPractice;
+use Modules\ITOM\Models\TrsItspInfoflowInput;
+use Modules\ITOM\Models\TrsItspInfoflowOutput;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

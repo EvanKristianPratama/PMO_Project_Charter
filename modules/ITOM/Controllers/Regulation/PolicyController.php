@@ -3,10 +3,10 @@
 namespace Modules\ITOM\Controllers\Regulation;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstObjective;
-use App\Models\MstPractice;
-use App\Models\MstRegulation;
-use App\Models\TrsMapingKebijakanCobit;
+use Modules\ITOM\Models\MstObjective;
+use Modules\ITOM\Models\MstPractice;
+use Modules\ITOM\Models\MstRegulation;
+use Modules\ITOM\Models\TrsMapingKebijakanCobit;
 use DB;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -220,7 +220,7 @@ class PolicyController extends Controller
             $selectedRegulation = $regulations->first();
         }
 
-        $generalPolicyService = app(\App\Services\Regulation\GeneralPolicyService::class);
+        $generalPolicyService = app(\Modules\ITOM\Services\Regulation\GeneralPolicyService::class);
         $policyData = $generalPolicyService->getGeneralPolicyData($selectedRegulation?->id);
 
         return Inertia::render('modules/ITOM/Regulation/PolicyStandartProcedure/Guidance/Manage', [

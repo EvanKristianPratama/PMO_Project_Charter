@@ -1,0 +1,42 @@
+<?php
+
+namespace Modules\ITSP\Models;
+
+use App\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class ProjectStatusHistory extends Model
+{
+    use LogsActivity;
+
+    protected $table = 'trs_project_status_history';
+
+    protected $fillable = [
+        'project_charter_id',
+        'status',
+        'version',
+        'tanggal',
+        'notes',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'project_charter_id' => 'integer',
+            'status' => 'integer',
+            'version' => 'integer',
+            'tanggal' => 'date',
+        ];
+    }
+
+    public function projectCharter(): BelongsTo
+    {
+        return $this->belongsTo(TrsProjectCharter::class, 'project_charter_id');
+    }
+
+    public function statusRef(): BelongsTo
+    {
+        return $this->belongsTo(InitiativeStatus::class, 'status');
+    }
+}

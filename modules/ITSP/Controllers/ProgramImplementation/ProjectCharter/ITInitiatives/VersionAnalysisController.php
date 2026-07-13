@@ -4,9 +4,9 @@ namespace Modules\ITSP\Controllers\ProgramImplementation\ProjectCharter\ITInitia
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProgramImplementation\ProjectCharter\ITInitiatives\StoreVersionAnalysisRequest;
-use App\Models\TrsPcVersionAnalysis;
-use App\Models\TrsProject;
-use App\Services\ProgramImplementation\ProjectCharter\ITInitiatives\VersionAnalysisService;
+use Modules\ITSP\Models\TrsPcVersionAnalysis;
+use Modules\ITSP\Models\TrsProject;
+use Modules\ITSP\Services\ProgramImplementation\ProjectCharter\ITInitiatives\VersionAnalysisService;
 use Illuminate\Http\RedirectResponse;
 
 class VersionAnalysisController extends Controller

@@ -3,9 +3,9 @@
 namespace Modules\ITOM\Controllers\Regulation\SK;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstCompany;
-use App\Models\MstRegulation;
-use App\Models\MstBod;
+use Modules\ITOM\Models\MstCompany;
+use Modules\ITOM\Models\MstRegulation;
+use Modules\ITOM\Models\MstBod;
 use App\Models\TrsOrganization;
 use Inertia\Inertia;
 use Inertia\Response;

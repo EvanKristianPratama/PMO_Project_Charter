@@ -3,13 +3,13 @@
 namespace Modules\ITSP\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives\MasterDigitalInitiative;
 
 use App\Http\Controllers\Controller;
-use App\Models\InitiativeStatus;
-use App\Models\MstCoe;
-use App\Models\MstInitiative;
-use App\Models\StatusMstInitiative;
-use App\Models\TrsMapSc;
+use Modules\ITSP\Models\InitiativeStatus;
+use Modules\ITSP\Models\MstCoe;
+use Modules\ITSP\Models\MstInitiative;
+use Modules\ITSP\Models\StatusMstInitiative;
+use Modules\ITSP\Models\TrsMapSc;
 use App\Models\TrsOrganization;
-use App\Models\TrsScInitiative;
+use Modules\ITSP\Models\TrsScInitiative;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;

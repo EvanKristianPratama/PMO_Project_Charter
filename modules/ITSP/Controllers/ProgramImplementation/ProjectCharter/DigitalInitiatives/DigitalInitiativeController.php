@@ -7,9 +7,9 @@ use App\Http\Requests\ProgramImplementation\ProjectCharter\DigitalInitiatives\St
 use App\Http\Requests\ProgramImplementation\ProjectCharter\DigitalInitiatives\UpsertImplementationStatusRequest;
 use App\Http\Requests\ProgramImplementation\ProjectCharter\DigitalInitiatives\UpdateDigitalInitiativeRequest;
 use App\Http\Requests\ProgramImplementation\ProjectCharter\UpdateProjectStatusHistoryRequest;
-use App\Models\ProjectStatusHistory;
-use App\Models\TrsProject;
-use App\Services\ProgramImplementation\ProjectCharter\DigitalInitiatives\DigitalInitiativeService;
+use Modules\ITSP\Models\ProjectStatusHistory;
+use Modules\ITSP\Models\TrsProject;
+use Modules\ITSP\Services\ProgramImplementation\ProjectCharter\DigitalInitiatives\DigitalInitiativeService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;

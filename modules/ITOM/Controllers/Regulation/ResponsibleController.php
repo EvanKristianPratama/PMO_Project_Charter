@@ -3,7 +3,7 @@
 namespace Modules\ITOM\Controllers\Regulation;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstResponsible;
+use Modules\ITOM\Models\MstResponsible;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -16,7 +16,7 @@ class ResponsibleController extends Controller
      */
     public function manage(): Response
     {
-        return Inertia::render('modules/ITOM/OperatingModel/RaciAnalysis/Responsible', [
+        return Inertia::render('modules/ITOM/OperatingModel/Policy/RaciAnalysis/Responsible', [
             'responsibles' => Inertia::defer(fn() => MstResponsible::select(['id', 'responsible'])->orderBy('id', 'asc')->get()),
         ]);
     }

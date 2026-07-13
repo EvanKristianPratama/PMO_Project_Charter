@@ -24,7 +24,7 @@ class StoreITInitiativeRequest extends FormRequest
 
             if (
                 $statusId === null
-                || ! \App\Models\InitiativeStatus::query()->whereKey($statusId)->exists()
+                || ! \Modules\ITSP\Models\InitiativeStatus::query()->whereKey($statusId)->exists()
             ) {
                 $fail('Status project charter tidak valid.');
             }

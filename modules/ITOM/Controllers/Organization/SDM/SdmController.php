@@ -3,9 +3,9 @@
 namespace Modules\ITOM\Controllers\Organization\SDM;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstResource;
+use Modules\ITOM\Models\MstResource;
 use App\Models\TrsOrganization;
-use App\Services\Organization\SDM\SdmService;
+use Modules\ITOM\Services\Organization\SDM\SdmService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

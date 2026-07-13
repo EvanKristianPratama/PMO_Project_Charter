@@ -4,7 +4,7 @@ namespace Modules\ITSP\Controllers\ProgramPlanning\ProgramDefinition\DigitalInit
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
-use App\Models\MstInitiative;
+use Modules\ITSP\Models\MstInitiative;
 use Illuminate\Http\Request;
 
 class UpdateController extends Controller

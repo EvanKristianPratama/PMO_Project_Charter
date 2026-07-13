@@ -3,8 +3,8 @@
 namespace Modules\ITOM\Controllers\Regulation\Definition;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstDefinition;
-use App\Services\Regulation\DefinitionService;
+use Modules\ITOM\Models\MstDefinition;
+use Modules\ITOM\Services\Regulation\DefinitionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

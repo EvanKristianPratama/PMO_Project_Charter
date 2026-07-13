@@ -3,9 +3,9 @@
 namespace Modules\ITOM\Controllers\Regulation;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstRole;
-use App\Models\TrsResponsibility;
-use App\Services\Regulation\RoleService;
+use Modules\ITOM\Models\MstRole;
+use Modules\ITOM\Models\TrsResponsibility;
+use Modules\ITOM\Services\Regulation\RoleService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -19,14 +19,14 @@ class RoleController extends Controller
     protected $roleService;
 
     /**
-     * @var \App\Services\Regulation\GeneralPolicyService
+     * @var \Modules\ITOM\Services\Regulation\GeneralPolicyService
      */
     protected $generalPolicyService;
 
     /**
      * RoleController constructor.
      */
-    public function __construct(RoleService $roleService, \App\Services\Regulation\GeneralPolicyService $generalPolicyService)
+    public function __construct(RoleService $roleService, \Modules\ITOM\Services\Regulation\GeneralPolicyService $generalPolicyService)
     {
         $this->roleService = $roleService;
         $this->generalPolicyService = $generalPolicyService;

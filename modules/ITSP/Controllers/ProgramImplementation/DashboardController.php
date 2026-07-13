@@ -4,8 +4,8 @@ namespace Modules\ITSP\Controllers\ProgramImplementation;
 
 use App\Http\Controllers\Concerns\ResolvesInitiativeStatus;
 use App\Http\Controllers\Controller;
-use App\Models\MstInitiative;
-use App\Models\TrsProject;
+use Modules\ITSP\Models\MstInitiative;
+use Modules\ITSP\Models\TrsProject;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
@@ -21,7 +21,7 @@ class DashboardController extends Controller
         return redirect()->route('itsp.strategic-house.index');
     }
 
-    // ── Private helpers ──────────────────────────────────────────────────
+    // â”€â”€ Private helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     private function flowStatusOptions(): array
     {
@@ -83,7 +83,7 @@ class DashboardController extends Controller
         return $counts;
     }
 
-    private function latestProjectStatusHistoryEntry(TrsProject $project): ?\App\Models\ProjectStatusHistory
+    private function latestProjectStatusHistoryEntry(TrsProject $project): ?\Modules\ITSP\Models\ProjectStatusHistory
     {
         if ($project->relationLoaded('projectStatusHistories')) {
             return $project->projectStatusHistories->first();

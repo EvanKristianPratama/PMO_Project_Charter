@@ -4,7 +4,7 @@ namespace Modules\ITSP\Controllers\ProgramImplementation;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
-use App\Services\ProgramImplementation\ProgramImplementationPageService;
+use Modules\ITSP\Services\ProgramImplementation\ProgramImplementationPageService;
 use Inertia\Inertia;
 use Inertia\Response;
 

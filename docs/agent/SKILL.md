@@ -51,7 +51,7 @@ graph TD
 Berikut adalah struktur direktori lengkap yang menunjukkan pemisahan antara core induk CIS dengan sub-modul:
 
 ```text
-itom/ (CIS Codebase)
+(CIS Codebase)
 ├── app/                         # CORE INDUK: Logika global portal shell
 │   ├── Http/
 │   │   ├── Controllers/         # Controller portal (Auth, Admin, Workspace)
@@ -67,11 +67,13 @@ itom/ (CIS Codebase)
 │   │   ├── Controllers/
 │   │   ├── Models/
 │   │   ├── Providers/           # Tempat ITSPServiceProvider.php
+│   │   ├── Services/
 │   │   └── Routes/
 │   └── ITOM/                    # Modul IT Operating Model
 │       ├── Controllers/
 │       ├── Models/
 │       ├── Providers/           # Tempat ITOMServiceProvider.php
+│       ├── Services/
 │       └── Routes/
 ├── resources/
 │   └── js/

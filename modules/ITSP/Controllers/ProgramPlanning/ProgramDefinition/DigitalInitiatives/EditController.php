@@ -3,7 +3,7 @@
 namespace Modules\ITSP\Controllers\ProgramPlanning\ProgramDefinition\DigitalInitiatives;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstInitiative;
+use Modules\ITSP\Models\MstInitiative;
 use Illuminate\Http\RedirectResponse;
 
 class EditController extends Controller

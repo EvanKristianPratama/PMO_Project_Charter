@@ -3,10 +3,10 @@
 namespace Modules\ITOM\Controllers\Organization\Company;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstCompany;
+use Modules\ITOM\Models\MstCompany;
 use App\Models\Groub;
 use App\Models\TrsOrganization;
-use App\Services\Organization\Company\CompanyService;
+use Modules\ITOM\Services\Organization\Company\CompanyService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

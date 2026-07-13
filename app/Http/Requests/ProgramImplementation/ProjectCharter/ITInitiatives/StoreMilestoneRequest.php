@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\ProgramImplementation\ProjectCharter\ITInitiatives;
 
-use App\Models\Milestone;
+use Modules\ITSP\Models\Milestone;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 

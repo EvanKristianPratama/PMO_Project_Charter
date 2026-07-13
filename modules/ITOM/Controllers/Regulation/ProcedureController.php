@@ -3,13 +3,13 @@
 namespace Modules\ITOM\Controllers\Regulation;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstActor;
-use App\Models\MstSop;
-use App\Models\TrsMapActorSop;
-use App\Models\TrsSopCategory;
-use App\Models\TrsTkoSections;
-use App\Models\MstFunction;
-use App\Services\Regulation\Procedure\ProcedureService;
+use Modules\ITOM\Models\MstActor;
+use Modules\ITOM\Models\MstSop;
+use Modules\ITOM\Models\TrsMapActorSop;
+use Modules\ITOM\Models\TrsSopCategory;
+use Modules\ITOM\Models\TrsTkoSections;
+use Modules\ITOM\Models\MstFunction;
+use Modules\ITOM\Services\Regulation\Procedure\ProcedureService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;

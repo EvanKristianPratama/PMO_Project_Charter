@@ -3,8 +3,8 @@
 namespace Modules\ITOM\Controllers\BusinessProcess\Function;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstFunction;
-use App\Services\BusinessProcess\Function\FunctionService;
+use Modules\ITOM\Models\MstFunction;
+use Modules\ITOM\Services\BusinessProcess\Function\FunctionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -19,9 +19,9 @@ class FunctionController extends Controller
     {
         return Inertia::render('modules/ITOM/BusinessProcess/Function/Index', [
             'functions' => Inertia::defer(fn() => $functionService->getFunctions()),
-            'companyOptions' => Inertia::defer(fn() => \App\Models\MstCompany::orderBy('name')->get(['id', 'name'])),
-            'bodOptions' => Inertia::defer(fn() => \App\Models\MstBod::orderBy('order')->orderBy('name')->get(['id', 'name', 'alias', 'parent_id', 'order', 'pejabat', 'tipe'])),
-            'regulations' => Inertia::defer(fn() => \App\Models\MstRegulation::orderBy('judul')->get(['id', 'judul', 'nomor', 'tipe', 'parent_id', 'status'])),
+            'companyOptions' => Inertia::defer(fn() => \Modules\ITOM\Models\MstCompany::orderBy('name')->get(['id', 'name'])),
+            'bodOptions' => Inertia::defer(fn() => \Modules\ITOM\Models\MstBod::orderBy('order')->orderBy('name')->get(['id', 'name', 'alias', 'parent_id', 'order', 'pejabat', 'tipe'])),
+            'regulations' => Inertia::defer(fn() => \Modules\ITOM\Models\MstRegulation::orderBy('judul')->get(['id', 'judul', 'nomor', 'tipe', 'parent_id', 'status'])),
         ]);
     }
 

@@ -3,12 +3,12 @@
 namespace Modules\ITOM\Controllers\Regulation\CMS;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstCompany;
-use App\Models\MstDocument;
-use App\Models\MstProsesBisnis;
-use App\Models\MstRegulation;
-use App\Services\BusinessProcess\BusinessProcess\BusinessProcessV2Service;
-use App\Services\Regulation\CMS\CmsService;
+use Modules\ITOM\Models\MstCompany;
+use Modules\ITOM\Models\MstDocument;
+use Modules\ITOM\Models\MstProsesBisnis;
+use Modules\ITOM\Models\MstRegulation;
+use Modules\ITOM\Services\BusinessProcess\BusinessProcess\BusinessProcessV2Service;
+use Modules\ITOM\Services\Regulation\CMS\CmsService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
