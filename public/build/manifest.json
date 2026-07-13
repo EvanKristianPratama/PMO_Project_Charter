@@ -293,8 +293,8 @@
       "_vendor-vue-shared-BC0FtGEN.js"
     ]
   },
-  "_ManageRegulation-CeYOhtQ8.js": {
-    "file": "assets/ManageRegulation-CeYOhtQ8.js",
+  "_ManageRegulation-Ddya96sU.js": {
+    "file": "assets/ManageRegulation-Ddya96sU.js",
     "name": "ManageRegulation",
     "imports": [
       "_vendor-vue-runtime-dom-BgatCPeT.js",
@@ -306,12 +306,12 @@
       "_sweetalert2-DVN6D7eS.js"
     ],
     "css": [
-      "assets/ManageRegulation-q4z3bZVu.css"
+      "assets/ManageRegulation-acddlrG8.css"
     ]
   },
-  "_ManageRegulation-q4z3bZVu.css": {
-    "file": "assets/ManageRegulation-q4z3bZVu.css",
-    "src": "_ManageRegulation-q4z3bZVu.css"
+  "_ManageRegulation-acddlrG8.css": {
+    "file": "assets/ManageRegulation-acddlrG8.css",
+    "src": "_ManageRegulation-acddlrG8.css"
   },
   "_MasterInitiativeTable-BAX6HwDn.js": {
     "file": "assets/MasterInitiativeTable-BAX6HwDn.js",
@@ -2024,7 +2024,7 @@
     ]
   },
   "resources/js/Pages/modules/ITOM/BpmnWorkflow/Index.vue": {
-    "file": "assets/Index-BoR4mE_o.js",
+    "file": "assets/Index-C4KvaAZA.js",
     "name": "Index",
     "src": "resources/js/Pages/modules/ITOM/BpmnWorkflow/Index.vue",
     "isDynamicEntry": true,
@@ -3545,7 +3545,7 @@
     ]
   },
   "resources/js/Pages/modules/ITOM/Regulation/PolicyStandartProcedure/Guidance/Role/Manage.vue": {
-    "file": "assets/Manage-BT99iWGu.js",
+    "file": "assets/Manage-SkfWZjZI.js",
     "name": "Manage",
     "src": "resources/js/Pages/modules/ITOM/Regulation/PolicyStandartProcedure/Guidance/Role/Manage.vue",
     "isDynamicEntry": true,
@@ -3771,7 +3771,7 @@
     ]
   },
   "resources/js/Pages/modules/ITOM/Regulation/PolicyStandartProcedure/Index.vue": {
-    "file": "assets/Index-DCTJw6Tp.js",
+    "file": "assets/Index-BSxLNziU.js",
     "name": "Index",
     "src": "resources/js/Pages/modules/ITOM/Regulation/PolicyStandartProcedure/Index.vue",
     "isDynamicEntry": true,
@@ -3780,7 +3780,7 @@
       "_inertia-Ca0NRTmw.js",
       "_ModulLayout-BAcvZdNX.js",
       "_sweetalert2-DVN6D7eS.js",
-      "_ManageRegulation-CeYOhtQ8.js",
+      "_ManageRegulation-Ddya96sU.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
       "_vendor-vue-runtime-core-BGDWNuJN.js",
       "_vendor-vue-shared-BC0FtGEN.js",
@@ -3918,7 +3918,7 @@
     ]
   },
   "resources/js/Pages/modules/ITOM/Regulation/SK/Index.vue": {
-    "file": "assets/Index-BSg_OJZL.js",
+    "file": "assets/Index-FPmOeuhD.js",
     "name": "Index",
     "src": "resources/js/Pages/modules/ITOM/Regulation/SK/Index.vue",
     "isDynamicEntry": true,
@@ -3927,7 +3927,7 @@
       "_inertia-Ca0NRTmw.js",
       "_ModulLayout-BAcvZdNX.js",
       "_sweetalert2-DVN6D7eS.js",
-      "_ManageRegulation-CeYOhtQ8.js",
+      "_ManageRegulation-Ddya96sU.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
       "_vendor-vue-runtime-core-BGDWNuJN.js",
       "_vendor-vue-shared-BC0FtGEN.js",
@@ -5774,7 +5774,7 @@
     ]
   },
   "resources/js/Pages/modules/ITSP/StrategicHouse/Index.vue": {
-    "file": "assets/Index-DEIrQIRI.js",
+    "file": "assets/Index-BFwPzGTR.js",
     "name": "Index",
     "src": "resources/js/Pages/modules/ITSP/StrategicHouse/Index.vue",
     "isDynamicEntry": true,
@@ -6241,7 +6241,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-CEkzP0tp.js",
+    "file": "assets/app-DzzXfvvk.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,

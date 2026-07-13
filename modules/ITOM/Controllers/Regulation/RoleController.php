@@ -58,9 +58,10 @@ class RoleController extends Controller
     /**
      * Display the roles & responsibilities management CRUD view.
      */
-    public function manage(): Response
+    public function manage(Request $request): Response
     {
-        $data = $this->roleService->getRoleManageData();
+        $selectedRegulationId = $request->integer('regulation_id');
+        $data = $this->roleService->getRoleManageData($selectedRegulationId);
 
         return Inertia::render('modules/ITOM/Regulation/PolicyStandartProcedure/Guidance/Role/Manage', $data);
     }

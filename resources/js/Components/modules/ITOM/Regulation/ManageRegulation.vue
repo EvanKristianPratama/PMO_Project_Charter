@@ -459,6 +459,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    organizations: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const emit = defineEmits(['success']);

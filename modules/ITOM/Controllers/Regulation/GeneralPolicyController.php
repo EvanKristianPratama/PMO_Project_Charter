@@ -68,6 +68,7 @@ class GeneralPolicyController extends Controller
             'selectedRegulationId' => $resolvedRegId,
             'regulations' => Inertia::defer(fn() => $policyData['regulations']),
             'policies' => Inertia::defer(fn() => $policyData['policies']),
+            'objectives' => Inertia::defer(fn() => $policyData['objectives']),
         ]);
     }
 

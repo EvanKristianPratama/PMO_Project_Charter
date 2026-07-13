@@ -751,6 +751,24 @@ const props = defineProps({
         type: Array,
         required: true,
     },
+    regulations: {
+        type: Array,
+        default: () => [],
+    },
+    selectedRegulationId: {
+        type: [Number, String],
+        default: null,
+    },
+});
+
+const selectedRegulationId = ref(props.selectedRegulationId);
+
+const activeRegulation = computed(() => {
+    const regId = Number(selectedRegulationId.value);
+    if (!regId || props.regulations.length === 0) {
+        return props.regulations[0] || null;
+    }
+    return props.regulations.find(r => r.id === regId) || null;
 });
 
 const page = usePage();

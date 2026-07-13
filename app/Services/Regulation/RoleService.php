@@ -136,9 +136,10 @@ class RoleService
     /**
      * Get all data for the role management page.
      *
+     * @param int|null $selectedRegulationId
      * @return array
      */
-    public function getRoleManageData(): array
+    public function getRoleManageData(?int $selectedRegulationId = null): array
     {
         $roles = MstRole::with(['responsibilities' => function ($query) {
             $query->orderBy('id', 'asc');
@@ -146,9 +147,20 @@ class RoleService
 
         $responsibles = MstResponsible::with(['mappedRoles'])->orderBy('responsible', 'asc')->get();
 
+        $regulations = MstRegulation::orderBy('id', 'desc')->get();
+        $selectedRegulation = null;
+        if ($selectedRegulationId) {
+            $selectedRegulation = $regulations->firstWhere('id', $selectedRegulationId);
+        }
+        if (!$selectedRegulation && $regulations->isNotEmpty()) {
+            $selectedRegulation = $regulations->first();
+        }
+
         return [
             'roles' => $roles,
             'responsibles' => $responsibles,
+            'regulations' => $regulations,
+            'selectedRegulationId' => $selectedRegulation?->id,
         ];
     }
 
